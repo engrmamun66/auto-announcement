@@ -1,0 +1,74 @@
+/**
+opening animation classes
+========================
+'em-anim-blowUp',
+'em-anim-zoomIn',
+'em-anim-scaleUp',
+'em-anim-scaleForward',
+*/
+
+
+.em-anim-zoomIn {
+    animation: keyframe-zoomIn 0.5s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+}
+
+.em-anim-zoomIn--long {
+    animation: keyframe-zoomIn 1.5s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+}
+
+@keyframes keyframe-zoomIn {
+    0% {
+        transform: scale(0);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+
+.em-anim-scaleUp {
+    animation: keyframe-scaleUp 0.5s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+}
+
+@keyframes keyframe-scaleUp {
+    0% {
+        transform: scale(0.8) translateY(200px);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1) translateY(0px);
+        opacity: 1;
+    }
+}
+
+.em-anim-scaleForward {
+    animation: keyframe-scaleForward 0.5s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+}
+
+@keyframes keyframe-scaleForward {
+    0% {
+        transform: scale(0.85);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+.em-anim-blowUp {
+    animation: keyframe-blowUp 0.5s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+}
+
+@keyframes keyframe-blowUp {
+    0% {
+        transform: scale(2);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}

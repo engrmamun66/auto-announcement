@@ -1,17 +1,12 @@
   
-function setCookie(cname, cvalue, exdays = 1) { //new
+function setCookie(cname, cvalue, exdays=1) {
     var d = new Date();
-    d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
-    var expires = "expires=" + d.toUTCString();
-    
-    if (typeof cvalue === 'object') cvalue = JSON.stringify(cvalue);
-  
-    // Set SameSite=None and Secure for iframe compatibility
-    const usingIframe = RENTMY_GLOBAL?.afterOrder?.forIframe_topMode;
-    const iframePermissonText = usingIframe ? 'SameSite=None;Secure' : '';
-    document.cookie = `${cname}=${cvalue};${expires};path=/;${iframePermissonText}`;
+    d.setTime(d.getTime() + (exdays*24*60*60*1000));
+    var expires = "expires="+ d.toUTCString();
+    if(typeof cvalue == 'object') cvalue = JSON.stringify(cvalue);
+    document.cookie = cname + "=" + cvalue + ";" + expires + `;path=/;`;
 }
-  
+
 function getCookie(name) {
     const cookieName = name + "=";
     const decodedCookie = decodeURIComponent(document.cookie);
@@ -46,18 +41,13 @@ function checkCookie(cname) {
     }
 }
 
-
-function deleteCookie(cname) { // new
+function deleteCookie(cname) {
+    let cvalue = '';
     let d = new Date();
-    d.setTime(d.getTime() - 9999999); 
-    let expires = "expires=" + d.toUTCString();
-      
-    // Include SameSite=None and Secure for deletion consistency
-    const usingIframe = RENTMY_GLOBAL?.afterOrder?.forIframe_topMode;
-    const iframePermissonText = usingIframe ? 'SameSite=None;Secure' : '';
-    document.cookie = `${cname}=;${expires};path=/;${iframePermissonText}`;
-  }
-  
+    d.setTime(d.getTime() - 9999999);
+    var expires = "expires="+ d.toUTCString();   
+    document.cookie = cname + "=" + cvalue + ";" + expires + `;path=/;`;
+}
 
 function deleteKey(cookieName, key, exdays=1) {
     let object = getCookie(cookieName);

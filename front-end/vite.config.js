@@ -9,28 +9,28 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
+      '~': fileURLToPath(new URL('/', import.meta.url)),
       '@': fileURLToPath(new URL('./src', import.meta.url)),
-      '@components': fileURLToPath(new URL('./src/components', import.meta.url)),
-      '@modules': fileURLToPath(new URL('./src/modules', import.meta.url)),
       '@pages': fileURLToPath(new URL('./src/pages', import.meta.url)),
       '@stores': fileURLToPath(new URL('./src/stores', import.meta.url)),
       '@utils': fileURLToPath(new URL('./src/utilities', import.meta.url)),
     }
   },
   build: {
-    outDir: '../dist',
+    outDir: 'dist',
     assetsDir: 'assets',
     emptyOutDir: true,
     minify: true,
     chunkSizeWarningLimit: 1600,
     watch: {
-      include: ['src/**', 'templates/**'],
+      include: ['src/**'],
       exclude: 'node_modules/**, .git/**, dist/**, .vscode/**',
     },
     rollupOptions: {
       output: {
-        entryFileNames: 'assets/script_prod.js',
-        assetFileNames: 'assets/[name].[ext]',
+        entryFileNames: 'assets/em-datetimepicker-documentaion.min.js',
+        // assetFileNames: 'assets/[name].[ext]',
+        assetFileNames: 'assets/em-datetimepicker-documentaion.min.[ext]',
       },
     },
   }

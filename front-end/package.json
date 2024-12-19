@@ -3,29 +3,22 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "vite",
+    "dev": "vite dev",
     "build": "vite build",
-    "dev1": "vite build --mode dev1",
-    "dev2": "vite build --mode dev2",
-    "staging": "vite build --mode stage",
-    "prod": "vite build --mode prod",
-    "qa1": "vite build --mode qa1",
+    "watch": "vite build",
     "preview": "vite preview",
-    "watch-css": "powershell.exe -ExecutionPolicy Bypass -File \"buildCss.ps1\"",
-    "build-css": "buildCss.bat",
-    "copy": "cp -rf /media/mamun/drive/rentmy_js_cdn/dist/assets/script_prod.js /media/mamun/drive/ionic_rental_online/public/script && cp -rf /media/mamun/drive/rentmy_js_cdn/dist/assets/index.css /media/mamun/drive/ionic_rental_online/public/css/cdn-styles.css",
-    "cdn": "cd dist && php -S localhost:4444",
-    "wp": "cd dist && php -S localhost:4444"
+    "doc": "cd dist && php -S localhost:3200"
   },
   "dependencies": {
     "axios": "^1.5.0",
+    "jquery": "^3.7.1",
     "lodash": "^4.17.21",
     "mitt": "^3.0.1",
     "moment": "^2.30.1",
     "pinia": "^2.1.6",
-    "signature_pad": "^4.1.7",
+    "prismjs": "^1.29.0",
     "vue": "^3.3.4",
-    "vue-router": "^4.2.4"
+    "vue-router": "4"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.3.1",

@@ -1,5 +1,20 @@
 /* How to use in DOM */
 /* <span tooltip="Slide to the left" flow="left">Left</span> */
+
+/**
+variable: 
+--tbg 
+--tcolor
+--tmaxW
+*/
+:root{
+    --tbg : #dedfde;
+    --tcolor: #000000;
+    --tmaxW: 21em;
+    --tfsize: 0.8em;
+}
+
+
 [tooltip] {
     position: relative;
     /* opinion 1 */
@@ -10,7 +25,8 @@
 [tooltip]::after {
     text-transform: none;
     /* opinion 2 */
-    font-size: .9em;
+    font-size: var(--tfsize, 1em);
+    font-weight: 400;
     /* opinion 3 */
     line-height: 1;
     user-select: none;
@@ -33,23 +49,24 @@
     /* magic! */
 
     /* most of the rest of this is opinion */
-    font-family: inherit;
+    font-family: Helvetica, sans-serif;
     text-align: center;
+    font-weight: 400;
 
     /* 
     Let the content set the size of the tooltips 
     but this will also keep them from being obnoxious
     */
     min-width: 3em;
-    max-width: 21em;
+    max-width: var(--tmaxW, 21em);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     padding: 1ch 1.5ch;
     border-radius: .3ch;
     box-shadow: 0 1em 2em -.5em rgba(0, 0, 0, 0.35);
-    background: rgb(0, 0, 0);
-    color: rgb(165, 165, 165);
+    background: var(--tbg, rgb(0, 0, 0));
+    color: var(--tcolor, rgb(165, 165, 165));
     z-index: 1000;
     /* absurdity 2 */
 }
@@ -71,7 +88,7 @@
 [tooltip][flow^="up"]::before {
     bottom: 100%;
     border-bottom-width: 0;
-    border-top-color: rgb(0, 0, 0);
+    border-top-color: var(--tbg, rgb(0, 0, 0));
 }
 
 [tooltip]:not([flow])::after,
@@ -91,7 +108,7 @@
 [tooltip][flow^="down"]::before {
     top: 100%;
     border-top-width: 0;
-    border-bottom-color: rgb(0, 0, 0);
+    border-bottom-color: var(--tbg, rgb(0, 0, 0));
 }
 
 [tooltip][flow^="down"]::after {
@@ -108,7 +125,7 @@
 [tooltip][flow^="left"]::before {
     top: 50%;
     border-right-width: 0;
-    border-left-color: rgb(0, 0, 0);
+    border-left-color: var(--tbg, rgb(0, 0, 0));
     left: calc(0em - 5px);
     transform: translate(-.5em, -50%);
 }
@@ -123,7 +140,7 @@
 [tooltip][flow^="right"]::before {
     top: 50%;
     border-left-width: 0;
-    border-right-color: rgb(0, 0, 0);
+    border-right-color: var(--tbg, rgb(0, 0, 0));
     right: calc(0em - 5px);
     transform: translate(.5em, -50%);
 }
@@ -137,14 +154,14 @@
 /* KEYFRAMES */
 @keyframes tooltips-vert {
     to {
-        opacity: .9;
+        opacity: 1;
         transform: translate(-50%, 0);
     }
 }
 
 @keyframes tooltips-horz {
     to {
-        opacity: .9;
+        opacity: 1;
         transform: translate(0, -50%);
     }
 }
