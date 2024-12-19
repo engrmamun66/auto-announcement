@@ -11,7 +11,6 @@ let expand = ref(true);
 let activeMenu = ref('Home'); 
 
 let helper = inject('helper')
-let version = inject('version'); 
 
 if(expand.value) document.body.classList.add('expander')
 watch(expand, (nVal, oVal)=>{
@@ -27,23 +26,7 @@ let menuItems = ref([
     },
     {
         name: 'Initialize',
-        path: { name: 'home', params: { version }},
-        iconClass: 'bx bx-grid-alt nav-icon',
-        badge: { clasName: 'warning', text: '3' },
-        childs: [
-            {
-                name: 'Child -1',
-                path: '/',
-            },
-            {
-                name: 'Child -2',
-                path: '/',
-            },
-        ]
-    },
-    {
-        name: 'Options',
-        path: { name: 'contact', params: { version }},
+        path: { name: 'home'},
         iconClass: 'bx bx-grid-alt nav-icon',
         badge: { clasName: 'warning', text: '3' },
         childs: [
@@ -60,18 +43,7 @@ let menuItems = ref([
      
     
 ])
-
-let VERSIONS = inject('VERSIONS');
-
-function onChangeVersion({target: {value: version}}){ 
-  helper.localStorage('version').value = version;
-  router.replace({path: `/${version}`})
-  console.log({version});
-  setTimeout(() => {
-    window.location.reload()
-  }, 0);
-}
-
+ 
 function toggleLoopItem (data, index, key = "expand") {
   if (!data) return;
   data?.forEach((item, i) => {
@@ -108,22 +80,12 @@ function toggleLoopItem (data, index, key = "expand") {
         </div>
         <div class="version-display-area">
           <span class="user-name">Documentaion </span> 
-          <strong>{{ version }} 
-            <span v-if="VERSIONS.at(-1) === version" class="badge badge-success">Latest</span> 
-            <span v-else class="badge badge-warning">Older</span> 
+          <strong>
+            <span class="badge badge-warning">Good Afternoon</span> 
           </strong>
         </div>
       </div>
-      <!-- sidebar-header  -->
-      <div class="sidebar-search">
-        <div>
-          <div class="input-group">
-            <select class="form-control" :value="version" @change="onChangeVersion" >
-                <option v-for="ver in VERSIONS" :values="ver">{{ ver }}</option>
-              </select>
-          </div>
-        </div>
-      </div>
+      
       
       <div class="sidebar-menu">
         <ul>
@@ -365,13 +327,7 @@ function toggleLoopItem (data, index, key = "expand") {
   height: 100%;
   width: 100%;
 }
-
-.sidebar-wrapper .sidebar-header .version-display-area {
-  display: flex;
-  align-items: start;
-  flex-direction: column;
-}
-
+ 
 /*-----------------------sidebar-search------------------------*/
 
 .sidebar-wrapper .sidebar-search > div {

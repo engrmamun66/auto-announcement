@@ -1,6 +1,6 @@
 <script setup>
 import moment from 'moment/moment';
-import { ref, inject, provide, reactive, watch, defineEmits, defineProps, onMounted } from 'vue';
+import { ref, inject, provide, reactive, watch, defineEmits, onMounted } from 'vue';
 import EmDateTimePicker from './pages/EmDateTimePicker.vue';
 import { makeDate, createDateRange, checkType, addMonth, isInMinMaxDate } from './pages/childs/grand-childs/helper.js';
 

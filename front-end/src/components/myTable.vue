@@ -77,6 +77,9 @@ table {
       border-right: 7px solid #fff;
     }
     
+    &:first-child {
+      border-radius: 20px 0 0 0;
+    }
     &:last-child {
       border-right: none;
       border-radius: 0 20px 0 0;
