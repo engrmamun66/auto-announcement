@@ -4,9 +4,8 @@ import { createPinia } from 'pinia';
 import App from './App.vue';
 import moment from 'moment/moment';
 globalThis.windowLocation = windowLocation;
-import { loadGoogleMapCDN } from './googleMap';
 import {  minified_css } from './minified-css';
-import { emitter, utils, components, services } from './import-hub';
+import { emitter, utils, components } from './import-hub';
 import { send_css_in_header, windowLocation, clone, setDatePickerTheme } from './initial_functions';
 globalThis.moment = moment;
 
@@ -20,7 +19,6 @@ if (typeof window.RENTMY_GLOBAL === 'undefined') {
 
 
 const mapAPIKey = import.meta.env.VITE_GOOGLE_MAP_API_KEY;
-loadGoogleMapCDN(mapAPIKey);
 
 
 
