@@ -1,0 +1,56 @@
+.modal {
+  background-color: rgba(0, 0, 0, 0.59) !important;
+}
+.modal .la{
+  font-weight: unset;
+}
+
+.modal.show .modal-content{
+    animation: mymove 0.3s;
+}
+@keyframes mymove {
+  from {transform: translateY(-100px); opacity: 0; scale: 0.5;}
+  to {transform: translateY(0px); opacity: 1; scale: 1}
+}
+
+/* -------------------------------------------------------------------------- */
+/*                             Confirmation Modal                             */
+/* -------------------------------------------------------------------------- */
+.modal.RentMyConfirmationModal .modal-dialog {
+  width: 360px;
+}
+.modal.RentMyConfirmationModal .modal-body {
+  position: relative;
+  flex: 1 1 auto;
+  padding: 0px 1rem
+}
+.modal.RentMyConfirmationModal .modal-footer {
+  position: relative;
+  flex: 1 1 auto;
+  padding: 1rem;
+  border-top: none;
+}
+
+/* -------------------------------------------------------------------------- */
+/*                             Global Modal                             */
+/* -------------------------------------------------------------------------- */
+
+.modal.RentMyOrderDetails .modal-body {
+  position: relative;
+  flex: 1 1 auto;
+  padding: 0px 1rem
+}
+.modal.RentMyOrderDetails .modal-footer {
+  position: relative;
+  flex: 1 1 auto;
+  padding: 1rem;
+  border-top: none;
+}
+
+@media (min-width: 576px){
+  .modal.RentMyOrderDetails .modal-dialog {
+      max-width: 900px;
+      margin: 1.75rem auto;
+  }
+}
+

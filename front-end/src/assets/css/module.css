@@ -1,0 +1,35 @@
+@import '//unpkg.com/boxicons@2.1.4/css/boxicons.min.css';
+@import '//maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css';
+@import '//cdnjs.cloudflare.com/ajax/libs/font-awesome/5.9.0/css/all.min.css';
+@import '//cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css';
+@import './tooltip.css';
+@import './preloader.css';
+@import './modal.css';
+@import './common.css';
+@import './pagination.css';
+@import './animation.css';
+@import './inpage-cart-widget.css';
+@import '../../../templates/style.css';
+
+:root {
+    --rentmy-bg-default: #ffffff;
+    --rentmy-primary-color-default: #333333;
+    --rentmy-primary-color-hover-default: #333333;
+    --rentmy-border-default: #cacaca;
+    --rentmy-soft-grey-default: #ced4da;
+    --rentmy-light-grey-default: #efefef;
+    --rentmy-danger-bg-default: #f76767;
+}
+
+.dropInCart{
+    animation: dropInCart 0.5s ease;
+}
+@keyframes dropInCart {
+    0% {
+        opacity: 1;
+    }
+    
+    100% {
+        opacity: 0;
+    }
+}

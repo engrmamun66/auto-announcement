@@ -1,0 +1,1 @@
+export const minified_css = ``;//END
