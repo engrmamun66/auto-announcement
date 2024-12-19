@@ -1,8 +1,4 @@
-import { createRouter, createWebHashHistory } from "vue-router";
-
-import HomeView from '../pages/v-1.0.0/home.vue'
- 
-
+import HomeView from '../pages/home.vue'
 import ErrorView from '../pages/error.vue'
 
 const routes = [ 
