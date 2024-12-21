@@ -1,7 +1,24 @@
  
 
+
 *{
     box-sizing: border-box;
+}
+
+body{
+    background: var( --grad1);
+    background: -moz-var( --grad1);
+    background: -webkit-var( --grad1);
+    filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#DDB4F6", endColorstr="#8DD0FC", GradientType=1 );
+}
+
+.bg1{
+    background-color: rgb(227 255 243 / 24%);
+    background: var(--grad2);
+}
+.bg3{
+    background-color: rgba(19, 225, 136, 0.24);
+    background: var(--grad3);
 }
 
 ul{
@@ -107,6 +124,11 @@ kbd{
     &.red{
         background: linear-gradient(0deg, #eb6839, #ffffff00);
     }
+}
+
+
+.border{
+    border: 1px solid #e2e2e2;
 }
 
   

@@ -20,25 +20,25 @@ watch(expand, (nVal, oVal)=>{
 
 
 let menuItems = ref([
-    {
-        group: true,
-        name: 'General',
-    },
+    // {
+    //     group: true,
+    //     name: 'General',
+    // },
     {
         name: 'Initialize',
         path: { name: 'home'},
         iconClass: 'bx bx-grid-alt nav-icon',
         badge: { clasName: 'warning', text: '3' },
-        childs: [
-            {
-                name: 'Child -1',
-                path: '/',
-            },
-            {
-                name: 'Child -2',
-                path: '/',
-            },
-        ]
+        // childs: [
+        //     {
+        //         name: 'Child -1',
+        //         path: '/',
+        //     },
+        //     {
+        //         name: 'Child -2',
+        //         path: '/',
+        //     },
+        // ]
     },
      
     
@@ -68,12 +68,12 @@ function toggleLoopItem (data, index, key = "expand") {
   <nav id="sidebar" class="sidebar-wrapper">
     <div class="sidebar-content">
       <div class="sidebar-brand">
-        <a href="#">EM Date Time Picker</a>
+        <a href="#">রাশাদ মহিলা মাদ্রাশা</a>
         <div id="close-sidebar" @click="expand = false">
           <i class='bx bx-left-arrow-circle' ></i>
         </div>
       </div>
-      <div class="sidebar-header d-flex align-items-center">
+      <!-- <div class="sidebar-header d-flex align-items-center">
         <div class="user-pic">
           <img class="img-responsive img-rounded" src="../assets/img/calendar.png"
             alt="User picture">
@@ -84,7 +84,7 @@ function toggleLoopItem (data, index, key = "expand") {
             <span class="badge badge-warning">Good Afternoon</span> 
           </strong>
         </div>
-      </div>
+      </div> -->
       
       
       <div class="sidebar-menu">
@@ -243,12 +243,12 @@ function toggleLoopItem (data, index, key = "expand") {
 }
 /*----------------show sidebar button----------------*/
 #show-sidebar {
-  position: fixed;
-  left: 0;
-  top: 10px;
-  border-radius: 0 4px 4px 0px;
-  width: 35px;
-  transition-delay: 0.3s;
+    position: fixed;
+    left: -1px;
+    top: 0px;
+    border-radius: 0 4px 4px 0px;
+    width: 35px;
+    transition-delay: 0.3s;
 }
 .page-wrapper.toggled #show-sidebar {
   left: -40px;
@@ -370,7 +370,7 @@ function toggleLoopItem (data, index, key = "expand") {
   animation: swing ease-in-out 0.5s 1 alternate;
 }
 
-.sidebar-wrapper .sidebar-menu .sidebar-dropdown > a:after {
+.sidebar-wrapper .sidebar-menu .sidebar-dropdown:has(.show-childs) > a:after {
   font-family: "boxicons";
   font-weight: 900;
   content: "\ea50";
@@ -496,7 +496,7 @@ function toggleLoopItem (data, index, key = "expand") {
 .page-wrapper .page-content {
   display: inline-block;
   width: 100%;
-  padding-left: 0px;
+  padding-left: 20px;
   padding-top: 20px;
 }
 
@@ -545,6 +545,8 @@ function toggleLoopItem (data, index, key = "expand") {
 
 .emdoc-theme .sidebar-wrapper {
   background: #31353d;
+  background: #18146530;
+  backdrop-filter: blur(4px);
 }
 
 .emdoc-theme .sidebar-wrapper .sidebar-header,
@@ -623,6 +625,12 @@ function toggleLoopItem (data, index, key = "expand") {
 .emdoc-theme .sidebar-footer > a:last-child {
   border-right: none;
 }
+
+/* @media (min-width: 768px) {
+  #close-sidebar{
+    display: none;
+  }
+} */
 
 
 </style>

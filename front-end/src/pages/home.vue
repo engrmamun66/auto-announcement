@@ -4,9 +4,10 @@ import Note from '../components/note.vue'
 import myTable from '../components/myTable.vue'
 import Modal from '../components/modal.vue'
 import Barcode from '../components/createBarcode.vue'
+import Btn from '../components/Btn.vue'
+import FileUpload from '../components/FileUpload.vue'
 
-let script_js = `<link rel="stylesheet" href="http://localhost:3200/assets/em-datetimepicker-documentaion.min.css">`
-let script_file = `<script src="http://localhost:3200/assets/em-datetimepicker-documentaion.min.js">` + '<' + '/' + 'script' + '>'
+ 
  
 let showModal = ref(false)
 
@@ -39,26 +40,10 @@ function printDiv(divId) {
 </script>
 
 <template>
-     <h1>Introduction</h1> 
+     <h1>Import Students (excel file)</h1>    
 
-     <div class="btn btn-success" @click="showModal=true">SHOW MODAL</div>
-
-
-     <myTable></myTable>
-     <Modal v-model="showModal"></Modal>
-     
-     <div id="contentToPrint">
-          <Barcode data="play-1-2025/05/15" ></Barcode>
-     </div>
-
-          
-
-     <button @click="printDiv('contentToPrint')">Print</button>
-
-
-
-      
-
+ 
+    <FileUpload></FileUpload>
 <!-- 
      <hr v-for="x in 100" >
 

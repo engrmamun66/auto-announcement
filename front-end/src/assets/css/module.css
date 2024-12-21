@@ -14,5 +14,12 @@ body {
 }
 
 :root{
-    --borderColor: #dedede;
+    --primaryColor: #005af0;
+    --secondaryColor: #0247be;
+    --borderColor: #d5fdd7;
+    --fontColor:#333;
+    --grad1: linear-gradient(90deg, rgb(26, 175, 244) 0%, hsla(204, 95%, 77%, 1) 100%);
+    --grad2: linear-gradient(90deg, rgba(141, 208, 252, 0.348) 0%, rgba(223, 182, 246, 0.486) 100%);
+    --grad3: linear-gradient(90deg, #2f7de9 0%, #5558ffd6 100%);
 }
+

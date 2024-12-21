@@ -15,6 +15,7 @@ const Students = new students(DB.db)
 
 const app = express();
 app.use(express.json());
+app.use(express.static('public'));
 
  
 app.get("/api/students", (req, res) => {
