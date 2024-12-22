@@ -35,7 +35,7 @@ app.use(cors());
     Students.getStudent(req, res)
   });
   
-  app.post(prefix + "/student/import-students", upload.single("file"), (req, res) => {
+  app.post(prefix + "/students/import", upload.single("file"), (req, res) => {
     if (!req.file) {
       return res.status(400).send("No file uploaded.");
     }

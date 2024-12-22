@@ -8,10 +8,9 @@
         <p>Files Supported: excel</p>
         <input ref="uploader" @change="onChangeFile" type="file" hidden accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"   id="fileID" style="display:none;">
         <Btn v-if="!file?.name" class="red"  @click="open" >Choose File</Btn>
+        <Btn v-if="file?.name" @click.stop="uploadNow()" >Upload Now</Btn>
         <a :href="`${VITE_BASE_URL}/sample.xlsx`" class="mt-2">Download Sample File</a>
-        <div class="d-flex mt-3">
-          <Btn v-if="file?.name" @click.stop="uploadNow()" >Upload Now</Btn>
-        </div>
+        
         </div>  
     </div> 
 </template>
@@ -41,7 +40,7 @@ function onChangeFile(event){
 async function uploadNow(){
   if(file.value){    
     console.log(file.value);
-    http.post('/import-students', {file: file.value}, {formData: true}).then(response => {
+    http.post('/students/import', {file: file.value}, {formData: true}).then(response => {
         console.log({response});
       })
   }
