@@ -8,7 +8,7 @@ const path = require("path");
 
 class Students {
   insertQuery = `
-            INSERT INTO students (name, dakhela, class, class_short, year, sound1, sound2, sound3)
+            INSERT INTO students (name, dakhela, class, class_short, year, status, sound1, sound2, sound3)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
           `;
 
@@ -57,9 +57,7 @@ class Students {
         return;
       }
 
-      // Count total records for pagination metadata
-      this.db.get(
-        `SELECT COUNT(*) as total FROM ${this.tableName} ${whereClause}`,
+      this.db.get( `SELECT COUNT(*) as total FROM ${this.tableName} ${whereClause}`,
         filters.map((f, i) => filterValues[i]), // Pass the same filter values for the count query
         (err, result) => {
           if (err) {
@@ -103,14 +101,15 @@ class Students {
             this.db.run(
               insertQuery,
               [
-                row[2], // name
-                row[1], //dakhela
+                row[1], // name
+                row[2], //dakhela
                 row[3], //class
                 classes?.[row[3]] || "--", //class_short
-                row[10], // year
-                row.sound1 || null,
-                row.sound2 || null,
-                row.sound3 || null,
+                row[5], // year
+                row[6], // status
+                row[7], // sound1
+                row[8], // sound2
+                row[9], // sound3
               ],
               (err) => {
                 if (err) {
@@ -119,7 +118,7 @@ class Students {
               }
             );
           } else {
-            console.log({ row });
+            // console.log({ row });
           }
         });
       });
@@ -141,9 +140,7 @@ class Students {
       }
 
       if (rows.length === 0) {
-        res
-          .status(404)
-          .send({ message: "No data found in the students table." });
+        res.status(404).send({ message: "No data found in the students table." });
         return;
       }
 
@@ -154,18 +151,9 @@ class Students {
         // Create a new workbook and append the worksheet
         const workbook = xlsx.utils.book_new();
         xlsx.utils.book_append_sheet(workbook, worksheet, "Students");
-
-        // Define the file path for the export
-        const filePath = path.join(
-          __dirname,
-          "../public/exports",
-          `students_export_${Date.now()}.xlsx`
-        );
-
-        // Save the file to the server
+        const filePath = path.join( DIR, "/public/exports", `students_export_${Date.now()}.xlsx` );    
         xlsx.writeFile(workbook, filePath);
 
-        // Send the file as a downloadable response
         res.download(filePath, "students_export.xlsx", (err) => {
           if (err) {
             console.error("Error downloading file:", err.message);
@@ -173,15 +161,15 @@ class Students {
           }
 
           // Delete the file after download
-          fs.unlink(filePath, (unlinkErr) => {
-            if (unlinkErr) {
-              console.error("Error deleting file:", unlinkErr.message);
-            }
-          });
+          // fs.unlink(filePath, (unlinkErr) => {
+          //   if (unlinkErr) {
+          //     console.error("Error deleting file:", unlinkErr.message);
+          //   }
+          // });
         });
       } catch (exportError) {
         console.error("Error exporting data:", exportError.message);
-        res.status(500).send({ error: "Error exporting data." });
+        res.status(500).send({ error: exportError.message });
       }
     });
   }

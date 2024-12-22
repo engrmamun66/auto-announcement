@@ -47,6 +47,7 @@ class myDB {
                     class TEXT NOT NULL,
                     class_short TEXT NOT NULL,
                     year TEXT DEFAULT NULL,
+                    status INTEGER DEFAULT 1,
                     sound1 TEXT DEFAULT NULL,
                     sound2 TEXT DEFAULT NULL,
                     sound3 TEXT DEFAULT NULL,

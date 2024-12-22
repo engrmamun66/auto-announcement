@@ -60,9 +60,7 @@ getStudents()
         <router-link :to="{name: 'import'}"><Btn><i class='bx bxs-file-import' ></i> Import</Btn></router-link>
       </div>
     </div>
-
-    <Barcode data="safia-meherin-dola"></Barcode>
-
+    
     <!-- Search -->
     <div class="form-area mt-5 p-4 border">
       <form @submit.prevent="onSubmit">
@@ -113,7 +111,7 @@ getStudents()
           </template>
           <template v-else>
             <tr>
-                <td colspan="88">Not student found</td>
+                <td colspan="88">No student found</td>
                  
             </tr>
           </template>
