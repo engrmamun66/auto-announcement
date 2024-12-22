@@ -46,7 +46,7 @@ class myDB {
                     dakhela INTEGER NOT NULL,
                     class TEXT NOT NULL,
                     class_short TEXT NOT NULL,
-                    session TEXT DEFAULT NULL,
+                    year TEXT DEFAULT NULL,
                     sound1 TEXT DEFAULT NULL,
                     sound2 TEXT DEFAULT NULL,
                     sound3 TEXT DEFAULT NULL,

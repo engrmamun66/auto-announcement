@@ -25,8 +25,8 @@ button {
   cursor: pointer; /* Adds pointer cursor on hover */
 }
 button.red{
-  background-color: #f5613c;
-  box-shadow: 0px -1px 2px 0 #cb2f08 inset, 0px 1px 1px 1px #ccc;
+  background-color: #ea6b1a;
+  box-shadow: 0px -1px 2px 0 #6f1701 inset, 0px 1px 1px 1px #ccc;
 }
 
 

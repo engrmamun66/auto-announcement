@@ -33,6 +33,7 @@ const toggleMenu = () => {
     font-size: 17px;
     text-shadow: 1px 2px 2px rgb(0, 0, 0);
     margin-right: 10px;
+    border-radius: 30px;
 }
 
 .topnav {

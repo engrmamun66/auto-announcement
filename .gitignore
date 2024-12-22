@@ -133,3 +133,4 @@ yarn-lock.json
 .vscode
 public/temp/
 public/media/
+database/

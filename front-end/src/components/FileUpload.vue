@@ -34,19 +34,16 @@ function open(){
 function onChangeFile(event){
   const fileInput = event.target;
   if (fileInput.files && fileInput.files[0]) {
-    file.value = fileInput.files[0]; 
+    file.value = fileInput.files[0];
   }
 }
 
 async function uploadNow(){
-  if(file.value){
-
-    const Api = await http() 
-    console.log({Api});
-    console.dir({Api});
-    // Api.post('/import-students', {file: file.value}, {formDate: true}).then(response => {
-    //     console.log({response});
-    //   })
+  if(file.value){    
+    console.log(file.value);
+    http.post('/import-students', {file: file.value}, {formData: true}).then(response => {
+        console.log({response});
+      })
   }
 }
 

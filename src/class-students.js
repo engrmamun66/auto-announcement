@@ -2,6 +2,7 @@
 const xlsx = require("xlsx");
 const multer = require("multer");
 const upload = multer({ dest: DIR + '/public' });
+const { classes } = require('../config')
 
 class Students {
     constructor(db){
@@ -42,8 +43,8 @@ class Students {
                   row.name,
                   row.dakhela,
                   row.class,
-                  row.class_short,
-                  row.session,
+                  row.class.replace(row.class, classes[row.class]), // name_short
+                  row.year || null,
                   row.sound1 || null,
                   row.sound2 || null,
                   row.sound3 || null,

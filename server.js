@@ -6,7 +6,6 @@ const express = require('express')
 const sqlite3 = require("sqlite3").verbose();
 const multer = require("multer");
 const upload = multer({ dest: DIR + '/public/temp' });
-const config = require('./config')
 
 /**
  * Classes
