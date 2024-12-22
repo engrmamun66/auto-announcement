@@ -8,7 +8,7 @@ import Btn from '../components/Btn.vue'
 import FileUpload from '../components/FileUpload.vue'
 
  
- 
+const emitter = inject('emitter');
 let showModal = ref(false)
 
 

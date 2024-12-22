@@ -47,7 +47,7 @@ button.red:hover {
 }
  
 
-div > emb-buttons:not(:last-child) {
+div.right-align > emb-buttons:not(:last-child) {
   margin-right: 20px;
 }
 

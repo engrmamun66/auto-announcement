@@ -19,24 +19,12 @@
     </slot>
     <tbody>
       <slot name="rows">
-        <tr>
+        <!-- <tr>
           <td>1 </td>
           <td>Reviews </td>
           <td>efe </td>
           <td>222</td>
-        </tr> 
-        <tr>
-          <td>2 </td>
-          <td>Reviews </td>
-          <td>asd </td>
-          <td>334</td>
-        </tr> 
-        <tr>
-          <td>3 </td>
-          <td>Reviews </td>
-          <td>FGB </td>
-          <td>535</td>
-        </tr> 
+        </tr>   -->
       </slot>
        
     </tbody>
@@ -55,41 +43,44 @@ table {
   margin: 20px 0px;
 
   th,
-  td,
   caption {
-    padding: 1rem;
+    padding: 10px;
+  }
+  td{
+    padding: 8px 16px;
   }
 
   th {
     &:nth-child(1) {
-      background: #a7d4df;
+      background: #a7d4df80;
       border-radius: 20px 0 0 0;
-      border-right: 7px solid #fff;
+      border-right: 4px solid #fff;
     }
     &:nth-child(odd) {
-      background: #e5f4fb;
+      background: #e5f4fbc3;
       border-radius: 0 0 0 0;
-      border-right: 7px solid #fff;
+      border-right: 4px solid #5dceff;
     }
     &:nth-child(even) {
-      background: #f3f4df;
+      background: #f3f4dfb0;
       border-radius: 0 0 0 0;
-      border-right: 7px solid #fff;
+      border-right: 4px solid #5dceff;
     }
     
     &:first-child {
-      border-radius: 20px 0 0 0;
+      border-radius: 10px 0 0 0;
     }
     &:last-child {
       border-right: none;
-      border-radius: 0 20px 0 0;
+      border-radius: 0 10px 0 0;
     }
   }
   td {
     border-bottom: 1px dashed var(--borderColor);
     font-weight: 400;
     font-size: 16px;
-    color: #686868;
+    color: #181818;
+    background: rgba(245, 222, 179, 0.171);
   }
   tr:last-child {
     td {
@@ -97,13 +88,13 @@ table {
     }
   }
   col:nth-child(2) {
-    background: #f4feff;
+    background: #f4feff86;
   }
   & tbody tr td:first-child{
-    border-left: 1px solid var(--borderColor);
+    /* border-left: 1px solid var(--borderColor); */
   }
   & tbody tr td:last-child{
-    border-right: 1px solid var(--borderColor);
+    /* border-right: 1px solid var(--borderColor); */
   }
 }
 caption,

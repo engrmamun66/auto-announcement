@@ -3,22 +3,32 @@
         <a class="madrasha-title" href="#">
             রাশাদ মহিলা মাদ্রাসা
         </a>
-        <a href="#" class="active">Home <i class="fa fa-home" aria-hidden="true"></i></a>
-        <a href="#">Blog <i class="fa fa-book"></i></a>
-        <a href="#">Contact <i class="fa fa-envelope"></i></a>
-        <a href="#">About <i class="fa fa-user"></i></a>
+        <RouterLink :to="{name: 'home'}" :class="{'active': route.name === 'home'}"><i class='bx bxs-home'></i> Home</RouterLink>
+        <RouterLink :to="{name: 'students'}" :class="{'active': route.name === 'students'}"><i class='bx bxs-user'></i> Students</RouterLink>
+        <RouterLink :to="{name: 'import'}" :class="{'active': route.name === 'import'}"><i class='bx bxs-file-import' ></i> Import</RouterLink>
+        
         <div class="right-lnk">
-            <a href="#">Login</a>
+            <a v-if="loggedIn" href="#">
+              Logout <i class='bx bxs-log-in' ></i>
+            </a>
+            <a v-else href="#">
+              <i class='bx bxs-user' ></i> Admin
+            </a>
         </div>
         <a href="javascript:void(0);" class="icon" @click="toggleMenu">
-            <i class="fa fa-bars"></i>
+            <i class='bx bxs-log-in' ></i>
         </a>
     </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, inject } from 'vue';
+import { RouterLink, useRoute } from 'vue-router';
 
+let route = useRoute()
+let loggedIn = ref(false)
+
+const emitter = inject('emitter');
 const isResponsive = ref(false);
 
 const toggleMenu = () => {

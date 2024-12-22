@@ -48,6 +48,10 @@ app.use(cors());
     });
   });
    
+  app.get(prefix + "/students/export", (req, res) => {
+    Students.exportAll(req, res);
+  });
+   
 })
  
 

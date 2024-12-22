@@ -18,7 +18,11 @@
 <script setup>
 import Btn from './Btn.vue'
 import { ref, inject } from "vue";
+import { useRouter } from "vue-router";
 let http = inject('http'); 
+let emitter = inject('emitter'); 
+
+let router = useRouter()
 
 let { VITE_BASE_URL } = import.meta.env
 
@@ -41,8 +45,9 @@ async function uploadNow(){
   if(file.value){    
     console.log(file.value);
     http.post('/students/import', {file: file.value}, {formData: true}).then(response => {
-        console.log({response});
-      })
+      emitter.emit('toaster-success', {message: 'Import successful'})
+      file.value = null;
+    })
   }
 }
 
