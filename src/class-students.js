@@ -90,41 +90,59 @@ class Students {
       const workbook = xlsx.readFile(filePath);
       const sheetName = workbook.SheetNames[0]; // Assuming data is in the first sheet
       const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName], {
-        header: 1,
+        header: 1,         
       });
+    
 
       const { insertQuery } = this;
 
+      let errorOccurred = false
+
       this.db.serialize(() => {
         data.forEach((row, i) => {
-          if (i >= 1) {
-            this.db.run(
-              insertQuery,
-              [
-                row[1], // name
-                row[2], //dakhela
-                row[3], //class
-                classes?.[row[3]] || "--", //class_short
-                row[5], // year
-                row[6], // status
-                row[7], // sound1
-                row[8], // sound2
-                row[9], // sound3
-              ],
-              (err) => {
-                if (err) {
-                  console.error("Error inserting data:", err.message);
-                }
-              }
-            );
-          } else {
-            // console.log({ row });
+          
+          if (i === 0) {
+            // Skip the header row
+            console.log("Skipping header row:", row);
+            return;
           }
+
+          if (row.length === 0 || !row[1]) {
+            // Skip empty rows or rows without a name
+            console.log("Skipping empty row or invalid data:", row);
+            return;
+          }
+
+          this.db.run(
+            insertQuery,
+            [
+              row[1], // name
+              row[2], //dakhela
+              row[3], //class
+              classes?.[row[3]] || '--', //class_short
+              row[5], // year
+              row[6] || 1, // status
+              row[7] || null, // sound1
+              row[8] || null, // sound2
+              row[9] || null, // sound3
+            ],
+            (err) => {
+              if (err) {
+                console.error("Error inserting data:", err.message);
+                errorOccurred = true;
+              }
+            }
+          );
+          
         });
       });
 
       fs.unlink(filePath, () => {});
-      callback(null, `Successfully imported ${data.length} rows.`);
+      if(!errorOccurred){
+        callback(null, `Successfully imported ${data.length - 1} rows.`);
+      } else {
+        callback("Failed to upload some rows. Check logs for details.");
+      }
     } catch (error) {
       callback(error, null);
     }
