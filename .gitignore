@@ -131,3 +131,5 @@ package-lock.json
 yarn-lock.json
 .env
 .vscode
+public/temp/
+public/media/

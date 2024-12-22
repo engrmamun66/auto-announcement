@@ -13,5 +13,6 @@ http.interceptors.request.use((config) => {
     if(config.formData === true){
         config.headers = { ...config.headers, ...{ "Content-Type": "multipart/form-data" }}
     }
+    return config
 });
 export default http

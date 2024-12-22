@@ -3,82 +3,82 @@ module.exports = {
         {
             id: 1,
             name: 'Play',
-            short_name: 'play',
+            name_short: 'play',
         },
         {
             id: 1,
             name: 'Nursery',
-            short_name: 'nursery',
+            name_short: 'nursery',
         },
         {
             id: 1,
             name: 'KG',
-            short_name: 'kg',
+            name_short: 'kg',
         },
         {
             id: 1,
             name: 'One/Saffe Awal',
-            short_name: 'one',
+            name_short: 'one',
         },
         {
             id: 1,
             name: 'Two/Saffe Sani',
-            short_name: 'two',
+            name_short: 'two',
         },
         {
             id: 1,
             name: 'Three/Saffe Sales',
-            short_name: 'three',
+            name_short: 'three',
         },
         {
             id: 1,
             name: 'Four/Saffe Rabe',
-            short_name: 'four',
+            name_short: 'four',
         },
         {
             id: 1,
             name: 'Ibtedaiyah',
-            short_name: 'ibtedaiyah',
+            name_short: 'ibtedaiyah',
         },
         {
             id: 1,
             name: 'Mutawassitah Awal / Mizan',
-            short_name: 'mizan',
+            name_short: 'mizan',
         },
         {
             id: 1,
             name: 'Mutawassitah Sani / Nahbemir',
-            short_name: 'nahbemir',
+            name_short: 'nahbemir',
         },
         {
             id: 1,
             name: 'Mutawassitah Sales',
-            short_name: 'muta_sales',
+            name_short: 'muta_sales',
         },
         {
             id: 1,
             name: 'Sanabiya Awal/Shorhebekaya',
-            short_name: 'ebekaya',
+            name_short: 'shorhebe',
         },
         {
             id: 1,
             name: 'Sanabiya Sani',
-            short_name: 'sana_sani',
+            name_short: 'sana_sani',
         },
         {
             id: 1,
             name: 'Hifz',
-            short_name: 'hifz',
+            name_short: 'hifz',
         },
         {
             id: 1,
             name: 'Pre Hifz',
-            short_name: 'p_hifz',
+            name_short: 'p_hifz',
         },
         {
             id: 1,
             name: 'Fozilat',
-            short_name: 'fozilat',
+            name_short: 'fozilat',
         },
     ]
 
