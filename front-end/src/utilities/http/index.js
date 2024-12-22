@@ -1,5 +1,4 @@
 import Axios from 'axios';
-import * as auth from './interceptors/authencation.interceptor';
 
 /* -------------------------------------------------------------------------- */
 /*                            Common Authentication                           */
@@ -10,5 +9,9 @@ const http = Axios.create({
         'content-type': 'application/json'
     }
 });
-http.interceptors.request.use(auth.setToken);
-export default http;
+http.interceptors.request.use((config) => {
+    if(config.formData === true){
+        config.headers = { ...config.headers, ...{ "Content-Type": "multipart/form-data" }}
+    }
+});
+export default http

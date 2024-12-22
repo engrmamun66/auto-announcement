@@ -26,8 +26,7 @@ button {
 }
 button.red{
   background-color: #f5613c;
-  box-shadow: 0px -1px 2px 0 #cb2f08 inset,
-              0px 1px 1px 1px #ccc;
+  box-shadow: 0px -1px 2px 0 #cb2f08 inset, 0px 1px 1px 1px #ccc;
 }
 
 
@@ -48,7 +47,7 @@ button.red:hover {
 }
  
 
-div.left-align > emb-buttons:not(:last-child) {
+div > emb-buttons:not(:last-child) {
   margin-right: 20px;
 }
 

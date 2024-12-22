@@ -7,16 +7,19 @@
         </header>
         <p>Files Supported: excel</p>
         <input ref="uploader" @change="onChangeFile" type="file" hidden accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"   id="fileID" style="display:none;">
-        <Btn v-if="!file"  @click="open" >Choose File</Btn>
-        <Btn v-else  @click="uploadNow" >Upload Now</Btn>
+        <Btn v-if="!file?.name" class="red"  @click="open" >Choose File</Btn>
         <a :href="`${VITE_BASE_URL}/sample.xlsx`" class="mt-2">Download Sample File</a>
+        <div class="d-flex mt-3">
+          <Btn v-if="file?.name" @click.stop="uploadNow()" >Upload Now</Btn>
+        </div>
         </div>  
     </div> 
 </template>
 
 <script setup>
 import Btn from './Btn.vue'
-import { ref } from "vue";
+import { ref, inject } from "vue";
+let http = inject('http'); 
 
 let { VITE_BASE_URL } = import.meta.env
 
@@ -35,9 +38,15 @@ function onChangeFile(event){
   }
 }
 
-function uploadNow(){
+async function uploadNow(){
   if(file.value){
-    console.log('sdfdfdf');
+
+    const Api = await http() 
+    console.log({Api});
+    console.dir({Api});
+    // Api.post('/import-students', {file: file.value}, {formDate: true}).then(response => {
+    //     console.log({response});
+    //   })
   }
 }
 

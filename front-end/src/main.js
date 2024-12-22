@@ -16,7 +16,7 @@ globalThis.printWarning = function(message='This is a warning', {size='22px'}={}
     console.log(`%c ${message}`, `color:red;font-size:${size};background-color:yellow;padding:10px 20px 10px 10px;border-radius:5px;margin:10px 0px;font-family: system-ui;border:1px solid red`)
 }
 
-function mountTheApp(){
+async function mountTheApp(){
     try {
         const app = createApp(App)
         app.use(router)
