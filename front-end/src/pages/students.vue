@@ -59,9 +59,9 @@ getStudents()
       <h1>Students</h1> 
       
       <div class="d-flex justify-content-end">
-        <Btn v-if="!addMode" class="me-1" @click="addMode = !addMode" ><i class='bx bx-plus'></i> Add Student</Btn>
-        <Btn v-else class="me-1 red" @click="addMode = !addMode" >Cancel</Btn>
-        <Btn><i class='bx bxs-file-import' ></i> Import</Btn>
+        <!-- <Btn v-if="!addMode" class="me-1" @click="addMode = !addMode" ><i class='bx bx-plus'></i> Add Student</Btn>
+        <Btn v-else class="me-1 red" @click="addMode = !addMode" >Cancel</Btn> -->
+        <Btn @click="router.push({name: 'import'})"><i class='bx bxs-file-import' ></i> Import</Btn>
       </div>
     </div>
     

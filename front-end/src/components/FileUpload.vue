@@ -6,7 +6,7 @@
             <h4>{{file ? file?.name : 'Select File here'}}</h4>
         </header>
         <p>Files Supported: excel</p>
-        <input ref="uploader" @change="onChangeFile" type="file" hidden accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"   id="fileID" style="display:none;">
+        <input v-if="fileInputField" ref="uploader" @change="onChangeFile" type="file" hidden accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"   id="fileID" style="display:none;">
         <Btn v-if="!file?.name" class="red"  @click="open" >Choose File</Btn>
         <Btn v-if="file?.name" @click.stop="uploadNow()" >Upload Now <BtnLoader v-if="loading"></BtnLoader></Btn>
         <a :href="`${VITE_BASE_URL}/sample.xlsx`" class="mt-2">Download Sample File</a>
@@ -30,6 +30,7 @@ let { VITE_BASE_URL } = import.meta.env
 let uploader = ref(null)
 let file = ref(null)
 let loading = ref(false)
+let fileInputField = ref(true)
 
 function open(){
     uploader.value.click()
@@ -49,12 +50,11 @@ async function uploadNow(){
       emitter.emit('toaster-success', {message: 'Import successful'})
       file.value = null;
     }).finally(()=>{
+      fileInputField.value = false
       setTimeout(() => {
         loading.value = false       
-      }, 500);
-      setTimeout(() => {
-        window.location.reload()
-      }, 3000);
+        fileInputField.value = true       
+      }, 500); 
     })
   }
 }
