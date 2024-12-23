@@ -8,6 +8,7 @@ import Barcode from '../components/createBarcode.vue'
 import Btn from '../components/Btn.vue'
 import Pagination from '../components/Pagination.vue'
 import BtnLoader from '../components/BtnLoader.vue'
+import Switch from '../components/Switch.vue'
 
 let router = useRouter()
  
@@ -66,7 +67,7 @@ getStudents()
     </div>
     
     <!-- Search -->
-    <div class="form-area mt-5 p-4 border">
+    <div class="form-area mt-5 p-4 border radius-10">
       <form @submit.prevent="onSubmit">
         <div class="row">
           <div class="col-md-3 col-12">
@@ -105,6 +106,15 @@ getStudents()
               <input type="number" class="form-control" id="email">
             </div>
           </div>
+          <div class="col-md-3 col-12">
+            <div class="form-group">
+              <label for="email">Media</label>
+              <select class="form-control" id="ClassId" required="required">
+                <option value="">All</option>
+                <option value="Play">Play</option> 
+              </select>
+            </div>
+          </div>
           <div class="col-md-3 col-6">
             <div class="form-group mt-md-3"> 
                 <Btn></Btn> 
@@ -127,6 +137,7 @@ getStudents()
               <th>Dakhela</th>
               <th>Year</th>
               <th>Sound</th>
+              <th>Status</th>
               <th>Action</th> 
             </tr>
           </thead>
@@ -140,6 +151,12 @@ getStudents()
                 <td> {{ std.dakhela }} </td> 
                 <td> {{ std.year }} </td> 
                 <td> {{ std.sound1 }} </td> 
+                <td> <Switch size="sm" v-model="std.status" @change="async (status) => {
+                  await http.post('/students/update-status', {id: std.id, status} );
+              
+                    emitter.emit('toaster-success', {message: 'Status updated', duration: 0})
+                
+                }"></Switch> </td> 
                 <td> 
                   <div class="d-flex">
 
@@ -157,7 +174,7 @@ getStudents()
      </myTable>
 
      <div class="d-flex justify-content-center">
-        <Pagination v-model="params" @jumpToPage="(page) => {
+        <Pagination v-if="params?.totalPages > 1" v-model="params" @jumpToPage="(page) => {
           params.page = page
           getStudents()
         }" ></Pagination>

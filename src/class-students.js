@@ -87,7 +87,7 @@ class Students {
 
   getStudent(req, res) {}
 
-  importExcel__(filePath, callback) {
+  importExcel2(filePath, callback) {
     try {
       const workbook = xlsx.readFile(filePath);
       const sheetName = workbook.SheetNames[0]; // Assuming data is in the first sheet
@@ -300,6 +300,60 @@ class Students {
       }
     });
   }
+
+
+  truncateStudentsTable(req, res) {
+    const query = `DELETE FROM students`;
+  
+    this.db.serialize(() => {
+      this.db.run(query, (err) => {
+        if (err) {
+          res.status(500).send({ error: "Failed to truncate students table: " + err.message });
+          return;
+        }
+  
+        // Reset the auto-increment value
+        this.db.run(`DELETE FROM sqlite_sequence WHERE name='students'`, (resetErr) => {
+          if (resetErr) {
+            res.status(500).send({ error: "Failed to reset ID sequence: " + resetErr.message });
+            return;
+          }
+  
+          res.send({ message: "Students table truncated successfully." });
+        });
+      });
+    });
+  }
+
+
+  updateStatus(req, res) {
+    const { id, status } = req.body;
+  
+    // Validate the input
+    if (typeof id === "undefined" || typeof status === "undefined") {
+      res.status(400).send({ error: "Invalid input. 'id' and 'status' are required." });
+      return;
+    }
+  
+    // Ensure status is either 0 or 1
+    if (status !== 0 && status !== 1) {
+      res.status(400).send({ error: "Invalid status value. Must be 0 or 1." });
+      return;
+    }
+  
+    const query = `UPDATE students SET status = ? WHERE id = ?`;
+  
+    this.db.run(query, [status, id], (err) => {
+      if (err) {
+        res.status(500).send({ error: "Failed to update status: " + err.message });
+        return;
+      }
+  
+      res.send({ message: `Status updated to ${status} for student ID ${id}.` });
+    });
+  }
+  
+  
 }
 
 module.exports = Students;

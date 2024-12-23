@@ -179,15 +179,16 @@ onMounted(() => {
      * icon-error
      */ 
 
-    ['success', 'error', 'warning', 'system'].forEach(type => {
-
+     function clearAll(){
       let els = document.querySelectorAll('.toasts-container');
       els.forEach(function(el){
         el.innerHTML = '';
       });
+     }
 
-
+    ['success', 'error', 'warning', 'system'].forEach(type => {   
       emitter.on(`toaster-${type}`, ({ message='', duration=3000 })=>{
+        clearAll()
         toastsFactory.createToast({
           type: type,
           icon: `icon-${type}`,

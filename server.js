@@ -40,7 +40,7 @@ app.use(cors());
       return res.status(400).send("No file uploaded.");
     }
   
-    Students.importExcel(req.file.path, (error, message) => {
+    Students.importExcel2(req.file.path, (error, message) => {
       if (error) {
         return res.status(500).send(`Failed to import data: ${error.message}`);
       }
@@ -50,6 +50,14 @@ app.use(cors());
    
   app.get(prefix + "/students/export", (req, res) => {
     Students.exportAll(req, res);
+  });
+
+  app.get(prefix + "/students/erase-all", (req, res) => {
+    Students.truncateStudentsTable(req, res);
+  });
+
+  app.post(prefix + "/students/update-status", (req, res) => {
+    Students.updateStatus(req, res);
   });
    
 })
