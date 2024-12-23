@@ -7,11 +7,7 @@ const fs = require("fs");
 const path = require("path");
 const moment = require('moment')
 
-class Students {
-  insertQuery = `
-            INSERT INTO students (name,	dakhela, class, class_short,	year,	status,	sound1,	sound2,	sound3)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-          `;
+class Students { 
 
   constructor(db) {
     this.tableName = "students";
@@ -91,55 +87,95 @@ class Students {
       const workbook = xlsx.readFile(filePath);
       const sheetName = workbook.SheetNames[0]; // Assuming data is in the first sheet
       const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName], {
-        header: 1,         
+        header: 1,
       });
-    
-
-      const { insertQuery } = this;
-
-      let errorOccurred = false
-
+  
+      const insertQuery = `
+        INSERT INTO students (name,	dakhela, class, class_short, year, status, sound1, sound2, sound3)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `;
+  
+      const updateQuery = `
+        UPDATE students
+        SET name = ?, dakhela = ?, class = ?, class_short = ?, year = ?, status = ?, sound1 = ?, sound2 = ?, sound3 = ?
+        WHERE id = ?
+      `;
+  
+      const findQuery = `
+        SELECT id FROM students WHERE dakhela = ? AND class = ? AND year = ?
+      `;
+  
+      let errorOccurred = false;
+  
       this.db.serialize(() => {
         data.forEach((row, i) => {
-          
           if (i === 0) {
             // Skip the header row
             console.log("Skipping header row:", row);
             return;
           }
-
+  
           if (row.length === 0 || !row[1]) {
             // Skip empty rows or rows without a name
             console.log("Skipping empty row or invalid data:", row);
             return;
-          }     
-
-          this.db.run(
-            insertQuery, 
-            [
-              row[1], // name
-              row[2], //dakhela
-              row[3], //class
-              classes?.[row[3]] || '--', //class_short
-              row[5], // year
-              row[6] || 1, // status
-              row[7] || null, // sound1
-              row[8] || null, // sound2
-              row[9] || null, // sound3
-            ],
-            (err) => {
-              if (err) {
-                console.error("Error inserting data:", err);
-                errorOccurred = true;
+          }
+  
+          const [id, name, dakhela, className, , year, status, sound1, sound2, sound3] = row;
+  
+          if (id) {
+            // If `id` is provided, update the row
+            this.db.run(
+              updateQuery,
+              [name, dakhela, className, classes?.[className] || '--', year, status || 1, sound1 || null, sound2 || null, sound3 || null, id],
+              (err) => {
+                if (err) {
+                  console.error(`Error updating data with ID ${id}:`, err);
+                  errorOccurred = true;
+                }
               }
-            }
-          );
-          
+            );
+          } else {
+            // Check if the row already exists based on `dakhela`, `class`, and `year`
+            this.db.get(findQuery, [dakhela, className, year], (err, existingRow) => {
+              if (err) {
+                console.error("Error querying existing data:", err);
+                errorOccurred = true;
+                return;
+              }
+  
+              if (existingRow) {
+                // Update the existing row
+                this.db.run(
+                  updateQuery,
+                  [name, dakhela, className, classes?.[className] || '--', year, status || 1, sound1 || null, sound2 || null, sound3 || null, existingRow.id],
+                  (err) => {
+                    if (err) {
+                      console.error(`Error updating data for dakhela: ${dakhela}, class: ${className}, year: ${year}:`, err);
+                      errorOccurred = true;
+                    }
+                  }
+                );
+              } else {
+                // Insert a new row
+                this.db.run(
+                  insertQuery,
+                  [name, dakhela, className, classes?.[className] || '--', year, status || 1, sound1 || null, sound2 || null, sound3 || null],
+                  (err) => {
+                    if (err) {
+                      console.error("Error inserting data:", err);
+                      errorOccurred = true;
+                    }
+                  }
+                );
+              }
+            });
+          }
         });
       });
-
+  
       fs.unlink(filePath, () => {});
-      if(!errorOccurred){
+      if (!errorOccurred) {
         callback(null, `Successfully imported ${data.length - 1} rows.`);
       } else {
         callback("Failed to upload some rows. Check logs for details.");
@@ -148,6 +184,7 @@ class Students {
       callback(error, null);
     }
   }
+  
 
   exportAll(req, res) {
     const query = `SELECT * FROM ${this.tableName}`;
