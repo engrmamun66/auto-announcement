@@ -138,3 +138,16 @@ kbd{
 .text-left{
     text-align: left;
 }
+
+.form-control{
+    background-color: #a7d4df80;
+}
+.form-control:focus{
+    background-color: #a7d4df80;
+    outline: none;
+    border-color: #fffce9b5;
+    box-shadow: 0 0 0 .15rem rgb(253 217 13 / 12%);
+}
+.form-control:focus-visible{
+    outline: none;
+}

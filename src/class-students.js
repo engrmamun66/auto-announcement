@@ -5,11 +5,12 @@ const upload = multer({ dest: DIR + "/public" });
 const { classes } = require("../config");
 const fs = require("fs");
 const path = require("path");
+const moment = require('moment')
 
 class Students {
   insertQuery = `
-            INSERT INTO students (name, dakhela, class, class_short, year, status, sound1, sound2, sound3)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO students (name,	dakhela, class, class_short,	year,	status,	sound1,	sound2,	sound3)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
           `;
 
   constructor(db) {
@@ -111,10 +112,10 @@ class Students {
             // Skip empty rows or rows without a name
             console.log("Skipping empty row or invalid data:", row);
             return;
-          }
+          }     
 
           this.db.run(
-            insertQuery,
+            insertQuery, 
             [
               row[1], // name
               row[2], //dakhela
@@ -128,7 +129,7 @@ class Students {
             ],
             (err) => {
               if (err) {
-                console.error("Error inserting data:", err.message);
+                console.error("Error inserting data:", err);
                 errorOccurred = true;
               }
             }
@@ -169,7 +170,8 @@ class Students {
         // Create a new workbook and append the worksheet
         const workbook = xlsx.utils.book_new();
         xlsx.utils.book_append_sheet(workbook, worksheet, "Students");
-        const filePath = path.join( DIR, "/public/exports", `students_export_${Date.now()}.xlsx` );    
+        const fileName = `students_export_${moment().format('YYYY_MMM_DD')}_${Date.now()}.xlsx`
+        const filePath = path.join( DIR, "/public/exports", fileName );    
         xlsx.writeFile(workbook, filePath);
 
         res.download(filePath, "students_export.xlsx", (err) => {

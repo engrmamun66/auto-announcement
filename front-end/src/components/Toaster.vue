@@ -179,7 +179,7 @@ onMounted(() => {
      * icon-error
      */ 
 
-    ['success', 'error', 'warning', 'sustem'].forEach(type => {
+    ['success', 'error', 'warning', 'system'].forEach(type => {
 
       let els = document.querySelectorAll('.toasts-container');
       els.forEach(function(el){
@@ -205,11 +205,12 @@ onMounted(() => {
 <style>
 :root {
   --snakbar-white: #fff;
-  --snakbar-green: #4caf50;
+  --snakbar-green: #0989c9;
   --snakbar-blue: #2896f3;
   --snakbar-yellow: #bf9303;
   --snakbar-red: #f55153;
   --snakbar-duration: 0.25s;
+  --snakbar-radius: 4px;
 }
 
 *,
@@ -291,7 +292,7 @@ h1 {
   min-width: 28rem;
   min-width: 24rem;
   background-color: #121212;
-  border-radius: 1.2rem;
+  border-radius: var(--snakbar-radius);
   padding: 1.1rem;
   margin-bottom: 1.1rem;
   opacity: 0;

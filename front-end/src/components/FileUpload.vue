@@ -8,7 +8,7 @@
         <p>Files Supported: excel</p>
         <input ref="uploader" @change="onChangeFile" type="file" hidden accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"   id="fileID" style="display:none;">
         <Btn v-if="!file?.name" class="red"  @click="open" >Choose File</Btn>
-        <Btn v-if="file?.name" @click.stop="uploadNow()" >Upload Now</Btn>
+        <Btn v-if="file?.name" @click.stop="uploadNow()" >Upload Now <BtnLoader v-if="loading"></BtnLoader></Btn>
         <a :href="`${VITE_BASE_URL}/sample.xlsx`" class="mt-2">Download Sample File</a>
         
         </div>  
@@ -21,14 +21,15 @@ import { ref, inject } from "vue";
 import { useRouter } from "vue-router";
 let http = inject('http'); 
 let emitter = inject('emitter'); 
+import BtnLoader from './BtnLoader.vue'
 
 let router = useRouter()
 
 let { VITE_BASE_URL } = import.meta.env
 
-let log = console.log
 let uploader = ref(null)
 let file = ref(null)
+let loading = ref(false)
 
 function open(){
     uploader.value.click()
@@ -43,10 +44,17 @@ function onChangeFile(event){
 
 async function uploadNow(){
   if(file.value){    
-    console.log(file.value);
+    loading.value = true
     http.post('/students/import', {file: file.value}, {formData: true}).then(response => {
       emitter.emit('toaster-success', {message: 'Import successful'})
       file.value = null;
+    }).finally(()=>{
+      setTimeout(() => {
+        loading.value = false       
+      }, 500);
+      setTimeout(() => {
+        window.location.reload()
+      }, 3000);
     })
   }
 }
