@@ -25,7 +25,7 @@ class Students {
     const limit = parseInt(req.query.limit) || 10;
     const offset = (page - 1) * limit;
   
-    const { name, class: className, sound1 } = req.query;
+    const { name, class: className, sound1, dakhela } = req.query;
   
     let query = `SELECT * FROM ${this.tableName} WHERE 1=1`;
     let queryParams = [];
@@ -37,9 +37,13 @@ class Students {
     }
   
     if (className) {
-      // query += ` AND class = ?`;
-      query += ` AND class LIKE ?`;
+      query += ` AND class = ?`;
       queryParams.push(className);
+    }
+  
+    if (dakhela) {
+      query += ` AND dakhela = ?`;       
+      queryParams.push(dakhela);
     }
   
     if (sound1) {
@@ -65,7 +69,7 @@ class Students {
   
       let countQueryParams = [...queryParams.slice(0, queryParams.length - 2)]; // Exclude limit and offset for count query
   
-      this.db.get(countQuery, countQueryParams, (err, result) => {
+      this.db.get(countQuery, [], (err, result) => {
         if (err) {
           res.status(500).send({ error__2: err.message, query, queryParams });
           return;

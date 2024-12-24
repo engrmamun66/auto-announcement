@@ -115,13 +115,13 @@ onMounted(()=>{
           <div class="col-md-3 col-12">
             <div class="form-group">
               <label for="email">Name</label>
-              <input v-model="params.name" type="text" class="form-control" id="email">
+              <input v-model="params.name" type="text" class="form-control">
             </div>
           </div>
           <div class="col-md-3 col-12">
             <div class="form-group">
               <label for="email">Dakhela</label>
-              <input v-model="params.dakhela" type="number" class="form-control" id="email">
+              <input v-model="params.dakhela" type="number" class="form-control">
             </div>
           </div>
           <div class="col-md-3 col-12">
