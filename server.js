@@ -83,36 +83,8 @@ const audioUpload = multer({
 
   app.post(prefix + "/students/upload-audio", audioUpload.single("file"), (req, res) => {
     // Check if a file was uploaded
-    try {
-      if (!req.file) {
-        res.status(400).send({ error: "No audio file uploaded or invalid file type." });
-        return;
-      }
-    
-      let { id, column } = req.body;
-      const audioPath = `/media/${req.file.filename}`;  
-  
-     
-    
-      // Update sound1 column in the database
-      const query = `UPDATE students SET ${column} = ? WHERE id = ?`;
-      DB.db.run(query, [audioPath, id], (err) => {
-        if (err) {
-          res.status(500).send({ error: "Error updating database" });
-          return;
-        }
-        res.send({
-          message: "Audio uploaded successfully",
-          audio_path: audioPath,
-          audio_url: utils.audioFullUrl(req, audioPath),
-        });
-      });
-    } catch (erroreee) {
-      console.log({erroreee});
-    }
+    Students.uploadAudio(req, res)
   });
-
-
  
   app.delete(prefix + '/students/delete-audio/:id/:column', (req, res) => {
     Students.deleteAudio(req, res);

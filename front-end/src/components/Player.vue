@@ -45,7 +45,7 @@ onMounted(() => {
 }
 .close{
     position: absolute;
-    right: 16px;
+    right: 19px;
     top: 15px;
     z-index:9999991;
     cursor: pointer;

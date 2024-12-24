@@ -359,6 +359,33 @@ class Students {
     });
   }
 
+
+  uploadAudio(req, res){
+    if (!req.file) {
+      res.status(400).send({ error: "No audio file uploaded or invalid file type." });
+      return;
+    }
+  
+    let { id, column } = req.body;
+    const audioPath = `/media/${req.file.filename}`;  
+
+   
+  
+    // Update sound1 column in the database
+    const query = `UPDATE students SET ${column} = ? WHERE id = ?`;
+    this.db.run(query, [audioPath, id], (err) => {
+      if (err) {
+        res.status(500).send({ error: "Error updating database" });
+        return;
+      }
+      res.send({
+        message: "Audio uploaded successfully",
+        audio_path: audioPath,
+        audio_url: utils.audioFullUrl(req, audioPath),
+      });
+    });
+  }
+
   deleteAudio(req, res){
     const { id, column } = req.params;
     
