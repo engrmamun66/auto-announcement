@@ -35,6 +35,15 @@ h2, .h2{
 h3, .h3{
     font-size: 20px;
 }
+h4, .h4{
+    font-size: 17px;
+}
+h5, .h5{
+    font-size: 15px;
+}
+h6, .h6{
+    font-size: 12px;
+}
 
 .cp{
     cursor: pointer !important;
@@ -159,4 +168,97 @@ select {
     background-size: 16px;
     background-repeat: no-repeat;
     background-position: calc(100% - 5px) center; /* Adjusted position */
+}
+
+
+
+.size-05 {
+    font-size: 0.5rem !important;
+}
+
+.size-06 {
+    font-size: 0.6rem !important;
+}
+
+.size-07 {
+    font-size: 0.7rem !important;
+}
+
+.size-08 {
+    font-size: 0.8rem !important;
+}
+
+.size-09 {
+    font-size: 0.9rem !important;
+}
+
+.size-1 {
+    font-size: 1rem !important;
+}
+.size-1p1{
+    font-size: 1.1rem !important;
+}
+.size-1p2 {
+    font-size: 1.2rem !important;
+}
+.size-1p3 {
+    font-size: 1.3rem !important;
+}
+.size-1p4 {
+    font-size: 1.4rem !important;
+}
+.size-1p5 {
+    font-size: 1.5rem !important;
+}
+
+.size-2 {
+    font-size: 1.2rem !important;
+}
+
+.size-3 {
+    font-size: 1.3rem !important;
+}
+
+.size-sm {
+    font-size: 1.4rem !important;
+}
+
+
+
+
+.transformY-0px{
+    transform: translateY(var(--transformY, 0px));
+}
+.transformY-1px{
+    transform: translateY(var(--transformY, 1px));
+}
+.transformY-2px{
+    transform: translateY(var(--transformY, 2px));
+}
+.transformY-3px{
+    transform: translateY(var(--transformY, 3px));
+}
+.transformY-4px{
+    transform: translateY(var(--transformY, 4px));
+}
+.transformY-5px{
+    transform: translateY(var(--transformY, 5px));
+}
+.transformY-0px-{
+    transform: translateY(var(--transformY, 0px));
+}
+.transformY-1px-{
+    transform: translateY(var(--transformY, -1px));
+}
+.transformY-2px-{
+    transform: translateY(var(--transformY, -2px));
+}
+.transformY-3px-{
+    transform: translateY(var(--transformY, -3px));
+}
+.transformY-4px-{
+    transform: translateY(var(--transformY, -4px));
+}
+.transformY-5px-{
+    transform: translateY(var(--transformY, -5px));
 }

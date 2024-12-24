@@ -206,7 +206,7 @@ onMounted(() => {
 <style>
 :root {
   --snakbar-white: #fff;
-  --snakbar-green: #0989c9;
+  --snakbar-green: #015af0;
   --snakbar-blue: #2896f3;
   --snakbar-yellow: #bf9303;
   --snakbar-red: #f55153;
@@ -272,11 +272,18 @@ h1 {
 /*                              Main Toaster CSS                              */
 /* -------------------------------------------------------------------------- */
 
-.toasts-container {
+/* .toasts-container {
   position: fixed;
   top: 0;
   right: 0;
   padding: 1.1rem;
+  z-index: 1000000000;
+} */
+.toasts-container {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  padding: 0px 1.1rem;
   z-index: 1000000000;
 }
 

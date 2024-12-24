@@ -1,5 +1,5 @@
 <template>
-  <button v-bind="$attrs" class="emb-buttons">
+  <button v-bind="$attrs" @click.stop="(e)=>$emit('click', e)" class="emb-buttons">
     <slot>
       Submit
     </slot>
@@ -8,7 +8,7 @@
 
 
 <script setup>
-
+defineEmits(['click'])
 </script>
 
 
@@ -24,8 +24,20 @@ button {
   text-decoration: none;
   cursor: pointer; /* Adds pointer cursor on hover */
 }
+button.sm{
+  padding: 6px 15px;
+  font-size: 12px;
+}
+button.xsm{
+  padding: 2px 10px;
+  font-size: 10px;
+}
 button.red{
   background-color: #ea6b1a;
+}
+button.sound{
+  color: #141414c6;
+  background-color: #ddf9f09c;
 }
 
 
@@ -35,6 +47,9 @@ button:active {
 button.color:active {
   background-color: #d23109;
 }
+button.sound:active {
+  background-color: #bbf3e1;
+}
 
  
 button:hover {
@@ -43,6 +58,10 @@ button:hover {
 
 button.red:hover {
   background: #df5330;
+}
+ 
+button.sound:hover {
+  background: #bbf3e1;
 }
  
 

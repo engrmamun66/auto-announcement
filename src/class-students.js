@@ -6,6 +6,7 @@ const { classes } = require("../config");
 const fs = require("fs");
 const path = require("path");
 const moment = require('moment')
+const utils = require('./utls')
 
 class Students { 
 
@@ -23,67 +24,72 @@ class Students {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const offset = (page - 1) * limit;
-
-    // Optional filters
-    const filters = [];
-    const filterValues = [];
-
-    if (req.query.name) {
-      filters.push("name LIKE ?");
-      filterValues.push(`%${req.query.name}%`);
+  
+    const { name, class: className, sound1 } = req.query;
+  
+    let query = `SELECT * FROM ${this.tableName} WHERE 1=1`;
+    let queryParams = [];
+  
+    // Add filters if provided
+    if (name) {
+      query += ` AND name LIKE ?`;
+      queryParams.push(`%${name}%`);
     }
-
-    if (req.query.class) {
-      filters.push("class = ?");
-      filterValues.push(req.query.class);
+  
+    if (className) {
+      query += ` AND class = ?`;
+      queryParams.push(className);
     }
-
-    if (req.query.sound1) {
-      if (req.query.sound1 === "has_sound") {
-        filters.push("sound1 IS NOT NULL");
-      } else if (req.query.sound1 === "no_sound") {
-        filters.push("sound1 IS NULL");
+  
+    if (sound1) {
+      if (sound1 === 'has_sound') {
+        query += ` AND sound1 IS NOT NULL`;
+      } else if (sound1 === 'no_sound') {
+        query += ` AND sound1 IS NULL`;
       }
     }
-
-    // Base query with dynamic filters
-    const whereClause = filters.length ? `WHERE ${filters.join(" AND ")}` : "";
-    const query = `SELECT * FROM ${this.tableName} ${whereClause} LIMIT ? OFFSET ?`;
-
-    // Add pagination values to filter values
-    filterValues.push(limit, offset);
-
-    this.db.all(query, filterValues, (err, rows) => {
+  
+    // Add pagination
+    query += ` LIMIT ? OFFSET ?`;
+    queryParams.push(limit, offset);
+  
+    this.db.all(query, queryParams, (err, rows) => {
       if (err) {
         res.status(500).send({ error: err.message });
         return;
       }
-
-      this.db.get( `SELECT COUNT(*) as total FROM ${this.tableName} ${whereClause}`,
-        filters.map((f, i) => filterValues[i]), // Pass the same filter values for the count query
-        (err, result) => {
-          if (err) {
-            res.status(500).send({ error: err.message });
-            return;
-          }
-
-          const total = result.total;
-          const totalPages = Math.ceil(total / limit);
-
-          // Send response with data and pagination info
-          res.send({
-            data: rows,
-            pagination: {
-              page,
-              total,
-              limit,
-              totalPages,
-            },
-          });
+  
+      // Count total records for pagination metadata
+      const countQuery = `SELECT COUNT(*) as total FROM ${this.tableName} WHERE 1=1`;
+  
+      let countQueryParams = [...queryParams.slice(0, queryParams.length - 2)]; // Exclude limit and offset for count query
+  
+      this.db.get(countQuery, countQueryParams, (err, result) => {
+        if (err) {
+          res.status(500).send({ error: err.message });
+          return;
         }
-      );
+  
+        const total = result.total;
+        const totalPages = Math.ceil(total / limit);
+  
+        // Send response with data and pagination info
+        res.send({
+          data: rows.map(row => {
+            if(row.sound1) row.sound1 = utils.audioFullUrl(req, row.sound1)
+            return row
+          }),
+          pagination: {
+            page,
+            total,
+            limit,
+            totalPages,
+          },
+        });
+      });
     });
   }
+  
 
   getStudent(req, res) {}
 

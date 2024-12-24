@@ -16,4 +16,7 @@ module.exports = {
           return 'error-url'
       }
     },
+    audioFullUrl(req, audio_path){
+        return `${req.protocol}://${req.get("host")}${audio_path}`
+    }
 };

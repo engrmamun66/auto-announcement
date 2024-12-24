@@ -9,6 +9,8 @@ import Btn from '../components/Btn.vue'
 import Pagination from '../components/Pagination.vue'
 import BtnLoader from '../components/BtnLoader.vue'
 import Switch from '../components/Switch.vue'
+import AudioUpload from '../components/AudioUpload.vue'
+import Player from '../components/Player.vue'
 
 let router = useRouter()
  
@@ -41,6 +43,17 @@ async function getStudents(){
     console.warn('getStudents_error::', error);
   }
 }
+
+function toggleLoopItem (data, index, key = "isPlaying") {
+  if (!data) return;
+  data?.forEach((item, i) => {
+    if (i == index) {
+      item[key] = !(item[key] ?? false);
+    } else {
+      item[key] = false;
+    }
+  });
+}
  
 async function clearParams(){
   params.value.class = null
@@ -50,7 +63,9 @@ async function clearParams(){
   getStudents()
 }
  
-getStudents()
+onMounted(()=>{
+  getStudents()
+})
 
  
 
@@ -69,7 +84,7 @@ getStudents()
     
     <!-- Search -->
     <div class="form-area mt-5 p-4 border radius-10">
-      <form @submit.prevent="getStudents">
+      <form @submit.prevent.stop="getStudents">
         <div class="row">
           <div class="col-md-3 col-12">
             <div class="form-group">
@@ -101,7 +116,7 @@ getStudents()
               <input v-model="params.name" type="text" class="form-control" id="email">
             </div>
           </div>
-          <div class="col-md-3 col-6">
+          <div class="col-md-3 col-12">
             <div class="form-group">
               <label for="email">Dakhela</label>
               <input v-model="params.dakhela" type="number" class="form-control" id="email">
@@ -117,11 +132,11 @@ getStudents()
               </select>
             </div>
           </div>
-          <div class="col-md-3 col-6">
+          <div class="col-md-12 mt-2">
             <div class="form-group mt-md-3"> 
                 <div class="d-flex">
-                  <Btn @click="getStudents"  class="me-1"></Btn> 
-                  <Btn @click="clearParams" class="me-1 red">Clear</Btn> 
+                  <Btn    class="me-1"></Btn> 
+                  <Btn @click.stop="clearParams" class="me-1 red">Clear</Btn> 
                 </div>
             </div>
           </div>
@@ -155,11 +170,21 @@ getStudents()
                 <td> {{ std.class }} </td> 
                 <td> {{ std.dakhela }} </td> 
                 <td> {{ std.year }} </td> 
-                <td> {{ std.sound1 }} </td> 
+                <td> 
+                  <template v-if="std.sound1">
+                    <Btn v-if="!std.isPlaying" @click.stop="toggleLoopItem(students, i)" class="radius-10 sm sound" style="padding: 2px 96px;" >
+                      <i class='bx bx-play size-1 transformY-3px'></i>&nbsp;Play
+                    </Btn>
+                    <Player v-else :src="std.sound1" @close="std.isPlaying = false"></Player>
+                  </template>  
+                  <template v-else>
+                    <AudioUpload :student="std" column="sound1" @change="({audio_path, audio_url})=>{
+                      std.sound1 = audio_url
+                    }" ></AudioUpload>
+                  </template>  
+                </td> 
                 <td> <Switch size="sm" v-model="std.status" @change="async (status) => {
                   await http.post('/students/update-status', {id: std.id, status} );
-              
-                    emitter.emit('toaster-success', {message: 'Status updated', duration: 0})
                 
                 }"></Switch> </td> 
                 <td> 

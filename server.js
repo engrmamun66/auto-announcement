@@ -11,7 +11,8 @@ const upload = multer({ dest: DIR + '/public/temp' });
  * Classes
 */
 const classDB = require('./src/class-db')
-const students = require('./src/class-students')
+const students = require('./src/class-students');
+const { utils } = require('xlsx');
 const DB = new classDB() 
 const Students = new students(DB.db) 
 
@@ -23,9 +24,28 @@ app.use(express.static('public'));
 // Enable CORS
 app.use(cors());
 
+ 
+const audioUpload = multer({
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, __dirname + "/public/media"); // Save files to public/media folder
+    },
+    filename: (req, file, cb) => {
+      const uniqueName = `${Date.now()}-${file.originalname}`;
+      cb(null, uniqueName);
+    },
+  }),
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith("audio/")) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only audio files are allowed"), false);
+    }
+  },
+});
 
-['/api'].forEach(prefix => {
-  
+
+['/api'].forEach(prefix => {  
   app.get(prefix + "/students", (req, res) => {
     Students.getStudents(req, res)
   });
@@ -58,6 +78,32 @@ app.use(cors());
 
   app.post(prefix + "/students/update-status", (req, res) => {
     Students.updateStatus(req, res);
+  });
+
+  app.post(prefix + "/students/upload-audio", audioUpload.single("file"), (req, res) => {
+    // Check if a file was uploaded
+    if (!req.file) {
+      res.status(400).send({ error: "No audio file uploaded or invalid file type." });
+      return;
+    }
+  
+    let { id, column } = req.body;
+    const audioPath = `/media/${req.file.filename}`; 
+    column = ['sound1', 'sound2', 'sound3'].includes(column) ? column : 'sound1'
+  
+    // Update sound1 column in the database
+    const query = `UPDATE students SET ${column} = ? WHERE id = ?`;
+    DB.db.run(query, [audioPath, id], (err) => {
+      if (err) {
+        res.status(500).send({ error: "Error updating database" });
+        return;
+      }
+      res.send({
+        message: "Audio uploaded successfully",
+        audio_path: audioPath,
+        audio_url: utils.audioFullUrl(req, audioPath),
+      });
+    });
   });
    
 })

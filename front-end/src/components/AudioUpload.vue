@@ -1,15 +1,10 @@
 <template> 
     <div class="card bg1">
-        <h3>Upload Files</h3>
-        <div class="drop_box">
-        <header>
-            <h4>{{file ? file?.name : 'Select File here'}}</h4>
-        </header>
-        <p>Files Supported: excel</p>
-        <input v-if="fileInputField" ref="uploader" @change="onChangeFile" type="file" hidden accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"   id="fileID" style="display:none;">
-        <Btn v-if="!file?.name" class="red"  @click="open" >Choose File</Btn>
-        <Btn v-if="file?.name" @click.stop="uploadNow()" >Upload Now <BtnLoader v-if="loading"></BtnLoader></Btn>
-        <a :href="`${VITE_BASE_URL}/sample.xlsx`" class="mt-2">Download Sample File</a>
+        <div class="drop_box">        
+        <input v-if="fileInputField" ref="uploader" @change="onChangeFile" type="file" hidden accept="audio/*" id="fileID" style="display:none;" >
+        <Btn v-if="!file?.name" class="xsm" style="padding: 2px 88px;" @click="open" >Choose&nbsp;File 
+          <BtnLoader v-if="loading"></BtnLoader>
+        </Btn>
         
         </div>  
     </div> 
@@ -23,14 +18,13 @@ let http = inject('http');
 let emitter = inject('emitter'); 
 import BtnLoader from './BtnLoader.vue'
 
-
+let props = defineProps(['student', 'column'])
+let emits = defineEmits(['change']) 
 
 let uploader = ref(null)
 let file = ref(null)
 let loading = ref(false)
 let fileInputField = ref(true)
-
-let { VITE_BASE_URL } = import.meta
 
 function open(){
     uploader.value.click()
@@ -40,15 +34,19 @@ function onChangeFile(event){
   const fileInput = event.target;
   if (fileInput.files && fileInput.files[0]) {
     file.value = fileInput.files[0];
+    uploadNow()
   }
 }
 
 async function uploadNow(){
+  let { id } = props.student
   if(file.value){    
     loading.value = true
-    http.post('/students/import', {file: file.value}, {formData: true}).then(response => {
-      emitter.emit('toaster-success', {message: 'Import successful'})
+    http.post('/students/upload-audio', {id, file: file.value, column: props.column}, {formData: true}).then(response => {
+      emitter.emit('toaster-success', {message: 'Audio uploaded'})
       file.value = null;
+      emits('change', response.data)
+
     }).finally(()=>{
       fileInputField.value = false
       setTimeout(() => {
@@ -67,24 +65,23 @@ async function uploadNow(){
 .card {
   border-radius: 10px; 
   width: 100%;
-  padding: 10px 30px 40px;
+  padding: 5px 3px;
 }
 
 .card h3 {
-  font-size: 22px;
+  font-size: 16px;
   font-weight: 600;
   
 }
 
 .drop_box {
-    margin: 10px 0;
-    padding: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    border: 1px dashed var(--borderColor);
-    border-radius: 5px;
+  margin: 0;
+  padding: 0px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  border-radius: 5px;
 }
 
 .drop_box h4 {
@@ -94,8 +91,8 @@ async function uploadNow(){
 }
 
 .drop_box p {
-  margin-top: 10px;
-  margin-bottom: 20px;
+  margin-top: 0px;
+  margin-bottom: 0px;
   font-size: 12px;
   
 }
