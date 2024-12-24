@@ -174,6 +174,9 @@ onMounted(()=>{
                   <template v-if="std.sound1">
                     <Btn v-if="!std.isPlaying" @click.stop="toggleLoopItem(students, i)" class="radius-10 sm sound" style="padding: 2px 96px;" >
                       <i class='bx bx-play size-1 transformY-3px'></i>&nbsp;Play
+                      <span class="absolute" style="top:5px;right:10px" @click.stop="http.delete(`/students/delete-audio/${std.id}/${'sound1'}`).then(()=>{students.sound1 = null})" >
+                        <i class='bx bxs-trash-alt text-danger' ></i>
+                      </span> 
                     </Btn>
                     <Player v-else :src="std.sound1" @close="std.isPlaying = false"></Player>
                   </template>  

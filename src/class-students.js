@@ -358,6 +358,40 @@ class Students {
       res.send({ message: `Status updated to ${status} for student ID ${id}.` });
     });
   }
+
+  deleteAudio(req, res){
+    const { id, column } = req.params;
+    
+    // Query to fetch the current sound file path from the database
+    const query = `SELECT ${column} FROM ${this.tableName} WHERE id = ?`;
+    
+    this.db.get(query, [id], (err, row) => {
+      if (err) {
+        return res.status(500).send({ error: 'Error fetching data from database' });
+      }
+
+      if (!row || !row[column]) {
+        return res.status(404).send({ error: 'No audio file found for this student' });
+      }
+
+      const audioFilePath = path.join(DIR, 'public', row[column]);
+
+  
+      fs.unlink(audioFilePath, (unlinkErr) => {
+        if (unlinkErr) {
+          // return res.status(500).send({ error: 'Error deleting audio file' });
+        } 
+        const updateQuery = `UPDATE students SET ${column} = NULL WHERE id = ?`;
+
+        this.db.run(updateQuery, [id], (updateErr) => {
+          if (updateErr) {
+            return res.status(500).send({ error: 'Error updating database' });
+          }
+          res.send({ message: 'Audio file deleted successfully' });
+        });
+      });
+    });
+  }
   
   
 }

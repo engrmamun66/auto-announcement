@@ -6,13 +6,14 @@ const express = require('express')
 const sqlite3 = require("sqlite3").verbose();
 const multer = require("multer");
 const upload = multer({ dest: DIR + '/public/temp' });
+ 
 
 /**
  * Classes
 */
 const classDB = require('./src/class-db')
 const students = require('./src/class-students');
-const { utils } = require('xlsx');
+const utils = require('./src/utls');
 const DB = new classDB() 
 const Students = new students(DB.db) 
 
@@ -82,33 +83,44 @@ const audioUpload = multer({
 
   app.post(prefix + "/students/upload-audio", audioUpload.single("file"), (req, res) => {
     // Check if a file was uploaded
-    if (!req.file) {
-      res.status(400).send({ error: "No audio file uploaded or invalid file type." });
-      return;
-    }
-  
-    let { id, column } = req.body;
-    const audioPath = `/media/${req.file.filename}`; 
-    column = ['sound1', 'sound2', 'sound3'].includes(column) ? column : 'sound1'
-  
-    // Update sound1 column in the database
-    const query = `UPDATE students SET ${column} = ? WHERE id = ?`;
-    DB.db.run(query, [audioPath, id], (err) => {
-      if (err) {
-        res.status(500).send({ error: "Error updating database" });
+    try {
+      if (!req.file) {
+        res.status(400).send({ error: "No audio file uploaded or invalid file type." });
         return;
       }
-      res.send({
-        message: "Audio uploaded successfully",
-        audio_path: audioPath,
-        audio_url: utils.audioFullUrl(req, audioPath),
+    
+      let { id, column } = req.body;
+      const audioPath = `/media/${req.file.filename}`;  
+  
+     
+    
+      // Update sound1 column in the database
+      const query = `UPDATE students SET ${column} = ? WHERE id = ?`;
+      DB.db.run(query, [audioPath, id], (err) => {
+        if (err) {
+          res.status(500).send({ error: "Error updating database" });
+          return;
+        }
+        res.send({
+          message: "Audio uploaded successfully",
+          audio_path: audioPath,
+          audio_url: utils.audioFullUrl(req, audioPath),
+        });
       });
-    });
+    } catch (erroreee) {
+      console.log({erroreee});
+    }
   });
+
+
+ 
+  app.delete(prefix + '/students/delete-audio/:id/:column', (req, res) => {
+    Students.deleteAudio(req, res);
+  });
+
    
 })
  
-
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

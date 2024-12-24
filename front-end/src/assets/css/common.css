@@ -223,7 +223,9 @@ select {
     font-size: 1.4rem !important;
 }
 
-
+.absolute{
+    position: absolute;
+}
 
 
 .transformY-0px{
