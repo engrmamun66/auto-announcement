@@ -19,7 +19,12 @@ let params = ref({
     "page": 1,
     "total": 3,
     "totalPages": 1,
-    "limit": 100
+    "limit": 100,
+
+    class: null,
+    name: null,
+    dakhela: null,
+    sound1: null,
 })
 let addMode = ref(false)
 // let filterForm
@@ -29,26 +34,22 @@ async function getStudents(){
     http.get('/students', { params: params.value }).then(response => {
       if(response.status == 200){
         students.value = response.data.data;
-        params.value = response.data.pagination;
+        params.value = {...params.value, ...response.data.pagination};
       }
     })
   } catch (error) {
     console.warn('getStudents_error::', error);
   }
 }
-
-
-async function onSubmit(){
-  try {
-    http.get('/students/add', { params: {}}).then(response => {
-      if(response.status == 200){
-        students.value = response.data;
-      }
-    })
-  } catch (error) {
-    console.warn('onSubmit_error::', error);
-  }
+ 
+async function clearParams(){
+  params.value.class = null
+  params.value.name = null
+  params.value.dakhela = null
+  params.value.sound1 = null
+  getStudents()
 }
+ 
 getStudents()
 
  
@@ -68,12 +69,12 @@ getStudents()
     
     <!-- Search -->
     <div class="form-area mt-5 p-4 border radius-10">
-      <form @submit.prevent="onSubmit">
+      <form @submit.prevent="getStudents">
         <div class="row">
           <div class="col-md-3 col-12">
             <div class="form-group">
               <label for="email">Class</label>
-              <select class="form-control" id="ClassId" required="required">
+              <select v-model="params.class" class="form-control" id="ClassId">
                 <option value=""></option>
                 <option value="Play">Play</option>
                 <option value="Nursery">Nursery</option>
@@ -97,27 +98,31 @@ getStudents()
           <div class="col-md-3 col-12">
             <div class="form-group">
               <label for="email">Name</label>
-              <input type="text" class="form-control" id="email">
+              <input v-model="params.name" type="text" class="form-control" id="email">
             </div>
           </div>
           <div class="col-md-3 col-6">
             <div class="form-group">
               <label for="email">Dakhela</label>
-              <input type="number" class="form-control" id="email">
+              <input v-model="params.dakhela" type="number" class="form-control" id="email">
             </div>
           </div>
           <div class="col-md-3 col-12">
             <div class="form-group">
               <label for="email">Media</label>
-              <select class="form-control" id="ClassId" required="required">
+              <select v-model="params.sound1" class="form-control">
                 <option value="">All</option>
-                <option value="Play">Play</option> 
+                <option value="no_sound">No Sound</option> 
+                <option value="has_sound">Has Sound</option> 
               </select>
             </div>
           </div>
           <div class="col-md-3 col-6">
             <div class="form-group mt-md-3"> 
-                <Btn></Btn> 
+                <div class="d-flex">
+                  <Btn @click="getStudents"  class="me-1"></Btn> 
+                  <Btn @click="clearParams" class="me-1 red">Clear</Btn> 
+                </div>
             </div>
           </div>
         </div>

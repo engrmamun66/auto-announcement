@@ -151,3 +151,12 @@ kbd{
 .form-control:focus-visible{
     outline: none;
 }
+
+
+select {
+    appearance: none;
+    background-image: url('../down-arrow.png');
+    background-size: 16px;
+    background-repeat: no-repeat;
+    background-position: calc(100% - 5px) center; /* Adjusted position */
+}

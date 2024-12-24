@@ -26,7 +26,6 @@ button {
 }
 button.red{
   background-color: #ea6b1a;
-  box-shadow: 0px -1px 2px 0 #6f1701 inset, 0px 1px 1px 1px #ccc;
 }
 
 
