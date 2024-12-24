@@ -22,20 +22,23 @@
                                 {{ timeparts.hour }}:{{ timeparts.minute }}:{{ timeparts.second }}
                             </div>
                             <template v-if="isRecording">
-                                <span class="size-08 ms-1 d-flex border radius-10 px-2 text-black-75">
+                                <span class="size-08 ms-1 d-flex border radius-10 px-2 text-black-75 ttr">
                                     Recording <i class='bx bx-dots-horizontal bx-flashing transformY-5px' ></i>
                                 </span>   
                                 <Btn  @click="stopRecording" class="sm red ms-2">STOP</Btn>
                             </template>
                             <template v-else-if="audioBlob">
-                                <Btn @click="uploadNow" class="sm ms-2"><i class='bx bxs-cloud-upload size-1p2 transformY-4px' ></i> UPLOAD</Btn> 
+                                <Btn @click.stop="uploadNow" class="sm ms-2">
+                                  <BtnLoader v-if="loading"></BtnLoader>
+                                  <i v-else class='bx bxs-cloud-upload size-1p2 transformY-4px' ></i>
+                                   UPLOAD </Btn> 
                                 
                                 <i v-if="!isPlaying" @click.stop="play()" class='bx bx-play-circle bx-flashing ms-3 size-1p3 cp' ></i>
                                 <i v-else @click.stop="stop()" class='bx bx-stop-circle bx-flashing- ms-3 size-1p3 cp' ></i>
                                 <i @click.stop="resetPlayer()" class='bx bxs-trash-alt ms-3 text-danger size-1p1 cp' ></i>
                             </template>
                             <template v-else>
-                                <span @click="startRecording" class="size-08 ms-1 d-flex border2 radius-10 px-2 ms-4 text-black-75 cp">
+                                <span @click="startRecording" class="size-08 ms-1 d-flex border2 radius-10 px-2 ms-4 text-black-75 cp ttr">
                                     Click To Start Recording
                                 </span> 
                             </template>                            
@@ -54,6 +57,7 @@
   import RecordRTC from 'recordrtc'
   let audioPlayer = ref(null)
   import Btn from './Btn.vue'
+  import BtnLoader from './BtnLoader.vue'
 
   let props = defineProps(['student', 'column'])
   
@@ -64,6 +68,7 @@
 
   let http = inject('http')
   let emits = defineEmits(['uploaded'])
+  let emitter = inject('emitter')
 
   let interVal = null
   let seconds = ref(0)
@@ -155,16 +160,17 @@ async function uploadNow(){
    
   loading.value = true
   http.post('/students/upload-audio', {id, file: audioBlob.value, column: props.column}, {formData: true}).then(response => {
-    emitter.emit('toaster-success', {message: 'Audio uploaded'})
-    file.value = null;
-    emits('uploaded', response.data)
+    
+    setTimeout(() => { 
+      resetPlayer()
+      emits('uploaded', response.data)
+    }, 600); 
+    
     
   }).finally(()=>{
-    fileInputField.value = false
     setTimeout(() => {
-      loading.value = false       
-      fileInputField.value = true       
-    }, 500); 
+      resetPlayer()
+    }, 600); 
   }) 
 }
 
@@ -180,6 +186,13 @@ async function uploadNow(){
 }
 .player-icon:hover {
   color: #000;
+}
+
+.ttr{
+  background: var(--grad1);
+  padding: 5px 3px;
+  color: #1d1d1dc5;
+  border-radius: 15px;
 }
 
 .container {

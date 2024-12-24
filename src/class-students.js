@@ -82,6 +82,8 @@ class Students {
         res.send({
           data: rows.map(row => {
             if(row.sound1) row.sound1 = utils.audioFullUrl(req, row.sound1)
+            if(row.sound2) row.sound2 = utils.audioFullUrl(req, row.sound2)
+            if(row.sound3) row.sound3 = utils.audioFullUrl(req, row.sound3)
             return row
           }),
           pagination: {

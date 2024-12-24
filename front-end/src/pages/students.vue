@@ -11,7 +11,7 @@ import BtnLoader from '../components/BtnLoader.vue'
 import Switch from '../components/Switch.vue'
 import AudioUpload from '../components/AudioUpload.vue'
 import Player from '../components/Player.vue'
-import RcordAudioAndUpload from '../components/RcordAudioAndUpload.vue'
+import AudioRecorAndUpload from '../components/AudioRecorAndUpload.vue'
 
 let router = useRouter()
  
@@ -252,10 +252,16 @@ onMounted(()=>{
       <modal @close="targetStd=null" :title="false">
         <div style="height:100px" class="d-flex justify-content-center align-items-center">
 
-          <RcordAudioAndUpload :student="targetStd" :column="columnName" @uploaded="({audio_path, audio_url})=>{
-            std[column] = audio_url
+          <AudioRecorAndUpload :student="targetStd" :column="columnName" @uploaded="({audio_path, audio_url})=>{
+            students.forEach(student => {
+              if(student.id == targetStd.id){
+                student[columnName] = audio_url;
+              }
+            })
+            targetStd = null;
+            columnName = null;
           }">
-          </RcordAudioAndUpload>
+          </AudioRecorAndUpload>
         </div>
       </modal>
      </template>
