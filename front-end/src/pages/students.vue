@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, inject, ref } from 'vue';
+import { onMounted, inject, ref, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import Note from '../components/note.vue'
 import myTable from '../components/myTable.vue'
@@ -11,6 +11,7 @@ import BtnLoader from '../components/BtnLoader.vue'
 import Switch from '../components/Switch.vue'
 import AudioUpload from '../components/AudioUpload.vue'
 import Player from '../components/Player.vue'
+import RcordAudioAndUpload from '../components/RcordAudioAndUpload.vue'
 
 let router = useRouter()
  
@@ -31,6 +32,9 @@ let params = ref({
     sound1: null,
 })
 let addMode = ref(false)
+let targetStd = ref(null)
+let columnName = ref('sound1')
+let targetStdForBarcode = ref(null)
 // let filterForm
 
 async function getStudents(){
@@ -46,7 +50,7 @@ async function getStudents(){
   }
 }
 
-function toggleLoopItem (data, index, key = "isPlaying") {
+function toggleLoopItem (data, index, key = "isPlaying_sound1") {
   if (!data) return;
   data?.forEach((item, i) => {
     if (i == index) {
@@ -63,6 +67,12 @@ async function clearParams(){
   params.value.dakhela = null
   params.value.sound1 = null
   getStudents()
+}
+ 
+async function deleteAudio(std, colName){
+  http.delete(`/students/delete-audio/${std.id}/${colName}`).then(()=>{
+    std[colName] = null
+  })
 }
  
 onMounted(()=>{
@@ -150,15 +160,18 @@ onMounted(()=>{
       </form>
     </div>
 
+    
+
      <myTable>
         <template #thead>
           <thead>
             <tr>
-              <th>Name</th>
               <th>Class</th>
+              <th>Name</th>
               <th>Dakhela</th>
               <th>Year</th>
               <th>Sound</th>
+              <th>Sound-2</th>
               <th>Status</th>
               <th>Action</th> 
             </tr>
@@ -168,49 +181,55 @@ onMounted(()=>{
           <template v-if="students?.length">
             <template v-for="(std, i) in students">
               <tr>
+                <td class="text-left"> {{ std.class }} </td> 
                 <td class="text-left">{{ std.name }}</td>
-                <td> {{ std.class }} </td> 
                 <td> {{ std.dakhela }} </td> 
                 <td> {{ std.year }} </td> 
-                <td> 
-                  <template v-if="std.sound1">
-                    <Btn v-if="!std.isPlaying" @click.stop="toggleLoopItem(students, i)" class="radius-10 sm sound" style="padding: 2px 96px;" >
-                      <i class='bx bx-play size-1 transformY-3px'></i>&nbsp;Play
-                      <span class="absolute" style="top:5px;right:10px" @click.stop="http.delete(`/students/delete-audio/${std.id}/${'sound1'}`).then(()=>{students.sound1 = null})" >
-                        <i class='bx bxs-trash-alt text-danger' ></i>
-                      </span> 
-                    </Btn>
-                    <Player v-else :src="std.sound1" @close="std.isPlaying = false"></Player>
-                  </template>  
-                  <template v-else>
-                    <AudioUpload :student="std" column="sound1" @change="({audio_path, audio_url})=>{
-                      std.sound1 = audio_url
-                    }" ></AudioUpload>
-                  </template>  
-                </td> 
+                <template v-for="column in ['sound1', 'sound2']">
+                  <td> 
+                    <!-- Sound -->
+                    <template v-if="std[column]">            
+                      <template v-if="!std[`isPlaying_${column}`]">            
+                        <div class="d-flex align-items-center">
+                          <Btn  @click.stop="toggleLoopItem(students, i, `isPlaying_${column}`)" class="radius-10 sm sound w-100" style="padding: 2px auto;" >
+                            <i class='bx bx-play size-1 transformY-3px'></i>&nbsp;Play
+                          </Btn>
+                          <span class="ms-2 me-1 cp" @click.stop="deleteAudio(std, column)" >
+                            <i class='bx bxs-trash-alt text-danger size-1' ></i>
+                          </span>
+                        </div> 
+                      </template>
+                      <template v-else>
+                        <Player  :src="std[column]" @close="std[`isPlaying_${column}`] = false"></Player>
+                      </template>
+                    </template>  
+                    <template v-else>
+
+                      <div class="d-flex align-items-center">
+                        <AudioUpload :student="std" :column="column" @change="({audio_path, audio_url})=>{
+                          std[column] = audio_url
+                        }" ></AudioUpload>
+                        <span tooltip="Rcord Sound" @click="targetStd=std;columnName=column">
+                          <i class='bx bxs-microphone p-1 ms-1 cp' ></i>
+                        </span>
+                      </div>
+
+                    </template>  
+                  </td> 
+                </template>
                 <td> <Switch size="sm" v-model="std.status" @change="async (status) => {
                   await http.post('/students/update-status', {id: std.id, status} );
                 
                 }"></Switch> </td> 
                 <td> 
-                  <div class="d-flex">
-                    <i @click="toggleLoopItem(students, i, 'showBarcode')" class='bx bx-barcode cp size-1p3' ></i>
+                  <div class="d-flex justify-content-center">
+                    <i @click.stop="targetStdForBarcode=std" class='bx bx-barcode cp size-1p5' ></i>
                   </div>
                 </td> 
             </tr> 
-            <tr v-if="std.showBarcode">
-              <td colspan="2">
-              </td>
-              <td colspan="5">
-                <div class="d-flex justify-content-around align-items-center">
-                  <div id="PRINTABLE_AREA"><Barcode :data="makeCarcode(std)"></Barcode></div>
-                  <span class="print-buton" @click="printDiv('PRINTABLE_AREA')">
-                    <i class='bx bx-printer' style="font-size: 30px" ></i>
-                  </span>
-                </div>
-              </td>
+
+            
              
-            </tr>
             </template>
           </template>
           <template v-else>
@@ -227,6 +246,34 @@ onMounted(()=>{
           getStudents()
         }" ></Pagination>
      </div> 
+
+
+     <template v-if="targetStd && columnName">
+      <modal @close="targetStd=null" :title="false">
+        <div style="height:100px" class="d-flex justify-content-center align-items-center">
+
+          <RcordAudioAndUpload :student="targetStd" :column="columnName" @uploaded="({audio_path, audio_url})=>{
+            std[column] = audio_url
+          }">
+          </RcordAudioAndUpload>
+        </div>
+      </modal>
+     </template>
+
+     <template v-if="targetStdForBarcode">
+      <modal @close="targetStdForBarcode=null" :title="false">
+        <div style="height:220px" class="d-flex justify-content-center align-items-center">
+          <div class="d-flex justify-content-center align-items-center flex-column w-100">
+              <div id="PRINTABLE_AREA">
+                <Barcode :data="makeCarcode(targetStdForBarcode)"  @load="printDiv('PRINTABLE_AREA')"></Barcode>
+              </div>
+              <span class="print-buton cp px-5 mt-3" @click="printDiv('PRINTABLE_AREA')">
+                <i class='bx bx-printer px-1' style="font-size: 18px" ></i> Print
+              </span>
+            </div>
+        </div>
+      </modal>
+     </template>
 
  
 

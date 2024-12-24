@@ -140,6 +140,10 @@ kbd{
     border: 1px solid #e2e2e2;
 }
 
+.border2{
+    border: 1px solid #cbcef6;
+}
+
 .radius-10{
     border-radius: 10px;
 }

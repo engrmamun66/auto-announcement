@@ -2,7 +2,7 @@
     <div class="card bg1">
         <div class="drop_box">        
         <input v-if="fileInputField" ref="uploader" @change="onChangeFile" type="file" hidden accept="audio/*" id="fileID" style="display:none;" >
-        <Btn v-if="!file?.name" class="xsm" style="padding: 2px 88px;" @click="open" >Choose&nbsp;File 
+        <Btn v-if="!file?.name" class="xsm w-100"   @click="open" >Choose&nbsp;File 
           <BtnLoader v-if="loading"></BtnLoader>
         </Btn>
         

@@ -212,11 +212,6 @@ axios@^1.7.9:
     form-data "^4.0.0"
     proxy-from-env "^1.1.0"
 
-axis@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.npmjs.org/axis/-/axis-1.0.0.tgz"
-  integrity sha512-2E3nE/hIsUAGoijbEa2FVoxgJBwn/pnbEVn94JRhagke9hPK8OIjD4raE44TRfjZgx3olSvCeXVCNnUn6/oang==
-
 balanced-match@^1.0.0:
   version "1.0.2"
   resolved "https://registry.npmjs.org/balanced-match/-/balanced-match-1.0.2.tgz"
@@ -947,6 +942,11 @@ readable-stream@^3.1.1, readable-stream@^3.4.0, readable-stream@^3.6.0:
     inherits "^2.0.3"
     string_decoder "^1.1.1"
     util-deprecate "^1.0.1"
+
+recordrtc@^5.6.2:
+  version "5.6.2"
+  resolved "https://registry.npmjs.org/recordrtc/-/recordrtc-5.6.2.tgz"
+  integrity sha512-1QNKKNtl7+KcwD1lyOgP3ZlbiJ1d0HtXnypUy7yq49xEERxk31PHvE9RCciDrulPCY7WJ+oz0R9hpNxgsIurGQ==
 
 retry@^0.12.0:
   version "0.12.0"

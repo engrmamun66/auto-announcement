@@ -1,5 +1,5 @@
 <script setup>
-import { ref, defineEmits } from 'vue'
+import { ref } from 'vue'
 
 let props = defineProps({
     modelValue: {
@@ -10,28 +10,30 @@ let props = defineProps({
     title: {
         default: 'Modal Title',
         required: false,
-        type: String,
     },
 
 })
 
-let emits = defineEmits(['update:modelValue'])
+let emits = defineEmits(['update:modelValue', 'close'])
 
 function close(){
     emits("update:modelValue", false);
+    emits("close", false);
 }
 
 </script>
 
 <template> 
     <Teleport to="body" >
-        <div class="an-modal" v-if="modelValue">
+        <div class="an-modal" v-if="modelValue" @click.stop="close()">
             <div class="modal__content" @click.stop="false">
-                <h1>{{title}}</h1> 
+                <slot name="title">
+                    <h3 v-if="title">{{title}}</h3> 
+                </slot>
                 <slot>
                     Lorem ipsum dolor sit amet consectetur adipisicing elit. Sapiente nihil assumenda voluptates voluptatem repellat cumque esse numquam quam soluta natus, deserunt facere maiores quos nobis similique, quis, nisi vel minus!
                 </slot> 
-                <a href="#" @click.stop="close()" class="modal__close">×</a>
+                <a @click.stop.prevent="close()" class="modal__close">×</a>
             </div>
         </div>
     </Teleport>   
@@ -69,6 +71,7 @@ function close(){
     color: #585858;
     text-decoration: none;
     font-size: 24px;
+    cursor: pointer;
 }
 
 </style>

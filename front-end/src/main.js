@@ -20,28 +20,31 @@ function makeCarcode({class_short, dakhela, year}){
     return ([class_short, dakhela, year].join('-'))
 }
 
-function printDiv(divId) {
-    const content = document.getElementById(divId).innerHTML;
-    const printWindow = window.open('', '_blank');
-    printWindow.document.open();
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>Print</title>
-          <style>
-            /* Add styles here for the printed content */
-            body { font-family: Arial, sans-serif; margin: 20px; }
-          </style>
-        </head>
-        <body>
-          ${content}
-        </body>
-      </html>
-    `);
-    printWindow.document.close();
-    printWindow.focus();
-    printWindow.print();
-    printWindow.close();
+function printDiv(divId, delay=0) {
+    setTimeout(() => {
+        const content = document.getElementById(divId).innerHTML;
+        const printWindow = window.open('', '_blank');
+        printWindow.document.open();
+        printWindow.document.write(`
+          <html>
+            <head>
+              <title>Print</title>
+              <style>
+                /* Add styles here for the printed content */
+                body { font-family: Arial, sans-serif; margin: 20px; }
+              </style>
+            </head>
+            <body>
+              ${content}
+            </body>
+          </html>
+        `);
+        printWindow.document.close();
+        printWindow.focus();
+        printWindow.print();
+        printWindow.close();
+        
+    }, delay);
   }
 
 async function mountTheApp(){

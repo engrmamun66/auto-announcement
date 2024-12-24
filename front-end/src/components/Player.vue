@@ -13,8 +13,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from "vue";
-import { defineProps } from "vue";
+import { computed, onMounted, ref } from "vue"; 
 let emits = defineEmits([
     'close',
 ])
@@ -41,13 +40,17 @@ onMounted(() => {
 <style scoped>
 .audio-player-area{
     position: relative;
-    zoom: 0.8;
+    width: 250px;
+}
+audio{
+    width: 100%;
+    height: 40px;
 }
 .close{
     position: absolute;
-    right: 19px;
-    top: 15px;
-    z-index:9999991;
+    right: 9px;
+    top: 8px;
+    z-index: 9999991;
     cursor: pointer;
 }
 .close i{
