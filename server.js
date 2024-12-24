@@ -61,7 +61,7 @@ const audioUpload = multer({
       return res.status(400).send("No file uploaded.");
     }
   
-    Students.importExcel2(req.file.path, (error, message) => {
+    Students.importExcel(req.file.path, (error, message) => {
       if (error) {
         return res.status(500).send(`Failed to import data: ${error.message}`);
       }

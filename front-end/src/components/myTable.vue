@@ -5,7 +5,7 @@
 
 <template>
 <div class="table-container">
-  <table>  
+  <table class="table">  
    
     <slot name="thead">
       <thead>

@@ -15,6 +15,8 @@ import Player from '../components/Player.vue'
 let router = useRouter()
  
 const emitter = inject('emitter');
+const printDiv = inject('printDiv');
+const makeCarcode = inject('makeCarcode');
 let http = inject('http'); 
 let students = ref([])
 let params = ref({
@@ -192,10 +194,23 @@ onMounted(()=>{
                 }"></Switch> </td> 
                 <td> 
                   <div class="d-flex">
-
+                    <i @click="toggleLoopItem(students, i, 'showBarcode')" class='bx bx-barcode cp size-1p3' ></i>
                   </div>
                 </td> 
             </tr> 
+            <tr v-if="std.showBarcode">
+              <td colspan="2">
+              </td>
+              <td colspan="5">
+                <div class="d-flex justify-content-around align-items-center">
+                  <div id="PRINTABLE_AREA"><Barcode :data="makeCarcode(std)"></Barcode></div>
+                  <span class="print-buton" @click="printDiv('PRINTABLE_AREA')">
+                    <i class='bx bx-printer' style="font-size: 30px" ></i>
+                  </span>
+                </div>
+              </td>
+             
+            </tr>
             </template>
           </template>
           <template v-else>
@@ -211,12 +226,18 @@ onMounted(()=>{
           params.page = page
           getStudents()
         }" ></Pagination>
-     </div>
+     </div> 
+
  
 
 </template>
 
 <style>
-  
+.print-buton{
+  padding: 5px 5px;
+  border-radius: 5px;
+  background: var(--grad1);
+  /* margin-left: 0px 20px; */
+}
 </style>
 

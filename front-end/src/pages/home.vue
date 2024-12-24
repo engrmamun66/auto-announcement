@@ -10,32 +10,9 @@ import FileUpload from '../components/FileUpload.vue'
  
 const emitter = inject('emitter');
 let showModal = ref(false)
-
-
-function printDiv(divId) {
-  const content = document.getElementById(divId).innerHTML;
-  const printWindow = window.open('', '_blank');
-  printWindow.document.open();
-  printWindow.document.write(`
-    <html>
-      <head>
-        <title>Print</title>
-        <style>
-          /* Add styles here for the printed content */
-          body { font-family: Arial, sans-serif; margin: 20px; }
-        </style>
-      </head>
-      <body>
-        ${content}
-      </body>
-    </html>
-  `);
-  printWindow.document.close();
-  printWindow.focus();
-  printWindow.print();
-  printWindow.close();
-}
-
+const printDiv = inject('printDiv');
+const makeCarcode = inject('makeCarcode');
+ 
 
 </script>
 
@@ -43,11 +20,7 @@ function printDiv(divId) {
      <h1>Import Students (excel file)</h1>    
 
  
-    <FileUpload></FileUpload>
-<!-- 
-     <hr v-for="x in 100" >
-
-     <h3 id="TEST">asdf</h3> -->
+     
 
 </template>
 

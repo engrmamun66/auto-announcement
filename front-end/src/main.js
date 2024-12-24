@@ -16,6 +16,34 @@ globalThis.printWarning = function(message='This is a warning', {size='22px'}={}
     console.log(`%c ${message}`, `color:red;font-size:${size};background-color:yellow;padding:10px 20px 10px 10px;border-radius:5px;margin:10px 0px;font-family: system-ui;border:1px solid red`)
 }
 
+function makeCarcode({class_short, dakhela, year}){
+    return ([class_short, dakhela, year].join('-'))
+}
+
+function printDiv(divId) {
+    const content = document.getElementById(divId).innerHTML;
+    const printWindow = window.open('', '_blank');
+    printWindow.document.open();
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Print</title>
+          <style>
+            /* Add styles here for the printed content */
+            body { font-family: Arial, sans-serif; margin: 20px; }
+          </style>
+        </head>
+        <body>
+          ${content}
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
+  }
+
 async function mountTheApp(){
     try {
         const app = createApp(App)
@@ -30,6 +58,8 @@ async function mountTheApp(){
         .provide('helper', utils.helper)
         .provide('cookie', utils.cookie)
         .provide('emitter', emitter)
+        .provide('printDiv', printDiv)
+        .provide('makeCarcode', makeCarcode)
         .mount('#em-datetimepicker-doc');
     } catch (error) {
         console.log({error});
