@@ -12,6 +12,7 @@ import Switch from '../components/Switch.vue'
 import AudioUpload from '../components/AudioUpload.vue'
 import Player from '../components/Player.vue'
 import AudioRecorAndUpload from '../components/AudioRecorAndUpload.vue'
+import RecoringAnimation from '../components/RecoringAnimation.vue'
 
 let router = useRouter()
  
@@ -32,6 +33,7 @@ let params = ref({
     sound1: null,
 })
 let addMode = ref(false)
+let showSearchForm = ref(true)
 let targetStd = ref(null)
 let columnName = ref('sound1')
 let targetStdForBarcode = ref(null)
@@ -70,9 +72,14 @@ async function clearParams(){
 }
  
 async function deleteAudio(std, colName){
-  http.delete(`/students/delete-audio/${std.id}/${colName}`).then(()=>{
-    std[colName] = null
-  })
+  let text = prompt('Type secret pass code')
+  if(text === 'delete' || text === String(new Date().getDate()) || text === 'D'){
+    http.delete(`/students/delete-audio/${std.id}/${colName}`).then(()=>{
+      std[colName] = null
+    })
+  } else if(text) {
+    emitter.emit('toaster-error', { message: 'Pass code not matched' })
+  }
 }
  
 onMounted(()=>{
@@ -90,12 +97,13 @@ onMounted(()=>{
       <div class="d-flex justify-content-end">
         <!-- <Btn v-if="!addMode" class="me-1" @click="addMode = !addMode" ><i class='bx bx-plus'></i> Add Student</Btn>
         <Btn v-else class="me-1 red" @click="addMode = !addMode" >Cancel</Btn> -->
+        <Btn @click="showSearchForm = !showSearchForm" class="me-2"><i class='bx bx-search transformY-2px size-1' ></i> {{ showSearchForm ? "Hide" : 'Show' }} search</Btn>
         <Btn @click="router.push({name: 'import'})"><i class='bx bxs-file-import' ></i> Import</Btn>
       </div>
     </div>
     
     <!-- Search -->
-    <div class="form-area mt-5 p-4 border radius-10">
+    <div v-if="showSearchForm" class="form-area mt-3 p-4 border radius-10">
       <form @submit.prevent.stop="getStudents">
         <div class="row">
           <div class="col-md-3 col-12">

@@ -24,6 +24,7 @@ body{
 ul{
     padding: 0px;
     margin: 0px;
+    list-style: none;
 }
 
 h1, .h1{
@@ -148,6 +149,13 @@ kbd{
     border-radius: 10px;
 }
 
+.radius-20{
+    border-radius: 20px;
+}
+.radius-30{
+    border-radius: 30px;
+}
+
 .text-left{
     text-align: left;
 }
@@ -164,7 +172,11 @@ kbd{
 .form-control:focus-visible{
     outline: none;
 }
-
+.form-control:disabled {
+    background-color: #e9ecef33;
+    opacity: 1;
+    color: #2a2a2aa6;
+}
 
 select {
     appearance: none;
@@ -267,4 +279,97 @@ select {
 }
 .transformY-5px-{
     transform: translateY(var(--transformY, -5px));
+}
+
+
+audio{
+    opacity: 0.8;
+}
+
+input::placeholder{
+    color: #6e968cb2 !important;
+
+}
+
+input[type="checkbox"]{
+    width: 16px;
+    height: 16px;
+    transform: translateY(2px);
+    background: var(--grad1);
+}
+
+
+/*------scroll bar---------------------*/
+
+::-webkit-scrollbar {
+    width: 5px;
+    height: 7px;
+  }
+  ::-webkit-scrollbar-button {
+    width: 0px;
+    height: 0px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #4f8df9;
+    border: 0px none #ffffff;
+    border-radius: 0px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #3877e4;
+  }
+  ::-webkit-scrollbar-thumb:active {
+    background: #3877e4;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+    border: 0px none #ffffff;
+    border-radius: 50px;
+  }
+  ::-webkit-scrollbar-track:hover {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-track:active {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+  
+  /*-----------------------------emdoc-theme-------------------------------------------------*/
+
+
+.bg_animation {
+    --bcolor: #00fa602a;
+    --bspeed: 3s;
+}
+.bg_animation {   
+    background: linear-gradient(to right, transparent 0%, rgba(7, 169, 128, 0.658) 25%, transparent 50%);
+    background-size: 200% 300vh;    
+    animation: shimmerEffect var(--bspeed) linear infinite;  
+}
+
+@keyframes shimmerEffect {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+@-webkit-keyframes shimmerEffect {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+.relative{
+    position: relative;
+}
+
+.absolute{
+    position: absolute;
 }

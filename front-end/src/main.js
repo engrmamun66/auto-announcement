@@ -45,7 +45,38 @@ function printDiv(divId, delay=0) {
         printWindow.close();
         
     }, delay);
-  }
+}
+
+function storage (name) {
+  return {
+    get value() {
+      if (typeof process == "undefined") {
+        var process = { client: true };
+      }
+      if (process.client && globalThis.localStorage) {
+        let data = globalThis.localStorage.getItem(name);
+        if (
+          (data && data?.startsWith("{") && data?.endsWith("}")) ||
+          (data?.startsWith("[") && data?.endsWith("]"))
+        ) {
+          data = JSON.parse(data);
+        }
+        return data;
+      }
+    },
+    set value(value) {
+      if (typeof process == "undefined") {
+        var process = { client: true };
+      }
+      if (process.client) {
+        if (value && typeof value === "object") {
+          value = JSON.stringify(value);
+        }
+        localStorage.setItem(name, value);
+      }
+    },
+  };
+}
 
 async function mountTheApp(){
     try {
@@ -63,6 +94,7 @@ async function mountTheApp(){
         .provide('emitter', emitter)
         .provide('printDiv', printDiv)
         .provide('makeCarcode', makeCarcode)
+        .provide('storage', storage)
         .mount('#em-datetimepicker-doc');
     } catch (error) {
         console.log({error});

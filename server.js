@@ -90,6 +90,10 @@ const audioUpload = multer({
     Students.deleteAudio(req, res);
   });
 
+  app.get(prefix + '/single-student', (req, res) => {
+    Students.getStudent(req, res);
+  });
+
    
 })
  

@@ -29,6 +29,7 @@ let route = useRoute()
 let loggedIn = ref(false)
 
 const emitter = inject('emitter');
+const is_started_schedule = inject('is_started_schedule');
 const isResponsive = ref(false);
 
 const toggleMenu = () => {
@@ -38,15 +39,18 @@ const toggleMenu = () => {
 
 <style scoped>
 .madrasha-title {
-    background: linear-gradient(180deg, #002767b2 0%, #002767 9%, #316cd9d6 50%, #16188fd6 100%);
+  background: linear-gradient(360deg, #002767b2 0%, #002767 9%, #316cd95e 50%, #16188f2e 100%);
     color: yellow;
     font-size: 17px;
     text-shadow: 1px 2px 2px rgb(0, 0, 0);
     margin-right: 10px;
-    border-radius: 30px;
+    /* border-radius: 30px; */
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
 }
 
 .topnav {
+  padding-left: 20px;
   overflow: hidden;
   background-color: #333; /* Add background color */
 }

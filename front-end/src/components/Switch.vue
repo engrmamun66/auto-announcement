@@ -241,7 +241,7 @@ let sw = computed(() => {
   content: attr(data-on);
   font-weight: 400;
   left: 10px;
-  color: f7f7f7;
+  /* color: #f7f7f7; */
   text-shadow: 0 1px rgba(0, 0, 0, 0.2);
   opacity: 0;
   font-size: 13px;
@@ -267,10 +267,12 @@ let sw = computed(() => {
 
 .switch-label.bothVisible:before {
   opacity: 1 !important;
+  color: #f7f7f7;
   z-index: 99999;
 }
 .switch-label.bothVisible:after {
   opacity: 1 !important;
+  color: #f7f7f7;
   z-index: 99998;
 }
 

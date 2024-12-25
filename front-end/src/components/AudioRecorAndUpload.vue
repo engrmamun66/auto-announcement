@@ -22,8 +22,9 @@
                                 {{ timeparts.hour }}:{{ timeparts.minute }}:{{ timeparts.second }}
                             </div>
                             <template v-if="isRecording">
-                                <span class="size-08 ms-1 d-flex border radius-10 px-2 text-black-75 ttr">
-                                    Recording <i class='bx bx-dots-horizontal bx-flashing transformY-5px' ></i>
+                                <span class="size-08 ms-1 d-flex justify-content-around border radius-10 px-2 text-black-75 ttr" style="width: 70px;">
+                                    <RecoringAnimation style="zoom:0.4" ></RecoringAnimation> 
+                                    <i class='bx bx-dots-horizontal bx-flashing transformY-5px text-white' ></i>
                                 </span>   
                                 <Btn  @click="stopRecording" class="sm red ms-2">STOP</Btn>
                             </template>
@@ -58,6 +59,7 @@
   let audioPlayer = ref(null)
   import Btn from './Btn.vue'
   import BtnLoader from './BtnLoader.vue'
+  import RecoringAnimation from './RecoringAnimation.vue'
 
   let props = defineProps(['student', 'column'])
   

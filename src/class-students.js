@@ -98,7 +98,37 @@ class Students {
   }
   
 
-  getStudent(req, res) {}
+  getStudent(req, res) { 
+    let { barcode } = req.query
+    let [ class_short, dakhela ] = barcode.split('-')
+
+    const query = `SELECT * FROM ${this.tableName} WHERE class_short = ? AND dakhela = ?`;
+  
+    this.db.all(query, [class_short, dakhela], (err, rows) => {
+      if (err) {
+        res.status(500).send({ error: err.message });
+        return;
+      }
+  
+      if (rows.length === 0) {
+        res.status(404).send({ message: "No data found in the students table." });
+        return;
+      }
+
+      let row = rows?.length ? rows.at(-1) : null;
+      if(row){
+        if(row.sound1) row.sound1 = utils.audioFullUrl(req, row.sound1)
+        if(row.sound2) row.sound2 = utils.audioFullUrl(req, row.sound2)
+        if(row.sound3) row.sound3 = utils.audioFullUrl(req, row.sound3)
+      }
+  
+      res.send({
+        data: row
+      });
+    });
+  }
+    
+  
 
   importExcel(filePath, callback) {
     try {
