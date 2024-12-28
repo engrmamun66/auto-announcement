@@ -42,9 +42,9 @@ let columnName = ref('sound1')
 let targetStdForBarcode = ref(null)
 // let filterForm
 
-async function getStudents(){
+async function getStudents({id=null}={}){
   try {
-    http.get('/students', { params: params.value }).then(response => {
+    http.get('/students', { params: {...params.value, id} }).then(response => {
       if(response.status == 200){
         students.value = response.data.data;
         params.value = {...params.value, ...response.data.pagination};
@@ -66,19 +66,19 @@ function toggleLoopItem (data, index, key = "isPlaying_sound1") {
   });
 }
  
-async function clearParams(){
+async function clearParams({dakhela=null, id=null}={}){
 
-  params.page = 1
-  params.total = 3
-  params.totalPages = 1
-  params.limit = 100
+  params.value.page = 1
+  params.value.total = 3
+  params.value.totalPages = 1
+  params.value.limit = 100
 
     
   params.value.class = null
   params.value.name = null
-  params.value.dakhela = null
+  params.value.dakhela = dakhela
   params.value.sound1 = null
-  getStudents()
+  getStudents({id})
 }
  
 async function deleteAudio(std, colName){
@@ -89,6 +89,70 @@ async function deleteAudio(std, colName){
     })
   } else if(text) {
     emitter.emit('toaster-error', { message: 'Pass code not matched' })
+  }
+}
+
+let payload = reactive({
+  class: null,
+  name: null,
+  class_short: null,
+  dakhela: null,
+  year: null,
+
+})
+
+let is___adding = ref(false)
+ 
+async function addStudent(){
+  try {
+
+    if(!payload.name) return emitter.emit('toaster-warning', {message: 'Name is required'})
+    if(!payload.class) return emitter.emit('toaster-warning', {message: 'Class is required'})
+    if(!payload.dakhela) return emitter.emit('toaster-warning', {message: 'Dhakhela is required'})
+    is___adding.value = true
+    http.post('/students/add', payload).then(response => {
+      if(response.status == 200){
+        let { id } = response.data.data; 
+        if(id){          
+          clearParams({id}) 
+        }
+      }
+    }).catch(() => {}).finally(()=>{
+      payload.name = null
+      payload.class = null
+      payload.class_short = null
+      payload.dakhela = null
+      payload.year = null
+      is___adding.value = false
+      addMode.value = false
+    })
+  } catch (error) {
+    console.warn('getStudents_error::', error);
+  }
+}
+
+
+ 
+async function deleteStudent(id, i){
+  try {
+
+    if(!confirm('Do you want to delete?')) return;
+    let passcode = prompt('Type passcode to delete')
+    if(passcode !== String(new Date().getDate()) && passcode !== 'D') {
+      emitter.emit('toaster-error', {message: 'Passcode not matched!'})
+      return
+    }
+
+    
+    http.delete(`/students/delete/${id}`).then(response => {
+      if(response.status == 200){
+         students.value.splice(i, 1)
+      }
+    }).catch(() => {}).finally(()=>{ 
+
+    })
+  } catch (error) {
+    console.warn('getStudents_error::', error);
   }
 }
  
@@ -113,12 +177,60 @@ onMounted(()=>{
     </div>
 
     <template v-if="addMode">
-      <form @submit.prevent="addStudent()">
-        <div class="row">
+      <div class="w-100 d-flex justify-content-center">
 
+        <div class="add-form-wrapper">
+          <form @submit.prevent="addStudent()">
+            <div class="row mt-4">
+
+              <div class="col-12">
+                <div class="form-group">
+                  <label for="email">Class</label>
+                  <select v-model="payload.class" class="form-control" id="ClassId">
+                    <option :value="null">-class-</option>
+                    <template v-for="(cls, index) in classes" :key="index">
+                      <option :value="cls.class_name">{{cls.class_name}}</option>
+                    </template>                  
+                  </select>
+                </div>
+              </div>
+
+              <div class="col-12">
+                <div class="form-group">
+                  <label for="name">Name</label>
+                  <input v-model="payload.name" type="text" class="form-control">
+                </div>
+              </div>
+
+              <div class="col-12">
+                <div class="form-group">
+                  <label for="name">Dakhela</label>
+                  <input v-model="payload.dakhela" type="number" class="form-control">
+                </div>
+              </div>
+
+              <div class="col-12">
+                <div class="form-group">
+                  <label for="name">Year</label>
+                  <input v-model="payload.year" type="number" class="form-control">
+                </div>
+              </div>
+
+              <div class="col-12 d-flex justify-content-center">
+                <Btn @click="addStudent" class="red me-2" >Cancel</Btn>
+                <Btn @click="addStudent" class="me-0" >Submit <BtnLoader v-if="is___adding"></BtnLoader> </Btn>
+              </div> 
+
+            </div>
+          </form>
         </div>
-      </form>
+
+      </div>
     </template>
+
+
+
+
     <template v-else>
       
       <!-- Search -->
@@ -139,7 +251,7 @@ onMounted(()=>{
             </div>
             <div class="col-md-3 col-12">
               <div class="form-group">
-                <label for="email">Name</label>
+                <label for="name">Name</label>
                 <input v-model="params.name" type="text" class="form-control">
               </div>
             </div>
@@ -162,8 +274,8 @@ onMounted(()=>{
             <div class="col-md-12 mt-2">
               <div class="form-group mt-md-3"> 
                   <div class="d-flex">
-                    <Btn    class="me-1"></Btn> 
-                    <Btn @click.stop="clearParams" class="me-1 red">Clear</Btn> 
+                    <Btn class="me-1"></Btn> 
+                    <Btn @click.stop="clearParams();getStudents()" class="me-1 red">Clear</Btn> 
                   </div>
               </div>
             </div>
@@ -243,6 +355,10 @@ onMounted(()=>{
                       <span tooltip="Copy barcode">
                         <i @click="({target}) => helper.copyToClipboard(makeCarcode(std), {el: target.parentElement})" class='bx bxs-copy-alt cp px-1' style="font-size: 18px" ></i>
                       </span>
+
+                      <span tooltip="Delete student">
+                       <i @click="deleteStudent(std.id, i)" class='bx bx-trash text-danger cp' ></i>
+                      </span>
           
                     </div>
                   </td> 
@@ -313,6 +429,18 @@ onMounted(()=>{
   border-radius: 5px;
   background: var(--grad1);
   /* margin-left: 0px 20px; */
+}
+.add-form-wrapper{
+  width: 500px;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.545);
+  margin-top: 100px;
+  border-radius: 10px;
+  background: var(--grad2);
+  box-shadow: 0px 43px 50px #00000061;
+}
+.add-form-wrapper .form-group{
+  padding-bottom: 20px;
 }
 </style>
 

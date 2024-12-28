@@ -7,7 +7,7 @@
         <RouterLink :to="{name: 'students'}" :class="{'active': route.name === 'students'}"><i class='bx bxs-user'></i> Students</RouterLink>
         <RouterLink :to="{name: 'import'}" :class="{'active': route.name === 'import'}"><i class='bx bxs-file-import' ></i> Import</RouterLink>
         
-        <div class="right-lnk">
+        <!-- <div class="right-lnk">
             <a v-if="loggedIn" href="#">
               Logout <i class='bx bxs-log-in' ></i>
             </a>
@@ -15,9 +15,7 @@
               <i class='bx bxs-user' ></i> Admin
             </a>
         </div>
-        <a href="javascript:void(0);" class="icon" @click="toggleMenu">
-            <i class='bx bxs-log-in' ></i>
-        </a>
+        --> 
     </div>
 </template>
 
