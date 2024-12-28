@@ -16,8 +16,8 @@ globalThis.printWarning = function(message='This is a warning', {size='22px'}={}
     console.log(`%c ${message}`, `color:red;font-size:${size};background-color:yellow;padding:10px 20px 10px 10px;border-radius:5px;margin:10px 0px;font-family: system-ui;border:1px solid red`)
 }
 
-function makeCarcode({class_short, dakhela, year}){
-    return ([class_short, dakhela, year].join('-'))
+function makeCarcode({class_short, dakhela, year}, soundColName='sound1'){
+    return ([class_short, dakhela, soundColName, year].join('-'))
 }
 
 function printDiv(divId, delay=0) {
@@ -109,3 +109,5 @@ if(document.readyState === 'loading'){
     mountTheApp();
 }
 
+
+globalThis.helper = utils.helper

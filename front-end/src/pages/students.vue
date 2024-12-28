@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted, inject, ref, reactive } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import Note from '../components/note.vue'
 import myTable from '../components/myTable.vue'
 import Modal from '../components/modal.vue'
@@ -14,11 +14,13 @@ import Player from '../components/Player.vue'
 import AudioRecorAndUpload from '../components/AudioRecorAndUpload.vue'
 import RecoringAnimation from '../components/RecoringAnimation.vue'
 
+let route = useRoute()
 let router = useRouter()
  
 const emitter = inject('emitter');
 const printDiv = inject('printDiv');
 const makeCarcode = inject('makeCarcode');
+const helper = inject('helper');
 let http = inject('http'); 
 let students = ref([])
 let params = ref({
@@ -29,7 +31,7 @@ let params = ref({
 
     class: null,
     name: null,
-    dakhela: null,
+    dakhela: route.query?.dakhela || null,
     sound1: null,
 })
 let addMode = ref(false)
@@ -232,6 +234,11 @@ onMounted(()=>{
                 <td> 
                   <div class="d-flex justify-content-center">
                     <i @click.stop="targetStdForBarcode=std" class='bx bx-barcode cp size-1p5' ></i>
+                    
+                    <span tooltip="Copy barcode">
+                      <i @click="({target}) => helper.copyToClipboard(makeCarcode(std), {el: target.parentElement})" class='bx bxs-copy-alt cp px-1' style="font-size: 18px" ></i>
+                    </span>
+        
                   </div>
                 </td> 
             </tr> 
@@ -283,7 +290,7 @@ onMounted(()=>{
               </div>
               <span class="print-buton cp px-5 mt-3" @click="printDiv('PRINTABLE_AREA')">
                 <i class='bx bx-printer px-1' style="font-size: 18px" ></i> Print
-              </span>
+              </span>              
             </div>
         </div>
       </modal>

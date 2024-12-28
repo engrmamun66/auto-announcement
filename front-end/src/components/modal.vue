@@ -58,7 +58,7 @@ function close(){
 .modal__content {
   border-radius: 4px;
   position: relative;
-  width: 500px;
+  width: 600px;
   max-width: 90%;
   background: #fff;
   padding: 1em 2em;

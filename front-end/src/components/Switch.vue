@@ -6,7 +6,7 @@
     --sw-boxHeight: ${sw.boxHeight};
     --sw-left: ${sw.left};
   `" >
-    <div :class="{'switch-flexar': inline, 'grayscale': disabled}" :style="` --s-yes:'${yes}'; --s-no:'${no};'`">
+    <div @click.stop="onClick" :class="{'switch-flexar': inline, 'grayscale': disabled}" :style="` --s-yes:'${yes}'; --s-no:'${no};'`">
         <label v-if="label" class="main-label" >{{label}}</label>
         <div class="switch-area" :class="{['-size-' + size]: true}" >
           <label class="switch" :class="{['-size-' + size]: true}" > 
@@ -72,10 +72,13 @@ let props = defineProps({
     required: false,
   },  
 })
-let emit = defineEmits([ 'update:modelValue', 'change'])
-
-function changed(status) {
-  emit('change', status)
+let emit = defineEmits([ 'update:modelValue', 'change', 'click'])
+let timeout = null
+function onClick(e) {
+  clearTimeout(timeout)
+  timeout = setTimeout(() => {
+    emit('click', e)
+  }, 0);
 
 }
 

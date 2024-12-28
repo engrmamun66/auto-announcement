@@ -100,10 +100,10 @@ class Students {
 
   getStudent(req, res) { 
     let { barcode } = req.query
-    let [ class_short, dakhela ] = barcode.split('-')
+    let [ class_short, dakhela, soundColName, year ] = barcode.split('-') // nursary-23-sound1-2024
 
     const query = `SELECT * FROM ${this.tableName} WHERE class_short = ? AND dakhela = ?`;
-  
+
     this.db.all(query, [class_short, dakhela], (err, rows) => {
       if (err) {
         res.status(500).send({ error: err.message });
@@ -115,12 +115,12 @@ class Students {
         return;
       }
 
-      let row = rows?.length ? rows.at(-1) : null;
-      if(row){
-        if(row.sound1) row.sound1 = utils.audioFullUrl(req, row.sound1)
-        if(row.sound2) row.sound2 = utils.audioFullUrl(req, row.sound2)
-        if(row.sound3) row.sound3 = utils.audioFullUrl(req, row.sound3)
-      }
+      let row = rows.at(-1)  
+      if(row.sound1) row.sound1 = utils.audioFullUrl(req, row.sound1)
+      if(row.sound2) row.sound2 = utils.audioFullUrl(req, row.sound2)
+      if(row.sound3) row.sound3 = utils.audioFullUrl(req, row.sound3)
+
+      row['soundColName'] = soundColName
   
       res.send({
         data: row

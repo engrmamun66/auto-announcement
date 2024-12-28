@@ -4,6 +4,28 @@ const helper = {
     randomBetween: function (min, max) {
         return Math.floor(Math.random() * (max - min + 1) + min)
     }, 
+    copyToClipboard: function(text='', {el=null}={}) {
+      if(text){
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.style.position = "fixed";
+        textarea.style.left = "-9999px";
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+            document.execCommand("copy");
+        } catch (err) {
+            console.error("Failed to copy text", err);
+        }
+        document.body.removeChild(textarea);
+        if(el && el instanceof HTMLElement){
+          el.setAttribute('tooltip', 'copied');
+          setTimeout(() => {
+            el.setAttribute('tooltip', 'copy');          
+          }, 1000);
+        }
+      }
+    },
     localStorage: function (name) {
         return {
           get value() {
@@ -34,6 +56,25 @@ const helper = {
           },
         };
     },  
+    time_in_miliseconds: function(time_24=''){
+      let [hours, minutes] = time_24.split(":")      
+      
+      let time_current= new Date().getTime()// - new Date().getMilliseconds()
+
+      let dateObj = new Date()
+      
+      dateObj.setHours(parseInt(hours))
+      dateObj.setMinutes(parseInt(minutes))
+      dateObj.setSeconds(0)
+      
+      let time_future = dateObj.getTime()
+      let miliseconds = Math.ceil(time_future - time_current)
+      if(time_future > time_current){
+          return miliseconds;
+      } else {
+          return 0
+      } 
+    },
     device: function() {
         const getType = () => {
             if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
