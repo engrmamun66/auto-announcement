@@ -21,6 +21,7 @@ const emitter = inject('emitter');
 const printDiv = inject('printDiv');
 const makeCarcode = inject('makeCarcode');
 const helper = inject('helper');
+const classes = inject('classes');
 let http = inject('http'); 
 let students = ref([])
 let params = ref({
@@ -66,6 +67,13 @@ function toggleLoopItem (data, index, key = "isPlaying_sound1") {
 }
  
 async function clearParams(){
+
+  params.page = 1
+  params.total = 3
+  params.totalPages = 1
+  params.limit = 100
+
+    
   params.value.class = null
   params.value.name = null
   params.value.dakhela = null
@@ -94,173 +102,172 @@ onMounted(()=>{
 
 <template>
     <div class="d-flex justify-content-between">
-      <h1>Students</h1> 
+      <h1>{{ !addMode ? 'Students' : 'Add Student'}}</h1> 
       
       <div class="d-flex justify-content-end">
-        <!-- <Btn v-if="!addMode" class="me-1" @click="addMode = !addMode" ><i class='bx bx-plus'></i> Add Student</Btn>
-        <Btn v-else class="me-1 red" @click="addMode = !addMode" >Cancel</Btn> -->
         <Btn @click="showSearchForm = !showSearchForm" class="me-2"><i class='bx bx-search transformY-2px size-1' ></i> {{ showSearchForm ? "Hide" : 'Show' }} search</Btn>
-        <Btn @click="router.push({name: 'import'})"><i class='bx bxs-file-import' ></i> Import</Btn>
+        <Btn v-if="!addMode" class="me-2" @click="addMode = !addMode" ><i class='bx bx-plus'></i> Add Student</Btn>
+        <Btn v-else class="me-2 red" @click="addMode = !addMode" >Cancel</Btn>
+        <!-- <Btn @click="router.push({name: 'import'})"><i class='bx bxs-file-import' ></i> Import</Btn> -->
       </div>
     </div>
-    
-    <!-- Search -->
-    <div v-if="showSearchForm" class="form-area mt-3 p-4 border radius-10">
-      <form @submit.prevent.stop="getStudents">
+
+    <template v-if="addMode">
+      <form @submit.prevent="addStudent()">
         <div class="row">
-          <div class="col-md-3 col-12">
-            <div class="form-group">
-              <label for="email">Class</label>
-              <select v-model="params.class" class="form-control" id="ClassId">
-                <option value=""></option>
-                <option value="Play">Play</option>
-                <option value="Nursery">Nursery</option>
-                <option value="KG">KG</option>
-                <option value="One/Saffe Awal">One/Saffe Awal</option>
-                <option value="Two/Saffe Sani">Two/Saffe Sani</option>
-                <option value="Three/Saffe Sales">Three/Saffe Sales</option>
-                <option value="Four/Saffe Rabe">Four/Saffe Rabe</option>
-                <option value="Ibtedaiyah">Ibtedaiyah</option>
-                <option value="Mutawassitah Awal / Mizan">Mutawassitah Awal / Mizan</option>
-                <option value=">Mutawassitah Sani / Nahbemir">Mutawassitah Sani / Nahbemir</option>
-                <option value=">Mutawassitah Sales">Mutawassitah Sales</option>
-                <option value=">Sanabiya Awal/Shorhebekaya">Sanabiya Awal/Shorhebekaya</option>
-                <option value=">Sanabiya Sani">Sanabiya Sani</option>
-                <option value=">Hifz">Hifz</option>
-                <option value=">Pre Hifz">Pre Hifz</option>
-                <option value=">Fozilat">Fozilat</option>
-              </select>
-            </div>
-          </div>
-          <div class="col-md-3 col-12">
-            <div class="form-group">
-              <label for="email">Name</label>
-              <input v-model="params.name" type="text" class="form-control">
-            </div>
-          </div>
-          <div class="col-md-3 col-12">
-            <div class="form-group">
-              <label for="email">Dakhela</label>
-              <input v-model="params.dakhela" type="number" class="form-control">
-            </div>
-          </div>
-          <div class="col-md-3 col-12">
-            <div class="form-group">
-              <label for="email">Media</label>
-              <select v-model="params.sound1" class="form-control">
-                <option value="">All</option>
-                <option value="no_sound">No Sound</option> 
-                <option value="has_sound">Has Sound</option> 
-              </select>
-            </div>
-          </div>
-          <div class="col-md-12 mt-2">
-            <div class="form-group mt-md-3"> 
-                <div class="d-flex">
-                  <Btn    class="me-1"></Btn> 
-                  <Btn @click.stop="clearParams" class="me-1 red">Clear</Btn> 
-                </div>
-            </div>
-          </div>
+
         </div>
-        
-         
-     
-        
       </form>
-    </div>
-
-    
-
-     <myTable>
-        <template #thead>
-          <thead>
-            <tr>
-              <th>Class</th>
-              <th>Name</th>
-              <th>Dakhela</th>
-              <th>Year</th>
-              <th>Sound</th>
-              <th>Sound-2</th>
-              <th>Status</th>
-              <th>Action</th> 
-            </tr>
-          </thead>
-        </template>
-        <template #rows>
-          <template v-if="students?.length">
-            <template v-for="(std, i) in students">
-              <tr>
-                <td class="text-left"> {{ std.class }} </td> 
-                <td class="text-left">{{ std.name }}</td>
-                <td> {{ std.dakhela }} </td> 
-                <td> {{ std.year }} </td> 
-                <template v-for="column in ['sound1', 'sound2']">
-                  <td> 
-                    <!-- Sound -->
-                    <template v-if="std[column]">            
-                      <template v-if="!std[`isPlaying_${column}`]">            
-                        <div class="d-flex align-items-center">
-                          <Btn  @click.stop="toggleLoopItem(students, i, `isPlaying_${column}`)" class="radius-10 sm sound w-100" style="padding: 2px auto;" >
-                            <i class='bx bx-play size-1 transformY-3px'></i>&nbsp;Play
-                          </Btn>
-                          <span class="ms-2 me-1 cp" @click.stop="deleteAudio(std, column)" >
-                            <i class='bx bxs-trash-alt text-danger size-1' ></i>
-                          </span>
-                        </div> 
-                      </template>
-                      <template v-else>
-                        <Player  :src="std[column]" @close="std[`isPlaying_${column}`] = false"></Player>
-                      </template>
-                    </template>  
-                    <template v-else>
-
-                      <div class="d-flex align-items-center">
-                        <AudioUpload :student="std" :column="column" @change="({audio_path, audio_url})=>{
-                          std[column] = audio_url
-                        }" ></AudioUpload>
-                        <span tooltip="Rcord Sound" @click="targetStd=std;columnName=column">
-                          <i class='bx bxs-microphone p-1 ms-1 cp' ></i>
-                        </span>
-                      </div>
-
-                    </template>  
-                  </td> 
-                </template>
-                <td> <Switch size="sm" v-model="std.status" @change="async (status) => {
-                  await http.post('/students/update-status', {id: std.id, status} );
-                
-                }"></Switch> </td> 
-                <td> 
-                  <div class="d-flex justify-content-center">
-                    <i @click.stop="targetStdForBarcode=std" class='bx bx-barcode cp size-1p5' ></i>
-                    
-                    <span tooltip="Copy barcode">
-                      <i @click="({target}) => helper.copyToClipboard(makeCarcode(std), {el: target.parentElement})" class='bx bxs-copy-alt cp px-1' style="font-size: 18px" ></i>
-                    </span>
-        
+    </template>
+    <template v-else>
+      
+      <!-- Search -->
+      <div v-if="showSearchForm" class="form-area mt-3 p-4 border radius-10">
+        <form @submit.prevent.stop="getStudents">
+          <div class="row">
+            <div class="col-md-3 col-12">
+              <div class="form-group">
+                <label for="email">Class</label>
+                <select v-model="params.class" class="form-control" id="ClassId">
+                  <option :value="null">-class-</option>
+                  <template v-for="(cls, index) in classes" :key="index">
+                    <option :value="cls.class_name">{{cls.class_name}}</option>
+                  </template>
+                  
+                </select>
+              </div>
+            </div>
+            <div class="col-md-3 col-12">
+              <div class="form-group">
+                <label for="email">Name</label>
+                <input v-model="params.name" type="text" class="form-control">
+              </div>
+            </div>
+            <div class="col-md-3 col-12">
+              <div class="form-group">
+                <label for="email">Dakhela</label>
+                <input v-model="params.dakhela" type="number" class="form-control">
+              </div>
+            </div>
+            <div class="col-md-3 col-12">
+              <div class="form-group">
+                <label for="email">Media</label>
+                <select v-model="params.sound1" class="form-control">
+                  <option :value="null">-All-</option>
+                  <option value="no_sound">No Sound</option> 
+                  <option value="has_sound">Has Sound</option> 
+                </select>
+              </div>
+            </div>
+            <div class="col-md-12 mt-2">
+              <div class="form-group mt-md-3"> 
+                  <div class="d-flex">
+                    <Btn    class="me-1"></Btn> 
+                    <Btn @click.stop="clearParams" class="me-1 red">Clear</Btn> 
                   </div>
-                </td> 
-            </tr> 
-
-            
-             
+              </div>
+            </div>
+          </div>
+          
+           
+       
+          
+        </form>
+      </div>
+  
+      
+  
+       <myTable>
+          <template #thead>
+            <thead>
+              <tr>
+                <th>Class</th>
+                <th>Name</th>
+                <th>Dakhela</th>
+                <th>Year</th>
+                <th>Sound</th>
+                <th>Sound-2</th>
+                <th>Status</th>
+                <th>Action</th> 
+              </tr>
+            </thead>
+          </template>
+          <template #rows>
+            <template v-if="students?.length">
+              <template v-for="(std, i) in students">
+                <tr>
+                  <td class="text-left"> {{ std.class }} </td> 
+                  <td class="text-left">{{ std.name }}</td>
+                  <td> {{ std.dakhela }} </td> 
+                  <td> {{ std.year }} </td> 
+                  <template v-for="column in ['sound1', 'sound2']">
+                    <td> 
+                      <!-- Sound -->
+                      <template v-if="std[column]">            
+                        <template v-if="!std[`isPlaying_${column}`]">            
+                          <div class="d-flex align-items-center">
+                            <Btn  @click.stop="toggleLoopItem(students, i, `isPlaying_${column}`)" class="radius-10 sm sound w-100" style="padding: 2px auto;" >
+                              <i class='bx bx-play size-1 transformY-3px'></i>&nbsp;Play
+                            </Btn>
+                            <span class="ms-2 me-1 cp" @click.stop="deleteAudio(std, column)" >
+                              <i class='bx bxs-trash-alt text-danger size-1' ></i>
+                            </span>
+                          </div> 
+                        </template>
+                        <template v-else>
+                          <Player  :src="std[column]" @close="std[`isPlaying_${column}`] = false"></Player>
+                        </template>
+                      </template>  
+                      <template v-else>
+  
+                        <div class="d-flex align-items-center">
+                          <AudioUpload :student="std" :column="column" @change="({audio_path, audio_url})=>{
+                            std[column] = audio_url
+                          }" ></AudioUpload>
+                          <span tooltip="Rcord Sound" @click="targetStd=std;columnName=column">
+                            <i class='bx bxs-microphone p-1 ms-1 cp' ></i>
+                          </span>
+                        </div>
+  
+                      </template>  
+                    </td> 
+                  </template>
+                  <td> <Switch size="sm" v-model="std.status" @change="async (status) => {
+                    await http.post('/students/update-status', {id: std.id, status} );
+                  
+                  }"></Switch> </td> 
+                  <td> 
+                    <div class="d-flex justify-content-center">
+                      <i @click.stop="targetStdForBarcode=std" class='bx bx-barcode cp size-1p5' ></i>
+                      
+                      <span tooltip="Copy barcode">
+                        <i @click="({target}) => helper.copyToClipboard(makeCarcode(std), {el: target.parentElement})" class='bx bxs-copy-alt cp px-1' style="font-size: 18px" ></i>
+                      </span>
+          
+                    </div>
+                  </td> 
+              </tr> 
+  
+              
+               
+              </template>
+            </template>
+            <template v-else>
+              <tr>
+                  <td colspan="88">No student found</td>                 
+              </tr>
             </template>
           </template>
-          <template v-else>
-            <tr>
-                <td colspan="88">No student found</td>                 
-            </tr>
-          </template>
-        </template>
-     </myTable>
+       </myTable>
+  
+       <div class="d-flex justify-content-center">
+          <Pagination v-if="params?.totalPages > 1" v-model="params" @jumpToPage="(page) => {
+            params.page = page
+            getStudents()
+          }" ></Pagination>
+       </div> 
 
-     <div class="d-flex justify-content-center">
-        <Pagination v-if="params?.totalPages > 1" v-model="params" @jumpToPage="(page) => {
-          params.page = page
-          getStudents()
-        }" ></Pagination>
-     </div> 
+    </template>
 
 
      <template v-if="targetStd && columnName">

@@ -30,7 +30,7 @@ let file = ref(null)
 let loading = ref(false)
 let fileInputField = ref(true)
 
-let { VITE_BASE_URL } = import.meta
+let { VITE_BASE_URL } = import.meta.env 
 
 function open(){
     uploader.value.click()

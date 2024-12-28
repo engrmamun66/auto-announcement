@@ -18,6 +18,7 @@ const http = inject('http');
 const schedule_start_time = inject('schedule_start_time');
 const is_started_schedule = inject('is_started_schedule');
 const stop_clear_and_reload = inject('stop_clear_and_reload');
+const speakText = inject('speakText');
 
 const classes = inject('classes');
 const wattingList = inject('wattingList');
@@ -70,9 +71,10 @@ function checkAndList(barcode='play-417-2024'){
           let [ class_short ] = barcode.split('-') // nursary-23-sound1-2024
 
           let targetClass = classes.value.filter(cls => cls.class_short == class_short)?.[0];
+          console.log(classes.value);
           if(!targetClass?.isActive){
-               emitter.emit('toaster-error', { message: 'This class is inactive now'})
-               return
+               // emitter.emit('toaster-error', { message: 'This class is inactive now'})
+               // return
           }
 
 
@@ -80,20 +82,22 @@ function checkAndList(barcode='play-417-2024'){
                if(response.status == 200){
                     let student = response.data.data;
                     student.barcode = barcode;
-                    let founds = wattingList.value.filter(s => s.id === student.id)
-                    let is_called = founds.at(-1)?.is_called
+                    let findLast = wattingList.value.findLast(s => s.id == student.id)
+                    let findLastIndex = wattingList.value.findLastIndex(s => s.id == student.id)
 
                     if(!student[student['soundColName']]){
                          emitter.emit('toaster-error', { message: `Sound not added for this student. <i><a href="http://localhost:3006/#/students?dakhela=${student.dakhela}" target="_blank" >Add</a></i>`, duration: 10000})
-                         return
+                         speakText(student.name + ', her voice is not added yet')
                     }
                     
-                    if(!founds.length){
-                         wattingList.value.push(student) 
+                    if(!findLast){
+                         wattingList.value.push(student)
+                         emitter.emit('pushed_a_student', student)
                     }
-                    else if(founds.length && is_called){
-                         wattingList.value.push(student) 
-                    } else {
+                    else if(findLast && findLast?.is_called){
+                         wattingList.value.splice(findLastIndex, 0, student)
+                         emitter.emit('pushed_a_student', student)
+                    } else if (findLast) {
                          let studentCard = document.querySelector(`[barcode="${barcode}"]`)
                          if(studentCard){
                               studentCard.classList.add('bx-fade-down')
@@ -182,7 +186,7 @@ function checkSchedule(){
                <div class="set-max-height">
                     <div>
                          <template v-for="(student, i) in wattingList" :key="i"> 
-                              <div class="student-box" :barcode="student?.barcode" >
+                              <div class="student-box" :class="{'is_called': student.is_called}" :barcode="student?.barcode" >
                                    <div :class="{ 'bg_animation': student?.isPlaying }">
                                         <div class="student-name">{{ student.name }}</div>
                                         <div class="class-name">
@@ -272,6 +276,9 @@ function checkSchedule(){
   background: var(--calling); 
   background: var(--call-done); 
   border-radius: 5px;
+}
+.watting-list .set-max-height div .student-box.is_called {
+  opacity: 0.5;
 }
 .watting-list .set-max-height div .student-box .icons {
   position: absolute;

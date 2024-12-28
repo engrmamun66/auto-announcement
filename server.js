@@ -94,6 +94,10 @@ const audioUpload = multer({
     Students.getStudent(req, res);
   });
 
+  app.post(prefix + '/students/add', (req, res) => {
+    Students.addStudent(req, res);
+  });
+
    
 })
  

@@ -17,7 +17,7 @@ button {
   background-color: var(--primaryColor);
   border-radius: 5px;
   color: white;
-  padding: 10px 30px;
+  padding: 10px 20px;
   position: relative;
   text-align: center;
   border: none; /* Removes default border for button */

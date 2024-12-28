@@ -9,6 +9,7 @@
   
   
   // Refs and state
+  const emitter = inject('emitter');
   const storage = inject('storage');
   const wattingList = inject('wattingList');
   const stop_clear_and_reload = inject('stop_clear_and_reload');
@@ -59,6 +60,11 @@
   onMounted(() => {
       console.log('playlist mounted');
       playNext()
+
+      emitter.on('pushed_a_student', ()=>{
+        console.log('asd pushed');
+        playNext()
+      })
   })
   </script>
    

@@ -392,6 +392,35 @@ class Students {
       });
     });
   }
+
+  addStudent(req, res) {
+    const { class: className, name, class_short, dakhela, year } = req.body;
+  
+    if (!className || !name || !class_short || !dakhela || !year) {
+      res.status(400).send({ error: "All fields (class, name, class_short, dakhela, year) are required." });
+      return;
+    }
+  
+    const query = `
+      INSERT INTO ${this.tableName} (class, name, class_short, dakhela, year)
+      VALUES (?, ?, ?, ?, ?)
+    `;
+  
+    const params = [className, name, class_short, dakhela, year];
+  
+    this.db.run(query, params, function (err) {
+      if (err) {
+        res.status(500).send({ error: err.message });
+        return;
+      }
+  
+      res.status(201).send({
+        message: "Student added successfully.",
+        studentId: this.lastID, // The ID of the inserted row
+      });
+    });
+  }
+  
   
   
 }

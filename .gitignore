@@ -135,4 +135,4 @@ public/temp/
 public/media/
 public/exports/
 database/
-.DS_Store
+*DS_Store*

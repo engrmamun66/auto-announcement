@@ -147,6 +147,22 @@ function checkAndStartAnnouncement(){
     } 
 }
 
+
+function speakText(text) {
+  const utterance = new SpeechSynthesisUtterance(text);
+  const voices = window.speechSynthesis.getVoices();
+  const maleVoice = voices.find(voice => /male/i.test(voice.name)) || voices[0];
+  if (maleVoice) utterance.voice = maleVoice;
+  utterance.lang = 'en-US';
+  utterance.rate = 1;
+  utterance.pitch = 1;
+  utterance.volume = 1;
+  window.speechSynthesis.speak(utterance);
+}
+
+provide('speakText', speakText)
+
+
 let tout = null
 watch(is_started_schedule, (a, b) => {
     clearTimeout(tout)
@@ -178,7 +194,7 @@ function stop_clear_and_reload(){
 }
 provide('stop_clear_and_reload', stop_clear_and_reload)
 
-onMounted(()=>{
+onMounted(()=>{ 
     clearTimeout(schedule_timeout.value)
     classes.value = storage('classes').value || classes.value
     wattingList.value = storage('wattingList').value || wattingList.value
