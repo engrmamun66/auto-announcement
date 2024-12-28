@@ -84,7 +84,7 @@ async function mountTheApp(){
         app.use(router)
         app.use(createPinia())
         let app_div = document.createElement('div');
-        app_div.id = 'em-datetimepicker-doc';
+        app_div.id = 'my-app';
         app_div.style.display = 'none';
         document.body.append(app_div);
         app
@@ -95,7 +95,7 @@ async function mountTheApp(){
         .provide('printDiv', printDiv)
         .provide('makeCarcode', makeCarcode)
         .provide('storage', storage)
-        .mount('#em-datetimepicker-doc');
+        .mount('#my-app');
     } catch (error) {
         console.log({error});
     }

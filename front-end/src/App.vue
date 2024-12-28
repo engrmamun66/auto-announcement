@@ -227,7 +227,6 @@ onMounted(()=>{
 
 <style scoped>
 .page-contents{
-    width: 100%;
     height: auto;
     margin: 0px;
     padding: 20px;

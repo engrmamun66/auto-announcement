@@ -165,7 +165,7 @@ onMounted(()=>{
 </script>
 
 <template>
-    <div class="d-flex justify-content-between">
+    <div class="d-flex justify-content-between flex-wrap">
       <h1>{{ !addMode ? 'Students' : 'Add Student'}}</h1> 
       
       <div class="d-flex justify-content-end">

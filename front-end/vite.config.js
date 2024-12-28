@@ -28,9 +28,8 @@ export default defineConfig({
     },
     rollupOptions: {
       output: {
-        entryFileNames: 'assets/em-datetimepicker-documentaion.min.js',
-        // assetFileNames: 'assets/[name].[ext]',
-        assetFileNames: 'assets/em-datetimepicker-documentaion.min.[ext]',
+        entryFileNames: 'assets/my-announcement.min.js',
+        assetFileNames: 'assets/my-announcement.min.[ext]',
       },
     },
   }
