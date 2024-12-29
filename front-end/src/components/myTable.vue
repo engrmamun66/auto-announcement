@@ -50,7 +50,7 @@ th{
 }
 
 th:not(:last-child) { 
-  border-right: 4px solid #fff;
+  border-right: 4px solid #55bdf7;
 }
 th:nth-child(odd) {
   background: #e5f4fbc3; 

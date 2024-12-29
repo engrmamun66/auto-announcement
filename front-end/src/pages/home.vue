@@ -71,10 +71,9 @@ function checkAndList(barcode='play-417-2024'){
           let [ class_short ] = barcode.split('-') // nursary-23-sound1-2024
 
           let targetClass = classes.value.filter(cls => cls.class_short == class_short)?.[0];
-          console.log(classes.value);
           if(!targetClass?.isActive){
-               // emitter.emit('toaster-error', { message: 'This class is inactive now'})
-               // return
+               emitter.emit('toaster-error', { message: 'This class is inactive now'})
+               return
           }
 
 

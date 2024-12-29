@@ -6,6 +6,7 @@ const express = require('express')
 const sqlite3 = require("sqlite3").verbose();
 const multer = require("multer");
 const upload = multer({ dest: DIR + '/public/temp' });
+const config = require("./config");
  
 
 /**
@@ -13,9 +14,11 @@ const upload = multer({ dest: DIR + '/public/temp' });
 */
 const classDB = require('./src/class-db')
 const students = require('./src/class-students');
+const schedules = require('./src/class-schedules');
 const utils = require('./src/utls');
 const DB = new classDB() 
 const Students = new students(DB.db) 
+const Schedules = new schedules(DB.db) 
 
 
 
@@ -47,6 +50,11 @@ const audioUpload = multer({
 
 
 ['/api'].forEach(prefix => {  
+
+  app.get(prefix + "/config", (req, res) => {
+    res.send({ ...config })
+  });
+
   app.get(prefix + "/students", (req, res) => {
     Students.getStudents(req, res)
   });
@@ -101,7 +109,14 @@ const audioUpload = multer({
   app.delete(prefix + '/students/delete/:id', (req, res) => {
     Students.deleteStudent(req, res);
   });
-
+  
+  /**
+   * =============== Schedules ========
+  */
+  // app.delete(prefix + '/schedules/add', (req, res) => {
+  //   Schedules.add(req, res);
+  // });
+ 
    
 })
  

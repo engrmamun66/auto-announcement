@@ -10,6 +10,7 @@ import Playlist from './components/Playlist.vue'
 
 
 let helper = inject('helper')
+let http = inject('http')
 let storage = inject('storage')
 let route = useRoute();
 let router = useRouter();  
@@ -23,88 +24,8 @@ provide('is_started_schedule', is_started_schedule)
 provide('schedule_timeout', schedule_timeout)
 
 
-let classes = ref([
-     {
-          class_name:'Play',
-          class_short: 'play',
-          isActive: true,
-     },
-     {
-          class_name:'Nursery',
-          class_short: 'nursery',
-          isActive: true,
-     },
-     {
-          class_name:'KG',
-          class_short: 'kg',
-          isActive: true,
-     },
-     {
-          class_name:'One/Saffe Awal',
-          class_short: 'one',
-          isActive: true,
-     },
-     {
-          class_name:'Two/Saffe Sani',
-          class_short: 'two',
-          isActive: true,
-     },
-     {
-          class_name:'Three/Saffe Sales',
-          class_short: 'three',
-          isActive: true,
-     },
-     {
-          class_name:'Four/Saffe Rabe',
-          class_short: 'four',
-          isActive: true,
-     },
-     {
-          class_name:'Ibtedaiyah',
-          class_short: 'ibtedaiyah',
-          isActive: true,
-     },
-     {
-          class_name:'Mutawassitah Awal / Mizan',
-          class_short: 'mizan',
-          isActive: true,
-     },
-     {
-          class_name:'Mutawassitah Sani / Nahbemir',
-          class_short: 'nahbemir',
-          isActive: true,
-     },
-     {
-          class_name:'Mutawassitah Sales',
-          class_short: 'muta_sales',
-          isActive: true,
-     },
-     {
-          class_name:'Sanabiya Awal/Shorhebekaya',
-          class_short: 'shorhebe',
-          isActive: true,
-     },
-     {
-          class_name:'Sanabiya Sani',
-          class_short: 'sana_sani',
-          isActive: true,
-     },
-     {
-          class_name:'Hifz',
-          class_short: 'hifz',
-          isActive: true,
-     },
-     {
-          class_name:'Pre Hifz',
-          class_short: 'p_hifz',
-          isActive: true,
-     },
-     {
-          class_name:'Fozilat',
-          class_short: 'fozilat',
-          isActive: true,
-     },
-]);
+let classes = ref([]);
+
 
 provide('classes', classes)
 
@@ -173,13 +94,8 @@ watch(is_started_schedule, (a, b) => {
  
 
  // Initial play when the component mounts
+ let isMounted = ref(false)
  let user_interacted = ref(false)
-onMounted(() => { 
-    document.addEventListener('click', () => {
-        if(user_interacted.value) return;
-        user_interacted.value = true;  
-    })
-})
 
 
 function stop_clear_and_reload(){
@@ -194,7 +110,20 @@ function stop_clear_and_reload(){
 }
 provide('stop_clear_and_reload', stop_clear_and_reload)
 
-onMounted(()=>{ 
+onMounted(async ()=>{ 
+
+    try {
+        let response = await http.get('/config')
+        if(response.status == 200){
+            classes.value = response.data.classes
+        }
+    } catch (error) {
+        
+    }
+    document.addEventListener('click', () => {
+        if(user_interacted.value) return;
+        user_interacted.value = true;  
+    })
     clearTimeout(schedule_timeout.value)
     classes.value = storage('classes').value || classes.value
     wattingList.value = storage('wattingList').value || wattingList.value
@@ -208,6 +137,8 @@ onMounted(()=>{
     
 
     setInterval(focusBarcodeInput__and__startAnnoucement, 1000);
+
+    isMounted.value = true;
 })
 
 </script>
@@ -218,7 +149,7 @@ onMounted(()=>{
     </SideBar> -->
     <Toaster></Toaster>
     <TopNav></TopNav>
-    <div class="page-contents" >
+    <div v-if="isMounted" class="page-contents" >
         <routerView />
         <Playlist v-if="play_in_playlist && user_interacted"></Playlist>
     </div>

@@ -2,11 +2,11 @@
 const xlsx = require("xlsx");
 const multer = require("multer");
 const upload = multer({ dest: DIR + "/public" });
-const { classes } = require("../config");
 const fs = require("fs");
 const path = require("path");
 const moment = require('moment')
 const utils = require('./utls')
+ 
 
 class Students { 
 
@@ -180,7 +180,7 @@ class Students {
             // If `id` is provided, update the row
             this.db.run(
               updateQuery,
-              [name, dakhela, className, classes?.[className] || '--', year, status || 1, sound1 || null, sound2 || null, sound3 || null, id],
+              [name, dakhela, className, utils.getClassShort(className) || '--', year, status || 1, sound1 || null, sound2 || null, sound3 || null, id],
               (err) => {
                 if (err) {
                   console.error(`Error updating data with ID ${id}:`, err);
@@ -201,7 +201,7 @@ class Students {
                 // Update the existing row
                 this.db.run(
                   updateQuery,
-                  [name, dakhela, className, classes?.[className] || '--', year, status || 1, sound1 || null, sound2 || null, sound3 || null, existingRow.id],
+                  [name, dakhela, className, utils.getClassShort(className), year, status || 1, sound1 || null, sound2 || null, sound3 || null, existingRow.id],
                   (err) => {
                     if (err) {
                       console.error(`Error updating data for dakhela: ${dakhela}, class: ${className}, year: ${year}:`, err);
@@ -213,7 +213,7 @@ class Students {
                 // Insert a new row
                 this.db.run(
                   insertQuery,
-                  [name, dakhela, className, classes?.[className] || '--', year, status || 1, sound1 || null, sound2 || null, sound3 || null],
+                  [name, dakhela, className, utils.getClassShort(className), year, status || 1, sound1 || null, sound2 || null, sound3 || null],
                   (err) => {
                     if (err) {
                       console.error("Error inserting data:", err);
@@ -401,7 +401,7 @@ class Students {
   addStudent(req, res) {
     const { class: className, name, dakhela, year } = req.body;
   
-    const class_short = classes?.[className];
+    const class_short = utils.getClassShort(className);
   
     if (!className || !name || !class_short || !dakhela) {
       res.status(400).send({ error: "All fields (class, name, class_short, dakhela, year) are required." });

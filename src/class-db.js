@@ -59,6 +59,25 @@ class myDB {
                   }
                 }
             );
+
+            this.db.run(
+              //DROP TABLE IF EXISTS schedules;
+              `CREATE TABLE IF NOT EXISTS schedules (
+                  id INTEGER PRIMARY KEY AUTOINCREMENT,
+                  type INTEGER DEFAULT 1, -- Represents the type of the schedule (punch=1 | call=2)
+                  title TEXT DEFAULT NULL, 
+                  start_time TEXT NOT NULL, -- 24 hour format time as string (e.g. 20:40)
+                  end_time TEXT NOT NULL,  -- 24 hour format time as string (e.g. 20:40)
+                  classes TEXT DEFAULT NULL,  -- 24 hour format time as string (e.g. 20:40)                   
+                  created TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+              );`,
+              (err) => {
+                if (err) {
+                  console.error("Error creating table:", err.message);
+                }
+              }
+            );
+            
         } catch (error) {
             console.log('ddfdf', error);
         }
