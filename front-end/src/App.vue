@@ -34,6 +34,43 @@ provide('speakText', speakText)
 provide('getSchedules', getSchedules)
 provide('punch_schedules', punch_schedules)
 provide('call_schedules', call_schedules) 
+ 
+
+let callbacks = {
+    isMatchedAnySchedule(class_short){
+        let className = classes.value.find(c => c.class_short == class_short)?.name
+        if(!className) return false;
+      
+        let ms = helper.miliseconds()
+        let founds = punch_schedules.value.filter(schedule => {
+            let { start_ms, end_ms } = schedule
+            return (ms >= start_ms && ms <= end_ms)
+        }) 
+        return Boolean(founds.length)
+    },
+    running_punch_schedule(){        
+      
+        let ms = helper.miliseconds()
+        let founds = punch_schedules.value.filter(schedule => {
+            let { start_ms, end_ms } = schedule
+            return (ms >= start_ms && ms <= end_ms)
+        })       
+        return founds
+    },
+    running_call_schedule(){        
+      
+        let ms = helper.miliseconds()
+        let founds = call_schedules.value.filter(schedule => {
+            let { start_ms, end_ms } = schedule
+            return (ms >= start_ms && ms <= end_ms)
+        })       
+        return founds
+    },
+}
+provide('callbacks', callbacks)
+globalThis.isMatchedAnySchedule = callbacks.isMatchedAnySchedule
+
+
 
 
 watch(schedule_start_time, (a, b)=>{
@@ -82,6 +119,7 @@ function speakText(text) {
 
 let tout = null
 watch(is_started_schedule, (a, b) => {
+    storage('is_started_schedule').value = a
     clearTimeout(tout)
     tout = setTimeout(() => {
         checkAndStartAnnouncement()
@@ -96,13 +134,7 @@ watch(is_started_schedule, (a, b) => {
 
 function stop_clear_and_reload(){
     wattingList.value = []
-    storage('wattingList').value = []
-    is_started_schedule.value = false
-    classes.value.forEach(c => c.isActive = true)
-    storage('classes').value = classes.value
-    schedule_start_time.value = ''
-    storage('schedule_start_time').value = ''
-    window.location.reload()
+    storage('wattingList').value = []  
 }
 provide('stop_clear_and_reload', stop_clear_and_reload)
 
@@ -150,14 +182,11 @@ onMounted(async ()=>{
     })
     clearTimeout(schedule_timeout.value)
     classes.value = storage('classes').value || classes.value
-    wattingList.value = storage('wattingList').value || wattingList.value
-    schedule_start_time.value = storage('schedule_start_time').value || schedule_start_time.value
+    wattingList.value = storage('wattingList').value || wattingList.value 
+    is_started_schedule.value = storage('is_started_schedule').value || is_started_schedule.value 
 
     checkAndStartAnnouncement()
-
-    if(schedule_start_time.value){
-        is_started_schedule.value = 1
-    }
+ 
     
 
     setInterval(focusBarcodeInput__and__startAnnoucement, 1000);

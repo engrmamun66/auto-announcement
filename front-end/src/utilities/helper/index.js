@@ -1,6 +1,7 @@
 import moment from 'moment/moment';
 
 const helper = { 
+    log: console.log,
     randomBetween: function (min, max) {
         return Math.floor(Math.random() * (max - min + 1) + min)
     }, 

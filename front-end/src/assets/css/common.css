@@ -145,6 +145,14 @@ kbd{
     border: 1px solid #cbcef6;
 }
 
+.border3{
+    border: 1px solid #2c83da;
+}
+
+.radius-5{
+    border-radius: 5px;
+}
+
 .radius-10{
     border-radius: 10px;
 }
@@ -372,6 +380,10 @@ input[type="checkbox"]{
 
 .absolute{
     position: absolute;
+}
+
+.nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link {
+    margin-right: 1px;
 }
 
 .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active {

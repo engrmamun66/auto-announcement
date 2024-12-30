@@ -45,9 +45,15 @@ border-right: 4px solid #5dceff;
   overflow-y: auto;
 }
 
-th{
-  padding: 25px;
+
+td{
+  padding: 5px 20px !important;  
 }
+
+th{
+  padding: 10px 20px !important;
+}
+
 
 th:not(:last-child) { 
   border-right: 4px solid #55bdf7;

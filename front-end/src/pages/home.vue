@@ -9,16 +9,17 @@ import FileUpload from '../components/FileUpload.vue'
 import Switch from '../components/Switch.vue'
 import BtnLoader from '../components/BtnLoader.vue'
 import BarcodeScannigAnimation from '../components/BarcodeScannigAnimation.vue'
+import helper from '../utilities/helper';
 
 
  
 const emitter = inject('emitter');
 const storage = inject('storage');
 const http = inject('http');
-const schedule_start_time = inject('schedule_start_time');
 const is_started_schedule = inject('is_started_schedule');
 const stop_clear_and_reload = inject('stop_clear_and_reload');
 const speakText = inject('speakText');
+const callbacks = inject('callbacks');
 
 const classes = inject('classes');
 const wattingList = inject('wattingList');
@@ -70,6 +71,12 @@ function checkAndList(barcode='play-417-2024'){
 
           let [ class_short ] = barcode.split('-') // nursary-23-sound1-2024
 
+          let isAllowed = callbacks.isMatchedAnySchedule(class_short)
+          if(!isAllowed){
+               emitter.emit('toaster-error', { message: 'Not matched with any punch schedule'})
+               return
+          }
+
           let targetClass = classes.value.filter(cls => cls.class_short == class_short)?.[0];
           if(!targetClass?.isActive){
                emitter.emit('toaster-error', { message: 'This class is inactive now'})
@@ -118,31 +125,17 @@ function checkAndList(barcode='play-417-2024'){
 
  
 function checkSchedule(){   
-     if(is_started_schedule.value){          
-     
-          if(!schedule_start_time.value){
-               is_started_schedule.value = false
-               emitter.emit('toaster-warning', { message: 'Set time first' }) 
-          } 
-
-     } else {
-          if(schedule_start_time.value){
-               if(confirm('You want to stop?')){
-                    if(confirm('Delete collected data ?')){
-                         let t = prompt('To delete type "yes"')
-                         if(t == 'yes'){
-                              stop_clear_and_reload()
-                         }
-                    }
-               } else {               
-                    is_started_schedule.value = true             
-               }
+     if(!is_started_schedule.value){          
+          if(confirm('You want to stop?')){
+               stop_clear_and_reload()
+          } else {               
+               is_started_schedule.value = true
           } 
                  
      } 
 }
 
-
+let tab = ref(1)
 
 </script>
 
@@ -152,31 +145,62 @@ function checkSchedule(){
           
           <input id="BARCODE_INPUT" type="text" @keyup.enter="inputBarcode" class="form-control px-4 py-2 text-center py-1 shadow me-2" placeholder="Barcode receiver field">
          
-          <BarcodeScannigAnimation :scannig="is_started_schedule" class="me-1"  ></BarcodeScannigAnimation> 
-          <Switch v-model="is_started_schedule" @click="checkSchedule" size="lg" yes="Started" no="Stopped" :bothVisible="false" :yesNoValue="[1, 0]" class="me-2" ></Switch> 
-          <input type="time" :disabled="schedule_start_time && is_started_schedule" v-model="schedule_start_time" class="form-control py-2 px-4 text-center py-1" style="width: 180px">
+          <BarcodeScannigAnimation v-if="is_started_schedule" :scannig="is_started_schedule" class="me-1"  ></BarcodeScannigAnimation> 
+          <Switch v-model="is_started_schedule" @click="checkSchedule" size="lg" yes="Started" no="Stopped" :bothVisible="false" class="me-2" ></Switch> 
      </div>
+
 
 
      <div class="sections mt-3">
           <div class="class-list" v-if="toggleSettings">
                <div class="inner-list">
-                    <h5 class="p-1 px-2 pb-2 me-2 radius-10 border bg1 cp shadow" @click="toggleClassesSelection($event)">
-                         <i class='bx size-1p4 transformY-4px' :class="[!isActiveAllClasses ? 'bx-checkbox' : 'bx-checkbox-checked']"  ></i> 
-                         Toggle Selection
-                    </h5>
+                    <div class="tab-view" >
+                         <div :class="{'active': tab==1}" @click="tab=1">Punch</div>
+                         <div :class="{'active': tab==2}" @click="tab=2">Call</div>
+                    </div>
                     <ul>
-                         <template v-for="(clas, i) in classes">
-                              <li class="mb-2" >                    
-                                   <label>
-                                        <input :checked="clas.isActive" type="checkbox" class="p-1 me-2" @change="({target}) => {
-                                             clas.isActive=target.checked;
-                                             storage('classes').value = classes;
-                                             }">
-                                        {{ clas.class_name }} 
-                                   </label> 
-                              </li>
+                         
+                         <template v-if="tab==1">
+                              <template v-if="callbacks.running_punch_schedule().length">
+                                   <template v-for="(item, i) in callbacks.running_punch_schedule()">
+                                        <li class="mb-2" >                    
+                                             <h3> 
+                                                  {{ item.title }}  
+                                             </h3>
+                                             <p> 
+                                                  {{ helper.formatTime(item.start_time) }} - {{ helper.formatTime(item.end_time) }}
+                                             </p>
+                                        <div class="d-flex flex-wrap">
+                                             <p class="m-1 p-1 border3 radius-5" v-for="cls in item.classes">{{ cls.class_short }}</p>
+                                        </div>                                    
+                                        </li>
 
+                                   </template>
+                              </template>
+                              <template v-else>
+                                   <li class="text-center text-black-50">No schedule at now</li>
+                              </template>
+                         </template>
+                         <template v-else-if="tab==2">
+                              <template v-if="callbacks.running_call_schedule().length">
+                                   <template v-for="(item, i) in callbacks.running_call_schedule()">
+                                        <li class="mb-2" >                    
+                                             <h3> 
+                                                  {{ item.title }}  
+                                             </h3>
+                                             <p> 
+                                                  {{ helper.formatTime(item.start_time) }} - {{ helper.formatTime(item.end_time) }}
+                                             </p>
+                                        <div class="d-flex flex-wrap">
+                                             <p class="m-1 p-1 border3 radius-5" v-for="cls in item.classes">{{ cls.class_short }}</p>
+                                        </div>                                    
+                                        </li>
+
+                                   </template>
+                              </template>
+                              <template v-else>
+                                   <li class="text-center text-black-50">No schedule at now</li>
+                              </template>
                          </template>
                     </ul>
                </div>
@@ -306,5 +330,30 @@ function checkSchedule(){
     border: 1px solid #ffffff36;
     padding: 0px 10px;
     font-size: 14px;
+}
+.tab-view{
+     display: flex;
+     justify-content: space-between;
+     margin-bottom: 15px;
+}
+.tab-view div{
+     background: rgba(255, 255, 255, 0.146);
+    border-radius: 0px;
+    cursor: pointer;
+    padding: 12px;
+    width: 50%;
+    border-bottom: 2px transparent;
+    text-align: center;
+}
+.tab-view div:first-child{
+     border-top-left-radius: 5px;
+}
+.tab-view div:last-child{
+     border-top-right-radius: 5px;
+}
+.tab-view div.active{
+     background: rgba(255, 255, 255, 0.495);
+     border-bottom: 2px solid white;
+     
 }
 </style>

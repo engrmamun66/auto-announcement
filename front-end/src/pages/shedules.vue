@@ -228,7 +228,7 @@ function deleteSchedule(id, i, type=1){
         <template #rows>
           <template v-if="tab==1 ? punch_schedules?.length  : call_schedules?.length">
             <template v-for="(item, i) in tab==1 ? punch_schedules  : call_schedules">
-              <tr>
+              <tr @click="helper.log(item)">
                   
                 <td> {{ item.title }} </td> 
                 <td> {{ helper.formatTime(item.start_time) }} </td>                   
