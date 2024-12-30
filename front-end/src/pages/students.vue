@@ -180,7 +180,7 @@ onMounted(()=>{
       <div class="w-100 d-flex justify-content-center">
 
         <div class="add-form-wrapper">
-          <form @submit.prevent="addStudent()">
+          <form @submit.prevent="false">
             <div class="row mt-4">
 
               <div class="col-12">
@@ -370,7 +370,7 @@ onMounted(()=>{
             </template>
             <template v-else>
               <tr>
-                  <td colspan="88">No student found</td>                 
+                  <td colspan="88" class="text-center">No student found</td>                 
               </tr>
             </template>
           </template>

@@ -18,6 +18,7 @@ class Schedules {
 
 
   add(req, res){
+    
     const { type, title, start_time, end_time, classes /** comma separated */ } = req.body;  
  
   
@@ -67,7 +68,54 @@ class Schedules {
     });
   }
 
-   
+  list(req, res){ 
+
+    const {db, tableName} = this; // Capture `this.db` reference  
+    const selectQuery = `SELECT * FROM ${tableName} WHERE 1=1`;
+
+    db.all(selectQuery, [], (err, data) => {
+      if (err) {
+        res.status(500).send({ error: "Error fetching the newly added student." });
+        return;
+      } 
+
+      res.send({ 
+        data: data, // Full row of the newly added student
+      });
+    });
+
+  }  
+
+  deleteSchedule(req, res) {
+
+    const { db, tableName } = this; // Capture `this.db` reference
+    const { id } = req.params;
+
+    if (!id) {
+      res.status(400).send({ error: "ID is required to delete a schedule." });
+      return;
+    }
+
+    const query = `DELETE FROM ${tableName} WHERE id = ?`;
+
+    db.run(query, [id], function (err) {
+      if (err) {
+        res.status(500).send({ error: "Error deleting the schedule." });
+        return;
+      }
+
+      if (this.changes === 0) {
+        res.status(404).send({ message: "No schedule found with the provided ID." });
+        return;
+      }
+
+      res.send({ 
+        message: "Delete successful",
+        deletedId: id, 
+      });
+    });
+  }
+
   
   
   

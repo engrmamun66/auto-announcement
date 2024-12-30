@@ -19,36 +19,32 @@ let schedule_start_time = ref(null) // will set always 25 hours format > example
 let is_started_schedule = ref(0) 
 let schedule_timeout = ref(0) 
 let play_in_playlist = ref(false) 
+let classes = ref([]);
+let wattingList = ref([])
+let punch_schedules = ref([])
+let call_schedules = ref([]) 
+
 provide('schedule_start_time', schedule_start_time)
 provide('is_started_schedule', is_started_schedule)
 provide('schedule_timeout', schedule_timeout)
-
-
-let classes = ref([]);
-
-
 provide('classes', classes)
+provide('wattingList', wattingList)
+provide('getSchedules', getSchedules)
+provide('speakText', speakText)
+provide('getSchedules', getSchedules)
+provide('punch_schedules', punch_schedules)
+provide('call_schedules', call_schedules) 
 
 
 watch(schedule_start_time, (a, b)=>{
     storage('schedule_start_time').value = a;
 })
 
- 
-
-// item['soundColName']  will be play
-let wattingList = ref([])
-
-
-provide('wattingList', wattingList)
-
-
+  
 function focusBarcodeInput__and__startAnnoucement(){
     if(is_started_schedule.value){
         let inputEl = document.getElementById('BARCODE_INPUT')
         if(inputEl) inputEl.focus()
-
-        // check annoucement list
     }
 }
 
@@ -81,7 +77,7 @@ function speakText(text) {
   window.speechSynthesis.speak(utterance);
 }
 
-provide('speakText', speakText)
+
 
 
 let tout = null
@@ -110,7 +106,35 @@ function stop_clear_and_reload(){
 }
 provide('stop_clear_and_reload', stop_clear_and_reload)
 
+
+async function getSchedules(){
+ 
+ try { 
+
+   http.get('/schedules/list').then(response => {
+     if(response.status == 200){
+       let data = response.data.data
+       data.forEach(item => {
+         item.start_ms = helper.miliseconds(item.start_time)
+         item.end_ms = helper.miliseconds(item.end_time)
+         item.classes = JSON.parse(item.classes)
+       })
+       punch_schedules.value = data.filter(item => item.type == 1);              
+       call_schedules.value = data.filter(item => item.type == 2);        
+     }
+   }).finally(()=>{
+      
+   })
+   
+ } catch (error) {
+   console.warn('addSchedule__error::', error);
+ }
+
+}
+
 onMounted(async ()=>{ 
+
+    await getSchedules()
 
     try {
         let response = await http.get('/config')
@@ -166,6 +190,7 @@ onMounted(async ()=>{
     background-position: 60% -30%;
     background-size: cover;
     background-repeat: repeat-y;
+    min-height: 100vw;
 }
 </style>
 

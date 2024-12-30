@@ -68,7 +68,7 @@ class myDB {
                   title TEXT DEFAULT NULL, 
                   start_time TEXT NOT NULL, -- 24 hour format time as string (e.g. 20:40)
                   end_time TEXT NOT NULL,  -- 24 hour format time as string (e.g. 20:40)
-                  classes TEXT DEFAULT NULL,  -- 24 hour format time as string (e.g. 20:40)                   
+                  classes TEXT DEFAULT NULL,  -- JSON string          
                   created TIMESTAMP DEFAULT CURRENT_TIMESTAMP
               );`,
               (err) => {

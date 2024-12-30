@@ -74,51 +74,72 @@ const helper = {
       } else {
           return 0
       } 
-    },
-    device: function() {
-        const getType = () => {
-            if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-                return 'mobile';
-            }
-            else if (/iPad/i.test(navigator.userAgent)) {
-                return 'tablet';
-            }
-            else {
-                return 'desktop';
-            }
-        }
-
-        function DeviceType(){
-            this.type = getType();
-        }
-
-        DeviceType.prototype.is = function (deviceType='') {
-            return deviceType ? this.type === deviceType : false;
-        }
-
-        DeviceType.prototype.in = function (deviceTypes=[]) {
-            if(deviceTypes && Array.isArray(deviceTypes) && deviceTypes?.length){
-                return deviceTypes.includes(this.type);
-            } else {
-                return false;
-            }
-        }
-
-        DeviceType.prototype.isMobile = function (extra=null) {
-            return this.type === 'mobile';
-        }
-
-        DeviceType.prototype.isTable = function () {
-            return this.type === 'tablet';
-        }
-
-        DeviceType.prototype.isDesktop = function () {
-            return this.type === 'desktop';
-        }
-
-        return new DeviceType();        
-
     }, 
+    clone: function (data, { remove = [], add = {}, only = [] } = {}) {
+      data = JSON.parse(JSON.stringify(data));
+  
+      if (data && typeof data === "object" && Array.isArray(data) === false) {
+        // Delete keys
+        if (remove?.length && Array.isArray(remove)) {
+          remove.forEach((key) => {
+            if (data.hasOwnProperty(key)) {
+              delete data[key];
+            }
+          });
+        }
+  
+        // keep only
+        if (only?.length && Array.isArray(only)) {
+          const new_data = {};
+          only.forEach((key) => {
+            if (data.hasOwnProperty(key)) {
+              new_data[key] = data[key];
+            }
+          });
+          data = new_data;
+        }
+  
+        return { ...data, ...add };
+      } else {
+        return data;
+      }
+    },
+    delay: function (callback, time = 0, ...args) {
+      setTimeout(() => {
+        callback(...args);
+      }, time);
+    },
+    // with Time
+    // with Time
+    // with Time
+    // with Time
+    miliseconds: function(time_24=''){
+      
+      let dateObj = new Date()
+      
+      if(time_24){
+        let [hours, minutes] = time_24.split(":") 
+        dateObj.setHours(parseInt(hours))
+        dateObj.setMinutes(parseInt(minutes))
+        dateObj.setSeconds(0)      
+      }
+      
+      let miliseconds = dateObj.getTime()
+      return miliseconds
+    },
+    formatTime: function(time_24){
+      let dateObj = new Date()
+      
+      if(time_24){
+        let [hours, minutes] = time_24.split(":") 
+        dateObj.setHours(parseInt(hours))
+        dateObj.setMinutes(parseInt(minutes))
+        dateObj.setSeconds(0)      
+      }
+
+      return moment(dateObj).format('hh:mm A')
+       
+    }
 }
 
 export default helper

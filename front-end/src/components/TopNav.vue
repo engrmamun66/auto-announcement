@@ -5,6 +5,7 @@
         </a>
         <RouterLink :to="{name: 'home'}" :class="{'active': route.name === 'home'}"><i class='bx bxs-home'></i> Dashboard</RouterLink>
         <RouterLink :to="{name: 'students'}" :class="{'active': route.name === 'students'}"><i class='bx bxs-user'></i> Students</RouterLink>
+        <RouterLink :to="{name: 'shedules'}" :class="{'active': route.name === 'shedules'}"><i class='bx bxs-calendar' ></i> Shedules</RouterLink>
         <RouterLink :to="{name: 'import'}" :class="{'active': route.name === 'import'}"><i class='bx bxs-file-import' ></i> Import</RouterLink>
         
         <!-- <div class="right-lnk">
