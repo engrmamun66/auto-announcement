@@ -48,7 +48,7 @@ let callbacks = {
         })   
         return Boolean(founds.length)
     },
-    running_punch_schedule(){        
+    running_punch_schedules(){        
       
         let ms = helper.miliseconds()
         let founds = punch_schedules.value.filter(schedule => {
@@ -57,7 +57,7 @@ let callbacks = {
         })       
         return founds
     },
-    running_call_schedule(){        
+    running_call_schedules(){        
       
         let ms = helper.miliseconds()
         let founds = call_schedules.value.filter(schedule => {
@@ -129,15 +129,15 @@ function focusBarcodeInput__and__startAnnoucement(){
 }
 
 function checkAndStartAnnouncement(){
-    if(schedule_start_time.value){
+    if(schedule_start_time.value && callbacks.running_call_schedules().length){
+        let [ firstSchedule ] = callbacks.running_call_schedules()
 
-        let delay_time = helper.time_in_miliseconds(schedule_start_time.value /* time_24 format */)
+        let delay_time = helper.time_in_miliseconds(firstSchedule.start_time)
 
         console.log('setTimeout For', {miliSecond: delay_time, second: delay_time / 1000});
 
         schedule_timeout.value = setTimeout(() => {
             play_in_playlist.value = true;
-
         }, delay_time);
 
         // strting annouchment, instantly or delay

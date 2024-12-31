@@ -162,8 +162,8 @@ let tab = ref(1)
                     <ul>
                          
                          <template v-if="tab==1">
-                              <template v-if="callbacks.running_punch_schedule().length">
-                                   <template v-for="(item, i) in callbacks.running_punch_schedule()">
+                              <template v-if="callbacks.running_punch_schedules().length">
+                                   <template v-for="(item, i) in callbacks.running_punch_schedules()">
                                         <li class="mb-2" >                    
                                              <h3> 
                                                   {{ item.title }}  
@@ -216,9 +216,9 @@ let tab = ref(1)
                               </template>
                          </template>
                          <template v-else-if="tab==2">
-                              <template v-if="callbacks.running_call_schedule().length">
+                              <template v-if="callbacks.running_call_schedules().length">
                                    <!-- running call scheduls -->
-                                   <template v-for="(item, i) in callbacks.running_call_schedule()">
+                                   <template v-for="(item, i) in callbacks.running_call_schedules()">
                                         <li class="mb-2" >                    
                                              <h3> 
                                                   {{ item.title }}
