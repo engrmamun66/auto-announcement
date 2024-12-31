@@ -38,14 +38,14 @@ provide('call_schedules', call_schedules)
 
 let callbacks = {
     isMatchedAnySchedule(class_short){
-        let className = classes.value.find(c => c.class_short == class_short)?.name
+        let className = classes.value.find(c => c.class_short == class_short)?.class_name 
         if(!className) return false;
-      
+
         let ms = helper.miliseconds()
         let founds = punch_schedules.value.filter(schedule => {
-            let { start_ms, end_ms } = schedule
-            return (ms >= start_ms && ms <= end_ms)
-        }) 
+            let { start_ms, end_ms } = schedule 
+            return (schedule.class_shorts.includes(class_short) && ms >= start_ms && ms <= end_ms) 
+        })   
         return Boolean(founds.length)
     },
     running_punch_schedule(){        
@@ -75,7 +75,7 @@ let callbacks = {
             schedule['incoming_time'] = (ms < start_ms) ? start_ms - ms : -1
         })
         data.sort((a, b) => {
-            return a.incoming_time - b.incoming_time
+            return a['incoming_time'] - b['incoming_time']
         })    
         
         return data.filter(s => s.incoming_time != -1)
@@ -85,18 +85,33 @@ let callbacks = {
         let ms = helper.miliseconds()
         let data = helper.clone(call_schedules.value)
         data.forEach(schedule => {
-            let { start_ms, end_ms } = schedule
+            let { start_ms } = schedule
             schedule['incoming_time'] = (ms < start_ms) ? start_ms - ms : -1
         })
         data.sort((a, b) => {
-            return a.incoming_time - b.incoming_time
+            return a['incoming_time'] - b['incoming_time']
         })    
         
         return data.filter(s => s.incoming_time != -1)
     },
+    timesup_punch_schedules(){       
+      
+        let ms = helper.miliseconds()
+        return (punch_schedules.value.filter(schedule => {
+            let { end_ms } = schedule
+            return ms > end_ms
+        }))
+    },
+    timesup_call_schedules(){       
+      
+        let ms = helper.miliseconds()
+        return (call_schedules.value.filter(schedule => {
+            let { end_ms } = schedule
+            return ms > end_ms
+        }))
+    },
 }
-provide('callbacks', callbacks)
-globalThis.isMatchedAnySchedule = callbacks.isMatchedAnySchedule
+provide('callbacks', callbacks) 
 
 
 
@@ -176,8 +191,7 @@ async function getSchedules(){
        let data = response.data.data
        data.forEach(item => {
          item.start_ms = helper.miliseconds(item.start_time)
-         item.end_ms = helper.miliseconds(item.end_time)
-         item.classes = JSON.parse(item.classes)
+         item.end_ms = helper.miliseconds(item.end_time) 
        })
        punch_schedules.value = data.filter(item => item.type == 1);              
        call_schedules.value = data.filter(item => item.type == 2);        

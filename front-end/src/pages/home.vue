@@ -72,6 +72,7 @@ function checkAndList(barcode='play-417-2024'){
           let [ class_short ] = barcode.split('-') // nursary-23-sound1-2024
 
           let isAllowed = callbacks.isMatchedAnySchedule(class_short)
+          console.log({isAllowed});
           if(!isAllowed){
                emitter.emit('toaster-error', { message: 'Not matched with any punch schedule'})
                return
@@ -177,13 +178,31 @@ let tab = ref(1)
 
                                    </template>
                               </template>
+                              <!-- Incomming puch -->
                               <template v-if="true">
-                                  <!-- Incomming call -->
                                   <h3 class="p-2 border3 radius-5 my-2 shadow me-1" style="background:var(--grad1)">Incoming...</h3>
                                   <template v-for="item in callbacks.incoming_punch_schedules()">
                                          <li class="mb-0" >                    
                                               <h4> 
                                                    {{ item?.title }}  <kbd> {{ helper.ms_to_hour_minute(item.incoming_time) }} </kbd>
+                                              </h4>
+                                              <p> 
+                                                   {{ helper.formatTime(item.start_time) }} - {{ helper.formatTime(item.end_time) }}
+                                              </p>
+                                              <!-- <div class="d-flex flex-wrap">
+                                                   <p class="m-1 p-1 border3 radius-5" v-for="cls in item.classes">{{ cls.class_short }}</p>
+                                              </div>                                     -->
+                                         </li>
+                                         <!-- <li class="text-center text-black-50">No schedule at now</li> -->
+                                    </template>
+                              </template>
+                              <!-- Times up puch -->
+                              <template v-if="true">
+                                  <h3 v-if="callbacks.timesup_punch_schedules()?.length" class="p-2 border3 radius-5 my-2 shadow me-1" style="background:var(--grad1)">Times Up</h3>
+                                  <template v-for="item in callbacks.timesup_punch_schedules()">
+                                         <li class="mb-0" >                    
+                                              <h4> 
+                                                   {{ item?.title }} 
                                               </h4>
                                               <p> 
                                                    {{ helper.formatTime(item.start_time) }} - {{ helper.formatTime(item.end_time) }}
@@ -214,13 +233,31 @@ let tab = ref(1)
                                         
                                    </template>
                               </template>
+                              <!-- Incomming call -->
                               <template v-if="true">
-                                   <!-- Incomming call -->
                                    <h3 class="p-2 border3 radius-5 my-2 shadow me-1" style="background:var(--grad1)">Incoming...</h3>
                                    <template v-for="item in callbacks.incoming_call_schedules()">
                                          <li class="mb-0" >                    
                                               <h4> 
                                                    {{ item?.title }}  <kbd> {{ helper.ms_to_hour_minute(item.incoming_time) }} </kbd>
+                                              </h4>
+                                              <p> 
+                                                   {{ helper.formatTime(item.start_time) }} - {{ helper.formatTime(item.end_time) }}
+                                              </p>
+                                              <!-- <div class="d-flex flex-wrap">
+                                                   <p class="m-1 p-1 border3 radius-5" v-for="cls in item.classes">{{ cls.class_short }}</p>
+                                              </div>                                     -->
+                                         </li>
+                                         <!-- <li class="text-center text-black-50">No schedule at now</li> -->
+                                    </template>
+                              </template>
+                               <!-- Times up puch -->
+                               <template v-if="true">
+                                  <h3 v-if="callbacks.timesup_call_schedules()?.length" class="p-2 border3 radius-5 my-2 shadow me-1" style="background:var(--grad1)">Times Up</h3>
+                                  <template v-for="item in callbacks.timesup_punch_schedules()">
+                                         <li class="mb-0" >                    
+                                              <h4> 
+                                                   {{ item?.title }} 
                                               </h4>
                                               <p> 
                                                    {{ helper.formatTime(item.start_time) }} - {{ helper.formatTime(item.end_time) }}

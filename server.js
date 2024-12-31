@@ -8,7 +8,6 @@ const multer = require("multer");
 const upload = multer({ dest: DIR + '/public/temp' });
 const config = require("./config");
  
-
 /**
  * Classes
 */
@@ -51,7 +50,8 @@ const audioUpload = multer({
 
 ['/api'].forEach(prefix => {  
 
-  app.get(prefix + "/config", (req, res) => {
+  app.get(prefix + "/config", (req, res) => {   
+    
     res.send({ ...config })
   });
 
