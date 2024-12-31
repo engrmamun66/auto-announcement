@@ -136,8 +136,10 @@ watch(toggleSettings, getSchedules)
 </script>
 
 <template>
-     <div class="d-flex align-items-center">
-          <btn @click="toggleSettings = !toggleSettings" class="px-3 shadow me-2"><i class='bx bx-list-ul'></i></btn>
+     <div class="d-flex align-items-center bttt">
+          <div class="togglerbtn">
+               <btn @click="toggleSettings = !toggleSettings" class="px-3 shadow me-2"><i class='bx bx-list-ul'></i></btn>
+          </div>
           
           <input id="BARCODE_INPUT" type="text" @keyup.enter="inputBarcode" class="form-control px-4 py-2 text-center py-1 shadow me-2" placeholder="Barcode receiver field">
          
@@ -175,7 +177,7 @@ watch(toggleSettings, getSchedules)
                               </template>
                               <!-- Incomming puch -->
                               <template v-if="true">
-                                  <h3 class="p-2 border3 radius-5 my-2 shadow me-1" style="background:var(--grad1)">Incoming...</h3>
+                                  <h4 class="p-2 border3 radius-5 my-2 shadow me-1" style="background:var(--grad1)">Incoming...</h4>
                                   <template v-for="item in callbacks.incoming_punch_schedules()">
                                          <li class="mb-0" >                    
                                               <h4> 
@@ -193,7 +195,7 @@ watch(toggleSettings, getSchedules)
                               </template>
                               <!-- Times up puch -->
                               <template v-if="true">
-                                  <h3 v-if="callbacks.timesup_punch_schedules()?.length" class="p-2 border3 radius-5 my-2 shadow me-1" style="background:var(--grad1)">Times Up</h3>
+                                  <h4 v-if="callbacks.timesup_punch_schedules()?.length" class="p-2 border3 radius-5 my-2 shadow me-1" style="background:var(--grad1)">Times Up</h4>
                                   <template v-for="item in callbacks.timesup_punch_schedules()">
                                          <li class="mb-0" >                    
                                               <h4> 
@@ -230,7 +232,7 @@ watch(toggleSettings, getSchedules)
                               </template>
                               <!-- Incomming call -->
                               <template v-if="true">
-                                   <h3 class="p-2 border3 radius-5 my-2 shadow me-1" style="background:var(--grad1)">Incoming...</h3>
+                                   <h4 class="p-2 border3 radius-5 my-2 shadow me-1" style="background:var(--grad1)">Incoming...</h4>
                                    <template v-for="item in callbacks.incoming_call_schedules()">
                                          <li class="mb-0" >                    
                                               <h4> 
@@ -418,5 +420,30 @@ watch(toggleSettings, getSchedules)
      background: rgba(255, 255, 255, 0.495);
      border-bottom: 2px solid white;
      
+}
+
+@media screen and (max-width: 450px) {
+     .sections {
+          flex-direction: column;
+     }
+     .togglerbtn{
+          position: fixed;
+          top: 10px;
+          right: 10px;
+          z-index: 99999;
+     }
+     .togglerbtn > button,
+     .togglerbtn > button:active,
+     .togglerbtn > button:active:focus
+     { 
+          background: var(--grad1) !important;
+          color: black;
+     }
+     .bttt{
+          flex-wrap: wrap;
+     }
+     .bttt > *{
+          margin-bottom: 5px;
+     }
 }
 </style>
