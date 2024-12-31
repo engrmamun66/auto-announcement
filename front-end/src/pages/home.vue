@@ -176,22 +176,22 @@ watch(toggleSettings, getSchedules)
                                    </template>
                               </template>
                               <!-- Incomming puch -->
-                              <template v-if="true">
-                                  <h4 class="p-2 border3 radius-5 my-2 shadow me-1" style="background:var(--grad1)">Incoming...</h4>
-                                  <template v-for="item in callbacks.incoming_punch_schedules()">
-                                         <li class="mb-0" >                    
-                                              <h4> 
-                                                   {{ item?.title }}  <kbd> {{ helper.ms_to_hour_minute(item.incoming_time) }} </kbd>
-                                              </h4>
-                                              <p> 
-                                                   {{ helper.formatTime(item.start_time) }} - {{ helper.formatTime(item.end_time) }}
-                                              </p>
-                                              <!-- <div class="d-flex flex-wrap">
-                                                   <p class="m-1 p-1 border3 radius-5" v-for="cls in item.classes">{{ cls.class_short }}</p>
-                                              </div>                                     -->
-                                         </li>
-                                         <!-- <li class="text-center text-black-50">No schedule at now</li> -->
-                                    </template>
+                              <template v-if="callbacks.incoming_punch_schedules().length">                                    
+                                   <h4 class="p-2 border3 radius-5 my-2 shadow me-1" style="background:var(--grad1)">Incoming...</h4>
+                                   <template v-for="item in callbacks.incoming_punch_schedules()">
+                                        <li class="mb-0" >                    
+                                             <h4> 
+                                                  {{ item?.title }}  <kbd> {{ helper.ms_to_hour_minute(item.incoming_time) }} </kbd>
+                                             </h4>
+                                             <p> 
+                                                  {{ helper.formatTime(item.start_time) }} - {{ helper.formatTime(item.end_time) }}
+                                             </p>
+                                             <!-- <div class="d-flex flex-wrap">
+                                                  <p class="m-1 p-1 border3 radius-5" v-for="cls in item.classes">{{ cls.class_short }}</p>
+                                             </div>                                     -->
+                                        </li>
+                                        <!-- <li class="text-center text-black-50">No schedule at now</li> -->
+                                   </template> 
                               </template>
                               <!-- Times up puch -->
                               <template v-if="true">
@@ -231,7 +231,7 @@ watch(toggleSettings, getSchedules)
                                    </template>
                               </template>
                               <!-- Incomming call -->
-                              <template v-if="true">
+                              <template v-if="callbacks.incoming_call_schedules().length">
                                    <h4 class="p-2 border3 radius-5 my-2 shadow me-1" style="background:var(--grad1)">Incoming...</h4>
                                    <template v-for="item in callbacks.incoming_call_schedules()">
                                          <li class="mb-0" >                    
