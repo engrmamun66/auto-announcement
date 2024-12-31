@@ -143,7 +143,6 @@
 
     audioPlayer.value.onended = () => {
       isPlaying.value = false
-      console.log('Audio finished playing!')
     }
   }
 

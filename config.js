@@ -73,7 +73,7 @@ module.exports = {
         },
         {
              class_name:'Pre Hifz',
-             class_short: 'prehifz',
+             class_short: 'pre_hifz',
              isActive: true,
         },
         {

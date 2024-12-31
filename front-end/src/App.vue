@@ -118,19 +118,20 @@ let callbacks = {
         })
         return data;
     },
-    clearWattingList(max_time_in_minute=30){
+    clearWattingList(){
+        const max_time_in_minute = 1
         let timesupCallSchedules = this.timesup_call_schedules() // sorted by 'start_ms'
-        if(!wattingList.value?.length || !timesupCallSchedules.length) return
+        if(!wattingList.value?.length || !timesupCallSchedules.length) return        
         
         let newWaittinglist = wattingList.value.filter(item => {
+            console.log({item});
             if(item.is_called){
-                console.log({item});
                 let ms = helper.miliseconds()
                 let max_ms = max_time_in_minute * 1000
-                let puch_exact_time = item?.['puch_exact_time']
-                let gap = ms - puch_exact_time
+                let call_exact_time = item?.['call_exact_time']
+                let gap = ms - call_exact_time
 
-                if(!puch_exact_time) return false
+                if(!call_exact_time) return false
                 if(gap == 0) return true
 
                 if(gap >= max_ms){
@@ -143,6 +144,8 @@ let callbacks = {
 
             return true;
         })
+
+        console.log({newWaittinglist});
 
         wattingList.value = newWaittinglist
         storage('wattingList').value = newWaittinglist
@@ -163,6 +166,7 @@ watch(schedule_start_time, (a, b)=>{
 
   
 function focusBarcodeInput__and__startAnnoucement(){
+    callbacks.clearWattingList()
     if(is_started_schedule.value){
         let inputEl = document.getElementById('BARCODE_INPUT')
         if(inputEl) inputEl.focus()
@@ -206,7 +210,7 @@ watch(is_started_schedule, (a, b) => {
     storage('is_started_schedule').value = a
     clearTimeout(tout)
     tout = setTimeout(() => {
-        callbacks.clearWattingList(1)
+        callbacks.clearWattingList()
         checkAndStartAnnouncement()
     }, 1000);
 })
@@ -275,6 +279,7 @@ onMounted(async ()=>{
  
     
 
+    setInterval(getSchedules, 10 * 1000);
     setInterval(focusBarcodeInput__and__startAnnoucement, 1000);
 
     isMounted.value = true;

@@ -9,6 +9,7 @@
   
   
   // Refs and state
+  const helper = inject('helper');
   const emitter = inject('emitter');
   const storage = inject('storage');
   const wattingList = inject('wattingList');
@@ -37,6 +38,7 @@
       wattingList.value.forEach(item => {
         if(item.id === currentItem.value.id){
             item.is_called = true;
+            item['call_exact_time'] = helper.miliseconds()
         }
       })
       storage('wattingList').value = wattingList.value
