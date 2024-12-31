@@ -177,29 +177,60 @@ let tab = ref(1)
 
                                    </template>
                               </template>
-                              <template v-else>
-                                   <li class="text-center text-black-50">No schedule at now</li>
+                              <template v-if="true">
+                                  <!-- Incomming call -->
+                                  <h3 class="p-2 border3 radius-5 my-2 shadow me-1" style="background:var(--grad1)">Incoming...</h3>
+                                  <template v-for="item in callbacks.incoming_punch_schedules()">
+                                         <li class="mb-0" >                    
+                                              <h4> 
+                                                   {{ item?.title }}  <kbd> {{ helper.ms_to_hour_minute(item.incoming_time) }} </kbd>
+                                              </h4>
+                                              <p> 
+                                                   {{ helper.formatTime(item.start_time) }} - {{ helper.formatTime(item.end_time) }}
+                                              </p>
+                                              <!-- <div class="d-flex flex-wrap">
+                                                   <p class="m-1 p-1 border3 radius-5" v-for="cls in item.classes">{{ cls.class_short }}</p>
+                                              </div>                                     -->
+                                         </li>
+                                         <!-- <li class="text-center text-black-50">No schedule at now</li> -->
+                                    </template>
                               </template>
                          </template>
                          <template v-else-if="tab==2">
                               <template v-if="callbacks.running_call_schedule().length">
+                                   <!-- running call scheduls -->
                                    <template v-for="(item, i) in callbacks.running_call_schedule()">
                                         <li class="mb-2" >                    
                                              <h3> 
-                                                  {{ item.title }}  
+                                                  {{ item.title }}
                                              </h3>
                                              <p> 
                                                   {{ helper.formatTime(item.start_time) }} - {{ helper.formatTime(item.end_time) }}
                                              </p>
-                                        <div class="d-flex flex-wrap">
-                                             <p class="m-1 p-1 border3 radius-5" v-for="cls in item.classes">{{ cls.class_short }}</p>
-                                        </div>                                    
+                                             <div class="d-flex flex-wrap">
+                                                  <p class="m-1 p-1 border3 radius-5" v-for="cls in item.classes">{{ cls.class_short }}</p>
+                                             </div>                                    
                                         </li>
-
+                                        
                                    </template>
                               </template>
-                              <template v-else>
-                                   <li class="text-center text-black-50">No schedule at now</li>
+                              <template v-if="true">
+                                   <!-- Incomming call -->
+                                   <h3 class="p-2 border3 radius-5 my-2 shadow me-1" style="background:var(--grad1)">Incoming...</h3>
+                                   <template v-for="item in callbacks.incoming_call_schedules()">
+                                         <li class="mb-0" >                    
+                                              <h4> 
+                                                   {{ item?.title }}  <kbd> {{ helper.ms_to_hour_minute(item.incoming_time) }} </kbd>
+                                              </h4>
+                                              <p> 
+                                                   {{ helper.formatTime(item.start_time) }} - {{ helper.formatTime(item.end_time) }}
+                                              </p>
+                                              <!-- <div class="d-flex flex-wrap">
+                                                   <p class="m-1 p-1 border3 radius-5" v-for="cls in item.classes">{{ cls.class_short }}</p>
+                                              </div>                                     -->
+                                         </li>
+                                         <!-- <li class="text-center text-black-50">No schedule at now</li> -->
+                                    </template>
                               </template>
                          </template>
                     </ul>

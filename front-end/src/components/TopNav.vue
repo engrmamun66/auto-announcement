@@ -113,10 +113,7 @@ const toggleMenu = () => {
   float: right;
 }
 
-@media screen and (max-width: 600px) {
-  .topnav a:not(:first-child) {
-    display: none;
-  }
+@media screen and (max-width: 600px) {  
 
   .topnav.responsive a {
     display: block;

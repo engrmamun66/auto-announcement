@@ -34,7 +34,7 @@ provide('speakText', speakText)
 provide('getSchedules', getSchedules)
 provide('punch_schedules', punch_schedules)
 provide('call_schedules', call_schedules) 
- 
+
 
 let callbacks = {
     isMatchedAnySchedule(class_short){
@@ -65,6 +65,34 @@ let callbacks = {
             return (ms >= start_ms && ms <= end_ms)
         })       
         return founds
+    },
+    incoming_punch_schedules(){        
+      
+        let ms = helper.miliseconds()
+        let data = helper.clone(punch_schedules.value)
+        data.forEach(schedule => {
+            let { start_ms, end_ms } = schedule
+            schedule['incoming_time'] = (ms < start_ms) ? start_ms - ms : -1
+        })
+        data.sort((a, b) => {
+            return a.incoming_time - b.incoming_time
+        })    
+        
+        return data.filter(s => s.incoming_time != -1)
+    },
+    incoming_call_schedules(){        
+      
+        let ms = helper.miliseconds()
+        let data = helper.clone(call_schedules.value)
+        data.forEach(schedule => {
+            let { start_ms, end_ms } = schedule
+            schedule['incoming_time'] = (ms < start_ms) ? start_ms - ms : -1
+        })
+        data.sort((a, b) => {
+            return a.incoming_time - b.incoming_time
+        })    
+        
+        return data.filter(s => s.incoming_time != -1)
     },
 }
 provide('callbacks', callbacks)
@@ -219,7 +247,6 @@ onMounted(async ()=>{
     background-position: 60% -30%;
     background-size: cover;
     background-repeat: repeat-y;
-    min-height: 100vw;
 }
 </style>
 
