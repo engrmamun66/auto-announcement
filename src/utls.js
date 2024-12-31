@@ -21,17 +21,11 @@ module.exports = {
         return `${req.protocol}://${req.get("host")}${audio_path}`
     },
     getClassName(className){
-        let _class = classes.find(c => (c.class_name == className)) || ''
-        if(_class){
-            return _class.class_name
-        }     
-        return ''        
+        let _class = classes.find(c => c.class_name == className)         
+        return _class?.class_name || '<>'       
     },
-    getClassShort(classShort){
-        let _class = classes.find(c => (c.class_short == classShort)) || ''
-        if(_class){
-            return _class.class_short
-        }     
-        return ''
+    getClassShort(className){
+        let _class = classes.find(c => c.class_name == className)         
+        return _class?.class_short || '<>'
     },
 };

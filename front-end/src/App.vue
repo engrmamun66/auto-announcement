@@ -97,19 +97,60 @@ let callbacks = {
     timesup_punch_schedules(){       
       
         let ms = helper.miliseconds()
-        return (punch_schedules.value.filter(schedule => {
+        let data = (punch_schedules.value.filter(schedule => {
             let { end_ms } = schedule
             return ms > end_ms
         }))
+        data.sort((a, b) => {
+            return a.start_ms - b.start_ms
+        })
+        return data;
     },
     timesup_call_schedules(){       
       
         let ms = helper.miliseconds()
-        return (call_schedules.value.filter(schedule => {
+        let data =  (call_schedules.value.filter(schedule => {
             let { end_ms } = schedule
             return ms > end_ms
         }))
+        data.sort((a, b) => {
+            return a.start_ms - b.start_ms
+        })
+        return data;
     },
+    clearWattingList(max_time_in_minute=30){
+        let timesupCallSchedules = this.timesup_call_schedules() // sorted by 'start_ms'
+        if(!wattingList.value?.length || !timesupCallSchedules.length) return
+        
+        let newWaittinglist = wattingList.value.filter(item => {
+            if(item.is_called){
+                console.log({item});
+                let ms = helper.miliseconds()
+                let max_ms = max_time_in_minute * 1000
+                let puch_exact_time = item?.['puch_exact_time']
+                let gap = ms - puch_exact_time
+
+                if(!puch_exact_time) return false
+                if(gap == 0) return true
+
+                if(gap >= max_ms){
+                    return false
+                } else {
+                    return true
+                }
+
+            }
+
+            return true;
+        })
+
+        wattingList.value = newWaittinglist
+        storage('wattingList').value = newWaittinglist
+
+
+
+        // wattingList
+    }
 }
 provide('callbacks', callbacks) 
 
@@ -128,8 +169,8 @@ function focusBarcodeInput__and__startAnnoucement(){
     }
 }
 
-function checkAndStartAnnouncement(){
-    if(schedule_start_time.value && callbacks.running_call_schedules().length){
+function checkAndStartAnnouncement(){    
+    if(is_started_schedule.value && callbacks.running_call_schedules().length){ 
         let [ firstSchedule ] = callbacks.running_call_schedules()
 
         let delay_time = helper.time_in_miliseconds(firstSchedule.start_time)
@@ -165,6 +206,7 @@ watch(is_started_schedule, (a, b) => {
     storage('is_started_schedule').value = a
     clearTimeout(tout)
     tout = setTimeout(() => {
+        callbacks.clearWattingList(1)
         checkAndStartAnnouncement()
     }, 1000);
 })
@@ -227,7 +269,9 @@ onMounted(async ()=>{
     wattingList.value = storage('wattingList').value || wattingList.value 
     is_started_schedule.value = storage('is_started_schedule').value || is_started_schedule.value 
 
-    checkAndStartAnnouncement()
+    
+    // checkAndStartAnnouncement() ----- automtically run from watch(is_started_schedule
+  
  
     
 

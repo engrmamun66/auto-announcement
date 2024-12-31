@@ -12,6 +12,7 @@
   const emitter = inject('emitter');
   const storage = inject('storage');
   const wattingList = inject('wattingList');
+  const callbacks = inject('callbacks');
   const stop_clear_and_reload = inject('stop_clear_and_reload');
   const currentItem = ref(null);
   const audio = ref(null);
@@ -27,6 +28,10 @@
   
  
   function playNext() {
+
+    callbacks.clearWattingList(1)
+
+
     if (currentItem.value) {
       currentItem.value.is_called = true; 
       wattingList.value.forEach(item => {

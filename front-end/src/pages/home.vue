@@ -20,22 +20,13 @@ const is_started_schedule = inject('is_started_schedule');
 const stop_clear_and_reload = inject('stop_clear_and_reload');
 const speakText = inject('speakText');
 const callbacks = inject('callbacks');
+const getSchedules = inject('getSchedules');
 
 const classes = inject('classes');
 const wattingList = inject('wattingList');
 
-let toggleSettings = ref(true)
-let isActiveAllClasses = computed(() => classes.value.every(c => c.isActive))
-function toggleClassesSelection({target}){
-     let bool = !(isActiveAllClasses.value)
-     classes.value.forEach(cls => {
-          cls.isActive = bool
-     });
-     storage('classes').value = classes.value
+let toggleSettings = ref(true)   
 
-}
-
-let log = console.log
 let ttoout
 function inputBarcode(event){
      clearTimeout(ttoout)
@@ -88,7 +79,9 @@ function checkAndList(barcode='play-417-2024'){
           http.get('/single-student', { params: { barcode } }).then(response => {
                if(response.status == 200){
                     let student = response.data.data;
-                    student.barcode = barcode;
+                    student['barcode'] = barcode;
+                    student['puch_exact_time'] = helper.miliseconds();
+
                     let findLast = wattingList.value.findLast(s => s.id == student.id)
                     let findLastIndex = wattingList.value.findLastIndex(s => s.id == student.id)
 
@@ -137,6 +130,8 @@ function checkSchedule(){
 }
 
 let tab = ref(1)
+watch(tab, getSchedules)
+watch(toggleSettings, getSchedules)
 
 </script>
 

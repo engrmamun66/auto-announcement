@@ -1,23 +1,5 @@
 
-module.exports = {
-    // classes: {
-    //     'Play': 'play',
-    //     'Nursery': 'nursery',
-    //     'KG': 'kg',
-    //     'One/Saffe Awal': 'one',
-    //     'Two/Saffe Sani': 'two',
-    //     'Three/Saffe Sales': 'three',
-    //     'Four/Saffe Rabe': 'four',
-    //     'Ibtedaiyah': 'five',
-    //     'Mutawassitah Awal / Mizan': 'mizan',
-    //     'Mutawassitah Sani / Nahbemir': 'nahbemir',
-    //     'Mutawassitah Sales': 'kuduri',
-    //     'Sanabiya Awal/Shorhebekaya': 'shorhebekaya',
-    //     'Sanabiya Sani': 'meskat1',
-    //     'Hifz': 'hifz',
-    //     'Pre Hifz': 'pre_hifz',
-    //     'Fozilat': 'meskat2',
-    // },
+module.exports = { 
     classes: [
         {
              class_name:'Play',
@@ -91,7 +73,7 @@ module.exports = {
         },
         {
              class_name:'Pre Hifz',
-             class_short: 'pre_hifz',
+             class_short: 'prehifz',
              isActive: true,
         },
         {
