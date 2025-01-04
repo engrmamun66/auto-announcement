@@ -161,5 +161,4 @@ const helper = {
 }
 
 export default helper
-
-globalThis.storage = helper.localStorage
+ 

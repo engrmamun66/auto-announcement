@@ -1,14 +1,18 @@
 <script setup>
+import { inject } from  'vue'
+
 defineProps({
     scannig: {
         default: true,
         required: false,
     }
 })
+
+let emergency_mode = inject('emergency_mode')
 </script>
 
 <template>
-  <div v-bind="$attrs" class="preloader-scan">
+  <div @dblclick="emergency_mode = !emergency_mode" v-bind="$attrs" class="preloader-scan cp">
     <ul>
       <li></li>
       <li></li>

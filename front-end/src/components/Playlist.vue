@@ -56,7 +56,7 @@
     }
   
     const nextItem = findNextItem();
-    console.log({nextItem});
+    if(nextItem) console.log({nextItem});
   
     if (nextItem) {
       currentItem.value = nextItem;
@@ -77,7 +77,6 @@
     console.log('playlist mounted');
     playNext()
 
-    emitter.off('pushed_a_student__or__rechecktoPlay')
     emitter.on('pushed_a_student__or__rechecktoPlay', ()=>{
         if(is__playing.value == false){
           playNext()          

@@ -49,9 +49,9 @@ function inputBarcode(event){
                checkAndList(barcode)
                setTimeout(() => {
                     event.target.value = ''
-               }, 500);
+               }, 300);
           }
-     }, 100);
+     }, 10);
 }
 
 /**

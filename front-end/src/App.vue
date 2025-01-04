@@ -232,7 +232,7 @@ onMounted(async ()=>{
     classes.value = storage('classes').value || classes.value
     wattingList.value = storage('wattingList').value || wattingList.value 
     is_started_schedule.value = storage('is_started_schedule').value || is_started_schedule.value 
-    emergency_mode.value = storage('emergency_mode').value || emergency_mode.value 
+    emergency_mode.value = Boolean(storage('emergency_mode').value)
  
 
     setTimeout(() => {
