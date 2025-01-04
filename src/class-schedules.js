@@ -122,6 +122,7 @@ class Schedules {
 
         let play = classes.find(c =>  c.class_name === 'Play')  
         let nursery = classes.find(c =>  c.class_name === 'Nursery')  
+        let one = classes.find(c =>  c.class_name === 'One/Saffe Awal')  
         
   
         data.push({
@@ -130,8 +131,7 @@ class Schedules {
             "title": " puch test",
             "start_time": "18:10",
             "end_time": "23:00",
-            "classes": JSON.stringify([ play, nursery ]),
-            "created": "2024-12-30 15:02:42"
+            "classes": JSON.stringify([ play, nursery ]), 
         }) 
         data.push({
             "id": 6,
@@ -139,8 +139,7 @@ class Schedules {
             "title": " call test - 2",
             "start_time": "15:48",
             "end_time": "15:49",
-            "classes": JSON.stringify([ play ]),
-            "created": "2024-12-30 15:02:42"
+            "classes": JSON.stringify([ play ]), 
         }) 
         data.push({
             "id": 6,
@@ -148,8 +147,7 @@ class Schedules {
             "title": " call test - 1",
             "start_time": "15:50",
             "end_time": "15:51",
-            "classes": JSON.stringify([ nursery ]),
-            "created": "2024-12-30 15:02:42"
+            "classes": JSON.stringify([ nursery ]), 
         }) 
 
       }
