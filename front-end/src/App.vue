@@ -14,19 +14,19 @@ let http = inject('http')
 let storage = inject('storage')
 let route = useRoute();
 let router = useRouter();  
-
-let schedule_start_time = ref(null) // will set always 25 hours format > example: 13:20
+ 
 let is_started_schedule = ref(0) 
 let schedule_timeout = ref(0) 
-let play_in_playlist = ref(false) 
 let classes = ref([]);
 let wattingList = ref([])
 let punch_schedules = ref([])
 let call_schedules = ref([]) 
 let toggleSettings = ref(true) 
 let refreshDOM = ref(true) 
-
-provide('schedule_start_time', schedule_start_time)
+let isMounted = ref(false)
+let user_interacted = ref(false)
+let emergency_mode = ref(false)
+ 
 provide('is_started_schedule', is_started_schedule)
 provide('schedule_timeout', schedule_timeout)
 provide('classes', classes)
@@ -38,6 +38,8 @@ provide('punch_schedules', punch_schedules)
 provide('call_schedules', call_schedules) 
 provide('toggleSettings', toggleSettings) 
 provide('refreshDOM', refreshDOM) 
+provide('user_interacted', user_interacted) 
+provide('emergency_mode', emergency_mode) 
 
 
 let callbacks = {
@@ -122,49 +124,29 @@ let callbacks = {
         })
         return data;
     },
-    clearWattingList(){
-        const max_time_in_minute = 1
-        let timesupCallSchedules = this.timesup_call_schedules() // sorted by 'start_ms'
-        if(!wattingList.value?.length || !timesupCallSchedules.length) return        
+    clearWattingList(){ 
+
+        if(!wattingList.value?.length ) return        
         
         let newWaittinglist = wattingList.value.filter(item => {
             if(item.is_called){
                 let ms = helper.miliseconds()
-                let max_ms = max_time_in_minute * 1000
-                let call_exact_time = item?.['call_exact_time']
-                let gap = ms - call_exact_time
-
-                if(!call_exact_time) return false
-                if(gap == 0) return true
-
-                if(gap >= max_ms){
-                    return false
+                let { end_ms } = item  
+                if(ms > (end_ms)){
+                    return false // times up
                 } else {
                     return true
-                }
-
+                }                
             }
-
             return true;
         })
 
         wattingList.value = newWaittinglist
-        storage('wattingList').value = newWaittinglist
-
-
-
-        // wattingList
+        storage('wattingList').value = newWaittinglist 
     }
 }
 provide('callbacks', callbacks) 
-
-
-
-
-watch(schedule_start_time, (a, b)=>{
-    storage('schedule_start_time').value = a;
-})
-
+ 
   
 function focusBarcodeInput__and__startAnnoucement(){
     callbacks.clearWattingList()
@@ -173,22 +155,7 @@ function focusBarcodeInput__and__startAnnoucement(){
         if(inputEl) inputEl.focus()
     }
 }
-
-function checkAndStartAnnouncement(){    
-    if(is_started_schedule.value && callbacks.running_call_schedules().length){ 
-        let [ firstSchedule ] = callbacks.running_call_schedules()
-
-        let delay_time = helper.time_in_miliseconds(firstSchedule.start_time)
-
-        console.log('setTimeout For', {miliSecond: delay_time, second: delay_time / 1000});
-
-        schedule_timeout.value = setTimeout(() => {
-            play_in_playlist.value = true;
-        }, delay_time);
-
-        // strting annouchment, instantly or delay
-    } 
-}
+ 
 
 
 function speakText(text) {
@@ -203,23 +170,15 @@ function speakText(text) {
   window.speechSynthesis.speak(utterance);
 }
 
-
-
-
-let tout = null
-watch(is_started_schedule, (a, b) => {
-    storage('is_started_schedule').value = a
-    clearTimeout(tout)
-    tout = setTimeout(() => {
-        callbacks.clearWattingList()
-        checkAndStartAnnouncement()
-    }, 1000);
-})
  
-
- // Initial play when the component mounts
- let isMounted = ref(false)
- let user_interacted = ref(false)
+  
+watch(is_started_schedule, (a, b) => {
+    storage('is_started_schedule').value = a 
+}) 
+  
+watch(emergency_mode, (a, b) => {
+    storage('emergency_mode').value = a 
+}) 
 
 
 function stop_clear_and_reload(){
@@ -266,25 +225,24 @@ onMounted(async ()=>{
         
     }
     document.addEventListener('click', () => {
-        if(user_interacted.value) return;
         user_interacted.value = true;  
+        document.body.classList.add('user-interacted')
     })
     clearTimeout(schedule_timeout.value)
     classes.value = storage('classes').value || classes.value
     wattingList.value = storage('wattingList').value || wattingList.value 
     is_started_schedule.value = storage('is_started_schedule').value || is_started_schedule.value 
+    emergency_mode.value = storage('emergency_mode').value || emergency_mode.value 
+ 
 
-    
-    // checkAndStartAnnouncement() ----- automtically run from watch(is_started_schedule
-  
-   
-
-
-    setInterval(()=>{
-        focusBarcodeInput__and__startAnnoucement()
-        refreshDOM.value = false
-        setTimeout(()=>refreshDOM.value = true, 0)
-    }, 1000);
+    setTimeout(() => {
+        setInterval(()=>{
+            focusBarcodeInput__and__startAnnoucement()
+            refreshDOM.value = false
+            emitter.emit('pushed_a_student__or__rechecktoPlay', true)
+            setTimeout(()=>refreshDOM.value = true, 0)
+        }, 1000);
+    }, 100);
 
     isMounted.value = true;
 })
@@ -299,7 +257,7 @@ onMounted(async ()=>{
     <TopNav></TopNav>
     <div v-if="isMounted" class="page-contents" >
         <routerView />
-        <Playlist v-if="play_in_playlist && user_interacted"></Playlist>
+        <Playlist></Playlist> 
     </div>
     
 </template>

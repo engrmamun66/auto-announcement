@@ -9,6 +9,7 @@ import FileUpload from '../components/FileUpload.vue'
 import Switch from '../components/Switch.vue'
 import BtnLoader from '../components/BtnLoader.vue'
 import BarcodeScannigAnimation from '../components/BarcodeScannigAnimation.vue'
+import EmergencyMode from '../components/EmergencyMode.vue'
 import helper from '../utilities/helper';
 
 
@@ -28,6 +29,8 @@ const wattingList = inject('wattingList');
 let toggleSettings = inject('toggleSettings') 
 let refreshDOM = inject('refreshDOM') 
 
+let emergency_mode = inject('emergency_mode')
+
 
 
 
@@ -46,7 +49,7 @@ function inputBarcode(event){
                checkAndList(barcode)
                setTimeout(() => {
                     event.target.value = ''
-               }, 800);
+               }, 500);
           }
      }, 100);
 }
@@ -58,26 +61,37 @@ function inputBarcode(event){
 
 function checkAndList(barcode='play-417-2024'){
      try {
-
-          if(!(/^[a-z_0-9]+-\d{1,}-sound(1|2|3)/gi.test(barcode))){
-               emitter.emit('toaster-error', { message: 'Barcode is not valid', duration: 5000})
+          if(barcode == 'i' || barcode == 'I'){
+               emergency_mode.value = !emergency_mode.value
                return
           }
+
+          if(!emergency_mode.value){
+               if(!(/^[a-z_0-9]+-\d{1,}-sound(1|2|3)/gi.test(barcode))){
+                    emitter.emit('toaster-error', { message: 'Barcode is not valid', duration: 5000})
+                    return
+               }
+          }
+
 
           let [ class_short ] = barcode.split('-') // nursary-23-sound1-2024
 
-          let isAllowed = callbacks.isMatchedAnySchedule(class_short)
-          console.log({isAllowed});
-          if(!isAllowed){
-               emitter.emit('toaster-error', { message: 'Not matched with any punch schedule'})
-               return
+                    
+          if(!emergency_mode.value){
+               let isAllowed = callbacks.isMatchedAnySchedule(class_short)
+             
+               if(!isAllowed){
+                    emitter.emit('toaster-error', { message: 'Not matched with any punch schedule'})
+                    return
+               }
+               let targetClass = classes.value.filter(cls => cls.class_short == class_short)?.[0];
+               if(!targetClass?.isActive){
+                    emitter.emit('toaster-error', { message: 'This class is inactive now'})
+                    return
+               }
           }
 
-          let targetClass = classes.value.filter(cls => cls.class_short == class_short)?.[0];
-          if(!targetClass?.isActive){
-               emitter.emit('toaster-error', { message: 'This class is inactive now'})
-               return
-          }
+
 
 
           http.get('/single-student', { params: { barcode } }).then(response => {
@@ -88,30 +102,57 @@ function checkAndList(barcode='play-417-2024'){
 
                     let findLast = wattingList.value.findLast(s => s.id == student.id)
                     let findLastIndex = wattingList.value.findLastIndex(s => s.id == student.id)
+                  
 
+                   
                     if(!student[student['soundColName']]){
                          emitter.emit('toaster-error', { message: `Sound not added for this student. <i><a href="http://localhost:3006/#/students?dakhela=${student.dakhela}" target="_blank" >Add</a></i>`, duration: 10000})
                          speakText(student.name + ', her voice is not added yet')
                     }
+
+                   
+
+
                     
-                    if(!findLast){
-                         wattingList.value.push(student)
-                         emitter.emit('pushed_a_student', student)
-                    }
-                    else if(findLast && findLast?.is_called){
-                         wattingList.value.splice(findLastIndex, 0, student)
-                         emitter.emit('pushed_a_student', student)
-                    } else if (findLast) {
-                         let studentCard = document.querySelector(`[barcode="${barcode}"]`)
-                         if(studentCard){
-                              studentCard.classList.add('bx-fade-down')
-                              setTimeout(() => {
-                                   studentCard.classList.remove('bx-fade-down')
-                                   
-                              }, 2000);
+                    student['emergency_mode'] = emergency_mode.value
+                    
+                    if(!emergency_mode.value){
+                         const { running_call_schedules, incoming_call_schedules  } = callbacks
+                         let rs = running_call_schedules()
+                         let is = incoming_call_schedules()
+                         
+                         if(rs.length){
+                              student['start_ms'] = rs[0].start_ms
+                              student['end_ms'] = rs[0].end_ms
+                         } else {
+                              student['start_ms'] = is[0].start_ms
+                              student['end_ms'] = is[0].end_ms
+                         } 
+
+                         // ----
+                         if(!findLast){
+                              wattingList.value.push(student)
+                              emitter.emit('pushed_a_student__or__rechecktoPlay', student)
                          }
-                         emitter.emit('toaster-warning', { message: 'Already added in here'})
-                    }
+                         else if(findLast && findLast?.is_called){
+                              wattingList.value.splice(findLastIndex, 0, student)
+                              emitter.emit('pushed_a_student__or__rechecktoPlay', student)
+                         } else if (findLast) {
+                              let studentCard = document.querySelector(`[barcode="${barcode}"]`)
+                              if(studentCard){
+                                   studentCard.classList.add('bx-fade-down')
+                                   setTimeout(() => {
+                                        studentCard.classList.remove('bx-fade-down')
+                                        
+                                   }, 2000);
+                              }
+                              emitter.emit('toaster-warning', { message: 'Already added in here'})
+                         }
+                    } else {
+                         student['start_ms'] = helper.miliseconds() - 1000
+                         student['end_ms'] = helper.miliseconds() + (10 * 1000)
+                         wattingList.value.unshift(student)                        
+                    } 
 
                     storage('wattingList').value = wattingList.value;
                }
@@ -150,11 +191,16 @@ watch(toggleSettings, getSchedules)
                <btn @click="toggleSettings = !toggleSettings" class="px-3 shadow me-2"><i class='bx bx-list-ul'></i></btn>
           </div>
           
-          <input id="BARCODE_INPUT" type="text" @keyup.enter="inputBarcode" class="form-control px-4 py-2 text-center py-1 shadow me-2" placeholder="Barcode receiver field">
+          <div class="relative w-100 me-2">
+               <EmergencyMode v-if="emergency_mode"></EmergencyMode>
+               <input id="BARCODE_INPUT" type="text" @keyup.enter="inputBarcode" class="form-control px-4 py-2 text-center py-1 shadow" placeholder="Barcode receiver field">
+          </div>
          
           <BarcodeScannigAnimation v-if="is_started_schedule" :scannig="is_started_schedule" class="me-1"  ></BarcodeScannigAnimation> 
           <Switch v-model="is_started_schedule" @click="checkSchedule" size="lg" yes="Started" no="Stopped" :bothVisible="false" class="me-2" ></Switch> 
      </div>
+
+     
 
 
 
@@ -316,7 +362,7 @@ watch(toggleSettings, getSchedules)
   justify-content: space-between;
 }
 .sections > div {
-  height: calc(100vh - 160px);
+  height: calc(100vh - 163px);
   border-radius: 10px;
   padding: 15px;
   background-color: rgba(255, 255, 255, 0.382);

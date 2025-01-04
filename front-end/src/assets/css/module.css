@@ -14,12 +14,12 @@ body {
 }
 
 :root{
-    --primaryColor: #9a7808;
+    --primaryColor: #f59928;
     --secondaryColor: #b26417;
     --borderColor: #d5fdd7;
-    --fontColor:#885c03;
-    --grad1: linear-gradient(90deg, rgba(180, 142, 37, 0.636) 0%, hsla(204, 95%, 77%, 1) 100%);
-    --grad2: linear-gradient(90deg, rgba(141, 208, 252, 0.348) 0%, rgba(223, 182, 246, 0.486) 100%);
-    --grad3: linear-gradient(90deg, #b28e17 0%, #d28d0cd6 100%);
+    --fontColor: #885c03;
+    --grad1: linear-gradient(90deg, rgba(180, 142, 37, .636) 0%, hsla(204, 95%, 77%, 1) 100%);
+    --grad2: linear-gradient(90deg, rgba(141, 208, 252, .348) 0%, rgba(223, 182, 246, .486) 100%);
+    --grad3: linear-gradient(90deg, #f59928 0%, #c18432 100%);
 }
 

@@ -50,12 +50,11 @@ onMounted(()=>{
 
 <style scoped>
 .madrasha-title {
-  background: linear-gradient(360deg, #9d6405c4 0%, #a56804 9%, #d931315e 50%, #16188f2e 100%);
-  color: yellow;
+  background: #f8f9fa;
+  color: #ff0;
   font-size: 17px;
-  text-shadow: 1px 2px 2px rgb(0, 0, 0);
+  text-shadow: 1px 2px 2px rgb(0,0,0);
   margin-right: 10px;
-  /* border-radius: 30px; */
   border-top-left-radius: 20px;
   border-top-right-radius: 20px;
 }
@@ -78,12 +77,12 @@ onMounted(()=>{
   position: relative;
 }
 
-.topnav a:active {
+.topnav a:not(.madrasha-title):active {
   background-color: #ffffffa7 !important;
   color: rgb(240, 237, 84);
 }
 
-.topnav a:hover {
+.topnav a:not(.madrasha-title):hover {
   background-color: #ffffff21;
   color: rgb(240, 237, 84);
 }

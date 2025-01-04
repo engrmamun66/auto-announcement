@@ -11,6 +11,9 @@ body{
     background: -webkit-var( --grad1);
     filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#DDB4F6", endColorstr="#8DD0FC", GradientType=1 );
 }
+body:not(.user-interacted) {
+    filter:  drop-shadow(2px 4px 6px black);
+}
 
 .page-contents{
     height: auto;
@@ -113,8 +116,9 @@ h6, .h6{
     background-color: #007bff;
 }
 
-kbd{
-   background-color: #3a3f48; 
+kbd {
+    background: var(--grad3);
+    display: inline-block;
 }
 
 .hl {

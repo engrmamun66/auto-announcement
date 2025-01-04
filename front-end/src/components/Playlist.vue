@@ -14,9 +14,10 @@
   const storage = inject('storage');
   const wattingList = inject('wattingList');
   const callbacks = inject('callbacks');
-  const stop_clear_and_reload = inject('stop_clear_and_reload');
+  const user_interacted = inject('user_interacted');
   const currentItem = ref(null);
   const audio = ref(null);
+  const is__playing = ref(false);
 
   watch(currentItem, (a, b)=>{
     storage('currentItem').value = a
@@ -24,21 +25,31 @@
   
  
   function findNextItem() {
-    return wattingList.value.find((item) => !item.is_called);
+    return wattingList.value.find((item) => {
+      let ms = helper.miliseconds()
+      let {start_ms, end_ms} = item
+      return (!item.is_called && ((ms >= start_ms && ms <= end_ms) || item['emergency_mode'] === true))
+    });
   }
   
  
   function playNext() {
 
-    callbacks.clearWattingList(1)
+    if(!user_interacted.value){
+      // console.log('user is not interacted');
+      return
+    }
+
+    is__playing.value = false
+
+    callbacks.clearWattingList()
 
 
     if (currentItem.value) {
       currentItem.value.is_called = true; 
       wattingList.value.forEach(item => {
         if(item.id === currentItem.value.id){
-            item.is_called = true;
-            item['call_exact_time'] = helper.miliseconds()
+            item.is_called = true; 
         }
       })
       storage('wattingList').value = wattingList.value
@@ -53,24 +64,25 @@
       if(soundSrc){
           audio.value.src = soundSrc;
           audio.value.play();
+          is__playing.value = true
       }
     } else {
       currentItem.value = null;  
     }
   }
   
-  watch(wattingList, () => {
-    playNext();
-  });
-  
+ 
 
   onMounted(() => {
-      console.log('playlist mounted');
-      playNext()
+    console.log('playlist mounted');
+    playNext()
 
-      emitter.on('pushed_a_student', ()=>{
-        console.log('asd pushed');
-        playNext()
+    emitter.off('pushed_a_student__or__rechecktoPlay')
+    emitter.on('pushed_a_student__or__rechecktoPlay', ()=>{
+        if(is__playing.value == false){
+          playNext()          
+        }
+        console.log('watching playlist...');
       })
   })
   </script>

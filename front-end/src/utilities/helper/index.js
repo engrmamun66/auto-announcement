@@ -41,6 +41,8 @@ const helper = {
               ) {
                 data = JSON.parse(data);
               }
+              if(data === 'true') return true
+              if(data === 'false') return false
               return data;
             }
           },
@@ -159,3 +161,5 @@ const helper = {
 }
 
 export default helper
+
+globalThis.storage = helper.localStorage
