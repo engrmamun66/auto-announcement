@@ -7,6 +7,7 @@ const sqlite3 = require("sqlite3").verbose();
 const multer = require("multer");
 const upload = multer({ dest: DIR + '/public/temp' });
 const config = require("./config");
+const webContents = require("./web-contents"); 
  
 /**
  * Classes
@@ -24,6 +25,7 @@ const Schedules = new schedules(DB.db)
 const app = express();
 app.use(express.json());
 app.use(express.static('public'));
+app.use(express.static('front-end'));
 // Enable CORS
 app.use(cors());
 
@@ -45,6 +47,12 @@ const audioUpload = multer({
       cb(new Error("Only audio files are allowed"), false);
     }
   },
+});
+
+
+const WEB_ROUTE = 'app' 
+app.get(`/${WEB_ROUTE}`, (req, res) => {   
+  res.send(webContents)
 });
 
 
@@ -130,6 +138,6 @@ const audioUpload = multer({
  
 
 app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+  console.log(`Server is running on http://localhost:${PORT}`); 
 });
 

@@ -1,7 +1,7 @@
 <template>
     <div class="topnav bg3" id="myTopnav">
         <a class="madrasha-title" href="#">
-            রাশাদ মহিলা মাদ্রাসা
+            <img ref="logoEl" id="LOGO" src="" style="width: 200px;">
         </a>
         <RouterLink :to="{name: 'home'}" :class="{'active': route.name === 'home'}"><i class='bx bxs-home'></i> Dashboard</RouterLink>
         <RouterLink :to="{name: 'students'}" :class="{'active': route.name === 'students'}"><i class='bx bxs-user'></i> Students</RouterLink>
@@ -21,9 +21,11 @@
 </template>
 
 <script setup>
-import { ref, inject } from 'vue';
+import { ref, inject, onMounted } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
 
+
+let logoEl = ref(null)
 let route = useRoute()
 let loggedIn = ref(false)
 
@@ -34,18 +36,28 @@ const isResponsive = ref(false);
 const toggleMenu = () => {
   isResponsive.value = !isResponsive.value;
 };
+
+onMounted(()=>{
+  if(typeof GLOBAL_DATA !== 'undefined'){
+    if(GLOBAL_DATA?.logo){
+      logoEl.value.src = GLOBAL_DATA.logo
+    }
+  }
+})
+
+
 </script>
 
 <style scoped>
 .madrasha-title {
-  background: linear-gradient(360deg, #002767b2 0%, #002767 9%, #316cd95e 50%, #16188f2e 100%);
-    color: yellow;
-    font-size: 17px;
-    text-shadow: 1px 2px 2px rgb(0, 0, 0);
-    margin-right: 10px;
-    /* border-radius: 30px; */
-    border-top-left-radius: 20px;
-    border-top-right-radius: 20px;
+  background: linear-gradient(360deg, #9d6405c4 0%, #a56804 9%, #d931315e 50%, #16188f2e 100%);
+  color: yellow;
+  font-size: 17px;
+  text-shadow: 1px 2px 2px rgb(0, 0, 0);
+  margin-right: 10px;
+  /* border-radius: 30px; */
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
 }
 
 .topnav {

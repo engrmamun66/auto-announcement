@@ -12,6 +12,17 @@ body{
     filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#DDB4F6", endColorstr="#8DD0FC", GradientType=1 );
 }
 
+.page-contents{
+    height: auto;
+    margin: 0px;
+    padding: 20px;
+    min-height: max-content;
+    background-image: url('../img/sound.png');
+    background-position: 60% -30%;
+    background-size: cover;
+    background-repeat: repeat-y;
+}
+
 .bg1{
     background-color: rgb(227 255 243 / 24%);
     background: var(--grad2);
@@ -318,12 +329,12 @@ input[type="checkbox"]{
     height: 0px;
   }
   ::-webkit-scrollbar-thumb {
-    background: #4f8df9;
+    background: var(--primaryColor);
     border: 0px none #ffffff;
     border-radius: 0px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #3877e4;
+    background: var(--primaryColor);
   }
   ::-webkit-scrollbar-thumb:active {
     background: #3877e4;

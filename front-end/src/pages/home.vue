@@ -25,7 +25,11 @@ const getSchedules = inject('getSchedules');
 const classes = inject('classes');
 const wattingList = inject('wattingList');
 
-let toggleSettings = ref(true)   
+let toggleSettings = inject('toggleSettings') 
+let refreshDOM = inject('refreshDOM') 
+
+
+
 
 let ttoout
 function inputBarcode(event){
@@ -55,7 +59,7 @@ function inputBarcode(event){
 function checkAndList(barcode='play-417-2024'){
      try {
 
-          if(!(/^[a-z_]+-\d{1,}-sound(1|2|3)/gi.test(barcode))){
+          if(!(/^[a-z_0-9]+-\d{1,}-sound(1|2|3)/gi.test(barcode))){
                emitter.emit('toaster-error', { message: 'Barcode is not valid', duration: 5000})
                return
           }
@@ -136,6 +140,11 @@ watch(toggleSettings, getSchedules)
 </script>
 
 <template>
+
+     <span v-if="refreshDOM" ></span>
+
+
+
      <div class="d-flex align-items-center bttt">
           <div class="togglerbtn">
                <btn @click="toggleSettings = !toggleSettings" class="px-3 shadow me-2"><i class='bx bx-list-ul'></i></btn>

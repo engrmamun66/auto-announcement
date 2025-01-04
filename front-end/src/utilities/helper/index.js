@@ -141,16 +141,21 @@ const helper = {
       return moment(dateObj).format('hh:mm A')
        
     },
-    ms_to_hour_minute: function(milliseconds = 23434) {
-      const totalMinutes = Math.floor(milliseconds / 60000); // Convert milliseconds to minutes
+    ms_to_hour_minute: function (milliseconds = 23434) {
+      const totalSeconds = Math.floor(milliseconds / 1000); // Convert milliseconds to seconds
+      const totalMinutes = Math.floor(totalSeconds / 60); // Convert seconds to minutes
       const hours = Math.floor(totalMinutes / 60); // Get the total hours
       const minutes = totalMinutes % 60; // Get the remaining minutes
-      let str = []
-      if(hours) str.push(hours + 'h')
-      if(minutes) str.push(minutes + 'm')
-
+      const seconds = totalSeconds % 60; // Get the remaining seconds
+    
+      let str = [];
+      if (hours) str.push(hours + 'h');
+      if (minutes) str.push(minutes + 'm');
+      if (seconds) str.push(seconds + 's');
+    
       return str.join(' ');
     }
+    
 }
 
 export default helper

@@ -23,6 +23,8 @@ let classes = ref([]);
 let wattingList = ref([])
 let punch_schedules = ref([])
 let call_schedules = ref([]) 
+let toggleSettings = ref(true) 
+let refreshDOM = ref(true) 
 
 provide('schedule_start_time', schedule_start_time)
 provide('is_started_schedule', is_started_schedule)
@@ -34,6 +36,8 @@ provide('speakText', speakText)
 provide('getSchedules', getSchedules)
 provide('punch_schedules', punch_schedules)
 provide('call_schedules', call_schedules) 
+provide('toggleSettings', toggleSettings) 
+provide('refreshDOM', refreshDOM) 
 
 
 let callbacks = {
@@ -124,7 +128,6 @@ let callbacks = {
         if(!wattingList.value?.length || !timesupCallSchedules.length) return        
         
         let newWaittinglist = wattingList.value.filter(item => {
-            console.log({item});
             if(item.is_called){
                 let ms = helper.miliseconds()
                 let max_ms = max_time_in_minute * 1000
@@ -144,8 +147,6 @@ let callbacks = {
 
             return true;
         })
-
-        console.log({newWaittinglist});
 
         wattingList.value = newWaittinglist
         storage('wattingList').value = newWaittinglist
@@ -276,11 +277,14 @@ onMounted(async ()=>{
     
     // checkAndStartAnnouncement() ----- automtically run from watch(is_started_schedule
   
- 
-    
+   
 
-    setInterval(getSchedules, 10 * 1000);
-    setInterval(focusBarcodeInput__and__startAnnoucement, 1000);
+
+    setInterval(()=>{
+        focusBarcodeInput__and__startAnnoucement()
+        refreshDOM.value = false
+        setTimeout(()=>refreshDOM.value = true, 0)
+    }, 1000);
 
     isMounted.value = true;
 })
@@ -299,17 +303,4 @@ onMounted(async ()=>{
     </div>
     
 </template>
-
-<style scoped>
-.page-contents{
-    height: auto;
-    margin: 0px;
-    padding: 20px;
-    min-height: max-content;
-    background: url(/src/assets/img/sound.png);
-    background-position: 60% -30%;
-    background-size: cover;
-    background-repeat: repeat-y;
-}
-</style>
-
+ 

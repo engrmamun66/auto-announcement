@@ -56,7 +56,7 @@ th{
 
 
 th:not(:last-child) { 
-  border-right: 4px solid #55bdf7;
+  border-right: 4px solid var(--borderColor);
 }
 th:nth-child(odd) {
   background: #e5f4fbc3; 
