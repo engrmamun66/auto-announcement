@@ -10,12 +10,13 @@
  .blink-container {
   position: absolute;
   left: 3px;
+  opacity: 0.8;
 }
 
 .led-box {
   height: 30px;
   width: 30px;
-  margin: 10px 0;
+  margin: 2px 0;
   float: left;
 }
 
@@ -27,66 +28,14 @@
 
 .led-red {
   margin: 0 auto;
-  width: 24px;
-  height: 24px;
+  width: 38px;
+  height: 38px;
   background-color: #f00;
-  border-radius: 50%;
-  box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #441313 0 -1px 9px, rgba(255, 0, 0, 0.5) 0 2px 12px; 
+  border-radius: 5px; 
+  box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #4e0f0f 0 -1px 9px, rgba(255, 0, 0, 0.5) 0 2px 12px; 
   animation: blinkRed 0.5s infinite;
 }
-
-@-webkit-keyframes blinkRed {
-  from {
-    background-color: #f00;
-  }
-  50% {
-    background-color: #a00;
-    box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #441313 0 -1px 9px,
-      rgba(255, 0, 0, 0.5) 0 2px 0;
-  }
-  to {
-    background-color: #f00;
-  }
-}
-@-moz-keyframes blinkRed {
-  from {
-    background-color: #f00;
-  }
-  50% {
-    background-color: #a00;
-    box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #441313 0 -1px 9px,
-      rgba(255, 0, 0, 0.5) 0 2px 0;
-  }
-  to {
-    background-color: #f00;
-  }
-}
-@-ms-keyframes blinkRed {
-  from {
-    background-color: #f00;
-  }
-  50% {
-    background-color: #a00;
-    box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #441313 0 -1px 9px,
-      rgba(255, 0, 0, 0.5) 0 2px 0;
-  }
-  to {
-    background-color: #f00;
-  }
-}
-@-o-keyframes blinkRed {
-  from {
-    background-color: #f00;
-  }
-  50% {
-    background-color: #a00;
-    box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #441313 0 -1px 9px,
-      rgba(255, 0, 0, 0.5) 0 2px 0;
-  }
-  to {
-    background-color: #f00;
-  }
-}
+ 
 @keyframes blinkRed {
   from {
     background-color: #f00;
@@ -100,19 +49,7 @@
     background-color: #f00;
   }
 }
-  
-
-.led-green {
-  margin: 0 auto;
-  width: 24px;
-  height: 24px;
-  background-color: #abff00;
-  border-radius: 50%;
-  box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #304701 0 -1px 9px,
-    #89ff00 0 2px 12px;
-}
-
- 
+   
 
 
 </style>
