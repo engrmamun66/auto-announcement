@@ -193,7 +193,7 @@ watch(toggleSettings, getSchedules)
           
           <div class="relative w-100 me-2">
                <EmergencyMode v-if="emergency_mode"></EmergencyMode>
-               <input id="BARCODE_INPUT" type="text" @keyup.enter="inputBarcode" class="form-control px-4 py-2 text-center py-1 shadow" placeholder="Barcode receiver field">
+               <input id="BARCODE_INPUT" type="text" @keyup.enter="inputBarcode" class="form-control px-4 py-2 text-center py-1 shadow" :placeholder="emergency_mode ? 'Emergency mode activated' : 'Barcode receiver field'">
           </div>
          
           <BarcodeScannigAnimation v-if="is_started_schedule" :scannig="is_started_schedule" class="me-1"  ></BarcodeScannigAnimation> 
