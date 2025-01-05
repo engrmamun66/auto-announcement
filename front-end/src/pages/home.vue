@@ -236,7 +236,7 @@ onMounted(()=>{
                                    <template v-for="(item, i) in callbacks.running_punch_schedules()">
                                         <li class="mb-2" >                    
                                              <h3> 
-                                                  {{ item.title }}  
+                                                  {{ helper.ucfirst(item?.title) }}
                                              </h3>
                                              <p> 
                                                   {{ helper.formatTime(item.start_time) }} - {{ helper.formatTime(item.end_time) }}
@@ -250,18 +250,18 @@ onMounted(()=>{
                               </template>
                               <!-- Incomming puch -->
                               <template v-if="callbacks.incoming_punch_schedules().length">                                    
-                                   <h4 class="p-2 border3 radius-5 my-2 shadow me-1" style="background:var(--grad1)">Incoming...</h4>
+                                   <h4 class="p-2 border3 radius-5 my-2 shadow me-1" style="background:var(--grad1)">Incoming punch...</h4>
                                    <template v-for="item in callbacks.incoming_punch_schedules()">
                                         <li class="mb-0" >                    
                                              <h4> 
-                                                  {{ item?.title }}  <kbd v-if="item.incoming_time"> {{ helper.ms_to_hour_minute(item.incoming_time) }} </kbd>
+                                                  {{ helper.ucfirst(item?.title) }}  <kbd v-if="item.incoming_time" > {{ helper.ms_to_hour_minute(item.incoming_time) }} </kbd>
                                              </h4>
                                              <p> 
                                                   {{ helper.formatTime(item.start_time) }} - {{ helper.formatTime(item.end_time) }}
                                              </p>
-                                             <!-- <div class="d-flex flex-wrap">
-                                                  <p class="m-1 p-1 border3 radius-5" v-for="cls in item.classes">{{ cls.class_short }}</p>
-                                             </div>                                     -->
+                                             <div class="d-flex flex-wrap mb-3">
+                                                  <span class="m-1" >{{ item.classes.map(cls => helper.ucfirst(cls.class_short)).join(', ') }}</span>
+                                             </div> 
                                         </li>
                                         <!-- <li class="text-center text-black-50">No schedule at now</li> -->
                                    </template> 
@@ -272,7 +272,7 @@ onMounted(()=>{
                                   <template v-for="item in callbacks.timesup_punch_schedules()">
                                          <li class="mb-0" >                    
                                               <h4> 
-                                                   {{ item?.title }} 
+                                                  {{ helper.ucfirst(item?.title) }}
                                               </h4>
                                               <p> 
                                                    {{ helper.formatTime(item.start_time) }} - {{ helper.formatTime(item.end_time) }}
@@ -291,7 +291,7 @@ onMounted(()=>{
                                    <template v-for="(item, i) in callbacks.running_call_schedules()">
                                         <li class="mb-2" >                    
                                              <h3> 
-                                                  {{ item.title }}
+                                                  {{ helper.ucfirst(item?.title) }}
                                              </h3>
                                              <p> 
                                                   {{ helper.formatTime(item.start_time) }} - {{ helper.formatTime(item.end_time) }}
@@ -305,19 +305,19 @@ onMounted(()=>{
                               </template>
                               <!-- Incomming call -->
                               <template v-if="callbacks.incoming_call_schedules().length">
-                                   <h4 class="p-2 border3 radius-5 my-2 shadow me-1" style="background:var(--grad1)">Incoming...</h4>
+                                   <h4 class="p-2 border3 radius-5 my-2 shadow me-1" style="background:var(--grad1)">Incoming call...</h4>
                                    <template v-for="item in callbacks.incoming_call_schedules()">
-                                         <li class="mb-0" >                    
-                                              <h4> 
-                                                   {{ item?.title }}  <kbd v-if="item.incoming_time"> {{ helper.ms_to_hour_minute(item.incoming_time) }} </kbd>
-                                              </h4>
-                                              <p> 
-                                                   {{ helper.formatTime(item.start_time) }} - {{ helper.formatTime(item.end_time) }}
-                                              </p>
-                                              <!-- <div class="d-flex flex-wrap">
-                                                   <p class="m-1 p-1 border3 radius-5" v-for="cls in item.classes">{{ cls.class_short }}</p>
-                                              </div>                                     -->
-                                         </li>
+                                        <li class="mb-0" >                    
+                                             <h4> 
+                                                  {{ helper.ucfirst(item?.title) }}  <kbd v-if="item.incoming_time" > {{ helper.ms_to_hour_minute(item.incoming_time) }} </kbd>
+                                             </h4>
+                                             <p> 
+                                                  {{ helper.formatTime(item.start_time) }} - {{ helper.formatTime(item.end_time) }}
+                                             </p>
+                                             <div class="d-flex flex-wrap mb-3" v-show="!item?.__hideClasses">
+                                                  <span class="m-1" >{{ item.classes.map(cls => helper.ucfirst(cls.class_short)).join(', ') }}</span>
+                                             </div> 
+                                        </li>
                                          <!-- <li class="text-center text-black-50">No schedule at now</li> -->
                                     </template>
                               </template>
@@ -327,7 +327,7 @@ onMounted(()=>{
                                   <template v-for="item in callbacks.timesup_punch_schedules()">
                                          <li class="mb-0" >                    
                                               <h4> 
-                                                   {{ item?.title }} 
+                                                   {{ helper.ucfirst(item?.title) }} 
                                               </h4>
                                               <p> 
                                                    {{ helper.formatTime(item.start_time) }} - {{ helper.formatTime(item.end_time) }}
