@@ -129,24 +129,31 @@ class Schedules {
             "id": 6,
             "type": 1,
             "title": " puch test",
-            "start_time": "18:10",
+            "start_time": "5:10",
             "end_time": "23:00",
             "classes": JSON.stringify([ play, nursery ]), 
         }) 
+
+        let D = new Date()
+        let H = D.getHours()
+        let M = D.getMinutes()
+        let pad2 = (n) => String(n).padStart(2, '0')
+
+
         data.push({
             "id": 6,
             "type": 2,
             "title": " call test - 2",
-            "start_time": "15:48",
-            "end_time": "15:49",
+            "start_time": `${pad2(H)}:${pad2(M + 1)}`,
+            "end_time": `${pad2(H)}:${pad2(M + 2)}`,
             "classes": JSON.stringify([ play ]), 
         }) 
         data.push({
             "id": 6,
             "type": 2,
             "title": " call test - 1",
-            "start_time": "15:50",
-            "end_time": "15:51",
+            "start_time": `${pad2(H)}:${pad2(M + 4)}`,
+            "end_time": `${pad2(H)}:${pad2(M + 5)}`,
             "classes": JSON.stringify([ nursery ]), 
         }) 
 
