@@ -83,7 +83,7 @@ function checkAndList(barcode='play-417-2024'){
                let isAllowed = callbacks.isMatchedAnySchedule(class_short)
              
                if(!isAllowed){
-                    emitter.emit('toaster-error', { message: 'Not matched with any punch schedule'})
+                    emitter.emit('toaster-error', { message: 'Punch schedule not started'})
                     return
                }
                let targetClass = classes.value.filter(cls => cls.class_short == class_short)?.[0];
@@ -242,7 +242,7 @@ onMounted(()=>{
                                                   {{ helper.formatTime(item.start_time) }} - {{ helper.formatTime(item.end_time) }}
                                              </p>
                                         <div class="d-flex flex-wrap">
-                                             <p class="m-1 p-1 border3 radius-5" v-for="cls in item.classes">{{ cls.class_short }}</p>
+                                             <p class="m-1 p-1 border3 radius-5" v-for="cls in item.classes">{{ helper.ucfirst(cls.class_short) }}</p>
                                         </div>                                    
                                         </li>
 
@@ -254,7 +254,7 @@ onMounted(()=>{
                                    <template v-for="item in callbacks.incoming_punch_schedules()">
                                         <li class="mb-0" >                    
                                              <h4> 
-                                                  {{ item?.title }}  <kbd> {{ helper.ms_to_hour_minute(item.incoming_time) }} </kbd>
+                                                  {{ item?.title }}  <kbd v-if="item.incoming_time"> {{ helper.ms_to_hour_minute(item.incoming_time) }} </kbd>
                                              </h4>
                                              <p> 
                                                   {{ helper.formatTime(item.start_time) }} - {{ helper.formatTime(item.end_time) }}
@@ -309,7 +309,7 @@ onMounted(()=>{
                                    <template v-for="item in callbacks.incoming_call_schedules()">
                                          <li class="mb-0" >                    
                                               <h4> 
-                                                   {{ item?.title }}  <kbd> {{ helper.ms_to_hour_minute(item.incoming_time) }} </kbd>
+                                                   {{ item?.title }}  <kbd v-if="item.incoming_time"> {{ helper.ms_to_hour_minute(item.incoming_time) }} </kbd>
                                               </h4>
                                               <p> 
                                                    {{ helper.formatTime(item.start_time) }} - {{ helper.formatTime(item.end_time) }}

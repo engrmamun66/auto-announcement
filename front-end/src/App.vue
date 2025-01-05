@@ -214,7 +214,7 @@ async function getSchedules(){
 
 }
 
-onMounted(async ()=>{ 
+onMounted(async ()=>{  
 
     await getSchedules()
 
@@ -232,7 +232,7 @@ onMounted(async ()=>{
     })
     clearTimeout(schedule_timeout.value)
     classes.value = storage('classes').value || classes.value
-    wattingList.value = storage('wattingList').value || wattingList.value 
+    wattingList.value = storage('wattingList').value || []
     is_started_schedule.value = storage('is_started_schedule').value || is_started_schedule.value 
     emergency_mode.value = Boolean(storage('emergency_mode').value)
  

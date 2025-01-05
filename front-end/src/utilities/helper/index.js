@@ -156,6 +156,11 @@ const helper = {
       if (seconds) str.push(seconds + 's');
     
       return str.join(' ');
+    },
+    ucfirst: (str) => {
+      if(!str) return ''
+      str = String(str);
+      return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()
     }
     
 }

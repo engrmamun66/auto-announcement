@@ -12,7 +12,7 @@ body{
     filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#DDB4F6", endColorstr="#8DD0FC", GradientType=1 );
 }
 body:not(.user-interacted) {
-    filter:  drop-shadow(2px 4px 6px black);
+    /* filter:  drop-shadow(2px 4px 6px black); */
 }
 
 .page-contents{

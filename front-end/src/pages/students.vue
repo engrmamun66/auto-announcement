@@ -298,7 +298,7 @@ onMounted(()=>{
                 <th>Dakhela</th>
                 <th>Year</th>
                 <th>Sound</th>
-                <th>Sound-2</th>
+                <!-- <th>Sound-2</th> -->
                 <th>Status</th>
                 <th>Action</th> 
               </tr>
@@ -312,7 +312,7 @@ onMounted(()=>{
                   <td class="text-left">{{ std.name }}</td>
                   <td> {{ std.dakhela }} </td> 
                   <td> {{ std.year }} </td> 
-                  <template v-for="column in ['sound1', 'sound2']">
+                  <template v-for="column in ['sound1']">
                     <td> 
                       <!-- Sound -->
                       <template v-if="std[column]">            

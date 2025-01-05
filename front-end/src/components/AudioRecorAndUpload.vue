@@ -7,6 +7,7 @@
         <audio v-if="audioUrl" ref="audioPlayer" v-show="false" :src="audioUrl" controls></audio>
 
         <div class="container">
+          <label class="text-center w-100">{{ student.name }}</label>
             <div class="player">
                 <div class="header-player">
                     <div class="audio-record">
@@ -54,7 +55,7 @@
   </template>
   
   <script setup>
-  import { computed, inject, ref, watch } from 'vue'
+  import { computed, inject, ref, watch, onMounted } from 'vue'
   import RecordRTC from 'recordrtc'
   let audioPlayer = ref(null)
   import Btn from './Btn.vue'
@@ -175,7 +176,11 @@ async function uploadNow(){
   }) 
 }
 
-  </script>
+onMounted(()=>{
+  startRecording()
+})
+
+</script>
   
 
 <style scoped>
