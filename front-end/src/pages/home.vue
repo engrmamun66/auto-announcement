@@ -14,6 +14,8 @@ import helper from '../utilities/helper';
 
 
  
+const route = inject('route');
+const router = inject('router');
 const emitter = inject('emitter');
 const storage = inject('storage');
 const http = inject('http');
@@ -105,9 +107,15 @@ function checkAndList(barcode='play-417-2024'){
                   
 
                    
-                    if(!student[student['soundColName']]){
-                         emitter.emit('toaster-error', { message: `Sound not added for this student. <i><a href="http://localhost:3006/#/students?dakhela=${student.dakhela}" target="_blank" >Add</a></i>`, duration: 10000})
-                         speakText(student.name + ', her voice is not added yet')
+                    if(!student[student['soundColName']]){ 
+                         emitter.emit('toaster-error', { message: `Sound not added for this student`, duration: 10000})
+                         speakText('voice is not added')
+                    
+                         router.push({name: 'students', query: {
+                              dakhela: student.dakhela,
+                              barcode,
+                         }})
+                         return
                     }
 
                    
@@ -177,6 +185,15 @@ function checkSchedule(){
 let tab = ref(1)
 watch(tab, getSchedules)
 watch(toggleSettings, getSchedules)
+
+onMounted(()=>{
+     if(route.query.barcode){
+          checkAndList(route.query.barcode)
+          setTimeout(() => {
+               router.push({name: 'home'})
+          }, 100);
+     }
+})
 
 </script>
 

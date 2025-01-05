@@ -27,6 +27,8 @@ let isMounted = ref(false)
 let user_interacted = ref(false)
 let emergency_mode = ref(false)
  
+provide('route', route)
+provide('router', router)
 provide('is_started_schedule', is_started_schedule)
 provide('schedule_timeout', schedule_timeout)
 provide('classes', classes)

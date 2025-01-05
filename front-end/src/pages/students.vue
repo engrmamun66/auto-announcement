@@ -14,9 +14,9 @@ import Player from '../components/Player.vue'
 import AudioRecorAndUpload from '../components/AudioRecorAndUpload.vue'
 import RecoringAnimation from '../components/RecoringAnimation.vue'
 
-let route = useRoute()
-let router = useRouter()
- 
+
+const route = inject('route');
+const router = inject('router');
 const emitter = inject('emitter');
 const printDiv = inject('printDiv');
 const makeCarcode = inject('makeCarcode');
@@ -381,6 +381,9 @@ onMounted(()=>{
             params.page = page
             getStudents()
           }" ></Pagination>
+       </div> 
+       <div v-if="route.query.barcode" class="d-flex justify-content-center mt-3 ">
+          <router-link :to="{name: 'home', query: {barcode: route.query.barcode}}" class="bg1 border2 radius-5 text-center text-black-50" style="width: 200px">Back And Push Barcode</router-link>
        </div> 
 
     </template>
