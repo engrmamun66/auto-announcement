@@ -126,8 +126,10 @@ function checkAndList(barcode='play-417-2024'){
                     
                     if(!emergency_mode.value){
                          const { running_call_schedules, incoming_call_schedules  } = callbacks
-                         let rs = running_call_schedules()
-                         let is = incoming_call_schedules()
+                         let rs = running_call_schedules(student['class_short'])
+                         let is = incoming_call_schedules(student['class_short'])
+
+                         console.log(student);
                          
                          if(rs.length){
                               student['start_ms'] = rs[0].start_ms
@@ -350,7 +352,9 @@ onMounted(()=>{
                               <div class="student-box" :class="{'is_called': student.is_called}" :barcode="student?.barcode" >
                                    <div :class="{ 'bg_animation': student?.isPlaying }">
                                         <div class="student-name">{{ student.name }}</div>
-                                        <div class="class-name">
+                                        <div class="class-name" @click="()=>{
+                                             console.log(student);
+                                        }">
                                              {{ student.class }} [{{ student.dakhela }}]
                                         </div>
                                        <div class="icons"> 

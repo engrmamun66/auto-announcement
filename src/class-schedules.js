@@ -116,6 +116,7 @@ class Schedules {
 
       /**  */ 
 
+      // if(true){
       if(false){
         
         data = []
@@ -152,8 +153,8 @@ class Schedules {
             "id": 6,
             "type": 2,
             "title": " call test - 1",
-            "start_time": `${pad2(H)}:${pad2(M + 4)}`,
-            "end_time": `${pad2(H)}:${pad2(M + 5)}`,
+            "start_time": `${pad2(H)}:${pad2(M + 2)}`,
+            "end_time": `${pad2(H)}:${pad2(M + 3)}`,
             "classes": JSON.stringify([ nursery ]), 
         }) 
 

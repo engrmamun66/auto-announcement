@@ -56,22 +56,25 @@ let callbacks = {
         })   
         return Boolean(founds.length)
     },
-    running_punch_schedules(){        
+    running_punch_schedules(class_short=null){        
       
         let ms = helper.miliseconds()
         let founds = punch_schedules.value.filter(schedule => {
             let { start_ms, end_ms } = schedule
             return (ms >= start_ms && ms <= end_ms)
-        })       
+        })      
+        if(class_short) return founds.filter(cls => cls.class_shorts.includes(class_short))   
         return founds
     },
-    running_call_schedules(){        
+    running_call_schedules(class_short=null){        
       
         let ms = helper.miliseconds()
         let founds = call_schedules.value.filter(schedule => {
             let { start_ms, end_ms } = schedule
             return (ms >= start_ms && ms <= end_ms)
-        })       
+           
+        })     
+        if(class_short) return founds.filter(cls => cls.class_shorts.includes(class_short))  
         return founds
     },
     incoming_punch_schedules(){        
@@ -88,7 +91,7 @@ let callbacks = {
         
         return data.filter(s => s.incoming_time != -1)
     },
-    incoming_call_schedules(){        
+    incoming_call_schedules(class_short=null){        
       
         let ms = helper.miliseconds()
         let data = helper.clone(call_schedules.value)
@@ -96,11 +99,15 @@ let callbacks = {
             let { start_ms } = schedule
             schedule['incoming_time'] = (ms < start_ms) ? start_ms - ms : -1
         })
-        data.sort((a, b) => {
+        data = data.toSorted((a, b) => {
             return a['incoming_time'] - b['incoming_time']
         })    
         
-        return data.filter(s => s.incoming_time != -1)
+        data = data.filter(s => s.incoming_time != -1)
+
+        if(class_short) return data.filter(cls => cls.class_shorts.includes(class_short)) 
+
+        return data
     },
     timesup_punch_schedules(){       
       
@@ -109,7 +116,7 @@ let callbacks = {
             let { end_ms } = schedule
             return ms > end_ms
         }))
-        data.sort((a, b) => {
+        data = data.toSorted((a, b) => {
             return a.start_ms - b.start_ms
         })
         return data;
