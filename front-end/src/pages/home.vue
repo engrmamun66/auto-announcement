@@ -14,6 +14,7 @@ import helper from '../utilities/helper';
 
 
  
+const SOCKET = inject('SOCKET');
 const route = inject('route');
 const router = inject('router');
 const emitter = inject('emitter');
@@ -24,6 +25,7 @@ const stop_clear_and_reload = inject('stop_clear_and_reload');
 const speakText = inject('speakText');
 const callbacks = inject('callbacks');
 const getSchedules = inject('getSchedules');
+const pushTheBarcode = inject('pushTheBarcode');
 
 const classes = inject('classes');
 const wattingList = inject('wattingList');
@@ -36,141 +38,25 @@ let emergency_mode = inject('emergency_mode')
 
 
 
+
+
 let ttoout
 function inputBarcode(event){
      clearTimeout(ttoout)
 
      ttoout = setTimeout(() => {          
         
-          if(!is_started_schedule.value){
-               emitter.emit('toaster-error', { message: 'Schedule not started'})
-               return
-          }
+          
           let barcode = event.target.value;
           if(barcode){
-               checkAndList(barcode)
+               pushTheBarcode(barcode)
                setTimeout(() => {
                     event.target.value = ''
                }, 300);
           }
      }, 10);
 }
-
-/**
- * 
- * student['is_called']
- */
-
-function checkAndList(barcode='play-417-2024'){
-     try {
-          if(barcode == 'i' || barcode == 'I'){
-               emergency_mode.value = !emergency_mode.value
-               return
-          }
-
-          if(!emergency_mode.value){
-               if(!(/^[a-z_0-9]+-\d{1,}-sound(1|2|3)/gi.test(barcode))){
-                    emitter.emit('toaster-error', { message: 'Barcode is not valid', duration: 5000})
-                    return
-               }
-          }
-
-
-          let [ class_short ] = barcode.split('-') // nursary-23-sound1-2024
-
-                    
-          if(!emergency_mode.value){
-               let isAllowed = callbacks.isMatchedAnySchedule(class_short)
-             
-               if(!isAllowed){
-                    emitter.emit('toaster-error', { message: 'Punch schedule not started'})
-                    return
-               }
-               let targetClass = classes.value.filter(cls => cls.class_short == class_short)?.[0];
-               if(!targetClass?.isActive){
-                    emitter.emit('toaster-error', { message: 'This class is inactive now'})
-                    return
-               }
-          }
-
-
-
-
-          http.get('/single-student', { params: { barcode } }).then(response => {
-               if(response.status == 200){
-                    let student = response.data.data;
-                    student['barcode'] = barcode;
-                    student['puch_exact_time'] = helper.miliseconds();
-
-                    let findLast = wattingList.value.findLast(s => s.id == student.id)
-                    let findLastIndex = wattingList.value.findLastIndex(s => s.id == student.id)
-                  
-
-                   
-                    if(!student[student['soundColName']]){ 
-                         emitter.emit('toaster-error', { message: `Sound not added for this student`, duration: 10000})
-                         speakText('voice is not added')
-                    
-                         router.push({name: 'students', query: {
-                              dakhela: student.dakhela,
-                              barcode,
-                         }})
-                         return
-                    }
-
-                   
-
-
-                    
-                    student['emergency_mode'] = emergency_mode.value
-                    
-                    if(!emergency_mode.value){
-                         const { running_call_schedules, incoming_call_schedules  } = callbacks
-                         let rs = running_call_schedules(student['class_short'])
-                         let is = incoming_call_schedules(student['class_short'])
-
-                         console.log(student);
-                         
-                         if(rs.length){
-                              student['start_ms'] = rs[0].start_ms
-                              student['end_ms'] = rs[0].end_ms
-                         } else {
-                              student['start_ms'] = is[0].start_ms
-                              student['end_ms'] = is[0].end_ms
-                         } 
-
-                         // ----
-                         if(!findLast){
-                              wattingList.value.push(student)
-                              emitter.emit('pushed_a_student__or__rechecktoPlay', student)
-                         }
-                         else if(findLast && findLast?.is_called){
-                              wattingList.value.splice(findLastIndex, 0, student)
-                              emitter.emit('pushed_a_student__or__rechecktoPlay', student)
-                         } else if (findLast) {
-                              let studentCard = document.querySelector(`[barcode="${barcode}"]`)
-                              if(studentCard){
-                                   studentCard.classList.add('bx-fade-down')
-                                   setTimeout(() => {
-                                        studentCard.classList.remove('bx-fade-down')
-                                        
-                                   }, 2000);
-                              }
-                              emitter.emit('toaster-warning', { message: 'Already added in here'})
-                         }
-                    } else {
-                         student['start_ms'] = helper.miliseconds() - 1000
-                         student['end_ms'] = helper.miliseconds() + (10 * 1000)
-                         wattingList.value.unshift(student)                        
-                    } 
-
-                    storage('wattingList').value = wattingList.value;
-               }
-          })
-     } catch (error) {
-          console.warn('checkAndList_error::', error);
-     }
-}
+ 
 
  
 function checkSchedule(){   
@@ -189,8 +75,17 @@ watch(tab, getSchedules)
 watch(toggleSettings, getSchedules)
 
 onMounted(()=>{
+
+     emitter.on('on_socket_message', ({barcode}) => {
+          if(barcode){
+               console.log({barcode});
+               pushTheBarcode(barcode)
+          }
+     })
+
+
      if(route.query.barcode){
-          checkAndList(route.query.barcode)
+          pushTheBarcode(route.query.barcode)
           setTimeout(() => {
                router.push({name: 'home'})
           }, 100);

@@ -6,6 +6,10 @@ import { send_css_in_header, minified_css } from './minified-css';
 import { emitter, utils } from './import-hub';
 import moment from 'moment/moment';
 import { router } from './routes/index';
+import { socketInit } from '../socket';
+
+
+const SOCKET = socketInit({emitter})
 
  
 // send_css_in_header(minified_css);
@@ -58,6 +62,7 @@ async function mountTheApp(){
         app_div.style.display = 'none';
         document.body.append(app_div);
         app
+        .provide('SOCKET', SOCKET)
         .provide('http', utils.http)
         .provide('helper', utils.helper)
         .provide('cookie', utils.cookie)
