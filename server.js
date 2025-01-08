@@ -59,26 +59,28 @@ app.get(`/${WEB_ROUTE}`, (req, res) => {
   res.send(webContents)
 });
 
-app.post(`/card-punch`, (req, res) => {   
-  const barcode = req.body.barcode;
 
-  // Notify WebSocket clients
-  if (global.socketServer) {
-    global.socketServer.clients.forEach((client) => {
-      if (client.readyState === client.OPEN) {
-        client.send(JSON.stringify({ barcode }));
-      }
-    });
-  } else {
-    res.status(420).send({ success: false, message: "Socket server not runnig" });
-  }
-
-  res.status(200).send({ success: true, message: "Card data processed." });
-
-});
 
 
 ['/api'].forEach(prefix => {  
+
+  app.post(prefix + `/card-punch`, (req, res) => {   
+    const barcode = req.body.barcode;
+  
+    // Notify WebSocket clients
+    if (global.socketServer) {
+      global.socketServer.clients.forEach((client) => {
+        if (client.readyState === client.OPEN) {
+          client.send(JSON.stringify({ barcode }));
+        }
+      });
+    } else {
+      res.status(420).send({ success: false, message: "Socket server not runnig" });
+    }
+  
+    res.status(200).send({ success: true, message: "Card data processed." });
+  
+  });
 
   app.get(prefix + "/config", (req, res) => {   
     
