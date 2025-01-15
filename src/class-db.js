@@ -9,6 +9,7 @@ class myDB {
         this.DB_ROOT_FOLDER = DB_ROOT_FOLDER;
         this.db = this._createDatabase(); 
         this._createTables(this.db);
+        // this._addColumn('students', 'card_no')
     }
 
     _createDatabase(){
@@ -46,8 +47,8 @@ class myDB {
                     dakhela INTEGER NOT NULL,
                     class TEXT NOT NULL,
                     class_short TEXT NOT NULL,
-                    year TEXT DEFAULT NULL,
-                    status INTEGER DEFAULT 1,
+                    card_no VARCHAR(255) DEFAULT NULL,
+                    year TEXT DEFAULT NULL,                    status INTEGER DEFAULT 1,
                     sound1 TEXT DEFAULT NULL,
                     sound2 TEXT DEFAULT NULL,
                     sound3 TEXT DEFAULT NULL,
@@ -83,7 +84,18 @@ class myDB {
         }
     }
 
-    _addColumn(tableName, columnName, { defaultVal = undefined, }={}){ this.db.run(
+    /**
+     * examples:
+     * ================
+      ALTER TABLE users
+      ADD age INT;
+
+
+      ALTER TABLE users
+      ADD age INT NOT NULL DEFAULT 0;
+
+     */
+    _addColumn(tableName, columnName, { defaultVal = undefined, _null=true }={}){ this.db.run(
             `   ALTER TABLE ${tableName}
                 ADD COLUMN ${columnName} VARCHAR ${defaultVal != undefined ? ('DEFAULT ' + defaultVal) : ''} CONSTRAINT ${columnName + '_addColumn_constraint'} 
                 ;

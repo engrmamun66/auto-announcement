@@ -144,13 +144,13 @@ class Students {
       });
   
       const insertQuery = `
-        INSERT INTO students (name,	dakhela, class, class_short, year, status, sound1, sound2, sound3)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO students (name, card_no,	dakhela, class, class_short, year, status, sound1, sound2, sound3)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
   
       const updateQuery = `
         UPDATE students
-        SET name = ?, dakhela = ?, class = ?, class_short = ?, year = ?, status = ?, sound1 = ?, sound2 = ?, sound3 = ?
+        SET name = ?, card_no = ?, dakhela = ?, class = ?, class_short = ?, year = ?, status = ?, sound1 = ?, sound2 = ?, sound3 = ?
         WHERE id = ?
       `;
   
@@ -174,13 +174,13 @@ class Students {
             return;
           }
   
-          const [id, name, dakhela, className, , year, status, sound1, sound2, sound3] = row;
+          const [id, name, card_no, dakhela, className, , year, status, sound1, sound2, sound3] = row;
   
           if (id) {
             // If `id` is provided, update the row
             this.db.run(
               updateQuery,
-              [name, dakhela, className, utils.getClassShort(className) || '--', year, status || 1, sound1 || null, sound2 || null, sound3 || null, id],
+              [name, card_no, dakhela, className, utils.getClassShort(className) || '--', year, status || 1, sound1 || null, sound2 || null, sound3 || null, id],
               (err) => {
                 if (err) {
                   console.error(`Error updating data with ID ${id}:`, err);
@@ -201,7 +201,7 @@ class Students {
                 // Update the existing row
                 this.db.run(
                   updateQuery,
-                  [name, dakhela, className, utils.getClassShort(className), year, status || 1, sound1 || null, sound2 || null, sound3 || null, existingRow.id],
+                  [name, card_no, dakhela, className, utils.getClassShort(className), year, status || 1, sound1 || null, sound2 || null, sound3 || null, existingRow.id],
                   (err) => {
                     if (err) {
                       console.error(`Error updating data for dakhela: ${dakhela}, class: ${className}, year: ${year}:`, err);
@@ -213,7 +213,7 @@ class Students {
                 // Insert a new row
                 this.db.run(
                   insertQuery,
-                  [name, dakhela, className, utils.getClassShort(className), year, status || 1, sound1 || null, sound2 || null, sound3 || null],
+                  [name, card_no, dakhela, className, utils.getClassShort(className), year, status || 1, sound1 || null, sound2 || null, sound3 || null],
                   (err) => {
                     if (err) {
                       console.error("Error inserting data:", err);
@@ -399,7 +399,7 @@ class Students {
   }
 
   addStudent(req, res) {
-    const { class: className, name, dakhela, year } = req.body;
+    const { class: className, name, dakhela, year, card_no } = req.body;
   
     const class_short = utils.getClassShort(className);
   
@@ -411,11 +411,11 @@ class Students {
     const tableName = this.tableName;
   
     const query = `
-      INSERT INTO ${tableName} (class, name, class_short, dakhela, year)
-      VALUES (?, ?, ?, ?, ?)
+      INSERT INTO ${tableName} (class, name, class_short, dakhela, year, card_no)
+      VALUES (?, ?, ?, ?, ?, ?)
     `;
   
-    const params = [className, name, class_short, dakhela, year || null];
+    const params = [className, name, class_short, dakhela, year || null, card_no];
   
     const db = this.db; // Capture `this.db` reference
   
@@ -446,6 +446,67 @@ class Students {
       });
     });
   }
+
+  updateStudent(req, res) {
+
+    const { id, class: className, name, dakhela, year, card_no } = req.body;
+  
+    if (!id) {
+      res.status(400).send({ error: "Student ID is required for updating." });
+      return;
+    }
+  
+    const class_short = utils.getClassShort(className);
+  
+    if (!className || !name || !class_short || !dakhela) {
+      res.status(400).send({ error: "All fields (id, class, name, class_short, dakhela, year, card_no) are required." });
+      return;
+    }
+  
+    const tableName = this.tableName;
+  
+    const query = `
+      UPDATE ${tableName}
+      SET class = ?, name = ?, class_short = ?, dakhela = ?, year = ?, card_no = ?
+      WHERE id = ?
+    `;
+  
+    const params = [className, name, class_short, dakhela, year || null, card_no, id];
+  
+    const db = this.db; // Capture `this.db` reference
+  
+    db.run(query, params, function (err) {
+      if (err) {
+        res.status(500).send({ error: err.message });
+        return;
+      }
+  
+      if (this.changes === 0) {
+        res.status(404).send({ error: "No student found with the provided ID." });
+        return;
+      }
+  
+      const selectQuery = `SELECT * FROM ${tableName} WHERE id = ?`;
+  
+      db.get(selectQuery, [id], (err, row) => {
+        if (err) {
+          res.status(500).send({ error: "Error fetching the updated student." });
+          return;
+        }
+  
+        if (!row) {
+          res.status(404).send({ error: "Student not found after update." });
+          return;
+        }
+  
+        res.send({
+          message: "Student updated successfully.",
+          data: row, // Full row of the updated student
+        });
+      });
+    });
+  }
+  
 
 
   deleteStudent(req, res) {

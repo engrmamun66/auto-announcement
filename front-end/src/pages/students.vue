@@ -66,7 +66,9 @@ function toggleLoopItem (data, index, key = "isPlaying_sound1") {
   });
 }
  
-async function clearParams({dakhela=null, id=null}={}){
+async function clearParams({dakhela=null, id=null, get=true}={}){
+
+  if(!get) getStudents()
 
   params.value.page = 1
   params.value.total = 3
@@ -78,7 +80,7 @@ async function clearParams({dakhela=null, id=null}={}){
   params.value.name = null
   params.value.dakhela = dakhela
   params.value.sound1 = null
-  getStudents({id})
+  if(get) getStudents({id}) 
 }
  
 async function deleteAudio(std, colName){
@@ -93,15 +95,36 @@ async function deleteAudio(std, colName){
 }
 
 let payload = reactive({
+  id: null,
   class: null,
   name: null,
   class_short: null,
   dakhela: null,
-  year: null,
+  year: new Date().getFullYear(),
+  card_no: null,
 
 })
 
 let is___adding = ref(false)
+
+function clearPayload(){
+  payload.id = null
+  payload.class = null
+  payload.name = null
+  payload.class_short = null
+  payload.dakhela = null
+  payload.year = new Date().getFullYear()
+  payload.card_no = null
+  addMode.value = false 
+  is___adding.value = false 
+}
+
+function prepareToEdit(std){
+  Object.keys(payload).forEach(key => {
+    payload[key] = std[key]
+  });
+  addMode.value = true
+}
  
 async function addStudent(){
   try {
@@ -118,13 +141,28 @@ async function addStudent(){
         }
       }
     }).catch(() => {}).finally(()=>{
-      payload.name = null
-      payload.class = null
-      payload.class_short = null
-      payload.dakhela = null
-      payload.year = null
-      is___adding.value = false
-      addMode.value = false
+      clearPayload()
+    })
+  } catch (error) {
+    console.warn('getStudents_error::', error);
+  }
+}
+async function updateStudent(){
+  try {
+
+    if(!payload.name) return emitter.emit('toaster-warning', {message: 'Name is required'})
+    if(!payload.class) return emitter.emit('toaster-warning', {message: 'Class is required'})
+    if(!payload.dakhela) return emitter.emit('toaster-warning', {message: 'Dhakhela is required'})
+    is___adding.value = true
+    http.post(`/students/update`, payload).then(response => {
+      if(response.status == 200){
+        let { id } = response.data.data; 
+        if(id){          
+          clearParams({id, get: false}) 
+        }
+      }
+    }).catch(() => {}).finally(()=>{
+      clearPayload()
     })
   } catch (error) {
     console.warn('getStudents_error::', error);
@@ -211,14 +249,27 @@ onMounted(()=>{
 
               <div class="col-12">
                 <div class="form-group">
-                  <label for="name">Year</label>
-                  <input v-model="payload.year" type="number" class="form-control">
+                  <label for="name">Year</label> 
+                  <select v-model="payload.year" id="" class="form-control">
+                    <option :value="new Date().getFullYear()">{{ new Date().getFullYear() }}</option>
+                    <option :value="new Date().getFullYear() - 1">{{ new Date().getFullYear() - 1 }}</option>
+                    <option :value="new Date().getFullYear() - 2">{{ new Date().getFullYear() - 2 }}</option>
+                    <option :value="new Date().getFullYear() - 3">{{ new Date().getFullYear() - 3 }}</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="col-12">
+                <div class="form-group">
+                  <label for="name">Card Number</label>
+                  <input v-model="payload.card_no" type="text" class="form-control" id="CARD_NUMBER">
                 </div>
               </div>
 
               <div class="col-12 d-flex justify-content-center">
-                <Btn @click="addStudent" class="red me-2" >Cancel</Btn>
-                <Btn @click="addStudent" class="me-0" >Submit <BtnLoader v-if="is___adding"></BtnLoader> </Btn>
+                <Btn @click.stop="clearPayload" class="red me-2" >Cancel</Btn>
+                <Btn v-if="!payload.id" @click="addStudent" class="me-0" >Submit <BtnLoader v-if="is___adding"></BtnLoader> </Btn>
+                <Btn v-else @click="updateStudent" class="me-0" >Update <BtnLoader v-if="is___adding"></BtnLoader> </Btn>
               </div> 
 
             </div>
@@ -295,6 +346,7 @@ onMounted(()=>{
               <tr>
                 <th>Class</th>
                 <th>Name</th>
+                <th>Card</th>
                 <th>Dakhela</th>
                 <th>Year</th>
                 <th>Sound</th>
@@ -309,7 +361,8 @@ onMounted(()=>{
               <template v-for="(std, i) in students">
                 <tr>
                   <td class="text-left"> {{ std.class }} </td> 
-                  <td class="text-left">{{ std.name }}</td>
+                  <td class="text-left cp" @click="prepareToEdit(std)" >{{ std.name }}</td>
+                  <td :class="{'bg-danger-subtle': !std.card_no}"> {{ std.card_no }} </td> 
                   <td> {{ std.dakhela }} </td> 
                   <td> {{ std.year }} </td> 
                   <template v-for="column in ['sound1']">
@@ -355,6 +408,7 @@ onMounted(()=>{
                       <span tooltip="Copy barcode">
                         <i @click="({target}) => helper.copyToClipboard(makeCarcode(std), {el: target.parentElement})" class='bx bxs-copy-alt cp px-1' style="font-size: 18px" ></i>
                       </span>
+                     
 
                       <span tooltip="Delete student">
                        <i @click="deleteStudent(std.id, i)" class='bx bx-trash text-danger cp' ></i>

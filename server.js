@@ -24,6 +24,9 @@ const Students = new students(DB.db)
 const Schedules = new schedules(DB.db) 
 
 
+utils.createRequiredFolders()
+
+
 
 const app = express();
 app.use(express.json());
@@ -136,6 +139,10 @@ app.get(`/${WEB_ROUTE}`, (req, res) => {
 
   app.post(prefix + '/students/add', (req, res) => {
     Students.addStudent(req, res);
+  });
+
+  app.post(prefix + '/students/update', (req, res) => {
+    Students.updateStudent(req, res);
   });
 
   app.delete(prefix + '/students/delete/:id', (req, res) => {
