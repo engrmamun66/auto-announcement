@@ -76,12 +76,7 @@ watch(toggleSettings, getSchedules)
 
 onMounted(()=>{
 
-     emitter.on('on_socket_message', ({barcode}) => {
-          if(barcode){
-               console.log({barcode});
-               pushTheBarcode(barcode)
-          }
-     })
+     
 
 
      if(route.query.barcode){

@@ -28,6 +28,7 @@ utils.createRequiredFolders()
 
 
 
+
 const app = express();
 app.use(express.json());
 app.use(express.static('public'));
@@ -67,7 +68,19 @@ app.get(`/${WEB_ROUTE}`, (req, res) => {
 
 ['/api'].forEach(prefix => {  
 
-  app.post(prefix + `/card-punch`, (req, res) => {   
+  app.get(prefix + `/card-punch`, (req, res) => {   
+
+    if (global.socketServer) {
+      Students.getStudentByCardNumber(req, res)      
+    } else {
+      res.status(420).send({ success: false, message: "Socket server not runnig" });
+    }
+  
+    // res.status(200).send({ success: true, message: "Card data processed." });
+  
+  });
+
+  app.post(prefix + `/barcode-punch`, (req, res) => {   
     const barcode = req.body.barcode;
   
     // Notify WebSocket clients

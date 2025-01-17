@@ -257,6 +257,17 @@ onMounted(async ()=>{
     }, 100);
 
     isMounted.value = true;
+
+
+    emitter.on('on_socket_message', ({barcode}) => {
+
+        console.log('asdf');
+          if(barcode){
+               pushTheBarcode(barcode)
+          } else {
+
+          }
+     })
 })
 
 

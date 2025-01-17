@@ -56,7 +56,7 @@
     }
   
     const nextItem = findNextItem();
-    if(nextItem) console.log({nextItem});
+    // if(nextItem) console.log({nextItem});
   
     if (nextItem) {
       currentItem.value = nextItem;

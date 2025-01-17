@@ -6,7 +6,7 @@ import { send_css_in_header, minified_css } from './minified-css';
 import { emitter, utils } from './import-hub';
 import moment from 'moment/moment';
 import { router } from './routes/index';
-import { socketInit } from '../socket';
+import { socketInit } from './socket';
 
 
 const SOCKET = socketInit({emitter})

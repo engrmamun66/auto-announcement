@@ -120,7 +120,7 @@ class Students {
         return;
       }
 
-      let row = rows.at(-1)  
+      const row = rows[rows.length - 1];   
       if(row.sound1) row.sound1 = utils.audioFullUrl(req, row.sound1)
       if(row.sound2) row.sound2 = utils.audioFullUrl(req, row.sound2)
       if(row.sound3) row.sound3 = utils.audioFullUrl(req, row.sound3)
@@ -132,6 +132,46 @@ class Students {
       });
     });
   }
+    
+  
+  getStudentByCardNumber(req, res) { 
+    const { card_no } = req.query; // Extract card number from query parameters
+  
+    if (!card_no) {
+      res.status(400).send({ error: "Card number is required." });
+      return;
+    }
+  
+    const query = `SELECT * FROM ${this.tableName} WHERE card_no = ?`;
+  
+    this.db.all(query, [card_no], (err, rows) => {
+      if (err) {
+        res.status(500).send({ error: err.message });
+        return;
+      }
+  
+      if (!rows || rows.length === 0) {
+        res.status(404).send({ message: "No data found for the provided card number." });
+        return;
+      }
+  
+      const student = rows[rows.length - 1]; 
+
+      let barcode = `${student.class_short}-${student.dakhela}-sound1-${student.year}`
+           
+
+      global.socketServer.clients.forEach((client) => {
+        if (client.readyState === client.OPEN) {
+          client.send(JSON.stringify({barcode})); 
+        }
+      });
+ 
+      res.send({
+        message: 'Punch accepted!',
+      });
+    });
+  }
+  
     
   
 

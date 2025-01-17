@@ -11,7 +11,7 @@ export function socketInit({emitter}){
         try {
             emitter.emit('on_socket_message', JSON.parse(event.data));
         } catch (error) {
-            emitter.emit('on_socket_message', event.data);
+            console.error('socket.onmessage__error::', event);
         }
     };
 
