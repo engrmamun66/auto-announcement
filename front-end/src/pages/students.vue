@@ -25,7 +25,7 @@ const classes = inject('classes');
 let http = inject('http'); 
 let students = ref([])
 let params = ref({
-    "page": 1,
+    "page_no": 1,
     "total": 3,
     "totalPages": 1,
     "limit": 100,
@@ -71,7 +71,7 @@ async function clearParams({dakhela=null, id=null, get=true}={}){
 
   if(!get) getStudents()
 
-  params.value.page = 1
+  params.value.page_no = 1
   params.value.total = 3
   params.value.totalPages = 1
   params.value.limit = 100
@@ -449,7 +449,7 @@ onMounted(()=>{
   
        <div class="d-flex justify-content-center">
           <Pagination v-if="params?.totalPages > 1" v-model="params" @jumpToPage="(page) => {
-            params.page = page
+            params.page_no = page
             getStudents()
           }" ></Pagination>
        </div> 

@@ -21,9 +21,9 @@ class Students {
   }
 
   getStudents(req, res) {
-    const page = parseInt(req.query.page) || 1;
+    const page_no = parseInt(req.query.page_no) || 1;
     const limit = parseInt(req.query.limit) || 10;
-    const offset = (page - 1) * limit;
+    const offset = (page_no - 1) * limit;
   
     const { id, name, class_name, sound1, dakhela, card_no } = req.query;
   
@@ -97,7 +97,7 @@ class Students {
             return row
           }),
           pagination: {
-            page,
+            page_no,
             total,
             limit,
             totalPages,
