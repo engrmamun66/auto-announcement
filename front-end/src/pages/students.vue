@@ -30,8 +30,9 @@ let params = ref({
     "totalPages": 1,
     "limit": 100,
 
-    class: null,
+    class_name: null,
     name: null,
+    card_no: null,
     dakhela: route.query?.dakhela || null,
     sound1: null,
 })
@@ -76,8 +77,9 @@ async function clearParams({dakhela=null, id=null, get=true}={}){
   params.value.limit = 100
 
     
-  params.value.class = null
+  params.value.class_name = null
   params.value.name = null
+  params.value.card_no = null
   params.value.dakhela = dakhela
   params.value.sound1 = null
   if(get) getStudents({id}) 
@@ -262,7 +264,7 @@ onMounted(()=>{
               <div class="col-12">
                 <div class="form-group">
                   <label for="name">Card Number</label>
-                  <input v-model="payload.card_no" type="text" class="form-control" id="CARD_NUMBER">
+                  <input v-model="payload.card_no" type="text" class="form-control" id="CARD_FIELD_IN_CARD_FORM">
                 </div>
               </div>
 
@@ -291,7 +293,7 @@ onMounted(()=>{
             <div class="col-md-3 col-12">
               <div class="form-group">
                 <label for="email">Class</label>
-                <select v-model="params.class" class="form-control" id="ClassId">
+                <select v-model="params.class_name" class="form-control" id="ClassId">
                   <option :value="null">-class-</option>
                   <template v-for="(cls, index) in classes" :key="index">
                     <option :value="cls.class_name">{{cls.class_name}}</option>
@@ -300,16 +302,22 @@ onMounted(()=>{
                 </select>
               </div>
             </div>
-            <div class="col-md-3 col-12">
-              <div class="form-group">
-                <label for="name">Name</label>
-                <input v-model="params.name" type="text" class="form-control">
-              </div>
-            </div>
-            <div class="col-md-3 col-12">
+            <div class="col-md-2 col-12">
               <div class="form-group">
                 <label for="email">Dakhela</label>
                 <input v-model="params.dakhela" type="number" class="form-control">
+              </div>
+            </div>
+            <div class="col-md-2 col-12">
+              <div class="form-group">
+                <label for="email">Card</label>
+                <input v-model="params.card_no" type="text" class="form-control">
+              </div>
+            </div>
+            <div class="col-md-2 col-12">
+              <div class="form-group">
+                <label for="name">Name</label>
+                <input v-model="params.name" type="text" class="form-control">
               </div>
             </div>
             <div class="col-md-3 col-12">
@@ -327,11 +335,20 @@ onMounted(()=>{
                   <div class="d-flex">
                     <Btn class="me-1"></Btn> 
                     <Btn @click.stop="clearParams();getStudents()" class="me-1 red">Clear</Btn> 
+
                   </div>
+                </div>
               </div>
             </div>
-          </div>
-          
+
+            <div class="col-12 mt-4">
+              <template v-for="cls in classes">
+                <button class="class-short-btn" :class="{'active': params.class_name === cls.class_name}" 
+                @click="params.class_name = cls.class_name;getStudents()" >{{ helper.ucfirst(cls.class_short) }}</button>
+              </template>
+
+            </div>
+            
            
        
           
@@ -498,6 +515,20 @@ onMounted(()=>{
 }
 .add-form-wrapper .form-group{
   padding-bottom: 20px;
+}
+.class-short-btn{
+  border: 1px solid var(--primaryColor);
+  padding: 5px 5px;
+  text-align: center;
+  background-color: #c2840a;
+  margin-right: 3px;
+  border-radius: 5px;
+  color: white;
+  margin-bottom: 5px;
+}
+.class-short-btn.active{
+  background-color: #614203;
+  border-bottom-color: black;
 }
 </style>
 

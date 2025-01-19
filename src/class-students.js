@@ -25,7 +25,7 @@ class Students {
     const limit = parseInt(req.query.limit) || 10;
     const offset = (page - 1) * limit;
   
-    const { id, name, class: className, sound1, dakhela } = req.query;
+    const { id, name, class_name, sound1, dakhela, card_no } = req.query;
   
     let query = `SELECT * FROM ${this.tableName} WHERE 1=1`;
     let queryParams = [];
@@ -40,10 +40,15 @@ class Students {
       query += ` AND name LIKE ?`;
       queryParams.push(`%${name}%`);
     }
+    
+    if (card_no) {
+      query += ` AND card_no LIKE ?`;
+      queryParams.push(`%${card_no}%`);
+    }
   
-    if (className) {
+    if (class_name) {
       query += ` AND class = ?`;
-      queryParams.push(className);
+      queryParams.push(class_name);
     }
   
     if (dakhela) {
