@@ -68,7 +68,7 @@ app.get(`/${WEB_ROUTE}`, (req, res) => {
 
 ['/api'].forEach(prefix => {  
 
-  app.get(prefix + `/card-punch`, (req, res) => {   
+  app.post(prefix + `/card-punch`, (req, res) => {   
     if (global.socketServer) {
       Students.getStudentByCardNumber(req, res)      
     } else {

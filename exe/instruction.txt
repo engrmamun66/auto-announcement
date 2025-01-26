@@ -1,0 +1,5 @@
+cd exe
+pip install pynput
+pip install pyinstaller requests
+pyinstaller --onefile main.py
+pyinstaller --onefile --noconsole main.py

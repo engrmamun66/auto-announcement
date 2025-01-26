@@ -140,7 +140,9 @@ class Students {
     
   
   getStudentByCardNumber(req, res) { 
-    const { card_no } = req.query; // Extract card number from query parameters
+    const { card_no, input } = req.body; // Extract card number from query parameters
+
+    console.log({card_no, input});
   
     if (!card_no) {
       res.status(400).send({ error: "Card number is required." });

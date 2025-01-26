@@ -136,3 +136,7 @@ public/media/
 public/exports/
 database/
 *DS_Store*
+
+exe/dist/
+exe/build/
+exe/main.spec
