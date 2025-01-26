@@ -337,7 +337,7 @@ function pushTheBarcode(barcode='play-417-2024'){
                    
                     if(!student[student['soundColName']]){ 
                          emitter.emit('toaster-error', { message: `Sound not added for this student`, duration: 10000})
-                         speakText('voice is not added')
+                        //  speakText('voice is not added')
                     
                          router.push({name: 'students', query: {
                               dakhela: student.dakhela,
