@@ -7,6 +7,7 @@ import Toaster from './components/Toaster.vue'
 const emitter = inject('emitter');
 import moment from 'moment/moment'
 import Playlist from './components/Playlist.vue'
+import axios from 'axios'
 
 
 let helper = inject('helper')
@@ -14,7 +15,7 @@ let http = inject('http')
 let storage = inject('storage')
 let route = useRoute();
 let router = useRouter();  
- 
+
 let is_started_schedule = ref(0) 
 let schedule_timeout = ref(0) 
 let classes = ref([]);
@@ -26,6 +27,12 @@ let refreshDOM = ref(true)
 let isMounted = ref(false)
 let user_interacted = ref(false)
 let emergency_mode = ref(false)
+
+let DEVICE_TOKEN = ref(null)
+
+
+
+
  
 provide('route', route)
 provide('router', router)
@@ -225,7 +232,7 @@ async function getSchedules(){
 }
 
 onMounted(async ()=>{  
-
+    
     await getSchedules()
 
     try {
@@ -259,14 +266,18 @@ onMounted(async ()=>{
     isMounted.value = true;
 
 
-    emitter.on('on_socket_message', ({barcode}) => {
+    emitter.on('on_socket_message', (socket_data) => {
+        if(socket_data.type == 'attendence'){
+            console.log(socket_data.data)
+        }
+         
 
-        console.log('asdf');
-          if(barcode){
-               pushTheBarcode(barcode)
-          } else {
+        // console.log('asdf');
+        //   if(barcode){
+        //        pushTheBarcode(barcode)
+        //   } else {
 
-          }
+        //   }
      })
 })
 

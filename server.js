@@ -9,6 +9,8 @@ const upload = multer({ dest: DIR + '/public/temp' });
 const config = require("./config");
 const webContents = require("./web-contents"); 
 const webSocket = require("./socket/socket")
+const { getToken } = require('./src/device')
+
 
 webSocket()
  
@@ -59,22 +61,50 @@ const audioUpload = multer({
 
 const WEB_ROUTE = 'app' 
 
-app.get(`/${WEB_ROUTE}`, (req, res) => {   
+app.get(`/${WEB_ROUTE}`, (req, res) => { 
+  getToken()
   res.send(webContents)
 });
 
 
 
 
-['/api'].forEach(prefix => {  
+['/api'].forEach(prefix => { 
 
-  app.post(prefix + `/card-punch`, (req, res) => {   
-    if (global.socketServer) {
-      Students.getStudentByCardNumber(req, res)      
-    } else {
-      res.status(420).send({ success: false, message: "Socket server not runnig" });
-    }  
+  app.get(prefix + `/transactions`, async (req, res) => {   
+    const myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json"); 
+
+    const raw = JSON.stringify({
+      "username": USERNAME,
+      "password": PASSWORD,
+    });
+
+    const requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: raw,
+      redirect: "follow"
+    };
+
+    let = fetch(`${DEVICE_API_BASE_URL}/iclock/api/transactions/?page=1&page_size=100&start_time=2025-01-26 16:08:00&end_time&terminal_alias=Device 1`, requestOptions)
+      .then((response) => response.text())
+      .then((result) => {
+        console.log(result)
+        res.send(result)
+      })
+      .catch((error) => {
+        res.status(420).send({ success: false, error });
+      }); 
   });
+
+  // app.post(prefix + `/card-punch`, (req, res) => {   
+  //   if (global.socketServer) {
+  //     Students.getStudentByCardNumber(req, res)      
+  //   } else {
+  //     res.status(420).send({ success: false, message: "Socket server not runnig" });
+  //   }  
+  // });
 
   app.post(prefix + `/barcode-punch`, (req, res) => {   
     const barcode = req.body.barcode;
@@ -179,5 +209,10 @@ app.get(`/${WEB_ROUTE}`, (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}/app/#`); 
+
+  // send to socket  
+  getToken()
+
+
 });
 
