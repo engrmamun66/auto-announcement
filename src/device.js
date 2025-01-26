@@ -41,7 +41,7 @@ function getToken(Students) {
 
                 clearInterval(interval)
                 interval = setInterval(() => {
-                    getTransaction(Students)
+                    getLastPunchData(Students)
                 }, (SECONDS * 1000));
 
 
@@ -52,7 +52,7 @@ function getToken(Students) {
         });
 }
  
-function getTransaction(Students) {
+function getLastPunchData(Students) {
 
     if (!global.DEVICE_TOKEN) return
 
