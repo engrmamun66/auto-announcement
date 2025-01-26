@@ -138,7 +138,9 @@ class Students {
     });
   }
     
-  
+  /** 
+   * @depricated 
+   */
   getStudentByCardNumber(req, res) { 
     let { card_no, input } = req.body; // Extract card number from query parameters
     
@@ -180,6 +182,61 @@ class Students {
       res.send({
         message: 'Punch accepted!',
       });
+    });
+  }
+  
+  getStudentByDakhela_and_sentToSocket(dakhela, { start_time, punch_time, studentOfDevice }) {    
+    if(!dakhela) return
+  
+    const query = `SELECT * FROM ${this.tableName} WHERE dakhela = ? limit 1`; 
+
+  
+    this.db.all(query, [dakhela], (err, rows) => {
+      if (err) {
+   
+        global.socketServer.clients.forEach((client) => {
+          if (client.readyState === client.OPEN) {
+            client.send(JSON.stringify({
+              type: 'message',
+              message: err.message
+            }));
+          }          
+        });
+
+        return;
+      }
+   
+  
+      const student = rows[rows.length - 1]; 
+      if (!student){
+        global.socketServer.clients.forEach((client) => {
+          if (client.readyState === client.OPEN) {
+            client.send(JSON.stringify({
+              type: 'notice',
+              message: `Nobody punched at ${start_time}`
+            }));
+          }
+        });
+        return
+      }
+         
+
+      let barcode = `${student.class_short}-${student.dakhela}-sound1-${student.year}`;
+
+      global.socketServer.clients.forEach((client) => {
+        if (client.readyState === client.OPEN) {
+          client.send(JSON.stringify({
+            type: 'attendence',
+            start_time,
+            punch_time,
+            barcode,
+            dakhela,
+            studentOfDevice,
+          }));
+        }
+      });
+ 
+      
     });
   }
   

@@ -1,12 +1,14 @@
 const moment = require('moment')
 
+const SECONDS = 2
+
 const USERNAME = process.env.BIO_TIME_APP_USERNAME
 const PASSWORD = process.env.BIO_TIME_APP_PASSWORD
 const DEVICE_API_BASE_URL = process.env.DEVICE_API_BASE_URL
 
 let interval = null
  
-function getToken() {
+function getToken(Students) {
     const myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
 
@@ -39,8 +41,8 @@ function getToken() {
 
                 clearInterval(interval)
                 interval = setInterval(() => {
-                    getTransaction()
-                }, 2000);
+                    getTransaction(Students)
+                }, (SECONDS * 1000));
 
 
             }
@@ -50,7 +52,7 @@ function getToken() {
         });
 }
  
-function getTransaction() {
+function getTransaction(Students) {
 
     if (!global.DEVICE_TOKEN) return
 
@@ -65,28 +67,32 @@ function getTransaction() {
         redirect: "follow"
     };
 
-    // let time = '2025-01-26 16:08:00'
-    let start_time = moment().subtract(2, 'second').format('YYYY-MM-DD hh:mm:ss') // 
-    let limit = 10000
+    // let time = '2025-01-26 16:08:00'   
+    let start_time = moment().subtract(SECONDS, 'second').format('YYYY-MM-DD HH:mm:ss') // two seconds before
+    let start_time_ampm = moment().subtract(SECONDS, 'second').format('hh:mm:ss A') // two seconds before
+    let limit = 100
  
     
     fetch(`${DEVICE_API_BASE_URL}/iclock/api/transactions/?page=1&page_size=${limit}&start_time=${start_time}&end_time=`, requestOptions)
         .then(async (response) => await response.text())
         .then((result) => {
-            result = JSON.parse(result)
-            let data = result.data || []
-            let reversed = data.toReversed()  
-            reversed.length = 10                    
-              
-            global.socketServer.clients.forEach((client) => {
-                if (client.readyState === client.OPEN) {
-                    client.send(JSON.stringify({
-                        type: 'attendence',
-                        start_time,
-                        data: reversed,
-                    }));
-                }
-            }); 
+            result = JSON.parse(result)            
+            let data = result?.data || []
+            let reversedData = data.toReversed()  
+
+            // console.log(result);           
+  
+
+            if (reversedData.length == 0){
+                console.log('Student not found ' + start_time_ampm)
+            } 
+
+            let studentOfDevice = reversedData?.[0]
+            let dakhela = studentOfDevice?.emp_id ?? 104
+            let punch_time = studentOfDevice?.punch_time ?? ''
+            Students.getStudentByDakhela_and_sentToSocket(dakhela, { start_time, studentOfDevice, punch_time, studentOfDevice })
+
+          
 
         })
         .catch((error) => {

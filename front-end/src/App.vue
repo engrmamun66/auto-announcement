@@ -264,20 +264,21 @@ onMounted(async ()=>{
     }, 100);
 
     isMounted.value = true;
+ 
 
 
     emitter.on('on_socket_message', (socket_data) => {
         if(socket_data.type == 'attendence'){
-            console.log(socket_data.data[0])
+            let { punch_time, barcode } = socket_data 
+            let time_and_barcode = `${punch_time}-${barcode}`
+
+            let existing = storage('time_and_barcode').value
+            
+            if(!existing || existing != time_and_barcode){
+                storage('time_and_barcode').value = time_and_barcode
+                pushTheBarcode(barcode)
+            }
         }
-         
-
-        // console.log('asdf');
-        //   if(barcode){
-        //        pushTheBarcode(barcode)
-        //   } else {
-
-        //   }
      })
 })
 

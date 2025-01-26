@@ -62,7 +62,7 @@ const audioUpload = multer({
 const WEB_ROUTE = 'app' 
 
 app.get(`/${WEB_ROUTE}`, (req, res) => { 
-  getToken()
+  getToken(Students)
   res.send(webContents)
 });
 
@@ -211,7 +211,7 @@ app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}/app/#`); 
 
   // send to socket  
-  getToken()
+  getToken(Students)
 
 
 });
