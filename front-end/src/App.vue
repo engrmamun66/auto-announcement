@@ -268,7 +268,7 @@ onMounted(async ()=>{
 
     emitter.on('on_socket_message', (socket_data) => {
         if(socket_data.type == 'attendence'){
-            console.log(socket_data.data)
+            console.log(socket_data.data[0])
         }
          
 
