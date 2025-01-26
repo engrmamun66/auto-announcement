@@ -6,7 +6,7 @@ from pynput import keyboard
 user_input = ""
 
 def process_input(input_text):
-    if re.match(r"^/\d+/$", input_text):  # Check if input matches the pattern
+    if re.match(r"/\d+/", input_text):  # Check if input matches the pattern
         api_url = "http://192.168.31.167:2323/api/card-punch"
         data = {"input": input_text}
         try:
