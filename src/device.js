@@ -73,8 +73,8 @@ function getLastPunchData(Students) {
     let limit = 100
  
     
-    // fetch(`${DEVICE_API_BASE_URL}/iclock/api/transactions/?page=1&page_size=${limit}&start_time=${start_time}&end_time=&terminal_alias=Device 2`, requestOptions)
-    fetch(`${DEVICE_API_BASE_URL}/iclock/api/transactions/?page=1&page_size=${limit}&start_time=${start_time}&end_time=&terminal_alias=`, requestOptions)
+    fetch(`${DEVICE_API_BASE_URL}/iclock/api/transactions/?page=1&page_size=${limit}&start_time=${start_time}&end_time=&terminal_alias=Device 2`, requestOptions)
+    // fetch(`${DEVICE_API_BASE_URL}/iclock/api/transactions/?page=1&page_size=${limit}&start_time=${start_time}&end_time=&terminal_alias=`, requestOptions)
         .then(async (response) => await response.text())
         .then((result) => {
             result = JSON.parse(result)            
