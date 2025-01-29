@@ -73,7 +73,8 @@ function getLastPunchData(Students) {
     let limit = 100
  
     
-    fetch(`${DEVICE_API_BASE_URL}/iclock/api/transactions/?page=1&page_size=${limit}&start_time=${start_time}&end_time=`, requestOptions)
+    // fetch(`${DEVICE_API_BASE_URL}/iclock/api/transactions/?page=1&page_size=${limit}&start_time=${start_time}&end_time=&terminal_alias=Device 2`, requestOptions)
+    fetch(`${DEVICE_API_BASE_URL}/iclock/api/transactions/?page=1&page_size=${limit}&start_time=${start_time}&end_time=&terminal_alias=`, requestOptions)
         .then(async (response) => await response.text())
         .then((result) => {
             result = JSON.parse(result)            
@@ -85,10 +86,11 @@ function getLastPunchData(Students) {
 
             if (reversedData.length == 0){
                 console.log('Student not found ' + start_time_ampm)
+                return
             } 
 
             let studentOfDevice = reversedData?.[0]
-            let dakhela = studentOfDevice?.emp_id ?? 104
+            let dakhela = studentOfDevice?.emp_id// ?? 104
             let punch_time = studentOfDevice?.punch_time ?? ''
             Students.getStudentByDakhela_and_sentToSocket(dakhela, { start_time, studentOfDevice, punch_time, studentOfDevice })
 
