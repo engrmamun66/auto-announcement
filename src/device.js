@@ -1,6 +1,6 @@
 const moment = require('moment')
 
-const SECONDS = 2
+const SECONDS = 1
 
 const USERNAME = process.env.BIO_TIME_APP_USERNAME
 const PASSWORD = process.env.BIO_TIME_APP_PASSWORD
@@ -78,20 +78,17 @@ function getLastPunchData(Students) {
         .then(async (response) => await response.text())
         .then((result) => {
             result = JSON.parse(result)            
-            let data = result?.data || []
-            let reversedData = data.toReversed()  
-
-            // console.log(result);           
-  
-
-            if (reversedData.length == 0){
+            let data = result?.data || []      
+            
+            
+            if (data.length == 0){
                 console.log('Student not found ' + start_time_ampm)
-                return
-            } 
+            }        
 
-            let studentOfDevice = reversedData?.[0]
-            let dakhela = studentOfDevice?.emp_id// ?? 104
-            let punch_time = studentOfDevice?.punch_time ?? ''
+            let studentOfDevice = data.at(-1)
+            let dakhela = studentOfDevice?.emp_code// ?? 104
+            let punch_time = studentOfDevice?.punch_time ?? '' 
+            
             Students.getStudentByDakhela_and_sentToSocket(dakhela, { start_time, studentOfDevice, punch_time, studentOfDevice })
 
           
