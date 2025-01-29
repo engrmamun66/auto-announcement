@@ -251,7 +251,7 @@ onMounted(()=>{
 
               <div class="col-12">
                 <div class="form-group">
-                  <label for="name">Year</label> 
+                  <label for="year">Year</label> 
                   <select v-model="payload.year" id="" class="form-control">
                     <option :value="new Date().getFullYear()">{{ new Date().getFullYear() }}</option>
                     <option :value="new Date().getFullYear() - 1">{{ new Date().getFullYear() - 1 }}</option>
@@ -260,13 +260,12 @@ onMounted(()=>{
                   </select>
                 </div>
               </div>
-
-              <div class="col-12">
+              <!--   <div class="col-12">
                 <div class="form-group">
-                  <label for="name">Card Number</label>
+                  <label for="card">Card Number</label>
                   <input v-model="payload.card_no" type="text" class="form-control" id="CARD_FIELD_IN_CARD_FORM">
                 </div>
-              </div>
+              </div> -->
 
               <div class="col-12 d-flex justify-content-center">
                 <Btn @click.stop="clearPayload" class="red me-2" >Cancel</Btn>
@@ -302,19 +301,19 @@ onMounted(()=>{
                 </select>
               </div>
             </div>
-            <div class="col-md-2 col-12">
+            <div class="col-md-3 col-12">
               <div class="form-group">
                 <label for="email">Dakhela</label>
                 <input v-model="params.dakhela" type="number" class="form-control">
               </div>
             </div>
-            <div class="col-md-2 col-12">
+            <!-- <div class="col-md-2 col-12">
               <div class="form-group">
                 <label for="email">Card</label>
                 <input v-model="params.card_no" type="text" class="form-control">
               </div>
-            </div>
-            <div class="col-md-2 col-12">
+            </div> -->
+            <div class="col-md-3 col-12">
               <div class="form-group">
                 <label for="name">Name</label>
                 <input v-model="params.name" type="text" class="form-control">
@@ -363,7 +362,7 @@ onMounted(()=>{
               <tr>
                 <th>Class</th>
                 <th>Name</th>
-                <th>Card</th>
+                <!-- <th>Card</th> -->
                 <th>Dakhela</th>
                 <th>Year</th>
                 <th>Sound</th>
@@ -379,7 +378,7 @@ onMounted(()=>{
                 <tr>
                   <td class="text-left"> {{ std.class }} </td> 
                   <td class="text-left cp" @click="prepareToEdit(std)" >{{ std.name }}</td>
-                  <td :class="{'bg-danger-subtle': !std.card_no}"> {{ std.card_no }} </td> 
+                  <!-- <td :class="{'bg-danger-subtle': !std.card_no}"> {{ std.card_no }} </td>  -->
                   <td> {{ std.dakhela }} </td> 
                   <td> {{ std.year }} </td> 
                   <template v-for="column in ['sound1']">
