@@ -81,8 +81,17 @@ module.exports = {
              class_short: 'meskat2',
              isActive: true,
         },
-   ],
-
+          {
+               class_name: 'Class 11',
+               class_short: 'class_11',
+               isActive: true,
+          },
+          {
+               class_name: 'Class 12',
+               class_short: 'class_12',
+               isActive: true,
+          }, 
+   ], 
 }
 
  
