@@ -87,7 +87,7 @@ app.get(`/${WEB_ROUTE}`, (req, res) => {
       redirect: "follow"
     };
 
-    let = fetch(`${DEVICE_API_BASE_URL}/iclock/api/transactions/?page=1&page_size=100&start_time=2025-01-26 16:08:00&end_time&terminal_alias=Device 1`, requestOptions)
+    fetch(`${DEVICE_API_BASE_URL}/iclock/api/transactions/?page=1&page_size=100&start_time=2025-01-26 16:08:00&end_time&terminal_alias=Device 1`, requestOptions)
       .then((response) => response.text())
       .then((result) => {
         console.log(result)
