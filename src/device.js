@@ -67,9 +67,10 @@ function getLastPunchData(Students) {
         redirect: "follow"
     };
 
-    // let time = '2025-01-26 16:08:00'   
-    let start_time = moment().subtract(SECONDS, 'second').format('YYYY-MM-DD HH:mm:ss') // two seconds before
-    let start_time_ampm = moment().subtract(SECONDS, 'second').format('hh:mm:ss A') // two seconds before
+    // let time = '2025-01-26 16:08:00' 
+    let back_seconds = 10  
+    let start_time = moment().subtract(back_seconds, 'second').format('YYYY-MM-DD HH:mm:ss') // two seconds before
+    let start_time_ampm = moment().subtract(back_seconds, 'second').format('hh:mm:ss A') // two seconds before
     let limit = 100
  
     
@@ -78,18 +79,44 @@ function getLastPunchData(Students) {
         .then(async (response) => await response.text())
         .then((result) => {
             result = JSON.parse(result)            
-            let data = result?.data || []      
+            let data = result?.data || []   
+            console.log(data);
+               
             
             
             if (data.length == 0){
                 console.log('Student not found ' + start_time_ampm)
-            }        
+            } else {
+                console.log('Wao:: Student found ' + start_time_ampm)
+            }     
 
             let studentOfDevice = data.at(-1)
+            // let studentOfDevice = {
+            //     id: 22381,
+            //     emp: 659,
+            //     emp_code: '417',
+            //     first_name: '',
+            //     last_name: null,
+            //     department: 'Department',
+            //     position: null,
+            //     punch_time: '2025-05-19 23:27:41',
+            //     punch_state: '0',
+            //     punch_state_display: 'Check In',
+            //     verify_type: 4,
+            //     verify_type_display: 'Card',
+            //     work_code: '0',
+            //     gps_location: null,
+            //     area_alias: 'Dhaka',
+            //     terminal_sn: 'CQZ7232360083',
+            //     temperature: 0,
+            //     is_mask: 'No',
+            //     terminal_alias: 'Device 2',
+            //     upload_time: '2025-05-19 23:27:40'
+            // }
             let dakhela = studentOfDevice?.emp_code// ?? 104
             let punch_time = studentOfDevice?.punch_time ?? '' 
             
-            Students.getStudentByDakhela_and_sentToSocket(dakhela, { start_time, studentOfDevice, punch_time, studentOfDevice })
+            Students.getStudentByDakhela_and_sentToSocket(Number(dakhela), { start_time, studentOfDevice, punch_time, studentOfDevice })
 
           
 

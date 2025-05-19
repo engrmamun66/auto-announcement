@@ -274,7 +274,7 @@ onMounted(async ()=>{
 
             let existing = storage('time_and_barcode').value
             
-            if(!existing || existing != time_and_barcode){
+            if(!existing || existing != time_and_barcode || useRoute().query.force=='true'){
                 storage('time_and_barcode').value = time_and_barcode
                 pushTheBarcode(barcode)
             }
