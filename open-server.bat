@@ -1,5 +1,5 @@
-@REM @echo off
-start pm2 start ecosystem.config.js
+@echo off
 start http://localhost:2323/app/#/
-@REM only closing this file
-exit /b
+pm2 start
+timeout /t 2 >nul
+exit
