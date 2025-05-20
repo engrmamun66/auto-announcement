@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: 'my-app',
+      name: 'announcment',
       script: './server.js',
       instances: 1,
       autorestart: true,
