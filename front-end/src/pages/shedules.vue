@@ -87,13 +87,12 @@ function addSchedule(){
     is___adding.value = true
     http.post('/schedules/add', _payload).then(response => {
       if(response.status == 200){
-        students.value = response.data.data;
-        params.value = {...params.value, ...response.data.pagination};
+        getSchedules()
       }
     }).finally(()=>{
       clearPayload()
       is___adding.value = false
-      getSchedules()
+      
     })
     
   } catch (error) {
@@ -105,12 +104,12 @@ function addSchedule(){
 }
 
 
-function updateSchedule(id){
+function updateSchedule(){
 
   try {
 
-    if(!payload.title || !payload.type || !payload.start_time || !payload.end_time || !payload.classes?.length){
-      emitter.emit('toaster-warning', { message: 'All field are required' })
+    if(!payload.id){
+      emitter.emit('toaster-warning', { message: 'Id not found' })
       return  
     }
     if(!payload.title || !payload.type || !payload.start_time || !payload.end_time || !payload.classes?.length){
@@ -122,9 +121,8 @@ function updateSchedule(id){
 
     is___adding.value = true
     http.post('/schedules/update', _payload).then(response => {
-      if(response.status == 200){
-        students.value = response.data.data;
-        params.value = {...params.value, ...response.data.pagination};
+      if(response.status == 200){ 
+        getSchedules()
       }
     }).finally(()=>{
       clearPayload()
@@ -235,7 +233,7 @@ function deleteSchedule(id, i, type=1){
 
               <div class="col-12 d-flex justify-content-center">
                 <Btn @click.stop="clearPayload()" class="red me-2" >Cancel</Btn>
-                <Btn class="me-0" @click.stop="payload.id ? addSchedule() : updateSchedule()" >Submit <BtnLoader v-if="is___adding"></BtnLoader> </Btn>
+                <Btn class="me-0" @click.stop="payload.id ? updateSchedule() : addSchedule()" > {{ payload.id ? 'Update' : 'Submit' }} <BtnLoader v-if="is___adding"></BtnLoader> </Btn>
               </div> 
 
             </div>
@@ -303,8 +301,10 @@ function deleteSchedule(id, i, type=1){
                   <div class="d-flex justify-content-center">
                   
 
+                    <span tooltip="Update Schedule" class="me-2">
+                      <i @click.stop="prepareEdit(item)" class='bx bx-pencil text-danger cp' ></i>
+                    </span>
                     <span tooltip="Delete Schedule">
-                      <i @click.stop="prepareEdit(item)" class='bx bx-pencil text-danger cp me-2' ></i>
                       <i @click.stop="deleteSchedule(item.id, i, item.type)" class='bx bx-trash text-danger cp' ></i>
                     </span>
         
