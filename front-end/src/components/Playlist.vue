@@ -84,5 +84,10 @@
         console.log('watching playlist...');
       })
   })
+
+  defineExpose({
+    audio,
+    currentItem,
+  })
   </script>
    

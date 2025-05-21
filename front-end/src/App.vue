@@ -28,6 +28,9 @@ let isMounted = ref(false)
 let user_interacted = ref(false)
 let emergency_mode = ref(false)
 
+let palylistComponent = ref(null)
+provide('palylistComponent', palylistComponent)
+
 let DEVICE_TOKEN = ref(null)
 
 
@@ -410,7 +413,7 @@ function pushTheBarcode(barcode='play-417-2024'){
     <TopNav></TopNav>
     <div v-if="isMounted" class="page-contents" >
         <routerView />
-        <Playlist></Playlist> 
+        <Playlist ref="palylistComponent"></Playlist> 
     </div>
     
 </template>

@@ -34,6 +34,26 @@ let toggleSettings = inject('toggleSettings')
 let refreshDOM = inject('refreshDOM') 
 
 let emergency_mode = inject('emergency_mode')
+let palylistComponent = inject('palylistComponent')
+
+let isPlaying = ref(true)
+
+function handlePayPause(){
+     const { currentItem, audio } = palylistComponent.value
+     console.log(audio.paused);
+     audio.currentTime = 0;
+     if(audio.paused){
+          audio.play()
+          isPlaying.value = true
+     } else {
+          audio.pause()
+          isPlaying.value = false
+     }
+     
+}
+
+
+
 
 
 
@@ -105,6 +125,9 @@ onMounted(()=>{
                <EmergencyMode v-if="emergency_mode" style="left:calc(100% - 40px)"></EmergencyMode>
                <input id="BARCODE_INPUT" type="text" @keyup.enter="inputBarcode" class="form-control px-4 py-2 text-center py-1 shadow" :placeholder="emergency_mode ? 'Emergency mode activated' : 'Barcode receiver field'">
           </div>
+
+          <div v-if="isPlaying" @click="handlePayPause()" class="me-2 p-1 play-pause"><i class='bx bx-pause'></i></div>
+          <div v-else @click="handlePayPause()" class="me-2 p-1 play-pause"><i class='bx bx-play'></i></div>
          
           <BarcodeScannigAnimation v-if="is_started_schedule" :scannig="is_started_schedule" class="me-1"  ></BarcodeScannigAnimation> 
           <Switch v-model="is_started_schedule" @click="checkSchedule" size="lg" yes="Started" no="Stopped" :bothVisible="false" class="me-2" ></Switch> 
@@ -269,6 +292,14 @@ onMounted(()=>{
 
 
 <style>
+.play-pause{
+ border: 1px solid #004311;
+    color: blue;
+    background-color: #41ddbf;
+    border-radius: 5px;
+    font-size: 18px;
+    cursor: pointer;
+}
 .sections {
   display: flex;
   justify-content: space-between;
