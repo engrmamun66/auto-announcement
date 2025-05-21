@@ -272,7 +272,11 @@ onMounted(()=>{
                                         </div>
                                        <div class="icons"> 
                                              <i v-if="!student.is_called" class='bx bx-check'></i>
-                                             <i v-else-if="student.is_called" class='bx bx-check-double' ></i> 
+                                             <i v-else-if="student.is_called" class='bx bx-check-double cp' @click="()=>{
+                                                  let status = student.is_called
+                                                  student.is_called = !status;
+                                                  student.is__playing = !status;
+                                             }"  ></i> 
                                              <i v-else class='bx bx-checkbox-square' ></i> 
                                        </div>
                                    </div>
