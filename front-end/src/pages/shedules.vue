@@ -31,12 +31,13 @@ const call_schedules = inject('call_schedules');
 const classes = inject('classes');
 let http = inject('http'); 
 
-let addMode = ref(false)
+let addUpdateMode = ref(false)
 let is___adding = ref(false)
 let tab = ref(1)
 
 
 let payload = reactive({
+    id: null,
     type: 1,
     title: null,
     start_time: null,
@@ -44,21 +45,31 @@ let payload = reactive({
     classes: [],
 })
 
-watch(addMode, (a, b)=>{
+watch(addUpdateMode, (a, b)=>{
   payload.type = tab.value
    
 })
 
 
-
 function clearPayload(){
+  payload.id =  null
   payload.type =  1
   payload.title =  null
   payload.start_time =  null
   payload.end_time =  null
   payload.classes =  []
-  addMode.value = false;
+  addUpdateMode.value = false;
   is___adding.value = false
+}
+
+function prepareEdit(item){
+  payload.id = item.id
+  payload.type = item.type
+  payload.title = item.title
+  payload.start_time = item.start_time
+  payload.end_time = item.end_time
+  payload.classes = item.classes
+  addUpdateMode.value = true; 
 }
 
 
@@ -75,6 +86,42 @@ function addSchedule(){
 
     is___adding.value = true
     http.post('/schedules/add', _payload).then(response => {
+      if(response.status == 200){
+        students.value = response.data.data;
+        params.value = {...params.value, ...response.data.pagination};
+      }
+    }).finally(()=>{
+      clearPayload()
+      is___adding.value = false
+      getSchedules()
+    })
+    
+  } catch (error) {
+    console.warn('addSchedule__error::', error);
+
+    
+  }
+
+}
+
+
+function updateSchedule(id){
+
+  try {
+
+    if(!payload.title || !payload.type || !payload.start_time || !payload.end_time || !payload.classes?.length){
+      emitter.emit('toaster-warning', { message: 'All field are required' })
+      return  
+    }
+    if(!payload.title || !payload.type || !payload.start_time || !payload.end_time || !payload.classes?.length){
+      emitter.emit('toaster-warning', { message: 'All field are required' })
+      return  
+    }
+    let _payload = helper.clone(payload)
+    _payload.classes = JSON.stringify(_payload.classes)
+
+    is___adding.value = true
+    http.post('/schedules/update', _payload).then(response => {
       if(response.status == 200){
         students.value = response.data.data;
         params.value = {...params.value, ...response.data.pagination};
@@ -119,10 +166,10 @@ function deleteSchedule(id, i, type=1){
 <template>
     <div>
         <div class="d-flex justify-content-between flex-wrap">
-           <h1>{{ !addMode ? `${tab == 1 ? 'Punch' : 'Call'} Schedules` : 'Add Schedule'}}</h1> 
+           <h1>{{ !addUpdateMode ? `${tab == 1 ? 'Punch' : 'Call'} Schedules` : (payload.id ? 'Update Schedule' : 'Add Schedule')}}</h1> 
        
            <div class="d-flex justify-content-end">
-               <Btn v-if="!addMode" class="me-2" @click="addMode = true" ><i class='bx bx-plus'></i> Add Schedule</Btn>
+               <Btn v-if="!addUpdateMode" class="me-2" @click="addUpdateMode = true" ><i class='bx bx-plus'></i> Add Schedule</Btn>
                <Btn v-else class="me-2 red" @click="clearPayload()" >Cancel</Btn>
                <!-- <Btn @click="router.push({name: 'import'})"><i class='bx bxs-file-import' ></i> Import</Btn> -->
              </div>
@@ -132,7 +179,7 @@ function deleteSchedule(id, i, type=1){
 
 
 
- <template v-if="addMode">
+ <template v-if="addUpdateMode">
       <div class="w-100 d-flex justify-content-center">
 
         <div class="add-form-wrapper">
@@ -188,7 +235,7 @@ function deleteSchedule(id, i, type=1){
 
               <div class="col-12 d-flex justify-content-center">
                 <Btn @click.stop="clearPayload()" class="red me-2" >Cancel</Btn>
-                <Btn class="me-0" @click.stop="addSchedule()" >Submit <BtnLoader v-if="is___adding"></BtnLoader> </Btn>
+                <Btn class="me-0" @click.stop="payload.id ? addSchedule() : updateSchedule()" >Submit <BtnLoader v-if="is___adding"></BtnLoader> </Btn>
               </div> 
 
             </div>
@@ -257,6 +304,7 @@ function deleteSchedule(id, i, type=1){
                   
 
                     <span tooltip="Delete Schedule">
+                      <i @click.stop="prepareEdit(item)" class='bx bx-pencil text-danger cp me-2' ></i>
                       <i @click.stop="deleteSchedule(item.id, i, item.type)" class='bx bx-trash text-danger cp' ></i>
                     </span>
         

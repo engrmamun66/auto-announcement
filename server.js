@@ -194,6 +194,10 @@ app.get(`/${WEB_ROUTE}`, (req, res) => {
   app.post(prefix + '/schedules/add', (req, res) => {
     Schedules.add(req, res);
   });
+
+  app.post(prefix + '/schedules/update', (req, res) => {
+    Schedules.updateSchedule(req, res);
+  });
   
   app.get(prefix + '/schedules/list', (req, res) => {
     Schedules.list(req, res);
@@ -201,8 +205,7 @@ app.get(`/${WEB_ROUTE}`, (req, res) => {
 
   app.delete(prefix + '/schedules/delete/:id', (req, res) => {
     Schedules.deleteSchedule(req, res);
-  });
- 
+  }); 
    
 })
  

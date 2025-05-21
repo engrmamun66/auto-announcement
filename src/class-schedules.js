@@ -69,6 +69,55 @@ class Schedules {
     });
   }
 
+
+  updateSchedule(req, res) {
+    const { id, type, title, start_time, end_time, classes } = req.body;
+
+    if (!id || !type || !start_time || !end_time || !classes) {
+      res.status(400).send({ error: "Fields id, type, start_time, end_time, and classes are required." });
+      return;
+    }
+
+    const updatedTitle = title || `${start_time} - ${end_time}`;
+    const tableName = this.tableName;
+    const db = this.db;
+
+    const query = `
+      UPDATE ${tableName}
+      SET type = ?, title = ?, start_time = ?, end_time = ?, classes = ?
+      WHERE id = ?
+    `;
+
+    const params = [type, updatedTitle, start_time, end_time, classes, id];
+
+    db.run(query, params, function (err) {
+      if (err) {
+        res.status(500).send({ error: err.message });
+        return;
+      }
+
+      if (this.changes === 0) {
+        res.status(404).send({ error: "No record found with the specified ID." });
+        return;
+      }
+
+      const selectQuery = `SELECT * FROM ${tableName} WHERE id = ?`;
+
+      db.get(selectQuery, [id], (err, row) => {
+        if (err) {
+          res.status(500).send({ error: "Error fetching the updated record." });
+          return;
+        }
+
+        res.send({
+          message: "Record updated successfully.",
+          data: row,
+        });
+      });
+    });
+  }
+  
+
   
   deleteSchedule(req, res) {
 
@@ -93,13 +142,14 @@ class Schedules {
         return;
       }
 
-      res.send({ 
+      res.send({
         message: "Delete successful",
-        deletedId: id, 
+        deletedId: id,
       });
     });
   }
 
+ 
 
 
   list(req, res){ 
