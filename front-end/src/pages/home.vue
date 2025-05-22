@@ -123,7 +123,7 @@ onMounted(()=>{
           <div class="relative w-100 me-2">
                <EmergencyMode v-if="emergency_mode"></EmergencyMode>
                <EmergencyMode v-if="emergency_mode" style="left:calc(100% - 40px)"></EmergencyMode>
-               <input id="BARCODE_INPUT" type="text" @keyup.enter="inputBarcode" class="form-control px-4 py-2 text-center py-1 shadow" :placeholder="emergency_mode ? 'Emergency mode activated' : 'Barcode receiver field'">
+               <input id="BARCODE_INPUT" type="text" @keyup.enter="inputBarcode" @paste="inputBarcode" class="form-control px-4 py-2 text-center py-1 shadow" :placeholder="emergency_mode ? 'Emergency mode activated' : 'Barcode receiver field'">
           </div>
 
           <div v-if="isPlaying" @click="handlePayPause()" class="me-2 p-1 play-pause"><i class='bx bx-pause'></i></div>

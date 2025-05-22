@@ -23,6 +23,7 @@ const makeCarcode = inject('makeCarcode');
 const helper = inject('helper');
 const classes = inject('classes');
 let http = inject('http'); 
+const pushTheBarcode = inject('pushTheBarcode');
 let students = ref([])
 let params = ref({
     "page_no": 1,
@@ -368,13 +369,14 @@ onMounted(()=>{
                 <th>Sound</th>
                 <!-- <th>Sound-2</th> -->
                 <th>Status</th>
+                <th>Punch</th>
                 <th>Action</th> 
               </tr>
             </thead>
           </template>
           <template #rows>
             <template v-if="students?.length">
-              <template v-for="(std, i) in students">
+              <template v-for="(std, i) in students.toReversed()">
                 <tr>
                   <td class="text-left"> {{ std.class }} </td> 
                   <td class="text-left cp" @click="prepareToEdit(std)" >{{ std.name }}</td>
@@ -417,6 +419,10 @@ onMounted(()=>{
                     await http.post('/students/update-status', {id: std.id, status} );
                   
                   }"></Switch> </td> 
+
+                  <td>
+                    <button class="class-short-btn px-2" @click="pushTheBarcode(makeCarcode(std), {message: 'Card Punches Successful'})">Punch</button>
+                  </td>
                   <td> 
                     <div class="d-flex justify-content-center">
                       <i @click.stop="targetStdForBarcode=std" class='bx bx-barcode cp size-1p5' ></i>
@@ -524,6 +530,10 @@ onMounted(()=>{
   border-radius: 5px;
   color: white;
   margin-bottom: 5px;
+  transition: all 0.3s;
+}
+.class-short-btn:hover{
+  box-shadow: -2px 3px 4px rgba(0, 0, 0, 0.171);
 }
 .class-short-btn.active{
   background-color: #614203;

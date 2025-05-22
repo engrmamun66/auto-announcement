@@ -286,7 +286,7 @@ onMounted(async ()=>{
 })
 
 
-function pushTheBarcode(barcode='play-417-2024'){
+function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
      try {
 
           if(!is_started_schedule.value){
@@ -374,10 +374,16 @@ function pushTheBarcode(barcode='play-417-2024'){
                          if(!findLast){
                               wattingList.value.push(student)
                               emitter.emit('pushed_a_student__or__rechecktoPlay', student)
+                              if(message){
+                                    emitter.emit('toaster-success', { message, duration: 3000})
+                              } 
                          }
                          else if(findLast && findLast?.is_called){
                               wattingList.value.splice(findLastIndex, 0, student)
                               emitter.emit('pushed_a_student__or__rechecktoPlay', student)
+                              if(message){
+                                    emitter.emit('toaster-success', { message, duration: 3000})
+                              } 
                          } else if (findLast) {
                               let studentCard = document.querySelector(`[barcode="${barcode}"]`)
                               if(studentCard){
@@ -387,12 +393,12 @@ function pushTheBarcode(barcode='play-417-2024'){
                                         
                                    }, 2000);
                               }
-                              emitter.emit('toaster-warning', { message: 'Already added in here'})
+                              emitter.emit('toaster-error', { message: 'Already punched yet'})
                          }
                     } else {
                          student['start_ms'] = helper.miliseconds() - 1000
                          student['end_ms'] = helper.miliseconds() + (10 * 1000)
-                         wattingList.value.unshift(student)                        
+                         wattingList.value.unshift(student)  
                     } 
 
                     storage('wattingList').value = wattingList.value;
