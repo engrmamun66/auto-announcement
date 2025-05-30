@@ -62,7 +62,6 @@ function playThis (i, key = "isPlaying_sound1", student) {
   students.value?.forEach((item, i) => {
     item[key] = false
   });
-  console.log(student);
   
   student[key] = true
   
