@@ -57,15 +57,15 @@ async function getStudents({id=null}={}){
   }
 }
 
-function toggleLoopItem (data, index, key = "isPlaying_sound1") {
-  if (!data) return;
-  data?.forEach((item, i) => {
-    if (i == index) {
-      item[key] = !(item[key] ?? false);
-    } else {
-      item[key] = false;
-    }
+function playThis (i, key = "isPlaying_sound1", student) {
+ 
+  students.value?.forEach((item, i) => {
+    item[key] = false
   });
+  console.log(student);
+  
+  student[key] = true
+  
 }
  
 async function clearParams({dakhela=null, id=null, get=true}={}){
@@ -200,8 +200,10 @@ async function deleteStudent(id, i){
 onMounted(()=>{
   getStudents()
 })
+const log = console.log 
 
- 
+
+
 
 </script>
 
@@ -389,7 +391,7 @@ onMounted(()=>{
                       <template v-if="std[column]">            
                         <template v-if="!std[`isPlaying_${column}`]">            
                           <div class="d-flex align-items-center">
-                            <Btn  @click.stop="toggleLoopItem(students, i, `isPlaying_${column}`)" class="radius-10 sm sound w-100" style="padding: 2px auto;" >
+                            <Btn  @click.stop="playThis(i, `isPlaying_${column}`, std); " class="radius-10 sm sound w-100" style="padding: 2px auto;" >
                               <i class='bx bx-play size-1 transformY-3px'></i>&nbsp;Play
                             </Btn>
                             <span class="ms-2 me-1 cp" @click.stop="deleteAudio(std, column)" >
