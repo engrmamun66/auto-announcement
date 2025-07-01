@@ -637,7 +637,7 @@ const log = console.log
 }
 .std-clone-area{
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
 }
 .std-clone-area input{
   padding: 5px 8px;
