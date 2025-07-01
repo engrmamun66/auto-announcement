@@ -20,7 +20,7 @@ class Students {
     this.db = db;
   }
 
-  getStudents(req, res) {
+  async getStudents(req, res) {
     const page_no = parseInt(req.query.page_no) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const offset = (page_no - 1) * limit;
@@ -53,7 +53,12 @@ class Students {
   
     if (dakhela) {
       query += ` AND dakhela = ?`;       
-      queryParams.push(dakhela);
+      queryParams.push(dakhela); 
+    }
+
+    if (dakhela) {
+      query += ` AND dakhela = ?`;       
+      queryParams.push(dakhela); 
     }
   
     if (sound1) {
@@ -61,6 +66,10 @@ class Students {
         query += ` AND sound1 IS NOT NULL`;
       } else if (sound1 === 'no_sound') {
         query += ` AND sound1 IS NULL`;
+      } else {
+        // finding similer type 
+        query += ` AND sound1 = ?`;       
+        queryParams.push(sound1);  
       }
     }
   
@@ -144,11 +153,7 @@ class Students {
   getStudentByCardNumber(req, res) { 
     let { card_no, input } = req.body; // Extract card number from query parameters
     
-    if(input) card_no = String(input).replaceAll('/', '')
-
-    console.log({card_no, input}); // input comming from pyton app
-
-
+    if(input) card_no = String(input).replaceAll('/', '') 
   
     if (!card_no) {
       res.status(400).send({ error: "Card number is required." });
@@ -182,6 +187,40 @@ class Students {
       res.send({
         message: 'Punch accepted!',
       });
+    });
+  }
+
+
+  getStudentByDakhela(req, res) { 
+    let { dakhela } = req.params;  
+  
+    if (!dakhela) {
+      res.status(400).send({ error: req.params });
+      return;
+    }
+  
+    const query = `SELECT * FROM ${this.tableName} WHERE dakhela = ?`;
+  
+    this.db.get(query, [dakhela], (err, student) => {
+      if (err) {
+        res.status(500).send({ error: err.message });
+        return;
+      }  
+      res.send(student);
+    });
+  }
+
+  allStudents(req, res) {   
+  
+    const query = `SELECT * FROM ${this.tableName} WHERE 1`;
+  
+    this.db.all(query, [], (err, students) => {
+      if (err) {
+        res.status(500).send({ error: err.message });
+        return;
+      }
+       
+      res.send(students);
     });
   }
   
@@ -553,6 +592,92 @@ class Students {
         });
       });
     });
+  }
+
+
+  cloneStudent(req, res) {
+    
+    const { id, dakhela } = req.params;
+    
+    if(dakhela < 1000){
+      res.status(500).send({ message: 'কপি করার জন্য দাখেলা ১০০০ এর উপরে দিন' });
+      return;
+    }
+
+    let query = `SELECT * FROM ${this.tableName} WHERE id=?`;
+    this.db.get(query, [id], async (err, studentRow) => {
+      if (err) {
+        res.status(500).send({ message: err.message });
+        return;
+      } 
+
+       this.db.get(`SELECT * FROM ${this.tableName} WHERE dakhela=?`, [dakhela], async(error, existing_student_by_dakhela) => {
+          if(existing_student_by_dakhela){
+            return res.status(500).send({ message: `Already used this dakhela (${dakhela})` });
+          } else {
+            let {name, class: className, card_no, year, status, sound1,} = studentRow
+             
+              const class_short = utils.getClassShort(className);
+            
+              if (!className || !name || !class_short || !dakhela) {
+                res.status(500).send({ message: "All fields (class, name, class_short, dakhela, year) are required." });
+                return;
+              }
+            
+              const tableName = this.tableName;
+            
+              const query = `
+                INSERT INTO ${tableName} (class, name, class_short, dakhela, year, card_no, sound1)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+              `;
+            
+              name = `${name} (Copied)`
+              let params = [className, name, class_short, dakhela, year || null, card_no, sound1];
+            
+              const db = this.db; // Capture `this.db` reference
+
+            
+              db.run(query, params, function (err) {
+                if (err) {
+                  res.status(500).send({ error: err.message });
+                  return;
+                }
+            
+                const selectQuery = `SELECT * FROM ${tableName} WHERE id = ?`;
+                const studentId = this.lastID; // `this` here refers to the `RunResult` object.
+            
+                db.get(selectQuery, [studentId], (err, clonedStudent) => {
+                  if (err) {
+                    res.status(500).send({ message: "Error fetching the newly added student." });
+                    return;
+                  } 
+            
+                  res.send({
+                    message: "কপি করা সম্পন্ন হয়েছে",
+                    data: clonedStudent, // Full row of the newly added student
+                  });
+                });
+              });
+ 
+          }
+
+
+            
+
+       }) 
+
+
+       
+      
+  
+      // res.send({
+      //   studentRow,
+      //   dakhela_no,
+      // });
+    });
+
+
+
   }
 
   updateStudent(req, res) {

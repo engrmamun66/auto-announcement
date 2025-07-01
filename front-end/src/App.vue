@@ -32,6 +32,7 @@ let palylistComponent = ref(null)
 provide('palylistComponent', palylistComponent)
 
 let DEVICE_TOKEN = ref(null)
+let all_students = ref([])
 
 
 
@@ -53,6 +54,8 @@ provide('refreshDOM', refreshDOM)
 provide('user_interacted', user_interacted) 
 provide('emergency_mode', emergency_mode) 
 provide('pushTheBarcode', pushTheBarcode) 
+provide('all_students', all_students) 
+provide('getAllStudents', getAllStudents) 
 
 
 
@@ -233,9 +236,28 @@ async function getSchedules(){
  }
 
 }
+ 
+async function getAllStudents(){
+ 
+ try { 
+
+   http.get('/students/all').then(response => {
+     if(response.status == 200){
+       all_students.value = response.data
+     }
+   }).finally(()=>{
+      
+   })
+   
+ } catch (error) {
+   console.warn('addSchedule__error::', error);
+ }
+
+}
 
 onMounted(async ()=>{  
     
+    await getAllStudents()
     await getSchedules()
 
     try {

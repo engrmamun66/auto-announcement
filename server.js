@@ -129,13 +129,23 @@ app.get(`/${WEB_ROUTE}`, (req, res) => {
     res.send({ ...config })
   });
 
-  app.get(prefix + "/students", (req, res) => {
+  app.get(prefix + "/students", (req, res) => { // with pagiantion
     Students.getStudents(req, res)
+  });
+
+  app.get(prefix + "/students/all", (req, res) => { // without pagination
+    Students.allStudents(req, res)
   });
   
    
   app.get(prefix + "/student/:id", (req, res) => {
     Students.getStudent(req, res)
+  });
+
+  
+
+  app.get(prefix + "/student/by-dakhela/:dakhela", (req, res) => {
+    Students.getStudentByDakhela(req, res)
   });
   
   app.post(prefix + "/students/import", upload.single("file"), (req, res) => {
@@ -178,6 +188,10 @@ app.get(`/${WEB_ROUTE}`, (req, res) => {
 
   app.post(prefix + '/students/add', (req, res) => {
     Students.addStudent(req, res);
+  });
+
+  app.post(prefix + '/students/clone/:id/:dakhela', (req, res) => {
+    Students.cloneStudent(req, res);
   });
 
   app.post(prefix + '/students/update', (req, res) => {
