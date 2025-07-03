@@ -55,8 +55,8 @@ onMounted(()=>{
   font-size: 17px;
   text-shadow: 1px 2px 2px rgb(0,0,0);
   margin-right: 10px;
-  border-top-left-radius: 20px;
-  border-top-right-radius: 20px;
+  border-top-left-radius: 0px;
+  border-top-right-radius: 0px;
 }
 
 .topnav {
