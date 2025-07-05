@@ -58,18 +58,20 @@ async function getStudents({id=null}={}){
       parameters.card_no = null;
       let dakehela_number = Number(parameters.dakhela)
       
+      
       let student = all_students.value.find(s => {
         return s.dakhela == dakehela_number
       })
       if(student){
         if(/||dakhela::\d+/g.test(student.name)){
-          let [ _, main_dakhele ] = /dakhela::(\d+)/g.exec(student.name)
-          main_dakhele = Number(main_dakhele)
-
-          parameters.dakhela = main_dakhele
+          let [ _, main_dakhele ] = /dakhela::(\d+)/g.exec(student.name) || []
+          if(main_dakhele){
+            main_dakhele = Number(main_dakhele)
+            parameters.dakhela = main_dakhele
+          }
           parameters.only_similler_students = true 
         }  
-      }
+      } 
     }
 
     let response = await http.get('/students', { params: {...parameters, id} }) 

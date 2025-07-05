@@ -58,7 +58,6 @@ class Students {
 
 
         query += ` OR name LIKE ?)`;       
-        // queryParams.push(`||dakhela::${dakhela}`);  
         queryParams.push(`%||dakhela::${dakhela}`);  
 
         // res.status(500).send({ query, queryParams  });
