@@ -57,20 +57,26 @@ async function getStudents({id=null}={}){
       parameters.name = null;
       parameters.card_no = null;
       let dakehela_number = Number(parameters.dakhela)
-      parameters.only_similler_students = true 
-      // parameters.student_id = all_students.value.find(s => {
-      //   return s.dakhela == dakehela_number
-      // })?.id
+      
+      let student = all_students.value.find(s => {
+        return s.dakhela == dakehela_number
+      })
+      if(student){
+        if(/||dakhela::\d+/g.test(student.name)){
+          let [ _, main_dakhele ] = /dakhela::(\d+)/g.exec(student.name)
+          main_dakhele = Number(main_dakhele)
+
+          parameters.dakhela = main_dakhele
+          parameters.only_similler_students = true 
+        }  
+      }
     }
 
-
-    http.get('/students', { params: {...parameters, id} }).then(response => {
-      if(response.status == 200){
-        students.value = response.data.data;
-        params.value = {...params.value, ...response.data.pagination};
-        getAllStudents()
-      }
-    })
+    let response = await http.get('/students', { params: {...parameters, id} }) 
+    if(response.status == 200){
+      students.value = response.data.data;
+      params.value = {...params.value, ...response.data.pagination};
+    } 
   } catch (error) {
     console.warn('getStudents_error::', error);
   }
@@ -183,12 +189,12 @@ async function onClickClone(std){
  
     
     
-    http.post(`/students/clone/${std.id}`, data).then(response => {
+    http.post(`/students/clone/${std.id}`, data).then(async (response) => {
       if(response.status == 200){
         std.cloneMode = false
         clearParams({dakhela: std.dakhela})
         only_similler_students.value = true
-        getStudents()
+        await getStudents()
         getAllStudents()
       }
     }).catch((err) => { 
@@ -304,7 +310,7 @@ const log = console.log
               <div class="col-12">
                 <div class="form-group">
                   <label for="email">Class</label>
-                  <select v-model="payload.class" class="form-control" id="ClassId">
+                  <select v-model="payload.class" class="form-control" id="ClassId" :disabled="payload.name.indexOf('||dakhela') > -1">
                     <option :value="null">-class-</option>
                     <template v-for="(cls, index) in classes" :key="index">
                       <option :value="cls.class_name">{{cls.class_name}}</option>
@@ -316,21 +322,21 @@ const log = console.log
               <div class="col-12">
                 <div class="form-group">
                   <label for="name">Name</label>
-                  <input v-model="payload.name" type="text" class="form-control">
+                  <input v-model="payload.name" type="text" class="form-control" :disabled="payload.name.indexOf('||dakhela') > -1">
                 </div>
               </div>
 
               <div class="col-12">
                 <div class="form-group">
                   <label for="name">Dakhela</label>
-                  <input v-model="payload.dakhela" type="number" class="form-control">
+                  <input v-model="payload.dakhela" type="number" class="form-control" :disabled="payload.name.indexOf('||dakhela') > -1">
                 </div>
               </div>
 
               <div class="col-12">
                 <div class="form-group">
                   <label for="year">Year</label> 
-                  <select v-model="payload.year" id="" class="form-control">
+                  <select v-model="payload.year" id="" class="form-control" :disabled="payload.name.indexOf('||dakhela') > -1">
                     <option :value="new Date().getFullYear()">{{ new Date().getFullYear() }}</option>
                     <option :value="new Date().getFullYear() - 1">{{ new Date().getFullYear() - 1 }}</option>
                     <option :value="new Date().getFullYear() - 2">{{ new Date().getFullYear() - 2 }}</option>
@@ -348,7 +354,7 @@ const log = console.log
               <div class="col-12 d-flex justify-content-center">
                 <Btn @click.stop="clearPayload" class="red me-2" >Cancel</Btn>
                 <Btn v-if="!payload.id" @click="addStudent" class="me-0" >Submit <BtnLoader v-if="is___adding"></BtnLoader> </Btn>
-                <Btn v-else @click="updateStudent" class="me-0" >Update <BtnLoader v-if="is___adding"></BtnLoader> </Btn>
+                <Btn v-else @click="updateStudent" class="me-0" :disabled="payload.name.indexOf('||dakhela') > -1">Update <BtnLoader v-if="is___adding"></BtnLoader> </Btn>
               </div> 
 
             </div>
@@ -465,14 +471,15 @@ const log = console.log
               <template v-for="(std, i) in students.toReversed()">
                 <tr>
                   <td class="text-left"> {{ std.class }} </td> 
-                  <td class="text-left cp" @click="prepareToEdit(std)" :student-id="std.id" >{{ std.name }}</td>
-                  <!-- <td :class="{'bg-danger-subtle': !std.card_no}"> {{ std.card_no }} </td>  -->
+                  <td class="text-left cp" @click="prepareToEdit(std)" :student-id="std.id" >{{ std.name.split('||')?.[0] }}</td>
                   <td> 
                     <label>
                       {{ std.dakhela }}
-                      <i @click.stop="()=>{
+                      <span tooltip="Cone Student">
+                      <i v-if="std.name.indexOf('||dakhela') > -1 === false" @click.stop="()=>{
                         std.cloneMode = !(!!(std.cloneMode));
                       }" class="bx bxs-copy-alt cp px-1"></i>
+                      </span>
                     </label>
                     
                     <template v-if="std?.cloneMode">
@@ -496,7 +503,7 @@ const log = console.log
                             <Btn  @click.stop="playThis(i, `isPlaying_${column}`, std); " class="radius-10 sm sound w-100" style="padding: 2px auto;" >
                               <i class='bx bx-play size-1 transformY-3px'></i>&nbsp;Play
                             </Btn>
-                            <span class="ms-2 me-1 cp" @click.stop="deleteAudio(std, column)" >
+                            <span v-if="std.name.indexOf('||dakhela') > -1 === false" class="ms-2 me-1 cp" @click.stop="deleteAudio(std, column)" >
                               <i class='bx bxs-trash-alt text-danger size-1' ></i>
                             </span>
                           </div> 
