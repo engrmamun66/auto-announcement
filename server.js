@@ -190,7 +190,7 @@ app.get(`/${WEB_ROUTE}`, (req, res) => {
     Students.addStudent(req, res);
   });
 
-  app.post(prefix + '/students/clone/:id/:dakhela', (req, res) => {
+  app.post(prefix + '/students/clone/:id/', (req, res) => {
     Students.cloneStudent(req, res);
   });
 

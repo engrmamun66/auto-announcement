@@ -28,7 +28,7 @@ const all_students = inject('all_students', [])
 const getAllStudents = inject('getAllStudents', () => {})
 
 let students = ref([])
-let only_simillerDakhalaBySound1 = ref(false)
+let only_similler_students = ref(false)
 let params = ref({
     "page_no": 1,
     "total": 3,
@@ -52,16 +52,15 @@ async function getStudents({id=null}={}){
   try {
     let parameters = {...params.value, id}
 
-    if(only_simillerDakhalaBySound1.value && parameters.dakhela){
-      console.log('inside');
+    if(only_similler_students.value && parameters.dakhela){
       parameters.class_name = null;
       parameters.name = null;
       parameters.card_no = null;
       let dakehela_number = Number(parameters.dakhela)
-      parameters.dakhela = null;
-      parameters.sound1 = all_students.value.find(s => {
-        return s.dakhela == dakehela_number
-      })?.sound1 || null
+      parameters.only_similler_students = true 
+      // parameters.student_id = all_students.value.find(s => {
+      //   return s.dakhela == dakehela_number
+      // })?.id
     }
 
 
@@ -69,6 +68,7 @@ async function getStudents({id=null}={}){
       if(response.status == 200){
         students.value = response.data.data;
         params.value = {...params.value, ...response.data.pagination};
+        getAllStudents()
       }
     })
   } catch (error) {
@@ -101,7 +101,7 @@ async function clearParams({dakhela=null, id=null, get=true}={}){
   params.value.card_no = null
   params.value.dakhela = dakhela
   params.value.sound1 = null
-  only_simillerDakhalaBySound1.value = false
+  only_similler_students.value = false
   if(get) getStudents({id}) 
 }
  
@@ -167,26 +167,34 @@ async function onClickClone(std){
     }
 
 
-    if(!std.__dakhela){
+    if(!std.dakhela_new){
       emitter.emit('toaster-warning', {message: 'নতুন দাখেল নাম্বার লিখুন'})
       return
     }
-
-    data.dakhela = Math.abs(Number(std.__dakhela))
-    if(data.dakhela < 1000){
+    
+    data.dakhela_new = Math.abs(Number(std.dakhela_new)) 
+    console.log('data.dakhela_newdata.dakhela_new///', data.dakhela_new);
+    
+    if(data.dakhela_new < 1000){ 
       emitter.emit('toaster-warning', {message: 'কপি করার জন্য দাখেলা ১০০০ এর উপরে দিন'})
       return
-    }
+    } 
+
+ 
     
-    http.post(`/students/clone/${std.id}/${data.dakhela}`, data).then(response => {
+    
+    http.post(`/students/clone/${std.id}`, data).then(response => {
       if(response.status == 200){
         std.cloneMode = false
         clearParams({dakhela: std.dakhela})
-        only_simillerDakhalaBySound1.value = true
+        only_similler_students.value = true
         getStudents()
+        getAllStudents()
       }
-    }).catch((response) => {
-      std.error_message = response.data?.message
+    }).catch((err) => { 
+      if(err.response.data?.message){
+        emitter.emit('toaster-error', { message: err.response.data?.message })
+      }
     }).finally(()=>{
       
     })
@@ -376,7 +384,7 @@ const log = console.log
                 <label for="email">Dakhela
 
                   <span tooltip="All Smillar">
-                    <input v-model="only_simillerDakhalaBySound1" :value="only_simillerDakhalaBySound1" type="checkbox" @change="()=>{
+                    <input v-model="only_similler_students" :value="only_similler_students" style="opacity: 0.7;" type="checkbox" @change="()=>{
                       if(params.dakhela){
                         getStudents()
                       }
@@ -469,7 +477,7 @@ const log = console.log
                     
                     <template v-if="std?.cloneMode">
                       <div class="std-clone-area">
-                        <input type="number" @input="std.__dakhela = $event.target.value" />
+                        <input type="number" @input="std.dakhela_new = $event.target.value" />
                         <button @click="onClickClone(std)">Copy</button>
                       </div>
                       <p v-if="std?.error_message" class="text-danger">

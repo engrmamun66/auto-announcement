@@ -25,7 +25,7 @@ class Students {
     const limit = parseInt(req.query.limit) || 10;
     const offset = (page_no - 1) * limit;
   
-    const { id, name, class_name, sound1, dakhela, card_no } = req.query;
+    const { id, name, class_name, sound1, dakhela, card_no, only_similler_students } = req.query;
   
     let query = `SELECT * FROM ${this.tableName} WHERE 1=1`;
     let queryParams = [];
@@ -52,14 +52,21 @@ class Students {
     }
   
     if (dakhela) {
-      query += ` AND dakhela = ?`;       
-      queryParams.push(dakhela); 
-    }
+      if(only_similler_students){
+        query += ` AND (dakhela = ?`;       
+        queryParams.push(dakhela); 
 
-    if (dakhela) {
-      query += ` AND dakhela = ?`;       
-      queryParams.push(dakhela); 
-    }
+
+        query += ` OR name LIKE ?)`;       
+        queryParams.push(`||dakhela::${dakhela}`);  
+
+      } else {
+        query += ` AND dakhela = ?`;       
+        queryParams.push(dakhela); 
+      }
+      
+
+    } 
   
     if (sound1) {
       if (sound1 === 'has_sound') {
@@ -596,10 +603,13 @@ class Students {
 
 
   cloneStudent(req, res) {
+    // return res.status(500).send(req.body);
     
-    const { id, dakhela } = req.params;
-    
-    if(dakhela < 1000){
+    const { id } = req.params;
+    const { dakhela, dakhela_new } = req.body;
+
+
+    if(dakhela_new < 1000){
       res.status(500).send({ message: 'কপি করার জন্য দাখেলা ১০০০ এর উপরে দিন' });
       return;
     }
@@ -611,11 +621,11 @@ class Students {
         return;
       } 
 
-       this.db.get(`SELECT * FROM ${this.tableName} WHERE dakhela=?`, [dakhela], async(error, existing_student_by_dakhela) => {
+       this.db.get(`SELECT * FROM ${this.tableName} WHERE dakhela=?`, [dakhela_new], async(error, existing_student_by_dakhela) => {
           if(existing_student_by_dakhela){
-            return res.status(500).send({ message: `Already used this dakhela (${dakhela})` });
+            return res.status(500).send({ message: `এই দাখেলাটি ইতিমধ্যে ব্যবহার করা হয়েছে (${dakhela_new})`, existing_student_by_dakhela });
           } else {
-            let {name, class: className, card_no, year, status, sound1,} = studentRow
+            let {name, class: className, card_no, year, status, sound1} = studentRow
              
               const class_short = utils.getClassShort(className);
             
@@ -631,8 +641,8 @@ class Students {
                 VALUES (?, ?, ?, ?, ?, ?, ?)
               `;
             
-              name = `${name} (Copied)`
-              let params = [className, name, class_short, dakhela, year || null, card_no, sound1];
+              name = `${name} (Copied)||dakhela::${dakhela}`
+              let params = [className, name, class_short, dakhela_new, year || null, card_no, sound1];
             
               const db = this.db; // Capture `this.db` reference
 
