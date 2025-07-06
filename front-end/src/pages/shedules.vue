@@ -78,7 +78,7 @@ function addSchedule(){
   try {
 
     if(!payload.title || !payload.type || !payload.start_time || !payload.end_time || !payload.classes?.length){
-      emitter.emit('toaster-warning', { message: 'All field are required' })
+      emitter.emit('toaster-warning', { message: 'সকল ফিল্ড পূরণ করা গুরুত্বপূর্ণ' })
       return  
     }
     let _payload = helper.clone(payload)
@@ -109,11 +109,11 @@ function updateSchedule(){
   try {
 
     if(!payload.id){
-      emitter.emit('toaster-warning', { message: 'Id not found' })
+      emitter.emit('toaster-warning', { message: 'আইডি পাওয়া যায়নি' })
       return  
     }
     if(!payload.title || !payload.type || !payload.start_time || !payload.end_time || !payload.classes?.length){
-      emitter.emit('toaster-warning', { message: 'All field are required' })
+      emitter.emit('toaster-warning', { message: 'সকল ফিল্ড পূরণ করা গুরুত্বপূর্ণ' })
       return  
     }
     let _payload = helper.clone(payload)

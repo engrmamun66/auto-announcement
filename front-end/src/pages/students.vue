@@ -19,11 +19,11 @@ const route = inject('route');
 const router = inject('router');
 const emitter = inject('emitter');
 const printDiv = inject('printDiv');
-const makeCarcode = inject('makeCarcode');
 const helper = inject('helper');
 const classes = inject('classes');
 let http = inject('http'); 
 const pushTheBarcode = inject('pushTheBarcode');
+const makeCarcode = inject('makeCarcode');
 const all_students = inject('all_students', [])
 const getAllStudents = inject('getAllStudents', () => {})
 
@@ -120,7 +120,7 @@ async function deleteAudio(std, colName){
       std[colName] = null
     })
   } else if(text) {
-    emitter.emit('toaster-error', { message: 'Pass code not matched' })
+    emitter.emit('toaster-error', { message: 'দয়া করে সঠিক পাসকোড দিন' })
   }
 }
 
@@ -263,7 +263,7 @@ async function deleteStudent(id, i){
     if(!confirm('Do you want to delete?')) return;
     let passcode = prompt('Type passcode to delete')
     if(passcode !== String(new Date().getDate()) && passcode !== 'D') {
-      emitter.emit('toaster-error', {message: 'Passcode not matched!'})
+      emitter.emit('toaster-error', {message: 'দয়া করে সঠিক পাসকোড দিন'})
       return
     }
 

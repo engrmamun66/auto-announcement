@@ -48,7 +48,7 @@ async function eraseAll() {
           if(!confi) return
           http.get('/students/erase-all').then(response => {
                if(response.status == 200){
-                    emitter.emit('toaster-success', {message: 'All students data deleted'})
+                    emitter.emit('toaster-success', {message: 'সব ছাত্র মুছে ফেলা হয়েছে'})
                }
           })
      } catch (error) {

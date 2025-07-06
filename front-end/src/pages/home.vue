@@ -27,6 +27,7 @@ const speakText = inject('speakText');
 const callbacks = inject('callbacks');
 const getSchedules = inject('getSchedules');
 const pushTheBarcode = inject('pushTheBarcode');
+const makeCarcode = inject('makeCarcode');
 
 const log = console.log
 
@@ -38,6 +39,8 @@ let refreshDOM = inject('refreshDOM')
 
 let emergency_mode = inject('emergency_mode')
 let palylistComponent = inject('palylistComponent')
+
+const all_students = inject('all_students', [])
 
 let isPlaying = ref(true)
 
@@ -70,12 +73,25 @@ function inputBarcode(event){
      ttoout = setTimeout(() => {          
         
           
-          let barcode = event.target.value;
-          if(barcode){
+          let input_value = event.target.value;
+          if(!input_value) return
+
+          const is_digits = /^\d{1,}$/.test(input_value)
+          if(is_digits){
+               let dakhela_number = Number(input_value)
+               let student = all_students.value.find(s => s.dakhela === dakhela_number)
+               if(student){
+                    event.target.value = ''
+                    pushTheBarcode(makeCarcode(student))
+               } else {
+                    emitter.emit('toaster-error', { message: 'দয়া করে সঠিক পাসকোড দিন' })
+               } 
+          } else {
+               const barcode = input_value
                pushTheBarcode(barcode)
                setTimeout(() => {
                     event.target.value = ''
-               }, 300);
+               }, 300); 
           }
      }, 10);
 }

@@ -47,7 +47,7 @@ async function uploadNow(){
   if(file.value){    
     loading.value = true
     http.post('/students/import', {file: file.value}, {formData: true}).then(response => {
-      emitter.emit('toaster-success', {message: 'Import successful'})
+      emitter.emit('toaster-success', {message: 'import সম্পন্ন হয়েছে'})
       file.value = null;
     }).finally(()=>{
       fileInputField.value = false

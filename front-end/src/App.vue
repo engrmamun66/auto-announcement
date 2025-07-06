@@ -312,7 +312,7 @@ function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
      try {
 
           if(!is_started_schedule.value){
-               emitter.emit('toaster-error', { message: 'Schedule not started'})
+               emitter.emit('toaster-error', { message: 'শিডিউল এখনো শুরু হয়নি'})
                return
           }
           
@@ -323,7 +323,7 @@ function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
 
           if(!emergency_mode.value){
                if(!(/^[a-z_0-9]+-\d{1,}-sound(1|2|3)/gi.test(barcode))){
-                    emitter.emit('toaster-error', { message: 'Barcode is not valid', duration: 5000})
+                    emitter.emit('toaster-error', { message: 'বারকোড সঠিক নয়', duration: 5000})
                     return
                }
           }
@@ -336,12 +336,12 @@ function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
                let isAllowed = callbacks.isMatchedAnySchedule(class_short)
              
                if(!isAllowed){
-                    emitter.emit('toaster-error', { message: 'Punch schedule not started'})
+                    emitter.emit('toaster-error', { message: 'পাঞ্চ এর সময় শুরু হয়নি'})
                     return
                }
                let targetClass = classes.value.filter(cls => cls.class_short == class_short)?.[0];
                if(!targetClass?.isActive){
-                    emitter.emit('toaster-error', { message: 'This class is inactive now'})
+                    emitter.emit('toaster-error', { message: 'এই ক্লাসটি আপাতত বন্ধ আছে'})
                     return
                }
           }
@@ -415,7 +415,7 @@ function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
                                         
                                    }, 2000);
                               }
-                              emitter.emit('toaster-error', { message: 'Already punched yet'})
+                              emitter.emit('toaster-error', { message: 'ইতিমধ্যে কার্ডটি পাঞ্চ করা হয়েছে'})
                          }
                     } else {
                          student['start_ms'] = helper.miliseconds() - 1000

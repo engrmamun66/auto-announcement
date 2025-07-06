@@ -43,7 +43,7 @@ async function uploadNow(){
   if(file.value){    
     loading.value = true
     http.post('/students/upload-audio', {id, file: file.value, column: props.column}, {formData: true}).then(response => {
-      emitter.emit('toaster-success', {message: 'Audio uploaded'})
+      emitter.emit('toaster-success', {message: 'আডিও আপলোড সম্পন্ন হয়েছে'})
       file.value = null;
       emits('change', response.data)
 
