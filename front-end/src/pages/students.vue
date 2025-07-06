@@ -438,7 +438,7 @@ const log = console.log
             <div class="col-12 mt-4">
               <template v-for="cls in classes">
                 <button class="class-short-btn" :class="{'active': params.class_name === cls.class_name}" 
-                @click="params.class_name = cls.class_name;getStudents()" >{{ helper.ucfirst(cls.class_short) }}</button>
+                @click="params.page_no = 1;params.class_name = cls.class_name;getStudents()" >{{ helper.ucfirst(cls.class_short) }}</button>
               </template>
 
             </div>
