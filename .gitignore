@@ -139,5 +139,7 @@ database/
 
 exe/dist/
 exe/build/
+public/logo.png
+public/logo.jpg
 exe/main.spec
 config.js

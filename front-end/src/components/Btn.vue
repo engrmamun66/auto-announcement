@@ -33,8 +33,8 @@ button.xsm{
   font-size: 10px;
 }
 button.red{
-  background: #ea6b1a;
-  background-color: #ea6b1a;
+  background: #fa6548;
+  background-color: #fa6548;
 }
 button.sound{
   color: black;

@@ -12,15 +12,14 @@ body{
     filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#DDB4F6", endColorstr="#8DD0FC", GradientType=1 );
 }
 body:not(.user-interacted) {
-    /* filter:  drop-shadow(2px 4px 6px black); */
-}
+    /* filter:  drop-shadow(2px 4px 44px black); */
+} 
 
 .page-contents{
     height: auto;
     margin: 0px;
     padding: 20px;
     min-height: max-content;
-    background-image: url('../img/sound.png');
     background-position: 60% -30%;
     background-size: cover;
     background-repeat: repeat-y;

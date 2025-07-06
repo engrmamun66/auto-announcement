@@ -8,7 +8,7 @@ const multer = require("multer");
 const upload = multer({ dest: DIR + '/public/temp' });
 const webSocket = require("./socket/socket")
 const { getToken } = require('./src/device')
-let webContents = require("./web-contents"); 
+let webContents = require("./src/web-contents"); 
 const fs = require('fs');
 const path = require('path');
 
@@ -69,6 +69,9 @@ const audioUpload = multer({
 
 app.get(`/app`, (req, res) => { 
   getToken(Students)
+
+  webContents = webContents.replace('DYNAMIC_LOGO_URL', `"../${ config.logo || logo.example.png}"`)
+
   if(config.css_vars){
     webContents = webContents.replace('<!-- CSS_VARS -->', `
       <style>
