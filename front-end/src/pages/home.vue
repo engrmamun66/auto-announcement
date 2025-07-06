@@ -84,7 +84,7 @@ function inputBarcode(event){
                     event.target.value = ''
                     pushTheBarcode(makeCarcode(student))
                } else {
-                    emitter.emit('toaster-error', { message: 'দয়া করে সঠিক পাসকোড দিন' })
+                    emitter.emit('toaster-error', { message: 'এই দাখেলা দিয়ে কোনও তথ্য খুঁজে পাওয়া যায়নি' })
                } 
           } else {
                const barcode = input_value
@@ -481,8 +481,13 @@ function removeFromWattingList(student, i){
      background: #da4646;
      color: white;
      top: -1px;
-     padding: 2px 5px;
+     padding: 0px 4px;
      border-bottom-left-radius: 9px;
      cursor: pointer;
+     opacity: 0;
+     transition: all 0.3s;
+}
+.student-box:hover .card-canceller{
+     opacity: 1;
 }
 </style>
