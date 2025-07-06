@@ -36,7 +36,11 @@ button.red{
   background-color: #ea6b1a;
 }
 button.sound{
-  color: #141414c6;
+  color: white;
+  background-color: #ddf9f09c;
+}
+button.sound:hover{
+  color: black;
   background-color: #ddf9f09c;
 }
 
