@@ -11,6 +11,7 @@ import Switch from '../components/Switch.vue'
 import BtnLoader from '../components/BtnLoader.vue'
 import BarcodeScannigAnimation from '../components/BarcodeScannigAnimation.vue'
 import EmergencyMode from '../components/EmergencyMode.vue'
+import PlayingAnimation from '../components/PlayingAnimation.vue'
 import helper from '../utilities/helper';
 
 
@@ -291,8 +292,15 @@ function removeFromWattingList(student, i){
                                         <div class="class-name" @click="log(student)">
                                              {{ student.class }} [{{ student.dakhela }}]
                                         </div>
-                                        <div class="class-name panch-time mt-1" @click="log(student)">
-                                             Punched {{ moment.unix(student.punch_exact_time).format('hh:mm A') }}
+                                        <div class="class-name panch-time mt-1" @click="log({student, currentItem: storage('currentItem').value}) ">
+                                             <div class="d-flex justify-content-between align-items-center">
+                                                  <label for="">Punched {{ moment.unix(student.punch_exact_time).format('hh:mm A') }}</label>
+                                                  <template v-if="!student.is_called && student?.dakhela == storage('currentItem').value?.dakhela">
+                                                       <div>
+                                                            <PlayingAnimation></PlayingAnimation>
+                                                       </div>
+                                                  </template> 
+                                             </div>
                                         </div>
                                        <div class="icons"> 
                                              <i v-if="!student.is_called" class='bx bx-check'></i>
@@ -365,7 +373,7 @@ function removeFromWattingList(student, i){
 
   /* overflow-y: auto; */
 }
-.watting-list .set-max-height div {
+.watting-list .set-max-height > div {
   max-height: 100%;
   width: 100%;
   display: flex;
