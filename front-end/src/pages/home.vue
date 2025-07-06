@@ -332,13 +332,13 @@ function removeFromWattingList(student, i){
 
 <style>
 .play-pause{
- border: 1px solid #004311;
-    color: blue;
-    background-color: #41ddbf;
+     border: 1px solid var(--primaryColor);
+    color: rgb(255, 255, 255);
+    background: var(--grad3);
     border-radius: 5px;
     font-size: 18px;
     cursor: pointer;
-}
+} 
 .sections {
   display: flex;
   justify-content: space-between;

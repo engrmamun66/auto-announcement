@@ -70,8 +70,13 @@ const audioUpload = multer({
 app.get(`/app`, (req, res) => { 
   getToken(Students)
   if(config.css_vars){
-    
-    webContents = webContents.replace('<!-- CSS_VARS -->', `<style>:root{${config.css_vars}}</style>`)
+    webContents = webContents.replace('<!-- CSS_VARS -->', `
+      <style>
+      :root{
+        ${config.css_vars}
+      }
+      </style>
+      `)
   }
   res.send(webContents)
 });

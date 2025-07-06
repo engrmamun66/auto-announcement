@@ -68,7 +68,7 @@ onMounted(()=>{
 .topnav a {
   float: left;
   display: block;
-  color: #f2f2f2;
+  color: white;
   text-align: center;
   padding: 14px 33px;
   text-decoration: none;

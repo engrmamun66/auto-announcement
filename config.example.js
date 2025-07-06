@@ -93,13 +93,14 @@ module.exports = {
           }, 
    ], 
    css_vars: `
-     --primaryColor: #1fb217;
-     --secondaryColor: #1fb217;
+     /* === Black & White Theme */
+     --primaryColor: #222322;
+     --secondaryColor: #3a3a3a;
      --borderColor: #d5fdd7;
-     --fontColor: #038824;
-     --grad1: linear-gradient(90deg, rgba(80, 180, 37, 0.636) 0%, hsla(204, 95%, 77%, 1) 100%);
-     --grad2: linear-gradient(90deg, rgba(141, 208, 252, .348) 0%, rgba(223, 182, 246, .486) 100%);
-     --grad3: linear-gradient(90deg, #06761d 0%, #085804 100%); 
+     --fontColor: #222322;
+     --grad1: linear-gradient(90deg, rgba(137, 137, 137, 0.636) 0%, rgb(227, 244, 255) 100%);
+     --grad2: linear-gradient(90deg, rgba(118, 118, 118, 0.348) 0%, rgba(246, 231, 255, 0.486) 100%);
+     --grad3: linear-gradient(90deg, #222322 0%, #3a3a3a 100%); 
      `, 
      // css_vars: false
 }
