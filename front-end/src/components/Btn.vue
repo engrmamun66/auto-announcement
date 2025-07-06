@@ -38,10 +38,12 @@ button.red{
 }
 button.sound{
   color: white;
+  background: #ddf9f09c;
   background-color: #ddf9f09c;
 }
 button.sound:hover{
   color: black;
+  background: #ddf9f09c;
   background-color: #ddf9f09c;
 }
 
