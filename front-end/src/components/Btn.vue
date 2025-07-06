@@ -37,7 +37,7 @@ button.red{
   background-color: #ea6b1a;
 }
 button.sound{
-  color: white;
+  color: black;
   background: #ddf9f09c;
   background-color: #ddf9f09c;
 }
