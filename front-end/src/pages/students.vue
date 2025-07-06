@@ -312,7 +312,7 @@ const log = console.log
               <div class="col-12">
                 <div class="form-group">
                   <label for="email">Class</label>
-                  <select v-model="payload.class" class="form-control" id="ClassId" :disabled="payload.name.indexOf('||dakhela') > -1">
+                  <select v-model="payload.class" class="form-control" id="ClassId" :disabled="payload.name && payload.name.indexOf('||dakhela') > -1">
                     <option :value="null">-class-</option>
                     <template v-for="(cls, index) in classes" :key="index">
                       <option :value="cls.class_name">{{cls.class_name}}</option>
@@ -324,21 +324,21 @@ const log = console.log
               <div class="col-12">
                 <div class="form-group">
                   <label for="name">Name</label>
-                  <input v-model="payload.name" type="text" class="form-control" :disabled="payload.name.indexOf('||dakhela') > -1">
+                  <input v-model="payload.name" type="text" class="form-control" :disabled="payload.name && payload.name.indexOf('||dakhela') > -1">
                 </div>
               </div>
 
               <div class="col-12">
                 <div class="form-group">
                   <label for="name">Dakhela</label>
-                  <input v-model="payload.dakhela" type="number" class="form-control" :disabled="payload.name.indexOf('||dakhela') > -1">
+                  <input v-model="payload.dakhela" type="number" class="form-control" :disabled="payload.name && payload.name.indexOf('||dakhela') > -1">
                 </div>
               </div>
 
               <div class="col-12">
                 <div class="form-group">
                   <label for="year">Year</label> 
-                  <select v-model="payload.year" id="" class="form-control" :disabled="payload.name.indexOf('||dakhela') > -1">
+                  <select v-model="payload.year" id="" class="form-control" :disabled="payload.name && payload.name.indexOf('||dakhela') > -1">
                     <option :value="new Date().getFullYear()">{{ new Date().getFullYear() }}</option>
                     <option :value="new Date().getFullYear() - 1">{{ new Date().getFullYear() - 1 }}</option>
                     <option :value="new Date().getFullYear() - 2">{{ new Date().getFullYear() - 2 }}</option>
@@ -381,7 +381,7 @@ const log = console.log
                 <select v-model="params.class_name" class="form-control" id="ClassId">
                   <option :value="null">-class-</option>
                   <template v-for="(cls, index) in classes" :key="index">
-                    <option :value="cls.class_name">{{cls.class_name}}</option>
+                    <option :value="cls.class_name">{{cls.class_name}}--</option>
                   </template>
                   
                 </select>
@@ -478,7 +478,7 @@ const log = console.log
                     <label>
                       {{ std.dakhela }}
                       <span tooltip="Cone Student">
-                      <i v-if="std.name.indexOf('||dakhela') > -1 === false" @click.stop="()=>{
+                      <i v-if="std.name && String(std.name)?.indexOf('||dakhela') > -1 === false" @click.stop="()=>{
                         std.cloneMode = !(!!(std.cloneMode));
                       }" class="bx bxs-copy-alt cp px-1"></i>
                       </span>
