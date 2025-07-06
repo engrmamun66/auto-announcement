@@ -356,7 +356,7 @@ const log = console.log
               <div class="col-12 d-flex justify-content-center">
                 <Btn @click.stop="clearPayload" class="red me-2" >Cancel</Btn>
                 <Btn v-if="!payload.id" @click="addStudent" class="me-0" >Submit <BtnLoader v-if="is___adding"></BtnLoader> </Btn>
-                <Btn v-else @click="updateStudent" class="me-0" :disabled="payload.name.indexOf('||dakhela') > -1">Update <BtnLoader v-if="is___adding"></BtnLoader> </Btn>
+                <Btn v-else @click="updateStudent" class="me-0" v-if="payload.name.indexOf('||dakhela') > -1">Update <BtnLoader v-if="is___adding"></BtnLoader> </Btn>
               </div> 
 
             </div>
@@ -537,7 +537,7 @@ const log = console.log
                     <button class="class-short-btn px-2" @click="pushTheBarcode(makeCarcode(std), {message: 'Card Punches Successful'})">Punch</button>
                   </td>
                   <td> 
-                    <div class="d-flex justify-content-center">
+                    <div class="d-flex justify-content-center action-icons">
                       <i @click.stop="targetStdForBarcode=std" class='bx bx-barcode cp size-1p5' ></i>
                       
                       <span tooltip="Copy barcode">
@@ -667,6 +667,9 @@ const log = console.log
   border: 1px solid #b8b8b8;
   border-radius: 6px;
   margin-left: 5px;
+}
+.action-icons > *:not(:last-child){
+  margin-right: 8px;
 }
 </style>
 
