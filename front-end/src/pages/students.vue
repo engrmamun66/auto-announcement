@@ -650,7 +650,6 @@ const log = console.log
 }
 .class-short-btn.active{
   background-color: #614203;
-  border-bottom-color: black;
   box-shadow: 0px 3px 0px rgba(0, 0, 0, 0.126), 0px 6px 4px rgba(0, 0, 0, 0.465);
 }
 .std-clone-area{
