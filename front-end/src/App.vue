@@ -280,7 +280,7 @@ onMounted(async ()=>{
  
 
     setTimeout(() => {
-        setInterval(()=>{
+        schedule_timeout.value = setInterval(()=>{
             focusBarcodeInput__and__startAnnoucement()
             refreshDOM.value = false
             emitter.emit('pushed_a_student__or__rechecktoPlay', true)
@@ -353,7 +353,7 @@ function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
                if(response.status == 200){
                     let student = response.data.data;
                     student['barcode'] = barcode;
-                    student['puch_exact_time'] = helper.miliseconds();
+                    student['punch_exact_time'] = helper.miliseconds();
 
                     let findLast = wattingList.value.findLast(s => s.id == student.id)
                     let findLastIndex = wattingList.value.findLastIndex(s => s.id == student.id)
@@ -361,7 +361,7 @@ function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
 
                    
                     if(!student[student['soundColName']]){ 
-                         emitter.emit('toaster-error', { message: `Sound not added for this student`, duration: 10000})
+                         emitter.emit('toaster-error', { message: `অডিও যুক্ত করা হয়নি`, duration: 10000})
                         //  speakText('voice is not added')
                     
                          router.push({name: 'students', query: {

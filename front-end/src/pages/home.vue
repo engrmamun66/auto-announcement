@@ -1,4 +1,5 @@
 <script setup>
+import moment from 'moment/moment'
 import { onMounted, inject, ref, watch, computed } from 'vue';
 import Note from '../components/note.vue'
 import myTable from '../components/myTable.vue'
@@ -26,6 +27,8 @@ const speakText = inject('speakText');
 const callbacks = inject('callbacks');
 const getSchedules = inject('getSchedules');
 const pushTheBarcode = inject('pushTheBarcode');
+
+const log = console.log
 
 const classes = inject('classes');
 const wattingList = inject('wattingList');
@@ -107,6 +110,10 @@ onMounted(()=>{
      }
 })
 
+function removeFromWattingList(student, i){
+     wattingList.value.splice(i, 1)
+}
+
 </script>
 
 <template>
@@ -156,9 +163,9 @@ onMounted(()=>{
                                              <p> 
                                                   {{ helper.formatTime(item.start_time) }} - {{ helper.formatTime(item.end_time) }}
                                              </p>
-                                        <div class="d-flex flex-wrap">
-                                             <p class="m-1 p-1 border3 radius-5" v-for="cls in item.classes">{{ helper.ucfirst(cls.class_short) }}</p>
-                                        </div>                                    
+                                             <div class="d-flex flex-wrap">
+                                                  <p class="m-1 p-1 border3 radius-5" v-for="cls in item.classes">{{ helper.ucfirst(cls.class_short) }}</p>
+                                             </div>                                    
                                         </li>
 
                                    </template>
@@ -265,10 +272,11 @@ onMounted(()=>{
                               <div class="student-box" :class="{'is_called': student.is_called}" :barcode="student?.barcode" >
                                    <div :class="{ 'bg_animation': student?.isPlaying }">
                                         <div class="student-name">{{ student.name }}</div>
-                                        <div class="class-name" @click="()=>{
-                                             console.log(student);
-                                        }">
+                                        <div class="class-name" @click="log(student)">
                                              {{ student.class }} [{{ student.dakhela }}]
+                                        </div>
+                                        <div class="class-name panch-time mt-1" @click="log(student)">
+                                             Punched {{ moment.unix(student.punch_exact_time).format('hh:mm A') }}
                                         </div>
                                        <div class="icons"> 
                                              <i v-if="!student.is_called" class='bx bx-check'></i>
@@ -279,6 +287,9 @@ onMounted(()=>{
                                              }"  ></i> 
                                              <i v-else class='bx bx-checkbox-square' ></i> 
                                        </div>
+                                       <span @click="removeFromWattingList(student, i)" class="card-canceller">
+                                             <i class='bx bx-x'></i>
+                                       </span>
                                    </div>
                               </div> 
                          </template>
@@ -447,5 +458,15 @@ onMounted(()=>{
      .bttt > *{
           margin-bottom: 5px;
      }
+}
+.card-canceller{
+     position: absolute;
+     right: -2px;
+     background: #da4646;
+     color: white;
+     top: -1px;
+     padding: 2px 5px;
+     border-bottom-left-radius: 9px;
+     cursor: pointer;
 }
 </style>
