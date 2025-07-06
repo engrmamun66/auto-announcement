@@ -299,6 +299,10 @@ let sw = computed(() => {
   -o-transition: left 0.15s ease-out;
 }
 
+.switch-input:not(:checked) ~ .switch-handle {
+  background: linear-gradient(90deg, #f55128 0%, #c45012 100%);
+} 
+
 .switch-input:checked ~ .switch-handle {
   left: var(--sw-left);
   background-color: var(--bg-primary);
