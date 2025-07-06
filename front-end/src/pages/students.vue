@@ -435,12 +435,14 @@ const log = console.log
               </div>
             </div>
 
-            <div class="col-12 mt-4">
-              <template v-for="cls in classes">
-                <button class="class-short-btn" :class="{'active': params.class_name === cls.class_name}" 
-                @click="params.page_no = 1;params.class_name = cls.class_name;getStudents()" >{{ helper.ucfirst(cls.class_short) }}</button>
-              </template>
+            <div class="col-12 mt-4 w-100 all-class-buttons-to-filter-area">
+              <div class="all-class-buttons-to-filter">
+                <template v-for="cls in classes">
+                  <button class="class-short-btn" :class="{'active': params.class_name === cls.class_name}" 
+                  @click="params.page_no = 1;params.class_name = cls.class_name;getStudents()" >{{ helper.ucfirst(cls.class_short) }}</button>
+                </template>
 
+              </div>
             </div>
             
            
@@ -634,23 +636,37 @@ const log = console.log
 .add-form-wrapper .form-group{
   padding-bottom: 20px;
 }
+.all-class-buttons-to-filter-area{
+  height: 100px;
+  overflow-y: auto;
+}
+.all-class-buttons-to-filter{ 
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
 .class-short-btn{
-  border: 1px solid var(--primaryColor);
-  padding: 5px 5px;
+  padding: 5px 10px;
   text-align: center;
   background: var(--grad3);
-  margin-right: 3px;
+  margin-right: 5px;
   border-radius: 5px;
   color: white;
   margin-bottom: 5px;
   transition: all 0.3s;
+  border: 2px solid transparent;
+  scale: 1;
+  transition: 0.3s all;
 }
 .class-short-btn:hover{
   box-shadow: 0px 3px 0px rgba(0, 0, 0, 0.126), 0px 6px 4px rgba(0, 0, 0, 0.465);
 }
-.class-short-btn.active{
-  background-color: #614203;
+.class-short-btn.active{ 
+  border: 2px solid var(--primaryColor);
   box-shadow: 0px 3px 0px rgba(0, 0, 0, 0.126), 0px 6px 4px rgba(0, 0, 0, 0.465);
+  text-shadow: -1px 1px 0px black; 
+  scale: 1.1;
+  z-index: 1123223;
 }
 .std-clone-area{
   display: flex;
