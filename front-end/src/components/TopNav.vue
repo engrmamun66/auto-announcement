@@ -41,6 +41,7 @@ onMounted(()=>{
   if(typeof GLOBAL_DATA !== 'undefined'){
     if(GLOBAL_DATA?.logo){
       logoEl.value.src = GLOBAL_DATA.logo
+      logoEl.value.style.width = GLOBAL_DATA.logo_width
     }
   }
 })

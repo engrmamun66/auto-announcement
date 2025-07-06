@@ -1,9 +1,12 @@
 
 module.exports = { 
      env: {
-          
+
      },
-    logo: 'logo.example.png', // or any http image url
+    logo: {
+          width: '100px',
+          image_url: 'logo.example.png',
+    },    
     classes: [
         {
              class_name:'Play',

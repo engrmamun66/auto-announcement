@@ -70,8 +70,18 @@ const audioUpload = multer({
 app.get(`/app`, (req, res) => { 
   getToken(Students)
 
-  webContents = webContents.replace('DYNAMIC_LOGO_URL', `"../${ config.logo || logo.example.png}"`)
+  // With logo
+  let logo_url = config?.logo?.image_url || 'logo.example.png'
+  if(!logo_url.startsWith('http') && !logo_url.startsWith('data:image/')){
+    logo_url = `../${logo_url}`
+  }
+  webContents = webContents.replace('DYNAMIC_LOGO_URL', logo_url)
 
+  // With logo_width
+  let logo_width = config?.logo?.width || '200px' 
+  webContents = webContents.replace('DYNAMIC_LOGO_WIDTH', logo_width)
+
+  // With CSS variables
   if(config.css_vars){
     webContents = webContents.replace('<!-- CSS_VARS -->', `
       <style>

@@ -11,7 +11,8 @@ module.exports = `
     <script src="/dist/assets/my-announcement.min.js"></script>
     <script>
      var GLOBAL_DATA = {
-        logo: DYNAMIC_LOGO_URL, 
+        logo: "DYNAMIC_LOGO_URL", 
+        logo_width: "DYNAMIC_LOGO_WIDTH", 
      }
     </script>
     <!-- CSS_VARS -->
