@@ -140,3 +140,4 @@ database/
 exe/dist/
 exe/build/
 exe/main.spec
+config.js

@@ -6,8 +6,9 @@ const fs = require("fs");
 const path = require("path");
 const moment = require('moment')
 const utils = require('./utls')
-const { classes } = require('./../config')
+ 
 
+const { classes } = global.config
 class Schedules { 
 
  

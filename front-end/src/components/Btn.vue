@@ -14,7 +14,7 @@ defineEmits(['click'])
 
 <style scoped>
 button {
-  background-color: var(--primaryColor);
+  background: var(--grad3);
   border-radius: 5px;
   color: white;
   padding: 10px 20px;

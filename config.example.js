@@ -92,6 +92,16 @@ module.exports = {
                isActive: true,
           }, 
    ], 
+   css_vars: `
+     --primaryColor: #1fb217;
+     --secondaryColor: #1fb217;
+     --borderColor: #d5fdd7;
+     --fontColor: #038824;
+     --grad1: linear-gradient(90deg, rgba(80, 180, 37, 0.636) 0%, hsla(204, 95%, 77%, 1) 100%);
+     --grad2: linear-gradient(90deg, rgba(141, 208, 252, .348) 0%, rgba(223, 182, 246, .486) 100%);
+     --grad3: linear-gradient(90deg, #06761d 0%, #085804 100%); 
+     `, 
+     // css_vars: false
 }
 
  

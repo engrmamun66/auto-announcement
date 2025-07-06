@@ -14,6 +14,7 @@ module.exports = `
         logo: '/logo.png', 
      }
     </script>
+    <!-- CSS_VARS -->
 </head>
 
 <body>

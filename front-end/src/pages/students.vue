@@ -638,7 +638,7 @@ const log = console.log
   border: 1px solid var(--primaryColor);
   padding: 5px 5px;
   text-align: center;
-  background-color: #c2840a;
+  background: var(--grad3);
   margin-right: 3px;
   border-radius: 5px;
   color: white;
@@ -646,11 +646,12 @@ const log = console.log
   transition: all 0.3s;
 }
 .class-short-btn:hover{
-  box-shadow: -2px 3px 4px rgba(0, 0, 0, 0.171);
+  box-shadow: 0px 3px 0px rgba(0, 0, 0, 0.126), 0px 6px 4px rgba(0, 0, 0, 0.465);
 }
 .class-short-btn.active{
   background-color: #614203;
   border-bottom-color: black;
+  box-shadow: 0px 3px 0px rgba(0, 0, 0, 0.126), 0px 6px 4px rgba(0, 0, 0, 0.465);
 }
 .std-clone-area{
   display: flex;

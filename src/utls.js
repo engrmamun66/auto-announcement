@@ -1,6 +1,6 @@
 const fs = require('fs')
 const path = require('path')
-const { classes } = require("../config");
+const { classes } = global.config
 
 module.exports = {
     createRequiredFolders(){

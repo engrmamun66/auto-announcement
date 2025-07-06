@@ -467,13 +467,13 @@ function removeFromWattingList(student, i){
           position: fixed;
           top: 10px;
           right: 10px;
-          z-index: 99999;
+          z-index: 99999; 
      }
      .togglerbtn > button,
      .togglerbtn > button:active,
      .togglerbtn > button:active:focus
      { 
-          background: var(--grad1) !important;
+          background: var(--grad) !important;
           color: black;
      }
      .bttt{

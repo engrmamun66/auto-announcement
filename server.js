@@ -6,11 +6,19 @@ const express = require('express')
 const sqlite3 = require("sqlite3").verbose();
 const multer = require("multer");
 const upload = multer({ dest: DIR + '/public/temp' });
-const config = require("./config");
-const webContents = require("./web-contents"); 
 const webSocket = require("./socket/socket")
 const { getToken } = require('./src/device')
+let webContents = require("./web-contents"); 
+const fs = require('fs');
+const path = require('path');
 
+let config = require('./config.example');
+const configPath = path.join(__dirname, 'config.js');
+if (fs.existsSync(configPath)) {
+  config = require(configPath);
+}
+
+global.config = config
 
 webSocket()
  
@@ -59,10 +67,12 @@ const audioUpload = multer({
 });
 
 
-const WEB_ROUTE = 'app' 
-
-app.get(`/${WEB_ROUTE}`, (req, res) => { 
+app.get(`/app`, (req, res) => { 
   getToken(Students)
+  if(config.css_vars){
+    
+    webContents = webContents.replace('<!-- CSS_VARS -->', `<style>:root{${config.css_vars}}</style>`)
+  }
   res.send(webContents)
 });
 
