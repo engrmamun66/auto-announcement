@@ -1,7 +1,14 @@
 
+const port_number = 2323
+
 module.exports = { 
      env: {
-
+          PORT: port_number,
+          BIO_TIME_APP_USERNAME: "admin",
+          BIO_TIME_APP_PASSWORD: "Admin@123",
+          // #Front End variables
+          BASE_URL: `http://localhost:${port_number}`,
+          API_BASE_URL: `http://localhost:${port_number}/api`,
      },
     logo: {
           width: '100px',

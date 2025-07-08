@@ -3,8 +3,15 @@ import Axios from 'axios';
 /* -------------------------------------------------------------------------- */
 /*                            Common Authentication                           */
 /* -------------------------------------------------------------------------- */
+
+if(globalThis.GLOBAL_DATA?.env && typeof globalThis.GLOBAL_DATA?.env === 'string'){
+    globalThis.GLOBAL_DATA.env = JSON.parse(globalThis.GLOBAL_DATA?.env)
+}
+ 
+
 const http = Axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL,
+    // baseURL: import.meta.env.API_BASE_URL,
+    baseURL: globalThis.GLOBAL_DATA?.env.API_BASE_URL,
     headers: {
         'content-type': 'application/json'
     }

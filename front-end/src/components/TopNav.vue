@@ -44,6 +44,7 @@ onMounted(()=>{
       logoEl.value.src = GLOBAL_DATA.logo
       logoEl.value.style.width = GLOBAL_DATA.logo_width
       logo_wrapper.value.style.padding = GLOBAL_DATA.logo_area_padding || '14px 33px'
+      // GLOBAL_DATA.env = JSON.parse(GLOBAL_DATA.env) 
     }
   }
 })

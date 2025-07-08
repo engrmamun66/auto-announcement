@@ -1,14 +1,5 @@
 global.DIR = __dirname;
-require('dotenv').config()
-const PORT = process.env?.PORT;
-const cors = require('cors'); 
-const express = require('express')
-const sqlite3 = require("sqlite3").verbose();
-const multer = require("multer");
-const upload = multer({ dest: DIR + '/public/temp' });
-const webSocket = require("./socket/socket")
-const { getToken } = require('./src/device')
-let webContents = require("./src/web-contents"); 
+// require('dotenv').config()
 const fs = require('fs');
 const path = require('path');
 
@@ -17,8 +8,21 @@ const configPath = path.join(__dirname, 'config.js');
 if (fs.existsSync(configPath)) {
   config = require(configPath);
 }
-
 global.config = config
+
+const cors = require('cors'); 
+const express = require('express')
+const sqlite3 = require("sqlite3").verbose();
+const multer = require("multer");
+const upload = multer({ dest: DIR + '/public/temp' });
+const webSocket = require("./socket/socket")
+const { getToken } = require('./src/device')
+let webContents = require("./src/web-contents"); 
+
+
+
+const PORT = config.env.PORT || 2323;
+
 
 webSocket()
  
@@ -84,6 +88,9 @@ app.get(`/app`, (req, res) => {
   // With logo area padding
   let logo_padding = config?.logo?.padding || '10px' 
   webContents = webContents.replace('DYNAMIC_LOGO_AREA_PADDING', logo_padding)
+
+
+  webContents = webContents.replace('ENV_VARIABLES_IN_JSON_FROMAT', JSON.stringify(config.env || {}))
 
   // With CSS variables
   if(config.css_vars){

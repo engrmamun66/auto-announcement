@@ -2,9 +2,9 @@ const moment = require('moment')
 
 const SECONDS = 1
 
-const USERNAME = process.env.BIO_TIME_APP_USERNAME
-const PASSWORD = process.env.BIO_TIME_APP_PASSWORD
-const DEVICE_API_BASE_URL = process.env.DEVICE_API_BASE_URL
+const USERNAME = global.config.env.BIO_TIME_APP_USERNAME
+const PASSWORD = global.config.env.BIO_TIME_APP_PASSWORD
+const DEVICE_API_BASE_URL = global.config.env.DEVICE_API_BASE_URL
 
 let interval = null
  
