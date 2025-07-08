@@ -1,7 +1,7 @@
 <template>
     <div class="topnav bg3" id="myTopnav">
-        <a class="madrasha-title" href="#">
-            <img ref="logoEl" id="LOGO" src="" style="width: 200px;">
+        <a ref="logo_wrapper" class="madrasha-title logo-area" href="#">
+            <img alt="site-logo" ref="logoEl" id="LOGO" src="" style="width: 200px;">
         </a>
         <RouterLink :to="{name: 'home'}" :class="{'active': route.name === 'home'}"><i class='bx bxs-home'></i> Dashboard</RouterLink>
         <RouterLink :to="{name: 'students'}" :class="{'active': route.name === 'students'}"><i class='bx bxs-user'></i> Students</RouterLink>
@@ -26,6 +26,7 @@ import { RouterLink, useRoute } from 'vue-router';
 
 
 let logoEl = ref(null)
+let logo_wrapper = ref(null)
 let route = useRoute()
 let loggedIn = ref(false)
 
@@ -42,6 +43,7 @@ onMounted(()=>{
     if(GLOBAL_DATA?.logo){
       logoEl.value.src = GLOBAL_DATA.logo
       logoEl.value.style.width = GLOBAL_DATA.logo_width
+      logo_wrapper.value.style.padding = GLOBAL_DATA.logo_area_padding || '14px 33px'
     }
   }
 })

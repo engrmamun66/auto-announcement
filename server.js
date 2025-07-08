@@ -81,6 +81,10 @@ app.get(`/app`, (req, res) => {
   let logo_width = config?.logo?.width || '200px' 
   webContents = webContents.replace('DYNAMIC_LOGO_WIDTH', logo_width)
 
+  // With logo area padding
+  let logo_padding = config?.logo?.padding || '10px' 
+  webContents = webContents.replace('DYNAMIC_LOGO_AREA_PADDING', logo_padding)
+
   // With CSS variables
   if(config.css_vars){
     webContents = webContents.replace('<!-- CSS_VARS -->', `

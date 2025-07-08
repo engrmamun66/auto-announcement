@@ -13,6 +13,7 @@ module.exports = `
      var GLOBAL_DATA = {
         logo: "DYNAMIC_LOGO_URL", 
         logo_width: "DYNAMIC_LOGO_WIDTH", 
+        logo_area_padding: "DYNAMIC_LOGO_AREA_PADDING", 
      }
     </script>
     <!-- CSS_VARS -->

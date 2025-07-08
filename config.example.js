@@ -6,6 +6,7 @@ module.exports = {
     logo: {
           width: '100px',
           image_url: 'logo.example.png',
+          padding: '14px 10px',
     },    
     classes: [
         {
