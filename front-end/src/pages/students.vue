@@ -356,7 +356,7 @@ const log = console.log
               <div class="col-12 d-flex justify-content-center">
                 <Btn @click.stop="clearPayload" class="red me-2" >Cancel</Btn>
                 <Btn v-if="!payload.id" @click="addStudent" class="me-0" >Submit <BtnLoader v-if="is___adding"></BtnLoader> </Btn>
-                <Btn v-else @click="updateStudent" class="me-0" v-if="payload.name.indexOf('||dakhela') > -1">Update <BtnLoader v-if="is___adding"></BtnLoader> </Btn>
+                <Btn v-else @click="updateStudent" class="me-0" v-if="payload.name && payload.name.indexOf('||dakhela') === -1">Update <BtnLoader v-if="is___adding"></BtnLoader> </Btn>
               </div> 
 
             </div>
