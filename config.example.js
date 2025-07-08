@@ -8,6 +8,17 @@ module.exports = {
           image_url: 'logo.example.png',
           padding: '14px 10px',
     },    
+    css_vars: `
+     /* === Black & White Theme */
+     --primaryColor: #222322;
+     --secondaryColor: #3a3a3a;
+     --borderColor: #d5fdd7;
+     --fontColor: #222322;
+     --grad1: linear-gradient(90deg, rgba(137, 137, 137, 0.636) 0%, rgb(227, 244, 255) 100%);
+     --grad2: linear-gradient(90deg, rgba(118, 118, 118, 0.348) 0%, rgba(246, 231, 255, 0.486) 100%);
+     --grad3: linear-gradient(90deg, #222322 0%, #3a3a3a 100%); 
+     `, 
+     // css_vars: false
     classes: [
         {
              class_name:'Play',
@@ -99,18 +110,8 @@ module.exports = {
                class_short: 'class_12',
                isActive: true,
           }, 
-   ], 
-   css_vars: `
-     /* === Black & White Theme */
-     --primaryColor: #222322;
-     --secondaryColor: #3a3a3a;
-     --borderColor: #d5fdd7;
-     --fontColor: #222322;
-     --grad1: linear-gradient(90deg, rgba(137, 137, 137, 0.636) 0%, rgb(227, 244, 255) 100%);
-     --grad2: linear-gradient(90deg, rgba(118, 118, 118, 0.348) 0%, rgba(246, 231, 255, 0.486) 100%);
-     --grad3: linear-gradient(90deg, #222322 0%, #3a3a3a 100%); 
-     `, 
-     // css_vars: false
+     ], 
+   
 }
 
  
