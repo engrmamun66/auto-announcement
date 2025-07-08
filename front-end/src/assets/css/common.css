@@ -12,25 +12,25 @@ body{
     filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#DDB4F6", endColorstr="#8DD0FC", GradientType=1 );
 }
 body:not(.user-interacted){
-    background: gray !important;
-    background-color: gray !important;
+    background: rgb(213, 213, 213) !important; 
 } 
 body:not(.user-interacted) *{
-    opacity: 0.2;
+    opacity: 0.7;
+    pointer-events: none !important;
 } 
 body:not(.user-interacted)::after{
     content: 'Click me to allow sound';
     position: fixed;
     width: calc(100% - 20%);
     text-align: center;
-    background-color: rgba(0, 0, 0, 0.589);
+    background-color: rgb(83, 83, 83);
     color: white;
     left: 50%;
     top: 50%;
     transform: translateX(-50%);
     font-size: 50px;
     border-radius: 20px;
-    box-shadow: 2px 4px 8px #0000004b;
+    box-shadow: 2px 4px 8px #00000080;
     padding: 20px;
 } 
 
