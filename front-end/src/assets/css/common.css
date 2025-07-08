@@ -32,7 +32,9 @@ body:not(.user-interacted)::after{
     border-radius: 80px;
     box-shadow: 2px 4px 8px #00000080;
     padding: 20px;
+    cursor: pointer;
 } 
+ 
 
 .page-contents{
     height: auto;
