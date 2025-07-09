@@ -4,6 +4,7 @@ const port_number = 2323
 module.exports = { 
      env: {
           PORT: port_number,
+          SOCKET_PORT: 2424,
           BIO_TIME_APP_USERNAME: "admin",
           BIO_TIME_APP_PASSWORD: "Admin@123",
           // #Front End variables
