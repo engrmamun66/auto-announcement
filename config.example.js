@@ -103,7 +103,19 @@ module.exports = {
           {
                class_name: 'Sanabiya Sani',
                class_short: 'meskat1',
-               display_name: 'meskat1',
+               display_name: 'Hedaya',
+               isActive: true,
+          },
+          {
+               class_name: 'Class 11',
+               class_short: 'class_11',
+               display_name: 'Meshkat',
+               isActive: true,
+          },
+          {
+               class_name: 'Takmil',
+               class_short: 'class_12',
+               display_name: 'Daora',
                isActive: true,
           },
           {
@@ -116,24 +128,6 @@ module.exports = {
                class_name: 'Pre Hifz',
                class_short: 'pre_hifz',
                display_name: 'pre_hifz',
-               isActive: true,
-          },
-          {
-               class_name: 'Fozilat',
-               class_short: 'meskat2',
-               display_name: 'meskat2',
-               isActive: true,
-          },
-          {
-               class_name: 'Class 11',
-               class_short: 'class_11',
-               display_name: 'class_11',
-               isActive: true,
-          },
-          {
-               class_name: 'Class 12',
-               class_short: 'class_12',
-               display_name: 'class_12',
                isActive: true,
           },
      ],
