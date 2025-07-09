@@ -18,6 +18,7 @@ const upload = multer({ dest: DIR + '/public/temp' });
 const webSocket = require("./socket/socket")
 const { getToken } = require('./src/device')
 let webContents = require("./src/web-contents"); 
+const DEVICE_API_BASE_URL = global.config.env.DEVICE_API_BASE_URL
 
 
 
