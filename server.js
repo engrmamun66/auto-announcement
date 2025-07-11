@@ -18,6 +18,7 @@ const upload = multer({ dest: DIR + '/public/temp' });
 const webSocket = require("./socket/socket")
 const { getToken } = require('./src/device')
 let webContents = require("./src/web-contents"); 
+let checkAccess = require("./src/checkaccess"); 
 
 
 
@@ -38,6 +39,7 @@ const Students = new students(DB.db)
 const Schedules = new schedules(DB.db) 
 
 
+utils.create_access_DOT_apikey()
 utils.createRequiredFolders()
 
 
@@ -69,6 +71,9 @@ const audioUpload = multer({
     }
   },
 });
+
+
+global.is_active_the_instutute = true
 
 
 app.get(`/app`, (req, res) => { 

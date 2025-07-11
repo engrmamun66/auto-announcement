@@ -24,6 +24,21 @@ module.exports = {
         });
         
     }, 
+    create_access_DOT_apikey(
+        access_api_key='https://script.google.com/macros/s/AKfycbyyN4zMND6JqTdJ0B7VJJM6SptDvwVirt7KBwQoBb2hCU5ry7GrSxn2oAeSvn4yLyOpcg/exec',
+        {ovverwrite=false}={}
+    ){
+        const file_content = `module.exports = '${access_api_key}'`
+        const filePath = path.join(__dirname, './../access.apikey.js');  
+        // Check if file exists
+        if (ovverwrite == false) {
+            if(!fs.existsSync(filePath)) fs.writeFileSync(filePath, file_content, 'utf8'); 
+        } else {
+            fs.writeFileSync(filePath, file_content, 'utf8'); 
+        }
+        
+        
+    }, 
     reqUrl(req){
       try {
         return req.protocol + '://' + req.get('host');
