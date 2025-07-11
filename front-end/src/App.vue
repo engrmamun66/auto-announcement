@@ -35,8 +35,9 @@ let DEVICE_TOKEN = ref(null)
 let all_students = ref([])
 
 
-
-
+let checking_accessibility = ref(false)
+let appAccessData = ref(null)
+ 
  
 provide('route', route)
 provide('router', router)
@@ -56,6 +57,7 @@ provide('emergency_mode', emergency_mode)
 provide('pushTheBarcode', pushTheBarcode) 
 provide('all_students', all_students) 
 provide('getAllStudents', getAllStudents) 
+provide('appAccessData', appAccessData)
 
 
 
@@ -213,6 +215,26 @@ function stop_clear_and_reload(){
 provide('stop_clear_and_reload', stop_clear_and_reload)
 
 
+async function CheckAccess(){
+ 
+ try { 
+    checking_accessibility.value = true
+    http.get('/check-access').then(response => {
+        if(response.status == 200){
+            let accessdata = response.data
+            console.log(accessdata);     
+        }
+    }).finally(()=>{
+        checking_accessibility.value = false
+    })
+   
+ } catch (error) {
+   console.warn('addSchedule__error::', error);
+ }
+
+}
+
+
 async function getSchedules(){
  
  try { 
@@ -257,6 +279,7 @@ async function getAllStudents(){
 
 onMounted(async ()=>{  
     
+    CheckAccess()
     await getAllStudents()
     await getSchedules()
 

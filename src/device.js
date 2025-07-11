@@ -48,7 +48,7 @@ function getToken(Students) {
             }
         })
         .catch((error) => {
-            console.error('MamError:: ZKTeco Device is not connected as env variable (DEVICE_API_BASE_URL) ')
+            console.error(`MamError:: ZKTeco Device is not connected with "${DEVICE_API_BASE_URL}"`)
         });
 }
  

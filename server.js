@@ -21,6 +21,8 @@ let webContents = require("./src/web-contents");
 let checkAccess = require("./src/checkaccess"); 
 const DEVICE_API_BASE_URL = global.config.env.DEVICE_API_BASE_URL
 
+// checkAccess.CheckAppAccess()
+
 
 
 const PORT = config.env.PORT || 2323;
@@ -109,6 +111,12 @@ app.get(`/app`, (req, res) => {
       `)
   }
   res.send(webContents)
+});
+
+
+app.get(`/api/check-access`, async (req, res) => { 
+  let accessData = await checkAccess.CheckAppAccess()
+  res.send(accessData)
 });
 
 

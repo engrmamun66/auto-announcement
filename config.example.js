@@ -10,7 +10,8 @@ module.exports = {
           // #Front End variables
           BASE_URL: `http://localhost:${port_number}`,
           API_BASE_URL: `http://localhost:${port_number}/api`,
-          DEVICE_API_BASE_URL: 'http://127.0.0.1:8081/'
+          DEVICE_API_BASE_URL: 'http://127.0.0.1:8081/',
+          SECRET_KEY: 'YOUR_SECRET_KEY',
      },
      logo: {
           width: '100px',
