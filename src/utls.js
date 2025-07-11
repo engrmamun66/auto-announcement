@@ -32,7 +32,9 @@ module.exports = {
         const filePath = path.join(__dirname, './../access.apikey.js');  
         // Check if file exists
         if (ovverwrite == false) {
-            if(!fs.existsSync(filePath)) fs.writeFileSync(filePath, file_content, 'utf8'); 
+            if(!fs.existsSync(filePath)) {
+                fs.writeFileSync(filePath, file_content, 'utf8');
+            } 
         } else {
             fs.writeFileSync(filePath, file_content, 'utf8'); 
         }
