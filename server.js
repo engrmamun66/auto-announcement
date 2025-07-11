@@ -19,6 +19,7 @@ const webSocket = require("./socket/socket")
 const { getToken } = require('./src/device')
 let webContents = require("./src/web-contents"); 
 let checkAccess = require("./src/checkaccess"); 
+const DEVICE_API_BASE_URL = global.config.env.DEVICE_API_BASE_URL
 
 
 

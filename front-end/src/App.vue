@@ -354,6 +354,7 @@ function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
                     let student = response.data.data;
                     student['barcode'] = barcode;
                     student['punch_exact_time'] = helper.miliseconds();
+                    student['punch_exact_time_text'] = moment().format('hh:mm A')
 
                     let findLast = wattingList.value.findLast(s => s.id == student.id)
                     let findLastIndex = wattingList.value.findLastIndex(s => s.id == student.id)

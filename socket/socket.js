@@ -1,7 +1,9 @@
 const WebSocket = require("ws");
 
+const { SOCKET_PORT } = global.config.env
+
 module.exports = function () {
-    const server = new WebSocket.Server({ port: 2424 });
+    const server = new WebSocket.Server({ port: SOCKET_PORT });
 
     global.socketServer = server; // Make WebSocket server accessible globally
     
@@ -17,8 +19,6 @@ module.exports = function () {
         });
     });
 
-
-    
-    console.log("WebSocket server running on ws://localhost:2424");
+    console.log(`WebSocket server running on ws://localhost:${SOCKET_PORT}`);
 };
 

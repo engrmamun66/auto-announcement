@@ -116,20 +116,23 @@ const helper = {
     // with Time
     // with Time
     // with Time
-    miliseconds: function(time_24=''){
-      
-      let dateObj = new Date()
-      
-      if(time_24){
-        let [hours, minutes] = time_24.split(":") 
-        dateObj.setHours(parseInt(hours))
-        dateObj.setMinutes(parseInt(minutes))
-        dateObj.setSeconds(0)      
+  miliseconds: function (time_24 = '') {
+    let momentObject = moment();
+
+    if (time_24) {
+      const [hours, minutes] = time_24.split(":").map(Number);
+
+      if (!isNaN(hours) && !isNaN(minutes)) {
+        momentObject.hour(hours);
+        momentObject.minute(minutes);
+        momentObject.second(0);
+        momentObject.millisecond(0);
       }
-      
-      let miliseconds = dateObj.getTime()
-      return miliseconds
-    },
+    }
+
+    return momentObject.valueOf(); // returns timestamp in milliseconds
+  }
+    ,
     formatTime: function(time_24){
       let dateObj = new Date()
       
