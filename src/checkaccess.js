@@ -24,22 +24,9 @@ module.exports = {
             })
           });
       
-          const result = await response.json();
-          /**
-           * data example
-           * =============================
-            secret_key: 'YOUR_SECRET_KEY',
-            prefix: 'developer',
-            institute_name: 'Developer Institute',
-            activation_last_date: '2025-07-17T18:00:00.000Z',
-            alert_message1: 'Alert Message 1',
-            alert_message2: 'Alert Message 2',
-            deactivation_message: 'Deactivation message',
-            is_active: true,
-            latest_api_url: ''
-           */
+          const result = await response.json(); 
           let data = result.data
-          globalThis.myApp = data
+          globalThis.myAppStatus = data
           return data;
         } catch (error) {
           console.error("Fetch error:", error);

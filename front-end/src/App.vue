@@ -7,6 +7,8 @@ import Toaster from './components/Toaster.vue'
 const emitter = inject('emitter');
 import moment from 'moment/moment'
 import Playlist from './components/Playlist.vue'
+import accessCheckAnimation from './components/accessCheckAnimation.vue'
+import Lockscreen from './components/Lockscreen.vue'
 import axios from 'axios'
 
 
@@ -36,7 +38,54 @@ let all_students = ref([])
 
 
 let checking_accessibility = ref(false)
-let appAccessData = ref(null)
+let appAccessData = ref(storage('appAccessData').value) 
+
+let showAccessibilityAlert = computed(() => {
+    console.log('appAccessData.value', appAccessData.value);
+    let { 
+        last_paid_date, 
+        permanently_active,
+    } = appAccessData.value
+
+    if(!appAccessData.value || !last_paid_date){ 
+        return false
+    } 
+    if(permanently_active) return false // if, permanently_active === true, warning never show
+   
+    let diff_day = moment().diff(last_paid_date, 'day')
+    if(diff_day > 0){
+        // Payment is due
+        return true
+    } else {
+        return false
+    } 
+})
+
+let appUseForbiddened = computed(() => { 
+    let { 
+        last_paid_date, 
+        is_active, 
+        stop_after_day,
+        permanently_active,
+    } = appAccessData.value
+
+    if(!appAccessData.value || !last_paid_date){ 
+        return false
+    } 
+    if(permanently_active) return false 
+    if(!is_active) return true 
+
+    let diff_day = moment().diff(last_paid_date, 'day')
+    if(diff_day > 0){
+        // Payment is due
+        stop_after_day = Math.abs(Number(stop_after_day))
+
+        if(diff_day >= stop_after_day) return true
+        else return true
+    } else {
+        return false
+    }
+})
  
  
 provide('route', route)
@@ -222,10 +271,16 @@ async function CheckAccess(){
     http.get('/check-access').then(response => {
         if(response.status == 200){
             let accessdata = response.data
-            console.log(accessdata);     
+            appAccessData.value = accessdata
+            storage('appAccessData').value = accessdata 
         }
     }).finally(()=>{
         checking_accessibility.value = false
+
+        document.body.setAttribute('warning', String(appUseForbiddened.value))
+        document.body.setAttribute('forbidden', String(showAccessibilityAlert.value))
+         
+
     })
    
  } catch (error) {
@@ -461,12 +516,59 @@ function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
     <!-- <SideBar>
         <routerView />
     </SideBar> -->
-    <Toaster></Toaster>
-    <TopNav></TopNav>
-    <div v-if="isMounted" class="page-contents" >
-        <routerView />
-        <Playlist ref="palylistComponent"></Playlist> 
-    </div>
+    <template v-if="appUseForbiddened">
+        <Lockscreen></Lockscreen>
+        <template v-if="showAccessibilityAlert">
+            <div class="diablitily-alert em-anim-scaleUp">
+                {{ appAccessData?.stopped_message }}
+            </div>
+        </template>
+    </template>
+    <template v-else>
+        <Toaster></Toaster>
+        <TopNav></TopNav>
+        <div v-if="isMounted" class="page-contents" >
+            <routerView />
+            <Playlist ref="palylistComponent"></Playlist> 
+        </div>
+    
+        <template v-if="checking_accessibility">
+            <div class="access-loading-area">
+                <accessCheckAnimation></accessCheckAnimation>
+            </div>
+        </template>
+        <template v-else>
+            <template v-if="showAccessibilityAlert">
+                <div class="diablitily-alert"> 
+                    {{ appAccessData?.warning_message }}  
+                </div>
+            </template>
+        </template>
+    </template>
     
 </template>
+
+<style scoped>
+.access-loading-area{
+    position: fixed;
+    bottom: 0px;
+    left: 0px;
+    width: 100%;
+    z-index: 333;
+    background-color: var(--primaryColor);
+    background-color: yellow;
+}
+.diablitily-alert{
+    position: fixed;
+    bottom: 0px;
+    left: 0px;
+    width: 100%;
+    min-height: 40px;
+    z-index: 333;
+    background-color: yellow;
+    padding: 8px 20px;
+    text-align: center; 
+    animation: keyframe-scaleUp 1s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+}
+</style>
  
