@@ -45,7 +45,7 @@ let showAccessibilityAlert = computed(() => {
     let { 
         last_paid_date, 
         permanently_active,
-    } = appAccessData.value
+    } = appAccessData.value || {}
 
     if(!appAccessData.value || !last_paid_date){ 
         return false
@@ -67,7 +67,9 @@ let appUseForbiddened = computed(() => {
         is_active, 
         stop_after_day,
         permanently_active,
-    } = appAccessData.value
+    } = appAccessData.value || {}
+
+    console.log('init---', appAccessData.value);
 
     if(!appAccessData.value || !last_paid_date){ 
         return false
@@ -279,6 +281,10 @@ async function CheckAccess(){
 
         document.body.setAttribute('warning', String(appUseForbiddened.value))
         document.body.setAttribute('forbidden', String(showAccessibilityAlert.value))
+
+        if(appUseForbiddened.value === true){
+            stop_clear_and_reload()
+        }
          
 
     })
@@ -519,7 +525,7 @@ function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
     <template v-if="appUseForbiddened">
         <Lockscreen></Lockscreen>
         <template v-if="showAccessibilityAlert">
-            <div class="diablitily-alert em-anim-scaleUp">
+            <div class="diablitily-alert">
                 {{ appAccessData?.stopped_message }}
             </div>
         </template>
@@ -568,7 +574,8 @@ function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
     background-color: yellow;
     padding: 8px 20px;
     text-align: center; 
-    animation: keyframe-scaleUp 1s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+    font-size: 20px;
+    /* animation: keyframe-scaleUp 1s cubic-bezier(0.165, 0.84, 0.44, 1) forwards; */
 }
 </style>
  
