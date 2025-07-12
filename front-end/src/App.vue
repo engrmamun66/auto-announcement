@@ -41,7 +41,6 @@ let checking_accessibility = ref(false)
 let appAccessData = ref(storage('appAccessData').value) 
 
 let showAccessibilityAlert = computed(() => {
-    console.log('appAccessData.value', appAccessData.value);
     let { 
         last_paid_date, 
         permanently_active,
@@ -109,6 +108,7 @@ provide('pushTheBarcode', pushTheBarcode)
 provide('all_students', all_students) 
 provide('getAllStudents', getAllStudents) 
 provide('appAccessData', appAccessData)
+provide('appUseForbiddened', appUseForbiddened)
 
 
 
@@ -294,6 +294,17 @@ async function CheckAccess(){
  }
 
 }
+
+function pauseAudioIfRurning(){
+    if(palylistComponent.value){
+        const { currentItem, audio } = palylistComponent.value
+        audio.currentTime = 0;
+        audio.pause()
+        isPlaying.value = false
+    }
+     
+}
+
 
 
 async function getSchedules(){

@@ -29,6 +29,7 @@ const callbacks = inject('callbacks');
 const getSchedules = inject('getSchedules');
 const pushTheBarcode = inject('pushTheBarcode');
 const makeCarcode = inject('makeCarcode');
+const appUseForbiddened = inject('appUseForbiddened');
 
 const log = console.log
 
@@ -47,7 +48,6 @@ let isPlaying = ref(true)
 
 function handlePayPause(){
      const { currentItem, audio } = palylistComponent.value
-     console.log(audio.paused);
      audio.currentTime = 0;
      if(audio.paused){
           audio.play()
@@ -70,6 +70,8 @@ function handlePayPause(){
 let ttoout
 function inputBarcode(event){
      clearTimeout(ttoout)
+
+     if(appUseForbiddened.value === true) return
 
      ttoout = setTimeout(() => {          
         
