@@ -15,7 +15,7 @@
   content: '';  
   width: 100%;
   height: 14px;
-  background-color: #ff0000;
+  background-color: #1f1f1f;
   font-size: 10px;
   background-image: linear-gradient(45deg, rgb(255, 255, 255) 25%, transparent 25%, transparent 50%, rgb(255, 255, 255) 50%, rgb(255, 255, 255) 75%, transparent 75%, transparent);
   background-size: 1em 1em;

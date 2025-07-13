@@ -285,8 +285,10 @@ async function CheckAccess(){
         checking_accessibility.value = false
 
         if(appUseForbiddened.value) document.body.setAttribute('forbidden', String(appUseForbiddened.value))
+        else document.body.removeAttribute('forbidden')
         if(showAccessibilityAlert.value) document.body.setAttribute('warning', String(showAccessibilityAlert.value))
-
+        else document.body.removeAttribute('warning')
+    
         if(appUseForbiddened.value === true){
             stop_clear_and_reload()
         }
@@ -543,7 +545,10 @@ function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
         <Lockscreen @tryToUnlock="CheckAccess"></Lockscreen>
         <template v-if="showAccessibilityAlert">
             <div class="diablitily-alert">
-                {{ appAccessData?.stopped_message }}
+                {{ 
+                checking_accessibility ? 'পুনরায় চেক করা হচ্ছে...' : (appAccessData?.stopped_message 
+                + ` আপনার গত ${moment(appAccessData?.last_paid_month)?.endOf('month').format('MMMM')} মাস পর্যন্ত প্ররিশোধ করা হয়েছে।`) 
+                }}
                 <accessCheckAnimation v-if="checking_accessibility"></accessCheckAnimation>
             </div>
         </template>
@@ -564,8 +569,8 @@ function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
             <template v-if="showAccessibilityAlert">
                 <div class="diablitily-alert"> 
                     {{ appAccessData?.warning_message }}  
+                    <accessCheckAnimation v-if="checking_accessibility"></accessCheckAnimation>
                 </div>
-                <accessCheckAnimation></accessCheckAnimation>
             </template>
         </template>
     </template>
