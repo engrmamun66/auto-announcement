@@ -364,7 +364,7 @@ async function getAllStudents(){
 
 onMounted(async ()=>{  
 
-    setInterval(CheckAccess, 1000 * 30);
+    CheckAccess()
     
     CheckAccess()
     await getAllStudents()
