@@ -26,6 +26,7 @@ module.exports = {
       
           const result = await response.json(); 
           let data = result.data
+          delete data.secret_key
           globalThis.myAppStatus = data
           return data;
         } catch (error) {

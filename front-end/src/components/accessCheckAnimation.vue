@@ -17,7 +17,7 @@
   height: 14px;
   background-color: #1f1f1f;
   font-size: 10px;
-  background-image: linear-gradient(45deg, rgb(255, 255, 255) 25%, transparent 25%, transparent 50%, rgb(255, 255, 255) 50%, rgb(255, 255, 255) 75%, transparent 75%, transparent);
+  background-image: linear-gradient(45deg, rgb(255, 255, 255) 25%, transparent 25%, transparent 50%, rgb(155, 17, 17) 50%, rgb(244, 181, 9) 75%, transparent 75%, transparent);
   background-size: 1em 1em;
   position: absolute;
   top: 0;

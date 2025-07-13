@@ -66,4 +66,18 @@ module.exports = {
         let _class = classes.find(c => c.class_name == className)         
         return _class?.class_short || '<>'
     },
+    encodeString: function (data='') {
+        try {
+            return btoa(unescape(encodeURIComponent(data)));
+        } catch (error) {
+            return data;
+        }
+    },
+    decodeString: function (data) {
+        try {
+            return decodeURIComponent(escape(atob(data)));
+        } catch (error) {
+            return data;
+        }
+    },
 };

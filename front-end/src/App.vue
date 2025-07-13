@@ -275,9 +275,15 @@ async function CheckAccess(){
  try { 
     if(checking_accessibility.value) return emitter.emit('toaster-error', { message: 'অপেক্ষা করুন, পারমিশন চেক করা হচ্ছে।'})
     checking_accessibility.value = true
-    http.get('/check-access').then(response => {
+    const devMode = useRoute().query.dev
+    let params = {}
+    if(window.location.href.indexOf('dev=true') > -1) params.dev = true
+    http.get('/_ac', { params }).then(response => {
         if(response.status == 200){
             let accessdata = response.data
+            if(!devMode){ 
+                accessdata = JSON.parse(decodeURIComponent(escape(atob(accessdata))).replace(/^sbrenc%34#/, ''))
+            }
             appAccessData.value = accessdata
             storage('appAccessData').value = accessdata 
         }

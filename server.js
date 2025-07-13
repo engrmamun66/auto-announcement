@@ -114,9 +114,14 @@ app.get(`/app`, (req, res) => {
 });
 
 
-app.get(`/api/check-access`, async (req, res) => { 
+// app.get(`/api/check-access`, async (req, res) => { 
+app.get(`/api/_ac`, async (req, res) => { 
   let accessData = await checkAccess.CheckAppAccess()
-  res.send(accessData)
+  if(req.query.dev){
+    res.send(accessData)
+  } else {
+    res.send(utils.encodeString('sbrenc%34#' + JSON.stringify(accessData)))
+  }
 });
 
 
