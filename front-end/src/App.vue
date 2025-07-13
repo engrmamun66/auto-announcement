@@ -9,7 +9,8 @@ import moment from 'moment/moment'
 import Playlist from './components/Playlist.vue'
 import accessCheckAnimation from './components/accessCheckAnimation.vue'
 import Lockscreen from './components/Lockscreen.vue'
-import axios from 'axios'
+
+const log = console.log
 
 
 let helper = inject('helper')
@@ -42,16 +43,19 @@ let appAccessData = ref(storage('appAccessData').value)
 
 let showAccessibilityAlert = computed(() => {
     let { 
-        last_paid_date, 
+        last_paid_month, 
         permanently_active,
     } = appAccessData.value || {}
 
-    if(!appAccessData.value || !last_paid_date){ 
+    if(!appAccessData.value || !last_paid_month){ 
         return false
     } 
     if(permanently_active) return false // if, permanently_active === true, warning never show
-   
-    let diff_day = moment().diff(last_paid_date, 'day')
+
+    const endOfPayMonth = moment(last_paid_month).endOf('month')
+    
+    let diff_day = moment().diff(endOfPayMonth, 'day')
+
     if(diff_day > 0){
         // Payment is due
         return true
@@ -62,27 +66,27 @@ let showAccessibilityAlert = computed(() => {
 
 let appUseForbiddened = computed(() => { 
     let { 
-        last_paid_date, 
+        last_paid_month, 
         is_active, 
         stop_after_day,
         permanently_active,
     } = appAccessData.value || {}
 
-    console.log('init---', appAccessData.value);
-
-    if(!appAccessData.value || !last_paid_date){ 
+    if(!appAccessData.value || !last_paid_month){ 
         return false
     } 
     if(permanently_active) return false 
     if(!is_active) return true 
 
-    let diff_day = moment().diff(last_paid_date, 'day')
+    const endOfPayMonth = moment(last_paid_month).endOf('month')
+
+    let diff_day = moment().diff(endOfPayMonth, 'day')
     if(diff_day > 0){
         // Payment is due
         stop_after_day = Math.abs(Number(stop_after_day))
 
         if(diff_day >= stop_after_day) return true
-        else return true
+        else return false
     } else {
         return false
     }
@@ -269,6 +273,7 @@ provide('stop_clear_and_reload', stop_clear_and_reload)
 async function CheckAccess(){
  
  try { 
+    if(checking_accessibility.value) return emitter.emit('toaster-error', { message: 'অপেক্ষা করুন, পারমিশন চেক করা হচ্ছে।'})
     checking_accessibility.value = true
     http.get('/check-access').then(response => {
         if(response.status == 200){
@@ -279,8 +284,8 @@ async function CheckAccess(){
     }).finally(()=>{
         checking_accessibility.value = false
 
-        document.body.setAttribute('warning', String(appUseForbiddened.value))
-        document.body.setAttribute('forbidden', String(showAccessibilityAlert.value))
+        if(appUseForbiddened.value) document.body.setAttribute('warning', String(appUseForbiddened.value))
+        if(showAccessibilityAlert.value) document.body.setAttribute('forbidden', String(showAccessibilityAlert.value))
 
         if(appUseForbiddened.value === true){
             stop_clear_and_reload()
@@ -533,16 +538,17 @@ function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
     <!-- <SideBar>
         <routerView />
     </SideBar> -->
+    <Toaster></Toaster>
     <template v-if="appUseForbiddened">
-        <Lockscreen></Lockscreen>
+        <Lockscreen @tryToUnlock="CheckAccess"></Lockscreen>
         <template v-if="showAccessibilityAlert">
             <div class="diablitily-alert">
                 {{ appAccessData?.stopped_message }}
+                <accessCheckAnimation v-if="checking_accessibility"></accessCheckAnimation>
             </div>
         </template>
     </template>
     <template v-else>
-        <Toaster></Toaster>
         <TopNav></TopNav>
         <div v-if="isMounted" class="page-contents" >
             <routerView />
@@ -559,6 +565,7 @@ function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
                 <div class="diablitily-alert"> 
                     {{ appAccessData?.warning_message }}  
                 </div>
+                <accessCheckAnimation></accessCheckAnimation>
             </template>
         </template>
     </template>
@@ -573,7 +580,7 @@ function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
     width: 100%;
     z-index: 333;
     background-color: var(--primaryColor);
-    background-color: yellow;
+    background-color: #ffd602;
 }
 .diablitily-alert{
     position: fixed;
@@ -582,11 +589,10 @@ function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
     width: 100%;
     min-height: 40px;
     z-index: 333;
-    background-color: yellow;
+    background-color: #ffd602;
     padding: 8px 20px;
     text-align: center; 
     font-size: 20px;
-    /* animation: keyframe-scaleUp 1s cubic-bezier(0.165, 0.84, 0.44, 1) forwards; */
 }
 </style>
  

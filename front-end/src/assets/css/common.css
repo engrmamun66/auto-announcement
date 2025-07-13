@@ -12,16 +12,20 @@ body{
     filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#DDB4F6", endColorstr="#8DD0FC", GradientType=1 );
     padding-bottom: 40px;
 }
+body[forbidden="true"]{
+    background: var(--primaryColor);
+    filter: none; 
+}
 
 
-body[warning="false"][forbidden="false"]:not(.user-interacted){
+body[warning][forbidden]:not(.user-interacted){
     background: rgb(213, 213, 213) !important; 
 } 
-body[warning="false"][forbidden="false"]:not(.user-interacted) *{
+body[warning][forbidden]:not(.user-interacted) *{
     opacity: 0.7;
     pointer-events: none !important;
 } 
-body[warning="false"][forbidden="false"]:not(.user-interacted)::after{
+body[warning][forbidden]:not(.user-interacted)::after{
     content: 'Click me to allow sound';
     position: fixed;
     width: calc(100% - 20%);
