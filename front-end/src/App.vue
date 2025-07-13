@@ -286,10 +286,8 @@ async function CheckAccess(){
             storage('appAccessData').value = accessdata 
         }
     }).finally(()=>{
-        if(appUseForbiddened.value) document.body.setAttribute('forbidden', String(appUseForbiddened.value))
-        else document.body.removeAttribute('forbidden')
-        if(showAccessibilityAlert.value) document.body.setAttribute('warning', String(showAccessibilityAlert.value))
-        else document.body.removeAttribute('warning')
+        document.body.setAttribute('forbidden', String(appUseForbiddened.value))
+        document.body.setAttribute('warning', String(showAccessibilityAlert.value))
     
         if(appUseForbiddened.value === true){
             stop_clear_and_reload()
