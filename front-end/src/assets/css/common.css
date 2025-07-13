@@ -18,14 +18,20 @@ body[warning=false][forbidden="true"]{
 }
 
 
-body[warning=false][forbidden=false]:not(.user-interacted){
+body[forbidden=false]:not(.user-interacted),
+body:not([forbidden]):not(.user-interacted)
+{
     background: rgb(213, 213, 213) !important; 
 } 
-body[warning=false][forbidden=false]:not(.user-interacted) *{
+body[forbidden=false]:not(.user-interacted) *,
+body:not([forbidden]):not(.user-interacted) *
+{
     opacity: 0.7;
     pointer-events: none !important;
 } 
-body[warning=false][forbidden=false]:not(.user-interacted)::after{
+body[forbidden=false]:not(.user-interacted)::after,
+body:not([forbidden]):not(.user-interacted)::after
+{
     content: 'Click me to allow sound';
     position: fixed;
     width: calc(100% - 20%);
