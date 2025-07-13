@@ -284,8 +284,8 @@ async function CheckAccess(){
     }).finally(()=>{
         checking_accessibility.value = false
 
-        if(appUseForbiddened.value) document.body.setAttribute('warning', String(appUseForbiddened.value))
-        if(showAccessibilityAlert.value) document.body.setAttribute('forbidden', String(showAccessibilityAlert.value))
+        if(appUseForbiddened.value) document.body.setAttribute('forbidden', String(appUseForbiddened.value))
+        if(showAccessibilityAlert.value) document.body.setAttribute('warning', String(showAccessibilityAlert.value))
 
         if(appUseForbiddened.value === true){
             stop_clear_and_reload()
