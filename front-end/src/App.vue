@@ -274,7 +274,6 @@ async function CheckAccess(){
  
  try { 
     if(checking_accessibility.value) return emitter.emit('toaster-error', { message: 'অপেক্ষা করুন, পারমিশন চেক করা হচ্ছে।'})
-    checking_accessibility.value = true
     const devMode = useRoute().query.dev
     let params = {}
     if(window.location.href.indexOf('dev=true') > -1) params.dev = true
@@ -363,7 +362,7 @@ async function getAllStudents(){
 }
 
 onMounted(async ()=>{      
-    CheckAccess()
+    
     await getAllStudents()
     await getSchedules()
 
@@ -412,6 +411,10 @@ onMounted(async ()=>{
             }
         }
      })
+
+     checking_accessibility.value = true
+     await CheckAccess()
+     checking_accessibility.value = false
 })
 
 
