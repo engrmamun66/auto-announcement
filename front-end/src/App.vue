@@ -273,10 +273,9 @@ provide('stop_clear_and_reload', stop_clear_and_reload)
 async function CheckAccess(){
  
  try { 
-    if(checking_accessibility.value) return emitter.emit('toaster-error', { message: 'অপেক্ষা করুন, পারমিশন চেক করা হচ্ছে।'})
-    const devMode = useRoute().query.dev
+    const devMode = window.location.href.indexOf('dev=true') > -1
     let params = {}
-    if(window.location.href.indexOf('dev=true') > -1) params.dev = true
+    if(devMode) params.dev = true
     http.get('/_ac', { params }).then(response => {
         if(response.status == 200){
             let accessdata = response.data
@@ -287,8 +286,6 @@ async function CheckAccess(){
             storage('appAccessData').value = accessdata 
         }
     }).finally(()=>{
-        checking_accessibility.value = false
-
         if(appUseForbiddened.value) document.body.setAttribute('forbidden', String(appUseForbiddened.value))
         else document.body.removeAttribute('forbidden')
         if(showAccessibilityAlert.value) document.body.setAttribute('warning', String(showAccessibilityAlert.value))
