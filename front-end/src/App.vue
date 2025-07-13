@@ -270,9 +270,11 @@ function stop_clear_and_reload(){
 provide('stop_clear_and_reload', stop_clear_and_reload)
 
 
-async function CheckAccess(){
+async function CheckAccess(loader=false){
  
  try { 
+    if(checking_accessibility.value) return
+    if(loader) checking_accessibility.value = true; 
     const devMode = window.location.href.indexOf('dev=true') > -1
     let params = {}
     if(devMode) params.dev = true
@@ -292,6 +294,8 @@ async function CheckAccess(){
         if(appUseForbiddened.value === true){
             stop_clear_and_reload()
         }
+
+        checking_accessibility.value = false
          
 
     })
@@ -407,9 +411,7 @@ onMounted(async ()=>{
         }
      })
 
-     checking_accessibility.value = true
-     await CheckAccess()
-     checking_accessibility.value = false
+     await CheckAccess(true) 
 })
 
 
@@ -545,7 +547,7 @@ function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
     </SideBar> -->
     <Toaster></Toaster>
     <template v-if="appUseForbiddened">
-        <Lockscreen @tryToUnlock="CheckAccess"></Lockscreen>
+        <Lockscreen @tryToUnlock="CheckAccess(true)"></Lockscreen>
         <template v-if="showAccessibilityAlert">
             <div class="diablitily-alert">
                 {{ 
