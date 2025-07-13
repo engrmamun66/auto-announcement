@@ -362,10 +362,7 @@ async function getAllStudents(){
 
 }
 
-onMounted(async ()=>{  
-
-    CheckAccess()
-    
+onMounted(async ()=>{      
     CheckAccess()
     await getAllStudents()
     await getSchedules()
