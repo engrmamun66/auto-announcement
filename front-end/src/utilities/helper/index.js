@@ -164,8 +164,38 @@ const helper = {
       if(!str) return ''
       str = String(str);
       return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()
+    },
+    enToBnDate: function(dateText=''){
+      let lang = {
+        '0': '০',
+        '1': '১',
+        '2': '২',
+        '3': '৩',
+        '4': '৪',
+        '5': '৫',
+        '6': '৬',
+        '7': '৭',
+        '8': '৮',
+        '9': '৯',
+        January: 'জানুয়ারি',
+        February: 'ফেব্রুয়ারি', 
+        March: 'মার্চ', 
+        April: 'এপ্রিল', 
+        May: 'মে', 
+        June: 'জুন', 
+        July: 'জুলাই', 
+        August: 'আগস্ট', 
+        September: 'সেপ্টেম্বর', 
+        October: 'অক্টোবর', 
+        November: 'নভেম্বর', 
+        December: 'ডিসেম্বর'
+      }
+      dateText = Array.from(dateText).map(letter => lang?.[letter] ? `<strong class="bloder-text">${lang?.[letter]}</strong>` : letter).join('')
+      dateText = dateText.split(' ').map(word => lang?.[word] ? `<stong class="bloder-text">${lang?.[word]}</stong>` : word ).join(' ')
+      return dateText
+
     }
-    
+     
 }
 
 export default helper

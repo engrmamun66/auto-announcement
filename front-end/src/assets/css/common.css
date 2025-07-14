@@ -442,4 +442,6 @@ kbd {
     background: var(--grad3);
 }
 
- 
+.bloder-text{
+    text-shadow: 0px 1px;
+}

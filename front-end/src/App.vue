@@ -30,6 +30,7 @@ let refreshDOM = ref(true)
 let isMounted = ref(false)
 let user_interacted = ref(false)
 let emergency_mode = ref(false)
+let LockscreenRef = ref(null)
 
 let palylistComponent = ref(null)
 provide('palylistComponent', palylistComponent)
@@ -40,6 +41,8 @@ let all_students = ref([])
 
 let checking_accessibility = ref(false)
 let appAccessData = ref(storage('appAccessData').value) 
+
+
 
 let showAccessibilityAlert = computed(() => {
     let { 
@@ -91,6 +94,88 @@ let appUseForbiddened = computed(() => {
         return false
     }
 })
+
+let getWarningMessage = computed(()=>{
+    let { 
+        warning_message,
+        last_paid_month,
+        stop_after_day,
+    } = appAccessData.value || {}
+
+    const endOfPayMonth = moment(last_paid_month).endOf('month')
+    const afterPaymonth = moment(last_paid_month).add(1, 'month').format('MMMM')
+ 
+    let left_to_stop = moment(last_paid_month).endOf('month').add(stop_after_day + 1, 'day').format('DD MMMM')
+    let stopAfter = moment(last_paid_month).endOf('month').add(stop_after_day + 1, 'day').format('DD MMMM')
+
+     
+
+
+    if(warning_message.startsWith('format_1::')){
+        warning_message = warning_message.replace(/format_1::\s?/g, '')
+        warning_message = warning_message.replace('{{month}}', afterPaymonth)
+        warning_message = warning_message.replace('{{date}}', stopAfter) 
+    }
+
+    return helper.enToBnDate(warning_message)
+})
+
+
+let getForbiddenedMessage = computed(()=>{
+    let { 
+        last_paid_month,
+        stopped_message,
+    } = appAccessData.value || {}
+
+    if(stopped_message.startsWith('format_1::')){
+        stopped_message = stopped_message.replace(/format_1::\s?/g, '') 
+        stopped_message = stopped_message.replace('{month}', moment(last_paid_month)?.endOf('month').format('MMMM'))
+    }
+
+    return helper.enToBnDate(stopped_message)
+})
+
+async function CheckAccess(loader=false){
+ 
+ try { 
+    if(checking_accessibility.value) return
+    if(loader) checking_accessibility.value = true; 
+    const devMode = window.location.href.indexOf('dev=true') > -1
+    let params = {}
+    if(devMode) params.dev = true
+    http.get('/_ac', { params }).then(response => {
+        if(response.status == 200){
+            let accessdata = response.data
+            if(!devMode){ 
+                accessdata = JSON.parse(decodeURIComponent(escape(atob(accessdata))).replace(/^sbrenc%34#/, ''))
+            }
+            appAccessData.value = accessdata
+            storage('appAccessData').value = accessdata 
+        }
+    }).finally(()=>{
+        document.body.setAttribute('forbidden', String(appUseForbiddened.value))
+        document.body.setAttribute('warning', String(showAccessibilityAlert.value))
+    
+        if(appUseForbiddened.value === true){
+            stop_clear_and_reload()
+        }
+
+        checking_accessibility.value = false
+
+        if(LockscreenRef.value){
+            if(showAccessibilityAlert.value){
+                
+            }
+        }
+         
+
+    })
+   
+ } catch (error) {
+   console.warn('addSchedule__error::', error);
+ }
+
+}
  
  
 provide('route', route)
@@ -270,41 +355,6 @@ function stop_clear_and_reload(){
 provide('stop_clear_and_reload', stop_clear_and_reload)
 
 
-async function CheckAccess(loader=false){
- 
- try { 
-    if(checking_accessibility.value) return
-    if(loader) checking_accessibility.value = true; 
-    const devMode = window.location.href.indexOf('dev=true') > -1
-    let params = {}
-    if(devMode) params.dev = true
-    http.get('/_ac', { params }).then(response => {
-        if(response.status == 200){
-            let accessdata = response.data
-            if(!devMode){ 
-                accessdata = JSON.parse(decodeURIComponent(escape(atob(accessdata))).replace(/^sbrenc%34#/, ''))
-            }
-            appAccessData.value = accessdata
-            storage('appAccessData').value = accessdata 
-        }
-    }).finally(()=>{
-        document.body.setAttribute('forbidden', String(appUseForbiddened.value))
-        document.body.setAttribute('warning', String(showAccessibilityAlert.value))
-    
-        if(appUseForbiddened.value === true){
-            stop_clear_and_reload()
-        }
-
-        checking_accessibility.value = false
-         
-
-    })
-   
- } catch (error) {
-   console.warn('addSchedule__error::', error);
- }
-
-}
 
 function pauseAudioIfRurning(){
     if(palylistComponent.value){
@@ -360,7 +410,11 @@ async function getAllStudents(){
 
 }
 
-onMounted(async ()=>{      
+onMounted(async ()=>{   
+    
+        
+    document.body.setAttribute('forbidden', String(appUseForbiddened.value))
+    document.body.setAttribute('warning', String(showAccessibilityAlert.value))
     
     await getAllStudents()
     await getSchedules()
@@ -547,13 +601,10 @@ function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
     </SideBar> -->
     <Toaster></Toaster>
     <template v-if="appUseForbiddened">
-        <Lockscreen @tryToUnlock="CheckAccess(true)"></Lockscreen>
+        <Lockscreen ref="LockscreenRef" @tryToUnlock="CheckAccess(true)"></Lockscreen>
         <template v-if="showAccessibilityAlert">
             <div class="diablitily-alert">
-                {{ 
-                checking_accessibility ? 'পুনরায় চেক করা হচ্ছে...' : (appAccessData?.stopped_message 
-                + ` আপনার গত ${moment(appAccessData?.last_paid_month)?.endOf('month').format('MMMM')} মাস পর্যন্ত প্ররিশোধ করা হয়েছে।`) 
-                }}
+                <div v-html="getForbiddenedMessage" @auxclick="log({getWarningMessage})"></div>
                 <accessCheckAnimation v-if="checking_accessibility"></accessCheckAnimation>
             </div>
         </template>
@@ -565,18 +616,9 @@ function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
             <Playlist ref="palylistComponent"></Playlist> 
         </div>
     
-        <template v-if="checking_accessibility">
-            <div class="access-loading-area">
-                <accessCheckAnimation></accessCheckAnimation>
+        <template v-if="showAccessibilityAlert">
+            <div class="diablitily-alert" @auxclick="log({getForbiddenedMessage})" v-html="getWarningMessage">  
             </div>
-        </template>
-        <template v-else>
-            <template v-if="showAccessibilityAlert">
-                <div class="diablitily-alert"> 
-                    {{ appAccessData?.warning_message }}  
-                    <accessCheckAnimation v-if="checking_accessibility"></accessCheckAnimation>
-                </div>
-            </template>
         </template>
     </template>
     

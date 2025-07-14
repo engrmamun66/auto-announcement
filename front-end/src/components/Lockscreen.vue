@@ -1,9 +1,9 @@
 <template>
-    <div class="alignCont">
+    <div class="alignCont" ref="wrapper">
         <div class="alignWrap">
 
             <div class="lock">
-            <svg version="1.1" id="lockSVG" xmlns="http://www.w3.org/2000/svg" viewBox="0 -60 166.7 308.6" style="max-width: 100%; height: auto;" xml:space="preserve" data-locked="true" @click="toggleLock">
+            <svg version="1.1" id="lockSVG" xmlns="http://www.w3.org/2000/svg" viewBox="0 -60 166.7 308.6" style="max-width: 100%; height: auto;" xml:space="preserve" data-locked="true" @click="toggleLock();delay(toggleLock, 0)">
                 <g class="lockPinGroup">
                 <path class="lockPin" d="M93.4,4H71.8C42.1,4,17.9,28.1,17.9,57.9v117.5H37V57.9C37,38.7,52.6,23,71.8,23h21.6 c19.2,0,34.9,15.6,34.9,34.9v50h4.3v7.4h-4.3v6.2h19.1v-6.2H143v-7.4h4.3v-50C147.4,28.1,123.2,4,93.4,4z" />
                 </g>
@@ -22,9 +22,18 @@
 </template>
 
 <script setup>
+import { ref } from 'vue'
 let emits = defineEmits(['tryToUnlock'])
 
-function toggleLock() {
+function delay (callback, time = 0, ...args) {
+  setTimeout(() => {
+    callback(...args);
+  }, time);
+}
+
+let wrapper = ref(null)
+
+function toggleLock(emitR=true) {
     var lock = document.getElementById("lockSVG");
     var isLocked = lock.getAttribute("data-locked") === "true";
     var lockPin = lock.querySelector(".lockPinGroup");
@@ -38,9 +47,19 @@ function toggleLock() {
     }
 
     lock.setAttribute("data-locked", !isLocked);
-    emits('tryToUnlock', true)
+    if(emitR) emits('tryToUnlock', true)
 }
 
+
+
+defineExpose({
+  unlock: function(){
+    if(wrapper.value){
+      wrapper.value.style.setProperty('--unlock-percent', '-15%');
+      toggleLock(false)
+    }
+  }
+})
 
  
 </script>
@@ -69,7 +88,7 @@ body {
 
 .alignWrap {
   display: table-cell;
-  vertical-align: middle;
+  vertical-align: sub;
   text-align: center;
 }
 
@@ -150,13 +169,13 @@ body {
   }
 
   100% {
-    transform: translateY(-2%);
+    transform: translateY(var(--unlock-percent, -2%));
   }
 }
 
 @keyframes lockLockBounce {
   0% {
-    transform: translateY(-2%);
+    transform: translateY(var(--unlock-percent, -2%));
   }
 
   50%,
