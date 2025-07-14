@@ -105,8 +105,8 @@ let getWarningMessage = computed(()=>{
     const endOfPayMonth = moment(last_paid_month).endOf('month')
     const afterPaymonth = moment(last_paid_month).add(1, 'month').format('MMMM')
  
-    let left_to_stop = moment(last_paid_month).endOf('month').add(stop_after_day + 1, 'day').format('DD MMMM')
-    let stopAfter = moment(last_paid_month).endOf('month').add(stop_after_day + 1, 'day').format('DD MMMM')
+    let stopAfter = moment(last_paid_month).endOf('month').add(stop_after_day + 1, 'day')
+    let left_days = stopAfter.diff(moment(), 'day') 
 
      
 
@@ -114,7 +114,8 @@ let getWarningMessage = computed(()=>{
     if(warning_message.startsWith('format_1::')){
         warning_message = warning_message.replace(/format_1::\s?/g, '')
         warning_message = warning_message.replace('{{month}}', afterPaymonth)
-        warning_message = warning_message.replace('{{date}}', stopAfter) 
+        warning_message = warning_message.replace('{{date}}', stopAfter.format('DD MMMM')) 
+        warning_message = warning_message.replace('{{left_days}}', left_days) 
     }
 
     return helper.enToBnDate(warning_message)
@@ -129,7 +130,7 @@ let getForbiddenedMessage = computed(()=>{
 
     if(stopped_message.startsWith('format_1::')){
         stopped_message = stopped_message.replace(/format_1::\s?/g, '') 
-        stopped_message = stopped_message.replace('{month}', moment(last_paid_month)?.endOf('month').format('MMMM'))
+        stopped_message = stopped_message.replace('{{month}}', moment(last_paid_month)?.endOf('month').format('MMMM'))
     }
 
     return helper.enToBnDate(stopped_message)
