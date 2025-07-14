@@ -102,7 +102,6 @@ let getWarningMessage = computed(()=>{
         stop_after_day,
     } = appAccessData.value || {}
 
-    const endOfPayMonth = moment(last_paid_month).endOf('month')
     const afterPaymonth = moment(last_paid_month).add(1, 'month').format('MMMM')
  
     let stopAfter = moment(last_paid_month).endOf('month').add(stop_after_day + 1, 'day')
