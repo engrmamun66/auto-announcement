@@ -12,9 +12,12 @@ module.exports = {
           API_BASE_URL: `http://localhost:${port_number}/api`,
           DEVICE_API_BASE_URL: 'http://127.0.0.1:8081/',
           SECRET_KEY: 'YOUR_SECRET_KEY', //ndeapkuq96bnsl17zzx2
+
+          PUNCH_LOG_FILENAME: 'punch.log.json',
      },
      settings: {
           backup_days: 7,
+          punch_log_indent: 0,
      },
      logo: {
           width: '100px',

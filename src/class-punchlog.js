@@ -10,14 +10,14 @@ const utils = require('./utls')
 
 class PunchLog { 
 
-
+  punch_log_filename = 'database/' + global.config.env?.PUNCH_LOG_FILENAME || 'punch.log.json'
  
   constructor() { 
     this.createFile()
   }
 
   createFile(){  
-    const filePath = path.join(global.DIR, 'database/punch.log.json')
+    const filePath = path.join(global.DIR, this.punch_log_filename)
 
     if (!fs.existsSync(filePath)) {
       fs.writeFileSync(filePath, JSON.stringify([]));
@@ -35,7 +35,7 @@ class PunchLog {
 
   add(req, res){ 
 
-    const filePath = path.join(global.DIR, 'database/punch.log.json') 
+    const filePath = path.join(global.DIR, this.punch_log_filename) 
     if (fs.existsSync(filePath)) {
       let logs = require(filePath) || [];
       const { student } = req.body
@@ -49,7 +49,9 @@ class PunchLog {
           return date_array.includes(punch_date)
         })
 
-        fs.writeFileSync(filePath, JSON.stringify(logs, null, 4));
+        const punch_log_indent = global.config?.settings?.punch_log_indent || 0
+
+        fs.writeFileSync(filePath, JSON.stringify(logs, null, punch_log_indent));
         return res.send({message: 'log saved'})
       }
     } 
