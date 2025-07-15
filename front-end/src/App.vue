@@ -484,7 +484,6 @@ onMounted(async ()=>{
 
 function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
      try {
-
           if(!is_started_schedule.value){
                emitter.emit('toaster-error', { message: 'শিডিউল এখনো শুরু হয়নি'})
                return
@@ -557,8 +556,6 @@ function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
                          let rs = running_call_schedules(student['class_short'])
                          let is = incoming_call_schedules(student['class_short'])
 
-                         console.log(student);
-                         
                          if(rs.length){
                               student['start_ms'] = rs[0].start_ms
                               student['end_ms'] = rs[0].end_ms
@@ -567,9 +564,15 @@ function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
                               student['end_ms'] = is[0].end_ms
                          } 
 
+
+                         function addPunchLog(student){
+                            http.post('/punch-log/add-log', { student }).then(response => { })
+                         }
+
                          // ----
                          if(!findLast){
                               wattingList.value.push(student)
+                              addPunchLog(student)
                               emitter.emit('pushed_a_student__or__rechecktoPlay', student)
                               if(message){
                                     emitter.emit('toaster-success', { message, duration: 3000})
@@ -577,6 +580,7 @@ function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
                          }
                          else if(findLast && findLast?.is_called){
                               wattingList.value.splice(findLastIndex, 0, student)
+                              addPunchLog(student)
                               emitter.emit('pushed_a_student__or__rechecktoPlay', student)
                               if(message){
                                     emitter.emit('toaster-success', { message, duration: 3000})
@@ -596,10 +600,7 @@ function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
                          student['start_ms'] = helper.miliseconds() - 1000
                          student['end_ms'] = helper.miliseconds() + (10 * 1000)
                          wattingList.value.unshift(student)  
-
-                         http.post('/punch-log/add-log', { student }).then(response => {
-                            console.log('puch---log', response.data);
-                         })
+                         addPunchLog(student)
                     } 
 
                     storage('wattingList').value = wattingList.value;
