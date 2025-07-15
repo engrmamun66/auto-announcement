@@ -419,10 +419,8 @@ async function getAllStudents(){
 
 onMounted(async ()=>{   
 
-    document.addEventListener('click', (e) => {
-        e.preventDefault()
-        e.stopPropagation()
-        emitter.emit('document_clicked', e)
+    document.addEventListener('click', (e) => { 
+        // emitter.emit('document_clicked', e)
     })
     
         
