@@ -342,7 +342,7 @@ const log = console.log
             <div class="row" :class="[payload?.id ? 'mt-2' : 'mt-4']">
 
               <div v-if="payload?.id" class="col-12">
-                <Tabset @click="(tab) => {
+                <Tabset @onTab="(tab) => {
                   editModeTabIndex = tab;
                   if(tab == 2) getStudentPuchLogs();
                 }"></Tabset> 

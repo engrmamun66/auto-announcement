@@ -1,12 +1,12 @@
 <template>
   <div class="tabset">
     <!-- Tab 1 -->
-    <input type="radio" name="tabset" id="tab1" aria-controls="marzen" checked @click.stop="emits('click', 1)" />
-    <label for="tab1" @click.stop="emits('click', 1)">General</label>
+    <input type="radio" name="tabset" id="tab1" aria-controls="marzen" checked @click.stop="emits('onTab', 1)" />
+    <label for="tab1" @click.stop="emits('onTab', 1)">General</label>
 
     <!-- Tab 2 -->
-    <input type="radio" name="tabset" id="tab2" aria-controls="rauchbier" @click.stop="emits('click', 2)" />
-    <label for="tab2" @click.stop="emits('click', 2)">Punch History</label>
+    <input type="radio" name="tabset" id="tab2" aria-controls="rauchbier" @click.stop="emits('onTab', 2)" />
+    <label for="tab2" @click.stop="emits('onTab', 2)">Punch History</label>
 
 
     <!-- Tab 3 -->
@@ -18,7 +18,7 @@
 </template>
 
 <script setup>
-let emits = defineEmits('click')
+let emits = defineEmits('onTab')
 </script>
 
 
