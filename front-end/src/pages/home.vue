@@ -487,15 +487,16 @@ function removeFromWattingList(student, i){
 }
 .card-canceller{
      position: absolute;
-     right: -2px;
-     background: #da4646;
-     color: white;
      top: -1px;
-     padding: 0px 4px;
+     right: -1px;
+     background: #da4646;
+     color: #fff;
+     padding: 0 4px;
      border-bottom-left-radius: 9px;
      cursor: pointer;
      opacity: 0;
-     transition: all 0.3s;
+     transition: all .3s;
+     border-top-right-radius: 4px; 
 }
 .student-box:hover .card-canceller{
      opacity: 1;
