@@ -36,10 +36,12 @@ webSocket()
 const classDB = require('./src/class-db')
 const students = require('./src/class-students');
 const schedules = require('./src/class-schedules');
+const PunchLoogClass = require('./src/class-punchlog');
 const utils = require('./src/utls');
 const DB = new classDB() 
 const Students = new students(DB.db) 
-const Schedules = new schedules(DB.db) 
+const Schedules = new schedules(DB.db)
+const PunchLog = new PunchLoogClass() 
 
 
 utils.create_access_DOT_apikey()
@@ -278,6 +280,18 @@ app.get(`/api/_ac`, async (req, res) => {
   app.delete(prefix + '/schedules/delete/:id', (req, res) => {
     Schedules.deleteSchedule(req, res);
   }); 
+
+
+  /**
+   * =============== With Logs ========
+  */
+  app.post(prefix + '/punch-log/add-log', (req, res) => {
+    PunchLog.add(req, res);
+  });
+  app.post(prefix + '/punch-log/get-log/', (req, res) => {
+    PunchLog.getLog(req, res);
+  });
+ 
    
 })
  

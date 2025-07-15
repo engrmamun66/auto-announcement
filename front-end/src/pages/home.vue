@@ -296,7 +296,7 @@ function removeFromWattingList(student, i){
                                         </div>
                                         <div class="class-name panch-time mt-1" @click="log({student, currentItem: storage('currentItem').value}) ">
                                              <div class="d-flex justify-content-between align-items-center">
-                                                  <label for="">Punched {{ student.punch_exact_time_text }}</label>
+                                                  <label tooltip="Punched Time">Time {{ moment(student.punch_exact_time_text).format('hh:mm:ss A') }}</label>
                                                   <template v-if="!student.is_called && student?.dakhela == storage('currentItem').value?.dakhela">
                                                        <div>
                                                             <PlayingAnimation></PlayingAnimation>

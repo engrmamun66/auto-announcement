@@ -55,21 +55,16 @@ th{
 }
 
 
-th:not(:last-child) { 
-  border-right: 4px solid var(--borderColor);
+ 
+th { 
+  /* background: var(--primaryColor) !important; */
+  color: black;
 }
-th:nth-child(odd) {
-  background: #e5f4fbc3; 
+
+thead tr {
+  background: var(--grad2)
 }
-th:nth-child(even) {
-  background: #f3f4dfb0; 
-}
-th:nth-child(1) {
-  border-radius: 20px 0 0 0;
-}
-th:last-child{
-  border-radius: 0 20px 0 0;
-}
+ 
 
 tbody tr {
   background: var(--grad2)

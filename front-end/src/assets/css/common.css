@@ -42,7 +42,7 @@ body:not([forbidden]):not(.user-interacted)::after
     top: 50%;
     transform: translateX(-50%);
     font-size: 50px;
-    border-radius: 80px;
+    border-radius: 20px;
     box-shadow: 2px 4px 8px #00000080;
     padding: 20px;
     cursor: pointer;

@@ -31,6 +31,7 @@ let isMounted = ref(false)
 let user_interacted = ref(false)
 let emergency_mode = ref(false)
 let LockscreenRef = ref(null)
+let disabilityAlretRef = ref(null)
 
 let palylistComponent = ref(null)
 provide('palylistComponent', palylistComponent)
@@ -117,7 +118,7 @@ let getWarningMessage = computed(()=>{
         warning_message = warning_message.replace('{{left_days}}', left_days) 
     }
 
-    return helper.enToBnDate(warning_message)
+    return helper.enToBnDate(warning_message, {bold: false})
 })
 
 
@@ -132,7 +133,7 @@ let getForbiddenedMessage = computed(()=>{
         stopped_message = stopped_message.replace('{{month}}', moment(last_paid_month)?.endOf('month').format('MMMM'))
     }
 
-    return helper.enToBnDate(stopped_message)
+    return helper.enToBnDate(stopped_message, {bold: false})
 })
 
 async function CheckAccess(loader=false){
@@ -167,6 +168,12 @@ async function CheckAccess(loader=false){
                 
             }
         }
+        setTimeout(() => {
+            if(disabilityAlretRef.value){
+                let { height } = disabilityAlretRef.value.getBoundingClientRect()
+                document.body.style.paddingBottom = height + 'px'
+            }
+        }, 10);
          
 
     })
@@ -411,6 +418,12 @@ async function getAllStudents(){
 }
 
 onMounted(async ()=>{   
+
+    document.addEventListener('click', (e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        emitter.emit('document_clicked', e)
+    })
     
         
     document.body.setAttribute('forbidden', String(appUseForbiddened.value))
@@ -515,7 +528,7 @@ function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
                     let student = response.data.data;
                     student['barcode'] = barcode;
                     student['punch_exact_time'] = helper.miliseconds();
-                    student['punch_exact_time_text'] = moment().format('hh:mm A')
+                    student['punch_exact_time_text'] = moment().format('Y-MM-DD HH:mm:ss')
 
                     let findLast = wattingList.value.findLast(s => s.id == student.id)
                     let findLastIndex = wattingList.value.findLastIndex(s => s.id == student.id)
@@ -583,6 +596,10 @@ function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
                          student['start_ms'] = helper.miliseconds() - 1000
                          student['end_ms'] = helper.miliseconds() + (10 * 1000)
                          wattingList.value.unshift(student)  
+
+                         http.post('/punch-log/add-log', { student }).then(response => {
+                            console.log('puch---log', response.data);
+                         })
                     } 
 
                     storage('wattingList').value = wattingList.value;
@@ -603,7 +620,7 @@ function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
     <template v-if="appUseForbiddened">
         <Lockscreen ref="LockscreenRef" @tryToUnlock="CheckAccess(true)"></Lockscreen>
         <template v-if="showAccessibilityAlert">
-            <div class="diablitily-alert">
+            <div ref="disabilityAlretRef" class="disablitily-alert">
                 <div v-html="getForbiddenedMessage" @auxclick="log({getWarningMessage})"></div>
                 <accessCheckAnimation v-if="checking_accessibility"></accessCheckAnimation>
             </div>
@@ -617,7 +634,7 @@ function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
         </div>
     
         <template v-if="showAccessibilityAlert">
-            <div class="diablitily-alert" @auxclick="log({getForbiddenedMessage})" v-html="getWarningMessage">  
+            <div ref="disabilityAlretRef" class="disablitily-alert" @auxclick="log({getForbiddenedMessage})" v-html="getWarningMessage">  
             </div>
         </template>
     </template>
@@ -634,7 +651,7 @@ function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
     background-color: var(--primaryColor);
     background-color: #ffd602;
 }
-.diablitily-alert{
+.disablitily-alert{
     position: fixed;
     bottom: 0px;
     left: 0px;

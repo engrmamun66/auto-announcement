@@ -1,5 +1,6 @@
 <script setup>
 import { onMounted, inject, ref, reactive } from 'vue';
+import moment from 'moment/moment'
 import { useRouter, useRoute } from 'vue-router';
 import Note from '../components/note.vue'
 import myTable from '../components/myTable.vue'
@@ -13,6 +14,7 @@ import AudioUpload from '../components/AudioUpload.vue'
 import Player from '../components/Player.vue'
 import AudioRecorAndUpload from '../components/AudioRecorAndUpload.vue'
 import RecoringAnimation from '../components/RecoringAnimation.vue'
+import Tabset from '../components/Tabset.vue'
 
 
 const route = inject('route');
@@ -28,6 +30,7 @@ const all_students = inject('all_students', [])
 const getAllStudents = inject('getAllStudents', () => {})
 
 let students = ref([])
+let studentLogs = ref([])
 let only_similler_students = ref(false)
 let params = ref({
     "page_no": 1,
@@ -46,6 +49,7 @@ let showSearchForm = ref(true)
 let targetStd = ref(null)
 let columnName = ref('sound1')
 let targetStdForBarcode = ref(null)
+let editModeTabIndex = ref(1)
 // let filterForm
 
 async function getStudents({id=null}={}){
@@ -97,12 +101,11 @@ function playThis (i, key = "isPlaying_sound1", student) {
 async function clearParams({dakhela=null, id=null, get=true}={}){
 
   if(!get) getStudents()
-
+  
   params.value.page_no = 1
   params.value.total = 3
   params.value.totalPages = 1
-  params.value.limit = 100
-
+  params.value.limit = 100 
     
   params.value.class_name = null
   params.value.name = null
@@ -110,6 +113,7 @@ async function clearParams({dakhela=null, id=null, get=true}={}){
   params.value.dakhela = dakhela
   params.value.sound1 = null
   only_similler_students.value = false
+  editModeTabIndex.value = 1
   if(get) getStudents({id}) 
 }
  
@@ -147,6 +151,7 @@ function clearPayload(){
   payload.card_no = null
   addMode.value = false 
   is___adding.value = false 
+  editModeTabIndex.value = 1
 }
 
 function prepareToEdit(std){
@@ -154,6 +159,7 @@ function prepareToEdit(std){
     payload[key] = std[key]
   });
   addMode.value = true
+  editModeTabIndex.value = 1
 }
  
 
@@ -279,9 +285,35 @@ async function deleteStudent(id, i){
     console.warn('getStudents_error::', error);
   }
 }
+
+
+/**
+ * 
+ * @param date=2025-07-22
+ */
+async function getStudentPuchLogs({date=null, day=null}={}){
+  studentLogs.value = []
+  if(!payload.id){
+    return
+  }
+  let student = students.value.find(std => std.id == payload.id)
+  if(student){
+    http.post(`/punch-log/get-log/`, { student, date, day }).then(response => {
+      if(response.status == 200){
+         studentLogs.value = response.data.data
+      }
+    }).catch(() => {}).finally(()=>{ 
+
+    })
+  }
+}
  
 onMounted(()=>{
   getStudents()
+  emitter.on('document_clicked', ()=>{
+    addMode.value = false
+    editModeTabIndex.value = 1
+  })
 })
 const log = console.log 
 
@@ -295,79 +327,118 @@ const log = console.log
       <h1>{{ !addMode ? 'Students' : 'Add Student'}}</h1> 
       
       <div class="d-flex justify-content-end">
-        <Btn @click="showSearchForm = !showSearchForm" class="me-2"><i class='bx bx-search transformY-2px size-1' ></i> {{ showSearchForm ? "Hide" : 'Show' }} search</Btn>
-        <Btn v-if="!addMode" class="me-2" @click="addMode = !addMode" ><i class='bx bx-plus'></i> Add Student</Btn>
-        <Btn v-else class="me-2 red" @click="addMode = !addMode" >Cancel</Btn>
+        <Btn @click="showSearchForm = !showSearchForm;editModeTabIndex=1" class="me-2"><i class='bx bx-search transformY-2px size-1' ></i> {{ showSearchForm ? "Hide" : 'Show' }} search</Btn>
+        <Btn v-if="!addMode" class="me-2" @click="addMode = !addMode;editModeTabIndex=1;clearParams();payload.id = null" ><i class='bx bx-plus'></i> Add Student</Btn>
+        <Btn v-else class="me-2 red" @click="addMode = !addMode;editModeTabIndex=1;clearParams();payload.id = null" >Cancel</Btn>
         <!-- <Btn @click="router.push({name: 'import'})"><i class='bx bxs-file-import' ></i> Import</Btn> -->
       </div>
     </div>
 
     <template v-if="addMode">
-      <div class="w-100 d-flex justify-content-center">
+      <div class="w-100 d-flex justify-content-center" >
 
         <div class="add-form-wrapper">
-          <form @submit.prevent="false">
-            <div class="row mt-4">
+          <form @submit.prevent="false" @click.stop.prevent="false">
+            <div class="row" :class="[payload?.id ? 'mt-2' : 'mt-4']">
 
-              <div class="col-12">
-                <div class="form-group">
-                  <label for="email">Class</label>
-                  <select v-model="payload.class" class="form-control" id="ClassId" :disabled="payload.name && payload.name.indexOf('||dakhela') > -1">
-                    <option :value="null">-class-</option>
-                    <template v-for="(cls, index) in classes" :key="index">
-                      <option :value="cls.class_name">{{cls.class_name}}</option>
-                    </template>                  
-                  </select>
-                </div>
+              <div v-if="payload?.id" class="col-12">
+                <Tabset @click="(tab) => {
+                  editModeTabIndex = tab;
+                  if(tab == 2) getStudentPuchLogs();
+                }"></Tabset> 
               </div>
 
-              <div class="col-12">
-                <div class="form-group">
-                  <label for="name">Name</label>
-                  <input v-model="payload.name" type="text" class="form-control" :disabled="payload.name && payload.name.indexOf('||dakhela') > -1">
-                </div>
-              </div>
 
-              <div class="col-12">
-                <div class="form-group">
-                  <label for="name">Dakhela</label>
-                  <input v-model="payload.dakhela" type="number" class="form-control" :disabled="payload.name && payload.name.indexOf('||dakhela') > -1">
-                </div>
-              </div>
+    
+                <template v-if="editModeTabIndex == 1">
 
-              <div class="col-12">
-                <div class="form-group">
-                  <label for="year">Year</label> 
-                  <select v-model="payload.year" id="" class="form-control" :disabled="payload.name && payload.name.indexOf('||dakhela') > -1">
-                    <option :value="new Date().getFullYear()">{{ new Date().getFullYear() }}</option>
-                    <option :value="new Date().getFullYear() - 1">{{ new Date().getFullYear() - 1 }}</option>
-                    <option :value="new Date().getFullYear() - 2">{{ new Date().getFullYear() - 2 }}</option>
-                    <option :value="new Date().getFullYear() - 3">{{ new Date().getFullYear() - 3 }}</option>
-                  </select>
-                </div>
-              </div>
-              <!--   <div class="col-12">
-                <div class="form-group">
-                  <label for="card">Card Number</label>
-                  <input v-model="payload.card_no" type="text" class="form-control" id="CARD_FIELD_IN_CARD_FORM">
-                </div>
-              </div> -->
+                  <div class="col-12">
+                    <div class="form-group">
+                      <label for="email">Class</label>
+                      <select v-model="payload.class" class="form-control" id="ClassId" :disabled="payload.name && payload.name.indexOf('||dakhela') > -1">
+                        <option :value="null">-class-</option>
+                        <template v-for="(cls, index) in classes" :key="index">
+                          <option :value="cls.class_name">{{cls.class_name}}</option>
+                        </template>                  
+                      </select>
+                    </div>
+                  </div>
+    
+                  <div class="col-12">
+                    <div class="form-group">
+                      <label for="name">Name</label>
+                      <input v-model="payload.name" type="text" class="form-control" :disabled="payload.name && payload.name.indexOf('||dakhela') > -1">
+                    </div>
+                  </div>
+    
+                  <div class="col-12">
+                    <div class="form-group">
+                      <label for="name">Dakhela</label>
+                      <input v-model="payload.dakhela" type="number" class="form-control" :disabled="payload.name && payload.name.indexOf('||dakhela') > -1">
+                    </div>
+                  </div>
+    
+                  <div class="col-12">
+                    <div class="form-group">
+                      <label for="year">Year</label> 
+                      <select v-model="payload.year" id="" class="form-control" :disabled="payload.name && payload.name.indexOf('||dakhela') > -1">
+                        <option :value="new Date().getFullYear()">{{ new Date().getFullYear() }}</option>
+                        <option :value="new Date().getFullYear() - 1">{{ new Date().getFullYear() - 1 }}</option>
+                        <option :value="new Date().getFullYear() - 2">{{ new Date().getFullYear() - 2 }}</option>
+                        <option :value="new Date().getFullYear() - 3">{{ new Date().getFullYear() - 3 }}</option>
+                      </select>
+                    </div>
+                  </div>
+                  <!--   <div class="col-12">
+                    <div class="form-group">
+                      <label for="card">Card Number</label>
+                      <input v-model="payload.card_no" type="text" class="form-control" id="CARD_FIELD_IN_CARD_FORM">
+                    </div>
+                  </div> -->
+    
+                  <div class="col-12 d-flex justify-content-center">
+                    <Btn @click.stop="clearPayload" class="red me-2" >Cancel</Btn>
+                    <Btn v-if="!payload.id" @click="addStudent" class="me-0" >Submit <BtnLoader v-if="is___adding"></BtnLoader> </Btn>
+                    <Btn v-else @click="updateStudent" class="me-0" v-if="payload.name && payload.name.indexOf('||dakhela') === -1">Update <BtnLoader v-if="is___adding"></BtnLoader> </Btn>
+                  </div> 
+                </template>
+                <template v-else-if="editModeTabIndex == 2"> 
+                  <div class="col-12 overflow-y-scroll">
+                     <table>
+                      <thead>
+                        <th>Name</th> 
+                        <th>Date&nbsp;Time</th>
+                        <th>Before</th>
+                      </thead>
 
-              <div class="col-12 d-flex justify-content-center">
-                <Btn @click.stop="clearPayload" class="red me-2" >Cancel</Btn>
-                <Btn v-if="!payload.id" @click="addStudent" class="me-0" >Submit <BtnLoader v-if="is___adding"></BtnLoader> </Btn>
-                <Btn v-else @click="updateStudent" class="me-0" v-if="payload.name && payload.name.indexOf('||dakhela') === -1">Update <BtnLoader v-if="is___adding"></BtnLoader> </Btn>
-              </div> 
+                      <tbody>
+                        <template v-if="studentLogs?.length">
+                          <template v-for="(student, i) in studentLogs">
+                            <tr>
+                              <td>{{ student?.name }}</td>
+                              <td>{{ helper.enToBnDate(moment(student?.punch_exact_time_text).format('DD MMMM, dddd')) }}</td>
+                              <td>{{ helper.enToBnDate(moment(student?.punch_exact_time_text).format('hh:mm&nbsp;A')) }}</td>
+                              <td>{{ helper.enToBnDate(moment().diff(student?.punch_exact_time_text, 'days')) }} দিন</td>
+                            </tr> 
+                          </template>
+                        </template>
+                        <template v-else> 
+                          <tr>
+                            <td colspan="44">No log found</td> 
+                          </tr>  
+                        </template>
+                      </tbody>
+                     </table>
+                  </div> 
+                </template> 
+
 
             </div>
           </form>
         </div>
 
       </div>
-    </template>
-
-
-
+    </template> 
 
     <template v-else>
       
@@ -428,7 +499,7 @@ const log = console.log
               <div class="form-group mt-md-3"> 
                   <div class="d-flex">
                     <Btn class="me-1"></Btn> 
-                    <Btn @click.stop="clearParams();getStudents()" class="me-1 red">Clear</Btn> 
+                    <Btn @click.stop="clearParams();getStudents();editModeTabIndex=1" class="me-1 red">Clear</Btn> 
 
                   </div>
                 </div>
@@ -475,7 +546,7 @@ const log = console.log
               <template v-for="(std, i) in students.toReversed()">
                 <tr>
                   <td class="text-left"> {{ std.class }} </td> 
-                  <td class="text-left cp" @click="prepareToEdit(std)" :student-id="std.id" >{{ std.name.split('||')?.[0] }}</td>
+                  <td class="text-left cp" @click.stop="prepareToEdit(std)" :student-id="std.id" >{{ std.name.split('||')?.[0] }}</td>
                   <td> 
                     <label>
                       {{ std.dakhela }}
@@ -625,13 +696,19 @@ const log = console.log
   /* margin-left: 0px 20px; */
 }
 .add-form-wrapper{
-  width: 500px;
+  width: 600px;
   padding: 20px;
   border: 1px solid rgba(255, 255, 255, 0.545);
   margin-top: 100px;
   border-radius: 10px;
   background: var(--grad2);
   box-shadow: 0px 43px 50px #00000061;
+}
+@media screen and (max-width: 500px) {
+  .add-form-wrapper{ 
+    margin-top: 20px; 
+    width: 100%;
+  }
 }
 .add-form-wrapper .form-group{
   padding-bottom: 20px;
@@ -686,6 +763,17 @@ const log = console.log
 }
 .action-icons > *:not(:last-child){
   margin-right: 8px;
+}
+.overflow-y-scroll{
+  max-height: calc(100vh - 390px);
+  overflow-y: auto;
+  padding-bottom: 15px;
+}
+@media (max-width: 500px) {
+  .overflow-y-scroll{
+    max-height: calc(100vh - 390px);
+    overflow-y: auto;
+  }
 }
 </style>
 

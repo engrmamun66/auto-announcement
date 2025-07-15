@@ -13,6 +13,9 @@ module.exports = {
           DEVICE_API_BASE_URL: 'http://127.0.0.1:8081/',
           SECRET_KEY: 'YOUR_SECRET_KEY', //ndeapkuq96bnsl17zzx2
      },
+     settings: {
+          backup_days: 7,
+     },
      logo: {
           width: '100px',
           image_url: 'logo.example.png',

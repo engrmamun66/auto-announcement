@@ -165,7 +165,12 @@ const helper = {
       str = String(str);
       return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()
     },
-    enToBnDate: function(dateText=''){
+    wordForm: function (word, number) {
+      if (number >= -1 && number <= 1) return word;
+      else return `${word}s`;
+    },
+    enToBnDate: function(dateText='', {bold=false}={}){
+      dateText = String(dateText)
       let lang = {
         '0': '০',
         '1': '১',
@@ -188,10 +193,32 @@ const helper = {
         September: 'সেপ্টেম্বর', 
         October: 'অক্টোবর', 
         November: 'নভেম্বর', 
-        December: 'ডিসেম্বর'
+        December: 'ডিসেম্বর',
+        Sunday: 'রবিবার',
+        Monday: 'সোমবার',
+        Tuesday: 'মঙ্গলবার',
+        Wednesday: 'বুধবার',
+        Thursday: 'বৃহস্পতিবার',
+        Friday: 'শুক্রবার',
+        Saturday: 'শনিবার',
+        day: 'দিন',
+        days: 'দিন',
       }
-      dateText = Array.from(dateText).map(letter => lang?.[letter] ? `<strong class="bloder-text">${lang?.[letter]}</strong>` : letter).join('')
-      dateText = dateText.split(' ').map(word => lang?.[word] ? `<stong class="bloder-text">${lang?.[word]}</stong>` : word ).join(' ')
+      if(bold){
+        dateText = Array.from(dateText).map(letter => lang?.[letter] ? `<strong class="bloder-text">${lang?.[letter]}</strong>` : letter).join('')
+        dateText = dateText.split(' ').map(word => {
+          let trimmedWord = word.replace(/,$/g, '')
+          let end_comma = /,$/g.test(word) ? ',' : ''
+          return lang?.[trimmedWord] ? `<stong class="bloder-text">${lang?.[trimmedWord]}${end_comma}</stong>` : word
+        }).join(' ')
+      } else {
+        dateText = Array.from(dateText).map(letter => lang?.[letter] ? lang?.[letter] : letter).join('')
+        dateText = dateText.split(' ').map(word => {
+          let trimmedWord = word.replace(/,$/g, '')
+          let end_comma = /,$/g.test(word) ? ',' : ''
+          return lang?.[trimmedWord] ? (lang?.[trimmedWord] + end_comma) : word
+        }).join(' ')
+      }
       return dateText
 
     }
