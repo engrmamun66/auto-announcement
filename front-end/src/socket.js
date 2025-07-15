@@ -9,9 +9,9 @@ export function socketInit({emitter}){
 
     socket.onmessage = (event) => {
         try {
-            emitter.emit('on_socket_message', JSON.parse(event.data));
+            emitter.emit('on_socket_message', JSON.parse(event.data || '{}'));
         } catch (error) {
-            console.error('socket.onmessage__error::', event);
+            console.error('socket.onmessage__error::', event.data);
         }
     };
 
