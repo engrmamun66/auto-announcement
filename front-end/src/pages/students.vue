@@ -83,6 +83,7 @@ async function getStudents({id=null}={}){
       students.value = response.data.data;
       params.value = {...params.value, ...response.data.pagination};
     } 
+    
   } catch (error) {
     console.warn('getStudents_error::', error);
   }
@@ -308,12 +309,23 @@ async function getStudentPuchLogs({date=null, day=null}={}){
   }
 }
  
-onMounted(()=>{
-  getStudents()
+onMounted(async()=>{
+  
   emitter.on('document_clicked', ()=>{
     addMode.value = false
     editModeTabIndex.value = 1
   })
+
+  await getStudents()
+
+  if(route.query.log === 'true' && route.query.dakhela){
+      let student = students.value.find(std => Number(std.dakhela) === Number(route.query.dakhela))
+      if(student){
+        prepareToEdit(student)
+        editModeTabIndex.value = 2
+        getStudentPuchLogs()
+      }
+  }
 })
 const log = console.log 
 
@@ -612,6 +624,14 @@ const log = console.log
                   </td>
                   <td> 
                     <div class="d-flex justify-content-center action-icons">
+                      <span tooltip="Punch Logs" class="transformY-2px">
+                        <i @click="() => {
+                          prepareToEdit(std);
+                          editModeTabIndex = 2;
+                          getStudentPuchLogs();
+                        }" class='bx bxs-time cp px-1' style="font-size: 18px" ></i>
+                      </span>
+                      
                       <i @click.stop="targetStdForBarcode=std" class='bx bx-barcode cp size-1p5' ></i>
                       
                       <span tooltip="Copy barcode">

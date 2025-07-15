@@ -291,12 +291,27 @@ function removeFromWattingList(student, i){
                               <div class="student-box" :class="{'is_called': student.is_called}" :barcode="student?.barcode" >
                                    <div :class="{ 'bg_animation': student?.isPlaying }">
                                         <div class="student-name">{{ student.name }}</div>
-                                        <div class="class-name" @click="log(student)">
-                                             {{ student.class }} [{{ student.dakhela }}]
-                                        </div>
-                                        <div class="class-name panch-time mt-1" @click="log({student, currentItem: storage('currentItem').value}) ">
-                                             <div class="d-flex justify-content-between align-items-center">
-                                                  <label tooltip="Punched Time">Time {{ moment(student.punch_exact_time_text).format('hh:mm:ss A') }}</label>
+                                        <div class="class-name cp" 
+                                        @click="()=>{
+                                             router.push({name: 'students', query: {
+                                                  dakhela: student.dakhela,
+                                                  barcode,
+                                             }})
+                                        }"
+                                        >
+                                             {{ student.class }} <span>[{{ student.dakhela }}]</span>
+                                        </div> 
+                                        <div class="class-name panch-time mt-1 cp" @click="log({student, currentItem: storage('currentItem').value}) ">
+                                             <div class="d-flex justify-content-between align-items-center"
+                                             @click="()=>{
+                                                  router.push({name: 'students', query: {
+                                                       dakhela: student.dakhela,
+                                                       barcode,
+                                                       log: true,
+                                                  }})
+                                             }"
+                                             >
+                                                  <label tooltip="Punched Time" class="cp">Time {{ moment(student.punch_exact_time_text).format('hh:mm:ss A') }}</label>
                                                   <template v-if="!student.is_called && student?.dakhela == storage('currentItem').value?.dakhela">
                                                        <div>
                                                             <PlayingAnimation></PlayingAnimation>
