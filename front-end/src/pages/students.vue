@@ -697,9 +697,14 @@ const log = console.log
               <div id="PRINTABLE_AREA">
                 <Barcode :data="makeCarcode(targetStdForBarcode)"  @load="printDiv('PRINTABLE_AREA')"></Barcode>
               </div>
-              <span class="print-buton cp px-5 mt-3" @click="printDiv('PRINTABLE_AREA')">
-                <i class='bx bx-printer px-1' style="font-size: 18px" ></i> Print
-              </span>              
+              <div class="d-flex justify-content-center align-items-center mt-3">
+                <span class="print-buton cp px-5" @click="printDiv('PRINTABLE_AREA')">
+                  <i class='bx bx-printer px-1' style="font-size: 18px" ></i> Print
+                </span>        
+                <span tooltip="Copy barcode">
+                    <i @click="({target}) => helper.copyToClipboard(makeCarcode(targetStdForBarcode), {el: target.parentElement})" class='bx bxs-copy-alt cp px-1' style="font-size: 18px" ></i>
+                </span> 
+              </div>     
             </div>
         </div>
       </modal>
