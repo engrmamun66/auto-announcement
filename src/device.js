@@ -80,15 +80,12 @@ function getLastPunchData(Students) {
         .then((result) => {
             result = JSON.parse(result)            
             let data = result?.data || []   
-            console.log(data);
-               
-            
-            
-            if (data.length == 0){
-                console.log('Student not found ' + start_time_ampm)
-            } else {
-                console.log('Wao:: Student found ' + start_time_ampm)
-            }     
+            // console.log(data);
+            // if (data.length == 0){
+            //     console.log('Student not found ' + start_time_ampm)
+            // } else {
+            //     console.log('Wao:: Student found ' + start_time_ampm)
+            // }     
 
             let studentOfDevice = data.at(-1)
             // let studentOfDevice = {
