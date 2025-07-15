@@ -253,7 +253,6 @@ onMounted(()=>{
   display: inline-block;
   width: 36px;
   height: 14px;
-  float: right;
 }
 .header-player .switch label {
   font-size: 12px;
