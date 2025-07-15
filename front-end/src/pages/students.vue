@@ -407,7 +407,8 @@ const log = console.log
                      <table>
                       <thead>
                         <th>Name</th> 
-                        <th>Date&nbsp;Time</th>
+                        <th>Date</th>
+                        <th>Time</th>
                         <th>Before</th>
                       </thead>
 
