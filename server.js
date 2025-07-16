@@ -3,6 +3,11 @@ global.DIR = __dirname;
 const fs = require('fs');
 const path = require('path');
 
+// --- Start: Added for socket.io ---
+const http = require('http');
+const { Server } = require("socket.io");
+// --- End: Added for socket.io ---
+
 let config = require('./config.example');
 const configPath = path.join(__dirname, 'config.js');
 if (fs.existsSync(configPath)) {
@@ -10,26 +15,23 @@ if (fs.existsSync(configPath)) {
 }
 global.config = config
 
-const cors = require('cors'); 
+const cors = require('cors');
 const express = require('express')
 const sqlite3 = require("sqlite3").verbose();
 const multer = require("multer");
 const upload = multer({ dest: DIR + '/public/temp' });
-const webSocket = require("./socket/socket")
 const { getToken } = require('./src/device')
-let webContents = require("./src/web-contents"); 
-let checkAccess = require("./src/checkaccess"); 
+let webContents = require("./src/web-contents");
+let checkAccess = require("./src/checkaccess");
 const DEVICE_API_BASE_URL = global.config.env.DEVICE_API_BASE_URL
 
 // checkAccess.CheckAppAccess()
 
+const PORT = config.env.SOCKET_PORT || 2323;
 
+// const webSocket = require("./socket/socket") // No longer needed
+// webSocket() // No longer needed
 
-const PORT = config.env.PORT || 2323;
-
-
-webSocket()
- 
 /**
  * Classes
 */
@@ -47,10 +49,36 @@ const PunchLog = new PunchLoogClass()
 utils.create_access_DOT_apikey()
 utils.createRequiredFolders()
 
-
-
-
 const app = express();
+
+// --- Start: socket.io Integration ---
+const server = http.createServer(app); // Create HTTP server from Express app
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
+});
+
+global.socketIo = io; // Make socket.io instance accessible globally
+
+global.socketIo.on('connection', (socket) => {
+  console.log('Frontend connected to socket.io');
+
+  socket.on('disconnect', () => {
+    console.log('Frontend disconnected from socket.io');
+  });
+
+  socket.on('message', (message) => {
+    console.log('Received:', message);
+    socket.emit('echo', `Echo: ${message}`); // Use emit to send back an event
+  });
+});
+
+console.log(`Socket.IO server initialized and attached to the HTTP server.`);
+// --- End: socket.io Integration ---
+
+
 app.use(express.json());
 app.use(express.static('public'));
 app.use(express.static('front-end'));
@@ -86,7 +114,7 @@ app.get(`/app`, (req, res) => {
 
   // With logo
   let logo_url = config?.logo?.image_url || 'logo.example.png'
-  if(!logo_url.startsWith('http') && !logo_url.startsWith('data:image/')){
+  if (!logo_url.startsWith('http') && !logo_url.startsWith('data:image/')) {
     logo_url = `../${logo_url}`
   }
   webContents = webContents.replace('DYNAMIC_LOGO_URL', logo_url)
@@ -96,15 +124,15 @@ app.get(`/app`, (req, res) => {
   webContents = webContents.replace('DYNAMIC_LOGO_WIDTH', logo_width)
 
   // With logo area padding
-  let logo_padding = config?.logo?.padding || '10px' 
+  let logo_padding = config?.logo?.padding || '10px'
   webContents = webContents.replace('DYNAMIC_LOGO_AREA_PADDING', logo_padding)
 
 
   webContents = webContents.replace('ENV_VARIABLES_IN_JSON_FROMAT', JSON.stringify(config.env || {}))
 
   // With CSS variables
-  if(config.css_vars){
-    webContents = webContents.replace('<!-- CSS_VARS -->', `
+  if (config.css_vars) {
+    webContents = webContents.replace('', `
       <style>
       :root{
         ${config.css_vars}
@@ -117,9 +145,9 @@ app.get(`/app`, (req, res) => {
 
 
 // app.get(`/api/check-access`, async (req, res) => { 
-app.get(`/api/_ac`, async (req, res) => { 
+app.get(`/api/_ac`, async (req, res) => {
   let accessData = await checkAccess.CheckAppAccess()
-  if(req.query.dev){
+  if (req.query.dev) {
     res.send(accessData)
   } else {
     res.send(utils.encodeString('sbrenc%34#' + JSON.stringify(accessData)))
@@ -166,22 +194,19 @@ app.get(`/api/_ac`, async (req, res) => {
   //   }  
   // });
 
-  app.post(prefix + `/barcode-punch`, (req, res) => {   
+  app.post(prefix + `/barcode-punch`, (req, res) => {
     const barcode = req.body.barcode;
-  
-    // Notify WebSocket clients
-    if (global.socketServer) {
-      global.socketServer.clients.forEach((client) => {
-        if (client.readyState === client.OPEN) {
-          client.send(JSON.stringify({ barcode }));
-        }
-      });
+
+    // Notify WebSocket clients using socket.io
+    if (global.socketIo) {
+      // Emit a 'barcode' event to all connected clients
+      global.socketIo.emit('barcode', { barcode });
     } else {
-      res.status(420).send({ success: false, message: "Socket server not runnig" });
+      // This case is unlikely now that socket.io is integrated
+      return res.status(420).send({ success: false, message: "Socket server not running" });
     }
-  
+
     res.status(200).send({ success: true, message: "Card data processed." });
-  
   });
 
   app.get(prefix + "/config", (req, res) => {   
@@ -261,7 +286,7 @@ app.get(`/api/_ac`, async (req, res) => {
   app.delete(prefix + '/students/delete/:id', (req, res) => {
     Students.deleteStudent(req, res);
   });
-  
+
   /**
    * =============== Schedules ========
   */
@@ -294,14 +319,12 @@ app.get(`/api/_ac`, async (req, res) => {
  
    
 })
- 
 
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}/app/#`); 
+
+// Use the http server to listen, not the express app
+server.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}/app/#`);
 
   // send to socket  
   getToken(Students)
-
-
 });
-
