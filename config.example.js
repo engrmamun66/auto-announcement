@@ -14,6 +14,8 @@ module.exports = {
           SECRET_KEY: 'YOUR_SECRET_KEY', //ndeapkuq96bnsl17zzx2
 
           PUNCH_LOG_FILENAME: 'punch.log.json',
+          DEVICE_NAMES: ['Device 2'], // zktecho device name, which already connected by name in BioTime-8.0 server
+          DATA_FETCH_INTERVAL_IN_SECOND: 2,
      },
      settings: {
           backup_days: 7,

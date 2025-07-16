@@ -1,10 +1,11 @@
 const moment = require('moment')
 
-const SECONDS = 1
+const SECONDS = global.config.env.DATA_FETCH_INTERVAL_IN_SECOND || 1
 
 const USERNAME = global.config.env.BIO_TIME_APP_USERNAME
 const PASSWORD = global.config.env.BIO_TIME_APP_PASSWORD
 const DEVICE_API_BASE_URL = global.config.env.DEVICE_API_BASE_URL
+const DEVICE_NAMES = global.config.env.DEVICE_NAMES || ['Device 2']
 
 let interval = null
  
@@ -52,78 +53,58 @@ function getToken(Students) {
         });
 }
  
-function getLastPunchData(Students) {
+async function getLastPunchData(Students) {
+    if (!global.DEVICE_TOKEN) return;
 
-    if (!global.DEVICE_TOKEN) return
+    DEVICE_NAMES.forEach(async (device_name) => {
 
-    const myHeaders = new Headers();
-    myHeaders.append("Content-Type", "application/json");
-    myHeaders.append("Authorization", `JWT ${global.DEVICE_TOKEN}`);
-   
+        const myHeaders = new Headers();
+        myHeaders.append("Content-Type", "application/json");
+        myHeaders.append("Authorization", `JWT ${global.DEVICE_TOKEN}`);
 
-    const requestOptions = {
-        method: "GET",
-        headers: myHeaders,
-        redirect: "follow"
-    };
+        const requestOptions = {
+            method: "GET",
+            headers: myHeaders,
+            redirect: "follow"
+        };
 
-    // let time = '2025-01-26 16:08:00' 
-    let back_seconds = 10  
-    let start_time = moment().subtract(back_seconds, 'second').format('YYYY-MM-DD HH:mm:ss') // two seconds before
-    let start_time_ampm = moment().subtract(back_seconds, 'second').format('hh:mm:ss A') // two seconds before
-    let limit = 100
- 
+        const back_seconds = 10;
+        const start_time = moment().subtract(back_seconds, 'second').format('YYYY-MM-DD HH:mm:ss');
+        const start_time_ampm = moment().subtract(back_seconds, 'second').format('hh:mm:ss A');
+        const limit = 100;
+
     
-    fetch(`${DEVICE_API_BASE_URL}/iclock/api/transactions/?page=1&page_size=${limit}&start_time=${start_time}&end_time=&terminal_alias=Device 2`, requestOptions)
-    // fetch(`${DEVICE_API_BASE_URL}/iclock/api/transactions/?page=1&page_size=${limit}&start_time=${start_time}&end_time=&terminal_alias=`, requestOptions)
-        .then(async (response) => await response.text())
-        .then((result) => {
-            result = JSON.parse(result)            
-            let data = result?.data || []   
-            console.log(data);
-               
-            
-            
-            if (data.length == 0){
-                console.log('Student not found ' + start_time_ampm)
+
+        try {
+            const response = await fetch(
+                `${DEVICE_API_BASE_URL}/iclock/api/transactions/?page=1&page_size=${limit}&start_time=${start_time}&end_time=&terminal_alias=${device_name}`,
+                requestOptions
+            );
+            const text = await response.text();
+            const result = JSON.parse(text);
+            const data = result?.data || [];
+    
+            if (data.length === 0) {
+                console.log(`Student not found (device::${device_name}) ` + start_time_ampm);
             } else {
-                console.log('Wao:: Student found ' + start_time_ampm)
-            }     
+                console.log(`Wao:: Student found (device::${device_name}) ` + start_time_ampm);
+            }
+    
+            const studentOfDevice = data.at(-1);
+            const dakhela = studentOfDevice?.emp_code;
+            const punch_time = studentOfDevice?.punch_time ?? '';
+    
+            Students.getStudentByDakhela_and_sentToSocket(Number(dakhela), {
+                start_time,
+                studentOfDevice,
+                punch_time,
+            });
+    
+        } catch (error) {
+            console.error(`data face error from device(${device_name})::`, error);
+        }
+    })
 
-            let studentOfDevice = data.at(-1)
-            // let studentOfDevice = {
-            //     id: 22381,
-            //     emp: 659,
-            //     emp_code: '417',
-            //     first_name: '',
-            //     last_name: null,
-            //     department: 'Department',
-            //     position: null,
-            //     punch_time: '2025-05-19 23:27:41',
-            //     punch_state: '0',
-            //     punch_state_display: 'Check In',
-            //     verify_type: 4,
-            //     verify_type_display: 'Card',
-            //     work_code: '0',
-            //     gps_location: null,
-            //     area_alias: 'Dhaka',
-            //     terminal_sn: 'CQZ7232360083',
-            //     temperature: 0,
-            //     is_mask: 'No',
-            //     terminal_alias: 'Device 2',
-            //     upload_time: '2025-05-19 23:27:40'
-            // }
-            let dakhela = studentOfDevice?.emp_code// ?? 104
-            let punch_time = studentOfDevice?.punch_time ?? '' 
-            
-            Students.getStudentByDakhela_and_sentToSocket(Number(dakhela), { start_time, studentOfDevice, punch_time, studentOfDevice })
-
-          
-
-        })
-        .catch((error) => {
-            console.error(error)
-        });
 }
 
 
