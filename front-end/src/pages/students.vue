@@ -429,8 +429,8 @@ const log = console.log
                           <template v-for="(student, i) in studentLogs">
                             <tr>
                               <td>{{ student?.name }}</td>
-                              <td>{{ helper.enToBnDate(moment(student?.punch_exact_time_text).format('DD MMMM, dddd')) }}</td>
-                              <td>{{ helper.enToBnDate(moment(student?.punch_exact_time_text).format('hh:mm&nbsp;A')) }}</td>
+                              <td>{{ helper.enToBnDate(moment(student?.punch_exact_time_text).format('DD MMMM, dddd')).replace(/ /g, '&nbsp;') }}</td>
+                              <td>{{ helper.enToBnDate(moment(student?.punch_exact_time_text).format('hh:mm:ss&nbsp;A')) }}</td>
                               <td>{{ helper.enToBnDate(moment().diff(student?.punch_exact_time_text, 'days')) }} দিন</td>
                             </tr> 
                           </template>

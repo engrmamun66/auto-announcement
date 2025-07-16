@@ -66,7 +66,7 @@ body {
   border-bottom: 0;
   cursor: pointer;
   font-weight: 400;
-  color: var(--secondaryColor);
+  color: #333;
   margin-bottom: 15px;
 }
 
@@ -88,13 +88,13 @@ input:focus-visible + label {
 .tabset > label:hover,
 .tabset > input:focus + label,
 .tabset > input:checked + label {
-  color: var(--primaryColor);
+  color: black;
 }
 
 .tabset > label:hover::after,
 .tabset > input:focus + label::after,
 .tabset > input:checked + label::after {
-  background: var(--primaryColor);
+  background: black;
 }
 
 .tabset > input:checked + label {
