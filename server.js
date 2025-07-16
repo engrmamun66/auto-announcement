@@ -2,11 +2,7 @@ global.DIR = __dirname;
 // require('dotenv').config()
 const fs = require('fs');
 const path = require('path');
-
-// --- Start: Added for socket.io ---
 const http = require('http');
-const { Server } = require("socket.io");
-// --- End: Added for socket.io ---
 
 let config = require('./config.example');
 const configPath = path.join(__dirname, 'config.js');
@@ -27,7 +23,7 @@ const DEVICE_API_BASE_URL = global.config.env.DEVICE_API_BASE_URL
 
 // checkAccess.CheckAppAccess()
 
-const PORT = config.env.SOCKET_PORT || 2323;
+const PORT = config.env.PORT || 2323;
 
 // const webSocket = require("./socket/socket") // No longer needed
 // webSocket() // No longer needed
@@ -52,31 +48,8 @@ utils.createRequiredFolders()
 const app = express();
 
 // --- Start: socket.io Integration ---
-const server = http.createServer(app); // Create HTTP server from Express app
-const io = new Server(server, {
-  cors: {
-    origin: "*",
-    methods: ["GET", "POST"]
-  }
-});
-
-global.socketIo = io; // Make socket.io instance accessible globally
-
-global.socketIo.on('connection', (socket) => {
-  console.log('Frontend connected to socket.io');
-
-  socket.on('disconnect', () => {
-    console.log('Frontend disconnected from socket.io');
-  });
-
-  socket.on('message', (message) => {
-    console.log('Received:', message);
-    socket.emit('echo', `Echo: ${message}`); // Use emit to send back an event
-  });
-});
-
-console.log(`Socket.IO server initialized and attached to the HTTP server.`);
-// --- End: socket.io Integration ---
+const server = http.createServer(app); // HTTP server from Express app
+require('./socket/socket')({server})
 
 
 app.use(express.json());
