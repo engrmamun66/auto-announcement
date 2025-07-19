@@ -81,6 +81,10 @@ const audioUpload = multer({
 global.is_active_the_instutute = true
 
 
+app.get(`/`, (req, res) => {
+  return res.redirect('/app/#') 
+})
+
 app.get(`/app`, (req, res) => { 
   getToken(Students)
 
