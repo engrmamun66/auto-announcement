@@ -358,6 +358,10 @@ watch(emergency_mode, (a, b) => {
 function stop_clear_and_reload(){
     wattingList.value = []
     storage('wattingList').value = []  
+    setTimeout(() => {
+        wattingList.value = []
+        storage('wattingList').value = []  
+    }, 1000);
 }
 provide('stop_clear_and_reload', stop_clear_and_reload)
 
