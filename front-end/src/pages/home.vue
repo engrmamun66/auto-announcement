@@ -131,6 +131,7 @@ onMounted(()=>{
 
 function removeFromWattingList(student, i){
      wattingList.value.splice(i, 1)
+     storage('wattingList').value = wattingList.value 
 }
 
 </script>
