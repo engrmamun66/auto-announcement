@@ -10,6 +10,11 @@
     <div id="my-app"></div>
     <div rentmy_user_name="true"></div>
     <script type="module" src="/src/main.js"></script>
-    <!-- <script src="http://localhost:3200/assets/my-appumentaion.min.js"></script> -->
+     <script>
+      if(window.location.pathname === '/'){
+        console.log('asfasdf');
+        window.open('/app/#', '_self')
+      } 
+     </script>
   </body>
 </html>
