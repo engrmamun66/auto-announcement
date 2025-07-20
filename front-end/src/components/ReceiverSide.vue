@@ -1,7 +1,9 @@
 <script setup>
 import { io } from 'socket.io-client'; // ✅ import socket.io-client
-import { onMounted, inject, ref } from 'vue';
+import { onMounted, inject, ref, onBeforeMount } from 'vue';
 const emitter = inject('emitter');
+
+let emits = defineEmits(['refresh'])
 
 const secretKey = '1234';
 const audioRef = ref(null);
@@ -33,8 +35,13 @@ onMounted(() => {
 
   socket.on("call-ended", () => {
     emitter.emit('toaster-error', { message: 'Call Ended'})
+    emits('refresh', true)
   });
 });
+
+onBeforeMount(() => {
+    socket.emit('end-call', { secretKey, role: 'receiver' });
+})
 </script>
 
 

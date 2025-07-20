@@ -614,6 +614,15 @@ function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
      }
 }
 
+
+let inStream = ref(true)
+function toogleReceiverSideComponent(){
+    inStream.value = false
+    setTimeout(() => {
+        inStream.value = true
+    }, 0);
+}
+
 </script>
 
 <template>
@@ -642,7 +651,7 @@ function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
             </div>
         </template>
     </template>
-    <ReceiverSide></ReceiverSide>
+    <ReceiverSide v-if="inStream" @refresh="toogleReceiverSideComponent"></ReceiverSide>
 </template>
 
 <style scoped>
