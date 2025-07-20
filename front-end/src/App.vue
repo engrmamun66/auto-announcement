@@ -9,6 +9,7 @@ import moment from 'moment/moment'
 import Playlist from './components/Playlist.vue'
 import accessCheckAnimation from './components/accessCheckAnimation.vue'
 import Lockscreen from './components/Lockscreen.vue'
+import ReceiverSide from './components/ReceiverSide.vue'
 
 const log = console.log
 
@@ -641,7 +642,7 @@ function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
             </div>
         </template>
     </template>
-    
+    <ReceiverSide></ReceiverSide>
 </template>
 
 <style scoped>
