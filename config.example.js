@@ -11,7 +11,7 @@ module.exports = {
           BASE_URL: `http://localhost:${port_number}`,
           API_BASE_URL: `http://localhost:${port_number}/api`,
           DEVICE_API_BASE_URL: 'http://127.0.0.1:8081/',
-          SECRET_KEY: 'YOUR_SECRET_KEY', //ndeapkuq96bnsl17zzx2
+          SECRET_KEY: 'YOUR_SECRET_KEY',
 
           PUNCH_LOG_FILENAME: 'punch.log.json',
           DEVICE_NAMES: ['Device 2'], // zktecho device name, which already connected by name in BioTime-8.0 server
