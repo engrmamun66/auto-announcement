@@ -16,8 +16,10 @@ const sqlite3 = require("sqlite3").verbose();
 const multer = require("multer");
 const upload = multer({ dest: DIR + '/public/temp' });
 const webSocket = require("./socket/socket")
-const { getToken } = require('./src/device')
-const startWithDevices = require('./src/device-with-ip')
+
+const { getToken } = require('./src/device') 
+const startWithDevices = require('./src/device.zkteco')
+
 let webContents = require("./src/web-contents"); 
 let checkAccess = require("./src/checkaccess"); 
 const DEVICE_API_BASE_URL = global.config.env.DEVICE_API_BASE_URL
