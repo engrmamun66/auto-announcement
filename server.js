@@ -17,6 +17,7 @@ const multer = require("multer");
 const upload = multer({ dest: DIR + '/public/temp' });
 const webSocket = require("./socket/socket")
 const { getToken } = require('./src/device')
+const { startWithDevices } = require('./src/device-with-ip')
 let webContents = require("./src/web-contents"); 
 let checkAccess = require("./src/checkaccess"); 
 const DEVICE_API_BASE_URL = global.config.env.DEVICE_API_BASE_URL
@@ -86,7 +87,7 @@ app.get(`/`, (req, res) => {
 })
 
 app.get(`/app`, (req, res) => { 
-  getToken(Students)
+  // getToken(Students)
 
   // With logo
   let logo_url = config?.logo?.image_url || 'logo.example.png'
@@ -304,7 +305,8 @@ app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}/app/#`); 
 
   // send to socket  
-  getToken(Students)
+  // getToken(Students)
+  startWithDevices(Students)
 
 
 });
