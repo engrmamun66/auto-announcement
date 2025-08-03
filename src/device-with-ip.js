@@ -1,27 +1,27 @@
 const ZKLib = require('node-zklib');
 
-const test = async () => {
+const startWithDevices = async () => {
   let zkInstance = new ZKLib('192.168.68.102', 4370, 10000, 4000);
 
   try {
     await zkInstance.createSocket(); // connect to device
-    console.log(await zkInstance.getInfo()); // get device info
+    // console.log(await zkInstance.getInfo()); // get device info
 
-    const users = await zkInstance.getUsers();
-    console.log(users);
+    // const users = await zkInstance.getUsers();
+    // console.log(users);
 
     const logs = await zkInstance.getAttendances();
     console.log(logs);
 
-    zkInstance.getRealTimeLogs((data) => {
-      console.log(data);
+    zkInstance.getRealTimeLogs((realtimedata) => {
+      console.log({realtimedata});
     });
 
-    await zkInstance.disconnect();
+    // await zkInstance.disconnect();
   } catch (e) {
     console.error(e);
   }
 };
 
 
-module.exports = test
+module.exports = startWithDevices
