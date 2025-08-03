@@ -1,98 +1,68 @@
 async function startWithDevices() {
-    const { default: ZKLib } = await import("node-zklib");
+    try {
+      const { default: ZKLib } = await import("node-zklib");
+      
+      const DEVICE_IP = "192.168.68.102";
+      const DEVICE_PORT = 4370;
+      const PROTOCOL = 0; // Force TCP
+      const TIMEOUT = 30000; // 30 seconds
   
-    const DEVICE_IP = "192.168.68.102";
-    const DEVICE_PORT = 4370;
-    const RECONNECT_DELAY = 5000; // 5 seconds between reconnect attempts
-    const POLL_INTERVAL = 2000;
-  
-    let zk;
-    let isConnecting = false;
-    let reconnectAttempts = 0;
-    const MAX_RECONNECT_ATTEMPTS = 5;
-  
-    async function createConnection() {
-      if (isConnecting) return null;
-      isConnecting = true;
-  
+      console.log(`⌛ Initializing ZKTeco connection (macOS)...`);
+      
+      // Debug: Verify network access
+      console.log("🔍 Running network pre-check...");
+      const { execSync } = require('child_process');
       try {
-        console.log(`⌛ Connecting to ${DEVICE_IP}...`);
-        // Try both UDP (1) and TCP (0) if needed
-        zk = new ZKLib(DEVICE_IP, DEVICE_PORT, 10000, 5000, 1);
-        
-        // Try to create socket with timeout
-        await Promise.race([
-          zk.createSocket(),
-          new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Connection timeout')), 10000))
-        ]);
-  
-        console.log("✅ Connected to ZKTeco device");
-        reconnectAttempts = 0;
-        return zk;
-      } catch (err) {
-        console.error(`❌ Connection failed (attempt ${reconnectAttempts + 1}):`, err.message);
-        return null;
-      } finally {
-        isConnecting = false;
-      }
-    }
-  
-    async function reconnect() {
-      if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
-        console.error("⚠️ Max reconnection attempts reached. Please check device connection.");
+        execSync(`ping -c 4 ${DEVICE_IP}`);
+        execSync(`nc -vz ${DEVICE_IP} ${DEVICE_PORT}`);
+        console.log("✅ Network pre-check passed");
+      } catch (e) {
+        console.error("❌ Network check failed:", e.message);
         return;
       }
   
-      reconnectAttempts++;
-      const delay = RECONNECT_DELAY * Math.min(reconnectAttempts, 3); // Exponential backoff
-      console.log(`🔄 Reconnecting in ${delay/1000} seconds...`);
+      const zk = new ZKLib(DEVICE_IP, DEVICE_PORT, TIMEOUT, TIMEOUT, PROTOCOL);
+      
+      // macOS-specific socket settings
+      if (process.platform === 'darwin') {
+        zk._socket?.setKeepAlive?.(true, 60000);
+      }
   
-      await new Promise(resolve => setTimeout(resolve, delay));
-      return await createConnection();
+      console.log("🔄 Creating socket connection...");
+      await zk.createSocket();
+      
+      // Verify communication
+      console.log("🔗 Verifying device protocol...");
+      const info = await zk.getInfo();
+      console.log("✅ Connected to device:", {
+        model: info.deviceName,
+        firmware: info.firmwareVersion
+      });
+  
+      // Start polling
+      setInterval(async () => {
+        try {
+          const logs = await zk.getAttendances();
+          const recent = logs.data.filter(log => 
+            Date.now() - new Date(log.recordTime).getTime() <= 10000
+          );
+          if (recent.length) console.log("📝 New logs:", recent);
+        } catch (e) {
+          console.error("⚠️ Polling error:", e.message);
+        }
+      }, 2000);
+  
+    } catch (err) {
+      console.error("🚨 Critical error:", err.stack || err.message);
+      
+      // macOS-specific fallback suggestion
+      if (process.platform === 'darwin') {
+        console.log("\n🔧 macOS Troubleshooting Tips:");
+        console.log("1. Try running with sudo: sudo node your_script.js");
+        console.log("2. Check firewall: sudo /usr/libexec/ApplicationFirewall/socketfilterfw --listapps");
+        console.log("3. Test with Python: python3 -c 'import socket; s=socket.socket(); s.connect((\"192.168.68.102\",4370)); print(\"OK\")'");
+      }
     }
-  
-    async function getLatestLogs() {
-      if (!zk) {
-        await reconnect();
-        return [];
-      }
-  
-      try {
-        const logs = await zk.getAttendances();
-        const now = Date.now();
-        return logs.data.filter(
-          (log) => now - new Date(log.recordTime).getTime() <= 10000
-        );
-      } catch (err) {
-        console.error("❌ Error fetching logs:", err.message);
-        await reconnect();
-        return [];
-      }
-    }
-  
-    // Initial connection
-    await createConnection();
-  
-    // Polling with error handling
-    const pollInterval = setInterval(async () => {
-      try {
-        const latestLogs = await getLatestLogs();
-        console.log(latestLogs.length ? latestLogs : "⚠️ No new logs");
-      } catch (err) {
-        console.error("⚠️ Polling error:", err.message);
-      }
-    }, POLL_INTERVAL);
-  
-    // Cleanup on process exit
-    process.on('SIGINT', () => {
-      clearInterval(pollInterval);
-      if (zk) {
-        zk.disconnect();
-        console.log("🔌 Disconnected from device");
-      }
-      process.exit();
-    });
   }
   
-  module.exports = { startWithDevices };
+module.exports = { startWithDevices }

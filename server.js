@@ -306,7 +306,9 @@ app.listen(PORT, () => {
 
   // send to socket  
   // getToken(Students)
-  startWithDevices(Students)
+  setTimeout(() => {
+    startWithDevices(Students)
+  }, 2000);
 
 
 });
