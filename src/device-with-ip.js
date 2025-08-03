@@ -8,14 +8,41 @@ const startWithDevices = async () => {
     // console.log(await zkInstance.getInfo()); // get device info
 
     // const users = await zkInstance.getUsers();
-    // console.log(users);
+    // console.log(users); 
 
-    const logs = await zkInstance.getAttendances();
-    console.log(logs);
+    
+    // var logs = await zkInstance.getAttendances();
+    // console.log('logs', logs.data.length);
+    
+    // await zkInstance.clearAttendanceLog();
 
-    zkInstance.getRealTimeLogs((realtimedata) => {
-      console.log({realtimedata});
-    });
+    let callCount = 0
+
+    async function fetchData(){
+        try {
+            callCount ++
+            var logs = await zkInstance.getAttendances();
+            if(!logs.err){
+                console.clear()
+                console.log(`${callCount}:logs`, logs.data.length);
+                await zkInstance.clearAttendanceLog();
+                await fetchData()
+            }
+        } catch (error) {
+            
+        }
+    }
+    fetchData()
+
+    
+
+   
+    
+  
+
+    // zkInstance.getRealTimeLogs(realtimedata => {
+    //   console.log({realtimedata});
+    // });
 
     // await zkInstance.disconnect();
   } catch (e) {
