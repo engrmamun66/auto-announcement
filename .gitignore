@@ -136,6 +136,7 @@ public/media/
 public/exports/
 database/
 *DS_Store*
+yarn.lock
 
 exe/dist/
 exe/build/
