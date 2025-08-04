@@ -96,7 +96,7 @@ app.get(`/app`, (req, res) => {
       if (client.readyState === client.OPEN) {
           client.send(JSON.stringify({
               type: 'notice',
-              data: 'Connected and fetched token'
+              data: 'Connected with socket'
           }));
       }
     });
