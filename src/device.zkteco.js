@@ -70,4 +70,4 @@ const startWithDevices = async (Students) => {
   }
 };
 
-module.exports = startWithDevices;
+module.exports = {startWithDevices};

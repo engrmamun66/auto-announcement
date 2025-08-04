@@ -18,7 +18,7 @@ const upload = multer({ dest: DIR + '/public/temp' });
 const webSocket = require("./socket/socket")
 
 const { getToken } = require('./src/device.biotimeApp') 
-const startWithDevices = require('./src/device.zkteco')
+const { startWithDevices } = require('./src/device.zkteco')
 
 let webContents = require("./src/web-contents"); 
 let checkAccess = require("./src/checkaccess"); 
@@ -88,8 +88,19 @@ app.get(`/`, (req, res) => {
   return res.redirect('/app/#') 
 })
 
-app.get(`/app`, (req, res) => { 
-  // getToken(Students)
+app.get(`/app`, (req, res) => {  
+
+  setTimeout(() => {
+    global.socketServer.clients.forEach((client) => {
+      console.log('asdfdf=====');
+      if (client.readyState === client.OPEN) {
+          client.send(JSON.stringify({
+              type: 'notice',
+              data: 'Connected and fetched token'
+          }));
+      }
+    });
+  }, 200);
 
   // With logo
   let logo_url = config?.logo?.image_url || 'logo.example.png'
