@@ -9,7 +9,7 @@ module.exports = {
           SECRET_KEY: 'YOUR_SECRET_KEY',
           
           /** ==== with-ips(Recommended) === */
-          DEVICE_IPS: ["192.168.68.101", "192.168.68.102"], 
+          DEVICE_IPS: ["192.168.68.113"], 
           CLEAN_POLICY: { 
                clean: false || 15000 || 500,
                // or ip wise setting
