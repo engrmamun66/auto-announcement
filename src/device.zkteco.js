@@ -37,7 +37,7 @@ const startWithDevices = async (Students) => {
             
             const dakhela = studentOfDevice?.emp_code;
             const punch_time = studentOfDevice?.punch_time ?? '';
-            const back_seconds = 10;
+            const back_seconds = 0;
             const start_time = moment().subtract(back_seconds, 'second').format('YYYY-MM-DD HH:mm:ss');
     
             Students.getStudentByDakhela_and_sentToSocket(Number(dakhela), {
