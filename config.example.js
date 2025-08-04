@@ -7,14 +7,15 @@ module.exports = {
           PORT: port_number,
           SOCKET_PORT: 2424,
           SECRET_KEY: 'YOUR_SECRET_KEY',
+          PUNCH_LOG_FILENAME: 'punch.log.json',
           
           /** ==== with-ips(Recommended) === */
           DEVICE_IPS: ["192.168.68.113"], 
           CLEAN_POLICY: { 
-               clean: false || 15000 || 500,
+               clean: false ?? 15000 ?? 500,
                // or ip wise setting
-               "192.168.68.101": false || 15000 || 500,
-               "192.168.68.102": false || 15000 || 500, 
+               "192.168.68.113": false ?? 15000 ?? 500,
+               "192.168.68.114": false ?? 15000 ?? 500, 
           },
           /** ==== End === */
 
@@ -22,7 +23,6 @@ module.exports = {
           /** ==== with-BioTime-app === */
           BIO_TIME_APP_USERNAME: "admin",
           BIO_TIME_APP_PASSWORD: "Admin@123",
-          PUNCH_LOG_FILENAME: 'punch.log.json',
           DEVICE_NAMES: ['Device 2'], // zktecho device name, which already connected by name in BioTime-8.0 server
           DATA_FETCH_INTERVAL_IN_SECOND: 2,
           /** ==== End === */

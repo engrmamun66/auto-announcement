@@ -3,14 +3,14 @@ const ZKTeco = require("zkteco");
 // DOC: https://www.npmjs.com/package/zkteco
 const devicePort = "4370"
 
-const startWithDevices = async (Students) => {
+const startWithDevices = async (Students, {connectOnly=false}={}) => {
   try {
     const device_ips = global.config.env?.DEVICE_IPS || []
     // const devices = [{ deviceIp: "192.168.68.102", devicePort: "4370" }];
     const devices = device_ips.map(deviceIp => ({deviceIp, devicePort}))
-    let zkInstance = new ZKTeco(devices);
+    global.zkInstance = new ZKTeco(devices);
 
-    await zkInstance.connectAll();
+    await global.zkInstance.connectAll(); 
 
     let callCount = 0;
 
@@ -20,7 +20,7 @@ const startWithDevices = async (Students) => {
         callCount++;
         let foundSomeLogsFromAnyDevice = false;
         for (const device of devices) {
-          const logs = await zkInstance.getAttendances(device.deviceIp);
+          const logs = await global.zkInstance.getAttendances(device.deviceIp);
 
           if (logs?.length) {
             foundSomeLogsFromAnyDevice = true;
@@ -39,12 +39,15 @@ const startWithDevices = async (Students) => {
             const punch_time = studentOfDevice?.punch_time ?? '';
            
             const start_time = moment().subtract(0, 'second').format('YYYY-MM-DD HH:mm:ss');
-    
-            Students.getStudentByDakhela_and_sentToSocket(Number(dakhela), {
-                start_time,
-                studentOfDevice,
-                punch_time,
-            });
+
+            if(global?.last_punch_time !== punch_time){
+              global.last_punch_time = punch_time
+              Students.getStudentByDakhela_and_sentToSocket(Number(dakhela), {
+                  start_time,
+                  studentOfDevice,
+                  punch_time,
+              });
+            }
             /** ============ END ============ */
 
             let CLEAN_POLICY = global.config.env?.CLEAN_POLICY?.[device.deviceIp] || global.config.env?.CLEAN_POLICY?.['clean'] || false
@@ -52,11 +55,12 @@ const startWithDevices = async (Students) => {
               let max_quantity = CLEAN_POLICY
               if (logs.length > max_quantity) {
                 console.log(`clearing data for ${device.deviceIp}....`);
-                // await zkInstance.clearAttendanceLog(device.deviceIp);
+                await global.zkInstance.clearAttendanceLog(device.deviceIp);
               }
             }
           } else {
             console.log(`No log found for IP: ${device.deviceIp}`);
+            await global.zkInstance.connectAll(); 
           }
         }
         if (foundSomeLogsFromAnyDevice) {
