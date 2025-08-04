@@ -318,10 +318,10 @@ app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}/app/#`); 
 
   // send to socket  
-  if(global.config.mode === 'with-ips'){
+  if(global.config?.mode === 'with-ips'){
     startWithDevices(Students)
-  }
-  else if(global.config.mode === 'with-BioTime-app'){
+  } 
+  else {
     getToken(Students)
   } 
 });
