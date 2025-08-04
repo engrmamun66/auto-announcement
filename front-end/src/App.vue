@@ -552,6 +552,10 @@ function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
 
                     
                     student['emergency_mode'] = emergency_mode.value
+
+                    function addPunchLog(student){
+                        http.post('/punch-log/add-log', { student }).then(response => { })
+                    }
                     
                     if(!emergency_mode.value){
                          const { running_call_schedules, incoming_call_schedules  } = callbacks
@@ -567,9 +571,7 @@ function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
                          } 
 
 
-                         function addPunchLog(student){
-                            http.post('/punch-log/add-log', { student }).then(response => { })
-                         }
+                         
 
                          // ----
                          if(!findLast){
