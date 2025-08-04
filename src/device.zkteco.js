@@ -21,7 +21,6 @@ const startWithDevices = async (Students) => {
         let foundSomeLogsFromAnyDevice = false;
         for (const device of devices) {
           const logs = await zkInstance.getAttendances(device.deviceIp);
-          console.log(device.deviceIp, {logs});
 
           if (logs?.length) {
             foundSomeLogsFromAnyDevice = true;
@@ -30,7 +29,12 @@ const startWithDevices = async (Students) => {
 
             /** =========== START ============ */
             /** After get log, send to fronend */
+ 
             const studentOfDevice = logs.at(-1);
+
+            studentOfDevice.emp_code = studentOfDevice.deviceUserId
+            studentOfDevice.punch_time = studentOfDevice.recordTime
+            
             const dakhela = studentOfDevice?.emp_code;
             const punch_time = studentOfDevice?.punch_time ?? '';
             const back_seconds = 10;
