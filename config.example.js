@@ -2,23 +2,37 @@
 const port_number = 2323
 
 module.exports = {
+     mode: 'with-ips', // 'with-ips' || 'with-BioTime-app'
      env: {
           PORT: port_number,
           SOCKET_PORT: 2424,
+          SECRET_KEY: 'YOUR_SECRET_KEY',
+          
+          /** ==== with-ips === */
+          DEVICE_IPS: "admin",
+          BIO_TIME_APP_PASSWORD: "Admin@123",
+          PUNCH_LOG_FILENAME: 'punch.log.json',
+          DEVICE_NAMES: ['Device 2'], // zktecho device name, which already connected by name in BioTime-8.0 server
+          DATA_FETCH_INTERVAL_IN_SECOND: 2,
+          /** ==== End === */
+
+
+          /** ==== with-BioTime-app === */
           BIO_TIME_APP_USERNAME: "admin",
           BIO_TIME_APP_PASSWORD: "Admin@123",
+          PUNCH_LOG_FILENAME: 'punch.log.json',
+          DEVICE_NAMES: ['Device 2'], // zktecho device name, which already connected by name in BioTime-8.0 server
+          DATA_FETCH_INTERVAL_IN_SECOND: 2,
+          /** ==== End === */
+
           // #Front End variables
           BASE_URL: `http://localhost:${port_number}`,
           API_BASE_URL: `http://localhost:${port_number}/api`,
           DEVICE_API_BASE_URL: 'http://127.0.0.1:8081/',
-          SECRET_KEY: 'YOUR_SECRET_KEY',
 
-          PUNCH_LOG_FILENAME: 'punch.log.json',
-          DEVICE_NAMES: ['Device 2'], // zktecho device name, which already connected by name in BioTime-8.0 server
-          DATA_FETCH_INTERVAL_IN_SECOND: 2,
      },
      settings: {
-          backup_days: 7,
+          log_backup_days: 7,
           punch_log_indent: 0,
      },
      logo: {

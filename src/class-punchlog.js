@@ -27,8 +27,8 @@ class PunchLog {
   }
 
   _allowedDates(){
-    const backup_days = global.config?.settings?.backup_days || 7
-    let dateArray = Array.from({length: backup_days}).map((item, i)=> moment().add(i, 'day').format('Y-MM-DD'))
+    const log_backup_days = global.config?.settings?.log_backup_days || 7
+    let dateArray = Array.from({length: log_backup_days}).map((item, i)=> moment().add(i, 'day').format('Y-MM-DD'))
     return dateArray
   }
 
