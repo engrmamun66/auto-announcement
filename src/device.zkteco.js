@@ -1,10 +1,12 @@
 const ZKTeco = require("zkteco");
 // DOC: https://www.npmjs.com/package/zkteco
+const devicePort = "4370"
 
 const startWithDevices = async (Students) => {
   try {
-    // const devices = ["192.168.68.102", "192.168.68.101"];
-    const devices = [{ deviceIp: "192.168.68.102", devicePort: "4370" }];
+    const device_ips = global.config.env?.DEVICE_IPS || []
+    // const devices = [{ deviceIp: "192.168.68.102", devicePort: "4370" }];
+    const devices = device_ips.map(deviceIp => ({deviceIp, devicePort}))
     let zkInstance = new ZKTeco(devices);
 
     await zkInstance.connectAll();
@@ -12,7 +14,7 @@ const startWithDevices = async (Students) => {
     let callCount = 0;
 
     async function fetchData() {
-      console.log("calling====");
+      console.log("fetching...");
       try {
         callCount++;
         let foundSomeLogsFromAnyDevice = false;
@@ -22,11 +24,29 @@ const startWithDevices = async (Students) => {
           if (logs?.length) {
             foundSomeLogsFromAnyDevice = true;
             console.log(`${callCount}:logs`, logs?.length);
-            // if (logs.length > 4) {
-            //   callCount = 0;
-            //   console.log("clearing data....");
-            //   await zkInstance.clearAttendanceLog(device.deviceIp);
-            // }
+
+
+            /** =========== START ============ */
+            /** After get log, send to fronend */
+            const studentOfDevice = data.at(-1);
+            const dakhela = studentOfDevice?.emp_code;
+            const punch_time = studentOfDevice?.punch_time ?? '';
+    
+            Students.getStudentByDakhela_and_sentToSocket(Number(dakhela), {
+                start_time,
+                studentOfDevice,
+                punch_time,
+            });
+            /** ============ END ============ */
+
+            let CLEAN_POLICY = global.config.env?.CLEAN_POLICY?.[device.deviceIp] || global.config.env?.CLEAN_POLICY?.['clean'] || false
+            if(CLEAN_POLICY){
+              let max_quantity = CLEAN_POLICY
+              if (logs.length > max_quantity) {
+                console.log(`clearing data for ${device.deviceIp}....`);
+                await zkInstance.clearAttendanceLog(device.deviceIp);
+              }
+            }
           } else {
             console.log(`No log found for IP: ${device.deviceIp}`);
           }
@@ -37,16 +57,14 @@ const startWithDevices = async (Students) => {
           setTimeout(fetchData, 2000);
         }
       } catch (error) {
-        console.log("error>>", error);
+        console.log("startWithDevices__error::", error);
       }
     }
+
     fetchData();
-
-    // zkInstance.getRealTimeLogs(realtimedata => {
-    //   console.log({realtimedata});
-    // });
-
+  
     // await zkInstance.disconnect();
+
   } catch (e) {
     console.error(e);
   }
