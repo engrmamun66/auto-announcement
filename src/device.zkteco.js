@@ -1,3 +1,4 @@
+const moment = require('moment')
 const ZKTeco = require("zkteco");
 // DOC: https://www.npmjs.com/package/zkteco
 const devicePort = "4370"
@@ -20,6 +21,7 @@ const startWithDevices = async (Students) => {
         let foundSomeLogsFromAnyDevice = false;
         for (const device of devices) {
           const logs = await zkInstance.getAttendances(device.deviceIp);
+          console.log(device.deviceIp, {logs});
 
           if (logs?.length) {
             foundSomeLogsFromAnyDevice = true;
@@ -28,9 +30,11 @@ const startWithDevices = async (Students) => {
 
             /** =========== START ============ */
             /** After get log, send to fronend */
-            const studentOfDevice = data.at(-1);
+            const studentOfDevice = logs.at(-1);
             const dakhela = studentOfDevice?.emp_code;
             const punch_time = studentOfDevice?.punch_time ?? '';
+            const back_seconds = 10;
+            const start_time = moment().subtract(back_seconds, 'second').format('YYYY-MM-DD HH:mm:ss');
     
             Students.getStudentByDakhela_and_sentToSocket(Number(dakhela), {
                 start_time,
@@ -44,7 +48,7 @@ const startWithDevices = async (Students) => {
               let max_quantity = CLEAN_POLICY
               if (logs.length > max_quantity) {
                 console.log(`clearing data for ${device.deviceIp}....`);
-                await zkInstance.clearAttendanceLog(device.deviceIp);
+                // await zkInstance.clearAttendanceLog(device.deviceIp);
               }
             }
           } else {
