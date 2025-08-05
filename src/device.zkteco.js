@@ -11,6 +11,7 @@ const startWithDevices = async (Students, {connectOnly=false}={}) => {
     await global.zkInstance.connectAll(); 
 
     let callCount = 0;
+    let punchTimes = {}
 
     async function fetchData() {
       console.log("fetching...");
@@ -30,14 +31,16 @@ const startWithDevices = async (Students, {connectOnly=false}={}) => {
 
             // let latestLogs = logs.filter()
             let latestLogs = logs.slice(-10).filter(({ recordTime }) => {
-              return moment().diff(new Date(recordTime), 'seconds') < 30 
+              return (moment().diff(new Date(recordTime), 'seconds') < 60 && !punchTimes[recordTime]) 
             })
-            // Last punch only
-            latestLogs = [latestLogs?.[0]].filter(Boolean)
+            // // Last punch only
+            // latestLogs = [latestLogs?.[0]].filter(Boolean)
             
             console.log('latestLogs::', latestLogs.length)
             
             latestLogs.forEach(eachLog => {
+
+              punchTimes[eachLog.recordTime] = 'true'
 
               eachLog.emp_code = eachLog.deviceUserId
               eachLog.punch_time = eachLog.recordTime
@@ -76,7 +79,7 @@ const startWithDevices = async (Students, {connectOnly=false}={}) => {
           }
         }
         if (foundSomeLogsFromAnyDevice) {
-          setTimeout(fetchData, 10);
+          setTimeout(fetchData, 1000);
         } else {
           setTimeout(async()=>{
             let allconnected_IPs = await global.zkInstance.getAllConnectedIps();
