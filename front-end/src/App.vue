@@ -441,9 +441,13 @@ onMounted(async ()=>{
 
     setInterval(()=>{
         if(Socket.value){
-            Socket.value.send(JSON.stringify({ type: 'hi' }))
+            try {
+                Socket.value.send(JSON.stringify({ type: 'hi' }))
+            } catch (socket_send_msg_error) {
+                console.warn({socket_send_msg_error})
+            }
             setTimeout(() => {
-                if(socketServerIsRunning.value ===  false){
+                if(socketServerIsRunning.value === false){
                     Socket.value = socketInit({emitter, toaster: true})
                 }
             }, 100);

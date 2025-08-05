@@ -27,33 +27,39 @@ const startWithDevices = async (Students, {connectOnly=false}={}) => {
 
             /** =========== START ============ */
             /** After get log, send to fronend */
- 
-            const studentOfDevice = logs.at(-1);
 
-            studentOfDevice.emp_code = studentOfDevice.deviceUserId
-            studentOfDevice.punch_time = studentOfDevice.recordTime
-
+            // let latestLogs = logs.filter()
+            let latestLogs = logs.slice(-10).filter(({ recordTime }) => {
+              return moment().diff(recordTime, 'seconds') < 30 
+            })
             
-            const dakhela = studentOfDevice?.emp_code;
-            const punch_time = studentOfDevice?.punch_time ?? '';
+            console.log('latestLogs::', latestLogs.length)
             
-            const start_time = moment().subtract(0, 'second').format('YYYY-MM-DD HH:mm:ss');
-            let diff_secodns = moment().diff(punch_time, 'seconds')
-            console.log('before::', moment().diff(punch_time, 'seconds'), 'seconds');
+            latestLogs.forEach(eachLog => {
 
-            if(diff_secodns < 40){
+              eachLog.emp_code = eachLog.deviceUserId
+              eachLog.punch_time = eachLog.recordTime
+  
+              
+              const dakhela = eachLog?.emp_code;
+              const punch_time = eachLog?.punch_time ?? '';
+              
+              const start_time = moment().subtract(0, 'second').format('YYYY-MM-DD HH:mm:ss');
+            
               if(global?.last_punch_time !== punch_time){
                 global.last_punch_time = punch_time
                 Students.getStudentByDakhela_and_sentToSocket(Number(dakhela), {
                     start_time,
-                    studentOfDevice,
+                    eachLog,
                     punch_time,
                 });
               }
-            } else {
-              console.log('');
-            }
-            /** ============ END ============ */
+               
+              /** ============ END ============ */
+
+            })
+            
+
 
             let CLEAN_POLICY = device?.clean ?? false
             if(CLEAN_POLICY){
@@ -74,8 +80,9 @@ const startWithDevices = async (Students, {connectOnly=false}={}) => {
           setTimeout(async()=>{
             let allconnected_IPs = await global.zkInstance.getAllConnectedIps();
             if (allconnected_IPs?.length){
-              console.log({ allconnected_IPs })
-              await global.zkInstance.clearAttendanceLog(device.deviceIp);
+              for (const device of devices) {
+                await global.zkInstance.clearAttendanceLog(device.deviceIp);
+              }
             }
             await global.zkInstance.connectAll(); 
             await fetchData()
