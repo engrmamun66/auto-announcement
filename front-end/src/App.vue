@@ -10,8 +10,11 @@ import Playlist from './components/Playlist.vue'
 import accessCheckAnimation from './components/accessCheckAnimation.vue'
 import Lockscreen from './components/Lockscreen.vue'
 
-const log = console.log
+const socketInit = inject('socketInit');
 
+
+
+const log = console.log
 
 let helper = inject('helper')
 let http = inject('http')
@@ -422,6 +425,10 @@ async function getAllStudents(){
 }
 
 onMounted(async ()=>{   
+
+    setTimeout(() => {
+        socketInit({emitter})
+    }, 1000);
 
     document.addEventListener('click', (e) => { 
         // emitter.emit('document_clicked', e)

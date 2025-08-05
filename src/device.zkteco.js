@@ -69,7 +69,7 @@ const startWithDevices = async (Students, {connectOnly=false}={}) => {
           }
         }
         if (foundSomeLogsFromAnyDevice) {
-          await fetchData();
+          setTimeout(fetchData, 10);
         } else {
           setTimeout(fetchData, 2000);
         }

@@ -16,7 +16,6 @@ import helper from '../utilities/helper';
 
 
  
-const SOCKET = inject('SOCKET');
 const route = inject('route');
 const router = inject('router');
 const emitter = inject('emitter');

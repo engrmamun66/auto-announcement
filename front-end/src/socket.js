@@ -5,6 +5,7 @@ export function socketInit({emitter}){
     socket.onopen = () => {
         console.log('Connected to socket server');
         // socket.send('Hello, Server!');
+        emitter.emit('toaster-success', { message: 'Connecte to socket server' })
     };
 
     socket.onmessage = (event) => {
