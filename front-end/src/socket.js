@@ -20,7 +20,8 @@ export function socketInit({emitter}){
     };
 
     socket.onclose = () => {
-        console.log('Disconnected from server');
+        console.log('Disconnected socket from server');
+        emitter.emit('toaster-error', { message: 'Disconnected socket from server' })
     };
 
     socket.onerror = (error) => {
