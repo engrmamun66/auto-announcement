@@ -10,7 +10,7 @@ const utils = require('./utls')
 
 class PunchLog { 
 
-  punch_log_filename = 'database/' + global.config.env?.PUNCH_LOG_FILENAME || 'punch.log.json'
+  punch_log_filename = 'database/' + (global.config.env?.PUNCH_LOG_FILENAME || 'punch.log.json')
  
   constructor() { 
     this.createFile()
