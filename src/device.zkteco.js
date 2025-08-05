@@ -30,7 +30,7 @@ const startWithDevices = async (Students, {connectOnly=false}={}) => {
 
             // let latestLogs = logs.filter()
             let latestLogs = logs.slice(-10).filter(({ recordTime }) => {
-              return moment().diff(recordTime, 'seconds') < 30 
+              return moment().diff(new Date(recordTime), 'seconds') < 30 
             })
             
             console.log('latestLogs::', latestLogs.length)
@@ -75,7 +75,6 @@ const startWithDevices = async (Students, {connectOnly=false}={}) => {
         }
         if (foundSomeLogsFromAnyDevice) {
           setTimeout(fetchData, 10);
-          console.log('0000')
         } else {
           setTimeout(async()=>{
             let allconnected_IPs = await global.zkInstance.getAllConnectedIps();

@@ -92,7 +92,6 @@ app.get(`/app`, (req, res) => {
 
 
   global.socketServer.clients.forEach((client) => {
-    console.log('asdfdf=====');
     if (client.readyState === client.OPEN) {
         client.send(JSON.stringify({
             type: 'notice',
