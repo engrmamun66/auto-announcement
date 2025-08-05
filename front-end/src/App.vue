@@ -487,7 +487,7 @@ onMounted(async ()=>{
 function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
      try {
           if(!is_started_schedule.value){
-               emitter.emit('toaster-error', { message: 'শিডিউল এখনো শুরু হয়নি'})
+               emitter.emit('toaster-error', { message: 'switched is off'})
                return
           }
           
