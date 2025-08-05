@@ -65,13 +65,21 @@ const startWithDevices = async (Students, {connectOnly=false}={}) => {
             }
           } else {
             console.log(`No log found for IP: ${device.deviceIp}`);
-            await global.zkInstance.connectAll(); 
           }
         }
         if (foundSomeLogsFromAnyDevice) {
           setTimeout(fetchData, 10);
+          console.log('0000')
         } else {
-          setTimeout(fetchData, 2000);
+          setTimeout(async()=>{
+            let allconnected_IPs = await global.zkInstance.getAllConnectedIps();
+            if (allconnected_IPs?.length){
+              console.log({ allconnected_IPs })
+              await global.zkInstance.clearAttendanceLog(device.deviceIp);
+            }
+            await global.zkInstance.connectAll(); 
+            await fetchData()
+          }, 2000);
         }
       } catch (error) {
         console.log("startWithDevices__error::", error);

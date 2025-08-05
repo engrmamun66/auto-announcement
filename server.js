@@ -90,17 +90,16 @@ app.get(`/`, (req, res) => {
 
 app.get(`/app`, (req, res) => {  
 
-  setTimeout(() => {
-    global.socketServer.clients.forEach((client) => {
-      console.log('asdfdf=====');
-      if (client.readyState === client.OPEN) {
-          client.send(JSON.stringify({
-              type: 'notice',
-              data: 'Connected with socket'
-          }));
-      }
-    });
-  }, 200);
+
+  global.socketServer.clients.forEach((client) => {
+    console.log('asdfdf=====');
+    if (client.readyState === client.OPEN) {
+        client.send(JSON.stringify({
+            type: 'notice',
+            data: 'Connected with socket'
+        }));
+    }
+  });
 
   // With logo
   let logo_url = config?.logo?.image_url || 'logo.example.png'

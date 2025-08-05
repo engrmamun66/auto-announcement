@@ -424,11 +424,31 @@ async function getAllStudents(){
 
 }
 
+let Socket = ref(null)
+let socketServerIsRunning = ref(false)
+
+emitter.on('is_connected_socket_server', (bool) => {
+    socketServerIsRunning.value = bool
+})
+
 onMounted(async ()=>{   
 
     setTimeout(() => {
-        socketInit({emitter})
+        Socket.value = socketInit({emitter, toaster: true})
     }, 1000);
+
+     
+
+    setInterval(()=>{
+        if(Socket.value){
+            Socket.value.send(JSON.stringify({ type: 'hi' }))
+            setTimeout(() => {
+                if(socketServerIsRunning.value ===  false){
+                    Socket.value = socketInit({emitter, toaster: true})
+                }
+            }, 100);
+        }
+    }, 5000)
 
     document.addEventListener('click', (e) => { 
         // emitter.emit('document_clicked', e)

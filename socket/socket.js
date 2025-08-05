@@ -14,8 +14,8 @@ module.exports = function () {
             console.log("Frontend disconnected from WebSocket");
         });
         socket.on("message", (message) => {
-            console.log("Received:", message);
-            socket.send("Echo: " + message);
+            const decodedMessage = JSON.parse(message.toString());
+            socket.send(JSON.stringify(decodedMessage));
         });
     });
 

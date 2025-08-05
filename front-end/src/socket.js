@@ -6,11 +6,18 @@ export function socketInit({emitter}){
         console.log('Connected to socket server');
         // socket.send('Hello, Server!');
         emitter.emit('toaster-success', { message: 'Connecte to socket server' })
+        emitter.emit('is_connected_socket_server', true)
+
     };
 
     socket.onmessage = (event) => {
         try {
-            emitter.emit('on_socket_message', JSON.parse(event.data || '{}'));
+            let data = JSON.parse(event.data || '{}')
+            if(data?.type == 'hi'){
+                emitter.emit('is_connected_socket_server', true)
+            } else {
+                emitter.emit('on_socket_message', data);
+            }
         } catch (error) {
             console.error('socket.onmessage__error::', {
                 error,
@@ -22,7 +29,9 @@ export function socketInit({emitter}){
 
     socket.onclose = () => {
         console.log('Disconnected socket from server');
-        emitter.emit('toaster-error', { message: 'Disconnected socket from server' })
+        // emitter.emit('toaster-error', { message: 'Disconnected socket from server' })
+        console.warn('Disconnected socket from server')
+        emitter.emit('is_connected_socket_server', false)
     };
 
     socket.onerror = (error) => {
