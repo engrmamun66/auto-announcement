@@ -40,6 +40,7 @@ class PunchLog {
       let logs = require(filePath) || [];
       const { student } = req.body
       if(student){
+        if(!logs) logs = []
         logs.unshift(student)
 
         let date_array = this._allowedDates()
