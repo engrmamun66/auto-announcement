@@ -32,6 +32,8 @@ const startWithDevices = async (Students, {connectOnly=false}={}) => {
             let latestLogs = logs.slice(-10).filter(({ recordTime }) => {
               return moment().diff(new Date(recordTime), 'seconds') < 30 
             })
+            // Last punch only
+            latestLogs = [latestLogs?.[0]].filter(Boolean)
             
             console.log('latestLogs::', latestLogs.length)
             
