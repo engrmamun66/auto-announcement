@@ -41,8 +41,8 @@ const startWithDevices = async (Students, {connectOnly=false}={}) => {
             let diff_secodns = moment().diff(punch_time, 'seconds')
             console.log('before::', moment().diff(punch_time, 'seconds'), 'seconds');
 
-            if(diff_secodns < 30){
-              if(global?.last_punch_time !== punch_time){
+            if(diff_secodns < 40){
+              if(global?.last_punch_time !== punch_time || true){
                 global.last_punch_time = punch_time
                 Students.getStudentByDakhela_and_sentToSocket(Number(dakhela), {
                     start_time,
@@ -50,6 +50,8 @@ const startWithDevices = async (Students, {connectOnly=false}={}) => {
                     punch_time,
                 });
               }
+            } else {
+              console.log('');
             }
             /** ============ END ============ */
 
