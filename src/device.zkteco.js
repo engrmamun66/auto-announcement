@@ -1,13 +1,11 @@
 const moment = require('moment')
 const ZKTeco = require("zkteco");
 // DOC: https://www.npmjs.com/package/zkteco
-const devicePort = "4370"
 
 const startWithDevices = async (Students, {connectOnly=false}={}) => {
   try {
-    const device_ips = global.config.env?.DEVICE_IPS || []
-    // const devices = [{ deviceIp: "192.168.68.102", devicePort: "4370" }];
-    const devices = device_ips.map(deviceIp => ({deviceIp, devicePort}))
+    const devices = global.config.env?.DEVICES || []
+    // const devices = [{ deviceIp: "192.168.68.113", devicePort: "4370", clear: false }];
     global.zkInstance = new ZKTeco(devices);
 
     await global.zkInstance.connectAll(); 
@@ -50,7 +48,7 @@ const startWithDevices = async (Students, {connectOnly=false}={}) => {
             }
             /** ============ END ============ */
 
-            let CLEAN_POLICY = global.config.env?.CLEAN_POLICY?.[device.deviceIp] || global.config.env?.CLEAN_POLICY?.['clean'] || false
+            let CLEAN_POLICY = device?.clean ?? false
             if(CLEAN_POLICY){
               let max_quantity = CLEAN_POLICY
               if (logs.length > max_quantity) {

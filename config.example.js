@@ -10,13 +10,13 @@ module.exports = {
           PUNCH_LOG_FILENAME: 'punch.log.json',
           
           /** ==== with-ips(Recommended) === */
-          DEVICE_IPS: ["192.168.68.113"], 
-          CLEAN_POLICY: { 
-               clean: false ?? 15000 ?? 500,
-               // or ip wise setting
-               "192.168.68.113": false ?? 15000 ?? 500,
-               "192.168.68.114": false ?? 15000 ?? 500, 
-          },
+          DEVICES: [
+               {
+                    devicePort: '4370',
+                    deviceIp: "192.168.68.113",
+                    clean: false, // false | anyquantity(e.g 500)
+               }
+          ], 
           /** ==== End === */
 
 
