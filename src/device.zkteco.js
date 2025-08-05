@@ -32,19 +32,24 @@ const startWithDevices = async (Students, {connectOnly=false}={}) => {
 
             studentOfDevice.emp_code = studentOfDevice.deviceUserId
             studentOfDevice.punch_time = studentOfDevice.recordTime
+
             
             const dakhela = studentOfDevice?.emp_code;
             const punch_time = studentOfDevice?.punch_time ?? '';
-           
+            
             const start_time = moment().subtract(0, 'second').format('YYYY-MM-DD HH:mm:ss');
+            let diff_secodns = moment().diff(punch_time, 'seconds')
+            console.log('before::', moment().diff(punch_time, 'seconds'), 'seconds');
 
-            if(global?.last_punch_time !== punch_time){
-              global.last_punch_time = punch_time
-              Students.getStudentByDakhela_and_sentToSocket(Number(dakhela), {
-                  start_time,
-                  studentOfDevice,
-                  punch_time,
-              });
+            if(diff_secodns < 30){
+              if(global?.last_punch_time !== punch_time){
+                global.last_punch_time = punch_time
+                Students.getStudentByDakhela_and_sentToSocket(Number(dakhela), {
+                    start_time,
+                    studentOfDevice,
+                    punch_time,
+                });
+              }
             }
             /** ============ END ============ */
 
