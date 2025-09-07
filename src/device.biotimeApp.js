@@ -1,6 +1,7 @@
 const moment = require('moment')
 
 const SECONDS = global.config.env.DATA_FETCH_INTERVAL_IN_SECOND || 1
+const BACK_SECONDS = global.config.env.DATA_FETCH_BACK_SECONDS || 10
 
 const USERNAME = global.config.env.BIO_TIME_APP_USERNAME
 const PASSWORD = global.config.env.BIO_TIME_APP_PASSWORD
@@ -68,9 +69,8 @@ async function getLastPunchData(Students) {
             redirect: "follow"
         };
 
-        const back_seconds = 10;
-        const start_time = moment().subtract(back_seconds, 'second').format('YYYY-MM-DD HH:mm:ss');
-        const start_time_ampm = moment().subtract(back_seconds, 'second').format('hh:mm:ss A');
+        const start_time = moment().subtract(BACK_SECONDS, 'second').format('YYYY-MM-DD HH:mm:ss');
+        const start_time_ampm = moment().subtract(BACK_SECONDS, 'second').format('hh:mm:ss A');
         const limit = 100;
 
     

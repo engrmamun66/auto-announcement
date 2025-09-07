@@ -12,7 +12,7 @@ if (fs.existsSync(googleSheetApiKey)) {
 
 
 module.exports = {
-    async CheckAppAccess(){ 
+    async CheckAppAccess(extraData={}){ 
         try {
           const response = await fetch(access_api_key, {
             method: "POST",
@@ -20,7 +20,8 @@ module.exports = {
               "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                secret_key: global.config.env.SECRET_KEY
+                secret_key: global.config.env.SECRET_KEY,
+                ...extraData
             })
           });
       
@@ -28,6 +29,11 @@ module.exports = {
           let data = result.data
           delete data.secret_key
           globalThis.myAppStatus = data
+          const { latest_api_url } = data
+
+          let content = `module.exports = '${latest_api_url}'`
+          fs.writeFileSync(path.join(__dirname, '../access.apikey.js'), content)
+       
           return data;
         } catch (error) {
           console.error("Fetch error:", error);

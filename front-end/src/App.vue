@@ -139,7 +139,7 @@ let getForbiddenedMessage = computed(()=>{
     return helper.enToBnDate(stopped_message, {bold: false})
 })
 
-async function CheckAccess(loader=false){
+async function CheckAccess({loader=false}={}){
  
  try { 
     if(checking_accessibility.value) return
@@ -483,6 +483,15 @@ onMounted(async ()=>{
             refreshDOM.value = false
             emitter.emit('pushed_a_student__or__rechecktoPlay', true)
             setTimeout(()=>refreshDOM.value = true, 0)
+
+
+            // Check accesivility each 1 hour
+            let minutes_secods = moment().format('mm:ss')
+            let end_of_hour = minutes_secods === '59:59'
+            if(end_of_hour){
+                CheckAccess()
+            }
+
         }, 1000);
     }, 100);
 
@@ -504,7 +513,7 @@ onMounted(async ()=>{
         }
      })
 
-     await CheckAccess(true) 
+     await CheckAccess({loader: true}) 
 })
 
 
@@ -647,7 +656,7 @@ function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
     </SideBar> -->
     <Toaster></Toaster>
     <template v-if="appUseForbiddened">
-        <Lockscreen ref="LockscreenRef" @tryToUnlock="CheckAccess(true)"></Lockscreen>
+        <Lockscreen ref="LockscreenRef" @tryToUnlock="CheckAccess({loader: true})"></Lockscreen>
         <template v-if="showAccessibilityAlert">
             <div ref="disabilityAlretRef" class="disablitily-alert">
                 <div v-html="getForbiddenedMessage" @auxclick="log({getWarningMessage})"></div>

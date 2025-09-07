@@ -2,7 +2,7 @@
 const port_number = 2323
 
 module.exports = {
-     mode: 'with-ips', // 'with-ips' || 'with-BioTime-app'
+     mode: 'with-BioTime-app', // 'with-ips' || 'with-BioTime-app'
      env: {
           PORT: port_number,
           SOCKET_PORT: 2424,
@@ -24,6 +24,7 @@ module.exports = {
           BIO_TIME_APP_USERNAME: "admin",
           BIO_TIME_APP_PASSWORD: "Admin@123",
           DEVICE_NAMES: ['Device 2'], // zktecho device name, which already connected by name in BioTime-8.0 server
+          DATA_FETCH_BACK_SECONDS: 10,
           DATA_FETCH_INTERVAL_IN_SECOND: 2,
           /** ==== End === */
 
