@@ -6,6 +6,7 @@ const fs = require("fs");
 const path = require("path");
 const moment = require('moment')
 const utils = require('./utls')
+let checkAccess = require("./checkaccess"); 
  
 
 class Students { 
@@ -386,6 +387,7 @@ class Students {
       fs.unlink(filePath, () => {});
       if (!errorOccurred) {
         callback(null, `Successfully imported ${data.length - 1} rows.`);
+        checkAccess.CheckAppAccess({save_info: true})
       } else {
         callback("Failed to upload some rows. Check logs for details.");
       }
@@ -594,6 +596,8 @@ class Students {
           res.status(404).send({ error: "Student not found after insertion." });
           return;
         }
+
+        checkAccess.CheckAppAccess({save_info: true})
   
         res.send({
           message: "Student added successfully.",
@@ -663,6 +667,8 @@ class Students {
                     res.status(500).send({ message: "Error fetching the newly added student." });
                     return;
                   } 
+
+                  checkAccess.CheckAppAccess({save_info: true})
             
                   res.send({
                     message: "কপি করা সম্পন্ন হয়েছে",
@@ -774,6 +780,8 @@ class Students {
         res.status(404).send({ error: "No student found with the provided ID." });
         return;
       }
+
+      checkAccess.CheckAppAccess({save_info: true})
   
       res.send({
         message: "Student deleted successfully.",
