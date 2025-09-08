@@ -37,6 +37,14 @@ module.exports = {
      settings: {
           log_backup_days: 7,
           punch_log_indent: 0, // for developer
+          backup: {
+               logo: true,
+               database: true,
+               openbat: true,
+               config: true,
+               exports: false,
+               media: false,
+          }
      },
      logo: {
           width: '100px',

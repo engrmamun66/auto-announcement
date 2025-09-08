@@ -7,7 +7,7 @@
         </header>
         <p>Files Supported: excel</p>
         <input v-if="fileInputField" ref="uploader" @change="onChangeFile" type="file" hidden accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"   id="fileID" style="display:none;">
-        <Btn v-if="!file?.name" class="red"  @click="open" >Choose File</Btn>
+        <Btn v-if="!file?.name"  @click="open" >Choose File</Btn>
         <Btn v-if="file?.name" @click.stop="uploadNow()" >Upload Now <BtnLoader v-if="loading"></BtnLoader></Btn>
         <a :href="`${BASE_URL}/sample.xlsx`" class="mt-2">Download Sample File</a>
         

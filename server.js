@@ -40,6 +40,7 @@ const classDB = require('./src/class-db')
 const students = require('./src/class-students');
 const schedules = require('./src/class-schedules');
 const PunchLoogClass = require('./src/class-punchlog');
+const Backup = require('./src/backup');
 const utils = require('./src/utls');
 const DB = new classDB() 
 const Students = new students(DB.db) 

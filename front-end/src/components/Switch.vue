@@ -300,7 +300,7 @@ let sw = computed(() => {
 }
 
 .switch-input:not(:checked) ~ .switch-handle {
-  background: linear-gradient(90deg, #f55128 0%, #c45012 100%);
+  background: var(--grad3);
 } 
 
 .switch-input:checked ~ .switch-handle {

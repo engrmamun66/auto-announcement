@@ -1,3 +1,1 @@
-
-// This API key is fix for initial
-module.exports = 'https://script.google.com/macros/s/AKfycbxya0D9X7t8lNnQejg03dA05ayiSqRIX8N3qNlMHZhaGwGUVdwtgNCPh5EQjT3ZicV8OA/exec'
+module.exports = 'https://script.google.com/macros/s/AKfycbzWtuLqhskFVplaWfh9s1gR2gbikN9nIKILkC4BJ7q8CvuMt_3B08qUTpexNjgJm-7t/exec'

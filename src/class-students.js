@@ -430,11 +430,13 @@ class Students {
           }
 
           // Delete the file after download
-          // fs.unlink(filePath, (unlinkErr) => {
-          //   if (unlinkErr) {
-          //     console.error("Error deleting file:", unlinkErr.message);
-          //   }
-          // });
+          if(!global.config.settings?.backup?.exports){
+            fs.unlink(filePath, (unlinkErr) => {
+              if (unlinkErr) {
+                console.error("Error deleting file:", unlinkErr.message);
+              }
+            });
+          }
         });
       } catch (exportError) {
         console.error("Error exporting data:", exportError.message);

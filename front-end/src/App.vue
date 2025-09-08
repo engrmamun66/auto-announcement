@@ -473,7 +473,7 @@ onMounted(async ()=>{
     clearTimeout(schedule_timeout.value)
     classes.value = storage('classes').value || classes.value
     wattingList.value = storage('wattingList').value || []
-    is_started_schedule.value = storage('is_started_schedule').value || is_started_schedule.value 
+    is_started_schedule.value = Number(storage('is_started_schedule').value || 0) || is_started_schedule.value 
     emergency_mode.value = Boolean(storage('emergency_mode').value)
  
 
