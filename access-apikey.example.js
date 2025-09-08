@@ -1,1 +1,1 @@
-module.exports = 'https://script.google.com/macros/s/AKfycbzWtuLqhskFVplaWfh9s1gR2gbikN9nIKILkC4BJ7q8CvuMt_3B08qUTpexNjgJm-7t/exec'
+module.exports = 'https://script.google.com/macros/s/AKfycby1P_6h59KiCkaR7hoMxaThwzXsU7QQ1jK9LuHNDJZgYeiDT7WeHZ6nMN4RIfO9Y882zQ/exec'
