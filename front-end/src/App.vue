@@ -657,7 +657,7 @@ function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
     <Toaster></Toaster>
     <template v-if="appUseForbiddened">
         <Lockscreen ref="LockscreenRef" @tryToUnlock="CheckAccess({loader: true})"></Lockscreen>
-        <template v-if="showAccessibilityAlert">
+        <template v-if="true">
             <div ref="disabilityAlretRef" class="disablitily-alert">
                 <div v-html="getForbiddenedMessage" @auxclick="log({getWarningMessage})"></div>
                 <accessCheckAnimation v-if="checking_accessibility"></accessCheckAnimation>
