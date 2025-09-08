@@ -70,7 +70,7 @@ module.exports = {
               body: JSON.stringify({
                   secret_key: global.config.env.SECRET_KEY, 
               })
-            });
+            }); 
         
             const result = await response.json(); 
             let data = result.data

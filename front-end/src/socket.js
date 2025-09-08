@@ -3,9 +3,9 @@ export function socketInit({emitter}){
     const socket = new WebSocket(`ws://localhost:${globalThis.GLOBAL_DATA?.env.SOCKET_PORT}`); 
 
     socket.onopen = () => {
-        console.log('Connected to socket server');
+        console.log('Connecte to socket server');
         // socket.send('Hello, Server!');
-        emitter.emit('toaster-success', { message: 'Connecte to socket server' })
+        // emitter.emit('toaster-success', { message: 'Connecte to socket server' })
         emitter.emit('is_connected_socket_server', true)
 
     };
