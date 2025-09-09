@@ -95,7 +95,6 @@ onMounted(() => {
 })
  
 
-console.log(useRoute());
 </script>
 
 <template>
