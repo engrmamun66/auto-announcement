@@ -495,7 +495,6 @@ class Students {
         return;
       }
 
-      Backup.createBackupAndSend()
   
       res.send({ message: `Status updated to ${status} for student ID ${id}.` });
     });
@@ -604,7 +603,6 @@ class Students {
         }
 
         checkAccess.CheckAppAccess({save_info: true})
-        Backup.createBackupAndSend()
   
         res.send({
           message: "Student added successfully.",
@@ -676,7 +674,6 @@ class Students {
                   } 
 
                   checkAccess.CheckAppAccess({save_info: true})
-                  Backup.createBackupAndSend()
             
                   res.send({
                     message: "কপি করা সম্পন্ন হয়েছে",
@@ -758,7 +755,6 @@ class Students {
           return;
         }
         
-        Backup.createBackupAndSend()
   
         res.send({
           message: "Student updated successfully.",
@@ -792,7 +788,6 @@ class Students {
       }
 
       checkAccess.CheckAppAccess({save_info: true})
-      Backup.createBackupAndSend()
   
       res.send({
         message: "Student deleted successfully.",

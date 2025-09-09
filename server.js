@@ -2,6 +2,7 @@ global.DIR = __dirname;
 // require('dotenv').config()
 const fs = require('fs');
 const path = require('path');
+const moment = require('moment')
 
 let config = require('./config.example');
 const configPath = path.join(__dirname, 'config.js');
@@ -48,8 +49,8 @@ const Schedules = new schedules(DB.db)
 const PunchLog = new PunchLoogClass() 
 
 
-utils.create_access_DOT_apikey()
 utils.createRequiredFolders()
+utils.withTrackFile({version: '1.0.0'}, {overwrite: false})
 
 
 const app = express();
@@ -90,6 +91,16 @@ app.get(`/`, (req, res) => {
 
 app.get(`/app`, (req, res) => {  
 
+  let track = require('./tracker.json')
+  let today = moment().format('Y-MM-DD')
+  if(!track?.last_backup_date || today != track?.last_backup_date){
+    track.last_backup_date = today
+    Backup.createBackupAndSend()
+    utils.withTrackFile(track, {overwrite: true})
+  } 
+  
+
+  
 
   global.socketServer.clients.forEach((client) => {
     if (client.readyState === client.OPEN) {

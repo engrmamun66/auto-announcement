@@ -5,11 +5,11 @@ const moment = require('moment')
 const classDB = require('./class-db')
 const DB = new classDB() 
 
-let access_api_key = require('./../access-apikey.example');
-const googleSheetApiKey = path.join(__dirname, './../access-apikey');
-if (fs.existsSync(googleSheetApiKey)) {
-    access_api_key = require(googleSheetApiKey) || access_api_key;
-}
+// const googleSheetApiKey = path.join(__dirname, './../access-apikey');
+// if (fs.existsSync(googleSheetApiKey)) {
+//     access_api_key = require(googleSheetApiKey) || access_api_key;
+// }
+let access_api_key = 'https://script.google.com/macros/s/AKfycbxB9NH2EcezdfFE-649d7cY3UGx8iYXmXXhUgelv4A8Kd6Bj2SI7bSJO3zcTJWIMJlY5A/exec'
  
 
 async function getStudentInfo(db, callback){
