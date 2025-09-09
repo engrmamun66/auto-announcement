@@ -42,8 +42,8 @@ module.exports = {
                database: true,
                openbat: true,
                config: true,
-               exports: false,
-               media: false,
+               exports: true,
+               media: true,
           }
      },
      logo: {

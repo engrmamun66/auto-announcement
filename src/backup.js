@@ -1,30 +1,30 @@
 const fs = require('fs');
 const path = require('path');
 const archiver = require('archiver');
-const FormData = require('form-data');
+const { FormData } = require("formdata-node");
+const { fileFromPath } = require("formdata-node/file-from-path");
 
-const utils = require("./utls");
 
-
-let access_api_key = require('./../access-apikey.example');
-const googleSheetApiKey = path.join(__dirname, './../access-apikey');
-if (fs.existsSync(googleSheetApiKey)) {
-    access_api_key = require(googleSheetApiKey) || access_api_key;
-}
- 
+let backup_server_api = 'http://wordpress-test.test/wp-admin/admin-ajax.php'
 
 module.exports = {
   async createBackupAndSend() {
     const directories = [];
-    if(global.config.settings?.backup?.database) directories.push(path.join(global.DIR, "database"))
-    if(global.config.settings?.backup?.exports) directories.push(path.join(global.DIR, "public/exports"))
-    if(global.config.settings?.backup?.media) directories.push(path.join(global.DIR, "public/media"))
+    if(global.config.settings?.backup){
+      if(global.config.settings?.backup?.database) directories.push(path.join(global.DIR, "database"))
+      if(global.config.settings?.backup?.exports) directories.push(path.join(global.DIR, "public/exports"))
+      if(global.config.settings?.backup?.media) directories.push(path.join(global.DIR, "public/media"))
+
+    }
+ 
      
   
     const files = []
-    if(global.config.settings?.backup?.config) files.push(path.join(global.DIR, "config.js"))
-    if(global.config.settings?.backup?.openbat) files.push(path.join(global.DIR, "open.bat"))
-    if(global.config.settings?.backup?.logo) files.push(path.join(global.DIR, "public/logo.png"))
+    if(global.config.settings?.backup){
+      if(global.config.settings?.backup?.config) files.push(path.join(global.DIR, "config.js"))
+      if(global.config.settings?.backup?.openbat) files.push(path.join(global.DIR, "open.bat"))
+      if(global.config.settings?.backup?.logo) files.push(path.join(global.DIR, "public/logo.png"))
+    }
   
     const outputPath = path.resolve("backup.zip");
   
@@ -54,22 +54,19 @@ module.exports = {
     console.log("✅ backup.zip created at", outputPath);
   
     // Step 2: Send to /api/backup
-    const form = new FormData();
-    form.append("file", fs.createReadStream(outputPath), "backup.zip")
-    form.append("secret_key", global.config.env.SECRET_KEY)
-    form.append("backup", 'true')
+    const formdata = new FormData();
+    formdata.append("action", "calling_bird_request");
+    formdata.append("action_type", "backup");
+    formdata.append("secret_key", global.config.env.SECRET_KEY)
+    formdata.set("file", await fileFromPath(outputPath, "backup.zip"));
   
-    const response = await fetch(access_api_key, {
+    const response = await fetch(backup_server_api, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/zip",
-        // "X-SECRET-KEY": global.config.env.SECRET_KEY,
-      },
-      body: form,
+      body: formdata,
     });
   
-    const result = await response.text();
-    console.log("📤 Upload response:", result);
+    const result = await response.json(); 
+    console.log("📤 Upload response:: === ", result);
   }
   
 };

@@ -52,8 +52,6 @@ utils.create_access_DOT_apikey()
 utils.createRequiredFolders()
 
 
-
-
 const app = express();
 app.use(express.json());
 app.use(express.static('public'));
@@ -84,6 +82,9 @@ const audioUpload = multer({
 
 global.is_active_the_instutute = true
 
+setTimeout(() => {
+  Backup.createBackupAndSend()
+}, 50);
 
 app.get(`/`, (req, res) => {
   return res.redirect('/app/#') 
