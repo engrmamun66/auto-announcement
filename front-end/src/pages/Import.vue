@@ -117,7 +117,7 @@ onMounted(() => {
                     <template v-for="backup in backupLinks">
                          <li> 
                               <strong class="me-2">{{ backup?.label }}</strong>
-                              <a :href="backup.download_url || backup?.donwload_url || ''" :download="backup.filename">{{ backup.filename }}  </a> 
+                              <a :href="backup.download_url || backup?.donwload_url || ''" :download="backup.filename" target="_top">{{ backup.filename }}  </a> 
                               <span class="ms-2">{{ moment(backup?.created).format('Y-MM-DD hh:mm:ss A - (dddd)') }}</span>
                          </li>
                     </template>
