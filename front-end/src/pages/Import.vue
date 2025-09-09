@@ -78,7 +78,7 @@ function getBackupDetails() {
                                    backupLinks.value[1] = item
                               }
                               else {
-                                   item['label'] = 'Startup'
+                                   item['label'] = 'Oldest'
                                    backupLinks.value[2] = item
                               }
                          }) 
@@ -110,17 +110,19 @@ onMounted(() => {
 
      <template v-if="backupLinks?.length">
 
-          <h1 class="text-start mt-3">Downlaod Backups Here</h1>  
+          <div class="d-flex flex-column align-items-center">
+               <h1 class="text-start mt-3">Downlaod Backups Here</h1>  
            
-          <ul>
-               <template v-for="backup in backupLinks">
-                    <li> 
-                         <strong class="me-2">{{ backup?.label }}</strong>
-                         <a :href="backup.download_url || backup?.donwload_url || ''" :download="backup.filename">{{ backup.filename }}  </a> 
-                         <span class="ms-2">{{ moment(backup?.created).format('Y-MM-DD hh:mm:ss A - (dddd)') }}</span>
-                    </li>
-               </template>
-          </ul>
+               <ul class="backups">
+                    <template v-for="backup in backupLinks">
+                         <li> 
+                              <strong class="me-2">{{ backup?.label }}</strong>
+                              <a :href="backup.download_url || backup?.donwload_url || ''" :download="backup.filename">{{ backup.filename }}  </a> 
+                              <span class="ms-2">{{ moment(backup?.created).format('Y-MM-DD hh:mm:ss A - (dddd)') }}</span>
+                         </li>
+                    </template>
+               </ul>
+          </div>
      </template>
  
 
@@ -128,7 +130,10 @@ onMounted(() => {
 
 </template>
 
-<style>
-  
+<style scoped>
+ul.backups li{
+     line-break: anywhere;
+     margin-bottom: 5px;
+}
 </style>
 
