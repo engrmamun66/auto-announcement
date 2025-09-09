@@ -41,6 +41,22 @@ module.exports = {
         
         
     }, 
+    updateTrackFile(data={}, {ovverwrite=true}={}){
+        let defaultData = {
+            version: '1.0.0',
+            ...data,
+        }
+        const file_content = JSON.stringify(defaultData, null, 4)
+        const filePath = path.join(global.DIR, 'track.json');  
+        // Check if file exists
+        if (ovverwrite == false) {
+            if(!fs.existsSync(filePath)) {
+                fs.writeFileSync(filePath, file_content, 'utf8');
+            } 
+        } else {
+            fs.writeFileSync(filePath, file_content, 'utf8'); 
+        }
+    }, 
     reqUrl(req){
       try {
         return req.protocol + '://' + req.get('host');

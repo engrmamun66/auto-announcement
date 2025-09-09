@@ -82,9 +82,7 @@ const audioUpload = multer({
 
 global.is_active_the_instutute = true
 
-setTimeout(() => {
-  Backup.createBackupAndSend()
-}, 50);
+Backup.createBackupAndSend()
 
 app.get(`/`, (req, res) => {
   return res.redirect('/app/#') 
@@ -309,6 +307,14 @@ app.get(`/api/_ac`, async (req, res) => {
   app.post(prefix + '/punch-log/get-log/', (req, res) => {
     PunchLog.getLog(req, res);
   });
+
+
+  // ====================================================== //
+  // ================= Get Backup Details ================= //
+  // ====================================================== //
+  app.get(prefix + '/backup-list', (req, res) => {
+    Backup.getBackupDetails({req, res})
+  }); 
  
    
 })

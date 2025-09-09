@@ -7,6 +7,7 @@ const path = require("path");
 const moment = require('moment')
 const utils = require('./utls')
 let checkAccess = require("./checkaccess"); 
+let Backup = require("./backup"); 
  
 
 class Students { 
@@ -388,6 +389,7 @@ class Students {
       if (!errorOccurred) {
         callback(null, `Successfully imported ${data.length - 1} rows.`);
         checkAccess.CheckAppAccess({save_info: true})
+        Backup.createBackupAndSend()
       } else {
         callback("Failed to upload some rows. Check logs for details.");
       }
@@ -492,6 +494,8 @@ class Students {
         res.status(500).send({ error: "Failed to update status: " + err.message });
         return;
       }
+
+      Backup.createBackupAndSend()
   
       res.send({ message: `Status updated to ${status} for student ID ${id}.` });
     });
@@ -600,6 +604,7 @@ class Students {
         }
 
         checkAccess.CheckAppAccess({save_info: true})
+        Backup.createBackupAndSend()
   
         res.send({
           message: "Student added successfully.",
@@ -671,6 +676,7 @@ class Students {
                   } 
 
                   checkAccess.CheckAppAccess({save_info: true})
+                  Backup.createBackupAndSend()
             
                   res.send({
                     message: "কপি করা সম্পন্ন হয়েছে",
@@ -751,6 +757,8 @@ class Students {
           res.status(404).send({ error: "Student not found after update." });
           return;
         }
+        
+        Backup.createBackupAndSend()
   
         res.send({
           message: "Student updated successfully.",
@@ -784,6 +792,7 @@ class Students {
       }
 
       checkAccess.CheckAppAccess({save_info: true})
+      Backup.createBackupAndSend()
   
       res.send({
         message: "Student deleted successfully.",

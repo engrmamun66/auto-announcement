@@ -61,6 +61,7 @@ async function mountTheApp(){
         document.body.append(app_div);
         app
         .provide('socketInit', socketInit)
+        .provide('moment', moment)
         .provide('http', utils.http)
         .provide('helper', utils.helper)
         .provide('cookie', utils.cookie)
