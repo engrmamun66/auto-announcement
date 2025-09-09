@@ -76,11 +76,6 @@ module.exports = {
             let data = result.data
             delete data.secret_key
             globalThis.myAppStatus = data
-            const { latest_api_url } = data
-  
-            let content = `module.exports = '${latest_api_url}'`
-            fs.writeFileSync(path.join(__dirname, '../access.apikey.js'), content)
-         
             return data;
           }
  
