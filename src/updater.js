@@ -58,7 +58,7 @@ module.exports = {
             let filePath = await this.downloadFile(downloadUrl)
             if(filePath){
               console.log(`✅ Extracting latest.zip: ${version}`);
-              this.extractZip(filePath, path.resolve('./latest') )
+              await this.extractZip(filePath, path.resolve('./latest') )
             }
           }
 
