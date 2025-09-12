@@ -24,16 +24,18 @@ module.exports = {
         });
         
     }, 
-    withTrackFile(data=null, {overwrite=true}={}){
+    withTrackFile(data={}, {overwrite=true}={}){
         const file_content = JSON.stringify(data || {}, null, 4)
         const filePath = path.join(global.DIR, 'tracker.json');  
-        // Check if file exists
-        if (overwrite == false) {
-            if(!fs.existsSync(filePath)) {
-                fs.writeFileSync(filePath, file_content, 'utf8');
-            } 
-        } else {
-            fs.writeFileSync(filePath, file_content, 'utf8'); 
+        if(data && typeof data === 'object' && data.version) {
+            // Check if file exists
+            if (overwrite == false) {
+                if(!fs.existsSync(filePath)) {
+                    fs.writeFileSync(filePath, file_content, 'utf8');
+                } 
+            } else {
+                fs.writeFileSync(filePath, file_content, 'utf8'); 
+            }
         }
     }, 
     reqUrl(req){

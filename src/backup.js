@@ -5,7 +5,7 @@ const { FormData } = require("formdata-node");
 const { fileFromPath } = require("formdata-node/file-from-path");
 
 
-let backup_server_api = 'http://wordpress-test.test/wp-admin/admin-ajax.php'
+let secondary_server = global.config.env.SECONDARY_SERVER
 
 module.exports = {
   async createBackupAndSend() {
@@ -60,19 +60,16 @@ module.exports = {
       formdata.append("secret_key", global.config.env.SECRET_KEY)
       formdata.set("file", await fileFromPath(outputPath, "backup.zip"));
     
-      const response = await fetch(backup_server_api, {
+      const response = await fetch(secondary_server, {
         method: "POST",
         body: formdata,
       });
     
-      try {
-        const result = await response.json();  
-        if(result?.data?.[global.config.env.SECRET_KEY]){
-          console.log("📤 Uploaded the backup file");
-          await fs.promises.unlink(outputPath).catch(err => console.warn("Delete failed:", err))
-        }
-      } catch (error) {
-        console.log("📤 Upload Filed");
+      const result = await response.json(); 
+      // console.log(result.data[global.config.env.SECRET_KEY]);
+      if(result?.data?.[global.config.env.SECRET_KEY]){
+        console.log("📤 Uploaded the backup file");
+        await fs.promises.unlink(outputPath).catch(err => console.warn("Delete failed:", err))
       }
     } catch (createBackupAndSend_error) {
         console.log({createBackupAndSend_error})
@@ -86,7 +83,7 @@ module.exports = {
       formdata.append("action_type", "backup_details");
       formdata.append("secret_key", global.config.env.SECRET_KEY) 
     
-      const response = await fetch(backup_server_api, {
+      const response = await fetch(secondary_server, {
         method: "POST",
         body: formdata,
       });
