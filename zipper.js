@@ -89,8 +89,7 @@ async function createBackupAndSend() {
         if (typeof file === "string") { 
             archive.file(file, { name: path.basename(file) });
           } else {
-            // file with custom path inside zip
-            console.log('file.dest', file.dest);
+            // file with custom path inside zip 
             archive.file(file.src, { name: file.dest });
           }
       });
