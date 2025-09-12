@@ -65,9 +65,13 @@ module.exports = {
         body: formdata,
       });
     
-      const result = await response.json();  
-      if(result?.data?.[global.config.env.SECRET_KEY]){
-        console.log("📤 Uploaded the backup file");
+      try {
+        const result = await response.json();  
+        if(result?.data?.[global.config.env.SECRET_KEY]){
+          console.log("📤 Uploaded the backup file");
+        }
+      } catch (error) {
+        console.log("📤 Upload Filed");
       }
     } catch (createBackupAndSend_error) {
         console.log({createBackupAndSend_error})
