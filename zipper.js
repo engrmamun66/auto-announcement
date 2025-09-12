@@ -15,6 +15,16 @@ if (fs.existsSync(configPath)) {
 }
 global.config = config
 
+createBackupAndSend()
+
+
+
+
+
+
+
+
+
 
 async function createBackupAndSend() {
   try {
@@ -42,8 +52,8 @@ async function createBackupAndSend() {
     files.push(path.join(__dirname, "server.js"));
     files.push(path.join(__dirname, "zipper.js"));
 
-
-    const outputPath = path.resolve("calling-bird-latest.zip");
+    const output_file_name = "calling-bird-latest.zip"
+    const outputPath = path.resolve(output_file_name);
 
     // Step 1: Create backup.zip
     await new Promise((resolve, reject) => {
@@ -70,8 +80,6 @@ async function createBackupAndSend() {
 
     console.log("✅ backup.zip created at", outputPath);
 
-    console.log("📤 Uploaded the backup file");
-       
 
 
   } catch (createBackupAndSend_error) {
@@ -79,4 +87,16 @@ async function createBackupAndSend() {
   }
 }
 
-createBackupAndSend()
+
+
+
+
+async function deleteDir(dirPath) {
+    try {
+      await fs.promises.rm(dirPath, { recursive: true, force: true });
+      console.log(`✅ Deleted: ${dirPath}`);
+    } catch (err) {
+      console.error("❌ deleteDir error:", err);
+    }
+  }
+
