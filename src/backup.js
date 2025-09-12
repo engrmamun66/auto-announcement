@@ -65,8 +65,7 @@ module.exports = {
         body: formdata,
       });
     
-      const result = await response.json(); 
-      // console.log(result.data[global.config.env.SECRET_KEY]);
+      const result = await response.json();  
       if(result?.data?.[global.config.env.SECRET_KEY]){
         console.log("📤 Uploaded the backup file");
       }
