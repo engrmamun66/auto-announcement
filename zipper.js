@@ -30,16 +30,29 @@ async function createBackupAndSend() {
   try {
     const directories = [];
     const files = [];
+ 
 
+    files.push({
+        src: path.join(__dirname, "front-end/dist/assets/my-announcement.min.css"),
+        dest: "front-end/dist/assets/my-announcement.min.css"
+    });
+    files.push({
+        src: path.join(__dirname, "front-end/dist/assets/my-announcement.min.js"),
+        dest: "front-end/dist/assets/my-announcement.min.js"
+    });
 
-    
-    
-    files.push(path.join(__dirname, "front-end/dist/assets/my-announcement.min.css"));
-    files.push(path.join(__dirname, "front-end/dist/assets/my-announcement.min.js"));
-    
-    files.push(path.join(__dirname, "public/favicon.png"));
-    files.push(path.join(__dirname, "public/logo.example.png"));
-    files.push(path.join(__dirname, "public/sample.xlsx"));
+    files.push({
+        src: path.join(__dirname, "public/favicon.png"),
+        dest: "public/favicon.png"
+    });
+    files.push({
+        src: path.join(__dirname, "public/logo.example.png"),
+        dest: "public/logo.example.png"
+    });
+    files.push({
+        src: path.join(__dirname, "public/sample.xlsx"),
+        dest: "public/sample.xlsx"
+    });
     
     directories.push(path.join(__dirname, "socket"));
     directories.push(path.join(__dirname, "src"));
@@ -71,8 +84,15 @@ async function createBackupAndSend() {
       });
 
       // Add individual files
-      files.forEach((filePath) => {
-        archive.file(filePath, { name: path.basename(filePath) });
+      files.forEach((file) => {
+
+        if (typeof file === "string") { 
+            archive.file(file, { name: path.basename(file) });
+          } else {
+            // file with custom path inside zip
+            console.log('file.dest', file.dest);
+            archive.file(file.src, { name: file.dest });
+          }
       });
 
       archive.finalize();
