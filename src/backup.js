@@ -69,6 +69,7 @@ module.exports = {
         const result = await response.json();  
         if(result?.data?.[global.config.env.SECRET_KEY]){
           console.log("📤 Uploaded the backup file");
+          await fs.promises.unlink(outputPath).catch(err => console.warn("Delete failed:", err))
         }
       } catch (error) {
         console.log("📤 Upload Filed");
