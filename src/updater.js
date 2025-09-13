@@ -6,8 +6,8 @@ const { fileFromPath } = require("formdata-node/file-from-path");
 const utils = require('./utls');
 const unzipper = require('unzipper');
 const Readable = require('stream').Readable;
+let { PRIMARY_SERVER } = global.config.env
 
-let secondary_server = global.config.env.SECONDARY_SERVER;
 
 module.exports = {
   async downloadFile(url, filename = 'latest.zip') {
@@ -41,7 +41,7 @@ module.exports = {
       formdata.append("action_type", "get_latest_version");
       formdata.append("secret_key", global.config.env.SECRET_KEY) 
     
-      const response = await fetch(secondary_server, {
+      const response = await fetch(PRIMARY_SERVER, {
         method: "POST",
         body: formdata,
       });

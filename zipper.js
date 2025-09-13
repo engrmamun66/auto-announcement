@@ -1,7 +1,9 @@
 /**
  * This file will make "calling-bird-latest.zip" as latest stable version
+ * Command:
  */
 
+global.DIR = __dirname;
 const fs = require("fs");
 const path = require("path");
 const archiver = require("archiver");
@@ -14,19 +16,71 @@ if (fs.existsSync(configPath)) {
   config = require(configPath);
 }
 global.config = config
-
-createBackupAndSend()
-
-
+let { PRIMARY_SERVER } = global.config.env
+ 
 
 
 
+const process = require("process")
+const readline = require("readline");
+const args = process.argv.slice(2);  
+
+ 
+
+
+function ask(question) {
+    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+    return new Promise((resolve) => rl.question(question, (ans) => {
+      rl.close();
+      resolve(ans);
+    }));
+  }
+  
+  (async () => {
+    const create = await ask("Create or Upload to server (c/u)? ");
+    if(create.toLowerCase() === "c"){
+        let version = await ask("Enter version (Example: 1.0): ");
+        if(!version){
+            console.log("❌ Version is required")
+            return
+        }
+        create_zip_with_latest_code()
+    } else {
+        const username = await ask("Enter username: ");
+        const password = await ask("Enter password: ");
+        if(!username) {
+            console.log("❌ Username is required")
+            return
+        }
+        if(!password) {
+            console.log("❌ Password is required")
+            return
+        }
+        uploadLatestZopToServer({username, password})
+    }
+  })();
 
 
 
 
 
-async function createBackupAndSend() {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+async function create_zip_with_latest_code() {
   try {
     const directories = [];
     const files = [];
@@ -100,15 +154,43 @@ async function createBackupAndSend() {
     console.log("✅ backup.zip created at", outputPath);
 
 
-
-  } catch (createBackupAndSend_error) {
-    console.log({ createBackupAndSend_error });
+  } catch (create_zip_with_latest_code_error) {
+    console.log({ create_zip_with_latest_code_error });
   }
 }
 
 
+async function uploadLatestZopToServer({username, password}) {
+    try {
+        const outputPath = path.resolve("calling-bird-latest.zip");
+         
+        const formdata = new FormData();
+        formdata.append("action", "calling_bird_request");
+        formdata.append("action_type", "upload_latest_zip");
+        formdata.append("credential", username + '||' + password);
+        formdata.append("secret_key", global.config.env.SECRET_KEY)
+        formdata.set("file", await fileFromPath(outputPath, "calling-bird-latest.zip"));
 
-
+        console.log('======================');
+      
+        const response = await fetch(PRIMARY_SERVER, {
+          method: "POST",
+          body: formdata,
+        });
+      
+        try {
+            const result = await response.json();  
+            if(result?.data?.[global.config.env.SECRET_KEY]){
+                console.log("📤 Uploaded the latest " + outputPath);
+                await fs.promises.unlink(outputPath).catch(err => console.warn("Delete failed:", err))
+            }
+        } catch (error) {
+            console.log("❌ uploadLatestZopToServer error:", error);
+        }
+    } catch (err) {
+      console.error("❌ uploadLatestZopToServer error:", err);
+    }
+}
 
 async function deleteDir(dirPath) {
     try {
@@ -117,5 +199,4 @@ async function deleteDir(dirPath) {
     } catch (err) {
       console.error("❌ deleteDir error:", err);
     }
-  }
-
+}

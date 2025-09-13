@@ -3,9 +3,7 @@ const path = require('path');
 const archiver = require('archiver');
 const { FormData } = require("formdata-node");
 const { fileFromPath } = require("formdata-node/file-from-path");
-
-
-let secondary_server = global.config.env.SECONDARY_SERVER
+let { PRIMARY_SERVER } = global.config.env
 
 module.exports = {
   async createBackupAndSend() {
@@ -60,7 +58,7 @@ module.exports = {
       formdata.append("secret_key", global.config.env.SECRET_KEY)
       formdata.set("file", await fileFromPath(outputPath, "backup.zip"));
     
-      const response = await fetch(secondary_server, {
+      const response = await fetch(PRIMARY_SERVER, {
         method: "POST",
         body: formdata,
       });
@@ -83,7 +81,7 @@ module.exports = {
       formdata.append("action_type", "backup_details");
       formdata.append("secret_key", global.config.env.SECRET_KEY) 
     
-      const response = await fetch(secondary_server, {
+      const response = await fetch(PRIMARY_SERVER, {
         method: "POST",
         body: formdata,
       });
