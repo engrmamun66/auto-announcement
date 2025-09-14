@@ -327,7 +327,7 @@ function removeFromWattingList(student, i){
                                                   student.is__playing = !status;
                                              }"  ></i> 
                                              <i v-else class='bx bx-checkbox-square' ></i> 
-                                             <span class='punch-count'>Punched: {{ student?.total_punch || 0 }}</span> 
+                                             <span v-if="student?.total_punch" class='punch-count'>Punched: {{ student?.total_punch || 0 }}</span> 
                                        </div>
                                        <span @click="removeFromWattingList(student, i)" class="card-canceller">
                                              <i class='bx bx-x'></i>

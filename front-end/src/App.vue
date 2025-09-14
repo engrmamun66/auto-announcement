@@ -607,7 +607,15 @@ function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
                               } 
                          }
                          else if(findLast && findLast?.is_called){
-                              wattingList.value.splice(findLastIndex, 0, student)
+                              // wattingList.value.splice(findLastIndex, 0, student)
+                              
+                              findLast['is_called'] = false
+                              if(!findLast?.['total_punch']) {
+                                findLast.total_punch = 1
+                              } else {
+                                findLast['total_punch'] += 1
+                              }
+
                               addPunchLog(student)
                               emitter.emit('pushed_a_student__or__rechecktoPlay', student)
                               if(message){
