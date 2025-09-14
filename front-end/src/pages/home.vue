@@ -43,17 +43,17 @@ let palylistComponent = inject('palylistComponent')
 
 const all_students = inject('all_students', [])
 
-let isPlaying = ref(true)
+let manually_paused_the_playlist = inject('manually_paused_the_playlist')
 
 function handlePayPause(){
      const { currentItem, audio } = palylistComponent.value
      audio.currentTime = 0;
      if(audio.paused){
           audio.play()
-          isPlaying.value = true
+          manually_paused_the_playlist.value = false
      } else {
           audio.pause()
-          isPlaying.value = false
+          manually_paused_the_playlist.value = true
      }
      
 }
@@ -152,7 +152,7 @@ function removeFromWattingList(student, i){
                <input id="BARCODE_INPUT" type="text" @keyup.enter="inputBarcode" @paste="inputBarcode" class="form-control px-4 py-2 text-center py-1 shadow" :placeholder="emergency_mode ? 'Emergency mode activated' : 'Barcode receiver field'">
           </div>
 
-          <div v-if="isPlaying" @click="handlePayPause()" class="me-2 p-1 play-pause"><i class='bx bx-pause'></i></div>
+          <div v-if="!manually_paused_the_playlist" @click="handlePayPause()" class="me-2 p-1 play-pause"><i class='bx bx-pause'></i></div>
           <div v-else @click="handlePayPause()" class="me-2 p-1 play-pause"><i class='bx bx-play'></i></div>
          
           <BarcodeScannigAnimation v-if="is_started_schedule" :scannig="is_started_schedule" class="me-1"  ></BarcodeScannigAnimation> 
@@ -327,6 +327,7 @@ function removeFromWattingList(student, i){
                                                   student.is__playing = !status;
                                              }"  ></i> 
                                              <i v-else class='bx bx-checkbox-square' ></i> 
+                                             <span v-if="student?.total_punch" class='punch-count'>Punched: {{ student?.total_punch || 0 }}</span> 
                                        </div>
                                        <span @click="removeFromWattingList(student, i)" class="card-canceller">
                                              <i class='bx bx-x'></i>
@@ -515,5 +516,11 @@ function removeFromWattingList(student, i){
 }
 .student-box:hover .card-canceller{
      opacity: 1;
+}
+.punch-count{ 
+     padding-left: 4px;
+     border-radius: 2px;
+     font-size: 11px; 
+     color: #333;
 }
 </style>

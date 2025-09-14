@@ -53,6 +53,9 @@ module.exports = {
           padding: '14px 10px',
      },
      css_vars: `
+
+     /* === Pick color from >> module.css ===*/
+
      /* === Black & White Theme */
      --primaryColor: #222322;
      --secondaryColor: #3a3a3a;
@@ -163,7 +166,7 @@ module.exports = {
           {
                class_name: 'Pre Hifz',
                class_short: 'pre_hifz',
-               display_name: 'pre_hifz',
+               display_name: 'Pre Hifz',
                isActive: true,
           },
      ],

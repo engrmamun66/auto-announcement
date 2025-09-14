@@ -55,8 +55,7 @@
       storage('wattingList').value = wattingList.value
     }
   
-    const nextItem = findNextItem();
-    // if(nextItem) console.log({nextItem});
+    const nextItem = findNextItem(); 
   
     if (nextItem) {
       currentItem.value = nextItem;

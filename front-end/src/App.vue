@@ -35,6 +35,7 @@ let user_interacted = ref(false)
 let emergency_mode = ref(false)
 let LockscreenRef = ref(null)
 let disabilityAlretRef = ref(null)
+let manually_paused_the_playlist = ref(false)
 
 let palylistComponent = ref(null)
 provide('palylistComponent', palylistComponent)
@@ -208,6 +209,7 @@ provide('all_students', all_students)
 provide('getAllStudents', getAllStudents) 
 provide('appAccessData', appAccessData)
 provide('appUseForbiddened', appUseForbiddened)
+provide('manually_paused_the_playlist', manually_paused_the_playlist)
 
 
 
@@ -368,18 +370,7 @@ function stop_clear_and_reload(){
 }
 provide('stop_clear_and_reload', stop_clear_and_reload)
 
-
-
-function pauseAudioIfRurning(){
-    if(palylistComponent.value){
-        const { currentItem, audio } = palylistComponent.value
-        audio.currentTime = 0;
-        audio.pause()
-        isPlaying.value = false
-    }
-     
-}
-
+ 
 
 
 async function getSchedules(){
@@ -616,7 +607,15 @@ function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
                               } 
                          }
                          else if(findLast && findLast?.is_called){
-                              wattingList.value.splice(findLastIndex, 0, student)
+                              // wattingList.value.splice(findLastIndex, 0, student)
+                              
+                              findLast['is_called'] = false
+                              if(!findLast?.['total_punch']) {
+                                findLast.total_punch = 1
+                              } else {
+                                findLast['total_punch'] += 1
+                              }
+
                               addPunchLog(student)
                               emitter.emit('pushed_a_student__or__rechecktoPlay', student)
                               if(message){
