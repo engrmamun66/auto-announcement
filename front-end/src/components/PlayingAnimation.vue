@@ -52,9 +52,15 @@ let manually_paused_the_playlist = inject('manually_paused_the_playlist')
   height: 30%;
   animation-delay: -2.4s;
 }
+.playing:not(.manually_paused_the_playlist) .playing__bar2 {
+  animation-delay: -2.4s;
+}
 
 .playing__bar3 {
   height: 75%;
+  animation-delay: -3.7s;
+}
+.playing:not(.manually_paused_the_playlist) .playing__bar3 {
   animation-delay: -3.7s;
 }
 
@@ -62,10 +68,17 @@ let manually_paused_the_playlist = inject('manually_paused_the_playlist')
   height: 75%;
   animation-delay: -4.2s;
 }
+.playing:not(.manually_paused_the_playlist) .playing__bar4 {
+  animation-delay: -4.2s;
+}
 .playing__bar5 {
   height: 75%;
   animation-delay: -4.9s;
 }
+.playing:not(.manually_paused_the_playlist) .playing__bar5 {
+  animation-delay: -4.9s;
+}
+ 
 
 @keyframes up-and-down {
   10% {
