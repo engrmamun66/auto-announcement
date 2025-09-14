@@ -522,7 +522,7 @@ const log = console.log
             <div class="col-12 mt-4 w-100 all-class-buttons-to-filter-area">
               <div class="all-class-buttons-to-filter">
                 <template v-for="cls in classes">
-                  <button class="class-short-btn" :class="{'active': params.class_name === cls.class_name}" 
+                  <button class="class-short-btn" :class="{'active': params.class_name === cls.class_name}" var="cls?.display_name || cls.class_short" 
                   @click="params.page_no = 1;params.class_name = cls.class_name;getStudents()" >{{ helper.ucfirst(cls?.display_name || cls.class_short) }}</button>
                 </template>
 
