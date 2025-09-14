@@ -327,6 +327,7 @@ function removeFromWattingList(student, i){
                                                   student.is__playing = !status;
                                              }"  ></i> 
                                              <i v-else class='bx bx-checkbox-square' ></i> 
+                                             <span class='punch-count'>Punched: {{ student?.total_punch || 0 }}</span> 
                                        </div>
                                        <span @click="removeFromWattingList(student, i)" class="card-canceller">
                                              <i class='bx bx-x'></i>
@@ -515,5 +516,11 @@ function removeFromWattingList(student, i){
 }
 .student-box:hover .card-canceller{
      opacity: 1;
+}
+.punch-count{ 
+     padding-left: 4px;
+     border-radius: 2px;
+     font-size: 11px; 
+     color: #333;
 }
 </style>
