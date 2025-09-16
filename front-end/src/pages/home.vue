@@ -491,8 +491,8 @@ function removeFromWattingList(student, i){
      .togglerbtn > button:active,
      .togglerbtn > button:active:focus
      { 
-          background: var(--grad) !important;
-          color: black;
+          background: var(--grad3) !important;
+          color: rgb(255, 255, 255);
      }
      .bttt{
           flex-wrap: wrap;

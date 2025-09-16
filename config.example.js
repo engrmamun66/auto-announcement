@@ -49,9 +49,9 @@ module.exports = {
           }
      },
      logo: {
-          width: '100px',
-          image_url: 'logo.example.png',
-          padding: '14px 10px',
+          width: '200px',
+          image_url: 'logo.example.jpeg',
+          padding: '4px 10px',
      },
      css_vars: `
 

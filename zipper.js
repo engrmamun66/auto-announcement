@@ -96,7 +96,15 @@ async function create_zip_with_latest_code() {
     });
     files.push({
         src: path.join(__dirname, "public/logo.example.png"),
-        dest: "public/logo.example.png"
+        dest: "public/logo.example.jpeg"
+    });
+    files.push({
+      src: path.join(__dirname, "public/logo.example.jpeg"),
+      dest: "public/logo.example.jpeg"
+    });
+    files.push({
+      src: path.join(__dirname, "public/logo.example.jpg"),
+      dest: "public/logo.example.jpg"
     });
     files.push({
         src: path.join(__dirname, "public/sample.xlsx"),
