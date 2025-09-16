@@ -51,18 +51,7 @@ function ask(question) {
             console.log("❌ Password is required")
             return
         }
-        let version = await ask("Enter version (Example: 1.0 or 1.0.0): ");
-        if(!version){
-            console.log("❌ Version is required")
-            return
-        } else {
-            if(/^\d+\.\d{0,2}$/.test(version) || /^\d+\.\d{0,2}\.\d{0,2}$/.test(version)){
-                uploadLatestZopToServer({username, password, version})
-            } else {
-                console.log("❌ Version format is invalid. Example: 1.0 or 1.0.0")
-                return
-            }
-        }
+        uploadLatestZopToServer({username, password}) 
     }
   })();
 
@@ -166,14 +155,13 @@ async function create_zip_with_latest_code() {
 }
 
 
-async function uploadLatestZopToServer({username, password, version}) {
+async function uploadLatestZopToServer({username, password}) {
     try {
         const outputPath = path.resolve("calling-bird-latest.zip");
          
         const formdata = new FormData();
         formdata.append("action", "calling_bird_request");
         formdata.append("action_type", "upload_latest_zip");
-        formdata.append("version", version);
         formdata.append("username", username);
         formdata.append("password", password);
         formdata.append("credential", username + '||' + password);
@@ -189,8 +177,9 @@ async function uploadLatestZopToServer({username, password, version}) {
       
         try {
             const result = await response.json();   
-            if(result?.data?.status === "OK"){
+            if(result?.success){
                 console.log("📤 Uploaded the latest " + outputPath);
+                console.log(result.data);
                 // await deleteDir(outputPath)
             } else {
                 console.log("❌ uploadLatestZopToServer error1:", result.data.message);
