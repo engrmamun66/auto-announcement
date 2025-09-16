@@ -1,20 +1,10 @@
-# auto-announcement
-`
-pm2 start
-or 
-npm start 
-`
+# Calling Bird
 
-#auto restartable pm2 server
-`
-pm2 start server.js --name auto-announcement --watch --restart-delay 2000 
-pm2 start server.js --name auto-announcement --watch --max-restarts 10 --restart-delay 2000 
-`
 
 # Check IP address
-win: ipconfig
-mac: ifconfig   --------- # note: show en0
-  
-# Check connect (command IP PORT)
-win: ping -vz 192.168.68.102 4370ddf
-mac: nc -vz 192.168.68.102 4370
+cmd: ipconfig 
+
+# Autoope open.bat shortut
+win + R         ---> Then press enter
+shell:startup   ---> Then press enter
+copy and pate the shortcut of open.bat

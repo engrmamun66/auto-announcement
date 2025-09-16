@@ -21,6 +21,7 @@ module.exports = {
     
       const files = []
       if(global.config.settings?.backup){
+        if(global.config.settings?.backup?.config) files.push(path.join(global.DIR, "README.md"))
         if(global.config.settings?.backup?.config) files.push(path.join(global.DIR, "config.js"))
         if(global.config.settings?.backup?.openbat) files.push(path.join(global.DIR, "open.bat"))
         if(global.config.settings?.backup?.logo) files.push(path.join(global.DIR, "public/logo.png"))
