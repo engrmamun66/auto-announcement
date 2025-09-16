@@ -26,7 +26,7 @@ module.exports = {
           DEVICE_NAMES: ['Device 2'], // zktecho device name, which already connected by name in BioTime-8.0 server
           DATA_FETCH_BACK_SECONDS: 10,
           DATA_FETCH_INTERVAL_IN_SECOND: 2,
-          PRIMARY_SERVER: 'http://wordpress-test.test/wp-admin/admin-ajax.php',
+          PRIMARY_SERVER: 'https://callingbird.softproit.com/wp-admin/admin-ajax.php', //http://wordpress-test.test/wp-admin/admin-ajax.php
           /** ==== End === */
 
           // #Front End variables
