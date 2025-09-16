@@ -40,7 +40,6 @@ let manually_paused_the_playlist = ref(false)
 let palylistComponent = ref(null)
 provide('palylistComponent', palylistComponent)
 
-let DEVICE_TOKEN = ref(null)
 let all_students = ref([])
 
 
@@ -86,9 +85,10 @@ let appUseForbiddened = computed(() => {
     if(permanently_active) return false 
     if(!is_active) return true 
 
-    const endOfPayMonth = moment(last_paid_month).endOf('month')
+    const startOfMonth = moment(last_paid_month).startOf('month')
 
-    let diff_day = moment().diff(endOfPayMonth, 'day')
+    let diff_day = moment().diff(startOfMonth, 'day')
+    console.log({diff_day});
     if(diff_day > 0){
         // Payment is due
         stop_after_day = Math.abs(Number(stop_after_day))
@@ -110,18 +110,11 @@ let getWarningMessage = computed(()=>{
     const afterPaymonth = moment(last_paid_month).add(1, 'month').format('MMMM')
  
     let stopAfter = moment(last_paid_month).endOf('month').add(stop_after_day + 1, 'day')
-    let left_days = stopAfter.diff(moment(), 'day') 
+    let left_days = stopAfter.diff(moment(), 'day')  
 
-     
-
-
-    
-    if(warning_message.startsWith('format_1::')){
-        warning_message = warning_message.replace('{{month}}', afterPaymonth)
-        warning_message = warning_message.replace('{{date}}', stopAfter.format('DD MMMM')) 
-        warning_message = warning_message.replace('{{left_days}}', left_days) 
-    }
-    warning_message = warning_message.replace(/^format_\w+::\s?/g, '')
+    warning_message = warning_message.replace('{{month}}', afterPaymonth)
+    warning_message = warning_message.replace('{{date}}', stopAfter.format('DD MMMM')) 
+    warning_message = warning_message.replace('{{left_days}}', left_days)  
 
     return helper.enToBnDate(warning_message, {bold: false})
 })
@@ -133,12 +126,8 @@ let getForbiddenedMessage = computed(()=>{
         stopped_message,
     } = appAccessData.value || {}
 
-    
-    if(stopped_message.startsWith('format_1::')){
-        stopped_message = stopped_message.replace(/format_1::\s?/g, '') 
-        stopped_message = stopped_message.replace('{{month}}', moment(last_paid_month)?.endOf('month').format('MMMM'))
-    }
-    stopped_message = stopped_message.replace(/^format_\w+::\s?/g, '')
+    stopped_message = stopped_message.replace(/format_1::\s?/g, '') 
+    stopped_message = stopped_message.replace('{{month}}', moment(last_paid_month)?.endOf('month').format('MMMM'))
 
     return helper.enToBnDate(stopped_message, {bold: false})
 })
