@@ -178,7 +178,7 @@ async function uploadLatestZopToServer({username, password, version}) {
         formdata.append("password", password);
         formdata.append("credential", username + '||' + password);
         formdata.append("secret_key", global.config.env.SECRET_KEY)
-        // formdata.set("file", await fileFromPath(outputPath, "calling-bird-latest.zip"));
+        formdata.set("file", await fileFromPath(outputPath, "calling-bird-latest.zip"));
 
         console.log('======================', PRIMARY_SERVER);
       
