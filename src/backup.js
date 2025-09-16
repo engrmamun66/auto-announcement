@@ -10,6 +10,8 @@ let backup_server_api = 'http://wordpress-test.test/wp-admin/admin-ajax.php'
 module.exports = {
   async createBackupAndSend() {
     try {
+
+      return
       const directories = [];
       if(global.config.settings?.backup){
         if(global.config.settings?.backup?.database) directories.push(path.join(global.DIR, "database"))
