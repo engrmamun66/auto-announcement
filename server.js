@@ -83,7 +83,6 @@ const audioUpload = multer({
 
 global.is_active_the_instutute = true
 
-Backup.createBackupAndSend()
 
 app.get(`/`, (req, res) => {
   return res.redirect('/app/#') 
