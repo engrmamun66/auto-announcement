@@ -633,7 +633,7 @@ function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
                               
                               findLast['is_called'] = false
                               if(!findLast?.['total_punch']) {
-                                findLast.total_punch = 1
+                                findLast.total_punch = 2
                               } else {
                                 findLast['total_punch'] += 1
                               }
