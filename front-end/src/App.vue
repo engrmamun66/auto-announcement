@@ -115,12 +115,13 @@ let getWarningMessage = computed(()=>{
      
 
 
+    
     if(warning_message.startsWith('format_1::')){
-        warning_message = warning_message.replace(/format_1::\s?/g, '')
         warning_message = warning_message.replace('{{month}}', afterPaymonth)
         warning_message = warning_message.replace('{{date}}', stopAfter.format('DD MMMM')) 
         warning_message = warning_message.replace('{{left_days}}', left_days) 
     }
+    warning_message = warning_message.replace(/^format_\w+::\s?/g, '')
 
     return helper.enToBnDate(warning_message, {bold: false})
 })
@@ -132,10 +133,12 @@ let getForbiddenedMessage = computed(()=>{
         stopped_message,
     } = appAccessData.value || {}
 
+    
     if(stopped_message.startsWith('format_1::')){
         stopped_message = stopped_message.replace(/format_1::\s?/g, '') 
         stopped_message = stopped_message.replace('{{month}}', moment(last_paid_month)?.endOf('month').format('MMMM'))
     }
+    stopped_message = stopped_message.replace(/^format_\w+::\s?/g, '')
 
     return helper.enToBnDate(stopped_message, {bold: false})
 })
@@ -154,7 +157,26 @@ async function CheckAccess({loader=false}={}){
             if(!devMode){ 
                 accessdata = JSON.parse(decodeURIComponent(escape(atob(accessdata))).replace(/^sbrenc%34#/, ''))
             }
-            appAccessData.value = accessdata
+
+            let defaultData = {
+                prefix: 'developer',
+                students_history: '445 | 4 | play:25 | nursery:17 | kg:29 | one:41 | two:40 | three:38 | four:25 | five:38 | mizan:37 | nahbemir:28 | kuduri:18 | shorhebekaya:20 | meskat1:13 | hifz:61 | pre_hifz:19',
+                institute_name: 'Developer Institute',
+                last_paid_month: '2025-09-29T18:00:00.000Z',
+                stop_after_day: 0,
+                warning_message: 'format_fixed::সম্মানিত কাস্টমার, অ্যাপ্লিকেশনটি বন্ধ রাখা হয়েছে, সচল রাখার অনুমতি নেই।',
+                stopped_message: 'format_fixed::সম্মানিত কাস্টমার, অ্যাপ্লিকেশনটি বন্ধ রাখা হয়েছে, সচল রাখার অনুমতি নেই।',
+                deactivation_message: 'Deactivation message',
+                is_active: false,
+                permanently_active: false,
+                latest_api_url: 'https://script.google.com/macros/s/AKfycbxB9NH2EcezdfFE-649d7cY3UGx8iYXmXXhUgelv4A8Kd6Bj2SI7bSJO3zcTJWIMJlY5A/exec'
+            }
+
+            if(accessdata && accessdata.institute_name){
+                accessdata.last_paid_month = moment(accessdata.last_paid_month).startOf('day').toISOString()
+            }
+            appAccessData.value = {...defaultData, ...accessdata}
+            
             storage('appAccessData').value = accessdata 
         }
     }).finally(()=>{
