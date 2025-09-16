@@ -2,7 +2,7 @@
 module.exports = {
   apps: [
     {
-      name: 'auto-announcement',       // ✅ updated name
+      name: 'callingbird',       // ✅ updated name
       script: './server.js',
       instances: 1,
       autorestart: true,
