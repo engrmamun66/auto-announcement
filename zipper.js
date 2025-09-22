@@ -16,7 +16,7 @@ if (fs.existsSync(configPath)) {
   config = require(configPath);
 }
 global.config = config
-let { PRIMARY_SERVER } = global.config.env
+let { PRIMARY_SERVER, PRIMARY_SERVER_LOCAL } = global.config.env
  
 
 
@@ -51,7 +51,17 @@ function ask(question) {
             console.log("❌ Password is required")
             return
         }
-        uploadLatestZopToServer({username, password}) 
+        let server_api_url = PRIMARY_SERVER
+        console.log('PRIMARY_SERVER:: ', PRIMARY_SERVER);
+        const server = await ask("Which Server(l/p)? ");
+        if(!server || server.toLowerCase() === "l"){
+            server_api_url = PRIMARY_SERVER_LOCAL
+        } else {
+            server_api_url = PRIMARY_SERVER
+        }
+
+
+        uploadLatestZopToServer({server_api_url, username, password}) 
     }
   })();
 
@@ -163,7 +173,7 @@ async function create_zip_with_latest_code() {
 }
 
 
-async function uploadLatestZopToServer({username, password}) {
+async function uploadLatestZopToServer({server_api_url=PRIMARY_SERVER, username, password}) {
     try {
         const outputPath = path.resolve("calling-bird-latest.zip");
          
@@ -176,9 +186,9 @@ async function uploadLatestZopToServer({username, password}) {
         formdata.append("secret_key", global.config.env.SECRET_KEY)
         formdata.set("file", await fileFromPath(outputPath, "calling-bird-latest.zip"));
 
-        console.log('======================', PRIMARY_SERVER);
+
       
-        const response = await fetch(PRIMARY_SERVER, {
+        const response = await fetch(server_api_url, {
           method: "POST",
           body: formdata,
         });
@@ -190,13 +200,13 @@ async function uploadLatestZopToServer({username, password}) {
                 console.log(result.data);
                 // await deleteDir(outputPath)
             } else {
-                console.log("❌ uploadLatestZopToServer error1:", result.data.message);
+                console.log("❌ uploadLatestZopToServer error1:", result.data?.message);
             }
         } catch (error) {
             console.log("❌ uploadLatestZopToServer error2:", error);
         } 
     } catch (err) {
-      console.error("❌ uploadLatestZopToServer error2:", err);
+      console.error("❌ uploadLatestZopToServer error3:", err);
     }
 }
 
