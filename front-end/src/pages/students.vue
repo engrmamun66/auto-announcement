@@ -190,13 +190,6 @@ async function onClickClone(std){
     data.dakhela_new = Math.abs(Number(std.dakhela_new)) 
     console.log('data.dakhela_newdata.dakhela_new///', data.dakhela_new);
     
-    if(data.dakhela_new < 1000){ 
-      emitter.emit('toaster-warning', {message: 'কপি করার জন্য দাখেলা ১০০০ এর উপরে দিন'})
-      return
-    } 
-
- 
-    
     
     http.post(`/students/clone/${std.id}`, data).then(async (response) => {
       if(response.status == 200){

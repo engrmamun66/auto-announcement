@@ -40,7 +40,6 @@ let manually_paused_the_playlist = ref(false)
 let palylistComponent = ref(null)
 provide('palylistComponent', palylistComponent)
 
-let DEVICE_TOKEN = ref(null)
 let all_students = ref([])
 
 
@@ -60,16 +59,11 @@ let showAccessibilityAlert = computed(() => {
     } 
     if(permanently_active) return false // if, permanently_active === true, warning never show
 
-    const endOfPayMonth = moment(last_paid_month).endOf('month')
-    
-    let diff_day = moment().diff(endOfPayMonth, 'day')
+    const endofPayMonth = moment(last_paid_month).endOf('month').add(1, 'day')
+    const endofPayMonth_time = endofPayMonth.valueOf()
+    const current_time = moment().hour(11).minute(59).second(59).valueOf()
 
-    if(diff_day > 0){
-        // Payment is due
-        return true
-    } else {
-        return false
-    } 
+    return current_time > endofPayMonth_time
 })
 
 let appUseForbiddened = computed(() => { 
@@ -80,24 +74,23 @@ let appUseForbiddened = computed(() => {
         permanently_active,
     } = appAccessData.value || {}
 
-    if(!appAccessData.value || !last_paid_month){ 
+    if(!appAccessData.value){ 
+        return false
+    } 
+    if(!last_paid_month){ 
         return false
     } 
     if(permanently_active) return false 
     if(!is_active) return true 
 
-    const endOfPayMonth = moment(last_paid_month).endOf('month')
+    // পরের মাসের ৫ তারিখের পরেই অ্যাপটি বন্ধ হবে
+    const lastPaidMonth = moment(last_paid_month).endOf('month').add(stop_after_day, 'days')
+    const lastPaidMonth_time = lastPaidMonth.valueOf()
+    const current_time = moment().hour(11).minute(59).second(59).valueOf()
 
-    let diff_day = moment().diff(endOfPayMonth, 'day')
-    if(diff_day > 0){
-        // Payment is due
-        stop_after_day = Math.abs(Number(stop_after_day))
+    const is_overdue = current_time > lastPaidMonth_time
 
-        if(diff_day >= stop_after_day) return true
-        else return false
-    } else {
-        return false
-    }
+    return is_overdue // বিলম্বিত?
 })
 
 let getWarningMessage = computed(()=>{
@@ -110,18 +103,11 @@ let getWarningMessage = computed(()=>{
     const afterPaymonth = moment(last_paid_month).add(1, 'month').format('MMMM')
  
     let stopAfter = moment(last_paid_month).endOf('month').add(stop_after_day + 1, 'day')
-    let left_days = stopAfter.diff(moment(), 'day') 
+    let left_days = stopAfter.diff(moment(), 'day')  
 
-     
-
-
-    
-    if(warning_message.startsWith('format_1::')){
-        warning_message = warning_message.replace('{{month}}', afterPaymonth)
-        warning_message = warning_message.replace('{{date}}', stopAfter.format('DD MMMM')) 
-        warning_message = warning_message.replace('{{left_days}}', left_days) 
-    }
-    warning_message = warning_message.replace(/^format_\w+::\s?/g, '')
+    warning_message = warning_message.replace('{{month}}', afterPaymonth)
+    warning_message = warning_message.replace('{{date}}', stopAfter.format('DD MMMM')) 
+    warning_message = warning_message.replace('{{left_days}}', left_days)  
 
     return helper.enToBnDate(warning_message, {bold: false})
 })
@@ -133,12 +119,7 @@ let getForbiddenedMessage = computed(()=>{
         stopped_message,
     } = appAccessData.value || {}
 
-    
-    if(stopped_message.startsWith('format_1::')){
-        stopped_message = stopped_message.replace(/format_1::\s?/g, '') 
-        stopped_message = stopped_message.replace('{{month}}', moment(last_paid_month)?.endOf('month').format('MMMM'))
-    }
-    stopped_message = stopped_message.replace(/^format_\w+::\s?/g, '')
+    stopped_message = stopped_message.replace('{{month}}', moment(last_paid_month)?.endOf('month').format('MMMM'))
 
     return helper.enToBnDate(stopped_message, {bold: false})
 })
@@ -633,7 +614,7 @@ function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
                               
                               findLast['is_called'] = false
                               if(!findLast?.['total_punch']) {
-                                findLast.total_punch = 1
+                                findLast.total_punch = 2
                               } else {
                                 findLast['total_punch'] += 1
                               }

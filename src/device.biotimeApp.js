@@ -29,7 +29,7 @@ function getToken(Students) {
     fetch(`${DEVICE_API_BASE_URL}/jwt-api-token-auth/`, requestOptions)
         .then(async (response) => await response.text())
         .then((result) => {
-            global.DEVICE_TOKEN = JSON.parse(result).token
+            global.DEVICE_TOKEN = JSON.parse(result).token || ''
             if(global.DEVICE_TOKEN){
                 
                 global.socketServer.clients.forEach((client) => {
@@ -45,8 +45,8 @@ function getToken(Students) {
                 interval = setInterval(() => {
                     getLastPunchData(Students)
                 }, (SECONDS * 1000));
-
-
+            } else {
+                console.log(`>> I hope BioTime app username or password is wrong.`);
             }
         })
         .catch((error) => {
