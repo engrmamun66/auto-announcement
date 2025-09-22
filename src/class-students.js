@@ -620,11 +620,6 @@ class Students {
     const { dakhela, dakhela_new } = req.body;
 
 
-    if(dakhela_new < 1000){
-      res.status(500).send({ message: 'কপি করার জন্য দাখেলা ১০০০ এর উপরে দিন' });
-      return;
-    }
-
     let query = `SELECT * FROM ${this.tableName} WHERE id=?`;
     this.db.get(query, [id], async (err, studentRow) => {
       if (err) {

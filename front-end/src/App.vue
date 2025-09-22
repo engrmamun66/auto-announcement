@@ -59,16 +59,11 @@ let showAccessibilityAlert = computed(() => {
     } 
     if(permanently_active) return false // if, permanently_active === true, warning never show
 
-    const endOfPayMonth = moment(last_paid_month).endOf('month')
-    
-    let diff_day = moment().diff(endOfPayMonth, 'day')
+    const endofPayMonth = moment(last_paid_month).endOf('month').add(1, 'day')
+    const endofPayMonth_time = endofPayMonth.valueOf()
+    const current_time = moment().hour(11).minute(59).second(59).valueOf()
 
-    if(diff_day > 0){
-        // Payment is due
-        return true
-    } else {
-        return false
-    } 
+    return current_time > endofPayMonth_time
 })
 
 let appUseForbiddened = computed(() => { 
@@ -79,25 +74,23 @@ let appUseForbiddened = computed(() => {
         permanently_active,
     } = appAccessData.value || {}
 
-    if(!appAccessData.value || !last_paid_month){ 
+    if(!appAccessData.value){ 
+        return false
+    } 
+    if(!last_paid_month){ 
         return false
     } 
     if(permanently_active) return false 
     if(!is_active) return true 
 
-    const startOfMonth = moment(last_paid_month).startOf('month')
+    // পরের মাসের ৫ তারিখের পরেই অ্যাপটি বন্ধ হবে
+    const lastPaidMonth = moment(last_paid_month).endOf('month').add(stop_after_day, 'days')
+    const lastPaidMonth_time = lastPaidMonth.valueOf()
+    const current_time = moment().hour(11).minute(59).second(59).valueOf()
 
-    let diff_day = moment().diff(startOfMonth, 'day')
-    console.log({diff_day});
-    if(diff_day > 0){
-        // Payment is due
-        stop_after_day = Math.abs(Number(stop_after_day))
+    const is_overdue = current_time > lastPaidMonth_time
 
-        if(diff_day >= stop_after_day) return true
-        else return false
-    } else {
-        return false
-    }
+    return is_overdue // বিলম্বিত?
 })
 
 let getWarningMessage = computed(()=>{
@@ -126,7 +119,6 @@ let getForbiddenedMessage = computed(()=>{
         stopped_message,
     } = appAccessData.value || {}
 
-    stopped_message = stopped_message.replace(/format_1::\s?/g, '') 
     stopped_message = stopped_message.replace('{{month}}', moment(last_paid_month)?.endOf('month').format('MMMM'))
 
     return helper.enToBnDate(stopped_message, {bold: false})
