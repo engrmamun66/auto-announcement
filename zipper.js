@@ -41,6 +41,7 @@ function ask(question) {
     if(create.toLowerCase() === "c"){
         create_zip_with_latest_code()
     } else {
+      console.log('===== Uploading Latest Code to Server =====');
         const username = await ask("Enter username: ");
         const password = await ask("Enter password: ");
         if(!username) {
@@ -195,6 +196,7 @@ async function uploadLatestZopToServer({server_api_url=PRIMARY_SERVER, username,
       
         try {
             const result = await response.json();   
+            console.log({result});
             if(result?.success){
                 console.log("📤 Uploaded the latest " + outputPath);
                 console.log(result.data);
