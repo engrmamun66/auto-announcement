@@ -23,6 +23,7 @@ const emitter = inject('emitter');
 const printDiv = inject('printDiv');
 const helper = inject('helper');
 const classes = inject('classes');
+const CONFIG = inject('CONFIG');
 let http = inject('http'); 
 const pushTheBarcode = inject('pushTheBarcode');
 const makeCarcode = inject('makeCarcode');
@@ -528,22 +529,21 @@ const log = console.log
         </form>
       </div>
   
-      
   
        <myTable>
           <template #thead>
             <thead>
               <tr>
-                <th>Class</th>
-                <th>Name</th>
+                <th>{{ CONFIG?.studentTableColumns?.class || 'Class' }}</th>
+                <th>{{ CONFIG?.studentTableColumns?.name || 'Name' }}</th>
                 <!-- <th>Card</th> -->
-                <th>Dakhela</th>
-                <th>Year</th>
-                <th>Sound</th>
+                <th>{{ CONFIG?.studentTableColumns?.class || 'Class' }}</th>
+                <th>{{ CONFIG?.studentTableColumns?.year || 'Year' }}</th>
+                <th>{{ CONFIG?.studentTableColumns?.sound || 'Sound' }}</th>
                 <!-- <th>Sound-2</th> -->
-                <th>Status</th>
-                <th>Punch</th>
-                <th>Action</th> 
+                <th>{{ CONFIG?.studentTableColumns?.status || 'Status' }}</th>
+                <th>{{ CONFIG?.studentTableColumns?.punch || 'Punch' }}</th>
+                <th>{{ CONFIG?.studentTableColumns?.action || 'Action' }}</th> 
               </tr>
             </thead>
           </template>
