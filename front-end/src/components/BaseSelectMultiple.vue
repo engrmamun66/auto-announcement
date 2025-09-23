@@ -370,9 +370,8 @@ let random_id = computed(() => ('random_' + H.randomBetween(333, 294444)))
     max-width: 250px;
     min-width: 100%;
     border: 1px solid;
-    border-radius: 10px;
-    background: #1e1e2d; 
-    background: var(--grad1); 
+    border-radius: 10px; 
+    background-color: white; 
     z-index: 22;
     padding: 12px 15px !important;
     border: none;
