@@ -171,6 +171,15 @@ module.exports = {
                isActive: true,
           },
      ],
+     studentTableColumns: {
+          class: 'Class',
+          name: 'Name',
+          dakhela: 'Dakhela',
+          year: 'Year',
+          sound: 'Sound',
+          status: 'Status',
+          punch: 'Punch',
+     }
 
 }
 

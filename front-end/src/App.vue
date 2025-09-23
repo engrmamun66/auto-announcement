@@ -21,6 +21,7 @@ let http = inject('http')
 let storage = inject('storage')
 let route = useRoute();
 let router = useRouter();  
+let CONFIG = ref({});  
 
 let is_started_schedule = ref(0) 
 let schedule_timeout = ref(0) 
@@ -194,6 +195,7 @@ async function CheckAccess({loader=false}={}){
  
 provide('route', route)
 provide('router', router)
+provide('CONFIG', CONFIG)
 provide('is_started_schedule', is_started_schedule)
 provide('schedule_timeout', schedule_timeout)
 provide('classes', classes)
@@ -455,6 +457,7 @@ onMounted(async ()=>{
     try {
         let response = await http.get('/config')
         if(response.status == 200){
+            CONFIG.value = response.data
             classes.value = response.data.classes
         }
     } catch (error) {
