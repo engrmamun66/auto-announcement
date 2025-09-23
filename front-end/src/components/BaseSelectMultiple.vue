@@ -1,5 +1,5 @@
 <template>
-    <div v-bind="$attrs" @mouseleave="showOptions = true">
+    <div v-bind="$attrs" @mouseleave="showOptions = false">
         <div :class="{'form-group': useFormGroup}">
             <div class="btn-options-toggler" :style="(width ? ('width:' + width) : '')">
                 <label v-if="label"> {{ label }} </label>
