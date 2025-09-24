@@ -151,3 +151,6 @@ backup*
 tracker.json
 test.js
 relaychannels.txt
+latest/
+test.js
+calling-bird-latest/

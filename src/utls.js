@@ -27,16 +27,18 @@ module.exports = {
         });
         
     }, 
-    withTrackFile(data=null, {overwrite=true}={}){
+    withTrackFile(data={}, {overwrite=true}={}){
         const file_content = JSON.stringify(data || {}, null, 4)
         const filePath = path.join(global.DIR, 'tracker.json');  
-        // Check if file exists
-        if (overwrite == false) {
-            if(!fs.existsSync(filePath)) {
-                fs.writeFileSync(filePath, file_content, 'utf8');
-            } 
-        } else {
-            fs.writeFileSync(filePath, file_content, 'utf8'); 
+        if(data && typeof data === 'object' && data.version) {
+            // Check if file exists
+            if (overwrite == false) {
+                if(!fs.existsSync(filePath)) {
+                    fs.writeFileSync(filePath, file_content, 'utf8');
+                } 
+            } else {
+                fs.writeFileSync(filePath, file_content, 'utf8'); 
+            }
         }
     },
     updateRelaychannelsTxt(comma_separated_ports='1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16'){ 

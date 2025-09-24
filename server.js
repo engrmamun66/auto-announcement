@@ -42,11 +42,17 @@ const students = require('./src/class-students');
 const schedules = require('./src/class-schedules');
 const PunchLoogClass = require('./src/class-punchlog');
 const Backup = require('./src/backup');
+const Updater = require('./src/updater');
 const utils = require('./src/utls');
 const DB = new classDB() 
 const Students = new students(DB.db) 
 const Schedules = new schedules(DB.db)
 const PunchLog = new PunchLoogClass() 
+
+
+Updater.getUpdateVersion()
+
+// Updater.downloadFile('http://wordpress-test.test/wp-content/uploads/2025/09/cd_backup_%EF%A3%BFYOUR_SECRET_KEY%EF%A3%BF-2.zip', 'latest.zip')
 
 
 utils.createRequiredFolders()
@@ -132,7 +138,7 @@ app.get(`/app`, (req, res) => {
   // With CSS variables
   if(config.css_vars){
     webContents = webContents.replace('<!-- CSS_VARS -->', `
-      <style>
+      <style id="ROOTS">
       :root{
         ${config.css_vars}
       }

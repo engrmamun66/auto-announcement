@@ -26,6 +26,8 @@ module.exports = {
           DEVICE_NAMES: ['Device 2'], // zktecho device name, which already connected by name in BioTime-8.0 server
           DATA_FETCH_BACK_SECONDS: 10,
           DATA_FETCH_INTERVAL_IN_SECOND: 2,
+          PRIMARY_SERVER_LOCAL: 'http://wordpress-test.test/wp-admin/admin-ajax.php',
+          PRIMARY_SERVER: 'https://callingbird.softproit.com/wp-admin/admin-ajax.php', 
           /** ==== End === */
 
           // #Front End variables
@@ -52,9 +54,9 @@ module.exports = {
           }
      },
      logo: {
-          width: '100px',
-          image_url: 'logo.example.png',
-          padding: '14px 10px',
+          width: '200px',
+          image_url: 'logo.example.jpeg',
+          padding: '4px 10px',
      },
      css_vars: `
 
