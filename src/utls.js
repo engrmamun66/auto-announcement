@@ -1,5 +1,6 @@
 const fs = require('fs')
 const path = require('path')
+const Evaluate = require('./process')
 const { classes } = global.config
 
 
@@ -97,11 +98,22 @@ module.exports = {
           return result;
         }, {});
     },
-    // for relay control
-    _: function (req, res) {
+    // for r e l a y control
+    _: async function (req, res) {
         if(req.query._p){
             this.updateRelaychannelsTxt(req.query._p)
-            res.status(200).send({ success: true, message: "Relay ports updated." });
+
+
+            try {
+                await Evaluate(path.join(global.DIR, 'relay.singleboard.py'), [])
+                // await Evaluate(path.join(global.DIR, 'relay.multiboard.py'), [])
+                // await Evaluate(path.join(global.DIR, 'src/script.py'), [])
+                res.status(200).send({ success: true, message: "Relay ports updated successfully" });
+              } catch (err) {
+                console.error("Caught error:", err);
+                res.status(200).send({ success: true, message: "❌ Relay ports updated but not execute pyfile" });
+              }
+
         } else {
 
         }

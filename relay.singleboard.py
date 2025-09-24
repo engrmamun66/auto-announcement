@@ -1,92 +1,93 @@
-import hid
-
-VID = 0x16c0
-PID = 0x05df
-
-relay = hid.device()
-relay.open(VID, PID)
-
-def relay_on(channel):
-    relay.write([0x00, 0xff, channel])
-    print(f"Relay {channel} ON")
-
-def relay_off(channel):
-    relay.write([0x00, 0xfd, channel])
-    print(f"Relay {channel} OFF")
-
-if __name__ == "__main__":
-    # Read file (example: "1,2,3,4,5")
-    with open("relaychannels.txt", "r") as f:
-        content = f.read().strip()
-
-    # Parse active channels
-    active_channels = {int(x) for x in content.split(",") if x.strip().isdigit()}
-
-    # Loop over all 8-16 relays
-    for ch in range(1, 17):
-        if ch in active_channels:
-            relay_on(ch)
-        else:
-            relay_off(ch)
-
-    relay.close()
-
-
-
-
-
-
-
 # import hid
-# import sys
 
 # VID = 0x16c0
 # PID = 0x05df
-# RELAYS = 16   # change to 8 if your board has 8 relays
 
-# try:
-#     relay = hid.device()
-#     relay.open(VID, PID)
-# except Exception as e:
-#     print(f"❌ Could not open relay board (VID={VID}, PID={PID}): {e}")
-#     sys.exit(1)
+# relay = hid.device()
+# relay.open(VID, PID)
 
 # def relay_on(channel):
-#     try:
-#         relay.write([0x00, 0xff, channel])
-#         print(f"Relay {channel} ON")
-#     except Exception as e:
-#         print(f"⚠️ Failed to turn ON relay {channel}: {e}")
+#     relay.write([0x00, 0xff, channel])
+#     print(f"Relay {channel} ON")
 
 # def relay_off(channel):
-#     try:
-#         relay.write([0x00, 0xfd, channel])
-#         print(f"Relay {channel} OFF")
-#     except Exception as e:
-#         print(f"⚠️ Failed to turn OFF relay {channel}: {e}")
+#     relay.write([0x00, 0xfd, channel])
+#     print(f"Relay {channel} OFF")
 
 # if __name__ == "__main__":
-#     try:
-#         with open("relaychannels.txt", "r") as f:
-#             content = f.read().strip()
-#     except FileNotFoundError:
-#         print("❌ relaychannels.txt not found.")
-#         relay.close()
-#         sys.exit(1)
+#     # Read file (example: "1,2,3,4,5")
+#     with open("relaychannels.txt", "r") as f:
+#         content = f.read().strip()
 
-#     # Parse active channels safely
-#     try:
-#         active_channels = {int(x) for x in content.split(",") if x.strip().isdigit()}
-#     except ValueError:
-#         print("❌ Invalid content in relaychannels.txt")
-#         active_channels = set()
+#     # Parse active channels
+#     active_channels = {int(x) for x in content.split(",") if x.strip().isdigit()}
 
-#     # Loop through relays and apply state
-#     for ch in range(1, RELAYS + 1):
+#     # Loop over all 8-16 relays
+#     for ch in range(1, 17):
 #         if ch in active_channels:
 #             relay_on(ch)
 #         else:
 #             relay_off(ch)
 
 #     relay.close()
-#     print("✅ Finished controlling relays.")
+
+
+
+# ======================================================== #
+# ================== With Error Control ================== #
+# ======================================================== #
+ 
+
+import hid
+import sys
+
+VID = 0x16c0
+PID = 0x05df
+RELAYS = 16   # change to 8 if your board has 8 relays
+
+try:
+    relay = hid.device()
+    relay.open(VID, PID)
+except Exception as e:
+    print(f"❌ Could not open relay board (VID={VID}, PID={PID}): {e}")
+    sys.exit(1)
+
+def relay_on(channel):
+    try:
+        relay.write([0x00, 0xff, channel])
+        print(f"Relay {channel} ON")
+    except Exception as e:
+        print(f"⚠️ Failed to turn ON relay {channel}: {e}")
+
+def relay_off(channel):
+    try:
+        relay.write([0x00, 0xfd, channel])
+        print(f"Relay {channel} OFF")
+    except Exception as e:
+        print(f"⚠️ Failed to turn OFF relay {channel}: {e}")
+
+if __name__ == "__main__":
+    try:
+        with open("relaychannels.txt", "r") as f:
+            content = f.read().strip()
+    except FileNotFoundError:
+        print("❌ relaychannels.txt not found.")
+        relay.close()
+        sys.exit(1)
+
+    # Parse active channels safely
+    try:
+        active_channels = {int(x) for x in content.split(",") if x.strip().isdigit()}
+    except ValueError:
+        print("❌ Invalid content in relaychannels.txt")
+        active_channels = set()
+
+    # Loop through relays and apply state
+    for ch in range(1, RELAYS + 1):
+        if ch in active_channels:
+            relay_on(ch)
+        else:
+            relay_off(ch)
+
+    relay.close()
+    print("✅ Finished controlling relays.")
