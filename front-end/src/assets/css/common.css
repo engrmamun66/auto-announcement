@@ -449,7 +449,7 @@ kbd {
 .class-wise-speaker-settings .speaker-port{
     padding: 3px 15px;
     border: 1px solid #ccc;
-    color: white;
-    background: var(--grad3);
+    color: var(--primaryColor);
+    background: var(--grad1);
     border-radius: 4px;
 }

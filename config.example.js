@@ -76,7 +76,7 @@ module.exports = {
                class_short: 'play',
                display_name: 'play',
                isActive: true,
-               speaker_ports: [1, 2],
+               speaker_ports: [1, 2, 3],
           },
           {
                class_name: 'Nursery',
