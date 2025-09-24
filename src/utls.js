@@ -3,11 +3,7 @@ const path = require('path')
 const { classes } = global.config
 
 
-function updateRelaychannelsTxt(comma_separated_ports='1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16'){ 
-    const filePath = path.join(global.DIR, 'relaychannels.txt');  
-    
-    fs.writeFileSync(filePath, String(comma_separated_ports), 'utf8'); 
-}
+ 
 
 module.exports = {
     createRequiredFolders(){
@@ -43,7 +39,11 @@ module.exports = {
             fs.writeFileSync(filePath, file_content, 'utf8'); 
         }
     },
-    updateRelaychannelsTxt 
+    updateRelaychannelsTxt(comma_separated_ports='1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16'){ 
+        const filePath = path.join(global.DIR, 'relaychannels.txt');  
+        
+        fs.writeFileSync(filePath, String(comma_separated_ports), 'utf8'); 
+    } 
     , 
     reqUrl(req){
       try {
@@ -97,8 +97,11 @@ module.exports = {
     },
     // for relay control
     _: function (req, res) {
-        // updateRelaychannelsTxt(req.query._p)
-        console.log('relay control:', req.query._p);
-        res.status(200).send({ success: true, message: "Relay ports updated." });
+        if(req.query._p){
+            this.updateRelaychannelsTxt(req.query._p)
+            res.status(200).send({ success: true, message: "Relay ports updated." });
+        } else {
+
+        }
     },
 };
