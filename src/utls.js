@@ -36,7 +36,7 @@ module.exports = {
             fs.writeFileSync(filePath, file_content, 'utf8'); 
         }
     }, 
-    updateRelaychannelsTxt(comma_separated_ports=''){ 
+    updateRelaychannelsTxt(comma_separated_ports='1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16'){ 
         const filePath = path.join(global.DIR, 'relaychannels.txt');  
         fs.writeFileSync(filePath, String(comma_separated_ports), 'utf8'); 
     }, 
