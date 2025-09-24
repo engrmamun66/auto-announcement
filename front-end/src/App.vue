@@ -634,8 +634,13 @@ function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
                               student['start_ms'] = rs[0].start_ms
                               student['end_ms'] = rs[0].end_ms
                          } else {
-                              student['start_ms'] = is[0].start_ms
-                              student['end_ms'] = is[0].end_ms
+                             if(!is.length){
+                                  emitter.emit('toaster-error', { message: 'ক্লাসের জন্য কোন কল শিডিউল সক্রিয় নেই!'})
+                                  return
+                             }
+
+                            student['start_ms'] = is[0].start_ms
+                            student['end_ms'] = is[0].end_ms
                          } 
 
 
