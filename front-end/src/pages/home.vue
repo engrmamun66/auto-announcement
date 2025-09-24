@@ -290,7 +290,7 @@ function removeFromWattingList(student, i){
                          <template v-for="(student, i) in wattingList" :key="i"> 
                               <div class="student-box" :class="{'is_called': student.is_called}" :barcode="student?.barcode" >
                                    <div :class="{ 'bg_animation': student?.isPlaying }">
-                                        <div class="student-name">{{ student.name }}</div>
+                                        <div class="student-name">{{ student.name.split('||')?.[0] }}</div>
                                         <div class="class-name cp" 
                                         @click="()=>{
                                              router.push({name: 'students', query: {
