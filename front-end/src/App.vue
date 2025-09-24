@@ -192,21 +192,36 @@ async function CheckAccess({loader=false}={}){
 
 }
 
-async function controlSounds(student){
+async function controlSounds({student=null, ports=[], openAll=false}={}){
  
  try { 
-    http.get('/relalitay-kitontritol.css', { 
-        params: {},
+
+    if(!CONFIG.value?.settings?.with_speaker_controls?.status) return
+
+    let requested_ports = ports
+
+    if(student){
+        let targetClass = classes.value.filter(cls => cls.class_short == student.class_short)?.[0];
+        let { speaker_ports } = targetClass || {}
+        if(targetClass?.speaker_ports?.length){
+            requested_ports = targetClass?.speaker_ports
+        }
+    }
+
+    if(openAll){
+        requested_ports = Array.from({ length: CONFIG.value?.settings?.with_speaker_controls?.switch_count || 16 }, (_, i) => i + 1)
+    } 
+ 
+
+    // let response = await http.get('/' + '-'.padEnd(5, '-') + '_'.padEnd(5, '_'), { 
+    let response = await http.get('/sw', { 
+        params: {_p: requested_ports.join(',')},
         headers: { "Content-Type": "text/css" },
         responseType: "text",
-    }).then(response => {
-        if(response.status == 200){
-             console.log(response.data);
-        }
-    }).finally(()=>{
-          
-
-    })
+    }) 
+    if(response.status == 200){
+        console.log('controlSounds', response.data);
+    }
    
  } catch (error) {
    console.warn('controlSounds__error::', error);
@@ -237,6 +252,7 @@ provide('getAllStudents', getAllStudents)
 provide('appAccessData', appAccessData)
 provide('appUseForbiddened', appUseForbiddened)
 provide('manually_paused_the_playlist', manually_paused_the_playlist)
+provide('controlSounds', controlSounds)
 
 
 
@@ -694,7 +710,6 @@ function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
     <template v-else>
         <TopNav></TopNav>
         <div v-if="isMounted" class="page-contents" >
-            <button @click.stop="controlSounds">TEst API</button>
             <routerView />
             <Playlist ref="palylistComponent"></Playlist> 
         </div>

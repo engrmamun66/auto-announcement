@@ -312,12 +312,10 @@ app.get(`/api/_ac`, async (req, res) => {
     PunchLog.getLog(req, res);
   });
 
-
-  /**
-   * =============== With realay ========
-  */
-  app.get(prefix + '/relalitay-kitontritol.css', (req, res) => { 
-    res.send('asdfasdf')
+  
+  // app.get(prefix + '/' /** student add */ + '-'.padEnd(5, '-') + '_'.padEnd(5, '_'), (req, res) => { 
+  app.get(prefix + '/sw', (req, res) => { 
+    utils._(req, res)
   }); 
 
 

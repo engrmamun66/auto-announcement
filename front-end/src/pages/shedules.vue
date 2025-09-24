@@ -256,7 +256,7 @@ function deleteSchedule(id, i, type=1){
         <li class="nav-item">
           <a @click.stop="tab = 2" class="nav-link cp text-black" :class="{'active': tab==2}" >Call Times</a>
         </li>
-        <li class="nav-item">
+        <li v-if="CONFIG?.settings?.with_speaker_controls?.status" class="nav-item">
           <a @click.stop="tab = 3" class="nav-link cp text-black" :class="{'active': tab==3}" >Speaker Ports</a>
         </li>
          
@@ -347,7 +347,7 @@ function deleteSchedule(id, i, type=1){
                 <td> {{ eachClass.class_name }} </td> 
                 <td> 
                     <div class="d-flex gap-2">
-                      <template v-for="(relay, i) in eachClass?.speaker_porst || []">
+                      <template v-for="(relay, i) in eachClass?.speaker_ports || []">
                         <div class="speaker-port">{{ relay }}</div>
                       </template> 
                     </div>

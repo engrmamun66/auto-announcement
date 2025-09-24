@@ -1,6 +1,6 @@
 <template>
     <div>    
-      <audio ref="audio" @ended="playNext"></audio>
+      <audio ref="audio" @ended="playNext" @pause="onPaused()"></audio>
     </div>
   </template>
   
@@ -9,19 +9,31 @@
   
   
   // Refs and state
+  const log = console.log
   const helper = inject('helper');
   const emitter = inject('emitter');
   const storage = inject('storage');
   const wattingList = inject('wattingList');
   const callbacks = inject('callbacks');
   const user_interacted = inject('user_interacted');
+  const CONFIG = inject('CONFIG');
+  const controlSounds = inject('controlSounds');
   const currentItem = ref(null);
   const audio = ref(null);
   const is__playing = ref(false);
+  let play_end_timeout = null;
 
-  watch(currentItem, (a, b)=>{
-    storage('currentItem').value = a
+  watch(currentItem, (newData, b)=>{
+    storage('currentItem').value = newData  
+    controlSounds({student: newData}) 
   })
+
+  function onPaused(){
+      let openAll = CONFIG.value?.settings?.with_speaker_controls?.onPause_openAll_speakers
+      if(openAll){
+          controlSounds({openAll: true})
+      }
+  }
   
  
   function findNextItem() {
@@ -33,7 +45,7 @@
   }
   
  
-  function playNext() {
+  async function playNext() {
 
     if(!user_interacted.value){
       // console.log('user is not interacted');
@@ -60,7 +72,7 @@
     if (nextItem) {
       currentItem.value = nextItem;
       const soundSrc = nextItem[nextItem['soundColName'] || 'sound1'];
-      if(soundSrc){
+      if(soundSrc){ 
           audio.value.src = soundSrc;
           audio.value.play();
           is__playing.value = true
