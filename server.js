@@ -50,6 +50,7 @@ const PunchLog = new PunchLoogClass()
 
 
 utils.createRequiredFolders()
+utils.updateRelaychannelsTxt()
 utils.withTrackFile({version: '1.0.0'}, {overwrite: false})
 
 
