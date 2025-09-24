@@ -42,25 +42,29 @@ function ask(question) {
         create_zip_with_latest_code()
     } else {
       console.log('===== Uploading Latest Code to Server =====');
-        const username = await ask("Enter username: ");
-        const password = await ask("Enter password: ");
-        if(!username) {
-            console.log("❌ Username is required")
-            return
-        }
-        if(!password) {
-            console.log("❌ Password is required")
-            return
-        }
-        let server_api_url = PRIMARY_SERVER
-        console.log('PRIMARY_SERVER:: ', PRIMARY_SERVER);
-        const server = await ask("Which Server(l/p)? ");
-        if(!server || server.toLowerCase() === "l"){
-            server_api_url = PRIMARY_SERVER_LOCAL
-        } else {
-            server_api_url = PRIMARY_SERVER
-        }
+        // const username = await ask("Enter username: ");
+        // const password = await ask("Enter password: ");
+        // if(!username) {
+        //     console.log("❌ Username is required")
+        //     return
+        // }
+        // if(!password) {
+        //     console.log("❌ Password is required")
+        //     return
+        // }
+        // let server_api_url = PRIMARY_SERVER
+        // console.log('PRIMARY_SERVER:: ', PRIMARY_SERVER);
+        // const server = await ask("Which Server(l/p)? ");
+        // if(!server || server.toLowerCase() === "l"){
+        //     server_api_url = PRIMARY_SERVER_LOCAL
+        // } else {
+        //     server_api_url = PRIMARY_SERVER
+        // }
 
+
+        let username = 'mamun'
+        let password = 'xasdf'
+        server_api_url = PRIMARY_SERVER_LOCAL
 
         uploadLatestZopToServer({server_api_url, username, password}) 
     }
