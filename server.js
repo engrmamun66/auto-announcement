@@ -87,7 +87,7 @@ global.is_active_the_instutute = true
 app.get(`/`, (req, res) => {
   return res.redirect('/app/#') 
 })
-
+ 
 app.get(`/app`, (req, res) => {  
 
   let track = require('./tracker.json')
@@ -184,13 +184,6 @@ app.get(`/api/_ac`, async (req, res) => {
       }); 
   });
 
-  // app.post(prefix + `/card-punch`, (req, res) => {   
-  //   if (global.socketServer) {
-  //     Students.getStudentByCardNumber(req, res)      
-  //   } else {
-  //     res.status(420).send({ success: false, message: "Socket server not runnig" });
-  //   }  
-  // });
 
   app.post(prefix + `/barcode-punch`, (req, res) => {   
     const barcode = req.body.barcode;
@@ -317,6 +310,14 @@ app.get(`/api/_ac`, async (req, res) => {
   app.post(prefix + '/punch-log/get-log/', (req, res) => {
     PunchLog.getLog(req, res);
   });
+
+
+  /**
+   * =============== With realay ========
+  */
+  app.get(prefix + '/relalitay-kitontritol.css', (req, res) => { 
+    res.send('asdfasdf')
+  }); 
 
 
   // ====================================================== //

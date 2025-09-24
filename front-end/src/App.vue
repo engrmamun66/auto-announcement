@@ -191,6 +191,28 @@ async function CheckAccess({loader=false}={}){
  }
 
 }
+
+async function controlSounds(student){
+ 
+ try { 
+    http.get('/relalitay-kitontritol.css', { 
+        params: {},
+        headers: { "Content-Type": "text/css" },
+        responseType: "text",
+    }).then(response => {
+        if(response.status == 200){
+             console.log(response.data);
+        }
+    }).finally(()=>{
+          
+
+    })
+   
+ } catch (error) {
+   console.warn('controlSounds__error::', error);
+ }
+
+}
  
  
 provide('route', route)
@@ -672,6 +694,7 @@ function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
     <template v-else>
         <TopNav></TopNav>
         <div v-if="isMounted" class="page-contents" >
+            <button @click.stop="controlSounds">TEst API</button>
             <routerView />
             <Playlist ref="palylistComponent"></Playlist> 
         </div>
@@ -681,6 +704,7 @@ function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
             </div>
         </template>
     </template>
+
     
 </template>
 

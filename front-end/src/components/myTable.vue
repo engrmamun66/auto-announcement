@@ -4,7 +4,7 @@
 </script>
 
 <template>
-<div class="table-container">
+<div class="table-container" v-bind="$attrs">
   <table class="table table-striped- mt-4">  
    
     <slot name="thead">

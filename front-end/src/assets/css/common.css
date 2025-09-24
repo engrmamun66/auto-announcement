@@ -445,3 +445,11 @@ kbd {
 .bloder-text{
     text-shadow: 0px 1px;
 }
+
+.class-wise-speaker-settings .speaker-port{
+    padding: 3px 15px;
+    border: 1px solid #ccc;
+    color: white;
+    background: var(--grad3);
+    border-radius: 4px;
+}
