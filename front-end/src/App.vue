@@ -595,6 +595,11 @@ function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
           http.get('/single-student', { params: { barcode } }).then(response => {
                if(response.status == 200){
                     let student = response.data.data;
+                    
+                    if(student.status !== 1){
+                        return emitter.emit('toaster-error', { message: 'এই স্টুডেন্টটি আপাতত নিষ্ক্রিয় আছে'})
+                    }
+                    
                     student['barcode'] = barcode;
                     student['punch_exact_time'] = helper.miliseconds();
                     student['punch_exact_time_text'] = moment().format('Y-MM-DD HH:mm:ss')
