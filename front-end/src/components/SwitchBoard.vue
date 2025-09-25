@@ -19,7 +19,8 @@ function arrayChunk(arr, size) {
 }
 
 let allPorts = Array.from({ length: CONFIG.value?.settings?.with_speaker_controls?.switch_count || 16 }, (_, i) => i + 1)
-let portChunks = computed(() => arrayChunk(allPorts, 4))
+let switch_board_chunk_size = CONFIG.value?.settings?.with_speaker_controls?.switch_board_chunk_size || 8
+let portChunks = computed(() => arrayChunk(allPorts, switch_board_chunk_size))
 
 let showModal = ref(true)
 

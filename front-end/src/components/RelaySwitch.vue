@@ -42,7 +42,7 @@ let props = defineProps({
 
 	width: calc(var(--switch-width) * 2.6);
 	height: calc(var(--switch-size) * 2.0);
-	margin: 40px auto 0;
+	margin: 20px auto 0;
 	display: flex;
 	justify-content: center;
 	align-items: center;
@@ -153,9 +153,10 @@ input:not(:checked) + span::after { opacity: 1; }
     position: absolute;
     bottom: 5px;
     left: 50%;
-    transform: translateX(-50%);
+    transform: translate(-50%);
     font-size: 14px;
-    font-weight: bold;
-    color: #555;
+    font-weight: 700;
+    color: #565454;
+    text-shadow: -1px 1px 0px white;
 }
 </style>
