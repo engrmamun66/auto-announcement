@@ -9,6 +9,8 @@ const getConfig = inject('getConfig');
 const controlSounds = inject('controlSounds');
 
 
+let emits = defineEmits(['close'])
+
 
 
 let CONFIG = inject('CONFIG');
@@ -69,7 +71,7 @@ async function onChangeRelaySwitch(){
 
 
 <template>
-	<Modal v-model="showModal" :closeIconInOutside="true">
+	<Modal v-model="showModal" :closeIconInOutside="true" @close="$emit('close')">
 		<template #title>
 			<div class="d-flex justify-content-between">
 				<h3>Speaker Control Box</h3>

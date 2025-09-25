@@ -29,6 +29,8 @@ const getSchedules = inject('getSchedules');
 const pushTheBarcode = inject('pushTheBarcode');
 const makeCarcode = inject('makeCarcode');
 const appUseForbiddened = inject('appUseForbiddened');
+const showSwithBoardModal = inject('showSwithBoardModal');
+const borad_image_url = inject('borad_image_url');
 
 const log = console.log
 
@@ -154,6 +156,10 @@ function removeFromWattingList(student, i){
 
           <div v-if="!manually_paused_the_playlist" @click="handlePayPause()" class="me-2 p-1 play-pause"><i class='bx bx-pause'></i></div>
           <div v-else @click="handlePayPause()" class="me-2 p-1 play-pause"><i class='bx bx-play'></i></div>
+
+          <div class="me-2 p-1" @click.stop="showSwithBoardModal = !showSwithBoardModal">
+               <img :src="borad_image_url" alt="" class="board-image">
+          </div>
          
           <BarcodeScannigAnimation v-if="is_started_schedule" :scannig="is_started_schedule" class="me-1"  ></BarcodeScannigAnimation> 
           <Switch v-model="is_started_schedule" @click="checkSchedule" size="lg" yes="Started" no="Stopped" :bothVisible="false" class="me-2" ></Switch> 

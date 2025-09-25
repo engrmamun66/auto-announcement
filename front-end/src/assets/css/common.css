@@ -453,3 +453,8 @@ kbd {
     background: var(--grad1);
     border-radius: 4px;
 }
+ 
+.board-image{
+    height: 38px;
+    cursor: pointer;
+}

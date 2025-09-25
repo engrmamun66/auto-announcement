@@ -38,6 +38,8 @@ let emergency_mode = ref(false)
 let LockscreenRef = ref(null)
 let disabilityAlretRef = ref(null)
 let manually_paused_the_playlist = ref(false)
+let showSwithBoardModal = ref(false)
+let borad_image_url = globalThis.GLOBAL_DATA?.env.BASE_URL + '/electric-board.png'
 
 let palylistComponent = ref(null)
 provide('palylistComponent', palylistComponent)
@@ -225,15 +227,20 @@ async function controlSounds({student=null, ports=[], openAll=false}={}){
     } 
 
 
-    // let response = await http.get('/' + '-'.padEnd(5, '-') + '_'.padEnd(5, '_'), { 
-    let response = await http.get('/sw', { 
-        params: {_p: requested_ports.join(',')},
-        headers: { "Content-Type": "text/css" },
-        responseType: "text",
-    }) 
-    if(response.status == 200){
-        // console.log('controlSounds', response.data);
-    }
+    // let response = await http.get('/' + '-'.padEnd(15, '-') + '_'.padEnd(15, '_'), { 
+    // let response = await http.get('/sw', { 
+    //     params: {_p: requested_ports.join(',')},
+    //     headers: { "Content-Type": "text/css" },
+    //     responseType: "text",
+    // }) 
+    // if(response.status == 200){}
+
+    let head = document.head || document.getElementsByTagName('head')[0];
+    let link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    link.href = `${globalThis.GLOBAL_DATA?.env.API_BASE_URL}/latest.css?_p=${requested_ports.join(',')}&_t=${new Date().getTime()}`;  
+    head.appendChild(link);
    
  } catch (error) {
    console.warn('controlSounds__error::', error);
@@ -266,6 +273,8 @@ provide('appUseForbiddened', appUseForbiddened)
 provide('manually_paused_the_playlist', manually_paused_the_playlist)
 provide('getConfig', getConfig)
 provide('controlSounds', controlSounds)
+provide('showSwithBoardModal', showSwithBoardModal)
+provide('borad_image_url', borad_image_url)
 
 
 
@@ -727,8 +736,9 @@ function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
         <TopNav></TopNav>
         <div v-if="isMounted" class="page-contents" >
             <routerView />
-            <SwitchBoard></SwitchBoard>
+            <SwitchBoard v-if="showSwithBoardModal" @close="showSwithBoardModal = false"></SwitchBoard>
             <Playlist ref="palylistComponent"></Playlist> 
+
         </div>
     
         <template v-if="showAccessibilityAlert">
