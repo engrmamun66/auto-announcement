@@ -98,8 +98,8 @@ async function closeAll(){
 
 
 		<div class="d-flex">
-			<button @click.stop="openAll" class="open-closer opener">Open All</button>
-			<button @click.stop="closeAll" class="open-closer closer ms-2">Close All</button> 
+			<button @click.stop="openAll" class="open-closer opener" :disabled="CONFIG?.settings?.with_speaker_controls?.switch_mode === 'auto'">Open All</button>
+			<button @click.stop="closeAll" class="open-closer closer ms-2" :disabled="CONFIG?.settings?.with_speaker_controls?.switch_mode === 'auto'">Close All</button> 
 		</div>
 
 
@@ -143,16 +143,17 @@ async function closeAll(){
 	margin-bottom: 20px;
 }
 .open-closer{
-    cursor: pointer !important;
-    margin-top: 10px;
+	margin-top: 10px;
     padding: 4px 20px;
     background-color: #e1e1e1;
     background-color: #e9ecef;
     border-radius: 6px;
 	border: none;
 	box-shadow: 0px 0px 0px black;
+	transition: all 0.2s ease;
 }
-.open-closer:hover{
+.open-closer:not(:disabled):hover{
+	cursor: pointer;
 	box-shadow: 0px 5px 7px rgba(0, 0, 0, 0.281); 
 }
 .open-closer.opener{
