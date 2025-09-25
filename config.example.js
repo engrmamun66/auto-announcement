@@ -49,7 +49,7 @@ module.exports = {
           },
           with_speaker_controls: {
                status: true,
-               switch_count: 8,
+               switch_count: 16,
                switch_board_chunk_size: 8,
                onPause_openAll_speakers: true,
           }

@@ -4,7 +4,7 @@
 import { provide, inject, ref, computed, watch, onMounted } from 'vue';
 import RelaySwitch from './RelaySwitch.vue'
 import Modal from './modal.vue'
-import Switch from './switch.vue'
+import Switch2 from './switch2.vue'
 
 
 
@@ -28,11 +28,16 @@ let showModal = ref(true)
 
 
 <template>
-	<Modal v-model="showModal">
+	<Modal v-model="showModal" :closeIconInOutside="true">
 		<template #title>
-			<h3>Speaker Control Box</h3>
+			<div class="d-flex justify-content-between">
+				<h3>Speaker Control Box</h3>
+				<Switch2 style="zoom: 0.7" yes="Auto" no="Manual" size="lg" ></Switch2>
+			</div>
 		</template>
 		<div class="switch-area">
+
+			
 			<template v-for="chunk in portChunks">
 				<div class="switch-row">
 					<template v-for="port in chunk">

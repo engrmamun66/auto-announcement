@@ -4,11 +4,22 @@
 import { provide, inject, ref, computed, watch, onMounted } from 'vue';
 
 let props = defineProps({
+    modelValue: {
+        type: Boolean,
+        default: true
+    },
     port: {
         type: Number,
         required: true
     }
 });
+
+let emit = defineEmits(['update:modelValue', 'change']);
+
+function updateModelValue(value) {
+    emit('update:modelValue', value);
+    emit('change', value);
+}
 
 
 </script>
@@ -21,7 +32,7 @@ let props = defineProps({
 		<span class="screw three"></span>
 		<span class="screw four"></span>
 		<div class="inner-wrap">
-			<input type="checkbox">
+			<input type="checkbox" :value="1" :checked="modelValue" @change="updateModelValue(modelValue)">
 			<span class="custom-checkbox"></span>
 		</div>
         <span class="port">{{ port }}</span>

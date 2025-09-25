@@ -11,6 +11,10 @@ let props = defineProps({
         default: 'Modal Title',
         required: false,
     },
+    closeIconInOutside: {
+        default: false,
+        required: false,
+    },
 
 })
 
@@ -33,7 +37,7 @@ function close(){
                 <slot>
                     Lorem ipsum dolor sit amet consectetur adipisicing elit. Sapiente nihil assumenda voluptates voluptatem repellat cumque esse numquam quam soluta natus, deserunt facere maiores quos nobis similique, quis, nisi vel minus!
                 </slot> 
-                <a @click.stop.prevent="close()" class="modal__close">×</a>
+                <a @click.stop.prevent="close()" class="modal__close" :class="{'closeIconInOutside': closeIconInOutside}" >×</a>
             </div>
         </div>
     </Teleport>   
@@ -72,6 +76,11 @@ function close(){
     text-decoration: none;
     font-size: 24px;
     cursor: pointer;
+}
+.modal__close.closeIconInOutside {
+    top: -32px;
+    color: white;
+    right: 0px;
 }
 
 </style>
