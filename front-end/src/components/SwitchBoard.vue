@@ -53,8 +53,8 @@ watch(switch_mode, (newVal) => {
 			</div>
 		</template>
 		<div class="switch-area">
-
-			
+			<div class="overlay-area">
+			</div>
 			<template v-for="chunk in portChunks">
 				<div class="switch-row">
 					<template v-for="port in chunk">
@@ -62,7 +62,6 @@ watch(switch_mode, (newVal) => {
 					</template> 
 				</div>
 			</template>
-
 		</div>
 
 	</Modal>
@@ -71,6 +70,22 @@ watch(switch_mode, (newVal) => {
 
 
 <style scoped>
+.switch-area {
+	position: relative;
+}
+.switch-area .overlay-area{
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	/* background-color: rgba(0, 0, 0, 0.075); */
+	backdrop-filter: blur(0px);
+	top: 0px;
+	left: 0px;
+	z-index: 11;
+	text-align: center;
+	cursor: not-allowed;
+}
+ 
 .switch-area .switch-row{
 	display: flex;
 	justify-content: space-around;
