@@ -57,7 +57,7 @@ Updater.getUpdateVersion()
 
 utils.createRequiredFolders()
 utils.updateRelaychannelsTxt()
-utils.withTrackFile({version: '1.0.0'}, {overwrite: false})
+utils.withTrackFile({version: '1.0.0', switch_mode: 'auto'}, {overwrite: false})
 
 
 const app = express();

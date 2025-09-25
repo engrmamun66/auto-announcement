@@ -126,6 +126,19 @@ let getForbiddenedMessage = computed(()=>{
     return helper.enToBnDate(stopped_message, {bold: false})
 })
 
+
+async function getConfig(){
+    try {
+        let response = await http.get('/config')
+        if(response.status == 200){
+            CONFIG.value = response.data
+            classes.value = response.data.classes
+        }
+    } catch (error) {
+        
+    }
+}
+
 async function CheckAccess({loader=false}={}){
  
  try { 
@@ -253,6 +266,7 @@ provide('getAllStudents', getAllStudents)
 provide('appAccessData', appAccessData)
 provide('appUseForbiddened', appUseForbiddened)
 provide('manually_paused_the_playlist', manually_paused_the_playlist)
+provide('getConfig', getConfig)
 provide('controlSounds', controlSounds)
 
 
@@ -493,15 +507,8 @@ onMounted(async ()=>{
     await getAllStudents()
     await getSchedules()
 
-    try {
-        let response = await http.get('/config')
-        if(response.status == 200){
-            CONFIG.value = response.data
-            classes.value = response.data.classes
-        }
-    } catch (error) {
-        
-    }
+    await getConfig()
+
     document.addEventListener('click', () => {
         user_interacted.value = true;  
         document.body.classList.add('user-interacted')
