@@ -31,6 +31,7 @@ const makeCarcode = inject('makeCarcode');
 const appUseForbiddened = inject('appUseForbiddened');
 const showSwithBoardModal = inject('showSwithBoardModal');
 const borad_image_url = inject('borad_image_url');
+const CONFIG = inject('CONFIG');
 
 const log = console.log
 
@@ -157,8 +158,9 @@ function removeFromWattingList(student, i){
           <div v-if="!manually_paused_the_playlist" @click="handlePayPause()" class="me-2 p-1 play-pause"><i class='bx bx-pause'></i></div>
           <div v-else @click="handlePayPause()" class="me-2 p-1 play-pause"><i class='bx bx-play'></i></div>
 
-          <div class="me-2 p-1" @click.stop="showSwithBoardModal = !showSwithBoardModal">
+          <div class="me-2 p-1 position-relative" @click.stop="showSwithBoardModal = !showSwithBoardModal">
                <img :src="borad_image_url" alt="" class="board-image">
+               <span class="manual-mode" v-if="CONFIG?.settings?.with_speaker_controls?.switch_mode === 'manual'">manual</span>
           </div>
          
           <BarcodeScannigAnimation v-if="is_started_schedule" :scannig="is_started_schedule" class="me-1"  ></BarcodeScannigAnimation> 
@@ -528,5 +530,19 @@ function removeFromWattingList(student, i){
      border-radius: 2px;
      font-size: 11px; 
      color: #333;
+}
+.manual-mode{
+     position: absolute;
+     width: 100%;
+     height: 16px;
+     background-color: #ff0000f7;
+     font-size: 10px;
+     color: #ffffff;
+     z-index: 2;
+     bottom: 0;
+     left: 0;
+     text-align: center;
+     border-radius: 8px;
+     pointer-events: none;
 }
 </style>
