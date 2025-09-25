@@ -150,6 +150,10 @@ async function closeAll(){
     background-color: #e9ecef;
     border-radius: 6px;
 	border: none;
+	box-shadow: 0px 0px 0px black;
+}
+.open-closer:hover{
+	box-shadow: 0px 5px 7px rgba(0, 0, 0, 0.281); 
 }
 .open-closer.opener{
     border-bottom: 2px solid green;
