@@ -51,7 +51,7 @@ module.exports = {
                status: true,
                switch_count: 8,
                switch_board_chunk_size: 8,
-               onPause_openAll_speakers: false,
+               onPause_openAll_speakers: true,
                switch_mode: 'auto', // auto || manual
           }
      },
