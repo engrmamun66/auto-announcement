@@ -9,7 +9,7 @@ module.exports = {
           SECRET_KEY: 'YOUR_SECRET_KEY',
           PUNCH_LOG_FILENAME: 'punch.log.json',
           
-          /** ==== with-ips(Recommended) === */
+          /** ==== with-ips === */
           DEVICES: [
                {
                     devicePort: '4370',
@@ -51,7 +51,7 @@ module.exports = {
                status: true,
                switch_count: 8,
                switch_board_chunk_size: 8,
-               onPause_openAll_speakers: true,
+               on_inactivity_switches_keep: 'all', // no_action | open_all | close_all | [1,2,3] ===> array of switch numbers
                switch_mode: 'auto', // auto || manual
           }
      },

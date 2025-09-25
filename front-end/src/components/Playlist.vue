@@ -32,9 +32,17 @@
   })
 
   function onPaused(){
-      let onPause_openAll_speakers = CONFIG.value?.settings?.with_speaker_controls?.onPause_openAll_speakers
-      if(onPause_openAll_speakers){
+      let action = CONFIG.value?.settings?.with_speaker_controls?.onPause_openAll_speakers
+      if(action && action !== 'no_action'){
+        if(action === 'open_all'){
           controlSounds({openAll: true})
+        }
+        else if(action === 'close_all'){
+          controlSounds({ports: []} )
+        }
+        else if(Array.isArray(action) /** port array */){
+          controlSounds({ports: action} )
+        }
       }
   }
   
