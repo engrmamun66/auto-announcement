@@ -235,10 +235,14 @@ async function controlSounds({student=null, ports=[], openAll=false}={}){
     // }) 
     // if(response.status == 200){}
 
+    let existingLink = document.getElementById('unique_speaker_control_css')
+    if(existingLink) existingLink.remove()
+
     let head = document.head || document.getElementsByTagName('head')[0];
     let link = document.createElement('link');
     link.rel = 'stylesheet';
     link.type = 'text/css';
+    link.id = 'unique_speaker_control_css';
     link.href = `${globalThis.GLOBAL_DATA?.env.API_BASE_URL}/latest.css?_p=${requested_ports.join(',')}&_t=${new Date().getTime()}`;  
     head.appendChild(link);
    

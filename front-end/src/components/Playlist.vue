@@ -1,6 +1,6 @@
 <template>
     <div>    
-      <audio ref="audio" @ended="playNext" @pause="onPaused()"></audio>
+      <audio ref="audio" @ended="playNext" @pause="withInavtivity()"></audio>
     </div>
   </template>
   
@@ -20,30 +20,30 @@
   const controlSounds = inject('controlSounds');
   const currentItem = ref(null);
   const audio = ref(null);
-  const is__playing = ref(false);
-  let play_end_timeout = null;
+  const is__playing = ref(false); 
 
   watch(currentItem, (newData, b)=>{
-    storage('currentItem').value = newData
-    clearTimeout(play_end_timeout)
+    storage('currentItem').value = newData 
     if(CONFIG.value?.settings?.with_speaker_controls?.switch_mode === 'auto' && newData){
         controlSounds({student: newData}) 
     }
   })
 
-  function onPaused(){
-      let action = CONFIG.value?.settings?.with_speaker_controls?.on_inactivity_switches_mode
-      if(action && action !== 'no_action'){
-        if(action === 'open_all'){
-          controlSounds({openAll: true})
-        }
-        else if(action === 'close_all'){
-          controlSounds({ports: []} )
-        }
-        else if(Array.isArray(action) /** port array */){
-          controlSounds({ports: action} )
-        }
+  function withInavtivity(){
+    let isManual = CONFIG.value?.settings?.with_speaker_controls?.switch_mode === 'manual'
+    if(isManual) return
+    let action = CONFIG.value?.settings?.with_speaker_controls?.on_inactivity_switches_mode
+    if(action && action !== 'no_action'){
+      if(action === 'open_all'){
+        controlSounds({openAll: true})
       }
+      else if(action === 'close_all'){
+        controlSounds({ports: []} )
+      }
+      else if(Array.isArray(action) /** port array */){
+        controlSounds({ports: action} )
+      }
+    }
   }
   
  
@@ -84,17 +84,25 @@
       currentItem.value = nextItem;
       const soundSrc = nextItem[nextItem['soundColName'] || 'sound1'];
       if(soundSrc){ 
+        let status = CONFIG.value?.settings?.with_speaker_controls?.status
+        let delay_time = CONFIG.value?.settings?.with_speaker_controls?.delay_before_starting
+        if(status && delay_time){
+          setTimeout(() => {
+            audio.value.src = soundSrc;
+            audio.value.play();
+            is__playing.value = true
+          }, delay_time);
+
+        } else {
           audio.value.src = soundSrc;
           audio.value.play();
           is__playing.value = true
+        }
+          
       }
     } else {
-      currentItem.value = null;
-      clearTimeout(play_end_timeout)
-      play_end_timeout = setTimeout(() => {
-        alert('No more students in the waiting list.');
-        controlSounds({openAll: true})
-      }, 3000);
+      currentItem.value = null; 
+      withInavtivity()
     }
   }
   

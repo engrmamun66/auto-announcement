@@ -98,18 +98,8 @@ async function closeAll(){
 
 
 		<div class="d-flex">
-			<div class="form-check cp" @click.stop="openAll">
-				<input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1">
-				<label class="form-check-label" for="flexRadioDefault1">
-					Open All
-				</label>
-			</div>
-			<div class="form-check ms-3 cp" @click.stop="closeAll">
-				<input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2" >
-				<label class="form-check-label" for="flexRadioDefault2">
-					Close All
-				</label>
-			</div>
+			<button @click.stop="openAll" class="open-closer opener">Open All</button>
+			<button @click.stop="closeAll" class="open-closer closer ms-2">Close All</button> 
 		</div>
 
 
@@ -152,11 +142,19 @@ async function closeAll(){
 	align-items: center;
 	margin-bottom: 20px;
 }
-.form-check{
+.open-closer{
     cursor: pointer !important;
     margin-top: 10px;
-    padding: 5px 33px;
+    padding: 4px 20px;
     background-color: #e1e1e1;
-    border-radius: 30px;
+    background-color: #e9ecef;
+    border-radius: 6px;
+	border: none;
+}
+.open-closer.opener{
+    border-bottom: 2px solid green;
+}
+.open-closer.closer{
+    border-bottom: 2px solid rgb(255, 0, 0);
 }
 </style>
