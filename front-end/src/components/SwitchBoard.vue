@@ -35,8 +35,6 @@ const log = console.log
 let switch_mode = ref(CONFIG.value?.settings?.with_speaker_controls?.switch_count === 'auto')
 
 watch(switch_mode, (newVal) => {
-	log('Switch mode changed to:', newVal ? 'Auto' : 'Manual');
-	// Here you can add additional logic to handle the mode change
 	getConfig({switch_mode: newVal ? 'auto' : 'manual'});
 });
 
