@@ -11,12 +11,13 @@ let props = defineProps({
     port: {
         type: Number,
         required: true
-    }
+    },
 });
-
+let CONFIG = inject('CONFIG');
 let emit = defineEmits(['update:modelValue', 'change']);
 
 function updateModelValue(value) {
+	value = Number(!value)
     emit('update:modelValue', value);
     emit('change', value);
 }
@@ -32,9 +33,10 @@ function updateModelValue(value) {
 		<span class="screw three"></span>
 		<span class="screw four"></span>
 		<div class="inner-wrap">
-			<input type="checkbox" :value="1" :checked="modelValue" @change="updateModelValue(modelValue)">
+			<input type="checkbox" :checked="modelValue" @change="updateModelValue(modelValue)">
 			<span class="custom-checkbox"></span>
 		</div>
+        <span v-if="CONFIG?.settings?.with_speaker_controls?.switch_mode === 'auto'" class="locked"> <i class='bx bxs-lock-alt'></i> </span>
         <span class="port">{{ port }}</span>
 	</div>
 </template>
@@ -168,6 +170,16 @@ input:not(:checked) + span::after { opacity: 1; }
     font-size: 14px;
     font-weight: 700;
     color: #565454;
+    text-shadow: -1px 1px 0px white;
+}
+.locked{
+    position: absolute;
+    top: 5px;
+    left: 50%;
+    transform: translate(-50%);
+    font-size: 14px;
+    font-weight: 700;
+    color: #828181;
     text-shadow: -1px 1px 0px white;
 }
 </style>

@@ -6,6 +6,7 @@ import RelaySwitch from './RelaySwitch.vue'
 import Modal from './modal.vue'
 import Switch2 from './switch2.vue'
 const getConfig = inject('getConfig');
+const controlSounds = inject('controlSounds');
 
 
 
@@ -15,28 +16,48 @@ let CONFIG = inject('CONFIG');
 function arrayChunk(arr, size) {
     const chunkedArr = [];
     for (let i = 0; i < arr.length; i += size) {
-        chunkedArr.push(arr.slice(i, i + size));
+		let port_chunk = arr.slice(i, i + size)
+        chunkedArr.push(portObject(port_chunk));
     }
     return chunkedArr;
+}
+function portObject(port_chunk) {
+    return port_chunk.map(port => ({ port, status: 1 }));
 }
 
 let allPorts = Array.from({ length: CONFIG.value?.settings?.with_speaker_controls?.switch_count || 16 }, (_, i) => i + 1)
 let switch_board_chunk_size = CONFIG.value?.settings?.with_speaker_controls?.switch_board_chunk_size || 8
-let portChunks = computed(() => arrayChunk(allPorts, switch_board_chunk_size))
+let portChunks = ref(arrayChunk(allPorts, switch_board_chunk_size))
 
-let showModal = ref(true)
-
-let default_controls = {
-	mode: 'auto', // auto | manual
+if(localStorage.getItem('manually_opened_ports')){
+	let manually_opened_ports = JSON.parse(localStorage.getItem('manually_opened_ports'))
+	portChunks.value.forEach(chunk => {
+		chunk.forEach(item => {
+			if(manually_opened_ports.includes(item.port)){
+				item.status = 1
+			}else{
+				item.status = 0
+			}
+		})
+	})
+	controlSounds({ports: manually_opened_ports})
 }
 
+let showModal = ref(true)
+ 
 const log = console.log
 
-let switch_mode = ref(CONFIG.value?.settings?.with_speaker_controls?.switch_count === 'auto')
+let switch_mode = ref(CONFIG.value?.settings?.with_speaker_controls?.switch_mode === 'auto')
 
 watch(switch_mode, (newVal) => {
 	getConfig({switch_mode: newVal ? 'auto' : 'manual'});
 });
+
+async function onChangeRelaySwitch(){
+	let manually_opened_ports = portChunks.value.map(chunk => chunk.filter(item => item.status).map(item => item.port)).flat()
+	localStorage.setItem('manually_opened_ports', JSON.stringify(manually_opened_ports))
+	controlSounds({ports: manually_opened_ports})
+}
 
  
 
@@ -53,12 +74,11 @@ watch(switch_mode, (newVal) => {
 			</div>
 		</template>
 		<div class="switch-area">
-			<div class="overlay-area">
-			</div>
+			<div v-if="CONFIG?.settings?.with_speaker_controls?.switch_mode === 'auto'" class="overlay-area"> </div>
 			<template v-for="chunk in portChunks">
 				<div class="switch-row">
-					<template v-for="port in chunk">
-						<RelaySwitch :port="port" />
+					<template v-for="item in chunk">
+						<RelaySwitch :port="item.port" v-model="item.status" @change="onChangeRelaySwitch" />
 					</template> 
 				</div>
 			</template>

@@ -127,7 +127,7 @@ let getForbiddenedMessage = computed(()=>{
 })
 
 
-async function getConfig({switch_mode='auto'}={}){
+async function getConfig({switch_mode=''}={}){
     try {
         let response = await http.get('/config', { params: { switch_mode } })
         if(response.status == 200){
@@ -224,8 +224,6 @@ async function controlSounds({student=null, ports=[], openAll=false}={}){
         requested_ports = Array.from({ length: CONFIG.value?.settings?.with_speaker_controls?.switch_count || 16 }, (_, i) => i + 1)
     } 
 
-    if(!requested_ports.length) return
- 
 
     // let response = await http.get('/' + '-'.padEnd(5, '-') + '_'.padEnd(5, '_'), { 
     let response = await http.get('/sw', { 
@@ -234,7 +232,7 @@ async function controlSounds({student=null, ports=[], openAll=false}={}){
         responseType: "text",
     }) 
     if(response.status == 200){
-        console.log('controlSounds', response.data);
+        // console.log('controlSounds', response.data);
     }
    
  } catch (error) {
