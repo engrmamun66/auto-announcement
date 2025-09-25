@@ -71,7 +71,7 @@ function updateModelValue(value) {
 .inner-wrap .custom-checkbox {
 	position: absolute;
 	box-shadow: 0 -1px 3px 0px #434343;
-	background: linear-gradient(0deg, rgba(192,192,192,1) 0%, rgba(255,255,255,1) 100%);
+    background: linear-gradient(0deg, rgba(255,255,255,1) 0%, rgba(192,192,192,1) 100%);
 	top: 0;
 	bottom: 0;
 	left: 0;
@@ -81,7 +81,7 @@ function updateModelValue(value) {
 }
 
 .inner-wrap input:checked + span {
-	background: linear-gradient(0deg, rgba(255,255,255,1) 0%, rgba(192,192,192,1) 100%);
+    background: linear-gradient(0deg, rgba(192,192,192,1) 0%, rgba(255,255,255,1) 100%);
 	box-shadow: 0 1px 3px 0px #434343;
 }
 
@@ -123,7 +123,7 @@ input:not(:checked) + span::after { opacity: 1; }
 	top: calc(var(--indicator-size) * 2.5);
     width: 80%;
     height: 5px;
-    background: linear-gradient(to right, rgba(0,128,0,1) 0%, rgba(100,200,100,1) 100%);
+    background: linear-gradient(to right, rgba(0,128,0,1) 0%, rgb(6, 150, 6) 100%);
 	box-shadow: 0 0 0px 0px #ff0000;
 }
 
