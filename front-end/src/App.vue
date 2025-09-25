@@ -127,9 +127,9 @@ let getForbiddenedMessage = computed(()=>{
 })
 
 
-async function getConfig(){
+async function getConfig({switch_mode='auto'}={}){
     try {
-        let response = await http.get('/config')
+        let response = await http.get('/config', { params: { switch_mode } })
         if(response.status == 200){
             CONFIG.value = response.data
             classes.value = response.data.classes

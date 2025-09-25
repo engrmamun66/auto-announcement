@@ -5,6 +5,8 @@ import { provide, inject, ref, computed, watch, onMounted } from 'vue';
 import RelaySwitch from './RelaySwitch.vue'
 import Modal from './modal.vue'
 import Switch2 from './switch2.vue'
+const getConfig = inject('getConfig');
+
 
 
 
@@ -24,6 +26,23 @@ let portChunks = computed(() => arrayChunk(allPorts, switch_board_chunk_size))
 
 let showModal = ref(true)
 
+let default_controls = {
+	mode: 'auto', // auto | manual
+}
+
+const log = console.log
+
+let switch_mode = ref(CONFIG.value?.settings?.with_speaker_controls?.switch_count === 'auto')
+
+watch(switch_mode, (newVal) => {
+	log('Switch mode changed to:', newVal ? 'Auto' : 'Manual');
+	// Here you can add additional logic to handle the mode change
+	getConfig({switch_mode: newVal ? 'auto' : 'manual'});
+});
+
+ 
+
+
 </script>
 
 
@@ -32,7 +51,7 @@ let showModal = ref(true)
 		<template #title>
 			<div class="d-flex justify-content-between">
 				<h3>Speaker Control Box</h3>
-				<Switch2 style="zoom: 0.7" yes="Auto" no="Manual" size="lg" ></Switch2>
+				<Switch2 v-model="switch_mode" style="zoom: 0.7" yes="Auto" no="Manual" size="lg" @change="log('changed')" ></Switch2>
 			</div>
 		</template>
 		<div class="switch-area">

@@ -211,6 +211,21 @@ app.get(`/api/_ac`, async (req, res) => {
   });
 
   app.get(prefix + "/config", (req, res) => {   
+
+    let track = require('./tracker.json')
+
+    if(req.query.switch_mode){
+      let switch_mode = req.query.switch_mode
+      if(['auto', 'manual'].includes(switch_mode)){
+        track.switch_mode = switch_mode
+        utils.withTrackFile((track), {overwrite: true}) 
+      }  
+    }
+
+
+
+    let switch_mode = track?.switch_mode || 'auto'
+    config.settings.with_speaker_controls.switch_mode = switch_mode
     
     res.send({ ...config })
   });
