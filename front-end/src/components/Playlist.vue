@@ -32,7 +32,7 @@
   })
 
   function onPaused(){
-      let action = CONFIG.value?.settings?.with_speaker_controls?.onPause_openAll_speakers
+      let action = CONFIG.value?.settings?.with_speaker_controls?.on_inactivity_switches_keep
       if(action && action !== 'no_action'){
         if(action === 'open_all'){
           controlSounds({openAll: true})
