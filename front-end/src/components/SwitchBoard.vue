@@ -64,6 +64,23 @@ async function onChangeRelaySwitch(){
 	controlSounds({ports: manually_opened_ports})
 }
 
+async function openAll(){
+	portChunks.value.forEach(chunk => {
+		chunk.forEach(item => {
+			item.status = 1
+		})
+	})
+	onChangeRelaySwitch()
+}
+async function closeAll(){
+	portChunks.value.forEach(chunk => {
+		chunk.forEach(item => {
+			item.status = 0
+		})
+	})
+	onChangeRelaySwitch()
+}
+
  
 
 
@@ -78,6 +95,24 @@ async function onChangeRelaySwitch(){
 				<Switch2 v-model="switch_mode" style="zoom: 0.7" yes="Auto" no="Manual" size="lg" @change="log('changed')" ></Switch2>
 			</div>
 		</template>
+
+
+		<div class="d-flex">
+			<div class="form-check cp" @click.stop="openAll">
+				<input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1">
+				<label class="form-check-label" for="flexRadioDefault1">
+					Open All
+				</label>
+			</div>
+			<div class="form-check ms-3 cp" @click.stop="closeAll">
+				<input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2" >
+				<label class="form-check-label" for="flexRadioDefault2">
+					Close All
+				</label>
+			</div>
+		</div>
+
+
 		<div class="switch-area">
 			<div v-if="CONFIG?.settings?.with_speaker_controls?.switch_mode === 'auto'" class="overlay-area"> </div>
 			<template v-for="chunk in portChunks">
@@ -115,6 +150,13 @@ async function onChangeRelaySwitch(){
 	display: flex;
 	justify-content: space-around;
 	align-items: center;
-	margin: 20px 0;
+	margin-bottom: 20px;
+}
+.form-check{
+    cursor: pointer !important;
+    margin-top: 10px;
+    padding: 5px 33px;
+    background-color: #e1e1e1;
+    border-radius: 30px;
 }
 </style>
