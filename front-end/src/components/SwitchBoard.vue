@@ -91,7 +91,7 @@ async function closeAll(){
 	<Modal v-model="showModal" :closeIconInOutside="true" @close="$emit('close')">
 		<template #title>
 			<div class="d-flex justify-content-between">
-				<h3>Speaker Control Box</h3>
+				<h3>Sitches Control Box</h3>
 				<Switch2 v-model="switch_mode" style="zoom: 0.7" yes="Auto" no="Manual" size="lg" @change="log('changed')" ></Switch2>
 			</div>
 		</template>
@@ -161,5 +161,11 @@ async function closeAll(){
 }
 .open-closer.closer{
     border-bottom: 2px solid rgb(255, 0, 0);
+}
+.open-closer.opener:disabled{
+    border-bottom: 2px solid rgba(0, 128, 0, 0.22);
+}
+.open-closer.closer:disabled{
+    border-bottom: 2px solid rgba(255, 0, 0, 0.22);
 }
 </style>
