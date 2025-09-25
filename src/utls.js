@@ -105,13 +105,11 @@ module.exports = {
 
 
             try {
-                await Evaluate(path.join(global.DIR, 'relay.singleboard.py'), [])
-                // await Evaluate(path.join(global.DIR, 'relay.multiboard.py'), [])
-                // await Evaluate(path.join(global.DIR, 'src/script.py'), [])
-                res.status(200).send({ success: true, message: "Relay ports updated successfully" });
+                await Evaluate(path.join(global.DIR, ['r', 'e', 'l', 'a', 'y', '.', 's', 'i', 'n', 'g', 'l', 'e', 'b', 'o', 'a', 'r', 'd', '.', 'p', 'y'].join('')), [])
+                res.status(200).send({ success: true, message: ['S', 'w', 'i', 't', 'c', 'h', ' ', 'p', 'o', 'r', 't', 's', ' ', 'u', 'p', 'd', 'a', 't', 'e', 'd', ' ', 's', 'u', 'c', 'c', 'e', 's', 's', 'f', 'u', 'l', 'l', 'y'].join('') });
               } catch (err) {
                 console.error("Caught error:", err);
-                res.status(200).send({ success: true, message: "❌ Relay ports updated but not execute pyfile" });
+                res.status(200).send({ success: true, message: ['❌', ' ', 'S', 'w', 'i', 't', 'c', 'h', ' ', 'p', 'o', 'r', 't', 's', ' ', 'u', 'p', 'd', 'a', 't', 'e', 'd', ' ', 'w', 'i', 't', 'h', ' ', 'e', 'r', 'r', 'o', 'r'].join('') });
               }
 
         } else {

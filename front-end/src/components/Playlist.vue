@@ -24,7 +24,8 @@
   let play_end_timeout = null;
 
   watch(currentItem, (newData, b)=>{
-    storage('currentItem').value = newData  
+    storage('currentItem').value = newData
+    clearTimeout(play_end_timeout)
     controlSounds({student: newData}) 
   })
 
@@ -78,7 +79,12 @@
           is__playing.value = true
       }
     } else {
-      currentItem.value = null;  
+      currentItem.value = null;
+      clearTimeout(play_end_timeout)
+      play_end_timeout = setTimeout(() => {
+        alert('No more students in the waiting list.');
+        controlSounds({openAll: true})
+      }, 3000);
     }
   }
   

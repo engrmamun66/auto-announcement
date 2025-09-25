@@ -206,11 +206,11 @@ async function controlSounds({student=null, ports=[], openAll=false}={}){
         if(targetClass?.speaker_ports?.length){
             requested_ports = targetClass?.speaker_ports
         }
-    }
-
-    if(openAll){
+    } else if(openAll){
         requested_ports = Array.from({ length: CONFIG.value?.settings?.with_speaker_controls?.switch_count || 16 }, (_, i) => i + 1)
     } 
+
+    if(!requested_ports.length) return
  
 
     // let response = await http.get('/' + '-'.padEnd(5, '-') + '_'.padEnd(5, '_'), { 
