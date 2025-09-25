@@ -26,12 +26,14 @@
   watch(currentItem, (newData, b)=>{
     storage('currentItem').value = newData
     clearTimeout(play_end_timeout)
-    controlSounds({student: newData}) 
+    if(CONFIG.value?.settings?.with_speaker_controls?.switch_mode === 'auto' && newData){
+        controlSounds({student: newData}) 
+    }
   })
 
   function onPaused(){
-      let openAll = CONFIG.value?.settings?.with_speaker_controls?.onPause_openAll_speakers
-      if(openAll){
+      let onPause_openAll_speakers = CONFIG.value?.settings?.with_speaker_controls?.onPause_openAll_speakers
+      if(onPause_openAll_speakers){
           controlSounds({openAll: true})
       }
   }

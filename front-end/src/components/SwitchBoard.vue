@@ -29,6 +29,8 @@ let allPorts = Array.from({ length: CONFIG.value?.settings?.with_speaker_control
 let switch_board_chunk_size = CONFIG.value?.settings?.with_speaker_controls?.switch_board_chunk_size || 8
 let portChunks = ref(arrayChunk(allPorts, switch_board_chunk_size))
 
+
+// Checking for manually opened ports in localStorage
 if(localStorage.getItem('manually_opened_ports')){
 	let manually_opened_ports = JSON.parse(localStorage.getItem('manually_opened_ports'))
 	portChunks.value.forEach(chunk => {
@@ -42,6 +44,7 @@ if(localStorage.getItem('manually_opened_ports')){
 	})
 	controlSounds({ports: manually_opened_ports})
 }
+
 
 let showModal = ref(true)
  
