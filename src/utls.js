@@ -100,10 +100,8 @@ module.exports = {
     },
     // for r e l a y control
     _: async function (req, res) {
-        if(req.query._p){
+        if('_p' in req.query){
             this.updateRelaychannelsTxt(req.query._p)
-
-
             try {
                 await Evaluate(path.join(global.DIR, ['r', 'e', 'l', 'a', 'y', '.', 's', 'i', 'n', 'g', 'l', 'e', 'b', 'o', 'a', 'r', 'd', '.', 'p', 'y'].join('')), [])
                 res.status(200).send({ success: true, message: ['S', 'w', 'i', 't', 'c', 'h', ' ', 'p', 'o', 'r', 't', 's', ' ', 'u', 'p', 'd', 'a', 't', 'e', 'd', ' ', 's', 'u', 'c', 'c', 'e', 's', 's', 'f', 'u', 'l', 'l', 'y'].join('') });
