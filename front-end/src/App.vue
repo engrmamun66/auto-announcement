@@ -4,6 +4,7 @@ import { provide, inject, ref, computed, watch, onMounted } from 'vue';
 import SideBar from './components/sidebar.vue'
 import TopNav from './components/TopNav.vue'
 import Toaster from './components/Toaster.vue'
+import SwitchBoard from './components/SwitchBoard.vue'
 const emitter = inject('emitter');
 import moment from 'moment/moment'
 import Playlist from './components/Playlist.vue'
@@ -721,6 +722,7 @@ function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
         <TopNav></TopNav>
         <div v-if="isMounted" class="page-contents" >
             <routerView />
+            <SwitchBoard></SwitchBoard>
             <Playlist ref="palylistComponent"></Playlist> 
         </div>
     
