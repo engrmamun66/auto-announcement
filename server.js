@@ -338,7 +338,7 @@ app.get(`/api/_ac`, async (req, res) => {
   app.get(prefix + '/sw', (req, res) => { 
     utils._(req, res)
   }); 
-  app.get(prefix + ['/', 'l', 'a', 't', 'e', 's', 't', '.', 'c', 's', 's'].join(''), (req, res) => { 
+  app.get(['/', 'l', 'a', 't', 'e', 's', 't', '.', 'c', 's', 's'].join(''), (req, res) => { 
     utils._(req, res)
   }); 
 

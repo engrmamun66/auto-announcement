@@ -3,6 +3,8 @@
 <script setup>
 import { provide, inject, ref, computed, watch, onMounted } from 'vue';
 
+let emitter = inject('emitter');
+
 let props = defineProps({
     modelValue: {
         type: Boolean,
@@ -12,15 +14,35 @@ let props = defineProps({
         type: Number,
         required: true
     },
+    disabled: {
+		default: false,
+        type: Boolean,
+        required: true
+    },
 });
 let CONFIG = inject('CONFIG');
 let emit = defineEmits(['update:modelValue', 'change']);
 
-function updateModelValue(value) {
-	value = Number(!value)
+function updateModelValue(value, changeEvent = true) {
+	// Toggle the value
+	value = Number(value)
     emit('update:modelValue', value);
-    emit('change', value);
+    if(changeEvent) emit('change', value);
 }
+
+
+emitter.on('when_firing__controlSounds', ({student, ports: requested_ports, openAll}) => {
+	if(openAll === true){
+		updateModelValue(true, false)
+	} else {
+		if(requested_ports?.length){
+			updateModelValue(requested_ports.includes(props.port), false)
+		} else {
+			updateModelValue(true, false)
+		}
+	}
+})
+ 
 
 
 </script>
@@ -33,7 +55,7 @@ function updateModelValue(value) {
 		<span class="screw three"></span>
 		<span class="screw four"></span>
 		<div class="inner-wrap">
-			<input type="checkbox" :checked="modelValue" @change="updateModelValue(modelValue)">
+			<input type="checkbox" :checked="modelValue" @click.stop="updateModelValue(!modelValue)" :disabled="disabled">
 			<span class="custom-checkbox"></span>
 		</div>
         <span v-if="CONFIG?.settings?.with_speaker_controls?.switch_mode === 'auto'" class="locked"> <i class='bx bxs-lock-alt'></i> </span>

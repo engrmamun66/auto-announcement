@@ -24,6 +24,7 @@
 
   watch(currentItem, (newData, b)=>{
     storage('currentItem').value = newData 
+    emitter.emit('palylist__currentItem', newData)
     if(CONFIG.value?.settings?.with_speaker_controls?.switch_mode === 'auto' && newData){
         controlSounds({student: newData}) 
     }

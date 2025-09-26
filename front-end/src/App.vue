@@ -39,7 +39,12 @@ let LockscreenRef = ref(null)
 let disabilityAlretRef = ref(null)
 let manually_paused_the_playlist = ref(false)
 let showSwithBoardModal = ref(false)
+let switches_PreviewInHomePage = ref(localStorage.getItem('switches_PreviewInHomePage') === 'true' ? true : false)
 let borad_image_url = globalThis.GLOBAL_DATA?.env.BASE_URL + '/electric-board.png'
+
+watch(switches_PreviewInHomePage, (bool) => {
+    localStorage.setItem('switches_PreviewInHomePage', bool)
+})
 
 let palylistComponent = ref(null)
 provide('palylistComponent', palylistComponent)
@@ -226,6 +231,8 @@ async function controlSounds({student=null, ports=[], openAll=false}={}){
         requested_ports = Array.from({ length: CONFIG.value?.settings?.with_speaker_controls?.switch_count || 16 }, (_, i) => i + 1)
     } 
 
+     
+
 
     // let response = await http.get('/' + '-'.padEnd(15, '-') + '_'.padEnd(15, '_'), { 
     // let response = await http.get('/sw', { 
@@ -235,16 +242,26 @@ async function controlSounds({student=null, ports=[], openAll=false}={}){
     // }) 
     // if(response.status == 200){}
 
+    emitter.emit('when_firing__controlSounds', {student, ports: requested_ports, openAll})
+
     let existingLink = document.getElementById('unique_speaker_control_css')
     if(existingLink) existingLink.remove()
+
+
+    /**
+     * =====CSS===REQUEST
+     */
 
     let head = document.head || document.getElementsByTagName('head')[0];
     let link = document.createElement('link');
     link.rel = 'stylesheet';
     link.type = 'text/css';
     link.id = 'unique_speaker_control_css';
-    link.href = `${globalThis.GLOBAL_DATA?.env.API_BASE_URL}/latest.css?_p=${requested_ports.join(',')}&_t=${new Date().getTime()}`;  
+    link.href = `${globalThis.GLOBAL_DATA?.env.BASE_URL}/latest.css?_p=${requested_ports.join(',')}&_t=${new Date().getTime()}`;  
     head.appendChild(link);
+    setTimeout(() => {
+        link.remove()
+    }, 10);  
    
  } catch (error) {
    console.warn('controlSounds__error::', error);
@@ -279,6 +296,7 @@ provide('getConfig', getConfig)
 provide('controlSounds', controlSounds)
 provide('showSwithBoardModal', showSwithBoardModal)
 provide('borad_image_url', borad_image_url)
+provide('switches_PreviewInHomePage', switches_PreviewInHomePage)
 
 
 

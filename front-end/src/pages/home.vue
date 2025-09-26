@@ -12,6 +12,7 @@ import BtnLoader from '../components/BtnLoader.vue'
 import BarcodeScannigAnimation from '../components/BarcodeScannigAnimation.vue'
 import EmergencyMode from '../components/EmergencyMode.vue'
 import PlayingAnimation from '../components/PlayingAnimation.vue'
+import SwitchBoard from '../components/SwitchBoard.vue'
 import helper from '../utilities/helper';
 
 
@@ -32,6 +33,7 @@ const appUseForbiddened = inject('appUseForbiddened');
 const showSwithBoardModal = inject('showSwithBoardModal');
 const borad_image_url = inject('borad_image_url');
 const CONFIG = inject('CONFIG');
+const switches_PreviewInHomePage = inject('switches_PreviewInHomePage');
 
 const log = console.log
 
@@ -172,7 +174,7 @@ function removeFromWattingList(student, i){
 
 
      <div class="sections mt-3">
-          <div class="class-list" v-if="toggleSettings">
+          <div class="single-section class-list " v-if="toggleSettings">
                <div class="inner-list">
                     <div class="tab-view" >
                          <div :class="{'active': tab==1}" @click="tab=1">Punch</div>
@@ -292,7 +294,9 @@ function removeFromWattingList(student, i){
                     </ul>
                </div>
           </div>
-          <div class="watting-list">
+
+
+          <div class="single-section watting-list">
                <div class="set-max-height">
                     <div>
                          <template v-for="(student, i) in wattingList" :key="i"> 
@@ -327,7 +331,7 @@ function removeFromWattingList(student, i){
                                                   </template> 
                                              </div>
                                         </div>
-                                       <div class="icons"> 
+                                   <div class="icons"> 
                                              <i v-if="!student.is_called" class='bx bx-check'></i>
                                              <i v-else-if="student.is_called" class='bx bx-check-double cp' @click="()=>{
                                                   let status = student.is_called
@@ -336,14 +340,19 @@ function removeFromWattingList(student, i){
                                              }"  ></i> 
                                              <i v-else class='bx bx-checkbox-square' ></i> 
                                              <span v-if="student?.total_punch" class='punch-count'>Punched: {{ student?.total_punch || 0 }}</span> 
-                                       </div>
-                                       <span @click="removeFromWattingList(student, i)" class="card-canceller">
+                                   </div>
+                                   <span @click="removeFromWattingList(student, i)" class="card-canceller">
                                              <i class='bx bx-x'></i>
-                                       </span>
+                                   </span>
                                    </div>
                               </div> 
                          </template>
                     </div>
+               </div>
+          </div>
+          <div v-if="switches_PreviewInHomePage" class="single-section right-sections">
+               <div class="switching-display-area">
+                    <SwitchBoard viewType="home"></SwitchBoard>
                </div>
           </div>
      </div>
@@ -367,9 +376,10 @@ function removeFromWattingList(student, i){
 } 
 .sections {
   display: flex;
-  justify-content: space-between;
+  gap: 20px;
+  /* justify-content: space-between; */
 }
-.sections > div {
+.sections > .single-section {
   height: calc(100vh - 163px);
   border-radius: 10px;
   padding: 15px;
@@ -377,7 +387,7 @@ function removeFromWattingList(student, i){
 }
 .class-list {
   width: 300px;
-  margin-right: 20px;
+  /* margin-right: 20px; */
 }
 .class-list .inner-list {
   height: calc(100% - 20px);

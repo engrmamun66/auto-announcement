@@ -7,9 +7,20 @@ import Modal from './modal.vue'
 import Switch2 from './switch2.vue'
 const getConfig = inject('getConfig');
 const controlSounds = inject('controlSounds');
+const switches_PreviewInHomePage = inject('switches_PreviewInHomePage');
+import helper from './../utilities/helper/index'
+
+let props = defineProps({
+	viewType: {
+		type: String,
+		default: 'modal' // or 'inline'
+	}
+ 
+})
 
 
 let emits = defineEmits(['close'])
+let emitter = inject('emitter');
 
 
 
@@ -81,40 +92,110 @@ async function closeAll(){
 	onChangeRelaySwitch()
 }
 
+
+function onChange_switches_PreviewInHomePage(event){
+	setTimeout(() => {
+		switches_PreviewInHomePage.value = event.target.checked
+	}, 5);
+}
+
+
+let tartgetItemOrStudent = ref(null)
+
+emitter.on('palylist__currentItem', (currentItem) => {
+	tartgetItemOrStudent.value = currentItem
+})
  
+let tab = ref(1)
 
 
 </script>
 
 
 <template>
-	<Modal v-model="showModal" :closeIconInOutside="true" @close="$emit('close')">
-		<template #title>
-			<div class="d-flex justify-content-between">
-				<h3>Sitches Control Box</h3>
-				<Switch2 v-model="switch_mode" style="zoom: 0.7" yes="Auto" no="Manual" size="lg" @change="log('changed')" ></Switch2>
+
+	<template v-if="viewType === 'modal'">
+		<Modal v-model="showModal" :closeIconInOutside="true" @close="$emit('close')">
+			<template #title>
+				<div class="d-flex justify-content-between">
+					<h3>Sitches Control Box</h3>
+					<Switch2 v-model="switch_mode" style="zoom: 0.7" yes="Auto" no="Manual" size="lg" @change="log('changed')" ></Switch2>
+				</div>
+			</template>
+	
+	
+			<div class="d-flex justify-content-between align-items-center">
+				<div class="d-flex">
+					<button @click.stop="openAll" class="open-closer opener" :disabled="CONFIG?.settings?.with_speaker_controls?.switch_mode === 'auto'">Open All</button>
+					<button @click.stop="closeAll" class="open-closer closer ms-2" :disabled="CONFIG?.settings?.with_speaker_controls?.switch_mode === 'auto'">Close All</button> 
+				</div>
+				<div class="d-flex mt-3">
+					<div class="form-check">
+						<input type="checkbox" value="" id="flexCheckDefault" @click="onChange_switches_PreviewInHomePage" :checked="onChange_switches_PreviewInHomePage">
+						<label class="form-check-label ms-2" for="flexCheckDefault">
+							Preview In Home Page
+						</label>
+						</div>
+				</div>
 			</div>
-		</template>
-
-
-		<div class="d-flex">
-			<button @click.stop="openAll" class="open-closer opener" :disabled="CONFIG?.settings?.with_speaker_controls?.switch_mode === 'auto'">Open All</button>
-			<button @click.stop="closeAll" class="open-closer closer ms-2" :disabled="CONFIG?.settings?.with_speaker_controls?.switch_mode === 'auto'">Close All</button> 
+	
+	
+			<div class="switch-area">
+				<div v-if="CONFIG?.settings?.with_speaker_controls?.switch_mode === 'auto'" class="overlay-area"> </div>
+				<template v-for="chunk in portChunks">
+					<div class="switch-row">
+						<template v-for="item in chunk">
+							<RelaySwitch :port="item.port" v-model="item.status" @change="onChangeRelaySwitch" />
+						</template> 
+					</div>
+				</template>
+			</div>
+	
+		</Modal>
+	</template>
+	<template v-else-if="viewType === 'home'">
+		<div>
+			<ul class="nav nav-tabs mb-3">
+				<li class="nav-item">
+					<a @click.stop="tab = 1" class="nav-link cp text-black" :class="{'active': tab==1}" >Switches</a>
+				</li>
+				<li class="nav-item">
+					<a @click.stop="tab = 2" class="nav-link cp text-black" :class="{'active': tab==2}" >Classes</a>
+				</li> 
+				
+			</ul>
 		</div>
-
-
+		<div class="d-flex justify-content-between align-items-center">
+			<h4>SWITCHES ACTIVITY</h4>
+			<!-- <button class="modeof-switch">{{ helper.ucfirst(CONFIG?.settings?.with_speaker_controls?.switch_mode) }}</button> -->
+			<Switch2 v-model="switch_mode" style="zoom: 0.7" yes="Auto" no="Manual" size="lg" @change="log('changed')" ></Switch2>
+		</div>
 		<div class="switch-area">
+
+			
+			<div class="d-flex justify-content-between align-items-center gap-2">
+				<div class="d-flex">
+					<button @click.stop="openAll" class="open-closer opener" :disabled="CONFIG?.settings?.with_speaker_controls?.switch_mode === 'auto'">Open&nbsp;All</button>
+					<button @click.stop="closeAll" class="open-closer closer ms-2" :disabled="CONFIG?.settings?.with_speaker_controls?.switch_mode === 'auto'">Close&nbsp;All</button> 
+				</div>
+				<div class="d-flex">
+					
+				</div>
+			</div>
+
+			<h4 class="mt-3" v-if="tartgetItemOrStudent">{{ tartgetItemOrStudent?.name }}</h4>
+
+
 			<div v-if="CONFIG?.settings?.with_speaker_controls?.switch_mode === 'auto'" class="overlay-area"> </div>
 			<template v-for="chunk in portChunks">
 				<div class="switch-row">
 					<template v-for="item in chunk">
-						<RelaySwitch :port="item.port" v-model="item.status" @change="onChangeRelaySwitch" />
+						<RelaySwitch :port="item.port" v-model="item.status" @change="onChangeRelaySwitch" :disabled="false" />
 					</template> 
 				</div>
 			</template>
-		</div>
-
-	</Modal>
+		</div>  
+	</template>
 </template>
 
 
@@ -122,6 +203,9 @@ async function closeAll(){
 <style scoped>
 .switch-area {
 	position: relative;
+}
+.switch-area *{
+	user-select: none;
 }
 .switch-area .overlay-area{
 	position: absolute;
@@ -141,6 +225,7 @@ async function closeAll(){
 	justify-content: space-around;
 	align-items: center;
 	margin-bottom: 20px;
+	flex-wrap: wrap;
 }
 .open-closer{
 	margin-top: 10px;
@@ -167,5 +252,12 @@ async function closeAll(){
 }
 .open-closer.closer:disabled{
     border-bottom: 2px solid rgba(255, 0, 0, 0.22);
+}
+.modeof-switch{
+	border: none;
+	border-radius: 20px;
+	background-color: red;
+	color: white;
+	padding: 2px 15px;
 }
 </style>
