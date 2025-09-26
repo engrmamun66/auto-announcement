@@ -351,8 +351,10 @@ function removeFromWattingList(student, i){
                </div>
           </div>
           <div v-if="switches_PreviewInHomePage" class="single-section right-sections">
-               <div class="switching-display-area">
-                    <SwitchBoard viewType="home"></SwitchBoard>
+               <div class="set-max-height">
+                    <div class="switching-display-area">
+                         <SwitchBoard viewType="home"></SwitchBoard>
+                    </div>
                </div>
           </div>
      </div>

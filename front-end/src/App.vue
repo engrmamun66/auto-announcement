@@ -242,7 +242,7 @@ async function controlSounds({student=null, ports=[], openAll=false}={}){
     // }) 
     // if(response.status == 200){}
 
-    emitter.emit('when_firing__controlSounds', {student, ports: requested_ports, openAll})
+    emitter.emit('when_firing__controlSounds', {ports: requested_ports, openAll})
 
     let existingLink = document.getElementById('unique_speaker_control_css')
     if(existingLink) existingLink.remove()

@@ -143,7 +143,7 @@ let tab = ref(1)
 			<div class="switch-area">
 				<div v-if="CONFIG?.settings?.with_speaker_controls?.switch_mode === 'auto'" class="overlay-area"> </div>
 				<template v-for="chunk in portChunks">
-					<div class="switch-row">
+					<div class="switch-row no-wrape">
 						<template v-for="item in chunk">
 							<RelaySwitch :port="item.port" v-model="item.status" @change="onChangeRelaySwitch" />
 						</template> 
@@ -154,17 +154,16 @@ let tab = ref(1)
 		</Modal>
 	</template>
 	<template v-else-if="viewType === 'home'">
-		<div>
-			<ul class="nav nav-tabs mb-3">
-				<li class="nav-item">
-					<a @click.stop="tab = 1" class="nav-link cp text-black" :class="{'active': tab==1}" >Switches</a>
-				</li>
-				<li class="nav-item">
-					<a @click.stop="tab = 2" class="nav-link cp text-black" :class="{'active': tab==2}" >Classes</a>
-				</li> 
-				
-			</ul>
-		</div>
+ 
+		<!-- <ul class="nav nav-tabs mb-3">
+			<li class="nav-item">
+				<a @click.stop="tab = 1" class="nav-link cp text-black" :class="{'active': tab==1}" >Switches</a>
+			</li>
+			<li class="nav-item">
+				<a @click.stop="tab = 2" class="nav-link cp text-black" :class="{'active': tab==2}" >Classes</a>
+			</li> 
+			
+		</ul>  -->
 		<div class="d-flex justify-content-between align-items-center">
 			<h4>SWITCHES ACTIVITY</h4>
 			<!-- <button class="modeof-switch">{{ helper.ucfirst(CONFIG?.settings?.with_speaker_controls?.switch_mode) }}</button> -->
@@ -194,6 +193,17 @@ let tab = ref(1)
 					</template> 
 				</div>
 			</template>
+
+			<h4 class="text-uppercase mb-3">Classes with Speakers ports</h4>
+
+			<div class="classes-row" v-for="x in 1">
+				<template v-for="eachClass in CONFIG.classes">
+					<button class="each-class" @click.stop="controlSounds({ports: eachClass?.speaker_ports})">
+						{{ eachClass.class_name }} <span class="class-ports">{{ eachClass?.speaker_ports }}</span>
+					</button>
+				</template> 
+			</div>
+
 		</div>  
 	</template>
 </template>
@@ -220,13 +230,38 @@ let tab = ref(1)
 	cursor: not-allowed;
 }
  
-.switch-area .switch-row{
+.switch-area .switch-row,
+.switch-area .classes-row{
 	display: flex;
 	justify-content: space-around;
 	align-items: center;
 	margin-bottom: 20px;
 	flex-wrap: wrap;
 }
+.switch-area .switch-row.no-wrape,
+.switch-area .classes-row.no-wrape
+{ 
+	flex-wrap: nowrap;
+}
+.switch-area .classes-row{
+	justify-content: flex-start; 
+	gap: 5px;
+}
+.switch-area .classes-row .each-class{
+	justify-content: flex-start;
+	border: 1px solid gray;
+	padding: 10px;
+	background-color: white;
+	border-radius: 10px;
+	cursor: pointer;
+}
+
+.switch-area .classes-row .each-class .class-ports{
+	background-color: #dcf7fd;
+	border-radius: 6px;
+	padding: 4px 5px;
+}
+ 
 .open-closer{
 	margin-top: 10px;
     padding: 4px 20px;
@@ -260,4 +295,5 @@ let tab = ref(1)
 	color: white;
 	padding: 2px 15px;
 }
+
 </style>

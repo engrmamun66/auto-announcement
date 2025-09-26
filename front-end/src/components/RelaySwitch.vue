@@ -31,7 +31,7 @@ function updateModelValue(value, changeEvent = true) {
 }
 
 
-emitter.on('when_firing__controlSounds', ({student, ports: requested_ports, openAll}) => {
+emitter.on('when_firing__controlSounds', ({ports: requested_ports, openAll}) => {
 	if(openAll === true){
 		updateModelValue(true, false)
 	} else {
