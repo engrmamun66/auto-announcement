@@ -136,7 +136,7 @@ function updateStudetCardSize(){
           let bound = targetCard.getBoundingClientRect()
           let width = Math.floor(bound.width) 
 
-          const scroolbarWidth = 5
+          const scroolbarWidth = 10
           const add = 5
           
           if(width < 400){
@@ -458,8 +458,8 @@ function isPayingThisCard(student){
   flex-wrap: wrap;
   overflow-y: auto;
   /* column-gap: 15px; */
-  column-gap: 5px;
-  row-gap: 5px;
+  column-gap: 10px;
+  row-gap: 10px;
 }
 .watting-list .set-max-height div .student-box {
      --call-done: linear-gradient(0deg, #2fe9df00 0%, #9c9cec00 100%); 
