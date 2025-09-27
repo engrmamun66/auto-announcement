@@ -1,6 +1,6 @@
 <script setup>
 import moment from 'moment/moment'
-import { onMounted, inject, ref, watch, computed } from 'vue';
+import { onMounted, inject, ref, watch, computed, onBeforeUnmount } from 'vue';
 import Note from '../components/note.vue'
 import myTable from '../components/myTable.vue'
 import Modal from '../components/modal.vue'
@@ -34,6 +34,8 @@ const showSwithBoardModal = inject('showSwithBoardModal');
 const borad_image_url = inject('borad_image_url');
 const CONFIG = inject('CONFIG');
 const switches_PreviewInHomePage = inject('switches_PreviewInHomePage');
+const isUsingSpeakerAutoControl = inject('isUsingSpeakerAutoControl');
+const isSpeakersAutoMode = inject('isSpeakersAutoMode');
 
 const log = console.log
 
@@ -62,14 +64,6 @@ function handlePayPause(){
      }
      
 }
-
-
-
-
-
-
-
-
 
 let ttoout
 function inputBarcode(event){
@@ -120,10 +114,9 @@ let tab = ref(1)
 watch(tab, getSchedules)
 watch(toggleSettings, getSchedules)
 
+let card_dynamic_width = ref(200)
+
 onMounted(()=>{
-
-     
-
 
      if(route.query.barcode){
           pushTheBarcode(route.query.barcode)
@@ -131,11 +124,54 @@ onMounted(()=>{
                router.push({name: 'home'})
           }, 100);
      }
+
+     emitter.on('document_click', updateStudetCardSize)
+     emitter.on('document_resize', updateStudetCardSize)
+     emitter.on('document_mousemove', updateStudetCardSize)
 })
 
+function updateStudetCardSize(){
+     let targetCard = document.getElementById('students_card_container')
+     if(targetCard){
+          let bound = targetCard.getBoundingClientRect()
+          let width = Math.floor(bound.width) 
+
+          const scroolbarWidth = 5
+          const add = 5
+          
+          if(width < 400){
+               card_dynamic_width.value = width
+          } 
+          else if(width < 600){
+               card_dynamic_width.value = Math.floor(width / 2) - (scroolbarWidth + add * 0)
+          }
+          else if(width < 800){
+               card_dynamic_width.value = Math.floor(width / 3) - (scroolbarWidth + add * 0)
+          } 
+          else if(width < 1000){
+               card_dynamic_width.value = Math.floor(width / 4) - (scroolbarWidth + add * 0)
+          } 
+          else if(width < 1200){
+               card_dynamic_width.value = Math.floor(width / 5) - (scroolbarWidth + add * 0)
+          } 
+          else if(width < 1400){
+               card_dynamic_width.value = Math.floor(width / 6) - (scroolbarWidth + add * 0)
+          } 
+          else if(width < 1600){
+               card_dynamic_width.value = Math.floor(width / 7) - (scroolbarWidth + add * 0)
+          } 
+          else if(width < 1800){
+               card_dynamic_width.value = Math.floor(width / 8) - (scroolbarWidth + add * 0)
+          } 
+     }
+}
 function removeFromWattingList(student, i){
      wattingList.value.splice(i, 1)
      storage('wattingList').value = wattingList.value 
+}
+
+function isPayingThisCard(student){
+     return !student.is_called && student?.dakhela == storage('currentItem').value?.dakhela
 }
 
 </script>
@@ -160,9 +196,9 @@ function removeFromWattingList(student, i){
           <div v-if="!manually_paused_the_playlist" @click="handlePayPause()" class="me-2 p-1 play-pause"><i class='bx bx-pause'></i></div>
           <div v-else @click="handlePayPause()" class="me-2 p-1 play-pause"><i class='bx bx-play'></i></div>
 
-          <div class="me-2 p-1 position-relative" @click.stop="showSwithBoardModal = !showSwithBoardModal">
+          <div v-if="isUsingSpeakerAutoControl" class="me-2 p-1 position-relative" @click.stop="showSwithBoardModal = !showSwithBoardModal">
                <img :src="borad_image_url" alt="" class="board-image">
-               <span class="manual-mode" v-if="CONFIG?.settings?.with_speaker_controls?.switch_mode === 'manual'">manual</span>
+               <span class="manual-mode" v-if="!isSpeakersAutoMode">manual</span>
           </div>
          
           <BarcodeScannigAnimation v-if="is_started_schedule" :scannig="is_started_schedule" class="me-1"  ></BarcodeScannigAnimation> 
@@ -297,10 +333,12 @@ function removeFromWattingList(student, i){
 
 
           <div class="single-section watting-list">
-               <div class="set-max-height">
+               <div class="set-max-height" id="students_card_container">
                     <div>
                          <template v-for="(student, i) in wattingList" :key="i"> 
-                              <div class="student-box" :class="{'is_called': student.is_called}" :barcode="student?.barcode" >
+                              <div class="student-box" :class="{'is_called': student.is_called}" 
+                              :style="`--std-card-width:${card_dynamic_width}px`"
+                              :barcode="student?.barcode" :card-id="student.id" :playing="isPayingThisCard(student)" >
                                    <div :class="{ 'bg_animation': student?.isPlaying }">
                                         <div class="student-name">{{ student.name.split('||')?.[0] }}</div>
                                         <div class="class-name cp" 
@@ -324,7 +362,7 @@ function removeFromWattingList(student, i){
                                              }"
                                              >
                                                   <label tooltip="Punched Time" class="cp">Time {{ moment(student.punch_exact_time_text).format('hh:mm:ss A') }}</label>
-                                                  <template v-if="!student.is_called && student?.dakhela == storage('currentItem').value?.dakhela">
+                                                  <template v-if="isPayingThisCard(student)">
                                                        <div>
                                                             <PlayingAnimation></PlayingAnimation>
                                                        </div>
@@ -419,6 +457,9 @@ function removeFromWattingList(student, i){
   flex-direction: row;
   flex-wrap: wrap;
   overflow-y: auto;
+  /* column-gap: 15px; */
+  column-gap: 5px;
+  row-gap: 5px;
 }
 .watting-list .set-max-height div .student-box {
      --call-done: linear-gradient(0deg, #2fe9df00 0%, #9c9cec00 100%); 
@@ -429,10 +470,8 @@ function removeFromWattingList(student, i){
 
 
 .watting-list .set-max-height div .student-box {
-  position: relative;
-  margin-bottom: 15px;
-  margin-right: 15px;
-  width: 200px;
+  position: relative; 
+  width: var(--std-card-width, 200px);
   min-height: 90px;
   border: 1px solid rgb(7, 109, 146);
   background: var(--waiting-for-call);

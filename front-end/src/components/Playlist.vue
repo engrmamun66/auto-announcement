@@ -18,6 +18,8 @@
   const user_interacted = inject('user_interacted');
   const CONFIG = inject('CONFIG');
   const controlSounds = inject('controlSounds');
+  const isUsingSpeakerAutoControl = inject('isUsingSpeakerAutoControl');
+  const isSpeakersAutoMode = inject('isSpeakersAutoMode');
   const currentItem = ref(null);
   const audio = ref(null);
   const is__playing = ref(false); 
@@ -25,14 +27,13 @@
   watch(currentItem, (newData, b)=>{
     storage('currentItem').value = newData 
     emitter.emit('palylist__currentItem', newData)
-    if(CONFIG.value?.settings?.with_speaker_controls?.switch_mode === 'auto' && newData){
+    if(isSpeakersAutoMode.value && newData){
         controlSounds({student: newData}) 
     }
   })
 
   function withInavtivity(){
-    let isManual = CONFIG.value?.settings?.with_speaker_controls?.switch_mode === 'manual'
-    if(isManual) return
+    if(!isSpeakersAutoMode.value) return
     let action = CONFIG.value?.settings?.with_speaker_controls?.on_inactivity_switches_mode
     if(action && action !== 'no_action'){
       if(action === 'open_all'){
@@ -85,9 +86,8 @@
       currentItem.value = nextItem;
       const soundSrc = nextItem[nextItem['soundColName'] || 'sound1'];
       if(soundSrc){ 
-        let status = CONFIG.value?.settings?.with_speaker_controls?.status
         let delay_time = CONFIG.value?.settings?.with_speaker_controls?.delay_before_starting
-        if(status && delay_time){
+        if(isUsingSpeakerAutoControl.value && delay_time){
           setTimeout(() => {
             audio.value.src = soundSrc;
             audio.value.play();

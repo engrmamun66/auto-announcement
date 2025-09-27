@@ -10,6 +10,7 @@ const controlSounds = inject('controlSounds');
 const switches_PreviewInHomePage = inject('switches_PreviewInHomePage');
 import helper from './../utilities/helper/index'
 import myTable from './../components/myTable.vue'
+const isSpeakersAutoMode = inject('isSpeakersAutoMode');
 
 let props = defineProps({
 	viewType: {
@@ -136,8 +137,8 @@ let tab = ref(1)
 	
 			<div class="d-flex justify-content-between align-items-center">
 				<div class="d-flex">
-					<button @click.stop="openAll" class="open-closer opener" :disabled="CONFIG?.settings?.with_speaker_controls?.switch_mode === 'auto'">Open All</button>
-					<button @click.stop="closeAll" class="open-closer closer ms-2" :disabled="CONFIG?.settings?.with_speaker_controls?.switch_mode === 'auto'">Close All</button> 
+					<button @click.stop="openAll" class="open-closer opener" :disabled="isSpeakersAutoMode">Open All</button>
+					<button @click.stop="closeAll" class="open-closer closer ms-2" :disabled="isSpeakersAutoMode">Close All</button> 
 				</div>
 				<div class="d-flex mt-3">
 					<div class="form-check">
@@ -151,7 +152,7 @@ let tab = ref(1)
 	
 	
 			<div class="switch-area">
-				<div v-if="CONFIG?.settings?.with_speaker_controls?.switch_mode === 'auto'" class="overlay-area"> </div>
+				<div v-if="isSpeakersAutoMode" class="overlay-area"> </div>
 				<template v-for="chunk in portChunks">
 					<div class="switch-row no-wrape">
 						<template v-for="item in chunk">
@@ -176,7 +177,6 @@ let tab = ref(1)
 		</ul>  -->
 		<div class="d-flex justify-content-between align-items-center">
 			<h4>SWITCHES ACTIVITY</h4>
-			<!-- <button class="modeof-switch">{{ helper.ucfirst(CONFIG?.settings?.with_speaker_controls?.switch_mode) }}</button> -->
 			<Switch2 v-model="switch_mode" style="zoom: 0.7" yes="Auto" no="Manual" size="lg" @change="log('changed')" ></Switch2>
 		</div>
 		<div class="switch-area">
@@ -184,8 +184,8 @@ let tab = ref(1)
 			
 			<div class="d-flex justify-content-between align-items-center gap-2">
 				<div class="d-flex">
-					<button @click.stop="openAll" class="open-closer opener" :disabled="CONFIG?.settings?.with_speaker_controls?.switch_mode === 'auto'">Open&nbsp;All</button>
-					<button @click.stop="closeAll" class="open-closer closer ms-2" :disabled="CONFIG?.settings?.with_speaker_controls?.switch_mode === 'auto'">Close&nbsp;All</button> 
+					<button @click.stop="openAll" class="open-closer opener" :disabled="isSpeakersAutoMode">Open&nbsp;All</button>
+					<button @click.stop="closeAll" class="open-closer closer ms-2" :disabled="isSpeakersAutoMode">Close&nbsp;All</button> 
 				</div>
 				<div class="d-flex">
 					
@@ -195,7 +195,7 @@ let tab = ref(1)
 			<h4 class="mt-3" v-if="tartgetItemOrStudent">{{ tartgetItemOrStudent?.name }}</h4>
 
 
-			<div v-if="CONFIG?.settings?.with_speaker_controls?.switch_mode === 'auto'" class="overlay-area"> </div>
+			<div v-if="isSpeakersAutoMode" class="overlay-area"> </div>
 			<template v-for="chunk in portChunks">
 				<div class="switch-row">
 					<template v-for="item in chunk">
@@ -225,12 +225,13 @@ let tab = ref(1)
 								<td>
 									<ul v-if="eachClass.speaker_ports">
 										<li @click.stop="onChangeRelaySwitch({eachClass})"> 
-											<button class="action-open-btn" :class="{'active': isOpenedPort(eachClass)}">
-												{{ isOpenedPort(eachClass) ? 'Activated': 'Open' }}
+											<button class="action-open-btn text-center" :class="{'active': isOpenedPort(eachClass)}">
+												{{ isOpenedPort(eachClass) ? 'Opened': 'Open' }}
 											</button>   
 										</li>
 									</ul>
-								</td>                   
+								</td>  
+								
 							
 							</tr>  
 						</template>
@@ -333,11 +334,12 @@ let tab = ref(1)
 }
 
 .action-open-btn{
-	border: none;
-	border-radius: 4px;
-	background-color: rgb(218, 218, 218);
-	color: var(--primaryColor);
-	padding: 2px 15px;
+    border: none;
+    border-radius: 4px;
+    background-color: #dadada;
+    color: var(--primaryColor);
+    padding: 2px 6px;
+    width: 80px;
 }
 .action-open-btn.active{
 	background-color: rgb(2, 156, 35);

@@ -4,6 +4,7 @@
 import { provide, inject, ref, computed, watch, onMounted } from 'vue';
 
 let emitter = inject('emitter');
+const isSpeakersAutoMode = inject('isSpeakersAutoMode');
 
 let props = defineProps({
     modelValue: {
@@ -58,7 +59,7 @@ emitter.on('when_firing__controlSounds', ({ports: requested_ports, openAll}) => 
 			<input type="checkbox" :checked="modelValue" @click.stop="updateModelValue(!modelValue)" :disabled="disabled">
 			<span class="custom-checkbox"></span>
 		</div>
-        <span v-if="CONFIG?.settings?.with_speaker_controls?.switch_mode === 'auto'" class="locked"> <i class='bx bxs-lock-alt'></i> </span>
+        <span v-if="isSpeakersAutoMode" class="locked"> <i class='bx bxs-lock-alt'></i> </span>
         <span class="port">{{ port }}</span>
 	</div>
 </template>

@@ -34,6 +34,7 @@ let toggleSettings = ref(true)
 let refreshDOM = ref(true) 
 let isMounted = ref(false)
 let user_interacted = ref(false)
+let last_mouse_activity_time = ref(moment().format('Y-MM-DD HH:mm:ss'))
 let emergency_mode = ref(false)
 let LockscreenRef = ref(null)
 let disabilityAlretRef = ref(null)
@@ -41,6 +42,8 @@ let manually_paused_the_playlist = ref(false)
 let showSwithBoardModal = ref(false)
 let switches_PreviewInHomePage = ref(localStorage.getItem('switches_PreviewInHomePage') === 'true' ? true : false)
 let borad_image_url = globalThis.GLOBAL_DATA?.env.BASE_URL + '/electric-board.png'
+let isUsingSpeakerAutoControl = computed(()=>CONFIG.value?.settings?.with_speaker_controls?.status)
+let isSpeakersAutoMode = computed(()=>CONFIG.value?.settings?.with_speaker_controls?.switch_mode === 'auto')
 
 watch(switches_PreviewInHomePage, (bool) => {
     localStorage.setItem('switches_PreviewInHomePage', bool)
@@ -217,7 +220,7 @@ async function controlSounds({student=null, ports=[], openAll=false}={}){
  
  try { 
 
-    if(!CONFIG.value?.settings?.with_speaker_controls?.status) return
+    if(!isUsingSpeakerAutoControl.value) return
 
     let requested_ports = ports
 
@@ -268,8 +271,6 @@ async function controlSounds({student=null, ports=[], openAll=false}={}){
  }
 
 }
- 
- 
 provide('route', route)
 provide('router', router)
 provide('CONFIG', CONFIG)
@@ -297,6 +298,8 @@ provide('controlSounds', controlSounds)
 provide('showSwithBoardModal', showSwithBoardModal)
 provide('borad_image_url', borad_image_url)
 provide('switches_PreviewInHomePage', switches_PreviewInHomePage)
+provide('isUsingSpeakerAutoControl', isUsingSpeakerAutoControl)
+provide('isSpeakersAutoMode', isSpeakersAutoMode) 
 
 
 
@@ -540,7 +543,16 @@ onMounted(async ()=>{
 
     document.addEventListener('click', () => {
         user_interacted.value = true;  
+        last_mouse_activity_time.value = moment().format('Y-MM-DD HH:mm:ss')
         document.body.classList.add('user-interacted')
+        emitter.emit('document_click')
+    })
+    document.addEventListener('mousemove', () => { 
+        last_mouse_activity_time.value = moment().format('Y-MM-DD HH:mm:ss') 
+        emitter.emit('document_mousemove')
+    })
+    document.addEventListener('resize', () => { 
+        emitter.emit('document_resize')
     })
     clearTimeout(schedule_timeout.value)
     classes.value = storage('classes').value || classes.value
@@ -564,7 +576,11 @@ onMounted(async ()=>{
                 CheckAccess()
             }
 
+
+
+
             emitter.emit('intervalling', true)
+            focusCurrenPlayingSoundCard_if_userIsInavtiveForFewSeconds()
 
         }, 1000);
     }, 100);
@@ -589,6 +605,22 @@ onMounted(async ()=>{
 
      await CheckAccess({loader: true}) 
 })
+
+
+function focusCurrenPlayingSoundCard_if_userIsInavtiveForFewSeconds(){
+    let last_activity_time = last_mouse_activity_time.value
+    let seconds = moment(moment()).diff(last_activity_time, 'seconds')
+
+    if(seconds >= 3){
+        let targetedCard = document.querySelector(`[playing=true]`)
+        if(targetedCard){
+            targetedCard.scrollIntoView({
+                behavior: "smooth", 
+                block: "start",
+            });
+        }
+    } 
+}
 
 
 function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
