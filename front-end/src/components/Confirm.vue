@@ -25,7 +25,7 @@
             
             <div class="modal-body mt-4">
               <div class="col-12">
-                  <h3 class="text-center">  
+                  <h4 class="text-center">  
                     <template v-if="effect">
                       <shimmer-effect height="15px" bg="dark"></shimmer-effect>
                     </template>
@@ -34,7 +34,7 @@
                         Are you confirm?
                       </slot>
                     </template>
-                  </h3>
+                  </h4>
               </div>
             </div>
             <hr>
