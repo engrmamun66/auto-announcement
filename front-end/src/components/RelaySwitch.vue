@@ -38,7 +38,7 @@ emitter.on('when_firing__controlSounds', ({ports: requested_ports, openAll}) => 
 		if(requested_ports?.length){
 			updateModelValue(requested_ports.includes(props.port), false)
 		} else {
-			updateModelValue(true, false)
+			updateModelValue(false, false)
 		}
 	}
 })
