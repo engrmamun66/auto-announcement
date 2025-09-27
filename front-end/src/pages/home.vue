@@ -136,32 +136,31 @@ function updateStudetCardSize(){
           let bound = targetCard.getBoundingClientRect()
           let width = Math.floor(bound.width) 
 
-          const scroolbarWidth = 10
-          const add = 5
+          const scroolbarWidth = 10 
           
           if(width < 400){
                card_dynamic_width.value = width
           } 
           else if(width < 600){
-               card_dynamic_width.value = Math.floor(width / 2) - (scroolbarWidth + add * 0)
+               card_dynamic_width.value = Math.floor(width / 2) - (scroolbarWidth)
           }
           else if(width < 800){
-               card_dynamic_width.value = Math.floor(width / 3) - (scroolbarWidth + add * 0)
+               card_dynamic_width.value = Math.floor(width / 3) - (scroolbarWidth)
           } 
           else if(width < 1000){
-               card_dynamic_width.value = Math.floor(width / 4) - (scroolbarWidth + add * 0)
+               card_dynamic_width.value = Math.floor(width / 4) - (scroolbarWidth)
           } 
           else if(width < 1200){
-               card_dynamic_width.value = Math.floor(width / 5) - (scroolbarWidth + add * 0)
+               card_dynamic_width.value = Math.floor(width / 5) - (scroolbarWidth)
           } 
           else if(width < 1400){
-               card_dynamic_width.value = Math.floor(width / 6) - (scroolbarWidth + add * 0)
+               card_dynamic_width.value = Math.floor(width / 6) - (scroolbarWidth)
           } 
           else if(width < 1600){
-               card_dynamic_width.value = Math.floor(width / 7) - (scroolbarWidth + add * 0)
+               card_dynamic_width.value = Math.floor(width / 7) - (scroolbarWidth)
           } 
           else if(width < 1800){
-               card_dynamic_width.value = Math.floor(width / 8) - (scroolbarWidth + add * 0)
+               card_dynamic_width.value = Math.floor(width / 8) - (scroolbarWidth)
           } 
      }
 }
@@ -339,7 +338,7 @@ function isPayingThisCard(student){
                               <div class="student-box" :class="{'is_called': student.is_called}" 
                               :style="`--std-card-width:${card_dynamic_width}px`"
                               :barcode="student?.barcode" :card-id="student.id" :playing="isPayingThisCard(student)" >
-                                   <div :class="{ 'bg_animation': student?.isPlaying }">
+                                   <div class="card-content" :class="{ 'bg_animation': student?.isPlaying }">
                                         <div class="student-name">{{ student.name.split('||')?.[0] }}</div>
                                         <div class="class-name cp" 
                                         @click="()=>{
@@ -377,7 +376,10 @@ function isPayingThisCard(student){
                                                   student.is__playing = !status;
                                              }"  ></i> 
                                              <i v-else class='bx bx-checkbox-square' ></i> 
-                                             <span v-if="student?.total_punch" class='punch-count'>Punched: {{ student?.total_punch || 0 }}</span> 
+                                             <span v-if="student?.total_punch" class='header-span-item'>Punched: {{ student?.total_punch || 0 }}</span> 
+                                             <span class="header-span-item" :class="{'waitting': !student.is_called, 'completed': student.is_called}">
+                                                  {{ !student.is_called ? (isPayingThisCard(student) ? 'Calling...' : 'Watting') : 'Completed' }}
+                                             </span>
                                    </div>
                                    <span @click="removeFromWattingList(student, i)" class="card-canceller">
                                              <i class='bx bx-x'></i>
@@ -480,14 +482,14 @@ function isPayingThisCard(student){
   border-radius: 5px;
 }
 .watting-list .set-max-height div .student-box.is_called {
-  opacity: 0.5;
+  opacity: 0.7;
 }
 .watting-list .set-max-height div .student-box .icons {
   position: absolute;
   width: 100%;
   height: 20px;
   right: 0px;
-  top: 0px; 
+  top: 4px; 
   padding-left: 12px;
   display: flex; 
 }
@@ -495,6 +497,9 @@ function isPayingThisCard(student){
   padding: 15px; 
 }
 
+.watting-list .set-max-height div .student-box .card-content{
+     padding-top: 25px;
+}
 .watting-list .set-max-height div .student-box .student-name,
 .watting-list .set-max-height div .student-box .class-name{
   width: 100%;
@@ -576,11 +581,27 @@ function isPayingThisCard(student){
 .student-box:hover .card-canceller{
      opacity: 1;
 }
-.punch-count{ 
+.header-span-item{ 
      padding-left: 4px;
      border-radius: 2px;
      font-size: 11px; 
      color: #333;
+     margin-top: 1px;
+}
+.header-span-item.waitting,
+.header-span-item.completed{
+     padding: 0px 5px;
+     border-radius: 25px;
+     padding-top: 1px;
+     margin-left: 10px;
+     color: black;
+}
+.header-span-item.waitting{ 
+     background-color: yellow; 
+}
+.header-span-item.completed{ 
+     color: #ffffff;
+     background-color: rgb(7, 165, 39); 
 }
 .manual-mode{
      position: absolute;
