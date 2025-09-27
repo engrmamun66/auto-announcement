@@ -9,6 +9,7 @@ const getConfig = inject('getConfig');
 const controlSounds = inject('controlSounds');
 const switches_PreviewInHomePage = inject('switches_PreviewInHomePage');
 import helper from './../utilities/helper/index'
+import myTable from './../components/myTable.vue'
 
 let props = defineProps({
 	viewType: {
@@ -24,7 +25,7 @@ let emitter = inject('emitter');
 
 
 
-let CONFIG = inject('CONFIG');
+let CONFIG = inject('CONFIG', null);
 
 function arrayChunk(arr, size) {
     const chunkedArr = [];
@@ -194,15 +195,46 @@ let tab = ref(1)
 				</div>
 			</template>
 
-			<h4 class="text-uppercase mb-3">Classes with Speakers ports</h4>
+			<template v-if="CONFIG?.classes?.length">
+				<h4 class="text-uppercase mb-3">Classes with Speakers ports</h4>
+				<div class="classes-row">
+					 
+	
+					<myTable >
+						<template #thead>
+							<thead>
+							<tr> 
+								<th>Class Name</th>
+								<th>Speaker Port</th>
+								<th>Action</th>  
+							</tr>
+							</thead>
+						</template>
+						<template #rows>
+							<template v-for="eachClass in CONFIG?.classes">
+								<tr>
+									
+									<td> {{ eachClass.class_name }} </td> 
+									<td> {{ eachClass?.speaker_ports }} </td>                     
+									<td>
+										<ul v-if="item.classes">
+											<li @click.stop="controlSounds({ports: eachClass?.speaker_ports})"> 
+												<a @click.stop.prevent="item.showClasses = true" class="ms-1" href=""> More...</a>   
+											</li>
+										</ul>
+									</td>                   
+								
+								</tr> 
+				
+							
+							
+							</template>
+						</template>
+						</myTable> 
+				</div>
+			</template>
 
-			<div class="classes-row" v-for="x in 1">
-				<template v-for="eachClass in CONFIG.classes">
-					<button class="each-class" @click.stop="controlSounds({ports: eachClass?.speaker_ports})">
-						{{ eachClass.class_name }} <span class="class-ports">{{ eachClass?.speaker_ports }}</span>
-					</button>
-				</template> 
-			</div>
+
 
 		</div>  
 	</template>
