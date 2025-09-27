@@ -73,9 +73,19 @@ watch(switch_mode, (newVal) => {
 	getConfig({switch_mode: newVal ? 'auto' : 'manual'});
 });
 
-async function onChangeRelaySwitch(){
+let all_manualy_opened_ports = ref(JSON.parse(localStorage.getItem('manually_opened_ports') || '[]'))
+
+
+function isOpenedPort({speaker_ports}){
+	let result = speaker_ports.every(port => all_manualy_opened_ports.value.includes(port))
+	return result
+}
+
+async function onChangeRelaySwitch({eachClass=null}={}){
 	let manually_opened_ports = portChunks.value.map(chunk => chunk.filter(item => item.status).map(item => item.port)).flat()
+	if(eachClass) manually_opened_ports = eachClass.speaker_ports
 	localStorage.setItem('manually_opened_ports', JSON.stringify(manually_opened_ports))
+	all_manualy_opened_ports.value = manually_opened_ports
 	controlSounds({ports: manually_opened_ports})
 }
 
@@ -111,7 +121,6 @@ emitter.on('palylist__currentItem', (currentItem) => {
 })
  
 let tab = ref(1)
-
 
 </script>
 
@@ -218,8 +227,10 @@ let tab = ref(1)
 								<td> {{ eachClass?.speaker_ports }} </td>                     
 								<td>
 									<ul v-if="eachClass.speaker_ports">
-										<li @click.stop="controlSounds({ports: eachClass?.speaker_ports})"> 
-											<button>Open</button>   
+										<li @click.stop="onChangeRelaySwitch({eachClass})"> 
+											<button class="action-open-btn" :class="{'active': isOpenedPort(eachClass)}">
+												{{ isOpenedPort(eachClass) ? 'Activated': 'Open' }}
+											</button>   
 										</li>
 									</ul>
 								</td>                   
@@ -324,4 +335,15 @@ let tab = ref(1)
 	padding: 2px 15px;
 }
 
+.action-open-btn{
+	border: none;
+	border-radius: 4px;
+	background-color: rgb(218, 218, 218);
+	color: var(--primaryColor);
+	padding: 2px 15px;
+}
+.action-open-btn.active{
+	background-color: rgb(2, 156, 35);
+	color: white;
+}
 </style>

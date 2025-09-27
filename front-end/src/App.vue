@@ -564,6 +564,8 @@ onMounted(async ()=>{
                 CheckAccess()
             }
 
+            emitter.emit('intervalling', true)
+
         }, 1000);
     }, 100);
 
