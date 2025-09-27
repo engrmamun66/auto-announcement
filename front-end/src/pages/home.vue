@@ -459,7 +459,7 @@ function isPayingThisCard(student){
   overflow-x: auto;
   align-items: center;
   width: 100%;
-  padding: 8px;
+  padding: 0px 8px 0px 0px;
   border-bottom: 1px solid #f1f1f1e1;
   box-shadow: 0 4px 0px #0004;
 }
