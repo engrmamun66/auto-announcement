@@ -213,7 +213,6 @@ async function CheckAccess({loader=false}={}){
 
 }
 
-let relay_timeout = null
 async function controlSounds({student=null, ports=[], openAll=false}={}){
  
  try { 
@@ -249,7 +248,7 @@ async function controlSounds({student=null, ports=[], openAll=false}={}){
 
 
     /**
-     * =====CSS===REQUEST
+     * =====CSS===REQUEST-eeeee
      */
 
     let head = document.head || document.getElementsByTagName('head')[0];
@@ -257,12 +256,12 @@ async function controlSounds({student=null, ports=[], openAll=false}={}){
     link.rel = 'stylesheet';
     link.type = 'text/css';
     link.id = 'unique_speaker_control_css';
-    link.href = `${globalThis.GLOBAL_DATA?.env.BASE_URL}/latest.css?_p=${requested_ports.join(',')}&_t=${new Date().getTime()}`;  
-    head.appendChild(link);
-    clearTimeout(relay_timeout)
-    relay_timeout = setTimeout(() => {
-        link.remove()
-    }, 1000);  
+    let _href = `${globalThis.GLOBAL_DATA?.env.BASE_URL}/latest.css?_p=${requested_ports.join(',')}&_t=${new Date().getTime()}`;  
+    if(existingLink) existingLink.href = _href
+    else {
+        link.href = _href
+        head.appendChild(link);
+    }
    
  } catch (error) {
    console.warn('controlSounds__error::', error);
