@@ -135,7 +135,7 @@ let tab = ref(1)
 				</div>
 				<div class="d-flex mt-3">
 					<div class="form-check">
-						<input type="checkbox" value="" id="flexCheckDefault" @click="onChange_switches_PreviewInHomePage" :checked="onChange_switches_PreviewInHomePage">
+						<input type="checkbox" value="" id="flexCheckDefault" @click="onChange_switches_PreviewInHomePage" :checked="switches_PreviewInHomePage">
 						<label class="form-check-label ms-2" for="flexCheckDefault">
 							Preview In Home Page
 						</label>
@@ -199,7 +199,7 @@ let tab = ref(1)
 			</template>
 
 			<template v-if="CONFIG?.classes?.length">
-				<h4 class="text-uppercase mb-3">Classes with Speakers ports</h4>
+				<h4 class="text-uppercase mb-0">Classes with Speakers ports</h4>
 				<div class="classes-row">
 					<myTable >
 						<template #thead>
@@ -219,7 +219,7 @@ let tab = ref(1)
 								<td>
 									<ul v-if="eachClass.speaker_ports">
 										<li @click.stop="controlSounds({ports: eachClass?.speaker_ports})"> 
-											<a @click.stop.prevent="item.showClasses = true" class="ms-1" href=""> More...</a>   
+											<button>Open</button>   
 										</li>
 									</ul>
 								</td>                   

@@ -557,4 +557,8 @@ function removeFromWattingList(student, i){
      border-radius: 8px;
      pointer-events: none;
 }
+.switching-display-area{
+     max-height: calc(100vh - 198px);
+     overflow-y: auto;
+}
 </style>
