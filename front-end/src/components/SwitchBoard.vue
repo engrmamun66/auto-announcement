@@ -26,6 +26,9 @@ let emitter = inject('emitter');
 
 
 let CONFIG = inject('CONFIG', null);
+watch(CONFIG, (configData) => {
+	console.log({configData});
+}, {deep: true})
 
 function arrayChunk(arr, size) {
     const chunkedArr = [];
@@ -198,8 +201,6 @@ let tab = ref(1)
 			<template v-if="CONFIG?.classes?.length">
 				<h4 class="text-uppercase mb-3">Classes with Speakers ports</h4>
 				<div class="classes-row">
-					 
-	
 					<myTable >
 						<template #thead>
 							<thead>
@@ -210,27 +211,22 @@ let tab = ref(1)
 							</tr>
 							</thead>
 						</template>
-						<template #rows>
-							<template v-for="eachClass in CONFIG?.classes">
-								<tr>
-									
-									<td> {{ eachClass.class_name }} </td> 
-									<td> {{ eachClass?.speaker_ports }} </td>                     
-									<td>
-										<ul v-if="item.classes">
-											<li @click.stop="controlSounds({ports: eachClass?.speaker_ports})"> 
-												<a @click.stop.prevent="item.showClasses = true" class="ms-1" href=""> More...</a>   
-											</li>
-										</ul>
-									</td>                   
+						<template #rows>  
+							<tr v-for="eachClass in CONFIG.classes">
 								
-								</tr> 
-				
+								<td> {{ eachClass.class_name }} </td> 
+								<td> {{ eachClass?.speaker_ports }} </td>                     
+								<td>
+									<ul v-if="eachClass.speaker_ports">
+										<li @click.stop="controlSounds({ports: eachClass?.speaker_ports})"> 
+											<a @click.stop.prevent="item.showClasses = true" class="ms-1" href=""> More...</a>   
+										</li>
+									</ul>
+								</td>                   
 							
-							
-							</template>
+							</tr>  
 						</template>
-						</myTable> 
+					</myTable> 
 				</div>
 			</template>
 
