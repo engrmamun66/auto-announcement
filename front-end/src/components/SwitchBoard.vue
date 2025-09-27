@@ -26,9 +26,6 @@ let emitter = inject('emitter');
 
 
 let CONFIG = inject('CONFIG', null);
-watch(CONFIG, (configData) => {
-	console.log({configData});
-}, {deep: true})
 
 function arrayChunk(arr, size) {
     const chunkedArr = [];
