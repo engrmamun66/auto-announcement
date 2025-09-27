@@ -331,7 +331,14 @@ function isPayingThisCard(student){
           </div>
 
 
-          <div class="single-section watting-list">
+          <div class="single-section watting-list relative">
+               <div class="header-and-tools">
+                    <div class="header-title"> Puch Board </div> 
+                    <div class="right-section">
+                         <span class="outlined" >Waitting: {{ wattingList.filter(student => !student.is_called).length }}/{{ wattingList.length }}</span>
+                         <span class="outlined" >Completed: {{ wattingList.filter(student => student.is_called).length }}/{{ wattingList.length }}</span>
+                    </div> 
+               </div>
                <div class="set-max-height" id="students_card_container">
                     <div>
                          <template v-for="(student, i) in wattingList" :key="i"> 
@@ -445,8 +452,36 @@ function isPayingThisCard(student){
   flex-wrap: wrap; /* Wraps to the next column */
   gap: 1rem; /* Spacing between columns */
 }
+.watting-list .header-and-tools{  
+  display: flex;
+  flex-wrap: wrap;  
+  justify-content: space-between; 
+  overflow-x: auto;
+  align-items: center;
+  width: 100%;
+  padding: 8px;
+  border-bottom: 1px solid #f1f1f1e1;
+  box-shadow: 0 4px 0px #0004;
+}
+.watting-list .header-and-tools .right-section{  
+  display: flex;
+  flex-wrap: wrap;  
+  justify-content: flex-end; 
+  overflow-x: auto;
+  align-items: center;
+  gap: 10px; 
+}
+.watting-list .header-and-tools .right-section .outlined{  
+  padding: 3px 10px;
+  color: var(--primaryColor);
+  border: 1px solid var(--primaryColor);
+  background: transparent;
+  border-radius: 4px; 
+  opacity: 0.8;
+  font-size: 14px;
+}
 .watting-list .set-max-height {
-  max-height: calc(100% - 20px);
+  max-height: calc(100% - 70px);
   width: 100%;
 
   /* overflow-y: auto; */
@@ -590,7 +625,7 @@ function isPayingThisCard(student){
 }
 .header-span-item.waitting,
 .header-span-item.completed{
-     padding: 0px 5px;
+     padding: 0px 8px;
      border-radius: 25px;
      padding-top: 1px;
      margin-left: 10px;
