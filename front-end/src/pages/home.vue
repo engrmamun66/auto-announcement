@@ -13,6 +13,7 @@ import BarcodeScannigAnimation from '../components/BarcodeScannigAnimation.vue'
 import EmergencyMode from '../components/EmergencyMode.vue'
 import PlayingAnimation from '../components/PlayingAnimation.vue'
 import SwitchBoard from '../components/SwitchBoard.vue'
+import Confirm from '../components/Confirm.vue'
 import helper from '../utilities/helper';
 
 
@@ -174,6 +175,17 @@ function isPayingThisCard(student){
 }
 function isMatchedWithCurrentItem(student){
      return student?.dakhela == storage('currentItem').value?.dakhela
+}
+function makeAsUncalled(student){
+     let status = student.is_called
+     student.is_called = false;
+     student.is__playing = false;
+}
+
+let showRecallConfirmation = ref(false)
+function recallAllPunchedStudents(){
+     wattingList.value.forEach(makeAsUncalled)
+     storage('wattingList').value = helper.clone(wattingList.value)
 }
 
 </script>
@@ -340,6 +352,7 @@ function isMatchedWithCurrentItem(student){
                     <div class="right-section">
                          <span class="outlined" >Waitting: {{ wattingList.filter(student => !student.is_called).length }}/{{ wattingList.length }}</span>
                          <span class="outlined" >Completed: {{ wattingList.filter(student => student.is_called).length }}/{{ wattingList.length }}</span>
+                         <button class="action-button" @click.stop="showRecallConfirmation = true" >Recall All</button>
                     </div> 
                </div>
                <div class="set-max-height" id="students_card_container">
@@ -379,23 +392,17 @@ function isMatchedWithCurrentItem(student){
                                              </div>
                                         </div>
                                    <div class="icons"> 
-                                             <i v-if="!student.is_called" class='bx bx-check'></i>
-                                             <i v-else-if="student.is_called" class='bx bx-check-double cp' @click="()=>{
-                                                  let status = student.is_called
-                                                  student.is_called = !status;
-                                                  student.is__playing = !status;
-                                             }"  ></i> 
-                                             <i v-else class='bx bx-checkbox-square' ></i> 
-                                             <span v-if="student?.total_punch" class='header-span-item'>Punched: {{ student?.total_punch || 0 }}</span> 
-                                             <span class="header-span-item" 
-                                             :class="{
-                                                  'waitting': !student.is_called,
-                                                  'completed': student.is_called,
-                                                  'calling': !manually_paused_the_playlist && isPayingThisCard(student),
-                                                  'paused': !student.is_called && manually_paused_the_playlist && isMatchedWithCurrentItem(student)
-                                             }">
-                                                  {{ !student.is_called ? (isPayingThisCard(student) ? (manually_paused_the_playlist ? 'Paused' : 'Calling...') : 'Watting') : 'Completed' }}
-                                             </span>
+                                        <span class="header-span-item" @click.stop="student.is_called ? makeAsUncalled(student) : () => {}"
+                                        :class="{
+                                             'waitting': !student.is_called,
+                                             'completed': student.is_called,
+                                             'cp': student.is_called,
+                                             'calling': !manually_paused_the_playlist && isPayingThisCard(student),
+                                             'paused': !student.is_called && manually_paused_the_playlist && isMatchedWithCurrentItem(student)
+                                        }">
+                                             {{ !student.is_called ? (isPayingThisCard(student) ? (manually_paused_the_playlist ? 'Paused' : 'Calling...') : 'Watting') : 'Completed' }}
+                                        </span>
+                                        <span v-if="student?.total_punch > 1" class='header-span-item comp'>Punched: {{ student?.total_punch }}</span> 
                                    </div>
                                    <span @click="removeFromWattingList(student, i)" class="card-canceller">
                                              <i class='bx bx-x'></i>
@@ -414,6 +421,11 @@ function isMatchedWithCurrentItem(student){
                </div>
           </div>
      </div>
+
+
+     <Confirm v-model="showRecallConfirmation" @yes="recallAllPunchedStudents()" >
+          সকল শিক্ষার্থীদের পুনরায় ডাকতে চান ?
+     </Confirm>
 
 
 
@@ -471,6 +483,7 @@ function isMatchedWithCurrentItem(student){
   padding: 0px 8px 0px 0px;
   border-bottom: 1px solid #f1f1f1e1;
   box-shadow: 0 4px 0px #0004;
+  height: 40px;
 }
 .watting-list .header-and-tools .right-section{  
   display: flex;
@@ -478,17 +491,25 @@ function isMatchedWithCurrentItem(student){
   justify-content: flex-end; 
   overflow-x: auto;
   align-items: center;
-  gap: 10px; 
+  gap: 10px;
 }
 .watting-list .header-and-tools .right-section .outlined{  
   padding: 3px 10px;
   color: var(--primaryColor);
   border: 1px solid var(--primaryColor);
-  background: transparent;
+  background: #f1f1f1;
   border-radius: 4px; 
   opacity: 0.8;
   font-size: 14px;
 }
+.watting-list .header-and-tools .right-section .action-button{  
+     padding: 3px 10px;
+     border: 1px solid var(--primaryColor);
+     background: var(--primaryColor);
+     color: white;
+     border-radius: 4px;  
+     font-size: 14px;
+} 
 .watting-list .set-max-height {
   max-height: calc(100% - 70px);
   width: 100%;
@@ -509,8 +530,6 @@ function isMatchedWithCurrentItem(student){
 }
 .watting-list .set-max-height div .student-box {
      --call-done: linear-gradient(0deg, #2fe9df00 0%, #9c9cec00 100%); 
-     --waiting-for-call: linear-gradient(0deg, #2fe9df00 0%, #22ca22b8 100%);
-     --calling: linear-gradient(0deg, #2fe9df00 0%, #09d21ebb 100%);
 }
 
 
@@ -520,8 +539,6 @@ function isMatchedWithCurrentItem(student){
   width: var(--std-card-width, 200px);
   min-height: 90px;
   border: 1px solid rgb(7, 109, 146);
-  background: var(--waiting-for-call);
-  background: var(--calling); 
   background: var(--call-done); 
   border-radius: 5px;
 }
@@ -536,6 +553,8 @@ function isMatchedWithCurrentItem(student){
   top: 4px; 
   padding-left: 12px;
   display: flex; 
+  justify-content: start;
+  gap: 6px;
 }
 .watting-list .set-max-height div .student-box > div{
   padding: 15px; 
@@ -639,7 +658,6 @@ function isMatchedWithCurrentItem(student){
      padding: 0px 8px;
      border-radius: 25px;
      padding-top: 1px;
-     margin-left: 10px;
      color: black;
 }
 .header-span-item.waitting{ 

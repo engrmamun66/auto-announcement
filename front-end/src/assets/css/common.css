@@ -458,3 +458,17 @@ kbd {
     height: 38px;
     cursor: pointer;
 }
+
+.btn-cb{
+    padding: 4px 8px;
+    border-radius: 5px;
+    padding-top: 1px;
+    color: white;
+    border: none;
+}
+.btn-cb.green{
+    background-color: var(--primaryColor);
+}
+.btn-cb.red{
+    background-color: red;
+}
