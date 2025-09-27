@@ -172,6 +172,9 @@ function removeFromWattingList(student, i){
 function isPayingThisCard(student){
      return !student.is_called && student?.dakhela == storage('currentItem').value?.dakhela
 }
+function isMatchedWithCurrentItem(student){
+     return student?.dakhela == storage('currentItem').value?.dakhela
+}
 
 </script>
 
@@ -384,8 +387,14 @@ function isPayingThisCard(student){
                                              }"  ></i> 
                                              <i v-else class='bx bx-checkbox-square' ></i> 
                                              <span v-if="student?.total_punch" class='header-span-item'>Punched: {{ student?.total_punch || 0 }}</span> 
-                                             <span class="header-span-item" :class="{'waitting': !student.is_called, 'completed': student.is_called}">
-                                                  {{ !student.is_called ? (isPayingThisCard(student) ? 'Calling...' : 'Watting') : 'Completed' }}
+                                             <span class="header-span-item" 
+                                             :class="{
+                                                  'waitting': !student.is_called,
+                                                  'completed': student.is_called,
+                                                  'calling': !manually_paused_the_playlist && isPayingThisCard(student),
+                                                  'paused': !student.is_called && manually_paused_the_playlist && isMatchedWithCurrentItem(student)
+                                             }">
+                                                  {{ !student.is_called ? (isPayingThisCard(student) ? (manually_paused_the_playlist ? 'Paused' : 'Calling...') : 'Watting') : 'Completed' }}
                                              </span>
                                    </div>
                                    <span @click="removeFromWattingList(student, i)" class="card-canceller">
@@ -623,6 +632,8 @@ function isPayingThisCard(student){
      color: #333;
      margin-top: 1px;
 }
+.header-span-item.calling,
+.header-span-item.paused,
 .header-span-item.waitting,
 .header-span-item.completed{
      padding: 0px 8px;
@@ -637,6 +648,14 @@ function isPayingThisCard(student){
 .header-span-item.completed{ 
      color: #ffffff;
      background-color: rgb(7, 165, 39); 
+}
+.header-span-item.calling{ 
+     color: #ffffff;
+     background-color: rgb(233, 5, 191); 
+}
+.header-span-item.paused{ 
+     color: #ffffff;
+     background-color: rgb(233, 96, 5); 
 }
 .manual-mode{
      position: absolute;
