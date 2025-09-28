@@ -75,10 +75,12 @@ let all_manualy_opened_ports = ref(JSON.parse(localStorage.getItem('manually_ope
 
 
 function isOpenedPort({speaker_ports}){
+	if(!isSpeakersAutoMode.value) return false
 	let result = speaker_ports.every(port => all_manualy_opened_ports.value.includes(port))
 	return result
 }
 function isOpenedThisPort(port){
+	if(!isSpeakersAutoMode.value) return false
 	return all_manualy_opened_ports.value.includes(port)
 }
 
@@ -225,7 +227,11 @@ let tab = ref(1)
 								
 								<td> {{ eachClass.class_name }} </td> 
 								<td class="text-center">
-									<span v-for="port in eachClass?.speaker_ports" class="each-class-speaker-port" :class="{'opened-port': isOpenedThisPort(port)}">
+									<span v-for="port in eachClass?.speaker_ports" :class="{
+										'each-class-speaker-port-auto': isSpeakersAutoMode,
+										'each-class-speaker-port-manual': !isSpeakersAutoMode,
+										'opened-port': isOpenedThisPort(port),
+										}">
 										{{ port }}
 									</span>
 								</td>                     
@@ -351,17 +357,27 @@ let tab = ref(1)
 .action-open-btn.active{
 	background-color: rgb(2, 156, 35);
 }
-.each-class-speaker-port{
+.each-class-speaker-port-auto{
+	padding: 4px;
+	font-size: 12px;
+	color: rgb(32, 32, 32);
+	background-color: #bebebe;
+	border-radius: 3px;
+}
+.each-class-speaker-port-auto:not(:last-child){
+	margin-right: 5px;
+}
+.each-class-speaker-port-manual{
 	padding: 4px;
 	font-size: 12px;
 	color: white;
 	background-color: #b75656;
 	border-radius: 3px;
 }
-.each-class-speaker-port.opened-port{
+.each-class-speaker-port-manual.opened-port{
 	background-color: #358f47;
 }
-.each-class-speaker-port:not(:last-child){
+.each-class-speaker-port-manual:not(:last-child){
 	margin-right: 5px;
 }
 </style>
