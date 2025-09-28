@@ -352,7 +352,7 @@ function recallAllPunchedStudents(){
                     <div class="right-section" v-if="wattingList?.length">
                          <span class="outlined" >Waitting: {{ wattingList.filter(student => !student.is_called).length }}/{{ wattingList.length }}</span>
                          <span class="outlined" >Completed: {{ wattingList.filter(student => student.is_called).length }}/{{ wattingList.length }}</span>
-                         <button class="action-button" @click.stop="showRecallConfirmation = true" >Recall All</button>
+                         <button class="action-button" @click.stop="showRecallConfirmation = true" ><i class='bx bxs-speaker transformY-1px' ></i> Recall All</button>
                     </div> 
                </div>
                <div class="set-max-height" id="students_card_container">
