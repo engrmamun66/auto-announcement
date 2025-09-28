@@ -231,7 +231,7 @@ let tab = ref(1)
 								</td>                     
 								<td>
 									<ul v-if="eachClass.speaker_ports">
-										<li @click.stop="onChangeRelaySwitch({eachClass})"> 
+										<li @click.stop="isOpenedPort(eachClass) ? closeAll() : onChangeRelaySwitch({eachClass})"> 
 											<button class="action-open-btn text-center" :class="{'active': isOpenedPort(eachClass)}">
 												{{ isSpeakersAutoMode ? 'Auto' : (isOpenedPort(eachClass) ? 'Opened': 'Open')  }}
 											</button>   
@@ -342,14 +342,14 @@ let tab = ref(1)
 .action-open-btn{
     border: none;
     border-radius: 4px;
-    background-color: #dadada;
+	color: white !important;
+    background-color: #b75656;
     color: var(--primaryColor);
     padding: 2px 6px;
     width: 80px;
 }
 .action-open-btn.active{
 	background-color: rgb(2, 156, 35);
-	color: white;
 }
 .each-class-speaker-port{
 	padding: 4px;
