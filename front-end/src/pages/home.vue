@@ -400,7 +400,7 @@ function recallAllPunchedStudents(){
                                              'calling': !manually_paused_the_playlist && isPayingThisCard(student),
                                              'paused': !student.is_called && manually_paused_the_playlist && isMatchedWithCurrentItem(student)
                                         }">
-                                             {{ !student.is_called ? (isPayingThisCard(student) ? (manually_paused_the_playlist ? 'Paused' : 'Calling...') : 'Watting') : 'Completed' }}
+                                             {{ !student.is_called ? (isPayingThisCard(student) ? (manually_paused_the_playlist ? 'Paused' : 'Calling...') : 'Waitting') : 'Completed' }}
                                         </span>
                                         <span v-if="student?.total_punch > 1" class='header-span-item comp'>Punched: {{ student?.total_punch }}</span> 
                                    </div>
