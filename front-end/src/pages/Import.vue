@@ -98,7 +98,7 @@ onMounted(() => {
 </script>
 
 <template>
-     <div class="d-flex justify-content-between mb-4">
+     <div class="d-flex justify-content-between align-items-center mb-4">
           <h1>Import Students</h1>  
           <div class="right-align" >
                <Btn v-if="useRoute().query.dev == 'true'" @click="eraseAll" class="red me-1" ><i class='bx bxs-eraser' ></i> Erase All <BtnLoader v-if="loading"></BtnLoader> </Btn>

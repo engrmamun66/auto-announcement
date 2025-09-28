@@ -331,7 +331,7 @@ const log = console.log
 </script>
 
 <template>
-    <div class="d-flex justify-content-between flex-wrap">
+    <div class="d-flex justify-content-between align-items-center flex-wrap">
       <h1>{{ !addMode ? 'Students' : 'Add Student'}}</h1> 
       
       <div class="d-flex justify-content-end">

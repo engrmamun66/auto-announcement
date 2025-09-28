@@ -17,7 +17,7 @@ button {
   background: var(--grad3);
   border-radius: 5px;
   color: white;
-  padding: 10px 20px;
+  padding: 8px 15px;
   position: relative;
   text-align: center;
   border: none; /* Removes default border for button */
