@@ -247,23 +247,29 @@ async function controlSounds({student=null, ports=[], openAll=false}={}){
 
     emitter.emit('when_firing__controlSounds', {ports: requested_ports, openAll})
 
-    let existingLink = document.getElementById('unique_speaker_control_css')
+    let existingLink = document.getElementById('latest_css')
 
 
     /**
      * =====CSS===REQUEST-eeeee
      */
 
+    let removeHref = (el) => setTimeout(()=>el.removeAttribute('href'), 10)
+
     let head = document.head || document.getElementsByTagName('head')[0];
     let link = document.createElement('link');
     link.rel = 'stylesheet';
     link.type = 'text/css';
-    link.id = 'unique_speaker_control_css';
+    link.id = 'latest_css';
     let _href = `${globalThis.GLOBAL_DATA?.env.BASE_URL}/latest.css?_p=${requested_ports.join(',')}&t=${new Date().getTime()}`;  
-    if(existingLink) existingLink.href = _href
+    if(existingLink){
+        existingLink.href = _href
+        removeHref(existingLink)
+    }
     else {
         link.href = _href
         head.appendChild(link);
+        removeHref(link)
     }
    
  } catch (error) {
@@ -624,8 +630,6 @@ function focusCurrenPlayingSoundCard_if_userIsInavtiveForFewSeconds(){
                 });
             }
         } 
-    } else {
-    console.log('=====EEEEs');
     }
 }
 
