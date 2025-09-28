@@ -608,18 +608,25 @@ onMounted(async ()=>{
 
 
 function focusCurrenPlayingSoundCard_if_userIsInavtiveForFewSeconds(){
-    let last_activity_time = last_mouse_activity_time.value
-    let seconds = moment(moment()).diff(last_activity_time, 'seconds')
-
-    if(seconds >= 3){
-        let targetedCard = document.querySelector(`[playing=true]`)
-        if(targetedCard){
-            targetedCard.scrollIntoView({
-                behavior: "smooth", 
-                block: "start",
-            });
-        }
-    } 
+    let auto_focus_mode = CONFIG.value?.settings?.auto_focus_student_card?.status
+    let delay_in_seconds = CONFIG.value?.settings?.auto_focus_student_card?.delay_in_seconds || 3
+    if(auto_focus_mode){
+        
+        let last_activity_time = last_mouse_activity_time.value
+        let seconds = moment(moment()).diff(last_activity_time, 'seconds')
+    
+        if(seconds >= delay_in_seconds){
+            let targetedCard = document.querySelector(`[playing=true]`)
+            if(targetedCard){
+                targetedCard.scrollIntoView({
+                    behavior: "smooth", 
+                    block: "start",
+                });
+            }
+        } 
+    } else {
+    console.log('=====EEEEs');
+    }
 }
 
 

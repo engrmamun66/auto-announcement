@@ -469,9 +469,6 @@ function recallAllPunchedStudents(){
 .watting-list {
   padding: 15px;
   width: 100%;
-  display: flex;
-  flex-wrap: wrap; /* Wraps to the next column */
-  gap: 1rem; /* Spacing between columns */
 }
 .watting-list .header-and-tools{  
   display: flex;
@@ -484,6 +481,7 @@ function recallAllPunchedStudents(){
   box-shadow: 0 4px 0px #0004;
   min-height: 40px;
   max-height: 62px;
+  margin-bottom: 20px;
 }
 .watting-list .header-and-tools .right-section{  
   display: flex;

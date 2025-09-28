@@ -38,7 +38,11 @@ module.exports = {
      },
      settings: {
           log_backup_days: 7,
-          punch_log_indent: 0, // for developer
+          punch_log_indent: 0, // for developer,
+          auto_focus_student_card: {
+               status: false,
+               delay_in_seconds: 3
+          },
           backup: {
                logo: true,
                database: true,
@@ -51,7 +55,7 @@ module.exports = {
                status: true,
                switch_count: 8,
                switch_board_chunk_size: 8,
-               on_inactivity_switches_mode: 'no_action', // no_action | open_all | close_all | [1,2,3] ===> array of switch numbers
+               on_inactivity_switches_mode: 'close_all', // no_action | open_all | close_all | [1,2,3] ===> array of switch numbers
                switch_mode: 'auto', // auto || manual,
                delay_before_starting: 10, // miliseconds
           }
