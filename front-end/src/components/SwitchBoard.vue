@@ -78,6 +78,9 @@ function isOpenedPort({speaker_ports}){
 	let result = speaker_ports.every(port => all_manualy_opened_ports.value.includes(port))
 	return result
 }
+function isOpenedThisPort(port){
+	return all_manualy_opened_ports.value.includes(port)
+}
 
 async function onChangeRelaySwitch({eachClass=null}={}){
 	let manually_opened_ports = portChunks.value.map(chunk => chunk.filter(item => item.status).map(item => item.port)).flat()
@@ -212,7 +215,7 @@ let tab = ref(1)
 							<thead>
 							<tr> 
 								<th>Class Name</th>
-								<th>Speaker Port</th>
+								<th>Speaker&nbsp;Port</th>
 								<th>Action</th>  
 							</tr>
 							</thead>
@@ -221,12 +224,18 @@ let tab = ref(1)
 							<tr v-for="eachClass in CONFIG.classes">
 								
 								<td> {{ eachClass.class_name }} </td> 
-								<td> {{ eachClass?.speaker_ports }} </td>                     
+								<!-- <td> {{ eachClass?.speaker_ports }} </td>                      -->
+								<td>
+
+									<span v-for="port in eachClass?.speaker_ports" class="each-class-speaker-port" :class="{'opened-port': isOpenedThisPort(port)}">
+										{{ port }}
+									</span>
+								</td>                     
 								<td>
 									<ul v-if="eachClass.speaker_ports">
 										<li @click.stop="onChangeRelaySwitch({eachClass})"> 
 											<button class="action-open-btn text-center" :class="{'active': isOpenedPort(eachClass)}">
-												{{ isOpenedPort(eachClass) ? 'Opened': 'Open' }}
+												{{ isSpeakersAutoMode ? 'Auto' : (isOpenedPort(eachClass) ? 'Opened': 'Open')  }}
 											</button>   
 										</li>
 									</ul>
@@ -343,5 +352,18 @@ let tab = ref(1)
 .action-open-btn.active{
 	background-color: rgb(2, 156, 35);
 	color: white;
+}
+.each-class-speaker-port{
+	padding: 4px;
+	font-size: 12px;
+	color: white;
+	background-color: #b75656;
+	border-radius: 3px;
+}
+.each-class-speaker-port.opened-port{
+	background-color: #358f47;
+}
+.each-class-speaker-port:not(:last-child){
+	margin-right: 5px;
 }
 </style>
