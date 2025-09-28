@@ -733,7 +733,7 @@ const log = console.log
   padding-bottom: 20px;
 }
 .all-class-buttons-to-filter-area{
-  height: 100px;
+  min-height: 40px;
   overflow-y: auto;
 }
 .all-class-buttons-to-filter{ 

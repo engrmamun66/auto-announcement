@@ -476,14 +476,13 @@ function recallAllPunchedStudents(){
 .watting-list .header-and-tools{  
   display: flex;
   flex-wrap: wrap;  
-  justify-content: space-between; 
-  overflow-x: auto;
+  justify-content: space-between;  
   align-items: center;
   width: 100%;
   padding: 0px 8px 0px 0px;
   border-bottom: 1px solid #f1f1f1e1;
   box-shadow: 0 4px 0px #0004;
-  height: 40px;
+  min-height: 40px;
 }
 .watting-list .header-and-tools .right-section{  
   display: flex;
