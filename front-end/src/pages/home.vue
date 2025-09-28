@@ -483,6 +483,7 @@ function recallAllPunchedStudents(){
   border-bottom: 1px solid #f1f1f1e1;
   box-shadow: 0 4px 0px #0004;
   min-height: 40px;
+  max-height: 62px;
 }
 .watting-list .header-and-tools .right-section{  
   display: flex;
