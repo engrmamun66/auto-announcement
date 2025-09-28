@@ -422,7 +422,7 @@ function recallAllPunchedStudents(){
           <div v-if="switches_PreviewInHomePage" class="single-section right-sections">
                <div class="set-max-height">
                     <div class="switching-display-area">
-                         <SwitchBoard viewType="home"></SwitchBoard>
+                         <SwitchBoard viewType="home" :chunkSize="4"></SwitchBoard>
                     </div>
                </div>
           </div>

@@ -8,15 +8,18 @@ import Switch2 from './switch2.vue'
 const getConfig = inject('getConfig');
 const controlSounds = inject('controlSounds');
 const switches_PreviewInHomePage = inject('switches_PreviewInHomePage');
-import helper from './../utilities/helper/index'
 import myTable from './../components/myTable.vue'
 const isSpeakersAutoMode = inject('isSpeakersAutoMode');
+let CONFIG = inject('CONFIG', null);
 
 let props = defineProps({
 	viewType: {
 		type: String,
 		default: 'modal' // or 'inline'
-	}
+	},
+	chunkSize: {
+		default: null
+	},
  
 })
 
@@ -25,8 +28,6 @@ let emits = defineEmits(['close'])
 let emitter = inject('emitter');
 
 
-
-let CONFIG = inject('CONFIG', null);
 
 function arrayChunk(arr, size) {
     const chunkedArr = [];
@@ -41,7 +42,7 @@ function portObject(port_chunk) {
 }
 
 let allPorts = Array.from({ length: CONFIG.value?.settings?.with_speaker_controls?.switch_count || 16 }, (_, i) => i + 1)
-let switch_board_chunk_size = CONFIG.value?.settings?.with_speaker_controls?.switch_board_chunk_size || 8
+let switch_board_chunk_size = props.chunkSize || CONFIG.value?.settings?.with_speaker_controls?.switch_board_chunk_size || 8
 let portChunks = ref(arrayChunk(allPorts, switch_board_chunk_size))
 
 
