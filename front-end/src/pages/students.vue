@@ -461,7 +461,7 @@ const log = console.log
                 <select v-model="params.class_name" class="form-control" id="ClassId">
                   <option :value="null">-class-</option>
                   <template v-for="(cls, index) in classes" :key="index">
-                    <option :value="cls.class_name">{{cls.class_name}}--</option>
+                    <option :value="cls.class_name">{{cls.class_name}}</option>
                   </template>
                   
                 </select>
