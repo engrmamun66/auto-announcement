@@ -20,8 +20,7 @@ let logoEl = ref(null)
 let logo_wrapper = ref(null)
 let route = useRoute()
 
-const emitter = inject('emitter');
-const isResponsive = ref(false);
+const emitter = inject('emitter'); 
  
 onMounted(()=>{
   if(typeof GLOBAL_DATA !== 'undefined'){
