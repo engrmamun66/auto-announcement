@@ -151,11 +151,15 @@ app.get(`/app`, (req, res) => {
 
 // app.get(`/api/check-access`, async (req, res) => { 
 app.get(`/api/_ac`, async (req, res) => { 
-  let accessData = await checkAccess.CheckAppAccess()
-  if(req.query.dev){
-    res.send(accessData)
-  } else {
-    res.send(utils.encodeString('sbrenc%34#' + JSON.stringify(accessData)))
+  try {
+    let accessData = await checkAccess.CheckAppAccess()
+    if(req.query.dev){
+      res.send(accessData)
+    } else {
+      res.send(utils.encodeString('sbrenc%34#' + JSON.stringify(accessData)))
+    }
+  } catch (error) {
+    res.status(404).send({message: 'May be network error'})
   }
 });
 
