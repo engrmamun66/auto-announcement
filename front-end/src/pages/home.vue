@@ -349,14 +349,14 @@ function recallAllPunchedStudents(){
           <div class="single-section watting-list relative">
                <div class="header-and-tools">
                     <div class="header-title"> Puch Board </div> 
-                    <div class="right-section">
+                    <div class="right-section" v-if="wattingList?.length">
                          <span class="outlined" >Waitting: {{ wattingList.filter(student => !student.is_called).length }}/{{ wattingList.length }}</span>
                          <span class="outlined" >Completed: {{ wattingList.filter(student => student.is_called).length }}/{{ wattingList.length }}</span>
                          <button class="action-button" @click.stop="showRecallConfirmation = true" >Recall All</button>
                     </div> 
                </div>
                <div class="set-max-height" id="students_card_container">
-                    <div>
+                    <div v-if="wattingList?.length">
                          <template v-for="(student, i) in wattingList" :key="i"> 
                               <div class="student-box" :class="{'is_called': student.is_called}" 
                               :style="`--std-card-width:${card_dynamic_width}px`"
@@ -411,6 +411,11 @@ function recallAllPunchedStudents(){
                                    </div>
                               </div> 
                          </template>
+                    </div>
+                    <div v-else>
+                         <div class="p-5 text-muted w-100 radius-5" style="border: 1px solid #949494;height:">
+                              <h5 class="text-center">Punch Board is Empty</h5>
+                         </div>
                     </div>
                </div>
           </div>
