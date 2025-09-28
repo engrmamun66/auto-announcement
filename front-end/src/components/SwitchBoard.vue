@@ -302,8 +302,7 @@ let tab = ref(1)
 .open-closer{
 	margin-top: 10px;
     padding: 4px 20px;
-    background-color: #e1e1e1;
-    background-color: #e9ecef;
+    background-color: #e0e0e0;
     border-radius: 6px;
 	border: none;
 	box-shadow: 0px 0px 0px black;
