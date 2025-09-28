@@ -75,12 +75,12 @@ let all_manualy_opened_ports = ref(JSON.parse(localStorage.getItem('manually_ope
 
 
 function isOpenedPort({speaker_ports}){
-	if(!isSpeakersAutoMode.value) return false
+	if(isSpeakersAutoMode.value) return false
 	let result = speaker_ports.every(port => all_manualy_opened_ports.value.includes(port))
 	return result
 }
 function isOpenedThisPort(port){
-	if(!isSpeakersAutoMode.value) return false
+	if(isSpeakersAutoMode.value) return false
 	return all_manualy_opened_ports.value.includes(port)
 }
 
