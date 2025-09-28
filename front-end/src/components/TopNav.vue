@@ -8,15 +8,6 @@
         <RouterLink :to="{name: 'shedules'}" :class="{'active': route.name === 'shedules'}"><i class='bx bxs-calendar' ></i> Shedules</RouterLink>
         <RouterLink :to="{name: 'import'}" :class="{'active': route.name === 'import'}"><i class='bx bxs-file-import' ></i> Import</RouterLink>
         
-        <!-- <div class="right-lnk">
-            <a v-if="loggedIn" href="#">
-              Logout <i class='bx bxs-log-in' ></i>
-            </a>
-            <a v-else href="#">
-              <i class='bx bxs-user' ></i> Admin
-            </a>
-        </div>
-        --> 
     </div>
 </template>
 
@@ -28,23 +19,16 @@ import { RouterLink, useRoute } from 'vue-router';
 let logoEl = ref(null)
 let logo_wrapper = ref(null)
 let route = useRoute()
-let loggedIn = ref(false)
 
 const emitter = inject('emitter');
-const is_started_schedule = inject('is_started_schedule');
 const isResponsive = ref(false);
-
-const toggleMenu = () => {
-  isResponsive.value = !isResponsive.value;
-};
-
+ 
 onMounted(()=>{
   if(typeof GLOBAL_DATA !== 'undefined'){
     if(GLOBAL_DATA?.logo){
       logoEl.value.src = GLOBAL_DATA.logo
       logoEl.value.style.width = GLOBAL_DATA.logo_width
-      logo_wrapper.value.style.padding = GLOBAL_DATA.logo_area_padding || '14px 33px'
-      // GLOBAL_DATA.env = JSON.parse(GLOBAL_DATA.env) 
+      logo_wrapper.value.style.padding = GLOBAL_DATA.logo_area_padding || '14px 33px' 
     }
   }
 })
