@@ -554,14 +554,14 @@ const log = console.log
                   <td class="text-left"> {{ std.class }} </td> 
                   <td class="text-left cp" @click.stop="prepareToEdit(std)" :student-id="std.id" >{{ std.name.split('||')?.[0] }}</td>
                   <td> 
-                    <label>
-                      {{ std.dakhela }}
+                    <div class="align-items-center d-flex">
+                      <span class="p-1">{{ std.dakhela }}</span>
                       <span tooltip="Cone Student">
                       <i v-if="std.name && String(std.name)?.indexOf('||dakhela') > -1 === false" @click.stop="()=>{
                         std.cloneMode = !(!!(std.cloneMode));
                       }" class="bx bxs-copy-alt cp px-1"></i>
                       </span>
-                    </label>
+                    </div>
                     
                     <template v-if="std?.cloneMode">
                       <div class="std-clone-area">
