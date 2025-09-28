@@ -471,17 +471,17 @@ function recallAllPunchedStudents(){
   width: 100%;
 }
 .watting-list .header-and-tools{  
-  display: flex;
-  flex-wrap: wrap;  
-  justify-content: space-between;  
-  align-items: center;
-  width: 100%;
-  padding: 0px 0px 8px 0px;
-  border-bottom: 1px solid #f1f1f1e1;
-  box-shadow: 0 4px 0px #0004;
-  min-height: 40px;
-  max-height: 62px;
-  margin-bottom: 20px;
+     display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 0 0 8px;
+    border-bottom: 1px solid #f1f1f1e1;
+    box-shadow: 0 1px #0004;
+    min-height: 40px;
+    max-height: 62px;
+    margin-bottom: 20px;
 }
 .watting-list .header-and-tools .right-section{  
   display: flex;

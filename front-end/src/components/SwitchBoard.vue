@@ -205,7 +205,7 @@ let tab = ref(1)
 			</template>
 
 			<template v-if="CONFIG?.classes?.length">
-				<h4 class="text-uppercase mb-0">Classes with Speakers ports</h4>
+				<h4 class="text-uppercase- mb-0">Classes with Speakers Ports</h4>
 				<div class="classes-row">
 					<myTable >
 						<template #thead>
