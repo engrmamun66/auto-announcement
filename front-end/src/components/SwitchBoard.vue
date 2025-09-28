@@ -224,9 +224,7 @@ let tab = ref(1)
 							<tr v-for="eachClass in CONFIG.classes">
 								
 								<td> {{ eachClass.class_name }} </td> 
-								<!-- <td> {{ eachClass?.speaker_ports }} </td>                      -->
-								<td>
-
+								<td class="text-center">
 									<span v-for="port in eachClass?.speaker_ports" class="each-class-speaker-port" :class="{'opened-port': isOpenedThisPort(port)}">
 										{{ port }}
 									</span>
