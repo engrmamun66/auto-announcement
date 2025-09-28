@@ -1,11 +1,17 @@
 <script setup>
  
+defineProps({
+  topMarginClass: {
+    default: 'mt-4',
+    required: false
+  }
+})
 
 </script>
 
 <template>
 <div class="table-container" v-bind="$attrs">
-  <table class="table table-striped- mt-4">  
+  <table class="table table-striped-" :class="[ topMarginClass ]">  
    
     <slot name="thead">
       <thead>
