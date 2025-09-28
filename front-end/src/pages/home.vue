@@ -513,8 +513,7 @@ function recallAllPunchedStudents(){
      max-height: calc(100% - 60px);
      width: 100%;
      overflow-y: auto;
-
-  /* overflow-y: auto; */
+     padding-right: 5px;
 }
 .watting-list .set-max-height > div {
   max-height: 100%;
