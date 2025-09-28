@@ -348,7 +348,7 @@ function recallAllPunchedStudents(){
 
           <div class="single-section watting-list relative">
                <div class="header-and-tools">
-                    <div class="header-title"> Puch Board </div> 
+                    <h4 class="header-title"> Puch Board </h4> 
                     <div class="right-section" v-if="wattingList?.length">
                          <span class="outlined" >Waitting: {{ wattingList.filter(student => !student.is_called).length }}/{{ wattingList.length }}</span>
                          <span class="outlined" >Completed: {{ wattingList.filter(student => student.is_called).length }}/{{ wattingList.length }}</span>
