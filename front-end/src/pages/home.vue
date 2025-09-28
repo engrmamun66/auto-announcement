@@ -140,7 +140,7 @@ function updateStudetCardSize(){
           const scroolbarWidth = 10 
           
           if(width < 400){
-               card_dynamic_width.value = width
+               card_dynamic_width.value = width - 15
           } 
           else if(width < 600){
                card_dynamic_width.value = Math.floor(width / 2) - (scroolbarWidth)
