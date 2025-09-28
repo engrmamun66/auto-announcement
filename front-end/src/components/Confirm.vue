@@ -16,7 +16,7 @@
     -->
     <teleport to="body">
       <div
-        class="modal fade "
+        class="modal fade fadeUp"
         :class="{ show: modelValue }"
         :style="modelValue ? 'display: block' : 'display: none'"
       >
