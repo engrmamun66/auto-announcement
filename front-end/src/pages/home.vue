@@ -509,8 +509,9 @@ function recallAllPunchedStudents(){
      font-size: 14px;
 } 
 .watting-list .set-max-height {
-  max-height: calc(100% - 70px);
-  width: 100%;
+     max-height: calc(100% - 60px);
+     width: 100%;
+     overflow-y: auto;
 
   /* overflow-y: auto; */
 }
