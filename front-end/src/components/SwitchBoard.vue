@@ -176,7 +176,7 @@ let tab = ref(1)
 			
 		</ul>  -->
 		<div class="d-flex justify-content-between align-items-center">
-			<h4>SWITCHES ACTIVITY</h4>
+			<h4>Switches Activity</h4>
 			<Switch2 v-model="switch_mode" style="zoom: 0.7" yes="Auto" no="Manual" size="lg" @change="log('changed')" ></Switch2>
 		</div>
 		<div class="switch-area">
