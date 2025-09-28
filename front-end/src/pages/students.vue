@@ -117,6 +117,8 @@ async function clearParams({dakhela=null, id=null, get=true}={}){
   only_similler_students.value = false
   editModeTabIndex.value = 1
   if(get) getStudents({id}) 
+  let studentsTab = document.querySelector('.students-tab')
+  if(studentsTab) studentsTab.click()
 }
  
 async function deleteAudio(std, colName){
