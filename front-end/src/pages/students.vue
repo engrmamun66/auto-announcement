@@ -586,7 +586,8 @@ const log = console.log
                             <Btn  @click.stop="playThis(i, `isPlaying_${column}`, std); " class="radius-10 sm sound w-100" style="padding: 2px auto;" >
                               <i class='bx bx-play size-1 transformY-3px'></i>&nbsp;Play
                             </Btn>
-                            <span v-if="std.name.indexOf('||dakhela') > -1 === false" class="ms-2 me-1 cp" @click.stop="deleteAudio(std, column)" >
+                            <!-- <span v-if="std.name.indexOf('||dakhela') > -1 === false" class="ms-2 me-1 cp" @click.stop="deleteAudio(std, column)" > -->
+                            <span class="ms-2 me-1 cp" @click.stop="deleteAudio(std, column)" >
                               <i class='bx bxs-trash-alt text-danger size-1' ></i>
                             </span>
                           </div> 
