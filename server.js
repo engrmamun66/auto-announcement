@@ -66,16 +66,6 @@ app.use(express.static('public'));
 app.use(express.static('front-end'));
 // Enable CORS
 app.use(cors());
-app.use((req, res, next) => {
-  if (req.method === "GET") {
-    utils.checkNetwork(is_connected_to_internet => {
-      console.log({is_connected_to_internet});
-      global.is_connected_to_internet = is_connected_to_internet
-    })
-  }
-  next();
-});
-
  
 const audioUpload = multer({
   storage: multer.diskStorage({
@@ -172,6 +162,12 @@ app.get(`/api/_ac`, async (req, res) => {
         } else {
           res.send(utils.encodeString('sbrenc%34#' + JSON.stringify(accessData)))
         }
+      } else {
+        // let 
+        let accessData = {
+          internet: false
+        }
+        res.send(utils.encodeString('sbrenc%34#' + JSON.stringify(accessData)))
       }
     })
 
