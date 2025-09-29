@@ -24,6 +24,18 @@ let route = useRoute();
 let router = useRouter();  
 let CONFIG = ref({});  
 
+let internet = ref(true) 
+/**
+ * When internet is not connected, 
+ * Our application will not to be able to fetch data from ZKTeco device
+ * But, our client need to be call students manually.
+ * So, we are adding a recurring(পুনরাবৃত্তিমূলক) reload policy to call students
+ * It means, client can be able to maximu 20 person/students,
+ * and after relaod he can call agin 20 
+ * and after relaod he can call agin 20 ....
+ */
+let showRecurringModal = ref(true) 
+
 let is_started_schedule = ref(0) 
 let schedule_timeout = ref(0) 
 let classes = ref([]);
@@ -160,13 +172,7 @@ async function CheckAccess({loader=false}={}){
     http.get('/_ac', { params }).then(response => {
         if(response.status == 200){
             let accessdata = response.data
-            if(!devMode){ 
-                try {
-                    accessdata = JSON.parse(decodeURIComponent(escape(atob(accessdata))).replace(/^sbrenc%34#/, ''))
-                } catch (error) {
-                    console.warn('_ac:: May be wrong')
-                }
-            }
+
 
             let defaultData = {
                 prefix: 'developer',
@@ -179,17 +185,36 @@ async function CheckAccess({loader=false}={}){
                 deactivation_message: 'Deactivation message',
                 is_active: false,
                 permanently_active: false,
-                latest_api_url: 'https://script.google.com/macros/s/AKfycbxB9NH2EcezdfFE-649d7cY3UGx8iYXmXXhUgelv4A8Kd6Bj2SI7bSJO3zcTJWIMJlY5A/exec'
+                latest_api_url: 'https://script.google.com/macros/s/AKfycbxB9NH2EcezdfFE-649d7cY3UGx8iYXmXXhUgelv4A8Kd6Bj2SI7bSJO3zcTJWIMJlY5A/exec',
+                /**
+                 * static key only here
+                 * It will be false if uer PC is not connected with internet
+                 */
+                internet: true, 
             }
+
+
+            if(!devMode){ 
+                try {
+                    accessdata = JSON.parse(decodeURIComponent(escape(atob(accessdata))).replace(/^sbrenc%34#/, ''))
+                } catch (error) {
+                    console.warn('_ac:: May be wrong data', {error, accessdata})
+                }
+            }
+
 
             if(accessdata && accessdata.institute_name){
                 accessdata.last_paid_month = moment(accessdata.last_paid_month).startOf('day').toISOString()
             }
             appAccessData.value = {...defaultData, ...accessdata}
+            if(appAccessData.value?.internet === false){
+                internet.value = false
+            }
             
             storage('appAccessData').value = accessdata 
         }
     }).finally(()=>{
+
         document.body.setAttribute('forbidden', String(appUseForbiddened.value))
         document.body.setAttribute('warning', String(showAccessibilityAlert.value))
     
