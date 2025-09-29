@@ -152,28 +152,27 @@ app.get(`/app`, (req, res) => {
 app.get(`/api/_ac`, async (req, res) => { 
   try {
 
-    utils.checkNetwork(async (isConnected) => {
-      if(!isConnected) console.log("❌ Not-Connected to the Internet");
-      else console.log("✅ Connected to the Internet");
-      if(isConnected){
-        let accessData = await checkAccess.CheckAppAccess() 
-        if(req.query.dev){
-          res.send(accessData)
-        } else {
-          res.send(utils.encodeString('sbrenc%34#' + JSON.stringify(accessData)))
-        }
+    let is_connecte_to_internet = await utils.checkNetwork()
+    if(!is_connecte_to_internet) console.log("❌ Not-Connected to the Internet");
+
+    if(is_connecte_to_internet){
+      let accessData = await checkAccess.CheckAppAccess() 
+      if(req.query.dev){
+        res.send(accessData)
       } else {
-        // let 
-        let accessData = {
-          internet: false
-        }
         res.send(utils.encodeString('sbrenc%34#' + JSON.stringify(accessData)))
       }
-    })
+    } else {
+      // let  
+      let accessData = {
+        internet: false
+      }
+      res.send(utils.encodeString('sbrenc%34#' + JSON.stringify(accessData)))
+    }
 
 
   } catch (error) {
-    res.status(404).send({message: 'May be network error'})
+    res.status(404).send({message: error || 'May be network error-'})
   }
 });
 

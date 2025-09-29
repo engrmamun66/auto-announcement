@@ -8,19 +8,13 @@ const { exec } = require("child_process");
  
 
 module.exports = {
-    /**
-     * 
-        checkNetwork(async (isConnected) => {
-            console.log("Connected:", isConnected);
-        });
-     */
-    checkNetwork(callback) {
-        const platform = process.platform;
-        const pingCmd = platform === "win32" ? "ping -n 1 8.8.8.8" : "ping -c 1 8.8.8.8";
-
-        exec(pingCmd, (error) => {
-            callback(!error); // true if connected, false if not
-        });
+    async checkNetwork() {
+        try {
+            const res = await fetch("https://www.google.com", { method: "HEAD", timeout: 3000 });
+            return res.ok;
+        } catch {
+            return false;
+        }
     },
     createRequiredFolders(){
 
