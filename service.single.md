@@ -1,5 +1,5 @@
 # About Single Soft Service
-/**
+"""
 
 ==== Simple Documentaion About Single Soft Service =====
 
@@ -51,7 +51,7 @@ Customization options are frequently available, enabling users to adapt the serv
 
 Performance monitoring tools may also be included, giving organizations visibility into productivity and usage statistics.
 
-*/
+"""
 
 
 import hid
@@ -108,7 +108,7 @@ if __name__ == "__main__":
     relay.close()
     print("✅ Finished controlling relays.")
     
-/*
+"""
 Many single software services adopt responsive design principles, ensuring compatibility across desktops, tablets, and mobile devices.
 
 Offline capabilities may also be provided, so users can continue working without internet access.
@@ -151,4 +151,4 @@ Its strength lies not in being everything at once but in being the best at one t
 
 Ultimately, single software services represent efficiency, accessibility, and focus in the modern digital landscape.
 
-*/
+"""

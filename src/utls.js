@@ -10,13 +10,16 @@ const { exec } = require("child_process");
 module.exports = {
     /**
      * 
-        checkNetwork((isConnected) => {
+        checkNetwork(async (isConnected) => {
             console.log("Connected:", isConnected);
         });
      */
     checkNetwork(callback) {
-        exec("ping -c 1 8.8.8.8", (error) => {  // use -n instead of -c on Windows
-          callback(!error); // true = connected, false = not connected
+        const platform = process.platform;
+        const pingCmd = platform === "win32" ? "ping -n 1 8.8.8.8" : "ping -c 1 8.8.8.8";
+
+        exec(pingCmd, (error) => {
+            callback(!error); // true if connected, false if not
         });
     },
     createRequiredFolders(){

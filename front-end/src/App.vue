@@ -161,7 +161,11 @@ async function CheckAccess({loader=false}={}){
         if(response.status == 200){
             let accessdata = response.data
             if(!devMode){ 
-                accessdata = JSON.parse(decodeURIComponent(escape(atob(accessdata))).replace(/^sbrenc%34#/, ''))
+                try {
+                    accessdata = JSON.parse(decodeURIComponent(escape(atob(accessdata))).replace(/^sbrenc%34#/, ''))
+                } catch (error) {
+                    console.warn('_ac:: May be wrong')
+                }
             }
 
             let defaultData = {

@@ -1,6 +1,6 @@
-# About Single Soft Service
-/**
+# About Multi Soft Service
 
+"""
 ==== Simple Documentaion About Multi Soft Service for a single customer =====
 
 Multi-software service for a single customer refers to a business model where one customer receives access to multiple software solutions under a unified framework.
@@ -57,7 +57,7 @@ This shortens onboarding time and increases adoption rates.
 
 Additionally, it encourages long-term vendor-customer relationships.
 By relying on one provider for multiple solutions, the customer builds trust and receives continuous value through updates and innovations.
-*/
+"""
 
 
 // Simple Example Code
@@ -115,7 +115,7 @@ for board in boards:
     board.close()
 
     
-/*
+"""
 Multi-software service also enhances digital transformation.
 Customers can modernize their workflows with coordinated upgrades instead of piecemeal adoption.
 This accelerates automation and improves overall competitiveness.
@@ -128,4 +128,4 @@ In summary, multi-software service for a single customer is about convenience, i
 It consolidates diverse needs into one seamless solution.
 It ensures better ROI, faster innovation, and a strong foundation for growth in an increasingly digital world.
 
-*/
+"""
