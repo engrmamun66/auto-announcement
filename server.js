@@ -49,10 +49,6 @@ const Students = new students(DB.db)
 const Schedules = new schedules(DB.db)
 const PunchLog = new PunchLoogClass() 
 
-utils.checkNetwork((isConnected) => {
-  console.log("Connected to new work:", isConnected);
-  global['isConnected'] = isConnected
-});
 
 Updater.getUpdateVersion()
 
@@ -70,6 +66,15 @@ app.use(express.static('public'));
 app.use(express.static('front-end'));
 // Enable CORS
 app.use(cors());
+app.use((req, res, next) => {
+  if (req.method === "GET") {
+    utils.checkNetwork(is_connected_to_internet => {
+      console.log({is_connected_to_internet});
+      global.is_connected_to_internet = is_connected_to_internet
+    })
+  }
+  next();
+});
 
  
 const audioUpload = multer({
@@ -156,12 +161,21 @@ app.get(`/app`, (req, res) => {
 // app.get(`/api/check-access`, async (req, res) => { 
 app.get(`/api/_ac`, async (req, res) => { 
   try {
-    let accessData = await checkAccess.CheckAppAccess()
-    if(req.query.dev){
-      res.send(accessData)
-    } else {
-      res.send(utils.encodeString('sbrenc%34#' + JSON.stringify(accessData)))
-    }
+
+    utils.checkNetwork(async (isConnected) => {
+      if(!isConnected) console.log("❌ Not-Connected to the Internet");
+      else console.log("✅ Connected to the Internet");
+      if(isConnected){
+        let accessData = await checkAccess.CheckAppAccess() 
+        if(req.query.dev){
+          res.send(accessData)
+        } else {
+          res.send(utils.encodeString('sbrenc%34#' + JSON.stringify(accessData)))
+        }
+      }
+    })
+
+
   } catch (error) {
     res.status(404).send({message: 'May be network error'})
   }

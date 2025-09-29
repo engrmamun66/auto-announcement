@@ -35,64 +35,55 @@ async function getStudentInfo(db, callback){
 module.exports = {
     async CheckAppAccess({save_info=false}={}){ 
 
+      try {
 
-      utils.checkNetwork(async (isConnected) => {
-        if(!isConnected) console.log("❌ Not-Connected to the Internet");
-        else console.log("✅ Connected to the Internet");
-        if(isConnected){
-          try {
-  
-            let student_history = null
-            if(save_info){
-              student_history = await getStudentInfo(DB.db, async ({exact_students, duplicate_cards, classwise_students})=>{
-  
-                let data = {
-                    save_info: true,
-                    secret_key: global.config.env.SECRET_KEY, 
-                    exact_students, 
-                    duplicate_cards,
-                    classwise_students: classwise_students.join(' | '),
-                }
-                console.log('Saving_information\n', data)
-                const response = await fetch(access_api_key, {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json"
-                  },
-                  body: JSON.stringify(data)
-                }); 
-                const result = await response.json(); 
-                let responseData = result.data
-                console.log({responseData});
-                return responseData
-              })
-            } else {
-  
-              const response = await fetch(access_api_key, {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    secret_key: global.config.env.SECRET_KEY, 
-                })
-              }); 
-          
-              const result = await response.json(); 
-              let data = result.data
-              delete data.secret_key
-              globalThis.myAppStatus = data
-              return data;
+        let student_history = null
+        if(save_info){
+          student_history = await getStudentInfo(DB.db, async ({exact_students, duplicate_cards, classwise_students})=>{
+
+            let data = {
+                save_info: true,
+                secret_key: global.config.env.SECRET_KEY, 
+                exact_students, 
+                duplicate_cards,
+                classwise_students: classwise_students.join(' | '),
             }
-   
-  
-          } catch (error) {
-            console.error("Fetch error:", error);
-            return { success: false, error: error.message };
-          }
+            console.log('Saving_information\n', data)
+            const response = await fetch(access_api_key, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify(data)
+            }); 
+            const result = await response.json(); 
+            let responseData = result.data
+            console.log({responseData});
+            return responseData
+          })
         } else {
-          global.isConnected = false
+
+          const response = await fetch(access_api_key, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                secret_key: global.config.env.SECRET_KEY, 
+            })
+          }); 
+      
+          const result = await response.json(); 
+          let data = result.data
+          delete data.secret_key
+          globalThis.myAppStatus = data
+          return data;
         }
-      })
+
+
+      } catch (error) {
+        console.error("Fetch error:", error);
+        return { success: false, error: error.message };
+      } 
     }
 }
