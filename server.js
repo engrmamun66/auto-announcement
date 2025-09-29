@@ -49,6 +49,10 @@ const Students = new students(DB.db)
 const Schedules = new schedules(DB.db)
 const PunchLog = new PunchLoogClass() 
 
+utils.checkNetwork((isConnected) => {
+  console.log("Connected to new work:", isConnected);
+  global['isConnected'] = isConnected
+});
 
 Updater.getUpdateVersion()
 

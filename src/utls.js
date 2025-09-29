@@ -2,11 +2,23 @@ const fs = require('fs')
 const path = require('path')
 const Evaluate = require('./process')
 const { classes } = global.config
+const { exec } = require("child_process");
 
 
  
 
 module.exports = {
+    /**
+     * 
+        checkNetwork((isConnected) => {
+            console.log("Connected:", isConnected);
+        });
+     */
+    checkNetwork(callback) {
+        exec("ping -c 1 8.8.8.8", (error) => {  // use -n instead of -c on Windows
+          callback(!error); // true = connected, false = not connected
+        });
+    },
     createRequiredFolders(){
 
         let folders = [
