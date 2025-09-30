@@ -68,7 +68,7 @@ let all_students = ref([])
 
 
 let checking_accessibility = ref(false)
-let appAccessData = ref(storage('appAccessData').value || {}) 
+let appAccessData = ref({...storage('appAccessData').value || {internet: true}}) 
 
 
 
@@ -572,6 +572,7 @@ onMounted(async ()=>{
 
     window.addEventListener("online", () => {
         appAccessData.value.internet = true
+        CheckAccess()
     });
     
     window.addEventListener("offline", () => {
