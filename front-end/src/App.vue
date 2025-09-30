@@ -856,7 +856,7 @@ function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
         </template>
         <template v-else-if="appAccessData?.internet === false">
             <div ref="disabilityAlretRef" class="disablitily-alert">
-                আপনার ইন্টারনেট সংযোগটি বিচ্ছিন্ন রয়েছে। এই মুহূর্তে ডিভাইস থেকে পাঞ্চ অকার্যকর। 
+                আপনার ইন্টারনেট সংযোগটি বিচ্ছিন্ন রয়েছে। এই মুহূর্তে ডিভাইস থেকে পাঞ্চ অকার্যকর।
             </div>
         </template>
     </template>
