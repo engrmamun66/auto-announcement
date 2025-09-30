@@ -828,7 +828,7 @@ function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
         <routerView />
     </SideBar> -->
     <Toaster></Toaster>
-    <template v-if="appUseForbiddened && appAccessData?.internet">
+    <template v-if="appUseForbiddened && appAccessData?.internet === true">
         <Lockscreen ref="LockscreenRef" @tryToUnlock="CheckAccess({loader: true})"></Lockscreen>
         <template v-if="true">
             <div ref="disabilityAlretRef" class="disablitily-alert">
@@ -850,9 +850,9 @@ function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
             <div ref="disabilityAlretRef" class="disablitily-alert" @auxclick="log({getForbiddenedMessage})" v-html="getWarningMessage">  
             </div>
         </template>
-        <template v-else-if="appAccessData?.internet === true">
+        <template v-else-if="appAccessData?.internet === false">
             <div ref="disabilityAlretRef" class="disablitily-alert">
-                No Iasdfkdf  
+                আপনার ইন্টারনেট সংযোগ বিচ্ছিন্ন রয়েছে। 
             </div>
         </template>
     </template>
