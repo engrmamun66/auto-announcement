@@ -68,7 +68,7 @@ let all_students = ref([])
 
 
 let checking_accessibility = ref(false)
-let appAccessData = ref(storage('appAccessData').value) 
+let appAccessData = ref(storage('appAccessData').value || {}) 
 
 
 
@@ -566,7 +566,16 @@ onMounted(async ()=>{
     document.addEventListener('click', (e) => { 
         // emitter.emit('document_clicked', e)
     })
+
+
+    window.addEventListener("online", () => {
+        appAccessData.value.internet = true
+    });
     
+    window.addEventListener("offline", () => {
+        appAccessData.value.internet = false
+    });
+
         
     document.body.setAttribute('forbidden', String(appUseForbiddened.value))
     document.body.setAttribute('warning', String(showAccessibilityAlert.value))
@@ -819,7 +828,7 @@ function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
         <routerView />
     </SideBar> -->
     <Toaster></Toaster>
-    <template v-if="appUseForbiddened">
+    <template v-if="appUseForbiddened && appAccessData?.internet">
         <Lockscreen ref="LockscreenRef" @tryToUnlock="CheckAccess({loader: true})"></Lockscreen>
         <template v-if="true">
             <div ref="disabilityAlretRef" class="disablitily-alert">
@@ -839,6 +848,11 @@ function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
     
         <template v-if="showAccessibilityAlert">
             <div ref="disabilityAlretRef" class="disablitily-alert" @auxclick="log({getForbiddenedMessage})" v-html="getWarningMessage">  
+            </div>
+        </template>
+        <template v-else-if="appAccessData?.internet === true">
+            <div ref="disabilityAlretRef" class="disablitily-alert">
+                No Iasdfkdf  
             </div>
         </template>
     </template>

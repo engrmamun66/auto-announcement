@@ -6,7 +6,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "create-zip-with-latest-code": "node zipper.js",
     "upload": "node zipper.js --upload=true",
-    "start": "nodemon server.js"
+    "start": "nodemon server.js",
+    "dev": "nodemon server.js"
   },
   "keywords": [],
   "author": "",
