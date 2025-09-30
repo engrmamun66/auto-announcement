@@ -616,7 +616,7 @@ const log = console.log
                   }"></Switch> </td> 
 
                   <td>
-                    <button class="class-short-btn px-2" @click="pushTheBarcode(makeCarcode(std), {message: 'Card Punches Successful'})">Punch</button>
+                    <button class="class-short-btn px-2" @click.stop="pushTheBarcode(makeCarcode(std), {message: 'কার্ডটি সফলভাবে পাঞ্চ হয়েছে।', source: 'manual_button'})">Punch</button>
                   </td>
                   <td> 
                     <div class="d-flex justify-content-center action-icons">

@@ -676,7 +676,7 @@ function focusCurrenPlayingSoundCard_if_userIsInavtiveForFewSeconds(){
 }
 
 
-function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
+function pushTheBarcode(barcode='play-417-2024', { message='', source='device' }={}){
      try {
           if(!is_started_schedule.value){
                emitter.emit('toaster-error', { message: 'switched is off'})
@@ -697,6 +697,15 @@ function pushTheBarcode(barcode='play-417-2024', { message='' }={}){
 
 
           let [ class_short ] = barcode.split('-') // nursary-23-sound1-2024
+
+
+          if(source === 'device'){
+            // Without internet device punch not allowed
+            if(appAccessData.value?.internet === false){
+                emitter.emit('toaster-error', { message: 'Without internet connection, device punch is not allowed'})
+                return
+            }
+          }
 
                     
           if(!emergency_mode.value){
