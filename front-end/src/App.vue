@@ -215,8 +215,10 @@ async function CheckAccess({loader=false}={}){
         }
     }).finally(()=>{
 
-        document.body.setAttribute('forbidden', String(appUseForbiddened.value))
-        document.body.setAttribute('warning', String(showAccessibilityAlert.value))
+        if(appAccessData.value?.internet === true){
+            document.body.setAttribute('forbidden', String(appUseForbiddened.value))
+            document.body.setAttribute('warning', String(showAccessibilityAlert.value))
+        }
     
         if(appUseForbiddened.value === true){
             stop_clear_and_reload()
