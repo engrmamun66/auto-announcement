@@ -104,8 +104,8 @@ let appUseForbiddened = computed(() => {
     if(!last_paid_month){ 
         return false
     } 
-    if(permanently_active) return false 
     if(!is_active) return true 
+    if(permanently_active) return false 
 
     // পরের মাসের ৫ তারিখের পরেই অ্যাপটি বন্ধ হবে
     const lastPaidMonth = moment(last_paid_month).endOf('month').add(stop_after_day, 'days')
@@ -578,9 +578,11 @@ onMounted(async ()=>{
         appAccessData.value.internet = false
     });
 
+    if(appAccessData.value?.internet === true){
+        document.body.setAttribute('forbidden', String(appUseForbiddened.value))
+        document.body.setAttribute('warning', String(showAccessibilityAlert.value))
+    }
         
-    document.body.setAttribute('forbidden', String(appUseForbiddened.value))
-    document.body.setAttribute('warning', String(showAccessibilityAlert.value))
     
     await getAllStudents()
     await getSchedules()
