@@ -208,7 +208,27 @@ module.exports = {
           sound: 'Sound',
           status: 'Status',
           punch: 'Punch',
-     }
+          card_owner: 'Card Owner',
+          note: 'Note',
+     },
+     card_owners: [
+          {
+               id: 1,
+               name: 'বাবা',
+          },
+          {
+               id: 2,
+               name: 'মা',
+          },
+          {
+               id: 3,
+               name: 'কাকা',
+          },
+          {
+               id: 4,
+               name: 'ড্রাইভার',
+          },
+     ]
 
 }
 

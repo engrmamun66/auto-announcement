@@ -140,7 +140,8 @@ let payload = reactive({
   dakhela: null,
   year: new Date().getFullYear(),
   card_no: null,
-
+  card_owner: null,
+  note: null,
 })
 
 let is___adding = ref(false)
@@ -153,6 +154,8 @@ function clearPayload(){
   payload.dakhela = null
   payload.year = new Date().getFullYear()
   payload.card_no = null
+  payload.card_owner = null
+  payload.note = null
   addMode.value = false 
   is___adding.value = false 
   editModeTabIndex.value = 1
@@ -326,6 +329,10 @@ onMounted(async()=>{
 const log = console.log 
 
 
+function getCardOwnerName(id){
+  if(!CONFIG.value?.card_owners?.length) return 1
+  return CONFIG.value?.card_owners.find(owner => owner.id == id)?.name
+}
 
 
 </script>
@@ -397,12 +404,27 @@ const log = console.log
                       </select>
                     </div>
                   </div>
-                  <!--   <div class="col-12">
+
+                  <div class="col-12">
                     <div class="form-group">
-                      <label for="card">Card Number</label>
-                      <input v-model="payload.card_no" type="text" class="form-control" id="CARD_FIELD_IN_CARD_FORM">
+                      <label for="name">Note</label>
+                      <input v-model="payload.note" type="text" class="form-control" :disabled="payload.name && payload.name.indexOf('||dakhela') > -1">
                     </div>
-                  </div> -->
+                  </div>
+
+                  <div class="col-12" v-if="CONFIG?.card_owners?.length">
+                    <div class="form-group d-flex align-items-center gap-3">
+                      <label>Card Owner</label>
+                      <div class="d-flex gap-2"> 
+                        <template v-for="owner in CONFIG?.card_owners">
+                          <div @click.stop="payload.card_owner = owner.id" class="d-flex justify-content-start each-owner-name">
+                              <span :class="{'checked': payload.card_owner == owner.id}" customized-radio ></span>
+                              <label class="cp">{{ owner.name }}</label>
+                          </div>  
+                        </template>
+                      </div>
+                    </div>
+                  </div>
     
                   <div class="col-12 d-flex justify-content-center">
                     <Btn @click.stop="clearPayload" class="red me-2" >Cancel</Btn>
@@ -538,6 +560,7 @@ const log = console.log
               <tr>
                 <th>{{ CONFIG?.studentTableColumns?.class || 'Class' }}</th>
                 <th>{{ CONFIG?.studentTableColumns?.name || 'Name' }}</th>
+                <th>{{ CONFIG?.studentTableColumns?.card_owner || 'Card Owner' }}</th>
                 <!-- <th>Card</th> -->
                 <th>{{ CONFIG?.studentTableColumns?.class || 'Class' }}</th>
                 <th>{{ CONFIG?.studentTableColumns?.year || 'Year' }}</th>
@@ -555,6 +578,10 @@ const log = console.log
                 <tr>
                   <td class="text-left"> {{ std.class }} </td> 
                   <td class="text-left cp" @click.stop="prepareToEdit(std)" :student-id="std.id" >{{ std.name.split('||')?.[0] }}</td>
+                  <td> 
+                    <p class="mb-1">{{ getCardOwnerName(std?.card_owner) }}</p>
+                    <div class="student-note" tooltio="Note" v-if="std?.note">{{ std?.note }}</div>
+                  </td> 
                   <td> 
                     <div class="align-items-center d-flex">
                       <span class="p-1" @dblclick="params.dakhela = std.dakhela">{{ std.dakhela }}</span>
@@ -576,6 +603,7 @@ const log = console.log
                     </template>
                     
                   </td> 
+                  
                   <td> {{ std.year }} </td> 
                   <template v-for="column in ['sound1']">
                     <td> 
@@ -667,7 +695,8 @@ const log = console.log
 
     </template>
 
-
+    
+     <!-- Audio Recorder Modal -->
      <template v-if="targetStd && columnName">
       <modal @close="targetStd=null" :title="false">
         <div style="height:100px" class="d-flex justify-content-center align-items-center">
@@ -686,6 +715,8 @@ const log = console.log
       </modal>
      </template>
 
+    
+     <!-- Barcode Modal View -->
      <template v-if="targetStdForBarcode">
       <modal @close="targetStdForBarcode=null" :title="false">
         <div style="height:220px" class="d-flex justify-content-center align-items-center">
@@ -796,6 +827,33 @@ const log = console.log
     max-height: calc(100vh - 390px);
     overflow-y: auto;
   }
+}
+[customized-radio]{
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  border: 1px solid var(--primaryColor);
+  background-color: white;
+  cursor: pointer;
+  margin-right: 5px;
+  transform: translateY(3px);
+}
+[customized-radio].checked{ 
+  border-color: rgb(6, 87, 6);
+  background-color: rgb(76, 222, 76);
+}
+.each-owner-name{
+    padding: 3px 10px;
+    background: var(--grad1);
+    border-radius: 32px;
+    box-shadow: 0px 3px 0px #0000004f;
+}
+.student-note{
+    width: 100%;
+    padding: 1px 5px;
+    background-color: #ffffff4f;
+    border-radius: 3px;
+    font-size: 13px;
 }
 </style>
 

@@ -562,7 +562,7 @@ class Students {
   }
 
   addStudent(req, res) {
-    const { class: className, name, dakhela, year, card_no } = req.body;
+    const { class: className, name, dakhela, year, card_no, card_owner, note } = req.body;
   
     const class_short = utils.getClassShort(className);
   
@@ -574,11 +574,11 @@ class Students {
     const tableName = this.tableName;
   
     const query = `
-      INSERT INTO ${tableName} (class, name, class_short, dakhela, year, card_no)
-      VALUES (?, ?, ?, ?, ?, ?)
+      INSERT INTO ${tableName} (class, name, class_short, dakhela, year, card_no, card_owner, note)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `;
   
-    const params = [className, name, class_short, dakhela, year || null, card_no];
+    const params = [className, name, class_short, dakhela, year || null, card_no, card_owner, note];
   
     const db = this.db; // Capture `this.db` reference
   
@@ -700,7 +700,7 @@ class Students {
 
   updateStudent(req, res) {
 
-    const { id, class: className, name, dakhela, year, card_no } = req.body;
+    const { id, class: className, name, dakhela, year, card_no, card_owner, note } = req.body;
   
     if (!id) {
       res.status(400).send({ error: "Student ID is required for updating." });
@@ -718,12 +718,11 @@ class Students {
   
     const query = `
       UPDATE ${tableName}
-      SET class = ?, name = ?, class_short = ?, dakhela = ?, year = ?, card_no = ?
+      SET class = ?, name = ?, class_short = ?, dakhela = ?, year = ?, card_no = ?, card_owner = ?, note = ?
       WHERE id = ?
     `;
-  
-    const params = [className, name, class_short, dakhela, year || null, card_no, id];
-  
+
+    const params = [className, name, class_short, dakhela, year || null, card_no, card_owner, note, id];
     const db = this.db; // Capture `this.db` reference
   
     db.run(query, params, function (err) {
@@ -749,7 +748,7 @@ class Students {
           res.status(404).send({ error: "Student not found after update." });
           return;
         }
-        
+
   
         res.send({
           message: "Student updated successfully.",
