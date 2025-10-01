@@ -1,6 +1,6 @@
 <template>
     <div>    
-      <audio ref="audio" @ended="playNext" @pause="withInavtivity()"></audio>
+      <audio ref="audio" @ended="playNext" @pause="withInavtivity()" @error="onErrorInPlayer" ></audio>
     </div>
   </template>
   
@@ -77,7 +77,6 @@
             item.is_called = true; 
         }
       })
-      storage('wattingList').value = wattingList.value
     }
   
     const nextItem = findNextItem(); 
@@ -105,6 +104,21 @@
       currentItem.value = null; 
       withInavtivity()
     }
+  }
+
+
+  function onErrorInPlayer(event){
+    let { env: { BASE_URL }} = GLOBAL_DATA
+    window.location.href = BASE_URL + '/app/#/students?dakhela=' + currentItem.value.dakhela
+    wattingList.value.filter(item => {
+      if(item.dakhela == currentItem.value.dakhela){
+        item.sound1_haserror = true
+      }
+    })
+    currentItem.value.is_called = true
+    currentItem.value.sound1_haserror = true
+    emitter.emit('toaster-warning', { message: 'এই অডিওতিতে কোন সমস্যা রয়েছে, অনুগ্রহপূর্বক ডিলেট করে পুনরায় রেকর্ড করুন এবং পুনরায় Punch করুন', duration: 0 })
+    playNext()
   }
   
  

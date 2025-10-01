@@ -61,6 +61,10 @@ watch(switches_PreviewInHomePage, (bool) => {
     localStorage.setItem('switches_PreviewInHomePage', bool)
 })
 
+watch(wattingList, (newWaittinglist) => {
+    storage('wattingList').value = newWaittinglist 
+}, {deep: true})
+
 let palylistComponent = ref(null)
 provide('palylistComponent', palylistComponent)
 
@@ -448,7 +452,6 @@ let callbacks = {
         })
 
         wattingList.value = newWaittinglist
-        storage('wattingList').value = newWaittinglist 
     }
 }
 provide('callbacks', callbacks) 
@@ -763,6 +766,9 @@ function pushTheBarcode(barcode='play-417-2024', { message='', source='device' }
                     function addPunchLog(student){
                         http.post('/punch-log/add-log', { student }).then(response => { })
                     }
+
+                    // dev code to make eroor in audio URL
+                    // student.sound1 = student.sound1 + 'e'
                     
                     if(!emergency_mode.value){
                          const { running_call_schedules, incoming_call_schedules  } = callbacks
@@ -798,6 +804,8 @@ function pushTheBarcode(barcode='play-417-2024', { message='', source='device' }
                               // wattingList.value.splice(findLastIndex, 0, student)
                               
                               findLast['is_called'] = false
+                              findLast['sound1'] = student.sound1
+                              delete findLast.sound1_haserror
                               if(!findLast?.['total_punch']) {
                                 findLast.total_punch = 2
                               } else {

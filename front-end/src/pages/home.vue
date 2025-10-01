@@ -167,7 +167,6 @@ function updateStudetCardSize(){
 }
 function removeFromWattingList(student, i){
      wattingList.value.splice(i, 1)
-     storage('wattingList').value = wattingList.value 
 }
 
 function isPayingThisCard(student){
@@ -185,7 +184,6 @@ function makeAsUncalled(student){
 let showRecallConfirmation = ref(false)
 function recallAllPunchedStudents(){
      wattingList.value.forEach(makeAsUncalled)
-     storage('wattingList').value = helper.clone(wattingList.value)
 }
 
 </script>
@@ -384,24 +382,38 @@ function recallAllPunchedStudents(){
                                              }"
                                              >
                                                   <label tooltip="Punched Time" class="cp">Time {{ moment(student.punch_exact_time_text).format('hh:mm:ss A') }}</label>
-                                                  <template v-if="isPayingThisCard(student)">
+                                                  <template v-if="!student?.sound1_haserror && isPayingThisCard(student)">
                                                        <div>
                                                             <PlayingAnimation></PlayingAnimation>
                                                        </div>
                                                   </template> 
                                              </div>
                                         </div>
+                                        <div v-if="student?.sound1_haserror" class="class-name panch-time mt-1 cp">
+                                             <div class="d-flex justify-content-between align-items-center" >
+                                                  <label class="cp text-danger">
+                                                       এই অডিওটি পুনরায় রেকর্ড করুন!
+                                                  </label>
+                                                  <button class="click-here" @click="()=>{
+                                                       router.push({name: 'students', query: {
+                                                            dakhela: student.dakhela,
+                                                            barcode,
+                                                       }})
+                                                  }">Click Here</button>
+                                             </div>
+                                        </div>
                                    <div class="icons"> 
                                         <span class="header-span-item" @click.stop="student.is_called ? makeAsUncalled(student) : () => {}"
                                         :class="{
-                                             'waitting': !student.is_called,
-                                             'completed': student.is_called,
-                                             'cp': student.is_called,
-                                             'calling': !manually_paused_the_playlist && isPayingThisCard(student),
-                                             'paused': !student.is_called && manually_paused_the_playlist && isMatchedWithCurrentItem(student)
+                                             'cp': student.is_called && !student?.sound1_haserror,
+                                             'waitting': !student.is_called && !student?.sound1_haserror,
+                                             'completed': student.is_called && !student?.sound1_haserror,
+                                             'calling': !manually_paused_the_playlist && isPayingThisCard(student) && !student?.sound1_haserror,
+                                             'paused': !student.is_called && manually_paused_the_playlist && isMatchedWithCurrentItem(student) && !student?.sound1_haserror,
+                                             'has-error': student?.sound1_haserror,
                                         }">
-                                             <i v-if="student.is_called" class='bx bx-sync size-09 transformY-2px' ></i>
-                                             {{ !student.is_called ? (isPayingThisCard(student) ? (manually_paused_the_playlist ? 'Paused' : 'Calling...') : 'Waitting') : 'Completed' }}
+                                             <i v-if="student.is_called && !student?.sound1_haserror" class='bx bx-sync size-09 transformY-2px' ></i>
+                                             {{ student?.sound1_haserror ? 'Error' : (!student.is_called ? (isPayingThisCard(student) ? (manually_paused_the_playlist ? 'Paused' : 'Calling...') : 'Waitting') : 'Completed') }}
                                         </span>
                                         <span v-if="student?.total_punch > 1" class='header-span-item comp'>Punched: {{ student?.total_punch }}</span> 
                                    </div>
@@ -659,7 +671,8 @@ function recallAllPunchedStudents(){
 .header-span-item.calling,
 .header-span-item.paused,
 .header-span-item.waitting,
-.header-span-item.completed{
+.header-span-item.completed,
+.header-span-item.has-error{
      padding: 0px 8px;
      border-radius: 25px;
      padding-top: 1px;
@@ -680,6 +693,10 @@ function recallAllPunchedStudents(){
      color: #ffffff;
      background-color: rgb(233, 96, 5); 
 }
+.header-span-item.has-error{ 
+     color: #ffffff;
+     background-color: rgb(233, 39, 5); 
+}
 .manual-mode{
      position: absolute;
      width: 100%;
@@ -697,5 +714,15 @@ function recallAllPunchedStudents(){
 .switching-display-area{
      max-height: calc(100vh - 198px);
      overflow-y: auto;
+}
+.click-here{
+     background: #da4646;
+     color: #fff;
+     padding: 3px 4px; 
+     border-radius: 6px;
+     cursor: pointer;
+     opacity: 1;
+     font-size: 10px;
+     border: none;
 }
 </style>
