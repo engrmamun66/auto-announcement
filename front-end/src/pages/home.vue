@@ -389,17 +389,17 @@ function recallAllPunchedStudents(){
                                                   </template> 
                                              </div>
                                         </div>
-                                        <div v-if="student?.sound1_haserror" class="class-name panch-time mt-1 cp">
-                                             <div class="d-flex justify-content-between align-items-center" >
-                                                  <label class="cp text-danger">
-                                                       এই অডিওটি পুনরায় রেকর্ড করুন!
-                                                  </label>
-                                                  <button class="click-here" @click="()=>{
+                                        <div v-if="student?.sound1_haserror" class="class-name panch-time mt-1 cp" @click="()=>{
                                                        router.push({name: 'students', query: {
                                                             dakhela: student.dakhela,
                                                             barcode,
                                                        }})
-                                                  }">Click Here</button>
+                                                  }">
+                                             <div class="d-flex justify-content-between align-items-center" >
+                                                  <label class="cp text-danger">
+                                                       এই অডিওটি পুনরায় রেকর্ড করুন!
+                                                  </label>
+                                                  <button class="click-here">Click Here</button>
                                              </div>
                                         </div>
                                    <div class="icons"> 

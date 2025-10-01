@@ -58,7 +58,9 @@ if(localStorage.getItem('manually_opened_ports')){
 			}
 		})
 	})
-	controlSounds({ports: manually_opened_ports})
+	if(!isSpeakersAutoMode.value){
+		controlSounds({ports: manually_opened_ports})
+	}
 }
 
 

@@ -117,7 +117,8 @@
     })
     currentItem.value.is_called = true
     currentItem.value.sound1_haserror = true
-    emitter.emit('toaster-warning', { message: 'এই অডিওতিতে কোন সমস্যা রয়েছে, অনুগ্রহপূর্বক ডিলেট করে পুনরায় রেকর্ড করুন এবং পুনরায় Punch করুন', duration: 0 })
+    let std = currentItem.value
+    emitter.emit('toaster-warning', { message: `${std.name.split('||')[0]}(${std.dakhela})` + ' এর অডিওতিতে কোন সমস্যা রয়েছে, অনুগ্রহপূর্বক ডিলেট করে পুনরায় রেকর্ড করুন এবং পুনরায় Punch করুন', duration: 0 })
     playNext()
   }
   

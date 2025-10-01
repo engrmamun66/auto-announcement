@@ -340,7 +340,7 @@ provide('showSwithBoardModal', showSwithBoardModal)
 provide('borad_image_url', borad_image_url)
 provide('switches_PreviewInHomePage', switches_PreviewInHomePage)
 provide('isUsingSpeakerAutoControl', isUsingSpeakerAutoControl)
-provide('isSpeakersAutoMode', isSpeakersAutoMode) 
+provide('isSpeakersAutoMode', isSpeakersAutoMode)
 
 
 
