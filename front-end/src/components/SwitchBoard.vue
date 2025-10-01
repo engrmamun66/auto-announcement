@@ -26,6 +26,7 @@ let props = defineProps({
 
 let emits = defineEmits(['close'])
 let emitter = inject('emitter');
+let last_requested_ports_for_auto_mode = inject('last_requested_ports_for_auto_mode');
 
 
 
@@ -47,20 +48,38 @@ let portChunks = ref(arrayChunk(allPorts, switch_board_chunk_size))
 
 
 // Checking for manually opened ports in localStorage
-if(localStorage.getItem('manually_opened_ports')){
-	let manually_opened_ports = JSON.parse(localStorage.getItem('manually_opened_ports'))
-	portChunks.value.forEach(chunk => {
-		chunk.forEach(item => {
-			if(manually_opened_ports.includes(item.port)){
-				item.status = 1
-			}else{
-				item.status = 0
-			}
+if(isSpeakersAutoMode.value){
+	if(last_requested_ports_for_auto_mode.value){
+		let ports = last_requested_ports_for_auto_mode.value
+		if(Array.isArray(ports)){
+
+			portChunks.value.forEach(chunk => {
+				chunk.forEach(item => {
+					if(ports.includes(item.port)){
+						item.status = 1
+					}else{
+						item.status = 0
+					}
+				})
+			})
+		}
+
+	}
+} else {
+	if(localStorage.getItem('manually_opened_ports')){
+		let manually_opened_ports = JSON.parse(localStorage.getItem('manually_opened_ports'))
+		portChunks.value.forEach(chunk => {
+			chunk.forEach(item => {
+				if(manually_opened_ports.includes(item.port)){
+					item.status = 1
+				}else{
+					item.status = 0
+				}
+			})
 		})
-	})
-	if(!isSpeakersAutoMode.value){
 		controlSounds({ports: manually_opened_ports})
 	}
+
 }
 
 

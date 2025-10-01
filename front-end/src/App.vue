@@ -56,6 +56,7 @@ let switches_PreviewInHomePage = ref(localStorage.getItem('switches_PreviewInHom
 let borad_image_url = globalThis.GLOBAL_DATA?.env.BASE_URL + '/electric-board.png'
 let isUsingSpeakerAutoControl = computed(()=>CONFIG.value?.settings?.with_speaker_controls?.status)
 let isSpeakersAutoMode = computed(()=>CONFIG.value?.settings?.with_speaker_controls?.switch_mode === 'auto')
+let last_requested_ports_for_auto_mode = ref(null)
 
 watch(switches_PreviewInHomePage, (bool) => {
     localStorage.setItem('switches_PreviewInHomePage', bool)
@@ -282,6 +283,10 @@ async function controlSounds({student=null, ports=[], openAll=false}={}){
 
     emitter.emit('when_firing__controlSounds', {ports: requested_ports, openAll})
 
+    if(isSpeakersAutoMode.value){
+        last_requested_ports_for_auto_mode.value = requested_ports
+    }
+
     let existingLink = document.getElementById('latest_css')
 
 
@@ -340,7 +345,8 @@ provide('showSwithBoardModal', showSwithBoardModal)
 provide('borad_image_url', borad_image_url)
 provide('switches_PreviewInHomePage', switches_PreviewInHomePage)
 provide('isUsingSpeakerAutoControl', isUsingSpeakerAutoControl)
-provide('isSpeakersAutoMode', isSpeakersAutoMode)
+provide('isSpeakersAutoMode', isSpeakersAutoMode) 
+provide('last_requested_ports_for_auto_mode', last_requested_ports_for_auto_mode) 
 
 
 
