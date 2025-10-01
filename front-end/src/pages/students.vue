@@ -580,7 +580,7 @@ function getCardOwnerName(id){
                   <td class="text-left cp" @click.stop="prepareToEdit(std)" :student-id="std.id" >{{ std.name.split('||')?.[0] }}</td>
                   <td> 
                     <p class="mb-1">{{ getCardOwnerName(std?.card_owner) }}</p>
-                    <div class="student-note" tooltio="Note" v-if="std?.note">{{ std?.note }}</div>
+                    <div class="student-note" tooltip="Note" v-if="std?.note">{{ std?.note }}</div>
                   </td> 
                   <td> 
                     <div class="align-items-center d-flex">

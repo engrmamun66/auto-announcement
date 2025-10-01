@@ -208,7 +208,7 @@ module.exports = {
           sound: 'Sound',
           status: 'Status',
           punch: 'Punch',
-          card_owner: 'Card Owner',
+          card_owner: 'Owner',
           note: 'Note',
      },
      card_owners: [
