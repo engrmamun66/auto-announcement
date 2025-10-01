@@ -9,7 +9,9 @@ class myDB {
         this.DB_ROOT_FOLDER = DB_ROOT_FOLDER;
         this.db = this._createDatabase(); 
         this._createTables(this.db);
-        // this._addColumn('students', 'card_no')
+        // this._addColumn('students', '')
+        // this._addColumn('students', '')
+        // this._addColumn('students', '')
     }
 
     _createDatabase(){
@@ -41,18 +43,21 @@ class myDB {
             );
 
             this.db.run(
-                `CREATE TABLE IF NOT EXISTS students (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    name TEXT NOT NULL,
-                    dakhela INTEGER NOT NULL,
-                    class TEXT NOT NULL,
-                    class_short TEXT NOT NULL,
-                    card_no VARCHAR(255) DEFAULT NULL,
-                    year TEXT DEFAULT NULL,                    
-                    status INTEGER DEFAULT 1,
-                    sound1 TEXT DEFAULT NULL,
-                    sound2 TEXT DEFAULT NULL,
-                    sound3 TEXT DEFAULT NULL,
+              `CREATE TABLE IF NOT EXISTS students (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                dakhela INTEGER NOT NULL,
+                class TEXT NOT NULL,
+                class_short TEXT NOT NULL,
+                card_no VARCHAR(255) DEFAULT NULL,
+                year TEXT DEFAULT NULL,                    
+                status INTEGER DEFAULT 1,
+                sound1 TEXT DEFAULT NULL,
+                sound2 TEXT DEFAULT NULL,
+                sound3 TEXT DEFAULT NULL,
+                card_owner TEXT DEFAULT NULL,
+                options TEXT DEFAULT NULL,
+                note TEXT DEFAULT NULL,
                     created TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );`,
                 (err) => {
