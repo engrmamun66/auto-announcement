@@ -562,7 +562,7 @@ function getCardOwnerName(id){
                 <th>{{ CONFIG?.studentTableColumns?.name || 'Name' }}</th>
                 <th>{{ CONFIG?.studentTableColumns?.card_owner || 'Card Owner' }}</th>
                 <!-- <th>Card</th> -->
-                <th>{{ CONFIG?.studentTableColumns?.class || 'Class' }}</th>
+                <th>{{ CONFIG?.studentTableColumns?.dakhela || 'Dakhela' }}</th>
                 <th>{{ CONFIG?.studentTableColumns?.year || 'Year' }}</th>
                 <th>{{ CONFIG?.studentTableColumns?.sound || 'Sound' }}</th>
                 <!-- <th>Sound-2</th> -->
