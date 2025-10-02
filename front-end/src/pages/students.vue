@@ -27,6 +27,7 @@ const CONFIG = inject('CONFIG');
 let http = inject('http'); 
 const pushTheBarcode = inject('pushTheBarcode');
 const makeCarcode = inject('makeCarcode');
+const callbacks = inject('callbacks');
 const all_students = inject('all_students', [])
 const getAllStudents = inject('getAllStudents', () => {})
 
@@ -329,10 +330,7 @@ onMounted(async()=>{
 const log = console.log 
 
 
-function getCardOwnerName(id){
-  if(!CONFIG.value?.card_owners?.length) return 1
-  return CONFIG.value?.card_owners.find(owner => owner.id == id)?.name
-}
+
 
 
 </script>
@@ -428,10 +426,12 @@ function getCardOwnerName(id){
     
                   <div class="col-12 d-flex justify-content-center">
                     <Btn @click.stop="clearPayload" class="red me-2" >Cancel</Btn>
-                    <Btn v-if="!payload.id" @click="addStudent" class="me-0" >Submit <BtnLoader v-if="is___adding"></BtnLoader> </Btn>
-                    <Btn v-else @click="updateStudent" class="me-0" v-if="payload.name && payload.name.indexOf('||dakhela') === -1">Update <BtnLoader v-if="is___adding"></BtnLoader> </Btn>
+                    <Btn v-if="!payload.id" @click="addStudent" addStudentAttr class="me-0" >Submit <BtnLoader v-if="is___adding"></BtnLoader> </Btn>
+                    <Btn v-else @click="updateStudent" updateStudentAttr class="me-0" v-if="payload.name && payload.name.indexOf('||dakhela') === -1">Update <BtnLoader v-if="is___adding"></BtnLoader> </Btn>
                   </div> 
                 </template>
+
+
                 <template v-else-if="editModeTabIndex == 2"> 
                   <div class="col-12 overflow-y-scroll">
                      <table>
@@ -579,7 +579,7 @@ function getCardOwnerName(id){
                   <td class="text-left"> {{ std.class }} </td> 
                   <td class="text-left cp" @click.stop="prepareToEdit(std)" :student-id="std.id" >{{ std.name.split('||')?.[0] }}</td>
                   <td> 
-                    <p class="mb-1">{{ getCardOwnerName(std?.card_owner) }}</p>
+                    <p class="mb-1">{{ callbacks.getCardOwnerName(std?.card_owner) }}</p>
                     <div class="student-note" tooltip="Note" v-if="std?.note">{{ std?.note }}</div>
                   </td> 
                   <td> 

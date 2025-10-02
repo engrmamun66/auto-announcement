@@ -402,6 +402,11 @@ function recallAllPunchedStudents(){
                                                   <button class="click-here">Click Here</button>
                                              </div>
                                         </div>
+                                        <div v-if="student.card_owner" class="class-name panch-time mt-1 cp">
+                                             <label>
+                                                  <i class='bx bxs-id-card fs-5 transformY-4px'></i> {{ callbacks.getCardOwnerName(student.card_owner) }}
+                                             </label> 
+                                        </div>
                                    <div class="icons"> 
                                         <span class="header-span-item" @click.stop="student.is_called ? makeAsUncalled(student) : () => {}"
                                         :class="{

@@ -458,6 +458,10 @@ let callbacks = {
         })
 
         wattingList.value = newWaittinglist
+    },
+    getCardOwnerName(id){
+        if(!CONFIG.value?.card_owners?.length) return 1
+        return CONFIG.value?.card_owners.find(owner => owner.id == id)?.name
     }
 }
 provide('callbacks', callbacks) 
