@@ -370,18 +370,10 @@ function recallAllPunchedStudents(){
                                              {{ student.class }} <span>[{{ student.dakhela }}]</span>
                                         </div> 
                                         <div class="class-name panch-time mt-1 cp" @click="log({student, currentItem: storage('currentItem').value}) ">
-                                             <div class="d-flex justify-content-between align-items-center"
-                                             @click.stop="()=>{
-                                                  router.push({name: 'students', query: {
-                                                       dakhela: student.dakhela,
-                                                       barcode,
-                                                       log: true,
-                                                  }})
-                                             }"
-                                             >
+                                             <div class="d-flex justify-content-between align-items-center" @click.stop="()=>{ router.push({name: 'students', query: { dakhela: student.dakhela, barcode, log: true }}) }" >
                                                   <label :tooltip="!student?.call_slot ? '' : 'Punched Time || Call Time'" class="cp"> 
                                                        <span v-if="!student?.call_slot" class="text-danger">Emergency Call</span>
-                                                       <span v-else>{{ moment(student.punch_exact_time_text).format('hh:mm:ss A') }} || {{ student?.call_slot }}</span>
+                                                       <span v-else v-html="(moment(student.punch_exact_time_text).format('hh:mm:ss A') + ' ' + student?.call_slot).replace(/\s/g, '&nbsp;-')"></span>
                                                         
                                                   </label>
                                                   <template v-if="!student?.sound1_haserror && isPayingThisCard(student)">
