@@ -391,6 +391,11 @@ function recallAllPunchedStudents(){
                                                   </template> 
                                              </div>
                                         </div>
+
+                                        <div class="class-name panch-time mt-1 cp" tooltip="Card Owner">
+                                             <label v-if="student.card_owner"> <i class='bx bxs-id-card fs-5 transformY-4px'></i> {{ callbacks.getCardOwnerName(student.card_owner) }} </label> 
+                                             <label v-else> <i class='bx bxs-id-card fs-5 transformY-4px'></i> {{ CONFIG.card_not_set_message }} </label> 
+                                        </div>
                                        
                                         <div v-if="student?.sound1_haserror" class="class-name panch-time mt-1 cp" @click="()=>{
                                                        router.push({name: 'students', query: {
@@ -404,11 +409,6 @@ function recallAllPunchedStudents(){
                                                   </label>
                                                   <button class="click-here">Click Here</button>
                                              </div>
-                                        </div>
-                                        <div v-if="student.card_owner" class="class-name panch-time mt-1 cp">
-                                             <label>
-                                                  <i class='bx bxs-id-card fs-5 transformY-4px'></i> {{ callbacks.getCardOwnerName(student.card_owner) }}
-                                             </label> 
                                         </div>
                                    <div class="icons"> 
                                         <span class="header-span-item" @click.stop="student.is_called ? makeAsUncalled(student) : () => {}"

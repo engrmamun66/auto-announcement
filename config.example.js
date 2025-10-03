@@ -211,22 +211,23 @@ module.exports = {
           card_owner: 'Owner',
           note: 'Note',
      },
+     card_not_set_message: 'Unknown',
      card_owners: [
           {
                id: 1,
-               name: 'বাবা',
+               name: 'Father',
           },
           {
                id: 2,
-               name: 'মা',
+               name: 'Mother',
           },
           {
                id: 3,
-               name: 'কাকা',
+               name: 'Uncle',
           },
           {
                id: 4,
-               name: 'ড্রাইভার',
+               name: 'Mahram',
           },
      ]
 
