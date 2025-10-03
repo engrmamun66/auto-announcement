@@ -704,7 +704,7 @@ function pushTheBarcode(barcode='play-417-2024', { message='', source='device' }
 
           if(!emergency_mode.value){
                if(!(/^[a-z_0-9]+-\d{1,}-sound(1|2|3)/gi.test(barcode))){
-                    emitter.emit('toaster-error', { message: 'বারকোড সঠিক নয়', duration: 5000})
+                    emitter.emit('toaster-error', { message: `বারকোড সঠিক নয় (${barcode})`, duration: 5000})
                     return
                }
           }
@@ -788,18 +788,28 @@ function pushTheBarcode(barcode='play-417-2024', { message='', source='device' }
                          if(rs.length){
                               student['start_ms'] = rs[0].start_ms
                               student['end_ms'] = rs[0].end_ms
-                         } else {
-                             if(!is.length){
-                                  emitter.emit('toaster-error', { message: 'ক্লাসের জন্য কোন কল শিডিউল সক্রিয় নেই!'})
-                                  return
-                             }
+                          
+                                let __startTime = moment(moment().format('Y-MM-DD') + ' ' + rs[0].start_time).format('hh:mm A')
+                                let __endTime = moment(moment().format('Y-MM-DD') + ' ' + rs[0].end_time).format('hh:mm A')
+                                student['call_slot'] = `${__startTime} - ${__endTime}`
+                              
 
+                         } else if(is?.length)  {
+                             
                             student['start_ms'] = is[0].start_ms
                             student['end_ms'] = is[0].end_ms
-                         } 
 
+                            let __startTime = moment(moment().format('Y-MM-DD') + ' ' + is[0].start_time).format('hh:mm A')
+                            let __endTime = moment(moment().format('Y-MM-DD') + ' ' + is[0].end_time).format('hh:mm A')
+                            student['call_slot'] = `${__startTime} - ${__endTime}`
+                         } else {
+                            if(!is.length){
+                                  emitter.emit('toaster-error', { message: 'ক্লাসের জন্য কোন কল শিডিউল সক্রিয় নেই!'})
+                                  console.log({rs, is}, student['class_short']);
+                                  return
+                             }
+                         }
 
-                         
 
                          // ----
                          if(!findLast){
@@ -839,10 +849,11 @@ function pushTheBarcode(barcode='play-417-2024', { message='', source='device' }
                               emitter.emit('toaster-error', { message: 'ইতিমধ্যে কার্ডটি পাঞ্চ করা হয়েছে'})
                          }
                     } else {
-                         student['start_ms'] = helper.miliseconds() - 1000
-                         student['end_ms'] = helper.miliseconds() + (10 * 1000)
-                         wattingList.value.unshift(student)  
-                         addPunchLog(student)
+                        student['start_ms'] = helper.miliseconds() - 1000
+                        student['end_ms'] = helper.miliseconds() + (10 * 1000)
+                        wattingList.value.unshift(student)  
+                        addPunchLog(student)
+                        emitter.emit('toaster-success', { message: `জরুরি অবস্থায় পাঞ্চ গ্রহণ করা হয়েছে`, duration: 5000})
                     } 
 
                     storage('wattingList').value = wattingList.value;

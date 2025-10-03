@@ -202,7 +202,7 @@ function recallAllPunchedStudents(){
           <div class="relative w-100 me-2">
                <EmergencyMode v-if="emergency_mode"></EmergencyMode>
                <EmergencyMode v-if="emergency_mode" style="left:calc(100% - 40px)"></EmergencyMode>
-               <input id="BARCODE_INPUT" type="text" @keyup.enter="inputBarcode" @paste="inputBarcode" class="form-control px-4 py-2 text-center py-1 shadow" :placeholder="emergency_mode ? 'Emergency mode activated' : 'Barcode receiver field'">
+               <input id="BARCODE_INPUT" type="text" @keyup.enter="inputBarcode" @paste="inputBarcode" class="form-control px-4 py-2 text-center py-1 shadow" :placeholder="emergency_mode ? 'Emergency mode activated' : 'Dakhela / Barcode'">
           </div>
 
           <div v-if="!manually_paused_the_playlist" @click="handlePayPause()" class="me-2 p-1 play-pause"><i class='bx bx-pause'></i></div>
@@ -359,21 +359,19 @@ function recallAllPunchedStudents(){
                               <div class="student-box" :class="{'is_called': student.is_called}" 
                               :style="`--std-card-width:${card_dynamic_width}px`"
                               :barcode="student?.barcode" :card-id="student.id" :playing="isPayingThisCard(student)" >
-                                   <div class="card-content" :class="{ 'bg_animation': student?.isPlaying }">
-                                        <div class="student-name">{{ student.name.split('||')?.[0] }}</div>
-                                        <div class="class-name cp" 
-                                        @click="()=>{
+                                   <div class="card-content" :class="{ 'bg_animation': student?.isPlaying }" >
+                                        <div class="student-name cp" @click="()=>{
                                              router.push({name: 'students', query: {
                                                   dakhela: student.dakhela,
                                                   barcode,
                                              }})
-                                        }"
-                                        >
+                                        }">{{ student.name.split('||')?.[0] }} <i class='bx bx-edit-alt cp'></i></div>
+                                        <div class="class-name">
                                              {{ student.class }} <span>[{{ student.dakhela }}]</span>
                                         </div> 
                                         <div class="class-name panch-time mt-1 cp" @click="log({student, currentItem: storage('currentItem').value}) ">
                                              <div class="d-flex justify-content-between align-items-center"
-                                             @click="()=>{
+                                             @click.stop="()=>{
                                                   router.push({name: 'students', query: {
                                                        dakhela: student.dakhela,
                                                        barcode,
@@ -381,7 +379,11 @@ function recallAllPunchedStudents(){
                                                   }})
                                              }"
                                              >
-                                                  <label tooltip="Punched Time" class="cp">Time {{ moment(student.punch_exact_time_text).format('hh:mm:ss A') }}</label>
+                                                  <label :tooltip="!student?.call_slot ? '' : 'Punched Time || Call Time'" class="cp"> 
+                                                       <span v-if="!student?.call_slot" class="text-danger">Emergency Call</span>
+                                                       <span v-else>{{ moment(student.punch_exact_time_text).format('hh:mm:ss A') }} || {{ student?.call_slot }}</span>
+                                                        
+                                                  </label>
                                                   <template v-if="!student?.sound1_haserror && isPayingThisCard(student)">
                                                        <div>
                                                             <PlayingAnimation></PlayingAnimation>
@@ -389,6 +391,7 @@ function recallAllPunchedStudents(){
                                                   </template> 
                                              </div>
                                         </div>
+                                       
                                         <div v-if="student?.sound1_haserror" class="class-name panch-time mt-1 cp" @click="()=>{
                                                        router.push({name: 'students', query: {
                                                             dakhela: student.dakhela,
@@ -592,6 +595,10 @@ function recallAllPunchedStudents(){
 .watting-list .set-max-height div .student-box .student-name{
   font-weight: bold;
   color: #333;
+}
+.watting-list .set-max-height div .student-box .student-name:hover{
+     color: var(--primaryColor);
+     text-decoration: underline;
 }
 .watting-list .set-max-height div .student-box .class-name{
      background-color: rgb(255 255 255 / 30%);
