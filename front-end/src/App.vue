@@ -805,7 +805,6 @@ function pushTheBarcode(barcode='play-417-2024', { message='', source='device' }
                          } else {
                             if(!is.length){
                                   emitter.emit('toaster-error', { message: 'ক্লাসের জন্য কোন কল শিডিউল সক্রিয় নেই!'})
-                                  console.log({rs, is}, student['class_short']);
                                   return
                              }
                          }
@@ -831,6 +830,8 @@ function pushTheBarcode(barcode='play-417-2024', { message='', source='device' }
                               } else {
                                 findLast['total_punch'] += 1
                               }
+
+                              findLast['punch_exact_time_text'] = moment().format('Y-MM-DD HH:mm:ss')
 
                               addPunchLog(student)
                               emitter.emit('pushed_a_student__or__rechecktoPlay', student)

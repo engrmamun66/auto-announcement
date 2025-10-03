@@ -163,6 +163,9 @@ function updateStudetCardSize(){
           else if(width < 1800){
                card_dynamic_width.value = Math.floor(width / 8) - (scroolbarWidth)
           } 
+          else {
+               card_dynamic_width.value = 300
+          } 
      }
 }
 function removeFromWattingList(student, i){
@@ -371,22 +374,18 @@ function recallAllPunchedStudents(){
                                         </div> 
                                         <div class="class-name panch-time mt-1 cp" @click="log({student, currentItem: storage('currentItem').value}) ">
                                              <div class="d-flex justify-content-between align-items-center" @click.stop="()=>{ router.push({name: 'students', query: { dakhela: student.dakhela, barcode, log: true }}) }" >
-                                                  <label :tooltip="!student?.call_slot ? '' : 'Punched Time || Call Time'" class="cp"> 
+                                                  <label :tooltip="!student?.call_slot ? '' : 'Punched: ' + moment(student.punch_exact_time_text).format('hh:mm:ss A')" class="cp"> 
                                                        <span v-if="!student?.call_slot" class="text-danger">Emergency Call</span>
-                                                       <span v-else v-html="(moment(student.punch_exact_time_text).format('hh:mm:ss A') + ' ' + student?.call_slot).replace(/\s/g, '&nbsp;-')"></span>
+                                                       <span v-else v-html="student?.call_slot"></span>
                                                         
                                                   </label>
-                                                  <template v-if="!student?.sound1_haserror && isPayingThisCard(student)">
-                                                       <div>
-                                                            <PlayingAnimation></PlayingAnimation>
-                                                       </div>
-                                                  </template> 
                                              </div>
                                         </div>
 
-                                        <div class="class-name panch-time mt-1 cp" tooltip="Card Owner">
+                                        <div class="class-name panch-time mt-1 cp d-flex justify-content-between" tooltip="Card Owner">
                                              <label v-if="student.card_owner"> <i class='bx bxs-id-card fs-5 transformY-4px'></i> {{ callbacks.getCardOwnerName(student.card_owner) }} </label> 
                                              <label v-else> <i class='bx bxs-id-card fs-5 transformY-4px'></i> {{ CONFIG.card_not_set_message }} </label> 
+                                             <PlayingAnimation v-if="!student?.sound1_haserror && isPayingThisCard(student)"></PlayingAnimation>
                                         </div>
                                        
                                         <div v-if="student?.sound1_haserror" class="class-name panch-time mt-1 cp" @click="()=>{
