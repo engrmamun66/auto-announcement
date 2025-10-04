@@ -11,9 +11,7 @@ class myDB {
         this._createTables(this.db);
         // this._addColumn('students', 'card_owner', 'VARCHAR', 'NULL')
         // this._addColumn('students', 'options', 'VARCHAR', 'NULL')
-        // this._addColumn('students', 'note', 'VARCHAR', 'NULL')
-        // this._removeColumn('students', 'id_type')
-        // this._addColumn('students', 'id_type', 'INTEGER', 'NULL')
+        // this._addColumn('students', 'note', 'VARCHAR', 'NULL') 
     }
 
     _createDatabase(){
