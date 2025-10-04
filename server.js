@@ -41,6 +41,8 @@ const classDB = require('./src/class-db')
 const students = require('./src/class-students');
 const schedules = require('./src/class-schedules');
 const PunchLoogClass = require('./src/class-punchlog');
+const AttendenceClass = require('./src/class-attendence');
+const HolydaysClass = require('./src/class-holidays');
 const Backup = require('./src/backup');
 const Updater = require('./src/updater');
 const utils = require('./src/utls');
@@ -48,6 +50,8 @@ const DB = new classDB()
 const Students = new students(DB.db) 
 const Schedules = new schedules(DB.db)
 const PunchLog = new PunchLoogClass() 
+const Attendence = new AttendenceClass(DB.db) 
+const Holidays = new HolydaysClass(DB.db) 
 
 
 Updater.getUpdateVersion()
@@ -365,8 +369,18 @@ app.get(`/api/_ac`, async (req, res) => {
   // ====================================================== //
   app.get(prefix + '/backup-list', (req, res) => {
     Backup.getBackupDetails({req, res})
+  });
+
+  // ====================================================== //
+  // =================== With Attendence ================== //
+  // ====================================================== //
+  app.post(prefix + '/attendence-add', (req, res) => {
+    Attendence.add(req, res)
   }); 
- 
+
+  console.log('======prefix', prefix + '/attendence-add');
+  
+   
    
 })
  

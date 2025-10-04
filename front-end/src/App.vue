@@ -697,11 +697,10 @@ function focusCurrenPlayingSoundCard_if_userIsInavtiveForFewSeconds(){
 }
 
 
-function pushTheBarcode(barcode='play-417-2024', { message='', source='device', studentObj=null }={}){
-    console.log('asdf');
-    if(studentObj && String(studentObj?.name).indexOf('Copied') > -1){
+function pushTheBarcode(barcode='play-417-2024', { message='', source='device', for_attendence=false }={}){
+    if(for_attendence){
         emitter.emit('toaster-success', { message: 'Wao attendence submit in progress' })
-        pushAttedence(barcode, { message, source, studentObj })
+        pushAttedence(barcode, { message, source })
         
     } else {
         try {
@@ -880,7 +879,7 @@ function pushTheBarcode(barcode='play-417-2024', { message='', source='device', 
 
 }
 
-function pushAttedence(barcode='play-417-2024', { message='', source='device', studentObj=null }={}){
+function pushAttedence(barcode='play-417-2024', { message='', source='device' }={}){
      try {
           if(!is_started_schedule.value){
                emitter.emit('toaster-error', { message: 'switched is off'})
@@ -931,8 +930,20 @@ function pushAttedence(barcode='play-417-2024', { message='', source='device', s
                     function addPunchLog(student){
                         http.post('/punch-log/add-log', { student }).then(response => { })
                     }
+                    function addAttendce(student){
+                        let payload = helper.clone(student, { remove: ['id']})
+                        payload.student_id = student.dakhela
+                        let __date = moment().format('Y-MM-DD')
+                        payload.date = __date
+                        
+
+                        http.post('/attendence-add', payload).then(response => {
+                            console.log('aaaa', response.data);
+                        })
+                    }
 
                     addPunchLog(student)
+                    addAttendce(student)
 
                     if(source !== 'device')
                     emitter.emit('toaster-success', { message: 'কার্ডটি সফলভাবে পাঞ্চ হয়েছে।'})

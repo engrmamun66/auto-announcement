@@ -655,8 +655,15 @@ const log = console.log
 
                   <td>
                     <template v-if="CONFIG?.settings?.attendence?.status">
-                      <button class="class-short-btn px-2" :class="{'for-call': std.name.indexOf('Copied') > -1, 'for-attendence': std.name.indexOf('Copied') == -1}" @click.stop="pushTheBarcode(makeCarcode(std), {message: 'কার্ডটি সফলভাবে পাঞ্চ হয়েছে।', source: 'manual_button', studentObj: std})">
-                        {{ std.name.indexOf('Copied') > -1 ? 'Call&nbsp;Punch' : 'Attendence' }}
+                      <button v-if="std.name.indexOf('Copied') > -1" class="class-short-btn px-2 for-call" 
+                        @click.stop="pushTheBarcode(makeCarcode(std), {message: 'কার্ডটি সফলভাবে পাঞ্চ হয়েছে।', source: 'manual_button', for_attendence: false})">
+                          <!-- For Guardian -->
+                          Call&nbsp;Punch
+                        </button>
+                      <button v-else class="class-short-btn px-2 for-call" 
+                        @click.stop="pushTheBarcode(makeCarcode(std), {message: 'কার্ডটি সফলভাবে পাঞ্চ হয়েছে।', source: 'manual_button', for_attendence: true})">
+                          <!-- For Students Attendence -->
+                          Attendence
                         </button>
                     </template> 
                     <template v-else>
