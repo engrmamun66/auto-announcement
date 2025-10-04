@@ -12,6 +12,8 @@ class myDB {
         // this._addColumn('students', 'card_owner', 'VARCHAR', 'NULL')
         // this._addColumn('students', 'options', 'VARCHAR', 'NULL')
         // this._addColumn('students', 'note', 'VARCHAR', 'NULL')
+        // this._removeColumn('students', 'id_type')
+        // this._addColumn('students', 'id_type', 'INTEGER', 'NULL')
     }
 
     _createDatabase(){
@@ -58,7 +60,7 @@ class myDB {
                 card_owner TEXT DEFAULT NULL,
                 options TEXT DEFAULT NULL,
                 note TEXT DEFAULT NULL,
-                id_type TEXT DEFAULT 1,
+                id_type INTEGER DEFAULT 1, -- when using attendence, 1 = students, 2 = guardians
                     created TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );`,
                 (err) => {
@@ -110,6 +112,15 @@ class myDB {
             (err) => {
               if (err) {
                 console.error("AddColumn Error creating table:", err.message);
+              }
+            }
+        );
+    }
+    _removeColumn(tableName, columnName){ this.db.run(
+            `ALTER TABLE ${tableName} DROP COLUMN ${columnName}`,
+            (err) => {
+              if (err) {
+                console.error("DropColumn Error:", err.message);
               }
             }
         );

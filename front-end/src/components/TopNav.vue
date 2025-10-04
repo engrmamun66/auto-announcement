@@ -4,8 +4,10 @@
             <img alt="site-logo" ref="logoEl" id="LOGO" src="" style="width: 200px;">
         </a>
         <RouterLink :to="{name: 'home'}" :class="{'active': route.name === 'home'}"><i class='bx bxs-home'></i> Dashboard</RouterLink>
+        <template v-if="CONFIG?.settings?.attendence?.status">
+          <RouterLink :to="{name: 'attendence'}" :class="{'active attendence-tab': route.name === 'attendence'}"><i class='bx bxs-user'></i> Attendence</RouterLink>
+        </template>
         <RouterLink :to="{name: 'students'}" :class="{'active students-tab': route.name === 'students'}"><i class='bx bxs-user'></i> Students</RouterLink>
-        <RouterLink :to="{name: 'attendence'}" :class="{'active attendence-tab': route.name === 'attendence'}"><i class='bx bxs-user'></i> Attendence</RouterLink>
         <RouterLink :to="{name: 'shedules'}" :class="{'active': route.name === 'shedules'}"><i class='bx bxs-calendar' ></i> Shedules</RouterLink>
         <RouterLink :to="{name: 'import'}" :class="{'active': route.name === 'import'}"><i class='bx bxs-file-import' ></i> Import</RouterLink>
         
@@ -22,6 +24,7 @@ let logo_wrapper = ref(null)
 let route = useRoute()
 
 const emitter = inject('emitter'); 
+const CONFIG = inject('CONFIG'); 
  
 onMounted(()=>{
   if(typeof GLOBAL_DATA !== 'undefined'){

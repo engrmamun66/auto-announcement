@@ -193,40 +193,8 @@ function recallAllPunchedStudents(){
 
 <template>
 
-     <span v-if="refreshDOM" ></span>
-
-
-
-     <div class="d-flex align-items-center bttt">
-          <div class="togglerbtn">
-               <btn @click="toggleSettings = !toggleSettings" class="px-3 shadow me-2"><i class='bx bx-list-ul'></i></btn>
-          </div>
-          
-          <div class="relative w-100 me-2">
-               <EmergencyMode v-if="emergency_mode"></EmergencyMode>
-               <EmergencyMode v-if="emergency_mode" style="left:calc(100% - 40px)"></EmergencyMode>
-               <input id="BARCODE_INPUT" type="text" @keyup.enter="inputBarcode" @paste="inputBarcode" class="form-control px-4 py-2 text-center py-1 shadow" :placeholder="emergency_mode ? 'Emergency mode activated' : 'Dakhela / Barcode'">
-          </div>
-
-          <div v-if="!manually_paused_the_playlist" @click="handlePayPause()" class="me-2 p-1 play-pause"><i class='bx bx-pause'></i></div>
-          <div v-else @click="handlePayPause()" class="me-2 p-1 play-pause"><i class='bx bx-play'></i></div>
-
-          <div v-if="isUsingSpeakerAutoControl" class="me-2 p-1 position-relative" @click.stop="showSwithBoardModal = !showSwithBoardModal">
-               <img :src="borad_image_url" alt="" class="board-image">
-               <span class="manual-mode" v-if="!isSpeakersAutoMode">manual</span>
-          </div>
-         
-          <BarcodeScannigAnimation v-if="is_started_schedule" :scannig="is_started_schedule" class="me-1"  ></BarcodeScannigAnimation> 
-          <Switch v-model="is_started_schedule" @click="checkSchedule" size="lg" yes="Started" no="Stopped" :bothVisible="false" class="me-2" ></Switch> 
-     </div>
-
-     
-
-
 
      <div class="sections mt-3">
-          
-
 
           <div class="single-section watting-list relative">
                <div class="header-and-tools">
