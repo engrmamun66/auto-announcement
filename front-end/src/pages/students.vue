@@ -357,11 +357,18 @@ const log = console.log
           <form @submit.prevent="false" @click.stop.prevent="false">
             <div class="row" :class="[payload?.id ? 'mt-2' : 'mt-4']">
 
-              <div v-if="payload?.id" class="col-12">
-                <Tabset @onTab="(tab) => {
+              <div class="col-12 d-flex justify-content-between align-items-center">
+                
+                <Tabset v-if="payload?.id" @onTab="(tab) => {
                   editModeTabIndex = tab;
                   if(tab == 2) getStudentPuchLogs();
                 }"></Tabset> 
+
+                <label class="using-card-title-in-form" v-if="CONFIG?.settings?.attendence?.status && payload?.id && payload?.name">
+                  {{ String(payload?.name).indexOf('Copied') > -1 ? 'This card for guardian' : 'this card for student' }}
+                </label>
+
+
               </div>
 
 
@@ -647,18 +654,19 @@ const log = console.log
                   }"></Switch> </td> 
 
                   <td>
-                    <button class="class-short-btn px-2" @click.stop="pushTheBarcode(makeCarcode(std), {message: 'কার্ডটি সফলভাবে পাঞ্চ হয়েছে।', source: 'manual_button'})">Punch</button>
+                    <template v-if="CONFIG?.settings?.attendence?.status">
+                      <button class="class-short-btn px-2" :class="{'for-call': std.name.indexOf('Copied') > -1, 'for-attendence': std.name.indexOf('Copied') == -1}" @click.stop="pushTheBarcode(makeCarcode(std), {message: 'কার্ডটি সফলভাবে পাঞ্চ হয়েছে।', source: 'manual_button', studentObj: std})">
+                        {{ std.name.indexOf('Copied') > -1 ? 'Call&nbsp;Punch' : 'Attendence' }}
+                        </button>
+                    </template> 
+                    <template v-else>
+                      <button class="class-short-btn px-2" @click.stop="pushTheBarcode(makeCarcode(std), {message: 'কার্ডটি সফলভাবে পাঞ্চ হয়েছে।', source: 'manual_button'})">
+                        Punch
+                      </button>
+                    </template> 
                   </td>
                   <td> 
                     <div class="d-flex justify-content-center action-icons">
-                      <span tooltip="Punch Logs" class="transformY-2px">
-                        <i @click="() => {
-                          prepareToEdit(std);
-                          editModeTabIndex = 2;
-                          getStudentPuchLogs();
-                        }" class='bx bxs-time cp px-1' style="font-size: 18px" ></i>
-                      </span>
-                      
                       <i @click.stop="targetStdForBarcode=std" class='bx bx-barcode cp size-1p5' ></i>
                       
                       <span tooltip="Copy barcode">
@@ -779,7 +787,7 @@ const log = console.log
   justify-content: flex-start;
 }
 .class-short-btn{
-  padding: 5px 10px;
+  padding: 1px 10px;
   text-align: center;
   background: var(--grad3);
   margin-right: 5px;
@@ -790,6 +798,16 @@ const log = console.log
   border: 2px solid transparent;
   scale: 1;
   transition: 0.3s all;
+}
+.class-short-btn.for-call,
+.class-short-btn.attendence {
+  width: 104px;
+}
+.class-short-btn.for-call{
+  background: #fa6548;
+}
+.class-short-btn.for-attendence{
+  background: #009a9e;
 }
 .class-short-btn:hover{
   box-shadow: 0px 3px 0px rgba(0, 0, 0, 0.126), 0px 6px 4px rgba(0, 0, 0, 0.465);
@@ -857,6 +875,12 @@ const log = console.log
     background-color: #ffffff4f;
     border-radius: 3px;
     font-size: 13px;
+}
+.using-card-title-in-form{
+  padding: 5px 15px; 
+  border-radius: 15px;
+  background: var(--grad1);
+  border-color: var(--primaryColor);
 }
 </style>
 

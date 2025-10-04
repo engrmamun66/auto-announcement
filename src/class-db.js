@@ -85,6 +85,66 @@ class myDB {
                 }
               }
             );
+
+            this.db.run(
+              `CREATE TABLE IF NOT EXISTS attendance (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                student_id INTEGER NOT NULL,
+                date DATE NOT NULL,
+                status TEXT NOT NULL, -- e.g., 'present', 'absent', 'late', 'leave'
+                in_time TIME DEFAULT NULL,
+                out_time TIME DEFAULT NULL,
+                remarks TEXT DEFAULT NULL,
+                created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            
+                -- Foreign key relation to students table
+                FOREIGN KEY(student_id) REFERENCES students(id)
+              );`,
+              (err) => {
+                if (err) {
+                  console.error("Error creating table:", err.message);
+                }
+              }
+            );
+
+            this.db.run(
+              `CREATE TABLE IF NOT EXISTS class_holidays (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                class_short TEXT NOT NULL, -- refers to class or class_short from students
+                holiday_date DATE NOT NULL,
+                type TEXT NOT NULL, -- e.g., 'holiday', 'leave', 'event'
+                reason TEXT DEFAULT NULL,
+                created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+              );`,
+              (err) => {
+                if (err) {
+                  console.error("Error creating table:", err.message);
+                }
+              }
+            );
+
+
+            this.db.run(
+              `CREATE TABLE IF NOT EXISTS class_holidays (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                class_id TEXT NOT NULL, -- refers to class or class_short from students
+                holiday_date DATE NOT NULL,
+                type TEXT NOT NULL, -- e.g., 'holiday', 'leave', 'event'
+                reason TEXT DEFAULT NULL,
+                created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+              );`,
+              (err) => {
+                if (err) {
+                  console.error("Error creating table:", err.message);
+                }
+              }
+            );
+            
+            
+            
             
         } catch (error) {
             console.log('ddfdf', error);
