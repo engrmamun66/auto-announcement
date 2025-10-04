@@ -9,9 +9,9 @@ class myDB {
         this.DB_ROOT_FOLDER = DB_ROOT_FOLDER;
         this.db = this._createDatabase(); 
         this._createTables(this.db);
-        // this._addColumn('students', '')
-        // this._addColumn('students', '')
-        // this._addColumn('students', '')
+        // this._addColumn('students', 'card_owner', 'VARCHAR', 'NULL')
+        // this._addColumn('students', 'options', 'VARCHAR', 'NULL')
+        // this._addColumn('students', 'note', 'VARCHAR', 'NULL')
     }
 
     _createDatabase(){
@@ -58,6 +58,7 @@ class myDB {
                 card_owner TEXT DEFAULT NULL,
                 options TEXT DEFAULT NULL,
                 note TEXT DEFAULT NULL,
+                id_type TEXT DEFAULT 1,
                     created TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );`,
                 (err) => {
@@ -101,9 +102,9 @@ class myDB {
       ADD age INT NOT NULL DEFAULT 0;
 
      */
-    _addColumn(tableName, columnName, { defaultVal = undefined, _null=true }={}){ this.db.run(
+    _addColumn(tableName, columnName, type='VARCHAR', defaultVal=undefined){ this.db.run(
             `   ALTER TABLE ${tableName}
-                ADD COLUMN ${columnName} VARCHAR ${defaultVal != undefined ? ('DEFAULT ' + defaultVal) : ''} CONSTRAINT ${columnName + '_addColumn_constraint'} 
+                ADD COLUMN ${columnName} ${type} DEFAULT ${defaultVal ?? 'NULL'} CONSTRAINT ${columnName + '_addColumn_constraint'} 
                 ;
             `,
             (err) => {

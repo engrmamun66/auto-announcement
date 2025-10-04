@@ -58,7 +58,10 @@ module.exports = {
                on_inactivity_switches_mode: 'no_action', // no_action | open_all | close_all | [1,2,3] ===> array of switch numbers
                switch_mode: 'auto', // auto || manual,
                delay_before_starting: 10, // miliseconds
-          }
+          },
+          attendence: {
+               status: true,
+          },
      },
      logo: {
           width: '200px',

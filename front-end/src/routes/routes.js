@@ -2,6 +2,7 @@ import HomeView from '../pages/home.vue'
 import StudentsView from '../pages/students.vue'
 import ImportView from '../pages/Import.vue'
 import SchedulesView from '../pages/shedules.vue'
+import AttendenceView from '../pages/attendence.vue'
 import ErrorView from '../pages/error.vue'
 
 const routes = [ 
@@ -14,6 +15,11 @@ const routes = [
         path: "/students",
         name: 'students',
         component: StudentsView,         
+    },
+    {
+        path: "/attendence",
+        name: 'attendence',
+        component: AttendenceView,         
     },
     {
         path: "/shedules",
