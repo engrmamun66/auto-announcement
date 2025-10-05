@@ -14,18 +14,18 @@ class Attendance {
     }
   
     // Add attendance
-    SHIFTS = [ 
-      {
-           start: '08:00',
-           end: '08:00',
-      }, 
-      {
-           start: '03:00',
-           end: '05:00',
-      } 
-    ]
-
+    
     /**
+     Example of SHIFTS = [ 
+       {
+            start: '08:00',
+            end: '08:00',
+       }, 
+       {
+            start: '03:00',
+            end: '05:00',
+       } 
+     ]
      * 
      * When each date (YYYY-MM-DD), will be maximum (shifts.length * 2)=4 entry, 
      * first check any entry is available or not, If no entry make a entry, 
@@ -34,19 +34,19 @@ class Attendance {
      * otherwise create a new entry with reversing in to out, out to in 
      * Note: for calculation time difference use moment js(imported already)
      */
-    add(req, res) {
-      const { student_id, date } = req.body;
+     add(req, res) {
+      const { student_id, date, class_short, class_name, branch_id = 1 } = req.body;
       if (!student_id || !date) {
         return res.status(400).send({ error: "student_id and date are required." });
       }
-
-      // let shifts = global.config.classes
     
-      const shifts = [
-        { start: "08:00", end: "08:00" },
-        { start: "03:00", end: "05:00" }
-      ];
-      const maxEntries = shifts.length * 2; // 4 entries per day
+      const db = this.db; // <-- use this.db (capture it)
+      let shifts = global.config.classes.find(cls => cls.class_short == class_short)?.shifts;
+      if (!shifts) {
+        return res.status(400).send({ error: `shift not found for [${class_name}]` });
+      }
+
+      const maxEntries = shifts.length * 2; // for 1 shift 2 entry max, for 2 shifts 4 entry max
     
       const selectQuery = `
         SELECT * FROM ${this.tableName}
@@ -54,32 +54,55 @@ class Attendance {
         ORDER BY created DESC LIMIT 1
       `;
     
-      this.db.get(selectQuery, [student_id, date], (err, lastRow) => {
+      db.get(selectQuery, [student_id, date], (err, lastRow) => {
         if (err) return res.status(500).send({ error: err.message });
     
         // Count entries for this date
-        this.db.get(
+        db.get(
           `SELECT COUNT(*) as cnt FROM ${this.tableName} WHERE student_id = ? AND date = ?`,
           [student_id, date],
           (err, result) => {
-            if (err) return res.status(500).send({ error: err.message });
+            if (err) return res.status(500).send({ error: err.message, 'tableName': this.tableName });
     
             const entryCount = result.cnt;
-            if (entryCount >= maxEntries) {
-              return res.status(400).send({ error: "Max attendance entries reached for today." });
-            }
-    
             const now = moment();
-            let action = "in"; // default in/out flag
+            let action = "in";
             let query, params;
-    
+
+            // calculate late_in_minute (only for first IN entry of the day)
+            let late_in_minute = 0;
             if (!lastRow) {
+              const firstShift = shifts[0];
+              if (firstShift?.start) {
+                const shiftStart = moment(`${date} ${firstShift.start}`, "YYYY-MM-DD HH:mm");
+                if (now.isAfter(shiftStart)) {
+                  late_in_minute = now.diff(shiftStart, "minutes");
+                }
+              }
+            }
+
+            if (entryCount >= maxEntries) {
+    
+              // Instead of blocking → update created timestamp of last row
+              if (!lastRow) {
+                // Defensive: if somehow count >= max but lastRow missing, fallback to updating latest by student/date
+                query = `UPDATE ${this.tableName} SET created=CURRENT_TIMESTAMP, updated=CURRENT_TIMESTAMP WHERE student_id=? AND date=? ORDER BY created DESC LIMIT 1`;
+                params = [student_id, date];
+              } else {
+                query = `UPDATE ${this.tableName} SET created=CURRENT_TIMESTAMP, updated=CURRENT_TIMESTAMP WHERE id=?`;
+                params = [lastRow.id];
+              }
+              action = "max-reached-update";
+              return res.send({action})
+            } else if (!lastRow) {
               // First entry → mark as IN
               query = `
-                INSERT INTO ${this.tableName} (student_id, date, status, in_time)
-                VALUES (?, ?, 'present', ?)
+              INSERT INTO ${this.tableName} 
+              (student_id, date, status, in_time, late_in_minute, branch_id)
+              VALUES (?, ?, 'present', ?, ?, ?)
               `;
-              params = [student_id, date, now.format("HH:mm:ss")];
+              params = [student_id, date, now.format("HH:mm:ss"), late_in_minute, branch_id];
+              
             } else {
               const lastCreated = moment(lastRow.created);
               const diffMinutes = now.diff(lastCreated, "minutes");
@@ -107,23 +130,47 @@ class Attendance {
                   action = "out-new";
                 } else {
                   query = `
-                    INSERT INTO ${this.tableName} (student_id, date, status, in_time)
-                    VALUES (?, ?, 'present', ?)
+                    INSERT INTO ${this.tableName} 
+                      (student_id, date, status, in_time, branch_id)
+                    VALUES (?, ?, 'present', ?, ?)
                   `;
-                  params = [student_id, date, now.format("HH:mm:ss")];
+                  params = [student_id, date, now.format("HH:mm:ss"), branch_id];
                   action = "in-new";
                 }
               }
             }
     
-            this.db.run(query, params, function (err) {
+            db.run(query, params,  (err) => {
+
               if (err) return res.status(500).send({ error: err.message });
-              res.send({ message: "Attendance recorded.", action, changes: this.changes, id: this.lastID });
+    
+              // Determine which row to fetch:
+              // - if last operation was INSERT, this.lastID is the new id
+              // - if it was UPDATE, use lastRow.id
+              const insertedId = this.lastID || (lastRow && lastRow.id);
+    
+              if (insertedId) {
+                // fetch by id
+                const fetchQuery = `SELECT * FROM ${this.tableName} WHERE id = ?`;
+                db.get(fetchQuery, [insertedId], (err, row) => {
+                  if (err) return res.status(500).send({ error: err.message });
+                  return res.send({ message: "Attendance recorded.", action, data: row });
+                });
+              } else {
+                // fallback: fetch latest row for student/date
+                const fetchQuery = `SELECT * FROM ${this.tableName} WHERE student_id = ? AND date = ? ORDER BY created DESC LIMIT 1`;
+                db.get(fetchQuery, [student_id, date], (err, row) => {
+                  if (err) return res.status(500).send({ error: err.message });
+                  return res.send({ message: "Attendance recorded.", action, data: row });
+                });
+              }
             });
           }
         );
       });
     }
+    
+    
     
       
   

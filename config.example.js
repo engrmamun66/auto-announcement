@@ -6,7 +6,7 @@ const SHIFTS = {
           start: '08:00',
           end: '08:00',
      },
-     seconds: {
+     second: {
           start: '03:00',
           end: '05:00',
      },
@@ -72,7 +72,7 @@ module.exports = {
           },
           attendence: {
                status: true,
-               only_attendence_feature: true,
+               only_attendence_feature: false,
           },
      },
      logo: {
@@ -101,7 +101,7 @@ module.exports = {
                display_name: 'play',
                isActive: true,
                speaker_ports: [1, 2],
-               shifts: [ SHIFTS.start, SHIFTS.seconds ],
+               shifts: [ SHIFTS.first, SHIFTS.second ],
           },
           {
                class_name: 'Nursery',
@@ -109,7 +109,7 @@ module.exports = {
                display_name: 'nursery',
                isActive: true,
                speaker_ports: [1, 2],
-               shifts: [ SHIFTS.start, SHIFTS.seconds ],
+               shifts: [ SHIFTS.first, SHIFTS.second ],
           },
           {
                class_name: 'KG',
@@ -117,7 +117,7 @@ module.exports = {
                display_name: 'kg',
                isActive: true,
                speaker_ports: [1, 2],
-               shifts: [ SHIFTS.start, SHIFTS.seconds ],
+               shifts: [ SHIFTS.first, SHIFTS.second ],
           },
           {
                class_name: 'One/Saffe Awal',
@@ -125,7 +125,7 @@ module.exports = {
                display_name: 'one',
                isActive: true,
                speaker_ports: [1, 2],
-               shifts: [ SHIFTS.start, SHIFTS.seconds ],
+               shifts: [ SHIFTS.first, SHIFTS.second ],
           },
           {
                class_name: 'Two/Saffe Sani',
@@ -133,7 +133,7 @@ module.exports = {
                display_name: 'two',
                isActive: true,
                speaker_ports: [1, 2],
-               shifts: [ SHIFTS.start, SHIFTS.seconds ],
+               shifts: [ SHIFTS.first, SHIFTS.second ],
           },
           {
                class_name: 'Three/Saffe Sales',
@@ -141,7 +141,7 @@ module.exports = {
                display_name: 'three',
                isActive: true,
                speaker_ports: [1, 6],
-               shifts: [ SHIFTS.start, SHIFTS.seconds ],
+               shifts: [ SHIFTS.first, SHIFTS.second ],
           },
           {
                class_name: 'Four/Saffe Rabe',
@@ -149,7 +149,7 @@ module.exports = {
                display_name: 'four',
                isActive: true,
                speaker_ports: [1, 6],
-               shifts: [ SHIFTS.start, SHIFTS.seconds ],
+               shifts: [ SHIFTS.first, SHIFTS.second ],
           },
           {
                class_name: 'Ibtedaiyah',
@@ -157,7 +157,7 @@ module.exports = {
                display_name: 'five',
                isActive: true,
                speaker_ports: [1, 6],
-               shifts: [ SHIFTS.start, SHIFTS.seconds ],
+               shifts: [ SHIFTS.first, SHIFTS.second ],
           },
           {
                class_name: 'Mutawassitah Awal / Mizan',
@@ -165,7 +165,7 @@ module.exports = {
                display_name: 'mizan',
                isActive: true,
                speaker_ports: [1, 6],
-               shifts: [ SHIFTS.start, SHIFTS.seconds ],
+               shifts: [ SHIFTS.first, SHIFTS.second ],
           },
           {
                class_name: 'Mutawassitah Sani / Nahbemir',
@@ -173,7 +173,7 @@ module.exports = {
                display_name: 'nahbemir',
                isActive: true,
                speaker_ports: [1, 6],
-               shifts: [ SHIFTS.start, SHIFTS.seconds ],
+               shifts: [ SHIFTS.first, SHIFTS.second ],
           },
           {
                class_name: 'Mutawassitah Sales',
@@ -181,7 +181,7 @@ module.exports = {
                display_name: 'kuduri',
                isActive: true,
                speaker_ports: [1, 6],
-               shifts: [ SHIFTS.start, SHIFTS.seconds ],
+               shifts: [ SHIFTS.first, SHIFTS.second ],
           },
           {
                class_name: 'Sanabiya Awal/Shorhebekaya',
@@ -189,7 +189,7 @@ module.exports = {
                display_name: 'shorhebekaya',
                isActive: true,
                speaker_ports: [1, 6],
-               shifts: [ SHIFTS.start, SHIFTS.seconds ],
+               shifts: [ SHIFTS.first, SHIFTS.second ],
           },
           {
                class_name: 'Sanabiya Sani',
@@ -197,7 +197,7 @@ module.exports = {
                display_name: 'Hedaya',
                isActive: true,
                speaker_ports: [1, 6],
-               shifts: [ SHIFTS.start, SHIFTS.seconds ],
+               shifts: [ SHIFTS.first, SHIFTS.second ],
           },
           {
                class_name: 'Class 11',
@@ -205,7 +205,7 @@ module.exports = {
                display_name: 'Meshkat',
                isActive: true,
                speaker_ports: [1, 6],
-               shifts: [ SHIFTS.start, SHIFTS.seconds ],
+               shifts: [ SHIFTS.first, SHIFTS.second ],
           },
           {
                class_name: 'Takmil',
@@ -213,7 +213,7 @@ module.exports = {
                display_name: 'Daora',
                isActive: true,
                speaker_ports: [1, 6],
-               shifts: [ SHIFTS.start, SHIFTS.seconds ],
+               shifts: [ SHIFTS.first, SHIFTS.second ],
           },
           {
                class_name: 'Hifz',
@@ -221,7 +221,7 @@ module.exports = {
                display_name: 'hifz',
                isActive: true,
                speaker_ports: [1, 5],
-               shifts: [ SHIFTS.start, SHIFTS.seconds ],
+               shifts: [ SHIFTS.first, SHIFTS.second ],
           },
           {
                class_name: 'Pre Hifz',
@@ -229,7 +229,7 @@ module.exports = {
                display_name: 'Pre Hifz',
                isActive: true,
                speaker_ports: [1, 5],
-               shifts: [ SHIFTS.start, SHIFTS.seconds ],
+               shifts: [ SHIFTS.first, SHIFTS.second ],
           },
      ],
      studentTableColumns: {
