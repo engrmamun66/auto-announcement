@@ -61,6 +61,7 @@ module.exports = {
           },
           attendence: {
                status: true,
+               only_attendence_feature: true,
           },
      },
      logo: {
