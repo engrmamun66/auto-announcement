@@ -711,6 +711,8 @@ function pushTheBarcode(barcode='play-417-2024', { message='', source='device' }
 
 
           let [ class_short ] = barcode.split('-') // nursary-23-sound1-2024
+          let class_object = classes.value.find(c => c.class_short === class_short)
+          let class_name = class_object?.class_name
 
 
           if(source === 'device'){
@@ -726,7 +728,8 @@ function pushTheBarcode(barcode='play-417-2024', { message='', source='device' }
                let isAllowed = callbacks.isMatchedAnySchedule(class_short)
              
                if(!isAllowed){
-                    emitter.emit('toaster-error', { message: 'পাঞ্চ এর সময় শুরু হয়নি'})
+                    let prefix = class_name ? (class_name + ' এর ') : 'ddd '
+                    emitter.emit('toaster-error', { message: `${prefix}পাঞ্চ এর সময় শুরু হয়নি`})
                     return
                }
                let targetClass = classes.value.filter(cls => cls.class_short == class_short)?.[0];
