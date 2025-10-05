@@ -101,8 +101,7 @@ class myDB {
                 status TEXT NOT NULL, -- e.g., 'present', 'absent', 'late', 'leave'
                 remarks TEXT DEFAULT NULL,
                 branch_id INTEGER DEFAULT 1, -- some client can be manage multiple institue by signle computer setup
-                created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                created TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
             
                 -- Foreign key relation to students table
                 FOREIGN KEY(student_id) REFERENCES students(id)

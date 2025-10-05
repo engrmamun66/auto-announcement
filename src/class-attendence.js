@@ -13,19 +13,47 @@ class Attendance {
       this.db = db;
     }
   
-    // Add attendance
+    addNew(req, res) {
+      const { student_id, date, in_time, out_time, status = 'present', remarks, late_in_minute = 0, branch_id = 1 } = req.body;
     
-    /**
-     Example of SHIFTS = [ 
-       {
-            start: '08:00',
-            end: '08:00',
-       }, 
-       {
-            start: '03:00',
-            end: '05:00',
-       } 
-     ]
+      if (!student_id || !date) {
+        return res.status(400).send({ error: "student_id and date are required." });
+      }
+    
+      const query = `
+        INSERT INTO ${this.tableName} 
+          (student_id, date, in_time, out_time, status, remarks, late_in_minute, branch_id)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `;
+    
+      const params = [
+        student_id,
+        date,
+        in_time || null,
+        out_time || null,
+        status,
+        remarks || null,
+        late_in_minute,
+        branch_id
+      ];
+    
+      const db = this.db;
+    
+      db.run(query, params, function (err) {
+        if (err) return res.status(500).send({ error: err.message });
+    
+        const insertedId = this.lastID;
+        db.get(`SELECT * FROM attendance WHERE id = ?`, [insertedId], (err, row) => {
+          if (err) return res.status(500).send({ error: err.message });
+          res.send({
+            message: "Row inserted successfully.",
+            data: row
+          });
+        });
+      });
+    }
+    
+    /** 
      * 
      * When each date (YYYY-MM-DD), will be maximum (shifts.length * 2)=4 entry, 
      * first check any entry is available or not, If no entry make a entry, 
@@ -34,7 +62,7 @@ class Attendance {
      * otherwise create a new entry with reversing in to out, out to in 
      * Note: for calculation time difference use moment js(imported already)
      */
-     add(req, res) {
+     add__(req, res) {
       const { student_id, date, class_short, class_name, branch_id = 1 } = req.body;
       if (!student_id || !date) {
         return res.status(400).send({ error: "student_id and date are required." });
@@ -86,10 +114,10 @@ class Attendance {
               // Instead of blocking → update created timestamp of last row
               if (!lastRow) {
                 // Defensive: if somehow count >= max but lastRow missing, fallback to updating latest by student/date
-                query = `UPDATE ${this.tableName} SET created=CURRENT_TIMESTAMP, updated=CURRENT_TIMESTAMP WHERE student_id=? AND date=? ORDER BY created DESC LIMIT 1`;
+                query = `UPDATE ${this.tableName} SET created=CURRENT_TIMESTAMP WHERE student_id=? AND date=? ORDER BY created DESC LIMIT 1`;
                 params = [student_id, date];
               } else {
-                query = `UPDATE ${this.tableName} SET created=CURRENT_TIMESTAMP, updated=CURRENT_TIMESTAMP WHERE id=?`;
+                query = `UPDATE ${this.tableName} SET created=CURRENT_TIMESTAMP WHERE id=?`;
                 params = [lastRow.id];
               }
               action = "max-reached-update";
@@ -110,11 +138,11 @@ class Attendance {
               if (diffMinutes <= 15) {
                 // Update last entry instead of new
                 if (!lastRow.out_time) {
-                  query = `UPDATE ${this.tableName} SET out_time=?, updated=CURRENT_TIMESTAMP WHERE id=?`;
+                  query = `UPDATE ${this.tableName} SET out_time=?, created=CURRENT_TIMESTAMP WHERE id=?`;
                   params = [now.format("HH:mm:ss"), lastRow.id];
                   action = "out-update";
                 } else {
-                  query = `UPDATE ${this.tableName} SET remarks='Updated again', updated=CURRENT_TIMESTAMP WHERE id=?`;
+                  query = `UPDATE ${this.tableName} SET remarks='Updated again', created=CURRENT_TIMESTAMP WHERE id=?`;
                   params = [lastRow.id];
                   action = "remark-update";
                 }
@@ -123,7 +151,7 @@ class Attendance {
                 if (lastRow.in_time && !lastRow.out_time) {
                   query = `
                     UPDATE ${this.tableName} 
-                    SET out_time=?, updated=CURRENT_TIMESTAMP
+                    SET out_time=?, created=CURRENT_TIMESTAMP
                     WHERE id=?
                   `;
                   params = [now.format("HH:mm:ss"), lastRow.id];
@@ -222,20 +250,26 @@ class Attendance {
   
     // Update attendance
     update(req, res) {
-      const { id, status, in_time, out_time, remarks } = req.body;
+      const { id, status, in_time, out_time, remarks, late_in_minute, branch_id } = req.body;
       if (!id) return res.status(400).send({ error: "ID required." });
-  
+    
       const query = `
         UPDATE ${this.tableName} 
-        SET status=?, in_time=?, out_time=?, remarks=?, updated=CURRENT_TIMESTAMP
+        SET status=?, in_time=?, out_time=?, remarks=?, late_in_minute=?, branch_id=?, updated=CURRENT_TIMESTAMP
         WHERE id=?
       `;
-  
-      this.db.run(query, [status, in_time, out_time, remarks, id], function (err) {
+    
+      this.db.run(query, [status, in_time, out_time, remarks, late_in_minute, branch_id, id], function (err) {
         if (err) return res.status(500).send({ error: err.message });
+    
+        if (this.changes === 0) {
+          return res.status(404).send({ error: "No attendance row found with that ID." });
+        }
+    
         res.send({ message: "Attendance updated.", changes: this.changes });
       });
     }
+    
   
     // Delete attendance
     delete(req, res) {

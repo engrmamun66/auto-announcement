@@ -660,7 +660,7 @@ const log = console.log
                           <!-- For Guardian -->
                           Call&nbsp;Punch
                         </button>
-                      <button v-else class="class-short-btn px-2 for-call" 
+                      <button v-else class="class-short-btn px-2 for-attendence" 
                         @click.stop="pushTheBarcode(makeCarcode(std), {message: 'কার্ডটি সফলভাবে পাঞ্চ হয়েছে।', source: 'manual_button', for_attendence: true})">
                           <!-- For Students Attendence -->
                           Attendence
@@ -811,7 +811,7 @@ const log = console.log
   width: 104px;
 }
 .class-short-btn.for-call{
-  background: #fa6548;
+  background: #00529e;
 }
 .class-short-btn.for-attendence{
   background: #009a9e;

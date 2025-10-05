@@ -129,7 +129,7 @@ class Students {
   
 
   getStudent(req, res) { 
-    let { barcode } = req.query
+    let { barcode, date, with_attendance } = req.query
     let [ class_short, dakhela, soundColName, year ] = barcode.split('-') // nursary-23-sound1-2024
 
     const query = `SELECT * FROM ${this.tableName} WHERE class_short = ? AND dakhela = ?`;
@@ -151,10 +151,27 @@ class Students {
       if(row.sound3) row.sound3 = utils.audioFullUrl(req, row.sound3)
 
       row['soundColName'] = soundColName
+
+      let result = { data: row }
+      if(!with_attendance){
+        return res.send(result);
+      } else {
+        const attendance_table_name = 'attendance'
+        const selectQuery = `
+          SELECT * FROM ${attendance_table_name}
+          WHERE student_id = ? AND date = ? 
+        `;
+        this.db.get(selectQuery, [dakhela, date], (err, entries) => {
+          if (err) return res.status(500).send({ error: err.message });
+
+          return res.send({
+            ...result,
+            entries: entries || [],
+          })
+
+        })
+      }
   
-      res.send({
-        data: row
-      });
     });
   }
     

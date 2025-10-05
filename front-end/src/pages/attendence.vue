@@ -1,54 +1,25 @@
 <script setup>
 import moment from 'moment/moment'
 import { onMounted, inject, ref, watch, computed, onBeforeUnmount } from 'vue';
-import Note from '../components/note.vue'
-import myTable from '../components/myTable.vue'
-import Modal from '../components/modal.vue' 
-import Btn from '../components/Btn.vue'
-import FileUpload from '../components/FileUpload.vue'
-import Switch from '../components/Switch.vue'
-import BtnLoader from '../components/BtnLoader.vue'
-import BarcodeScannigAnimation from '../components/BarcodeScannigAnimation.vue'
-import EmergencyMode from '../components/EmergencyMode.vue'
-import PlayingAnimation from '../components/PlayingAnimation.vue'
-import SwitchBoard from '../components/SwitchBoard.vue'
-import Confirm from '../components/Confirm.vue'
-import helper from '../utilities/helper';
-
-
+import RealtimeAttendences from './attendence-childs/RealtimeAttendences.vue'
  
 const route = inject('route');
 const router = inject('router');
 const emitter = inject('emitter');
 const storage = inject('storage');
-const http = inject('http');
-const is_started_schedule = inject('is_started_schedule');
-const stop_clear_and_reload = inject('stop_clear_and_reload');
-const speakText = inject('speakText');
-const callbacks = inject('callbacks');
-const getSchedules = inject('getSchedules');
-const pushTheBarcode = inject('pushTheBarcode');
-const makeCarcode = inject('makeCarcode');
-const appUseForbiddened = inject('appUseForbiddened');
-const showSwithBoardModal = inject('showSwithBoardModal');
-const borad_image_url = inject('borad_image_url');
-const CONFIG = inject('CONFIG');
-const switches_PreviewInHomePage = inject('switches_PreviewInHomePage');
-const isUsingSpeakerAutoControl = inject('isUsingSpeakerAutoControl');
-const isSpeakersAutoMode = inject('isSpeakersAutoMode');
+const http = inject('http'); 
 
 const log = console.log
 
+const CONFIG = inject('CONFIG');
 const classes = inject('classes');
-const wattingList = inject('wattingList');
+const attendenceList = inject('attendenceList');
 
-let toggleSettings = inject('toggleSettings') 
-let refreshDOM = inject('refreshDOM') 
+let tab = ref(1) 
 
  
   
 
-let tab = ref(1) 
 
 onMounted(()=>{
  
@@ -59,18 +30,38 @@ onMounted(()=>{
 
 <template>
 
+     <ul class="nav nav-tabs mt-4 mb-3">
+        <li class="nav-item">
+          <a @click.stop="tab = 1" class="nav-link cp text-black" :class="{'active': tab==1}" >Realtime&nbsp;Attendence</a>
+        </li>
+        <li class="nav-item">
+          <a @click.stop="tab = 2" class="nav-link cp text-black" :class="{'active': tab==2}" >Attendence&nbsp;History</a>
+        </li> 
+      </ul>
 
-     <div class="sections mt-3">
-          <h1>HEloo</h1>
-          
-           
-     </div> 
+      <transition>
+          <RealtimeAttendences v-if="tab == 1"></RealtimeAttendences>
+      </transition>
+
+
+      
      
 
 </template>
 
 
 <style>
+
+/* we will explain what these classes do next! */
+.v-enter-active,
+.v-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.v-enter-from,
+.v-leave-to {
+  opacity: 0;
+}
  
 .sections {
   display: flex;

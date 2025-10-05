@@ -716,7 +716,6 @@ function focusCurrenPlayingSoundCard_if_userIsInavtiveForFewSeconds(){
 
 function pushTheBarcode(barcode='play-417-2024', { message='', source='device', for_attendence=false }={}){
     if(for_attendence){
-        emitter.emit('toaster-success', { message: 'Wao attendence submit in progress' })
         pushAttedence(barcode, { message, source })
         
     } else {
@@ -899,7 +898,13 @@ function pushTheBarcode(barcode='play-417-2024', { message='', source='device', 
 
 }
 
-function pushAttedence(barcode='play-417-2024', { message='', source='device' }={}){
+function pushAttedence(barcode='play-417-2024', { 
+    message='', 
+    source='device', 
+    date=moment().format('Y-MM-DD'), 
+    branch_id=1,
+    reason=null,
+}={} ){
      try {
           if(!is_started_schedule.value){
                emitter.emit('toaster-error', { message: 'switched is off'})
@@ -933,42 +938,54 @@ function pushAttedence(barcode='play-417-2024', { message='', source='device' }=
           }
 
 
-          http.get('/single-student', { params: { barcode } }).then(response => {
+          http.get('/single-student', { params: { barcode, date, with_attendance: true } }).then(response => {
                if(response.status == 200){
                     let student = response.data.data;
+                    let entires = response.data.entries;
+                     
                     
                     if(student.status !== 1){
                         return emitter.emit('toaster-error', { message: 'এই স্টুডেন্টটি আপাতত নিষ্ক্রিয় আছে'})
-                    }
-                    
-                    student['barcode'] = barcode;
-                    student['punch_exact_time'] = helper.miliseconds();
-                    student['punch_exact_time_text'] = moment().format('Y-MM-DD HH:mm:ss')
+                    } 
 
-                    let findLast = attendenceList.value.findLast(s => s.id == student.id)
-                    let findLastIndex = attendenceList.value.findLastIndex(s => s.id == student.id)
-                    
 
-                    function addPunchLog(student){
-                        http.post('/punch-log/add-log', { student }).then(response => { })
+                    let payload = {
+                        id: null,
+                        studen_id: student.dakhela,
+                        student_id: null,
+                        date: null,
+                        in_time: null,
+                        out_time: null,
+                        late_in_minute: null,
+                        status: null,
+                        remarks: null,
+                        branch_id: null,
+                        created: null,
                     }
-                    function addAttendce(student){
-                        let payload = helper.clone(student, { remove: ['id']})
-                        payload.student_id = student.dakhela
-                        let __date = moment().format('Y-MM-DD')
-                        payload.date = __date
+
+
+                    let today_entries = entires
+                        let shifts = classes.value.find(cls => cls.class_short == class_short)?.shifts;
+                        if (true) {
+                            emitter.emit('toaster-success', `Shift not found for [${student.class_name}]`)
+                            return
+                        }
+                    
+                    function addAttendce(payload){
                         
-
+                        payload.student_id = student.dakhela 
+                        
                         http.post('/attendence-add', payload).then(response => {
-                            console.log('aaaa', response.data);
+                            console.log('/attendence-add:response', response.data);
+                            callbacks.getAttendeceList()
                         })
                     }
+ 
+                    // addAttendce(student)
 
-                    // addPunchLog(student)
-                    addAttendce(student)
-
-                    if(source !== 'device')
-                    emitter.emit('toaster-success', { message: 'কার্ডটি সফলভাবে পাঞ্চ হয়েছে।'})
+                    if(source !== 'device'){
+                        // emitter.emit('toaster-success', { message: 'কার্ডটি সফলভাবে পাঞ্চ হয়েছে।'})
+                    }
                }
           })
      } catch (error) {
