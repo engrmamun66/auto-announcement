@@ -378,9 +378,6 @@ app.get(`/api/_ac`, async (req, res) => {
     Attendence.add(req, res)
   }); 
 
-  console.log('======prefix', prefix + '/attendence-add');
-  
-   
    
 })
  
