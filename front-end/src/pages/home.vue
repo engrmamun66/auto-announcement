@@ -115,6 +115,18 @@ let tab = ref(1)
 watch(tab, getSchedules)
 watch(toggleSettings, getSchedules)
 
+
+function originalDakhela({name}){
+     if(!name) return false
+     let match = name.match(/dakhela::(\d+)/);
+
+     if (match) {
+          return match[1]
+     } else {
+          return false
+     }
+}
+
 let card_dynamic_width = ref(200)
 
 onMounted(()=>{
@@ -170,6 +182,9 @@ function updateStudetCardSize(){
 }
 function removeFromWattingList(student, i){
      wattingList.value.splice(i, 1)
+     if(isPayingThisCard(student)){
+          emitter.emit('stop_playing_and_clear_current_item_and_playnext', true)
+     }
 }
 
 function isPayingThisCard(student){
@@ -370,7 +385,7 @@ function recallAllPunchedStudents(){
                                              }})
                                         }">{{ student.name.split('||')?.[0] }} <i class='bx bx-edit-alt cp'></i></div>
                                         <div class="class-name">
-                                             {{ student.class }} <span>[{{ student.dakhela }}]</span>
+                                             {{ student.class }} <span>[{{ student.dakhela }}]{{ originalDakhela(student) ? `[main:${originalDakhela(student)}]` : '' }} </span>
                                         </div> 
                                         <div class="class-name panch-time mt-1 cp" @click="log({student, currentItem: storage('currentItem').value}) ">
                                              <div class="d-flex justify-content-between align-items-center" @click.stop="()=>{ router.push({name: 'students', query: { dakhela: student.dakhela, barcode, log: true }}) }" >
