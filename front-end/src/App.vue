@@ -469,6 +469,21 @@ let callbacks = {
     getCardOwnerName(id){
         if(!CONFIG.value?.card_owners?.length) return 1
         return CONFIG.value?.card_owners.find(owner => owner.id == id)?.name
+    },
+    getAttendeceList(){
+        try {
+            http.get('/attendence-list').then(response => {
+                if(response.status == 200){
+                let data = response.data
+                console.log('attendence-list::', data);
+                }
+            }).finally(()=>{
+                
+            })
+        } catch (error) {
+            
+        }
+  
     }
 }
 provide('callbacks', callbacks) 
@@ -544,6 +559,7 @@ async function getSchedules(){
 
 }
  
+ 
 async function getAllStudents(){
  
  try { 
@@ -607,6 +623,7 @@ onMounted(async ()=>{
     
     await getAllStudents()
     await getSchedules()
+    callbacks.getAttendeceList()
 
     await getConfig()
 
@@ -947,7 +964,7 @@ function pushAttedence(barcode='play-417-2024', { message='', source='device' }=
                         })
                     }
 
-                    addPunchLog(student)
+                    // addPunchLog(student)
                     addAttendce(student)
 
                     if(source !== 'device')
@@ -984,8 +1001,8 @@ function pushAttedence(barcode='play-417-2024', { message='', source='device' }=
 
         </div>
     
-        <template v-if="showAccessibilityAlert">
-            <div ref="disabilityAlretRef" class="disablitily-alert" @auxclick="log({getForbiddenedMessage})" v-html="getWarningMessage">  
+        <template v-if="showAccessibilityAlert && appAccessData?.internet === true">
+            <div ref="disabilityAlretRef" class="disablitily-alert" @auxclick="log({getWarningMessage})" v-html="'<h5>Hello</h5>' + getWarningMessage">  
             </div>
         </template>
         <template v-else-if="appAccessData?.internet === false">

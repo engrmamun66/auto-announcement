@@ -3,7 +3,7 @@ const path = require('path')
 const EvaluateCss = require('./process')
 const { classes } = global.config
 const { exec } = require("child_process");
-
+const moment = require('moment')
 
  
 
@@ -11,10 +11,28 @@ module.exports = {
     async checkNetwork() {
         try {
             const res = await fetch("https://www.google.com", { method: "HEAD", timeout: 3000 });
+            console.log('res.ok');
             return res.ok;
         } catch {
+            console.log('res.nok-');
             return false;
         }
+    },
+    miliseconds: function (time_24 = '') {
+        let momentObject = moment();
+    
+        if (time_24) {
+          const [hours, minutes] = time_24.split(":").map(Number);
+    
+          if (!isNaN(hours) && !isNaN(minutes)) {
+            momentObject.hour(hours);
+            momentObject.minute(minutes);
+            momentObject.second(0);
+            momentObject.millisecond(0);
+          }
+        }
+    
+        return momentObject.valueOf(); // returns timestamp in milliseconds
     },
     createRequiredFolders(){
 

@@ -67,7 +67,7 @@ module.exports = {
         console.log('isUsingLatestVersion error:', error);
       }
     } catch (err) {
-      console.error("❌ downloadFile error:", err);
+      console.error("❌ getUpdateVersion download error:", err);
     }
   },
   async extractZip(zipPath, extractTo) {

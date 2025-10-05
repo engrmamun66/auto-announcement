@@ -9,6 +9,7 @@ class myDB {
         this.DB_ROOT_FOLDER = DB_ROOT_FOLDER;
         this.db = this._createDatabase(); 
         this._createTables(this.db);
+        // this._addColumn('students', 'branch_id', 'INTEGER', '1')
         // this._addColumn('students', 'card_owner', 'VARCHAR', 'NULL')
         // this._addColumn('students', 'options', 'VARCHAR', 'NULL')
         // this._addColumn('students', 'note', 'VARCHAR', 'NULL') 
@@ -57,6 +58,7 @@ class myDB {
                 sound3 TEXT DEFAULT NULL,
                 card_owner TEXT DEFAULT NULL,
                 options TEXT DEFAULT NULL,
+                branch_id INTEGER DEFAULT 1, -- some client can be manage multiple institue by signle computer setup
                 note TEXT DEFAULT NULL,
                 id_type INTEGER DEFAULT 1, -- when using attendence, 1 = students, 2 = guardians
                     created TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -87,14 +89,18 @@ class myDB {
             );
 
             this.db.run(
-              `CREATE TABLE IF NOT EXISTS attendance (
+              // DROP TABLE IF EXISTS attendance;
+              `
+              CREATE TABLE IF NOT EXISTS attendance (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                student_id INTEGER NOT NULL,
+                student_id INTEGER NOT NULL, -- dakhela
                 date DATE NOT NULL,
-                status TEXT NOT NULL, -- e.g., 'present', 'absent', 'late', 'leave'
                 in_time TIME DEFAULT NULL,
                 out_time TIME DEFAULT NULL,
+                late_in_minute INTEGER DEFAULT 0,
+                status TEXT NOT NULL, -- e.g., 'present', 'absent', 'late', 'leave'
                 remarks TEXT DEFAULT NULL,
+                branch_id INTEGER DEFAULT 1, -- some client can be manage multiple institue by signle computer setup
                 created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             
@@ -109,12 +115,14 @@ class myDB {
             );
 
             this.db.run(
+              // DROP TABLE IF EXISTS class_holidays;
               `CREATE TABLE IF NOT EXISTS class_holidays (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 class_short TEXT NOT NULL, -- refers to class or class_short from students
                 holiday_date DATE NOT NULL,
                 type TEXT NOT NULL, -- e.g., 'holiday', 'leave', 'event'
                 reason TEXT DEFAULT NULL,
+                branch_id INTEGER DEFAULT 1, -- some client can be manage multiple institue by signle computer setup
                 created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
               );`,
@@ -123,27 +131,7 @@ class myDB {
                   console.error("Error creating table:", err.message);
                 }
               }
-            );
-
-
-            this.db.run(
-              `CREATE TABLE IF NOT EXISTS class_holidays (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                class_id TEXT NOT NULL, -- refers to class or class_short from students
-                holiday_date DATE NOT NULL,
-                type TEXT NOT NULL, -- e.g., 'holiday', 'leave', 'event'
-                reason TEXT DEFAULT NULL,
-                created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-              );`,
-              (err) => {
-                if (err) {
-                  console.error("Error creating table:", err.message);
-                }
-              }
-            );
-            
-            
+            ); 
             
             
         } catch (error) {
