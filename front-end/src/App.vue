@@ -903,7 +903,7 @@ function pushAttedence(barcode='play-417-2024', {
     source='device', 
     date=moment().format('Y-MM-DD'), 
     branch_id=1,
-    reason=null,
+    remarks=null,
 }={} ){
      try {
           if(!is_started_schedule.value){
@@ -949,43 +949,67 @@ function pushAttedence(barcode='play-417-2024', {
                     } 
 
 
-                    let payload = {
-                        id: null,
-                        studen_id: student.dakhela,
-                        student_id: null,
-                        date: null,
-                        in_time: null,
-                        out_time: null,
-                        late_in_minute: null,
-                        status: null,
-                        remarks: null,
-                        branch_id: null,
-                        created: null,
-                    }
-
-
-                    let today_entries = entires
-                        let shifts = classes.value.find(cls => cls.class_short == class_short)?.shifts;
-                        if (true) {
-                            emitter.emit('toaster-success', `Shift not found for [${student.class_name}]`)
-                            return
-                        }
                     
-                    function addAttendce(payload){
-                        
-                        payload.student_id = student.dakhela 
-                        
-                        http.post('/attendence-add', payload).then(response => {
-                            console.log('/attendence-add:response', response.data);
-                            callbacks.getAttendeceList()
-                        })
-                    }
- 
-                    // addAttendce(student)
 
-                    if(source !== 'device'){
-                        // emitter.emit('toaster-success', { message: 'কার্ডটি সফলভাবে পাঞ্চ হয়েছে।'})
+
+                    
+                    let shifts = classes.value.find(cls => cls.class_short == class_short)?.shifts;
+                    if (!shifts?.length) {
+                        return emitter.emit('toaster-success', {message: `${class_name} এর জন্য শিফট নির্ধারণ করা হয়নি`})
+                    } else {
+
+                        let DATE_FORMAT = 'YYYY-MM-DD'
+                        let TIME_FORMAT = 'HH:mm:ss'
+
+                        let payload = {
+                            // id: null,
+                            studen_id: student.dakhela,
+                            date: date,
+                            in_time: null,
+                            out_time: null,
+                            late_in_minute: 0, 
+                            status: 'present', // 'present', 'late', 'leave' | 'absent',
+                            remarks,
+                            branch_id,
+                        }
+
+                        let today_entries = entires
+                        let now = moment()
+                        if(!today_entries?.length){
+                            payload.in_time = moment().format(TIME_FORMAT)
+                            let fist_shift = moment().format(DATE_FORMAT) + ' ' + shifts[0].start
+                            if (now.isAfter(fist_shift)) {
+                                let late_in_minute = now.diff(fist_shift, "minutes");
+                                payload.late_in_minute = late_in_minute
+                                if(late_in_minute) payload.status = 'late'
+                            }
+                            console.log({payload});
+                            addAttendce(payload)
+                        } else {
+                            console.log('else=======', today_entries);
+                        }
+
+
+
+
+
+                        function addAttendce(payload){
+                            
+                            payload.student_id = student.dakhela 
+                            
+                            http.post('/attendence-add', payload).then(response => {
+                                console.log('/attendence-add:response', response.data);
+                                callbacks.getAttendeceList()
+                            })
+                        }
+     
+                        // addAttendce(student)
+    
+                        if(source !== 'device'){
+                            // emitter.emit('toaster-success', { message: 'কার্ডটি সফলভাবে পাঞ্চ হয়েছে।'})
+                        }
                     }
+                    
                }
           })
      } catch (error) {

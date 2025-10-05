@@ -95,8 +95,8 @@ class myDB {
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 student_id INTEGER NOT NULL, -- dakhela
                 date DATE NOT NULL,
-                in_time TIME DEFAULT NULL,
-                out_time TIME DEFAULT NULL,
+                in_time TIME DEFAULT NULL, -- 23:05:08 | null
+                out_time TIME DEFAULT NULL, -- 23:05:08 | null
                 late_in_minute INTEGER DEFAULT 0,
                 status TEXT NOT NULL, -- e.g., 'present', 'absent', 'late', 'leave'
                 remarks TEXT DEFAULT NULL,

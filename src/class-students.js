@@ -161,7 +161,7 @@ class Students {
           SELECT * FROM ${attendance_table_name}
           WHERE student_id = ? AND date = ? 
         `;
-        this.db.get(selectQuery, [dakhela, date], (err, entries) => {
+        this.db.all(selectQuery, [dakhela, date], (err, entries) => {
           if (err) return res.status(500).send({ error: err.message });
 
           return res.send({
