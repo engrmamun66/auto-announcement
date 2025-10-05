@@ -900,6 +900,8 @@ function pushAttedence(barcode='play-417-2024', { message='', source='device' }=
 
 
           let [ class_short ] = barcode.split('-') // nursary-23-sound1-2024
+          let class_object = classes.value.find(c => c.class_short === class_short)
+          let class_name = class_object?.class_name
 
 
           if(source === 'device'){

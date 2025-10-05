@@ -1,6 +1,6 @@
 <template>
     <div>    
-      <audio ref="audio" @ended="playNext" @pause="withInavtivity()" @error="onErrorInPlayer" ></audio>
+      <audio ref="audio" @ended="playNext" @play="checkAudioControlAgain" @pause="withInavtivity()" @error="onErrorInPlayer" ></audio>
     </div>
   </template>
   
@@ -31,6 +31,12 @@
         controlSounds({student: newData}) 
     }
   })
+
+  function checkAudioControlAgain(){
+    if(isSpeakersAutoMode.value && currentItem.value){
+        controlSounds({student: helper.clone(currentItem.value)}) 
+    }
+  }
 
   function withInavtivity(){
     if(!isSpeakersAutoMode.value) return
@@ -106,6 +112,11 @@
     }
   }
 
+  function stopAudio() {
+    audio.value.pause();
+    audio.value.currentTime = 0; // rewind to start
+  }
+
 
   function onErrorInPlayer(event){
     let { env: { BASE_URL }} = GLOBAL_DATA
@@ -133,7 +144,12 @@
           playNext()          
         }
         console.log('watching playlist...');
-      })
+    })
+    emitter.on('stop_playing_and_clear_current_item_and_playnext', ()=>{
+        currentItem.value = null
+        stopAudio()
+        playNext()
+    })
   })
 
   defineExpose({
