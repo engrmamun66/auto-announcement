@@ -1,6 +1,6 @@
 <template>
     <div>    
-      <audio ref="audio" @ended="playNext" @pause="withInavtivity()" @error="onErrorInPlayer" ></audio>
+      <audio ref="audio" @ended="playNext" @play="checkAudioControlAgain" @pause="withInavtivity()" @error="onErrorInPlayer" ></audio>
     </div>
   </template>
   
@@ -31,6 +31,12 @@
         controlSounds({student: newData}) 
     }
   })
+
+  function checkAudioControlAgain(){
+    if(isSpeakersAutoMode.value && currentItem.value){
+        controlSounds({student: helper.clone(currentItem.value)}) 
+    }
+  }
 
   function withInavtivity(){
     if(!isSpeakersAutoMode.value) return
