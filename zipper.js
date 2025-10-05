@@ -39,7 +39,8 @@ function ask(question) {
   (async () => {
     const create = await ask("Create or Upload zip (c/u)? ");
     if(create.toLowerCase() === "c"){
-        create_zip_with_latest_code()
+        const zip_for_setup_in_new_pc = await ask("Zip for setup in new PC (y/n): ");
+        create_zip_with_latest_code({zip_for_setup_in_new_pc: zip_for_setup_in_new_pc === 'y'})
     } else {
       console.log('===== Uploading Latest Code to Server =====');
         // const username = await ask("Enter username: ");
@@ -90,7 +91,7 @@ function ask(question) {
 
 
 
-async function create_zip_with_latest_code() {
+async function create_zip_with_latest_code({zip_for_setup_in_new_pc=false}={}) {
   try {
     const directories = [];
     const files = [];
@@ -105,29 +106,37 @@ async function create_zip_with_latest_code() {
         dest: "front-end/dist/assets/my-announcement.min.js"
     });
 
-    files.push({
-        src: path.join(__dirname, "public/favicon.png"),
-        dest: "public/favicon.png"
-    });
-    files.push({
-        src: path.join(__dirname, "public/logo.example.png"),
+    if(zip_for_setup_in_new_pc){
+      directories.push(path.join(__dirname, "database"));
+      directories.push(path.join(__dirname, "public"));
+
+    } else {
+      files.push({
+          src: path.join(__dirname, "public/favicon.png"),
+          dest: "public/favicon.png"
+      });
+      files.push({
+          src: path.join(__dirname, "public/logo.example.png"),
+          dest: "public/logo.example.jpeg"
+      });
+      files.push({
+        src: path.join(__dirname, "public/logo.example.jpeg"),
         dest: "public/logo.example.jpeg"
-    });
-    files.push({
-      src: path.join(__dirname, "public/logo.example.jpeg"),
-      dest: "public/logo.example.jpeg"
-    });
-    files.push({
-      src: path.join(__dirname, "public/logo.example.jpg"),
-      dest: "public/logo.example.jpg"
-    });
-    files.push({
-        src: path.join(__dirname, "public/sample.xlsx"),
-        dest: "public/sample.xlsx"
-    });
+      });
+      files.push({
+        src: path.join(__dirname, "public/logo.example.jpg"),
+        dest: "public/logo.example.jpg"
+      });
+      files.push({
+          src: path.join(__dirname, "public/sample.xlsx"),
+          dest: "public/sample.xlsx"
+      });
+    }
+
     
     directories.push(path.join(__dirname, "socket"));
     directories.push(path.join(__dirname, "src"));
+    
 
     files.push(path.join(__dirname, "config.example.js"));
     files.push(path.join(__dirname, "ecosystem.config.js"));
