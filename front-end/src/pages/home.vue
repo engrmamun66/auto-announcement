@@ -378,19 +378,22 @@ function recallAllPunchedStudents(){
                               :style="`--std-card-width:${card_dynamic_width}px`"
                               :barcode="student?.barcode" :card-id="student.id" :playing="isPayingThisCard(student)" >
                                    <div class="card-content" :class="{ 'bg_animation': student?.isPlaying }" >
-                                        <div class="student-name cp" @click="()=>{
+                                        <!-- Student name -->
+                                        <div class="student-name cp d-flex" @click="()=>{
                                              router.push({name: 'students', query: {
                                                   dakhela: student.dakhela,
                                                   barcode,
                                              }})
-                                        }">{{ student.name.split('||')?.[0] }} <i class='bx bx-edit-alt cp'></i></div>
+                                        }">
+                                             {{ student.name.split('||')?.[0] }} <i class='bx bx-edit-alt cp'></i>
+                                        </div>
                                         <div class="class-name">
                                              {{ student.class }} <span>[{{ student.dakhela }}]{{ originalDakhela(student) ? `[main:${originalDakhela(student)}]` : '' }} </span>
                                         </div> 
                                         <div class="class-name panch-time mt-1 cp" @click="log({student, currentItem: storage('currentItem').value}) ">
                                              <div class="d-flex justify-content-between align-items-center" @click.stop="()=>{ router.push({name: 'students', query: { dakhela: student.dakhela, barcode, log: true }}) }" >
                                                   <label :tooltip="!student?.call_slot ? '' : 'Punched: ' + moment(student.punch_exact_time_text).format('hh:mm:ss A')" class="cp"> 
-                                                       <span v-if="!student?.call_slot" class="text-danger">Emergency Call</span>
+                                                       <span v-if="!student?.call_slot && student?.emergency_mode " class="text-danger">Emergency Call</span>
                                                        <span v-else v-html="student?.call_slot"></span>
                                                         
                                                   </label>
