@@ -41,6 +41,7 @@ let schedule_timeout = ref(0)
 let classes = ref([]);
 let wattingList = ref([])
 let attendenceList = ref([])
+let liveAttendenceList = ref([])
 let punch_schedules = ref([])
 let call_schedules = ref([]) 
 let toggleSettings = ref(true) 
@@ -68,8 +69,12 @@ watch(wattingList, (newWaittinglist) => {
 }, {deep: true})
 
 watch(attendenceList, (newAttendenceList) => {
-    console.log('newAttendenceList[0]', newAttendenceList[0]);
-    storage('attendenceList').value = newAttendenceList
+    // console.log('newAttendenceList[0]', newAttendenceList[0]);
+}, {deep: true})
+
+
+watch(liveAttendenceList, (newliveAttendenceList) => {
+    storage('liveAttendenceList').value = newliveAttendenceList
 }, {deep: true})
 
 let palylistComponent = ref(null)
@@ -331,6 +336,7 @@ provide('schedule_timeout', schedule_timeout)
 provide('classes', classes)
 provide('wattingList', wattingList)
 provide('attendenceList', attendenceList)
+provide('liveAttendenceList', liveAttendenceList)
 provide('getSchedules', getSchedules)
 provide('speakText', speakText)
 provide('getSchedules', getSchedules)
@@ -475,7 +481,7 @@ let callbacks = {
             http.get('/attendence-list').then(response => {
                 if(response.status == 200){
                 let data = response.data
-                console.log('attendence-list::', data);
+                // console.log('attendence-list::', data);
                 }
             }).finally(()=>{
                 
@@ -975,35 +981,86 @@ function pushAttedence(barcode='play-417-2024', {
 
                         let today_entries = entires
                         let now = moment()
+                        let max_permitte_entry = shifts?.length * 2
+                        
                         if(!today_entries?.length){
+
+                            // When no entry today, just create an entry
                             payload.in_time = moment().format(TIME_FORMAT)
                             let fist_shift = moment().format(DATE_FORMAT) + ' ' + shifts[0].start
-                            if (now.isAfter(fist_shift)) {
+                            const [ consider, unit ] = fist_shift?.consider || [ 0, 'minutes']
+                            if (moment().add(consider, unit).isAfter(fist_shift)) {
                                 let late_in_minute = now.diff(fist_shift, "minutes");
                                 payload.late_in_minute = late_in_minute
                                 if(late_in_minute) payload.status = 'late'
                             }
-                            console.log({payload});
-                            addAttendce(payload)
+                            addAttendance(payload)
                         } else {
-                            console.log('else=======', today_entries);
+                            let last_enty = today_entries.at(-1)
+
+                            let last_punch_time = moment().format(DATE_FORMAT) + ' ' + (last_enty.in_time || last_enty.out_time)
+                            let gap_seconds = moment(new Date()).diff(last_punch_time, 'seconds')
+                            let minimum_gap_seconds = 300  
+
+                            console.log({minimum_gap_seconds, gap_seconds}, gap_seconds < minimum_gap_seconds); 
+
+                            if(gap_seconds < minimum_gap_seconds){
+                                // need to update last punch, right now
+                                payload = { ...payload, ...last_enty }
+
+                                if(last_enty.in_time){
+                                    last_enty.in_time = moment().format(TIME_FORMAT)
+                                }
+                                else if(last_enty.out_time){
+                                    last_enty.out_time = moment().format(TIME_FORMAT)
+                                }
+
+                                updateAttendance(payload)
+
+                            } else {
+                                // Check maximum entry permission for
+                                if(today_entries?.length < max_permitte_entry){
+                                    
+                                }
+                            }
+
+                            
+
+                            console.log({last_enty});
                         }
+                        
+                
 
 
 
 
-
-                        function addAttendce(payload){
+                        function addAttendance(payload){
                             
                             payload.student_id = student.dakhela 
                             
                             http.post('/attendence-add', payload).then(response => {
-                                console.log('/attendence-add:response', response.data);
-                                callbacks.getAttendeceList()
+                                if(response.status === 200){
+                                    let attendenceData = response.data.data
+                                    liveAttendenceList.value.unshift(attendenceData)
+                                    // callbacks.getAttendeceList()
+                                }
+                            })
+                        }
+
+                        function updateAttendance(payload){
+                            
+                            payload.student_id = student.dakhela 
+                            
+                            http.post('/attendence-update', payload).then(response => {
+                                if(response.status === 200){
+                                    let attendenceData = response.data.data
+                                    liveAttendenceList.value.unshift(attendenceData)
+                                    // callbacks.getAttendeceList()
+                                }
                             })
                         }
      
-                        // addAttendce(student)
+                   
     
                         if(source !== 'device'){
                             // emitter.emit('toaster-success', { message: 'কার্ডটি সফলভাবে পাঞ্চ হয়েছে।'})

@@ -3,12 +3,14 @@ const port_number = 2323
 
 const SHIFTS = {
      first: {
-          start: '08:00',
-          end: '08:00',
+          start: '09:00',
+          end: '12:00',
+          consider: [5, 'minutes']
      },
      second: {
           start: '03:00',
           end: '05:00',
+          consider: [0, 'minutes']
      },
 }
 
