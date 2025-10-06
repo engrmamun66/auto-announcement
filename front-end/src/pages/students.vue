@@ -364,7 +364,7 @@ const log = console.log
                   if(tab == 2) getStudentPuchLogs();
                 }"></Tabset> 
 
-                <label class="using-card-title-in-form" v-if="CONFIG?.settings?.attendence?.status && payload?.id && payload?.name">
+                <label class="using-card-title-in-form" v-if="CONFIG?.settings?.attendance?.status && payload?.id && payload?.name">
                   {{ String(payload?.name).indexOf('Copied') > -1 ? 'This card for guardian' : 'this card for student' }}
                 </label>
 
@@ -654,7 +654,7 @@ const log = console.log
                   }"></Switch> </td> 
 
                   <td>
-                    <template v-if="CONFIG?.settings?.attendence?.status">
+                    <template v-if="CONFIG?.settings?.attendance?.status">
                       <button v-if="std.name.indexOf('Copied') > -1" class="class-short-btn px-2 for-call" 
                         @click.stop="pushTheBarcode(makeCarcode(std), {message: 'কার্ডটি সফলভাবে পাঞ্চ হয়েছে।', source: 'manual_button', for_attendence: false})">
                           <!-- For Guardian -->

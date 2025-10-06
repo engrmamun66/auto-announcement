@@ -12,49 +12,9 @@ class Attendance {
       this.tableName = "attendance";
       this.db = db;
     }
-  
-    addNew(req, res) {
-      const { student_id, date, in_time, out_time, status = 'present', remarks, late_in_minute = 0, branch_id = 1 } = req.body;
-    
-      if (!student_id || !date) {
-        return res.status(400).send({ error: "student_id and date are required." });
-      }
-    
-      const query = `
-        INSERT INTO ${this.tableName} 
-          (student_id, date, in_time, out_time, status, remarks, late_in_minute, branch_id)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-      `;
-    
-      const params = [
-        student_id,
-        date,
-        in_time || null,
-        out_time || null,
-        status,
-        remarks || null,
-        late_in_minute,
-        branch_id
-      ];
-    
-      const db = this.db;
-    
-      db.run(query, params, function (err) {
-        if (err) return res.status(500).send({ error: err.message });
-    
-        const insertedId = this.lastID;
-        db.get(`SELECT * FROM attendance WHERE id = ?`, [insertedId], (err, row) => {
-          if (err) return res.status(500).send({ error: err.message });
-          res.send({
-            message: "Row inserted successfully.",
-            data: row
-          });
-        });
-      });
-    }
-    
-    // Get attendance records
-    list(req, res) {
+
+     // Get attendance records
+     list(req, res) {
       const page_no = parseInt(req.query.page_no) || 1;
       const limit = parseInt(req.query.limit) || 100;
       const offset = (page_no - 1) * limit;
@@ -99,18 +59,61 @@ class Attendance {
     }
     
   
+    addNew(req, res) {
+      const { student_id, date, in_time, out_time, status = 'present', remarks, late_in_minute = 0, branch_id = 1, shift_duration = '' } = req.body;
+    
+      if (!student_id || !date) {
+        return res.status(400).send({ error: "student_id and date are required." });
+      }
+    
+      const query = `
+        INSERT INTO ${this.tableName} 
+          (student_id, date, in_time, out_time, status, remarks, late_in_minute, branch_id, shift_duration)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `;
+    
+      const params = [
+        student_id,
+        date,
+        in_time || null,
+        out_time || null,
+        status,
+        remarks || null,
+        late_in_minute,
+        branch_id,
+        shift_duration,
+      ];
+    
+      const db = this.db;
+    
+      db.run(query, params, function (err) {
+        if (err) return res.status(500).send({ error: err.message });
+    
+        const insertedId = this.lastID;
+        db.get(`SELECT * FROM attendance WHERE id = ?`, [insertedId], (err, row) => {
+          if (err) return res.status(500).send({ error: err.message });
+          res.send({
+            message: "Row inserted successfully.",
+            data: row
+          });
+        });
+      });
+    }
+    
+   
+  
     // Update attendance
     update(req, res) {
-      const { id, status, in_time, out_time, remarks, late_in_minute, branch_id } = req.body;
+      const { id, status, in_time, out_time, remarks, late_in_minute, branch_id, shift_duration } = req.body;
       if (!id) return res.status(400).send({ error: "ID required." });
     
       const query = `
         UPDATE ${this.tableName} 
-        SET status=?, in_time=?, out_time=?, remarks=?, late_in_minute=?, branch_id=?, created=CURRENT_TIMESTAMP
+        SET status=?, in_time=?, out_time=?, remarks=?, late_in_minute=?, branch_id=?, shift_duration=?, created=CURRENT_TIMESTAMP
         WHERE id=?
       `;
     
-      this.db.run(query, [status, in_time, out_time, remarks, late_in_minute, branch_id, id], function (err) {
+      this.db.run(query, [status, in_time, out_time, remarks, late_in_minute, branch_id, shift_duration, id], function (err) {
         if (err) return res.status(500).send({ error: err.message });
     
         if (this.changes === 0) {

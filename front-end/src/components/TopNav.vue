@@ -1,12 +1,12 @@
 <template>
     <div class="topnav bg3" id="myTopnav">
-        <a ref="logo_wrapper" class="madrasha-title logo-area" :href="CONFIG?.settings?.attendence?.only_attendence_feature === true ? '#/attendence' : '#'">
+        <a ref="logo_wrapper" class="madrasha-title logo-area" :href="CONFIG?.settings?.attendance?.only_attendance_feature === true ? '#/attendence' : '#'">
             <img alt="site-logo" ref="logoEl" id="LOGO" src="" style="width: 200px;">
           </a>
-        <template v-if="!CONFIG?.settings?.attendence?.only_attendence_feature">
+        <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
           <RouterLink :to="{name: 'home'}" :class="{'active': route.name === 'home'}"><i class='bx bxs-home'></i> Dashboard</RouterLink>
         </template>
-        <template v-if="CONFIG?.settings?.attendence?.status">
+        <template v-if="CONFIG?.settings?.attendance?.status">
           <RouterLink :to="{name: 'attendence'}" :class="{'active attendence-tab': route.name === 'attendence'}"><i class='bx bxs-user'></i> Attendence</RouterLink>
         </template>
         <RouterLink :to="{name: 'students'}" :class="{'active students-tab': route.name === 'students'}"><i class='bx bxs-user'></i> Students</RouterLink>

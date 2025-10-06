@@ -100,6 +100,7 @@ class myDB {
                 late_in_minute INTEGER DEFAULT 0,
                 status TEXT NOT NULL, -- e.g., 'present', 'absent', 'late', 'leave'
                 remarks TEXT DEFAULT NULL,
+                shift_duration TEXT DEFAULT NULL,
                 branch_id INTEGER DEFAULT 1, -- some client can be manage multiple institue by signle computer setup
                 created TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
             

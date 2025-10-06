@@ -1,6 +1,6 @@
 <script setup>
 import { useRoute, useRouter } from "vue-router";
-import { provide, inject, ref, computed, watch, onMounted } from 'vue';
+import { provide, inject, ref, computed, watch, onMounted, getCurrentInstance } from 'vue';
 import SideBar from './components/sidebar.vue'
 import TopNav from './components/TopNav.vue'
 import Toaster from './components/Toaster.vue'
@@ -909,7 +909,7 @@ function pushAttedence(barcode='play-417-2024', {
     source='device', 
     date=moment().format('Y-MM-DD'), 
     branch_id=1,
-    remarks=null,
+    remarks='',
 }={} ){
      try {
           if(!is_started_schedule.value){
@@ -966,6 +966,7 @@ function pushAttedence(barcode='play-417-2024', {
 
                         let DATE_FORMAT = 'YYYY-MM-DD'
                         let TIME_FORMAT = 'HH:mm:ss'
+                        let DATE_TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss'
 
                         let payload = {
                             // id: null,
@@ -977,10 +978,10 @@ function pushAttedence(barcode='play-417-2024', {
                             status: 'present', // 'present', 'late', 'leave' | 'absent',
                             remarks,
                             branch_id,
+                            shift_duration: '', // 08:00 - 12:00
                         }
 
-                        let today_entries = entires
-                        let now = moment()
+                        let today_entries = entires 
                         let max_permitte_entry = shifts?.length * 2
                         
                         if(!today_entries?.length){
@@ -990,46 +991,107 @@ function pushAttedence(barcode='play-417-2024', {
                             let fist_shift = moment().format(DATE_FORMAT) + ' ' + shifts[0].start
                             const [ consider, unit ] = fist_shift?.consider || [ 0, 'minutes']
                             if (moment().add(consider, unit).isAfter(fist_shift)) {
-                                let late_in_minute = now.diff(fist_shift, "minutes");
+                                let late_in_minute = moment().diff(fist_shift, "minutes");
                                 payload.late_in_minute = late_in_minute
                                 if(late_in_minute) payload.status = 'late'
                             }
+                            payload.shift_duration = `${fist_shift.in_time} - ${fist_shift.out_time}`
+                            payload.late_in_minute = moment().diff(fist_shift.in_time, "minutes");
+                            payload.remarks = 'Added New Entry' 
                             addAttendance(payload)
                         } else {
                             let last_enty = today_entries.at(-1)
 
                             let last_punch_time = moment().format(DATE_FORMAT) + ' ' + (last_enty.in_time || last_enty.out_time)
-                            let gap_seconds = moment(new Date()).diff(last_punch_time, 'seconds')
-                            let minimum_gap_seconds = 300  
+                            let gap_seconds = moment(new Date()).diff(moment(last_punch_time), 'seconds')
+                            let minimum_gap_seconds = 10      
 
                             console.log({minimum_gap_seconds, gap_seconds}, gap_seconds < minimum_gap_seconds); 
 
-                            if(gap_seconds < minimum_gap_seconds){
+                            if(gap_seconds < minimum_gap_seconds || today_entries?.length === max_permitte_entry){
                                 // need to update last punch, right now
                                 payload = { ...payload, ...last_enty }
 
                                 if(last_enty.in_time){
-                                    last_enty.in_time = moment().format(TIME_FORMAT)
+                                    payload.in_time = moment().format(TIME_FORMAT)
                                 }
                                 else if(last_enty.out_time){
-                                    last_enty.out_time = moment().format(TIME_FORMAT)
+                                    payload.out_time = moment().format(TIME_FORMAT)
                                 }
+                                
+                                payload.remarks = 'Updated Existing Entry'
+
+                                let runningShift = getRunningShift(shifts)
+                                payload.shift_duration = `${runningShift.in_time} - ${runningShift.out_time}`
+                                payload.late_in_minute = moment().diff(runningShift.in_time, "minutes");
 
                                 updateAttendance(payload)
 
                             } else {
-                                // Check maximum entry permission for
                                 if(today_entries?.length < max_permitte_entry){
+                                    // Create a new entry 
+                                    // ==================
+                                    if(last_enty.in_time){ 
+                                        // if last is in_time, now will be out_time
+                                        payload.in_time = null
+                                        payload.out_time = moment().format(TIME_FORMAT)
+                                    }
+                                    else if(last_enty.out_time){
+                                        // if last is out_time, now will be in_time
+                                        payload.out_time = null
+                                        payload.in_time = moment().format(TIME_FORMAT)
+                                    }
+
+                                    let runningShift = getRunningShift(shifts)
+                                    payload.shift_duration = `${runningShift.in_time} - ${runningShift.out_time}`
+                                    payload.late_in_minute = moment().diff(runningShift.in_time, "minutes");
+                                    payload.remarks = 'Added New Entry' 
+
+                                    addAttendance(payload)
+
                                     
+                                } else {
+                                    console.log('==No action==')
                                 }
-                            }
+                            } 
+                        }
 
-                            
+                        if(payload.remarks){
+                            emitter.emit('toaster-success', { message: payload.remarks })
+                        } else {
+                            emitter.emit('toaster-error', { message: 'Attendence Failed!' })
 
-                            console.log({last_enty});
                         }
                         
                 
+
+                        function getRunningShift(shifts = []) {
+                            let all_shifts = shifts.map(shift => {
+                                // use shift.start / shift.end instead of in_time/out_time
+                                let in_time = moment(moment().format("YYYY-MM-DD") + ' ' + shift.start, "YYYY-MM-DD HH:mm");
+                                let out_time = moment(moment().format("YYYY-MM-DD") + ' ' + shift.end, "YYYY-MM-DD HH:mm");
+
+                                // pick shift-specific boundary if defined
+                                let [time, unit] = CONFIG.value.settings.attendance?.boundary_time || [0, 'minutes'];
+
+                                let start = moment(in_time).subtract(time, unit);
+                                let end = moment(out_time).add(time, unit); 
+
+                                let is_between = moment().isBetween(start, end); 
+
+                                return {
+                                ...shift,
+                                is_between
+                                };
+                            });
+
+                            let currentShift = all_shifts.reverse().find(s => s.is_between)
+                            if(!currentShift) currentShift = shifts[0]
+                            delete currentShift.is_between
+
+                            // return the last matching shift
+                            return currentShift
+                        }
 
 
 
@@ -1042,7 +1104,7 @@ function pushAttedence(barcode='play-417-2024', {
                                 if(response.status === 200){
                                     let attendenceData = response.data.data
                                     liveAttendenceList.value.unshift(attendenceData)
-                                    // callbacks.getAttendeceList()
+                                    callbacks.getAttendeceList()
                                 }
                             })
                         }
@@ -1053,9 +1115,12 @@ function pushAttedence(barcode='play-417-2024', {
                             
                             http.post('/attendence-update', payload).then(response => {
                                 if(response.status === 200){
-                                    let attendenceData = response.data.data
-                                    liveAttendenceList.value.unshift(attendenceData)
-                                    // callbacks.getAttendeceList()
+                                    liveAttendenceList.value.forEach(item => {
+                                        if(item.id == payload.id){
+                                            item = {...item, ...payload}
+                                        }
+                                    })
+                                    callbacks.getAttendeceList()
                                 }
                             })
                         }
