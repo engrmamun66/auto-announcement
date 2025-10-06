@@ -18,8 +18,7 @@ const multer = require("multer");
 const upload = multer({ dest: DIR + '/public/temp' });
 const webSocket = require("./socket/socket")
 
-const { getToken } = require('./src/device.biotimeApp') 
-const { startWithDevices } = require('./src/device.zkteco')
+const { getToken } = require('./src/device.biotimeApp')
 
 let webContents = require("./src/web-contents"); 
 let checkAccess = require("./src/checkaccess"); 
@@ -391,12 +390,9 @@ app.get(`/api/_ac`, async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}/app/#`); 
 
-  // send to socket  
-  if(global.config?.mode === 'with-ips'){
-    startWithDevices(Students)
-  } 
-  else {
-    getToken(Students)
-  } 
+  
+ 
+  getToken(Students)
+   
 });
 

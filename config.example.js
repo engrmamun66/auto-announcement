@@ -5,7 +5,8 @@ const SHIFTS = {
      first: {
           start: '09:00',
           end: '12:00',
-          consider: [5, 'minutes']
+          // consider: [5, 'minutes']
+          consider: [0, 'seconds']
      },
      second: {
           start: '03:00',
@@ -15,22 +16,11 @@ const SHIFTS = {
 }
 
 module.exports = {
-     mode: 'with-BioTime-app', // 'with-ips' || 'with-BioTime-app'
      env: {
           PORT: port_number,
           SOCKET_PORT: 2424,
           SECRET_KEY: 'YOUR_SECRET_KEY',
-          PUNCH_LOG_FILENAME: 'punch.log.json',
-          
-          /** ==== with-ips === */
-          DEVICES: [
-               {
-                    devicePort: '4370',
-                    deviceIp: "192.168.68.113",
-                    clean: false, // false | anyquantity(e.g 500)
-               }
-          ], 
-          /** ==== End === */
+          PUNCH_LOG_FILENAME: 'punch.log.json', 
 
 
           /** ==== with-BioTime-app === */
@@ -72,9 +62,11 @@ module.exports = {
                switch_mode: 'auto', // auto || manual,
                delay_before_starting: 10, // miliseconds
           },
-          attendence: {
+          attendance: {
                status: true,
-               only_attendence_feature: false,
+               only_attendance_feature: false,
+               // boundary_time: [30, 'minutes'], // using in getRunningShift() function
+               boundary_time: [10, 'seconds'], // using in getRunningShift() function
           },
      },
      logo: {

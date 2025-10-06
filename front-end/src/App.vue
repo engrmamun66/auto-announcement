@@ -41,7 +41,7 @@ let schedule_timeout = ref(0)
 let classes = ref([]);
 let wattingList = ref([])
 let attendenceList = ref([])
-let liveAttendenceList = ref([])
+let liveAttendenceList = ref(storage('liveAttendenceList').value || [])
 let punch_schedules = ref([])
 let call_schedules = ref([]) 
 let toggleSettings = ref(true) 
@@ -597,8 +597,6 @@ onMounted(async ()=>{
         Socket.value = socketInit({emitter, toaster: true})
     }, 1000);
 
-     
-
     setInterval(()=>{
         if(Socket.value){ 
             if(socketServerIsRunning.value === false){
@@ -880,8 +878,7 @@ function pushTheBarcode(barcode='play-417-2024', { message='', source='device', 
                                 if(studentCard){
                                     studentCard.classList.add('bx-fade-down')
                                     setTimeout(() => {
-                                            studentCard.classList.remove('bx-fade-down')
-                                            
+                                        studentCard.classList.remove('bx-fade-down')
                                     }, 2000);
                                 }
                                 emitter.emit('toaster-error', { message: 'ইতিমধ্যে কার্ডটি পাঞ্চ করা হয়েছে'})
@@ -1103,7 +1100,7 @@ function pushAttedence(barcode='play-417-2024', {
                             http.post('/attendence-add', payload).then(response => {
                                 if(response.status === 200){
                                     let attendenceData = response.data.data
-                                    liveAttendenceList.value.unshift(attendenceData)
+                                    liveAttendenceList.value.push(attendenceData)
                                     callbacks.getAttendeceList()
                                 }
                             })
@@ -1115,12 +1112,11 @@ function pushAttedence(barcode='play-417-2024', {
                             
                             http.post('/attendence-update', payload).then(response => {
                                 if(response.status === 200){
-                                    liveAttendenceList.value.forEach(item => {
-                                        if(item.id == payload.id){
-                                            item = {...item, ...payload}
-                                        }
-                                    })
-                                    callbacks.getAttendeceList()
+                                    let targetIndex = liveAttendenceList.value.findIndex(item => item.id == payload.id)
+                                    if(targetIndex > -1){
+                                        liveAttendenceList.value[targetIndex] = {...liveAttendenceList.value[targetIndex], ...payload}
+                                        callbacks.getAttendeceList()
+                                    }
                                 }
                             })
                         }

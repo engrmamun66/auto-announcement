@@ -1,9 +1,10 @@
 <template>
+    <!-- {{ liveAttendenceList }} -->
     <div class="row">
-        <template v-for="student in attendenceList">
+        <template v-for="item in liveAttendenceList">
             <div class="col-lg-2 col-md-3 col-sm-6">
                 <div class="w-100">
-                    <label for="">{{ student?.name }}</label>
+                    <label for="">{{ item?.student_id }}</label>
                 </div>
             </div> 
         </template>
@@ -32,6 +33,7 @@ const log = console.log
 const CONFIG = inject('CONFIG');
 const classes = inject('classes');
 const attendenceList = inject('attendenceList');
+const liveAttendenceList = inject('liveAttendenceList');
 
 
 </script>

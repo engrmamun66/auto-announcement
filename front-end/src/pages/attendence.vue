@@ -40,7 +40,9 @@ onMounted(()=>{
       </ul>
 
       <transition>
-          <RealtimeAttendences v-if="tab == 1"></RealtimeAttendences>
+        <template v-if="tab == 1">
+            <RealtimeAttendences ></RealtimeAttendences>
+        </template>
       </transition>
 
 
