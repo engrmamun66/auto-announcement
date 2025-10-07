@@ -1045,7 +1045,7 @@ function pushAttedence(barcode='play-417-2024', {
                                 if(last_enty.in_time){
                                     payload.in_time = moment().format(TIME_FORMAT)
                                     if(payload.late_in_minute > 0){
-                                        payload.status = 'late'
+                                        payload.status = 'Late'
                                     }
                                 }
                                 else if(last_enty.out_time){
