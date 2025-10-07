@@ -967,7 +967,7 @@ function pushAttedence(barcode='play-417-2024', {
 
                         let payload = {
                             // id: null,
-                            studen_id: student.dakhela,
+                            student_id: student.dakhela,
                             date: date,
                             in_time: null,
                             out_time: null,
@@ -985,15 +985,11 @@ function pushAttedence(barcode='play-417-2024', {
 
                             // When no entry today, just create an entry
                             payload.in_time = moment().format(TIME_FORMAT)
-                            let fist_shift = moment().format(DATE_FORMAT) + ' ' + shifts[0].start
-                            const [ consider, unit ] = fist_shift?.consider || [ 0, 'minutes']
-                            if (moment().add(consider, unit).isAfter(fist_shift)) {
-                                let late_in_minute = moment().diff(fist_shift, "minutes");
-                                payload.late_in_minute = late_in_minute
-                                if(late_in_minute) payload.status = 'late'
-                            }
+                            let firstShift = moment().format(DATE_FORMAT) + ' ' + shifts[0].start
+                            const [ consider, unit ] = firstShift?.consider || [ 0, 'minutes']
                             payload.shift_duration = `${shifts[0].start} - ${shifts[0].end}`
-                            payload.late_in_minute = moment().diff(shifts[0].start, "minutes");
+                            payload.late_in_minute = moment().add(consider, unit).diff(firstShift, "minutes");
+                            if(payload.late_in_minute > 0) payload.status = 'late'
                             payload.remarks = 'Added New Entry' 
                             addAttendance(payload)
                         } else {
@@ -1003,7 +999,6 @@ function pushAttedence(barcode='play-417-2024', {
                             let gap_seconds = moment(new Date()).diff(moment(last_punch_time), 'seconds')
                             let minimum_gap_seconds = 10      
 
-                            console.log({minimum_gap_seconds, gap_seconds}, gap_seconds < minimum_gap_seconds); 
 
                             if(gap_seconds < minimum_gap_seconds || today_entries?.length === max_permitte_entry){
                                 // need to update last punch, right now
@@ -1094,9 +1089,6 @@ function pushAttedence(barcode='play-417-2024', {
 
 
                         function addAttendance(payload){
-                            
-                            payload.student_id = student.dakhela 
-                            
                             http.post('/attendence-add', payload).then(response => {
                                 if(response.status === 200){
                                     let attendenceData = response.data.data
@@ -1107,9 +1099,6 @@ function pushAttedence(barcode='play-417-2024', {
                         }
 
                         function updateAttendance(payload){
-                            
-                            payload.student_id = student.dakhela 
-                            
                             http.post('/attendence-update', payload).then(response => {
                                 if(response.status === 200){
                                     let targetIndex = liveAttendenceList.value.findIndex(item => item.id == payload.id)

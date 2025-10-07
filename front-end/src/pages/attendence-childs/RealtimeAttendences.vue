@@ -18,7 +18,7 @@
                 </div>
 
                 <ul class="list-unstyled mb-2">
-                    <li><strong>Status:</strong> {{ item?.status || "N/A" }}</li>
+                    <li><strong>Status:</strong> <span status>{{ item?.status || "N/A" }}</span></li>
                     <li>
                     <strong>Late:</strong> {{ item?.late_in_minute || 0 }} min
                     </li>
@@ -26,10 +26,10 @@
                     <li><strong>Date:</strong> {{ Ahelper.printDate(item) }}</li>
                     <li>
                     <template v-if="item?.in_time">
-                        <strong>In:</strong> {{ item?.in_time || "--" }}
+                        <strong>In Time:</strong> {{ item?.in_time || "--" }}
                     </template>
                     <template v-else>
-                        <strong>Out:</strong> {{ item?.out_time || "--" }}
+                        <strong>Out Time:</strong> {{ item?.out_time || "--" }}
                     </template>
                     </li>
                 </ul>
@@ -81,7 +81,7 @@ const getStudent = ({ student_id }) =>
 }
 
 .attendance-card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
@@ -111,5 +111,12 @@ const getStudent = ({ student_id }) =>
   min-height: 250px;
   background-color: #f8f9fa;
   border: 1px dashed #ccc;
+}
+span[status]{
+    background-color: white;
+    padding: 1px 8px 3px 6px;
+    border-radius: 6px;
+    color: #222;
+    transform: translateY(-2px);
 }
 </style>

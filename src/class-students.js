@@ -252,7 +252,7 @@ class Students {
     });
   }
   
-  getStudentByDakhela_and_sentToSocket(dakhela, { start_time, punch_time, studentOfDevice }) {    
+  getStudentByDakhela_and_sentToSocket(dakhela, { start_time, punch_time, studentOfDevice, device_index=0 }={}) {    
     if(!dakhela) return
   
     const query = `SELECT * FROM ${this.tableName} WHERE dakhela = ? limit 1`; 
@@ -290,6 +290,11 @@ class Students {
 
       let barcode = `${student.class_short}-${student.dakhela}-sound1-${student.year}`;
 
+      let using_attendance = global.config?.settings?.attendance?.status
+      let is_copied = student.name.indexOf('Copied') > -1
+      let for_attendence = using_attendance && is_copied
+   
+
       global.socketServer.clients.forEach((client) => {
         if (client.readyState === client.OPEN) {
           client.send(JSON.stringify({
@@ -299,6 +304,8 @@ class Students {
             barcode,
             dakhela,
             studentOfDevice,
+            for_attendence,
+            device_index,
           }));
         }
       });

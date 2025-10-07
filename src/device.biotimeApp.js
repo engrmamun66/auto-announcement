@@ -66,7 +66,7 @@ function getToken(Students) {
 async function getLastPunchData(Students) {
     if (!global.DEVICE_TOKEN) return;
 
-    DEVICE_NAMES.forEach(async (device_name) => {
+    DEVICE_NAMES.forEach(async (device_name, device_index) => {
 
         const myHeaders = new Headers();
         myHeaders.append("Content-Type", "application/json");
@@ -107,6 +107,7 @@ async function getLastPunchData(Students) {
                 start_time,
                 studentOfDevice,
                 punch_time,
+                device_index,
             });
     
         } catch (error) {
@@ -117,7 +118,7 @@ async function getLastPunchData(Students) {
 }
 
 
-function fake_getLastPunchData(Students, dakhela, punch_time){ 
+function fake_getLastPunchData(Students, dakhela, punch_time, device_index=0){ 
 
     const start_time = moment().subtract(BACK_SECONDS, 'second').format('YYYY-MM-DD HH:mm:ss')
 
@@ -125,6 +126,7 @@ function fake_getLastPunchData(Students, dakhela, punch_time){
         start_time,
         studentOfDevice: null,
         punch_time,
+        device_index,
     });
 }
 
