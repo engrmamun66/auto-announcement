@@ -661,7 +661,7 @@ const log = console.log
                           Call&nbsp;Punch
                         </button>
                       <button v-else class="class-short-btn px-2 for-attendence" 
-                        @click.stop="pushTheBarcode(makeCarcode(std), {message: 'কার্ডটি সফলভাবে পাঞ্চ হয়েছে।', source: 'manual_button', for_attendence: true})">
+                        @click.stop="pushTheBarcode(makeCarcode(std), {message: 'কার্ডটি সফলভাবে পাঞ্চ হয়েছে।', source: 'manual_button', for_attendence: true, delay: 4000})">
                           <!-- For Students Attendence -->
                           Attendence
                         </button>

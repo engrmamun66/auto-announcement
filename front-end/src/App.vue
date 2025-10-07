@@ -723,9 +723,11 @@ function focusCurrenPlayingSoundCard_if_userIsInavtiveForFewSeconds(){
 }
 
 
-function pushTheBarcode(barcode='play-417-2024', { message='', source='device', for_attendence=false, device_index=0 }={}){
+function pushTheBarcode(barcode='play-417-2024', { message='', source='device', for_attendence=false, device_index=0, delay=0 }={}){
     if(for_attendence){
-        pushAttedence(barcode, { message, source, device_index })
+        setTimeout(() => {
+            pushAttedence(barcode, { message, source, device_index })
+        }, delay);
         
     } else {
         try {
@@ -1015,7 +1017,7 @@ function pushAttedence(barcode='play-417-2024', {
 
 
                                 let runningShift = getRunningShift(shifts)
-                                payload.shift_duration = `${runningShift.start_datetime} - ${runningShift.end_datetime}`
+                                payload.shift_duration = `${runningShift.start} - ${runningShift.end}`
 
                                 const [ consider, unit ] = CONFIG.value?.settings?.attendance?.not_late_consider || [ 0, 'minutes']
                                 let startDateTimeObj = moment(runningShift.start_datetime).add(consider, unit)
@@ -1103,8 +1105,8 @@ function pushAttedence(barcode='play-417-2024', {
 
                                 return {
                                 ...shift,
-                                start_datetime: in_time,
-                                end_datetime: out_time,
+                                start_datetime: in_time.format('YYYY-MM-DD HH:mm'),
+                                end_datetime: out_time.format('YYYY-MM-DD HH:mm'),
                                 is_between
                                 };
                             });
@@ -1137,8 +1139,10 @@ function pushAttedence(barcode='play-417-2024', {
                                     let targetIndex = liveAttendenceList.value.findIndex(item => item.id == payload.id)
                                     if(targetIndex > -1){
                                         liveAttendenceList.value[targetIndex] = {...liveAttendenceList.value[targetIndex], ...payload}
-                                        callbacks.getAttendeceList()
+                                    } else {
+                                        liveAttendenceList.value.push(payload)
                                     }
+                                    callbacks.getAttendeceList()
                                 }
                             })
                         }

@@ -4,53 +4,55 @@
     <template v-if="liveAttendenceList?.length">
         <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
             <template v-for="(item, i) in liveAttendenceList" :key="i">
-            <div class="col position-relative" :style="`order:${-i}`">
+              <div class="col position-relative fadeUp-9ms" :style="`order:${-i}`" @auxclick="log(item)">
 
-               
-                <div class="popup in-out d-flex">
-                    <span class="badge text-dark">
-                       ID: {{ item?.student_id }}
-                    </span>
-                    <span class="badge text-dark bg-body-secondary">
-                        {{ item?.in_time ? 'IN' : 'OUT' }}
-                    </span>
-                </div>
-                 
-
-                <div class="attendance-card shadow-sm" :class="{
-                    'status-present': item?.status?.toLowerCase() === 'present',
-                    'status-absent': item?.status?.toLowerCase() !== 'present',
-                }"
-                >
-                <div class="d-flex justify-content-between align-items-center mb-2" >
-                    <h4 class="student-name"> {{ getStudent(item)?.name || "Unknown" }} </h4>
-                </div>
-
-                <ul class="list-unstyled mb-2">
-                    <li>
-                        <strong>Status:</strong> 
-                        <span status class="ms-2">{{ item?.in_time ? item?.status : 'Just-Out' }}</span>
-                        <span v-if="item?.in_time" class="ms-2">{{ item?.late_in_minute }} min</span>
-                    </li>
-                    <li><strong>Shift:</strong> {{ item?.shift_duration }}</li>
-                    <li>
-                      <template v-if="item?.in_time">
-                          <strong>In Time:</strong> {{ item?.in_time }}
-                      </template>
-                      <template v-else>
-                          <strong>Out Time:</strong> {{ item?.out_time }}
-                      </template>
-                    </li>
-                </ul>
-
-                <div v-if="item?.remarks" class="remarks small d-flex justify-content-between align-items-center"> 
-                    <span>“{{ item.remarks }}”</span>
-                    <span class="badge text-dark bg-body-secondary">
-                        {{ Ahelper.printDate(item) }}
-                    </span>
+                
+                  <div class="popup in-out d-flex">
+                      <span class="badge text-dark">
+                        ID: {{ item?.student_id }}
+                      </span>
+                      <span class="badge text-dark bg-body-secondary">
+                          {{ item?.in_time ? 'IN' : 'OUT' }}
+                      </span>
                   </div>
+                  
+
+                  <div class="attendance-card shadow-sm" :class="{
+                      'status-present': item?.status?.toLowerCase() === 'present',
+                      'status-absent': item?.status?.toLowerCase() === 'late',
+                      'status-outtime': !item.in_time,
+                  }"
+                  >
+                  <div class="d-flex justify-content-between align-items-center mb-2" >
+                      <h4 class="student-name"> {{ getStudent(item)?.name || "Unknown" }} </h4>
+                  </div>
+
+                  <ul class="list-unstyled mb-2">
+                      <li><strong>Class :</strong> <span class="ms-1">{{ getStudent(item)?.class || "Unknown" }}</span></li>
+                      <li :tooltip="`${LateConsider[0]} ${LateConsider[1]} of consideration given.`">
+                          <strong>Status :</strong> 
+                          <span status class="ms-1">{{ item?.in_time ? item?.status : 'Just-Out' }}</span>
+                          <span v-if="item?.in_time" class="ms-1">{{ item?.late_in_minute }} min</span>
+                      </li>
+                      <li>
+                        <template v-if="item?.in_time">
+                            <strong>In Time :</strong> <span class="ms-1">{{ Ahelper.timeFromTime(item?.in_time) }}</span>
+                        </template>
+                        <template v-else>
+                            <strong>Out Time :</strong> <span class="ms-1">{{ Ahelper.timeFromTime(item?.out_time) }}</span>
+                        </template>
+                      </li>
+                      <li><strong>Shift :</strong> <span class="ms-1">{{ Ahelper.printShift(item?.shift_duration) }}</span> </li>
+                  </ul>
+
+                  <div v-if="item?.remarks" class="remarks small d-flex justify-content-between align-items-center"> 
+                      <span>“{{ item.remarks }}”</span>
+                      <span class="badge text-dark bg-body-secondary">
+                          {{ Ahelper.printDate(item) }}
+                      </span>
+                    </div>
+                </div>
               </div>
-            </div>
             </template>
         </div>
     </template>
@@ -71,7 +73,7 @@
 </template>
 
 <script setup>
-import { inject } from "vue";
+import { inject, ref, onMounted } from "vue";
 import Ahelper from "./attendacnceHelper";
 
 const CONFIG = inject("CONFIG");
@@ -80,10 +82,21 @@ const attendenceList = inject("attendenceList");
 const all_students = inject("all_students");
 const liveAttendenceList = inject("liveAttendenceList");
 
-const notLateConsider = CONFIG.value?.settings?.attendance?.not_late_consider || [ 0, 'minutes']
+let log = console.log
+
+const LateConsider = CONFIG.value?.settings?.attendance?.not_late_consider || [ 0, 'minutes']
+let isMounted = ref(false)
 
 const getStudent = ({ student_id }) =>
   all_students.value.find((std) => std.dakhela == student_id);
+
+onMounted(()=>{
+  setTimeout(() => {
+    isMounted.value = true
+  }, 500);
+})
+
+
 </script>
 
 <style scoped>
@@ -121,6 +134,11 @@ const getStudent = ({ student_id }) =>
   color: #fff !important;
 }
 
+.status-outtime {
+  background-color: #0095b7; /* Bootstrap danger red */
+  color: #fff !important;
+}
+
 .status-present .badge,
 .status-absent .badge {
   background: rgba(255, 255, 255, 0.2) !important;
@@ -148,7 +166,7 @@ span[status]{
 }
 .popup{
     position: absolute;
-    padding: 2px 6px;
+    padding: 5px 15px;
     text-align: center;
     background-color: rgb(255, 255, 255);
     border-radius: 0px 0px 5px 5px;

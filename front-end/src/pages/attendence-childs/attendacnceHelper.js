@@ -13,7 +13,19 @@ const Ahelper = {
         } else {
             return moment(date).format('DD MMMM, Y')
         }
-    }
+    },
+    timeFromTime(time_text){
+        let dateTime = moment().format('Y-MM-DD ') + time_text
+        return moment(dateTime).format('hh:mm:ss A')
+    },
+    printShift(times_text){
+        let [ startTime, endTime ] = times_text.split(' - ')
+        if(startTime && endTime){
+            return `${moment(moment().format('Y-MM-DD ') + startTime).format('hh:mm A')} - ${moment(moment().format('Y-MM-DD ') + endTime).format('hh:mm A')}`
+        } else {
+            return times_text
+        }
+    },
      
 }
 

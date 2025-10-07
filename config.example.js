@@ -1,10 +1,11 @@
 
 const port_number = 2323
 
+// shifts must be 24 hours format
 const SHIFTS = {
      first: {
-          start: '10:20',
-          end: '12:00',
+          start: '15:00', 
+          end: '17:00',
      },
      second: {
           start: '03:00',
