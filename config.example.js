@@ -3,15 +3,12 @@ const port_number = 2323
 
 const SHIFTS = {
      first: {
-          start: '09:00',
+          start: '10:20',
           end: '12:00',
-          // consider: [5, 'minutes']
-          consider: [0, 'seconds']
      },
      second: {
           start: '03:00',
-          end: '05:00',
-          consider: [0, 'minutes']
+          end: '05:00', 
      },
 }
 
@@ -66,7 +63,9 @@ module.exports = {
                status: true,
                only_attendance_feature: false,
                // boundary_time: [30, 'minutes'], // using in getRunningShift() function
-               boundary_time: [10, 'seconds'], // using in getRunningShift() function
+               boundary_time: [1330, 'seconds'], // using in getRunningShift() function,
+               not_late_consider: [5, 'minutes'],
+               maximum_live_attedence: 50,
           },
      },
      logo: {

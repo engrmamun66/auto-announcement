@@ -1,6 +1,6 @@
 <template>
   <!-- Attendance Cards -->
-  <div class="px-2">
+  <div class="">
     <template v-if="liveAttendenceList?.length">
         <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
             <template v-for="(item, i) in liveAttendenceList" :key="i">
@@ -23,33 +23,33 @@
                 }"
                 >
                 <div class="d-flex justify-content-between align-items-center mb-2" >
-                    <h4 class="mb-0 fw-bold"> {{ getStudent(item)?.name || "Unknown" }} </h4>
-                    
+                    <h4 class="student-name"> {{ getStudent(item)?.name || "Unknown" }} </h4>
                 </div>
 
                 <ul class="list-unstyled mb-2">
                     <li>
                         <strong>Status:</strong> 
-                        <span status>{{ item?.status || "Out Time" }}</span>
-                        <span></span>
-                    </li>
-                    <li>
-                    <strong>Late:</strong> {{ item?.late_in_minute || 0 }} min
+                        <span status class="ms-2">{{ item?.in_time ? item?.status : 'Just-Out' }}</span>
+                        <span v-if="item?.in_time" class="ms-2">{{ item?.late_in_minute }} min</span>
                     </li>
                     <li><strong>Shift:</strong> {{ item?.shift_duration }}</li>
-                    <li><strong>Date:</strong> {{ Ahelper.printDate(item) }}</li>
                     <li>
-                    <template v-if="item?.in_time">
-                        <strong>In Time:</strong> {{ item?.in_time }}
-                    </template>
-                    <template v-else>
-                        <strong>Out Time:</strong> {{ item?.out_time }}
-                    </template>
+                      <template v-if="item?.in_time">
+                          <strong>In Time:</strong> {{ item?.in_time }}
+                      </template>
+                      <template v-else>
+                          <strong>Out Time:</strong> {{ item?.out_time }}
+                      </template>
                     </li>
                 </ul>
 
-                <div v-if="item?.remarks" class="remarks small"> “{{ item.remarks }}” </div>
-                </div>
+                <div v-if="item?.remarks" class="remarks small d-flex justify-content-between align-items-center"> 
+                    <span>“{{ item.remarks }}”</span>
+                    <span class="badge text-dark bg-body-secondary">
+                        {{ Ahelper.printDate(item) }}
+                    </span>
+                  </div>
+              </div>
             </div>
             </template>
         </div>
@@ -80,6 +80,8 @@ const attendenceList = inject("attendenceList");
 const all_students = inject("all_students");
 const liveAttendenceList = inject("liveAttendenceList");
 
+const notLateConsider = CONFIG.value?.settings?.attendance?.not_late_consider || [ 0, 'minutes']
+
 const getStudent = ({ student_id }) =>
   all_students.value.find((std) => std.dakhela == student_id);
 </script>
@@ -92,11 +94,21 @@ const getStudent = ({ student_id }) =>
   border: 1px solid #e2e2e2;
   transition: all 0.25s ease;
   color: #333;
-  padding-top: 30px;
+  padding-top: 40px;
 }
 
 .attendance-card:hover {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.student-name{
+  margin-bottom: 10px;
+  font-weight: 700;
+  border: 1px solid;
+  border-bottom: 2px double;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 5px;
 }
 
 .status-present {
@@ -127,25 +139,30 @@ const getStudent = ({ student_id }) =>
   border: 1px dashed #ccc;
 }
 span[status]{
-    background-color: white;
+  background-color: rgba(255, 255, 255, 0.161);
     padding: 1px 8px 3px 6px;
     border-radius: 6px;
-    color: #222;
+    color: #ffffff;
     transform: translateY(-2px);
+    border: 1px solid white;
 }
 .popup{
     position: absolute;
-    padding: 1px 5px;
+    padding: 2px 6px;
     text-align: center;
-    background-color: white;
+    background-color: rgb(255, 255, 255);
     border-radius: 0px 0px 5px 5px;
     top: 1px;
+    box-shadow: 0px 1px 0px rgba(0, 0, 0, 0.489), inset 1px 1px 0px rgba(0, 0, 0, 0.175);
     z-index: 1;
-}
+  } 
 .popup.in-out{  
     left: 50%;
     top: 1px;
     transform: translateX(-50%);
     border-radius: 0px 0px 5px 5px;
 } 
+li{
+  margin-bottom: 6px;
+}
 </style>

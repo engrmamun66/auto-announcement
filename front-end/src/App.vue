@@ -993,7 +993,7 @@ function pushAttedence(barcode='play-417-2024', {
                             payload.in_time = moment().format(TIME_FORMAT)
                             let firstShift = moment().format(DATE_FORMAT) + ' ' + shifts[0].start
                             
-                            const [ consider, unit ] = shifts[0]?.consider || [ 0, 'minutes']
+                            const [ consider, unit ] = CONFIG.value?.settings?.attendance?.not_late_consider || [ 0, 'minutes']
 
                             payload.shift_duration = `${shifts[0].start} - ${shifts[0].end}`
                             let firstShiftOjb = moment(firstShift).add(consider, unit)
@@ -1017,7 +1017,7 @@ function pushAttedence(barcode='play-417-2024', {
                                 let runningShift = getRunningShift(shifts)
                                 payload.shift_duration = `${runningShift.start_datetime} - ${runningShift.end_datetime}`
 
-                                const [ consider, unit ] = runningShift?.consider || [ 0, 'minutes']
+                                const [ consider, unit ] = CONFIG.value?.settings?.attendance?.not_late_consider || [ 0, 'minutes']
                                 let startDateTimeObj = moment(runningShift.start_datetime).add(consider, unit)
 
                                 payload.late_in_minute = moment().diff(startDateTimeObj, "minutes");
@@ -1047,7 +1047,11 @@ function pushAttedence(barcode='play-417-2024', {
 
                                     let runningShift = getRunningShift(shifts)
                                     payload.shift_duration = `${runningShift.start} - ${runningShift.end}`
-                                    payload.late_in_minute = moment().diff(runningShift.start_datetime, "minutes");
+
+                                    const [ consider, unit ] = CONFIG.value?.settings?.attendance?.not_late_consider || [ 0, 'minutes']
+                                    const startDateTimeObj = moment(runningShift.start_datetime).add(consider, unit)
+
+                                    payload.late_in_minute = moment().diff(startDateTimeObj, "minutes");
 
 
                                     if(last_enty.in_time){ 
