@@ -73,7 +73,7 @@
 </template>
 
 <script setup>
-import { inject, ref, onMounted } from "vue";
+import { inject, ref, onMounted, onBeforeUnmount } from "vue";
 import Ahelper from "./attendacnceHelper";
 
 const CONFIG = inject("CONFIG");
@@ -95,7 +95,6 @@ onMounted(()=>{
     isMounted.value = true
   }, 500);
 })
-
 
 </script>
 
@@ -119,9 +118,12 @@ onMounted(()=>{
   font-weight: 700;
   border: 1px solid;
   border-bottom: 2px double;
+  border-color:rgba(255, 255, 255, 0.442);
   cursor: pointer;
   padding: 5px;
   border-radius: 5px;
+  width: 100%;
+  text-align: center;
 }
 
 .status-present {
@@ -162,7 +164,7 @@ span[status]{
     border-radius: 6px;
     color: #ffffff;
     transform: translateY(-2px);
-    border: 1px solid white;
+    border: 1px solid #ffffff54;
 }
 .popup{
     position: absolute;

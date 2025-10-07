@@ -1,6 +1,7 @@
 <script setup>
 import moment from 'moment/moment'
 import { onMounted, inject, ref, watch, computed, onBeforeUnmount } from 'vue';
+import AttendencesAll from './attendence-childs/AttendencesAll.vue'
 import RealtimeAttendences from './attendence-childs/RealtimeAttendences.vue'
  
 const route = inject('route');
@@ -44,6 +45,9 @@ onMounted(()=>{
      <transition>
        <template v-if="tab == 1">
            <RealtimeAttendences ></RealtimeAttendences>
+       </template>
+       <template v-else-if="tab == 2">
+           <AttendencesAll ></AttendencesAll>
        </template>
      </transition>
   </div>

@@ -1,6 +1,6 @@
 <script setup>
 import { useRoute, useRouter } from "vue-router";
-import { provide, inject, ref, computed, watch, onMounted, getCurrentInstance } from 'vue';
+import { provide, inject, ref, computed, watch, onMounted } from 'vue';
 import SideBar from './components/sidebar.vue'
 import TopNav from './components/TopNav.vue'
 import Toaster from './components/Toaster.vue'
@@ -328,6 +328,23 @@ async function controlSounds({student=null, ports=[], openAll=false}={}){
  }
 
 }
+
+let attendenceParams = ref({
+    "page_no": 1,
+    "total": 3,
+    "totalPages": 1,
+    "limit": 50,
+
+    // class_name: null,
+    // name: null,
+    // card_no: null,
+    // dakhela: route.query?.dakhela || null,
+    // sound1: null,
+})
+
+
+
+
 provide('route', route)
 provide('router', router)
 provide('CONFIG', CONFIG)
@@ -336,6 +353,7 @@ provide('schedule_timeout', schedule_timeout)
 provide('classes', classes)
 provide('wattingList', wattingList)
 provide('attendenceList', attendenceList)
+provide('attendenceParams', attendenceParams)
 provide('liveAttendenceList', liveAttendenceList)
 provide('getSchedules', getSchedules)
 provide('speakText', speakText)
@@ -364,7 +382,7 @@ provide('last_requested_ports_for_auto_mode', last_requested_ports_for_auto_mode
 
 
 
-let callbacks = {
+const callbacks = {
     isMatchedAnySchedule(class_short){
         let className = classes.value.find(c => c.class_short == class_short)?.class_name 
         if(!className) return false;
@@ -1128,7 +1146,7 @@ function pushAttedence(barcode='play-417-2024', {
                                     let attendenceData = response.data.data
                                     liveAttendenceList.value.push(attendenceData)
                                     callbacks.fixOverflowOfLiveAttendence()
-                                    callbacks.getAttendeceList()
+                                    // callbacks.getAttendeceList()
                                 }
                             })
                         }
@@ -1142,7 +1160,7 @@ function pushAttedence(barcode='play-417-2024', {
                                     } else {
                                         liveAttendenceList.value.push(payload)
                                     }
-                                    callbacks.getAttendeceList()
+                                    // callbacks.getAttendeceList()
                                 }
                             })
                         }
