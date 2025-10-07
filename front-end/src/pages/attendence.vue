@@ -30,20 +30,24 @@ onMounted(()=>{
 
 <template>
 
-     <ul class="nav nav-tabs mt-4 mb-3">
-        <li class="nav-item">
-          <a @click.stop="tab = 1" class="nav-link cp text-black" :class="{'active': tab==1}" >Realtime&nbsp;Attendence</a>
-        </li>
-        <li class="nav-item">
-          <a @click.stop="tab = 2" class="nav-link cp text-black" :class="{'active': tab==2}" >Attendence&nbsp;History</a>
-        </li> 
-      </ul>
+  <div class="page-contents">
 
-      <transition>
-        <template v-if="tab == 1">
-            <RealtimeAttendences ></RealtimeAttendences>
-        </template>
-      </transition>
+    <ul class="nav nav-tabs mt-0 mb-3">
+       <li class="nav-item">
+         <a @click.stop="tab = 1" class="nav-link cp text-black" :class="{'active': tab==1}" >Realtime&nbsp;Attendence</a>
+       </li>
+       <li class="nav-item">
+         <a @click.stop="tab = 2" class="nav-link cp text-black" :class="{'active': tab==2}" >Attendence&nbsp;History</a>
+       </li> 
+     </ul>
+  
+     <transition>
+       <template v-if="tab == 1">
+           <RealtimeAttendences ></RealtimeAttendences>
+       </template>
+     </transition>
+  </div>
+
 
 
       

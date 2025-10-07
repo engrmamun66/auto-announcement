@@ -44,7 +44,8 @@ class myDB {
             );
 
             this.db.run(
-              `CREATE TABLE IF NOT EXISTS students (
+              `
+              CREATE TABLE IF NOT EXISTS students (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
                 dakhela INTEGER NOT NULL,
@@ -72,7 +73,8 @@ class myDB {
 
             this.db.run(
               //DROP TABLE IF EXISTS schedules;
-              `CREATE TABLE IF NOT EXISTS schedules (
+              `
+              CREATE TABLE IF NOT EXISTS schedules (
                   id INTEGER PRIMARY KEY AUTOINCREMENT,
                   type INTEGER DEFAULT 1, -- Represents the type of the schedule (punch=1 | call=2)
                   title TEXT DEFAULT NULL, 
@@ -116,9 +118,12 @@ class myDB {
 
             this.db.run(
               // DROP TABLE IF EXISTS class_holidays;
-              `CREATE TABLE IF NOT EXISTS class_holidays (
+              `
+              CREATE TABLE IF NOT EXISTS class_holidays (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                class_short TEXT NOT NULL, -- refers to class or class_short from students
+                holi_by TEXT NOT NULL DEFAULT class_short, -- class_short | student
+                class_short TEXT DEFAULT NULL, -- refers to class or class_short from students
+                student_id INTEGER DEFAULT NULL, -- refers to class or class_short from students
                 holiday_date DATE NOT NULL,
                 type TEXT NOT NULL, -- e.g., 'holiday', 'leave', 'event'
                 reason TEXT DEFAULT NULL,

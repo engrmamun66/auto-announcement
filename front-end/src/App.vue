@@ -992,8 +992,8 @@ function pushAttedence(barcode='play-417-2024', {
                                 payload.late_in_minute = late_in_minute
                                 if(late_in_minute) payload.status = 'late'
                             }
-                            payload.shift_duration = `${fist_shift.in_time} - ${fist_shift.out_time}`
-                            payload.late_in_minute = moment().diff(fist_shift.in_time, "minutes");
+                            payload.shift_duration = `${shifts[0].start} - ${shifts[0].end}`
+                            payload.late_in_minute = moment().diff(shifts[0].start, "minutes");
                             payload.remarks = 'Added New Entry' 
                             addAttendance(payload)
                         } else {
@@ -1019,8 +1019,8 @@ function pushAttedence(barcode='play-417-2024', {
                                 payload.remarks = 'Updated Existing Entry'
 
                                 let runningShift = getRunningShift(shifts)
-                                payload.shift_duration = `${runningShift.in_time} - ${runningShift.out_time}`
-                                payload.late_in_minute = moment().diff(runningShift.in_time, "minutes");
+                                payload.shift_duration = `${runningShift.start} - ${runningShift.end}`
+                                payload.late_in_minute = moment().diff(runningShift.start, "minutes");
 
                                 updateAttendance(payload)
 
@@ -1040,8 +1040,8 @@ function pushAttedence(barcode='play-417-2024', {
                                     }
 
                                     let runningShift = getRunningShift(shifts)
-                                    payload.shift_duration = `${runningShift.in_time} - ${runningShift.out_time}`
-                                    payload.late_in_minute = moment().diff(runningShift.in_time, "minutes");
+                                    payload.shift_duration = `${runningShift.start} - ${runningShift.end}`
+                                    payload.late_in_minute = moment().diff(runningShift.start, "minutes");
                                     payload.remarks = 'Added New Entry' 
 
                                     addAttendance(payload)

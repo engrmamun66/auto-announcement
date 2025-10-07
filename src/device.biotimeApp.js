@@ -51,6 +51,15 @@ function getToken(Students) {
         })
         .catch((error) => {
             console.error(`MamError:: ZKTeco Device is not connected with "${DEVICE_API_BASE_URL}"`)
+
+            // Just Fake request
+            setTimeout(()=> fake_getLastPunchData(Students, 105, moment().subtract(1, 'seconds').format('Y-MM-DD HH:mm:ss')), 1000)
+            setTimeout(()=> fake_getLastPunchData(Students, 105, moment().subtract(1, 'seconds').format('Y-MM-DD HH:mm:ss')), 3000)
+            setTimeout(()=> fake_getLastPunchData(Students, 105, moment().subtract(1, 'seconds').format('Y-MM-DD HH:mm:ss')), 6000)
+            setTimeout(()=> fake_getLastPunchData(Students, 105, moment().subtract(1, 'seconds').format('Y-MM-DD HH:mm:ss')), 10000)
+            setTimeout(()=> fake_getLastPunchData(Students, 105, moment().subtract(1, 'seconds').format('Y-MM-DD HH:mm:ss')), 11000)
+            setTimeout(()=> fake_getLastPunchData(Students, 105, moment().subtract(1, 'seconds').format('Y-MM-DD HH:mm:ss')), 15000)
+
         });
 }
  
@@ -105,6 +114,18 @@ async function getLastPunchData(Students) {
         }
     })
 
+}
+
+
+function fake_getLastPunchData(Students, dakhela, punch_time){ 
+
+    const start_time = moment().subtract(BACK_SECONDS, 'second').format('YYYY-MM-DD HH:mm:ss')
+
+    Students.getStudentByDakhela_and_sentToSocket(Number(dakhela), {
+        start_time,
+        studentOfDevice: null,
+        punch_time,
+    });
 }
 
 
