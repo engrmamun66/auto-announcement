@@ -53,13 +53,24 @@ function getToken(Students) {
             console.error(`MamError:: ZKTeco Device is not connected with "${DEVICE_API_BASE_URL}"`)
 
             // Just Fake request
-            setTimeout(()=> fake_getLastPunchData(Students, 105, moment().subtract(1, 'seconds').format('Y-MM-DD HH:mm:ss')), 1000)
-            setTimeout(()=> fake_getLastPunchData(Students, 105, moment().subtract(1, 'seconds').format('Y-MM-DD HH:mm:ss')), 3000)
-            setTimeout(()=> fake_getLastPunchData(Students, 105, moment().subtract(1, 'seconds').format('Y-MM-DD HH:mm:ss')), 6000)
-            setTimeout(()=> fake_getLastPunchData(Students, 105, moment().subtract(1, 'seconds').format('Y-MM-DD HH:mm:ss')), 10000)
-            setTimeout(()=> fake_getLastPunchData(Students, 105, moment().subtract(1, 'seconds').format('Y-MM-DD HH:mm:ss')), 11000)
-            setTimeout(()=> fake_getLastPunchData(Students, 105, moment().subtract(1, 'seconds').format('Y-MM-DD HH:mm:ss')), 15000)
+            let students_ids = [
+                91,
+                92,
+                93,
+                94,
+                95,
+                96,
 
+                91,
+                92,
+                93,
+                94,
+                95,
+                96,
+            ]
+            students_ids.forEach((students_id, i) => {
+                // setTimeout(()=> fake_getLastPunchData(Students, students_id, moment().subtract(1, 'seconds').format('Y-MM-DD HH:mm:ss')), 1000 * (i + 1))
+            })
         });
 }
  

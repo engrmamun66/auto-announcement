@@ -4,7 +4,19 @@
     <template v-if="liveAttendenceList?.length">
         <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
             <template v-for="(item, i) in liveAttendenceList" :key="i">
-            <div class="col" :style="`order:${-i}`">
+            <div class="col position-relative" :style="`order:${-i}`">
+
+               
+                <div class="popup in-out d-flex">
+                    <span class="badge text-dark">
+                       ID: {{ item?.student_id }}
+                    </span>
+                    <span class="badge text-dark bg-body-secondary">
+                        {{ item?.in_time ? 'IN' : 'OUT' }}
+                    </span>
+                </div>
+                 
+
                 <div class="attendance-card shadow-sm" :class="{
                     'status-present': item?.status?.toLowerCase() === 'present',
                     'status-absent': item?.status?.toLowerCase() !== 'present',
@@ -12,13 +24,15 @@
                 >
                 <div class="d-flex justify-content-between align-items-center mb-2" >
                     <h4 class="mb-0 fw-bold"> {{ getStudent(item)?.name || "Unknown" }} </h4>
-                    <span class="badge bg-light text-dark">
-                    ID: {{ item?.student_id }}
-                    </span>
+                    
                 </div>
 
                 <ul class="list-unstyled mb-2">
-                    <li><strong>Status:</strong> <span status>{{ item?.status || "N/A" }}</span></li>
+                    <li>
+                        <strong>Status:</strong> 
+                        <span status>{{ item?.status || "Out Time" }}</span>
+                        <span></span>
+                    </li>
                     <li>
                     <strong>Late:</strong> {{ item?.late_in_minute || 0 }} min
                     </li>
@@ -26,10 +40,10 @@
                     <li><strong>Date:</strong> {{ Ahelper.printDate(item) }}</li>
                     <li>
                     <template v-if="item?.in_time">
-                        <strong>In Time:</strong> {{ item?.in_time || "--" }}
+                        <strong>In Time:</strong> {{ item?.in_time }}
                     </template>
                     <template v-else>
-                        <strong>Out Time:</strong> {{ item?.out_time || "--" }}
+                        <strong>Out Time:</strong> {{ item?.out_time }}
                     </template>
                     </li>
                 </ul>
@@ -78,10 +92,10 @@ const getStudent = ({ student_id }) =>
   border: 1px solid #e2e2e2;
   transition: all 0.25s ease;
   color: #333;
+  padding-top: 30px;
 }
 
 .attendance-card:hover {
-  transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
@@ -119,4 +133,19 @@ span[status]{
     color: #222;
     transform: translateY(-2px);
 }
+.popup{
+    position: absolute;
+    padding: 1px 5px;
+    text-align: center;
+    background-color: white;
+    border-radius: 0px 0px 5px 5px;
+    top: 1px;
+    z-index: 1;
+}
+.popup.in-out{  
+    left: 50%;
+    top: 1px;
+    transform: translateX(-50%);
+    border-radius: 0px 0px 5px 5px;
+} 
 </style>

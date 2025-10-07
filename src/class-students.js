@@ -291,8 +291,8 @@ class Students {
       let barcode = `${student.class_short}-${student.dakhela}-sound1-${student.year}`;
 
       let using_attendance = global.config?.settings?.attendance?.status
-      let is_copied = student.name.indexOf('Copied') > -1
-      let for_attendence = using_attendance && is_copied
+      let is_not_copied = student.name.indexOf('Copied') === -1
+      let for_attendence = using_attendance && is_not_copied
    
 
       global.socketServer.clients.forEach((client) => {
