@@ -4,7 +4,7 @@
     <template v-if="liveAttendenceList?.length">
         <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
             <template v-for="(item, i) in liveAttendenceList" :key="i">
-              <div class="col position-relative fadeUp-9ms" :style="`order:${-i}`" @auxclick="log(item)">
+              <div class="col position-relative" :style="`order:${-i}`" @auxclick="log(item)">
 
                 
                   <div class="popup in-out d-flex">
@@ -15,12 +15,16 @@
                           {{ item?.in_time ? 'IN' : 'OUT' }}
                       </span>
                   </div>
+                  <div @auxclick="deleteAttedence(item)" class="position-absolute cp text-white opacity-0" style="left:10px;top:-2px;z-index: 1;">
+                      
+                  </div>
                   
 
                   <div class="attendance-card shadow-sm" :class="{
                       'status-present': item?.status?.toLowerCase() === 'present',
                       'status-absent': item?.status?.toLowerCase() === 'late',
                       'status-outtime': !item.in_time,
+                      'latest-item': liveAttendenceList?.length - 1 === i
                   }"
                   >
                   <div class="d-flex justify-content-between align-items-center mb-2" >
@@ -29,7 +33,7 @@
 
                   <ul class="list-unstyled mb-2">
                       <li><strong>Class :</strong> <span class="ms-1">{{ getStudent(item)?.class || "Unknown" }}</span></li>
-                      <li :tooltip="late_conderation_minute ? `${late_conderation_minute} minutes} of consideration given.` : ''">
+                      <li :tooltip="(late_conderation_minute && item?.in_time) ? `${late_conderation_minute} minutes of consideration given.` : ''">
                           <strong>Status :</strong> 
                           <span status class="ms-1">{{ item?.in_time ? item?.status : 'Just-Out' }}</span>
                           <span v-if="item?.in_time" class="ms-1">{{ item?.late_in_minute > 0 ? `${item?.late_in_minute} min` : `before ${Math.abs(item?.late_in_minute)} min` }}</span>
@@ -78,6 +82,7 @@ import Ahelper from "./attendacnceHelper";
 
 const http = inject('http');
 const CONFIG = inject("CONFIG");
+const emitter = inject('emitter');
 const classes = inject("classes");
 const attendenceList = inject("attendenceList");
 const all_students = inject("all_students");
@@ -98,8 +103,12 @@ onMounted(()=>{
 })
 
 function deleteAttedence(item){
+  if(prompt("Delete this attendance?").toLocaleLowerCase() !== 'd') return
   http.delete(`/attendence-delete/${item.id}`).then(response => {
-    
+    if(response.status === 200){
+      liveAttendenceList.value = liveAttendenceList.value.filter(_item => _item.id != item.id)
+      emitter.emit('toaster-success', {message: 'Attendence Deleted!'})
+    }
   })
 }
 
@@ -114,6 +123,9 @@ function deleteAttedence(item){
   transition: all 0.25s ease;
   color: #333;
   padding-top: 40px;
+}
+.attendance-card.latest-item { 
+  animation: keyframe-blowUp 1.0s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
 }
 
 .attendance-card:hover {

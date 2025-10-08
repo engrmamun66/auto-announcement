@@ -1179,7 +1179,6 @@ function __punchToSubmitAttendance(barcode='play-417-2024', {
                                     let attendenceData = response.data.data
                                     liveAttendenceList.value.push(attendenceData)
                                     callbacks.fixOverflowOfLiveAttendence()
-                                    // callbacks.getAttendeceList()
                                 }
                             })
                         }
@@ -1192,8 +1191,7 @@ function __punchToSubmitAttendance(barcode='play-417-2024', {
                                         liveAttendenceList.value[targetIndex] = {...liveAttendenceList.value[targetIndex], ...payload}
                                     } else {
                                         liveAttendenceList.value.push(payload)
-                                    }
-                                    // callbacks.getAttendeceList()
+                                    } 
                                 }
                             })
                         }

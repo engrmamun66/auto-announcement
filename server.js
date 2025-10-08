@@ -382,6 +382,9 @@ app.get(`/api/_ac`, async (req, res) => {
   app.post(prefix + '/attendence-update', (req, res) => {
     Attendence.update(req, res)
   }); 
+  app.delete(prefix + '/attendence-delete/:id', (req, res) => {
+    Attendence.delete(req, res)
+  }); 
 
    
 })
