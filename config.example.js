@@ -4,7 +4,7 @@ const port_number = 2323
 // shifts must be 24 hours format
 const SHIFTS = {
      first: {
-          start: '15:00', 
+          start: '22:30', 
           end: '17:00',
      },
      second: {
@@ -64,8 +64,17 @@ module.exports = {
                status: true,
                only_attendance_feature: false,
                // boundary_time: [30, 'minutes'], // using in getRunningShift() function
-               boundary_time: [1330, 'seconds'], // using in getRunningShift() function,
-               not_late_consider: [5, 'minutes'],
+               boundary_time: [30, 'minutes'], // using in getRunningShift() function,
+               // ====================================================== //
+               /**
+                * [ It's only for shift start time ]
+                * If user come before over late_conderation_minute, late time will be 0 minute,
+                * example:
+                * =======================================
+                * When late_conderation_minute = 5
+                * shift start: 08:00, student come: 08:05
+                */
+               late_conderation_minute: 5, 
                maximum_live_attedence: 50,
           },
      },

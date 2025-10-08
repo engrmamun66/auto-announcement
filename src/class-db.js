@@ -100,7 +100,7 @@ class myDB {
                 in_time TIME DEFAULT NULL, -- 23:05:08 | null
                 out_time TIME DEFAULT NULL, -- 23:05:08 | null
                 late_in_minute INTEGER DEFAULT 0,
-                status TEXT NOT NULL, -- e.g: 'present' | 'late' | 'leave' | 'absent' | 'over-stay'
+                status TEXT NOT NULL, -- e.g: 'Present' | 'Late' | 'Just Out'  
                 remarks TEXT DEFAULT NULL,
                 shift_duration TEXT DEFAULT NULL,
                 branch_id INTEGER DEFAULT 1, -- some client can be manage multiple institue by signle computer setup

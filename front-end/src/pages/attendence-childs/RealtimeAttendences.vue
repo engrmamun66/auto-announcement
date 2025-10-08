@@ -1,6 +1,6 @@
 <template>
   <!-- Attendance Cards -->
-  <div class="">
+  <div class="mt-3">
     <template v-if="liveAttendenceList?.length">
         <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
             <template v-for="(item, i) in liveAttendenceList" :key="i">
@@ -29,10 +29,10 @@
 
                   <ul class="list-unstyled mb-2">
                       <li><strong>Class :</strong> <span class="ms-1">{{ getStudent(item)?.class || "Unknown" }}</span></li>
-                      <li :tooltip="`${LateConsider[0]} ${LateConsider[1]} of consideration given.`">
+                      <li :tooltip="late_conderation_minute ? `${late_conderation_minute} minutes} of consideration given.` : ''">
                           <strong>Status :</strong> 
                           <span status class="ms-1">{{ item?.in_time ? item?.status : 'Just-Out' }}</span>
-                          <span v-if="item?.in_time" class="ms-1">{{ item?.late_in_minute > 0 ? `${item?.late_in_minute} min` : `before ${Math.abs(item?.late_in_minute)}` }}</span>
+                          <span v-if="item?.in_time" class="ms-1">{{ item?.late_in_minute > 0 ? `${item?.late_in_minute} min` : `before ${Math.abs(item?.late_in_minute)} min` }}</span>
                       </li>
                       <li>
                         <template v-if="item?.in_time">
@@ -84,7 +84,7 @@ const liveAttendenceList = inject("liveAttendenceList");
 
 let log = console.log
 
-const LateConsider = CONFIG.value?.settings?.attendance?.not_late_consider || [ 0, 'minutes']
+const late_conderation_minute = CONFIG.value?.settings?.attendance?.late_conderation_minute || 0
 let isMounted = ref(false)
 
 const getStudent = ({ student_id }) =>
@@ -132,7 +132,7 @@ onMounted(()=>{
 }
 
 .status-absent {
-  background-color: #dc3545; /* Bootstrap danger red */
+  background-color: chocolate; /* Bootstrap danger red */
   color: #fff !important;
 }
 

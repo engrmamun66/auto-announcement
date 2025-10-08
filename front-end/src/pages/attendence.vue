@@ -60,29 +60,8 @@ onMounted(()=>{
 </template>
 
 
-<style>
-
-/* we will explain what these classes do next! */
-.v-enter-active,
-.v-leave-active {
-  transition: opacity 0.5s ease;
-}
-
-.v-enter-from,
-.v-leave-to {
-  opacity: 0;
-}
+<styles scoped>
  
-.sections {
-  display: flex;
-  gap: 20px;
-  /* justify-content: space-between; */
-}
-.sections > .single-section {
-  height: calc(100vh - 163px);
-  border-radius: 10px;
-  padding: 15px;
-  background-color: rgba(255, 255, 255, 0.382);
-}
  
-</style>
+ 
+</styles>

@@ -8,50 +8,37 @@
             <th>Name</th>
             <th>Class</th> 
             <th>Shift</th> 
-            <th>Remark</th> 
+            <th>Action</th> 
           </tr>
         </thead>
       </template>
       <template #rows>
-        <template v-if="tab==1 ? punch_schedules?.length  : call_schedules?.length">
-          <template v-for="(item, i) in tab==1 ? punch_schedules  : call_schedules">
-            <tr @click="helper.log(item)">
+        <template v-if="attendenceList?.length">
+          <template v-for="(item, i) in attendenceList">
+            <tr>
                 
-              <td> {{ item.title }} </td> 
-              <td> {{ helper.formatTime(item.start_time) }} </td>                   
-              <td> {{ helper.formatTime(item.end_time) }} </td>                   
-              <td>
-                <ul v-if="item.classes">
-                  <template v-if="item.showClasses">
-                    <li> <a @click.stop.prevent="item.showClasses = false" href="#">Less...</a> </li>
-                    <li v-for="cls in item.classes">
-                      {{ cls.class_name }}
-                    </li>
-                  </template>
-                  <template v-else>
-                    <li> 
-                      <a @click.stop.prevent="item.showClasses = true" class="ms-1" href=""> More...</a>   
-                    </li>
-                    <li>  
-                      <a > {{ item.classes.length == 16 ? 'All' :  item.classes.length }} Classes</a>  
-                    </li>
-                  </template>
-                </ul>
-              </td>                   
-        
+              <td> {{ item.id }} </td> 
+              <td> {{ getStudent(item)?.name }} </td>                   
+              <td> {{ getStudent(item)?.class }} </td>                   
+              <td> {{ Ahelper.printShift(item?.shift_duration) }} </td>                   
               <td> 
-                <div class="d-flex justify-content-center">
-                
+                <div class="d-flex justify-content-center action-icons">
+                    <i  class='bx bx-barcode cp size-1p5' ></i>
+                    
+                    <span tooltip="Copy barcode">
+                      <i  class='bx bxs-copy-alt cp px-1' style="font-size: 18px" ></i>
+                    </span>
+                    
 
-                  <span tooltip="Update Schedule" class="me-2">
-                    <i @click.stop="prepareEdit(item)" class='bx bx-pencil text-danger cp' ></i>
-                  </span>
-                  <span tooltip="Delete Schedule">
-                    <i @click.stop="deleteSchedule(item.id, i, item.type)" class='bx bx-trash text-danger cp' ></i>
-                  </span>
-      
-                </div>
-              </td> 
+                    <span tooltip="Delete student">
+                      <i   class='bx bx-trash text-danger cp' ></i>
+                    </span>
+        
+                  </div>  
+              </td>                   
+                               
+        
+              
           </tr> 
 
           
@@ -60,11 +47,17 @@
         </template>
         <template v-else>
           <tr>
-              <td colspan="88" class="text-center">No student found</td>                 
+              <td colspan="88" class="text-center">Not Attendence Found</td>                 
           </tr>
         </template>
       </template>
     </myTable> 
+
+    <div class="d-flex justify-content-center">
+        <Pagination v-if="attendenceParams?.totalPages > 1" v-model="attendenceParams" @jumpToPage="(page_no) => {
+          callbacks.getAttendeceList({page_no})
+        }" ></Pagination>
+      </div> 
   </div>
 </template>
 
@@ -77,19 +70,13 @@ const classes = inject("classes");
 const all_students = inject("all_students");
 const callbacks = inject("callbacks");
 const attendenceList = inject("attendenceList");
-const attendenceParams = inject("attendenceParams", ref({
-  "page_no": 1,
-  "total": 3,
-  "totalPages": 1,
-  "limit": 50,
-  }
-));
+const attendenceParams = inject("attendenceParams");
 const liveAttendenceList = inject("liveAttendenceList");
 import myTable from '../../components/myTable.vue'
+import Pagination from '../../components/Pagination.vue'
 
 let log = console.log
 
-const LateConsider = CONFIG.value?.settings?.attendance?.not_late_consider || [ 0, 'minutes']
 let isMounted = ref(false)
 
 const getStudent = ({ student_id }) =>
@@ -98,11 +85,13 @@ const getStudent = ({ student_id }) =>
 onMounted(()=>{
 
   callbacks.getAttendeceList()
-  
+
   setTimeout(() => {
     isMounted.value = true
   }, 500);
 })
+
+
 
 </script>
 

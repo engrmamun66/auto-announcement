@@ -333,7 +333,7 @@ let attendenceParams = ref({
     "page_no": 1,
     "total": 3,
     "totalPages": 1,
-    "limit": 50,
+    "limit": 7,
 
     // class_name: null,
     // name: null,
@@ -494,12 +494,25 @@ const callbacks = {
         if(!CONFIG.value?.card_owners?.length) return 1
         return CONFIG.value?.card_owners.find(owner => owner.id == id)?.name
     },
-    getAttendeceList(){
+    getAttendeceList({page_no=null, reset=false}={}){
         try {
-            http.get('/attendence-list').then(response => {
+
+            if(reset){
+                attendenceParams.value.page_no = 1
+                attendenceParams.value.total = 3
+                attendenceParams.value.totalPages = 1
+                attendenceParams.value.limit = 50 
+            }
+            let queryParams = {...attendenceParams.value}
+            if(page_no){
+                queryParams.page_no = page_no
+            }
+            
+            http.get('/attendence-list', { params: queryParams }).then(response => {
                 if(response.status == 200){
-                let data = response.data
-                // console.log('attendence-list::', data);
+                    let data = response.data
+                    attendenceList.value = data.data
+                    attendenceParams.value = data.pagination
                 }
             }).finally(()=>{
                 
@@ -994,7 +1007,7 @@ function pushAttedence(barcode='play-417-2024', {
                         let payload = {
                             // id: null,
                             student_id: student.dakhela,
-                            date: date,
+                            date: moment(date || new Date()).format(DATE_FORMAT),
                             in_time: null,
                             out_time: null,
                             late_in_minute: 0, 
@@ -1006,18 +1019,21 @@ function pushAttedence(barcode='play-417-2024', {
 
                         let today_entries = entires 
                         let max_permitte_entry = shifts?.length * 2
+                        const late_conderation_minute = CONFIG.value?.settings?.attendance?.late_conderation_minute || 0
                         
                         if(!today_entries?.length){
 
                             // When no entry today, just create an entry
                             payload.in_time = moment().format(TIME_FORMAT)
-                            let firstShift = moment().format(DATE_FORMAT) + ' ' + shifts[0].start
+                            let first_shift_start_time = moment().format(DATE_FORMAT) + ' ' + shifts[0].start
                             
-                            const [ consider, unit ] = CONFIG.value?.settings?.attendance?.not_late_consider || [ 0, 'minutes']
-
+                            
                             payload.shift_duration = `${shifts[0].start} - ${shifts[0].end}`
-                            let firstShiftOjb = moment(firstShift).add(consider, unit)
-                            payload.late_in_minute = moment().diff(firstShiftOjb, "minutes");
+                            payload.late_in_minute = moment().diff(first_shift_start_time, "minutes");
+                            
+                            if(late_conderation_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_conderation_minute){
+                                payload.late_in_minute = 0
+                            }
                             if(payload.late_in_minute > 0) payload.status = 'Late'
                             payload.remarks = 'First In Today' 
                             addAttendance(payload)
@@ -1037,13 +1053,17 @@ function pushAttedence(barcode='play-417-2024', {
                                 let runningShift = getRunningShift(shifts)
                                 payload.shift_duration = `${runningShift.start} - ${runningShift.end}`
 
-                                const [ consider, unit ] = CONFIG.value?.settings?.attendance?.not_late_consider || [ 0, 'minutes']
-                                let startDateTimeObj = moment(runningShift.start_datetime).add(consider, unit)
-
-                                payload.late_in_minute = moment().diff(startDateTimeObj, "minutes");
+                                payload.late_in_minute = moment().diff(runningShift.start_datetime, "minutes");
+                                
 
                                 if(last_enty.in_time){
                                     payload.in_time = moment().format(TIME_FORMAT)
+
+                                    if(late_conderation_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_conderation_minute){
+                                        payload.late_in_minute = 0
+                                    }
+
+
                                     if(payload.late_in_minute > 0){
                                         payload.status = 'Late'
                                     }
@@ -1068,10 +1088,8 @@ function pushAttedence(barcode='play-417-2024', {
                                     let runningShift = getRunningShift(shifts)
                                     payload.shift_duration = `${runningShift.start} - ${runningShift.end}`
 
-                                    const [ consider, unit ] = CONFIG.value?.settings?.attendance?.not_late_consider || [ 0, 'minutes']
-                                    const startDateTimeObj = moment(runningShift.start_datetime).add(consider, unit)
 
-                                    payload.late_in_minute = moment().diff(startDateTimeObj, "minutes");
+                                    payload.late_in_minute = moment().diff(runningShift.start_datetime, "minutes");
 
 
                                     if(last_enty.in_time){ 
@@ -1085,6 +1103,16 @@ function pushAttedence(barcode='play-417-2024', {
                                         // if last is out_time, now will be in_time
                                         payload.out_time = null
                                         payload.in_time = moment().format(TIME_FORMAT)
+
+                                        if(late_conderation_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_conderation_minute){
+                                            payload.late_in_minute = 0
+                                        }
+
+
+                                        if(payload.late_in_minute > 0){
+                                            payload.status = 'Late'
+                                        }
+                                        
                                         payload.remarks = 'Added In Time'
                                     }
 
@@ -1114,7 +1142,7 @@ function pushAttedence(barcode='play-417-2024', {
                                 let out_time = moment(moment().format("YYYY-MM-DD") + ' ' + shift.end, "YYYY-MM-DD HH:mm");
 
                                 // pick shift-specific boundary if defined
-                                let [time, unit] = CONFIG.value.settings.attendance?.boundary_time || [0, 'minutes'];
+                                let [time, unit] = CONFIG.value.settings?.attendance?.boundary_time || [0, 'minutes'];
 
                                 let left_boundary = moment(in_time).subtract(time, unit);
                                 let right_boundary = moment(out_time).add(time, unit); 
