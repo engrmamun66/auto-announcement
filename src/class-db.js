@@ -104,6 +104,7 @@ class myDB {
                 remarks TEXT DEFAULT NULL,
                 shift_duration TEXT DEFAULT NULL,
                 shift_count INTEGER DEFAULT 1,
+                shift_number INTEGER DEFAULT 1, -- 1 | 2 | 3
                 device_index INTEGER DEFAULT 1, -- zkteco punching device index
                 created TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
             

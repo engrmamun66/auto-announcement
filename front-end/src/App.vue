@@ -1017,6 +1017,7 @@ function __punchToSubmitAttendance(barcode='play-417-2024', {
                             shift_duration: '', // 08:00 - 12:00
                             device_index,
                             shift_count: shifts?.length,
+                            shift_number: 1,
                         }
 
                         let today_entries = entires 
@@ -1033,6 +1034,7 @@ function __punchToSubmitAttendance(barcode='play-417-2024', {
                             let runningShift = getRunningShift(shifts) 
 
                             
+                            payload.shift_number = runningShift.shift_number
                             payload.shift_duration = `${runningShift.start} - ${runningShift.end}`
                             payload.late_in_minute = moment().diff(runningShift.start_datetime, "minutes");
                             
@@ -1056,6 +1058,7 @@ function __punchToSubmitAttendance(barcode='play-417-2024', {
 
 
                                 let runningShift = getRunningShift(shifts)
+                                payload.shift_number = runningShift.shift_number
                                 payload.shift_duration = `${runningShift.start} - ${runningShift.end}`
 
                                 payload.late_in_minute = moment().diff(runningShift.start_datetime, "minutes");
@@ -1081,8 +1084,6 @@ function __punchToSubmitAttendance(barcode='play-417-2024', {
                                 
                                 payload.remarks = 'Updated Existing Entry'
 
-                                
-
                                 updateAttendance(payload)
 
                             } else {
@@ -1091,6 +1092,7 @@ function __punchToSubmitAttendance(barcode='play-417-2024', {
                                     // ==================
 
                                     let runningShift = getRunningShift(shifts)
+                                    payload.shift_number = runningShift.shift_number
                                     payload.shift_duration = `${runningShift.start} - ${runningShift.end}`
 
                                     let entry_count_by_shift = today_entries.filter(entry => entry.shift_duration === payload.shift_duration)
@@ -1146,7 +1148,7 @@ function __punchToSubmitAttendance(barcode='play-417-2024', {
                 
 
                         function getRunningShift(shifts = []) {
-                            let all_shifts = shifts.map(shift => {
+                            let all_shifts = shifts.map((shift, shift_index) => {
                                 // use shift.start / shift.end instead of in_time/out_time
                                 let in_time = moment(moment().format("YYYY-MM-DD") + ' ' + shift.start, "YYYY-MM-DD HH:mm");
                                 let out_time = moment(moment().format("YYYY-MM-DD") + ' ' + shift.end, "YYYY-MM-DD HH:mm");
@@ -1163,7 +1165,8 @@ function __punchToSubmitAttendance(barcode='play-417-2024', {
                                 ...shift,
                                 start_datetime: in_time.format('YYYY-MM-DD HH:mm'),
                                 end_datetime: out_time.format('YYYY-MM-DD HH:mm'),
-                                is_between
+                                is_between,
+                                shift_number: shift_index + 1,
                                 };
                             });
 
