@@ -643,12 +643,7 @@ onMounted(async ()=>{
                 Socket.value = socketInit({emitter, toaster: true})
             }
         }
-    }, 5000)
-
-    document.addEventListener('click', (e) => { 
-        // emitter.emit('document_clicked', e)
-    })
-
+    }, 5000) 
 
     window.addEventListener("online", () => {
         appAccessData.value.internet = true
@@ -670,6 +665,10 @@ onMounted(async ()=>{
     callbacks.getAttendeceList()
 
     await getConfig()
+
+    if(CONFIG.value?.settings?.attendance?.status && CONFIG.value?.settings?.attendance?.only_attendance_feature){
+        document.body.classList.add('user-interacted')
+    }
 
     document.addEventListener('click', () => {
         user_interacted.value = true;  

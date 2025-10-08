@@ -8,8 +8,8 @@ const SHIFTS = {
           end: '12:20',
      },
      second: {
-          start: '22:30',
-          end: '23:20', 
+          start: '14:30',
+          end: '15:20', 
      },
 }
 
