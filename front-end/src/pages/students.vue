@@ -25,7 +25,8 @@ const helper = inject('helper');
 const classes = inject('classes');
 const CONFIG = inject('CONFIG');
 let http = inject('http'); 
-const pushTheBarcode = inject('pushTheBarcode');
+const punchToCallStudent = inject('punchToCallStudent');
+const punchToSubmitAttendance = inject('punchToSubmitAttendance');
 const makeCarcode = inject('makeCarcode');
 const callbacks = inject('callbacks');
 const all_students = inject('all_students', [])
@@ -656,24 +657,26 @@ const log = console.log
                   <td>
                     <template v-if="CONFIG?.settings?.attendance?.status">
                       <button v-if="std.name.indexOf('Copied') > -1" class="class-short-btn px-2 for-call" 
-                        @click.stop="pushTheBarcode(makeCarcode(std), {message: 'কার্ডটি সফলভাবে পাঞ্চ হয়েছে।', source: 'manual_button', for_attendence: false})">
+                        @click.stop="punchToCallStudent(makeCarcode(std), {message: 'কার্ডটি সফলভাবে পাঞ্চ হয়েছে।', source: 'manual_button', for_attendence: false})">
                           <!-- For Guardian -->
                           Call&nbsp;Punch
                         </button>
                       <button v-else class="class-short-btn px-2 for-attendence" 
-                        @click.stop="pushTheBarcode(makeCarcode(std), {message: 'কার্ডটি সফলভাবে পাঞ্চ হয়েছে।', source: 'manual_button', for_attendence: true, delay: 4000})">
+                      @auxclick.stop="punchToSubmitAttendance(makeCarcode(std), {message: 'কার্ডটি সফলভাবে পাঞ্চ হয়েছে।', source: 'manual_button', delay: 0})"
+                      @click.stop="punchToSubmitAttendance(makeCarcode(std), {message: 'কার্ডটি সফলভাবে পাঞ্চ হয়েছে।', source: 'manual_button', delay: 4000})"
+                      >
                           <!-- For Students Attendence -->
                           Attendence
-                        </button>
+                      </button>
                     </template> 
                     <template v-else>
-                      <button class="class-short-btn px-2" @click.stop="pushTheBarcode(makeCarcode(std), {message: 'কার্ডটি সফলভাবে পাঞ্চ হয়েছে।', source: 'manual_button'})">
+                      <button class="class-short-btn px-2" @click.stop="punchToCallStudent(makeCarcode(std), {message: 'কার্ডটি সফলভাবে পাঞ্চ হয়েছে।', source: 'manual_button'})">
                         Punch
                       </button>
                     </template> 
                   </td>
                   <td> 
-                    <div class="d-flex justify-content-center action-icons">
+                    '<div class="d-flex justify-content-center action-icons">
                       <i @click.stop="targetStdForBarcode=std" class='bx bx-barcode cp size-1p5' ></i>
                       
                       <span tooltip="Copy barcode">
@@ -685,7 +688,7 @@ const log = console.log
                        <i @click="deleteStudent(std.id, i)" class='bx bx-trash text-danger cp' ></i>
                       </span>
           
-                    </div>
+                    </div>'
                   </td> 
               </tr> 
   

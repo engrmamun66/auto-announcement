@@ -364,7 +364,8 @@ provide('toggleSettings', toggleSettings)
 provide('refreshDOM', refreshDOM) 
 provide('user_interacted', user_interacted) 
 provide('emergency_mode', emergency_mode) 
-provide('pushTheBarcode', pushTheBarcode) 
+provide('punchToCallStudent', punchToCallStudent) 
+provide('punchToSubmitAttendance', punchToSubmitAttendance) 
 provide('all_students', all_students) 
 provide('getAllStudents', getAllStudents) 
 provide('appAccessData', appAccessData)
@@ -724,7 +725,7 @@ onMounted(async ()=>{
             
             if(!existing || existing != time_and_barcode || useRoute()?.query?.force=='true'){
                 storage('time_and_barcode').value = time_and_barcode
-                pushTheBarcode(barcode, { for_attendence, device_index })
+                punchToCallStudent(barcode, { for_attendence, device_index })
             }
         }
      })
@@ -754,192 +755,199 @@ function focusCurrenPlayingSoundCard_if_userIsInavtiveForFewSeconds(){
 }
 
 
-function pushTheBarcode(barcode='play-417-2024', { message='', source='device', for_attendence=false, device_index=0, delay=0 }={}){
-    if(for_attendence){
-        setTimeout(() => {
-            pushAttedence(barcode, { message, source, device_index })
-        }, delay);
+function punchToCallStudent(barcode='play-417-2024', { message='', source='device', device_index=0 }={}){
+    
+    try {
+        if(!is_started_schedule.value){
+            emitter.emit('toaster-error', { message: 'switched is off'})
+            return
+        }
         
-    } else {
-        try {
-            if(!is_started_schedule.value){
-                emitter.emit('toaster-error', { message: 'switched is off'})
-                return
-            }
-            
-            if(barcode == 'i' || barcode == 'I'){
-                emergency_mode.value = !emergency_mode.value
-                return
-            }
+        if(barcode == 'i' || barcode == 'I'){
+            emergency_mode.value = !emergency_mode.value
+            return
+        }
 
-            if(!emergency_mode.value){
-                if(!(/^[a-z_0-9]+-\d{1,}-sound(1|2|3)/gi.test(barcode))){
-                        emitter.emit('toaster-error', { message: `বারকোড সঠিক নয় (${barcode})`, duration: 5000})
-                        return
-                }
-            }
-
-
-            let [ class_short ] = barcode.split('-') // nursary-23-sound1-2024
-            let class_object = classes.value.find(c => c.class_short === class_short)
-            let class_name = class_object?.class_name
-
-
-            if(source === 'device'){
-                // Without internet device punch not allowed
-                if(appAccessData.value?.internet === false){
-                    emitter.emit('toaster-error', { message: 'Without internet connection, device punch is not allowed'})
+        if(!emergency_mode.value){
+            if(!(/^[a-z_0-9]+-\d{1,}-sound(1|2|3)/gi.test(barcode))){
+                    emitter.emit('toaster-error', { message: `বারকোড সঠিক নয় (${barcode})`, duration: 5000})
                     return
-                }
             }
+        }
 
-                        
-            if(!emergency_mode.value){
-                let isAllowed = callbacks.isMatchedAnySchedule(class_short)
+
+        let [ class_short ] = barcode.split('-') // nursary-23-sound1-2024
+        let class_object = classes.value.find(c => c.class_short === class_short)
+        let class_name = class_object?.class_name
+
+
+        if(source === 'device'){
+            // Without internet device punch not allowed
+            if(appAccessData.value?.internet === false){
+                emitter.emit('toaster-error', { message: 'Without internet connection, device punch is not allowed'})
+                return
+            }
+        }
+
+                    
+        if(!emergency_mode.value){
+            let isAllowed = callbacks.isMatchedAnySchedule(class_short)
+            
+            if(!isAllowed){
+                    let prefix = class_name ? (class_name + ' এর ') : 'ddd '
+                    emitter.emit('toaster-error', { message: `${prefix}পাঞ্চ এর সময় শুরু হয়নি`})
+                    return
+            }
+            let targetClass = classes.value.filter(cls => cls.class_short == class_short)?.[0];
+            if(!targetClass?.isActive){
+                    emitter.emit('toaster-error', { message: 'এই ক্লাসটি আপাতত বন্ধ আছে'})
+                    return
+            }
+        }
+
+
+
+
+        http.get('/single-student', { params: { barcode } }).then(response => {
+            if(response.status == 200){
+                    let student = response.data.data;
+                    
+                    if(student.status !== 1){
+                        return emitter.emit('toaster-error', { message: 'এই স্টুডেন্টটি আপাতত নিষ্ক্রিয় আছে'})
+                    }
+                    
+                    student['barcode'] = barcode;
+                    student['punch_exact_time'] = helper.miliseconds();
+                    student['punch_exact_time_text'] = moment().format('Y-MM-DD HH:mm:ss')
+
+                    let findLast = wattingList.value.findLast(s => s.id == student.id)
+                    let findLastIndex = wattingList.value.findLastIndex(s => s.id == student.id)
                 
-                if(!isAllowed){
-                        let prefix = class_name ? (class_name + ' এর ') : 'ddd '
-                        emitter.emit('toaster-error', { message: `${prefix}পাঞ্চ এর সময় শুরু হয়নি`})
+
+                
+                    if(!student[student['soundColName']]){ 
+                        emitter.emit('toaster-error', { message: `অডিও যুক্ত করা হয়নি`, duration: 10000})
+                        //  speakText('voice is not added')
+                    
+                        router.push({name: 'students', query: {
+                            dakhela: student.dakhela,
+                            barcode,
+                        }})
                         return
-                }
-                let targetClass = classes.value.filter(cls => cls.class_short == class_short)?.[0];
-                if(!targetClass?.isActive){
-                        emitter.emit('toaster-error', { message: 'এই ক্লাসটি আপাতত বন্ধ আছে'})
-                        return
-                }
-            }
+                    }
 
+                
 
-
-
-            http.get('/single-student', { params: { barcode } }).then(response => {
-                if(response.status == 200){
-                        let student = response.data.data;
-                        
-                        if(student.status !== 1){
-                            return emitter.emit('toaster-error', { message: 'এই স্টুডেন্টটি আপাতত নিষ্ক্রিয় আছে'})
-                        }
-                        
-                        student['barcode'] = barcode;
-                        student['punch_exact_time'] = helper.miliseconds();
-                        student['punch_exact_time_text'] = moment().format('Y-MM-DD HH:mm:ss')
-
-                        let findLast = wattingList.value.findLast(s => s.id == student.id)
-                        let findLastIndex = wattingList.value.findLastIndex(s => s.id == student.id)
-                    
 
                     
-                        if(!student[student['soundColName']]){ 
-                            emitter.emit('toaster-error', { message: `অডিও যুক্ত করা হয়নি`, duration: 10000})
-                            //  speakText('voice is not added')
-                        
-                            router.push({name: 'students', query: {
-                                dakhela: student.dakhela,
-                                barcode,
-                            }})
-                            return
-                        }
+                    student['emergency_mode'] = emergency_mode.value
 
+                    function addPunchLog(student){
+                        http.post('/punch-log/add-log', { student }).then(response => { })
+                    }
+
+                    // dev code to make eroor in audio URL
+                    // student.sound1 = student.sound1 + 'e'
                     
+                    if(!emergency_mode.value){
+                        const { running_call_schedules, incoming_call_schedules  } = callbacks
+                        let rs = running_call_schedules(student['class_short'])
+                        let is = incoming_call_schedules(student['class_short'])
 
-
+                        if(rs.length){
+                            student['start_ms'] = rs[0].start_ms
+                            student['end_ms'] = rs[0].end_ms
                         
-                        student['emergency_mode'] = emergency_mode.value
-
-                        function addPunchLog(student){
-                            http.post('/punch-log/add-log', { student }).then(response => { })
-                        }
-
-                        // dev code to make eroor in audio URL
-                        // student.sound1 = student.sound1 + 'e'
-                        
-                        if(!emergency_mode.value){
-                            const { running_call_schedules, incoming_call_schedules  } = callbacks
-                            let rs = running_call_schedules(student['class_short'])
-                            let is = incoming_call_schedules(student['class_short'])
-
-                            if(rs.length){
-                                student['start_ms'] = rs[0].start_ms
-                                student['end_ms'] = rs[0].end_ms
-                            
-                                    let __startTime = moment(moment().format('Y-MM-DD') + ' ' + rs[0].start_time).format('hh:mm A')
-                                    let __endTime = moment(moment().format('Y-MM-DD') + ' ' + rs[0].end_time).format('hh:mm A')
-                                    student['call_slot'] = `${__startTime} - ${__endTime}`
-                                
-
-                            } else if(is?.length)  {
-                                
-                                student['start_ms'] = is[0].start_ms
-                                student['end_ms'] = is[0].end_ms
-
-                                let __startTime = moment(moment().format('Y-MM-DD') + ' ' + is[0].start_time).format('hh:mm A')
-                                let __endTime = moment(moment().format('Y-MM-DD') + ' ' + is[0].end_time).format('hh:mm A')
+                                let __startTime = moment(moment().format('Y-MM-DD') + ' ' + rs[0].start_time).format('hh:mm A')
+                                let __endTime = moment(moment().format('Y-MM-DD') + ' ' + rs[0].end_time).format('hh:mm A')
                                 student['call_slot'] = `${__startTime} - ${__endTime}`
-                            } else {
-                                if(!is.length){
-                                    emitter.emit('toaster-error', { message: 'ক্লাসের জন্য কোন কল শিডিউল সক্রিয় নেই!'})
-                                    return
-                                }
-                            }
+                            
 
+                        } else if(is?.length)  {
+                            
+                            student['start_ms'] = is[0].start_ms
+                            student['end_ms'] = is[0].end_ms
 
-                            // ----
-                            if(!findLast){
-                                wattingList.value.push(student)
-                                addPunchLog(student)
-                                emitter.emit('pushed_a_student__or__rechecktoPlay', student)
-                                if(message){
-                                        emitter.emit('toaster-success', { message, duration: 3000})
-                                } 
-                            }
-                            else if(findLast && findLast?.is_called){
-                                // wattingList.value.splice(findLastIndex, 0, student)
-                                
-                                findLast['is_called'] = false
-                                findLast['sound1'] = student.sound1
-                                delete findLast.sound1_haserror
-                                if(!findLast?.['total_punch']) {
-                                    findLast.total_punch = 2
-                                } else {
-                                    findLast['total_punch'] += 1
-                                }
-
-                                findLast['punch_exact_time_text'] = moment().format('Y-MM-DD HH:mm:ss')
-
-                                addPunchLog(student)
-                                emitter.emit('pushed_a_student__or__rechecktoPlay', student)
-                                if(message){
-                                        emitter.emit('toaster-success', { message, duration: 3000})
-                                } 
-                            } else if (findLast) {
-                                let studentCard = document.querySelector(`[barcode="${barcode}"]`)
-                                if(studentCard){
-                                    studentCard.classList.add('bx-fade-down')
-                                    setTimeout(() => {
-                                        studentCard.classList.remove('bx-fade-down')
-                                    }, 2000);
-                                }
-                                emitter.emit('toaster-error', { message: 'ইতিমধ্যে কার্ডটি পাঞ্চ করা হয়েছে'})
-                            }
+                            let __startTime = moment(moment().format('Y-MM-DD') + ' ' + is[0].start_time).format('hh:mm A')
+                            let __endTime = moment(moment().format('Y-MM-DD') + ' ' + is[0].end_time).format('hh:mm A')
+                            student['call_slot'] = `${__startTime} - ${__endTime}`
                         } else {
-                            student['start_ms'] = helper.miliseconds() - 1000
-                            student['end_ms'] = helper.miliseconds() + (10 * 1000)
-                            wattingList.value.unshift(student)  
-                            addPunchLog(student)
-                            emitter.emit('toaster-success', { message: `জরুরি অবস্থায় পাঞ্চ গ্রহণ করা হয়েছে`, duration: 5000})
-                        } 
+                            if(!is.length){
+                                emitter.emit('toaster-error', { message: 'ক্লাসের জন্য কোন কল শিডিউল সক্রিয় নেই!'})
+                                return
+                            }
+                        }
 
-                        storage('wattingList').value = wattingList.value;
-                }
-            })
-     } catch (error) {
-          console.warn('pushTheBarcode_error::', error);
-     }
+
+                        // ----
+                        if(!findLast){
+                            wattingList.value.push(student)
+                            addPunchLog(student)
+                            emitter.emit('pushed_a_student__or__rechecktoPlay', student)
+                            if(message){
+                                    emitter.emit('toaster-success', { message, duration: 3000})
+                            } 
+                        }
+                        else if(findLast && findLast?.is_called){
+                            // wattingList.value.splice(findLastIndex, 0, student)
+                            
+                            findLast['is_called'] = false
+                            findLast['sound1'] = student.sound1
+                            delete findLast.sound1_haserror
+                            if(!findLast?.['total_punch']) {
+                                findLast.total_punch = 2
+                            } else {
+                                findLast['total_punch'] += 1
+                            }
+
+                            findLast['punch_exact_time_text'] = moment().format('Y-MM-DD HH:mm:ss')
+
+                            addPunchLog(student)
+                            emitter.emit('pushed_a_student__or__rechecktoPlay', student)
+                            if(message){
+                                    emitter.emit('toaster-success', { message, duration: 3000})
+                            } 
+                        } else if (findLast) {
+                            let studentCard = document.querySelector(`[barcode="${barcode}"]`)
+                            if(studentCard){
+                                studentCard.classList.add('bx-fade-down')
+                                setTimeout(() => {
+                                    studentCard.classList.remove('bx-fade-down')
+                                }, 2000);
+                            }
+                            emitter.emit('toaster-error', { message: 'ইতিমধ্যে কার্ডটি পাঞ্চ করা হয়েছে'})
+                        }
+                    } else {
+                        student['start_ms'] = helper.miliseconds() - 1000
+                        student['end_ms'] = helper.miliseconds() + (10 * 1000)
+                        wattingList.value.unshift(student)  
+                        addPunchLog(student)
+                        emitter.emit('toaster-success', { message: `জরুরি অবস্থায় পাঞ্চ গ্রহণ করা হয়েছে`, duration: 5000})
+                    } 
+
+                    storage('wattingList').value = wattingList.value;
+            }
+        })
+    } catch (error) {
+        console.warn('punchToCallStudent_error::', error);
     }
 
 }
 
-function pushAttedence(barcode='play-417-2024', { 
+function punchToSubmitAttendance(barcode='play-417-2024', { 
+    message='', 
+    source='device', 
+    date=moment().format('Y-MM-DD'), 
+    branch_id=1,
+    device_index=0,
+    remarks='',
+}={} ){
+    setTimeout(() => {
+        __punchToSubmitAttendance(barcode, { message, source, device_index })
+    }, delay);
+}
+
+function __punchToSubmitAttendance(barcode='play-417-2024', { 
     message='', 
     source='device', 
     date=moment().format('Y-MM-DD'), 
@@ -1203,7 +1211,7 @@ function pushAttedence(barcode='play-417-2024', {
                }
           })
      } catch (error) {
-          console.warn('pushAttedence_error::', error);
+          console.warn('punchToSubmitAttendance_error::', error);
      }
 }
 

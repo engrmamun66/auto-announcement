@@ -28,7 +28,7 @@ const stop_clear_and_reload = inject('stop_clear_and_reload');
 const speakText = inject('speakText');
 const callbacks = inject('callbacks');
 const getSchedules = inject('getSchedules');
-const pushTheBarcode = inject('pushTheBarcode');
+const punchToCallStudent = inject('punchToCallStudent');
 const makeCarcode = inject('makeCarcode');
 const appUseForbiddened = inject('appUseForbiddened');
 const showSwithBoardModal = inject('showSwithBoardModal');
@@ -84,13 +84,13 @@ function inputBarcode(event){
                let student = all_students.value.find(s => s.dakhela === dakhela_number)
                if(student){
                     event.target.value = ''
-                    pushTheBarcode(makeCarcode(student))
+                    punchToCallStudent(makeCarcode(student))
                } else {
                     emitter.emit('toaster-error', { message: 'এই দাখেলা দিয়ে কোনও তথ্য খুঁজে পাওয়া যায়নি' })
                } 
           } else {
                const barcode = input_value
-               pushTheBarcode(barcode)
+               punchToCallStudent(barcode)
                setTimeout(() => {
                     event.target.value = ''
                }, 300); 
@@ -132,7 +132,7 @@ let card_dynamic_width = ref(200)
 onMounted(()=>{
 
      if(route.query.barcode){
-          pushTheBarcode(route.query.barcode)
+          punchToCallStudent(route.query.barcode)
           setTimeout(() => {
                router.push({name: 'home'})
           }, 100);
