@@ -60,7 +60,7 @@ class Attendance {
     
   
     addNew(req, res) {
-      const { student_id, date, in_time, out_time, status = 'present', remarks, late_in_minute = 0, device_index = 1, shift_duration = '' } = req.body;
+      const { student_id, date, in_time, out_time, status = 'present', remarks, late_in_minute = 0, device_index = 1, shift_duration = '', shift_count = 1 } = req.body;
     
       if (!student_id || !date) {
         return res.status(400).send({ error: "student_id and date are required." });
@@ -68,7 +68,7 @@ class Attendance {
     
       const query = `
         INSERT INTO ${this.tableName} 
-          (student_id, date, in_time, out_time, status, remarks, late_in_minute, device_index, shift_duration)
+          (student_id, date, in_time, out_time, status, remarks, late_in_minute, device_index, shift_duration, shift_count)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
     
@@ -82,6 +82,7 @@ class Attendance {
         late_in_minute,
         device_index,
         shift_duration,
+        shift_count,
       ];
     
       const db = this.db;
@@ -104,16 +105,16 @@ class Attendance {
   
     // Update attendance
     update(req, res) {
-      const { id, status, in_time, out_time, remarks, late_in_minute, device_index, shift_duration } = req.body;
+      const { id, status, in_time, out_time, remarks, late_in_minute, device_index, shift_duration, shift_count } = req.body;
       if (!id) return res.status(400).send({ error: "ID required." });
     
       const query = `
         UPDATE ${this.tableName} 
-        SET status=?, in_time=?, out_time=?, remarks=?, late_in_minute=?, device_index=?, shift_duration=?, created=CURRENT_TIMESTAMP
+        SET status=?, in_time=?, out_time=?, remarks=?, late_in_minute=?, device_index=?, shift_duration=?, shift_count=?, created=CURRENT_TIMESTAMP
         WHERE id=?
       `;
     
-      this.db.run(query, [status, in_time, out_time, remarks, late_in_minute, device_index, shift_duration, id], function (err) {
+      this.db.run(query, [status, in_time, out_time, remarks, late_in_minute, device_index, shift_duration, shift_count, id], function (err) {
         if (err) return res.status(500).send({ error: err.message });
     
         if (this.changes === 0) {

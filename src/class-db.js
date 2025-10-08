@@ -103,6 +103,7 @@ class myDB {
                 status TEXT NOT NULL, -- e.g: 'Present' | 'Late' | 'Just Out'  
                 remarks TEXT DEFAULT NULL,
                 shift_duration TEXT DEFAULT NULL,
+                shift_count INTEGER DEFAULT 1,
                 device_index INTEGER DEFAULT 1, -- zkteco punching device index
                 created TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
             

@@ -1016,6 +1016,7 @@ function __punchToSubmitAttendance(barcode='play-417-2024', {
                             remarks,
                             shift_duration: '', // 08:00 - 12:00
                             device_index,
+                            shift_count: shifts?.length,
                         }
 
                         let today_entries = entires 

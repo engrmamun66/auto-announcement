@@ -4,12 +4,12 @@ const port_number = 2323
 // shifts must be 24 hours format
 const SHIFTS = {
      first: {
-          start: '10:30', 
-          end: '12:00',
+          start: '21:20', 
+          end: '21:20',
      },
      second: {
-          start: '03:00',
-          end: '05:00', 
+          start: '21:25',
+          end: '22:20', 
      },
 }
 
@@ -76,7 +76,11 @@ module.exports = {
                 * shift start: 08:00, student come: 08:05
                 */
                late_conderation_minute: 5, 
-               maximum_live_attedence: 50,
+               maximum_live_attedence: 50, 
+               pagination: {
+                    perpage: 2,
+                    pagiation_positon: 'top_left', // top_left | top_center | top_right ||| left_left | left_center | left_right
+               } 
           },
      },
      logo: {
