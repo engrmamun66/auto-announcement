@@ -97,7 +97,7 @@ module.exports = {
      --secondaryColor: #3a3a3a;
      --borderColor: #d5fdd7;
      --fontColor: #222322;
-     --grad1: linear-gradient(90deg, rgba(137, 137, 137, 0.636) 0%, rgb(227, 244, 255) 100%);
+     --grad1: linear-gradient(90deg, rgba(137, 137, 137, 0.636) 0%, #b3c6d2 100%);
      --grad2: linear-gradient(90deg, rgba(118, 118, 118, 0.348) 0%, rgba(246, 231, 255, 0.486) 100%);
      --grad3: linear-gradient(90deg, #222322 0%, #3a3a3a 100%); 
      `,

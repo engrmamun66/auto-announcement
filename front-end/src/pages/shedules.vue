@@ -249,7 +249,7 @@ function deleteSchedule(id, i, type=1){
 
     <template v-else>
 
-      <ul class="nav nav-tabs mt-4">
+      <ul class="nav nav-tabs mt-4 bottom-borderless">
         <li class="nav-item">
           <a @click.stop="tab = 1" class="nav-link cp text-black" :class="{'active': tab==1}" >Puch Times</a>
         </li>
