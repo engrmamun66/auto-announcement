@@ -52,7 +52,7 @@
         </template>
         <template v-else>
           <tr>
-              <td colspan="88" class="text-center">Not Attendence Found</td>                 
+              <td colspan="88" class="text-center">No Attendance Found</td>                 
           </tr>
         </template>
       </template>
