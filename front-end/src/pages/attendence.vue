@@ -40,6 +40,9 @@ onMounted(()=>{
        <li class="nav-item">
          <a @click.stop="tab = 2" class="nav-link cp text-black" :class="{'active': tab==2}" >Attendence&nbsp;History</a>
        </li> 
+       <li class="nav-item">
+        <input ref="SearchBox" type="text" placeholder="Search by Name/ID" class="cb-text-input py-1 px-2 radius-5">
+       </li> 
      </ul>
   
      <transition>
@@ -60,8 +63,16 @@ onMounted(()=>{
 </template>
 
 
-<styles scoped>
+<style scoped>
  
+.cb-text-input{
+  border: 1px solid #ffffff61;
+  height: 38px;
+  border-radius: 30px;
+  margin-left: 20px;
+  padding: 2px 20px !important;
+  background: #f0f0f0;
+  box-shadow: 1px 1px 2px #0000006e, inset 1px 1px 2px #0000006e;
+}
  
- 
-</styles>
+</style>

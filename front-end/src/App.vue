@@ -1177,8 +1177,11 @@ function __punchToSubmitAttendance(barcode='play-417-2024', {
                             http.post('/attendence-add', payload).then(response => {
                                 if(response.status === 200){
                                     let attendenceData = response.data.data
-                                    liveAttendenceList.value.push(attendenceData)
+                                    liveAttendenceList.value.push({...attendenceData, live_data: true})
                                     callbacks.fixOverflowOfLiveAttendence()
+                                    setTimeout(() => {
+                                        delete liveAttendenceList.value.at(-1).live_data
+                                    }, 700);
                                 }
                             })
                         }
@@ -1188,7 +1191,7 @@ function __punchToSubmitAttendance(barcode='play-417-2024', {
                                 if(response.status === 200){
                                     let targetIndex = liveAttendenceList.value.findIndex(item => item.id == payload.id)
                                     if(targetIndex > -1){
-                                        liveAttendenceList.value[targetIndex] = {...liveAttendenceList.value[targetIndex], ...payload}
+                                        liveAttendenceList.value[targetIndex] = {...liveAttendenceList.value[targetIndex], ...payload, updated_now: true}
                                     } else {
                                         liveAttendenceList.value.push(payload)
                                     } 

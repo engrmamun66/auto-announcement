@@ -1,5 +1,6 @@
 <template>
   <!-- Attendance Cards -->
+   
   <div class="mt-3">
     <template v-if="liveAttendenceList?.length">
         <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
@@ -24,7 +25,7 @@
                       'status-present': item?.status?.toLowerCase() === 'present',
                       'status-absent': item?.status?.toLowerCase() === 'late',
                       'status-outtime': !item.in_time,
-                      'latest-item': liveAttendenceList?.length - 1 === i
+                      'live_data': liveAttendenceList?.live_data,
                   }"
                   >
                   <div class="d-flex justify-content-between align-items-center mb-2" >
@@ -124,8 +125,9 @@ function deleteAttedence(item){
   color: #333;
   padding-top: 40px;
 }
-.attendance-card.latest-item { 
+.attendance-card.live_data { 
   animation: keyframe-blowUp 1.0s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+  animation: keyframe-scaleUp 1.5s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
 }
 
 .attendance-card:hover {
