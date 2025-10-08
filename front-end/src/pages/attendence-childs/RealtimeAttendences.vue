@@ -60,7 +60,7 @@
     <!-- No Attendance Found Message -->
     <div class="col-12">
         <div
-        class="attendance-card text-center no-data-card d-flex flex-column justify-content-center align-items-center"
+        class="text-center no-data-card d-flex flex-column justify-content-center align-items-center"
         >
         <h5 class="text-muted mb-2">No Attendance Records Found</h5>
         <p class="text-secondary mb-0">
