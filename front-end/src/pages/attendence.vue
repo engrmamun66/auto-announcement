@@ -33,7 +33,7 @@ onMounted(()=>{
 
   <div class="page-contents">
 
-    <ul class="nav nav-tabs mt-0 mb-3">
+    <ul class="nav nav-tabs mt-0 mb-3 bottom-borderless">
        <li class="nav-item">
          <a @click.stop="tab = 1" class="nav-link cp text-black" :class="{'active': tab==1}" >Realtime&nbsp;Attendence</a>
        </li>
@@ -65,14 +65,6 @@ onMounted(()=>{
 
 <style scoped>
  
-.cb-text-input{
-  border: 1px solid #ffffff61;
-  height: 38px;
-  border-radius: 30px;
-  margin-left: 20px;
-  padding: 2px 20px !important;
-  background: #f0f0f0;
-  box-shadow: 1px 1px 2px #0000006e, inset 1px 1px 2px #0000006e;
-}
+
  
 </style>

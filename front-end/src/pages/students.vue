@@ -662,8 +662,8 @@ const log = console.log
                           Call&nbsp;Punch
                         </button>
                       <button v-else class="class-short-btn px-2 for-attendence" 
-                      @auxclick.stop="punchToSubmitAttendance(makeCarcode(std), {message: 'কার্ডটি সফলভাবে পাঞ্চ হয়েছে।', source: 'manual_button', delay: 0})"
-                      @click.stop="punchToSubmitAttendance(makeCarcode(std), {message: 'কার্ডটি সফলভাবে পাঞ্চ হয়েছে।', source: 'manual_button', delay: 4000})"
+                      @auxclick.stop="punchToSubmitAttendance(makeCarcode(std), {message: 'কার্ডটি সফলভাবে পাঞ্চ হয়েছে।', source: 'manual_button', delay: 0, source: 'button'})"
+                      @click.stop="punchToSubmitAttendance(makeCarcode(std), {message: 'কার্ডটি সফলভাবে পাঞ্চ হয়েছে।', source: 'manual_button', delay: 4000, source: 'button'})"
                       >
                           <!-- For Students Attendence -->
                           Attendence

@@ -37,7 +37,7 @@
                       <li :tooltip="(late_conderation_minute && item?.in_time) ? `${late_conderation_minute} minutes of consideration given.` : ''">
                           <strong>Status :</strong> 
                           <span status class="ms-1">{{ item?.in_time ? item?.status : 'Just-Out' }}</span>
-                          <span v-if="item?.in_time" class="ms-1">{{ item?.late_in_minute > 0 ? `${item?.late_in_minute} min` : `before ${Math.abs(item?.late_in_minute)} min` }}</span>
+                          <span v-if="item?.in_time && item?.late_in_minute" class="ms-1">{{ item?.late_in_minute > 0 ? `${item?.late_in_minute} min` : `before ${Math.abs(item?.late_in_minute)} min` }}</span>
                       </li>
                       <li>
                         <template v-if="item?.in_time">

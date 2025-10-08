@@ -784,7 +784,7 @@ function punchToCallStudent(barcode='play-417-2024', { message='', source='devic
         if(source === 'device'){
             // Without internet device punch not allowed
             if(appAccessData.value?.internet === false){
-                emitter.emit('toaster-error', { message: 'Without internet connection, device punch is not allowed'})
+                emitter.emit('toaster-error', { message: 'ইন্টারনেট সংযোগ ছাড়া, ডিভাইস পাঞ্চ করার অনুমতি নেই'})
                 return
             }
         }
@@ -950,13 +950,9 @@ function __punchToSubmitAttendance(barcode='play-417-2024', {
     source='device', 
     date=moment().format('Y-MM-DD'), 
     device_index=0,
-    remarks='',
+    remarks='', 
 }={} ){
      try {
-          if(!is_started_schedule.value){
-               emitter.emit('toaster-error', { message: 'switched is off'})
-               return
-          }
           
           if(barcode == 'i' || barcode == 'I'){
                emergency_mode.value = !emergency_mode.value
@@ -979,7 +975,7 @@ function __punchToSubmitAttendance(barcode='play-417-2024', {
           if(source === 'device'){
             // Without internet device punch not allowed
             if(appAccessData.value?.internet === false){
-                emitter.emit('toaster-error', { message: 'Without internet connection, device punch is not allowed'})
+                emitter.emit('toaster-error', { message: 'ইন্টারনেট সংযোগ ছাড়া, ডিভাইস পাঞ্চ করার অনুমতি নেই'})
                 return
             }
           }
@@ -997,17 +993,14 @@ function __punchToSubmitAttendance(barcode='play-417-2024', {
 
 
                     
-
-
-                    
                     let shifts = classes.value.find(cls => cls.class_short == class_short)?.shifts;
                     if (!shifts?.length) {
                         return emitter.emit('toaster-success', {message: `${class_name} এর জন্য শিফট নির্ধারণ করা হয়নি`})
+                        
                     } else {
 
                         let DATE_FORMAT = 'YYYY-MM-DD'
                         let TIME_FORMAT = 'HH:mm:ss'
-                        let DATE_TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss'
 
                         let payload = {
                             // id: null,
@@ -1016,7 +1009,7 @@ function __punchToSubmitAttendance(barcode='play-417-2024', {
                             in_time: null,
                             out_time: null,
                             late_in_minute: 0, 
-                            status: 'present', // 'Present' | 'Late' | 'Leave' | 'Absent' | 'over-stay' | 'Gone-fast',
+                            status: 'Present', // 'Present' | 'Late' | 'Leave' | 'Absent' | 'over-stay' | 'Gone-fast',
                             remarks,
                             shift_duration: '', // 08:00 - 12:00
                             device_index,
@@ -1095,7 +1088,7 @@ function __punchToSubmitAttendance(barcode='play-417-2024', {
                                     let runningShift = getRunningShift(shifts)
                                     payload.shift_duration = `${runningShift.start} - ${runningShift.end}`
 
-                                    let entry_count_by_shift = shifts.filter(s => s.shift_duration === payload.shift_duration)
+                                    let entry_count_by_shift = today_entries.filter(entry => entry.shift_duration === payload.shift_duration)
                                     if(entry_count_by_shift?.length === 2){
                                         emitter.emit('toaster-error', {message: `এই শিফটের জন্য ${entry_count_by_shift.length} টি এন্ট্রি আছে। আর নতুন এন্ট্রি সম্ভব নয়।`})
                                         return
