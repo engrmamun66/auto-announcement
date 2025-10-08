@@ -160,6 +160,7 @@ onMounted(()=>{
   color: #fff !important;
 }
 
+.status-outtime .badge,
 .status-present .badge,
 .status-absent .badge {
   background: rgba(255, 255, 255, 0.2) !important;
