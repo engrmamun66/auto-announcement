@@ -1095,6 +1095,11 @@ function __punchToSubmitAttendance(barcode='play-417-2024', {
                                     let runningShift = getRunningShift(shifts)
                                     payload.shift_duration = `${runningShift.start} - ${runningShift.end}`
 
+                                    let entry_count_by_shift = shifts.filter(s => s.shift_duration === payload.shift_duration)
+                                    if(entry_count_by_shift?.length === 2){
+                                        emitter.emit('toaster-error', {message: `এই শিফটের জন্য ${entry_count_by_shift.length} টি এন্ট্রি আছে। আর নতুন এন্ট্রি সম্ভব নয়।`})
+                                        return
+                                    }
 
                                     payload.late_in_minute = moment().diff(runningShift.start_datetime, "minutes");
 

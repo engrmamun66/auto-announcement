@@ -65,7 +65,7 @@ module.exports = {
                only_attendance_feature: false,
                // boundary_time: [30, 'minutes'], // using in getRunningShift() function
                boundary_time: [30, 'minutes'], // using in getRunningShift() function,
-               minimum_gap_seconds: 10,
+               punch_separator_gap_in_seconds: 10,
                // ====================================================== //
                /**
                 * [ It's only for shift start time ]
