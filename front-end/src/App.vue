@@ -1023,9 +1023,11 @@ function __punchToSubmitAttendance(barcode='play-417-2024', {
                         }
 
                         let today_entries = entires 
-                        let max_permitte_entry = shifts?.length * 2
+                        const max_permitte_entry = shifts?.length * 2
                         const late_conderation_minute = CONFIG.value?.settings?.attendance?.late_conderation_minute || 0
-                        
+                        const punch_separator_gap_in_seconds = CONFIG.value?.settings?.attendance?.punch_separator_gap_in_seconds || 5
+
+
                         if(!today_entries?.length){
 
                             // When no entry today, just create an entry
@@ -1047,10 +1049,10 @@ function __punchToSubmitAttendance(barcode='play-417-2024', {
 
                             let last_punch_time = moment().format(DATE_FORMAT) + ' ' + (last_enty.in_time || last_enty.out_time)
                             let gap_seconds = moment(new Date()).diff(moment(last_punch_time), 'seconds')
-                            let minimum_gap_seconds = 10      
+                                
 
 
-                            if(gap_seconds < minimum_gap_seconds || today_entries?.length === max_permitte_entry){
+                            if(gap_seconds < punch_separator_gap_in_seconds || today_entries?.length === max_permitte_entry){
                                 // need to update last punch, right now
                                 payload = { ...payload, ...last_enty }
 

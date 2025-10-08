@@ -4,8 +4,8 @@ const port_number = 2323
 // shifts must be 24 hours format
 const SHIFTS = {
      first: {
-          start: '22:30', 
-          end: '17:00',
+          start: '10:30', 
+          end: '12:00',
      },
      second: {
           start: '03:00',
@@ -65,6 +65,7 @@ module.exports = {
                only_attendance_feature: false,
                // boundary_time: [30, 'minutes'], // using in getRunningShift() function
                boundary_time: [30, 'minutes'], // using in getRunningShift() function,
+               minimum_gap_seconds: 10,
                // ====================================================== //
                /**
                 * [ It's only for shift start time ]
