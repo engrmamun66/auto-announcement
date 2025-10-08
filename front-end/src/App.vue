@@ -1029,11 +1029,12 @@ function __punchToSubmitAttendance(barcode='play-417-2024', {
 
                             // When no entry today, just create an entry
                             payload.in_time = moment().format(TIME_FORMAT)
-                            let first_shift_start_time = moment().format(DATE_FORMAT) + ' ' + shifts[0].start
                             
+                            let runningShift = getRunningShift(shifts) 
+
                             
-                            payload.shift_duration = `${shifts[0].start} - ${shifts[0].end}`
-                            payload.late_in_minute = moment().diff(first_shift_start_time, "minutes");
+                            payload.shift_duration = `${runningShift.start} - ${runningShift.end}`
+                            payload.late_in_minute = moment().diff(runningShift.start_datetime, "minutes");
                             
                             if(late_conderation_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_conderation_minute){
                                 payload.late_in_minute = 0
