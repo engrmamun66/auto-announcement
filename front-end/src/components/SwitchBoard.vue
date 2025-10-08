@@ -193,15 +193,7 @@ let tab = ref(1)
 	</template>
 	<template v-else-if="viewType === 'home'">
  
-		<!-- <ul class="nav nav-tabs mb-3">
-			<li class="nav-item">
-				<a @click.stop="tab = 1" class="nav-link cp text-black" :class="{'active': tab==1}" >Switches</a>
-			</li>
-			<li class="nav-item">
-				<a @click.stop="tab = 2" class="nav-link cp text-black" :class="{'active': tab==2}" >Classes</a>
-			</li> 
-			
-		</ul>  -->
+	 
 		<div class="d-flex justify-content-between align-items-center">
 			<h4>Switches Activity</h4>
 			<Switch2 v-model="switch_mode" style="zoom: 0.7" yes="Auto" no="Manual" size="lg" @change="log('changed')" ></Switch2>
