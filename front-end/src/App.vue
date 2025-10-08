@@ -938,20 +938,17 @@ function punchToSubmitAttendance(barcode='play-417-2024', {
     message='', 
     source='device', 
     date=moment().format('Y-MM-DD'), 
-    branch_id=1,
     device_index=0,
     remarks='',
+    delay=0,
 }={} ){
-    setTimeout(() => {
-        __punchToSubmitAttendance(barcode, { message, source, device_index })
-    }, delay);
+    setTimeout(() => __punchToSubmitAttendance(barcode, { message, source, device_index }), delay);
 }
 
 function __punchToSubmitAttendance(barcode='play-417-2024', { 
     message='', 
     source='device', 
     date=moment().format('Y-MM-DD'), 
-    branch_id=1,
     device_index=0,
     remarks='',
 }={} ){
@@ -1021,8 +1018,8 @@ function __punchToSubmitAttendance(barcode='play-417-2024', {
                             late_in_minute: 0, 
                             status: 'present', // 'Present' | 'Late' | 'Leave' | 'Absent' | 'over-stay' | 'Gone-fast',
                             remarks,
-                            branch_id,
                             shift_duration: '', // 08:00 - 12:00
+                            device_index,
                         }
 
                         let today_entries = entires 

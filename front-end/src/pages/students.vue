@@ -676,7 +676,7 @@ const log = console.log
                     </template> 
                   </td>
                   <td> 
-                    '<div class="d-flex justify-content-center action-icons">
+                    <div class="d-flex justify-content-center action-icons">
                       <i @click.stop="targetStdForBarcode=std" class='bx bx-barcode cp size-1p5' ></i>
                       
                       <span tooltip="Copy barcode">
@@ -688,7 +688,7 @@ const log = console.log
                        <i @click="deleteStudent(std.id, i)" class='bx bx-trash text-danger cp' ></i>
                       </span>
           
-                    </div>'
+                    </div>
                   </td> 
               </tr> 
   

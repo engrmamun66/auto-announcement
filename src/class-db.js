@@ -9,7 +9,7 @@ class myDB {
         this.DB_ROOT_FOLDER = DB_ROOT_FOLDER;
         this.db = this._createDatabase(); 
         this._createTables(this.db);
-        // this._addColumn('students', 'branch_id', 'INTEGER', '1')
+        // this._addColumn('students', 'device_index', 'INTEGER', '1')
         // this._addColumn('students', 'card_owner', 'VARCHAR', 'NULL')
         // this._addColumn('students', 'options', 'VARCHAR', 'NULL')
         // this._addColumn('students', 'note', 'VARCHAR', 'NULL') 
@@ -59,7 +59,7 @@ class myDB {
                 sound3 TEXT DEFAULT NULL,
                 card_owner TEXT DEFAULT NULL,
                 options TEXT DEFAULT NULL,
-                branch_id INTEGER DEFAULT 1, -- some client can be manage multiple institue by signle computer setup
+                device_index INTEGER DEFAULT 1, -- zkteco punching device index
                 note TEXT DEFAULT NULL,
                 id_type INTEGER DEFAULT 1, -- when using attendence, 1 = students, 2 = guardians
                     created TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -103,7 +103,7 @@ class myDB {
                 status TEXT NOT NULL, -- e.g: 'Present' | 'Late' | 'Just Out'  
                 remarks TEXT DEFAULT NULL,
                 shift_duration TEXT DEFAULT NULL,
-                branch_id INTEGER DEFAULT 1, -- some client can be manage multiple institue by signle computer setup
+                device_index INTEGER DEFAULT 1, -- zkteco punching device index
                 created TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
             
                 -- Foreign key relation to students table
@@ -127,7 +127,7 @@ class myDB {
                 holiday_date DATE NOT NULL,
                 type TEXT NOT NULL, -- e.g., 'holiday', 'leave', 'event'
                 reason TEXT DEFAULT NULL,
-                branch_id INTEGER DEFAULT 1, -- some client can be manage multiple institue by signle computer setup
+                device_index INTEGER DEFAULT 1, -- zkteco punching device index
                 created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
               );`,

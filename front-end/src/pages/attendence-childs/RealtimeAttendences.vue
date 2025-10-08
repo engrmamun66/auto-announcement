@@ -76,6 +76,7 @@
 import { inject, ref, onMounted, onBeforeUnmount } from "vue";
 import Ahelper from "./attendacnceHelper";
 
+const http = inject('http');
 const CONFIG = inject("CONFIG");
 const classes = inject("classes");
 const attendenceList = inject("attendenceList");
@@ -95,6 +96,12 @@ onMounted(()=>{
     isMounted.value = true
   }, 500);
 })
+
+function deleteAttedence(item){
+  http.delete(`/attendence-delete/${item.id}`).then(response => {
+    
+  })
+}
 
 </script>
 
