@@ -158,7 +158,7 @@ function deleteAttedence(item){
 }
 
 .status-outtime {
-  background-color: #0095b7; /* Bootstrap danger red */
+  background-color: #0c7086; /* Bootstrap danger red */
   color: #fff !important;
 }
 
