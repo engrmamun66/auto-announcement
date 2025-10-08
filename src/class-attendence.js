@@ -69,7 +69,7 @@ class Attendance {
       const query = `
         INSERT INTO ${this.tableName} 
           (student_id, date, in_time, out_time, status, remarks, late_in_minute, device_index, shift_duration, shift_count)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
     
       const params = [

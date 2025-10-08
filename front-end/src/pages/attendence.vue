@@ -15,10 +15,16 @@ const log = console.log
 const CONFIG = inject('CONFIG');
 const classes = inject('classes');
 const attendenceList = inject('attendenceList');
+const liveAttendenceList = inject('liveAttendenceList');
 
 let tab = ref(1) 
 
- 
+
+function clearAllAndRelaod(){
+  if(!confirm('Clear-all and relaod?')) return
+  liveAttendenceList.value = []
+  window.location.reload()
+}
   
 
 
@@ -35,7 +41,7 @@ onMounted(()=>{
 
     <ul class="nav nav-tabs mt-0 mb-3 bottom-borderless">
        <li class="nav-item">
-         <a @click.stop="tab = 1" class="nav-link cp text-black" :class="{'active': tab==1}" >Realtime&nbsp;Attendence</a>
+         <a @click.stop="tab = 1" @auxclick.stop="clearAllAndRelaod()" class="nav-link cp text-black" :class="{'active': tab==1}" >Realtime&nbsp;Attendence</a>
        </li>
        <li class="nav-item">
          <a @click.stop="tab = 2" class="nav-link cp text-black" :class="{'active': tab==2}" >Attendence&nbsp;History</a>
