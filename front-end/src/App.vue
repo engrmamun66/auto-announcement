@@ -728,7 +728,12 @@ onMounted(async ()=>{
             
             if(!existing || existing != time_and_barcode || useRoute()?.query?.force=='true'){
                 storage('time_and_barcode').value = time_and_barcode
-                punchToCallStudent(barcode, { for_attendence, device_index })
+                if(for_attendence){
+                    punchToSubmitAttendance(barcode, { for_attendence, device_index })
+                } else {
+                    punchToCallStudent(barcode, { for_attendence, device_index })
+                }
+                
             }
         }
      })
@@ -945,7 +950,7 @@ function punchToSubmitAttendance(barcode='play-417-2024', {
     remarks='',
     delay=0,
 }={} ){
-    setTimeout(() => __punchToSubmitAttendance(barcode, { message, source, device_index }), delay);
+    setTimeout(() => __punchToSubmitAttendance(barcode, { message, source, device_index, date, remarks }), delay);
 }
 
 function __punchToSubmitAttendance(barcode='play-417-2024', { 
