@@ -22,7 +22,7 @@ let http = inject('http')
 let storage = inject('storage')
 let route = useRoute();
 let router = useRouter();  
-let CONFIG = ref({});  
+let CONFIG = ref(storage('CONFIG').value || {});  
 
 let internet = ref(true) 
 /**
@@ -171,6 +171,7 @@ async function getConfig({switch_mode=''}={}){
         if(response.status == 200){
             CONFIG.value = response.data
             classes.value = response.data.classes
+            storage('CONFIG').value = response.data
         }
     } catch (error) {
         
@@ -329,11 +330,13 @@ async function controlSounds({student=null, ports=[], openAll=false}={}){
 
 }
 
+const pagination_perpage = CONFIG.value?.settings?.attendance?.pagination?.perpage || 20
+
 let attendenceParams = ref({
     "page_no": 1,
     "total": 3,
     "totalPages": 1,
-    "limit": 7,
+    "limit": pagination_perpage,
 
     // class_name: null,
     // name: null,

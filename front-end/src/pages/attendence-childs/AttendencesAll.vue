@@ -1,5 +1,10 @@
 <template>
   <div>
+    <div v-if="pagiation_positon.startsWith('top')" class="d-flex" :class="[getPositionClass]">
+        <Pagination v-if="attendenceParams?.totalPages > 1" v-model="attendenceParams" @jumpToPage="(page_no) => {
+          callbacks.getAttendeceList({page_no})
+        }" ></Pagination>
+    </div> 
     <myTable >
       <template #thead>
         <thead>
@@ -53,16 +58,16 @@
       </template>
     </myTable> 
 
-    <div class="d-flex justify-content-center">
+    <div v-if="pagiation_positon.startsWith('bottom')" class="d-flex" :class="[getPositionClass]">
         <Pagination v-if="attendenceParams?.totalPages > 1" v-model="attendenceParams" @jumpToPage="(page_no) => {
           callbacks.getAttendeceList({page_no})
         }" ></Pagination>
-      </div> 
+    </div> 
   </div>
 </template>
 
 <script setup>
-import { inject, ref, onMounted, onBeforeUnmount } from "vue";
+import { inject, ref, onMounted, onBeforeUnmount, computed } from "vue";
 import Ahelper from "./attendacnceHelper";
 
 const CONFIG = inject("CONFIG");
@@ -75,12 +80,30 @@ const liveAttendenceList = inject("liveAttendenceList");
 import myTable from '../../components/myTable.vue'
 import Pagination from '../../components/Pagination.vue'
 
+const pagiation_positon = CONFIG.value?.settings?.attendance?.pagination?.pagiation_positon || 'bottom_center'
+
+let getPositionClass = computed(() => {
+  if(pagiation_positon.endsWith('left')){
+    return 'justify-content-left'
+  }
+  else if(pagiation_positon.endsWith('center')){
+    return 'justify-content-center'
+  }
+  else if(pagiation_positon.endsWith('right')){
+    return 'justify-content-right'
+  }
+  else{
+    return 'justify-content-center'
+  }
+})
+
 let log = console.log
 
 let isMounted = ref(false)
 
 const getStudent = ({ student_id }) =>
   all_students.value.find((std) => std.dakhela == student_id);
+
 
 onMounted(()=>{
 
