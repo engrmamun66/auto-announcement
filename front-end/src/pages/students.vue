@@ -686,7 +686,12 @@ function onChange_dateTimePicker(data){
                               Attendence
                           </button>
                           <!-- For Students Attendence calendar-->
-                          <button class="class-short-btn px-2 for-attendence" @click.stop="targetStudent = std; $refs.dateTimePickerRef.toggle()" >
+                          <button class="class-short-btn px-2 for-attendence" @click.stop="() => {
+                            targetStudent = std; 
+                            $refs.dateTimePickerRef.setTime(moment().format('HH:mm'))
+                            $refs.dateTimePickerRef.toggle()
+
+                          }" >
                               <i class='bx bxs-calendar'></i> 
                           </button>
 
