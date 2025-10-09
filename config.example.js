@@ -78,7 +78,7 @@ module.exports = {
                 * otherwise shift will be selected automatically 
                 */
               
-               strict_boundary_time: true, // true | false
+               strict_boundary_time: false, // true | false
                punch_separator_gap_in_seconds: 10,
                // ====================================================== //
                /**
