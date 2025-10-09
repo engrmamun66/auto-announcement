@@ -926,8 +926,8 @@ function onChange_dateTimePicker(data){
   transform: translateY(3px);
 }
 [customized-radio].checked{ 
-  border-color: rgb(6, 87, 6);
-  background-color: rgb(76, 222, 76);
+  border-color: var(--primaryColor);
+  background: radial-gradient(circle, var(--primaryColor) 0%, var(--primaryColor) 30%, #e2e2e2 40%, transparent 100%);
 }
 .each-owner-name{
     padding: 3px 10px;
