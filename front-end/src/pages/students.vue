@@ -720,7 +720,7 @@ function onChange_dateTimePicker(data){
                       </span> -->
                      
                       <ul>
-                        <li tooltip="Delete student">
+                        <li tooltip="Delete student" class="fs-5 transformY-3px">
                           <i @click="deleteStudent(std.id, i)" class='bx bx-trash text-danger cp' ></i>
                         </li>
                       </ul>
