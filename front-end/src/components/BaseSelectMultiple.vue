@@ -348,6 +348,7 @@ let random_id = computed(() => ('random_' + H.randomBetween(333, 294444)))
     justify-content: flex-start;
     flex-wrap: wrap;
     gap: 3px;
+    column-gap: 5px;
 }
 .btn-options-toggler button .selected-items .selected-item {
     display: flex;
@@ -359,8 +360,6 @@ let random_id = computed(() => ('random_' + H.randomBetween(333, 294444)))
     padding: 0 3px 0 8px!important;
     position: relative;
     color: #ffffff;
-    margin-right: .5rem;
-    margin-bottom: 2px;
     border-radius: 3px;
     text-decoration: none;
 }
@@ -440,13 +439,11 @@ let random_id = computed(() => ('random_' + H.randomBetween(333, 294444)))
     from {
         opacity: 1;
         transform: translateX(5rem);
-        display: block;
     }
 
     to {
         opacity: 1;
-        transform: translateX(0rem);
-        display: none;
+        transform: translateX(0rem); 
     }
 }
 .animation-removing {

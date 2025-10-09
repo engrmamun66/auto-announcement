@@ -4,6 +4,7 @@ import { onMounted, inject, ref, watch, computed, onBeforeUnmount, reactive } fr
 import AttendencesAll from './attendence-childs/AttendencesAll.vue'
 import RealtimeAttendences from './attendence-childs/RealtimeAttendences.vue'
 import BaseSelectMultiple from './../components/BaseSelectMultiple.vue'
+import Btn from './../components/Btn.vue'
  
 const route = inject('route');
 const router = inject('router');
@@ -51,11 +52,13 @@ onMounted(()=>{
          <a @click.stop="tab = 2" class="nav-link cp text-black" :class="{'active': tab==2}" >Attendence&nbsp;History</a>
        </li> 
        <li class="nav-item">
-        <input ref="SearchBox" type="text" placeholder="Search by Name/ID" class="cb-input py-1 px-2 radius-5">
-       </li> 
-       <li class="nav-item ms-1">
-        <BaseSelectMultiple v-model="filterPayload.classes" :label="false" :data="classes" displayKey="class_name" valueKey="class_name" style="width: 200px" ></BaseSelectMultiple>
-       </li> 
+
+        <div class="d-flex justify-content-start align-items-center gap-1">
+          <input ref="SearchBox" type="text" placeholder="Search by Name/ID" class="cb-input py-1 px-2 radius-5">
+          <BaseSelectMultiple v-model="filterPayload.classes" :label="false" :data="classes" displayKey="class_name" valueKey="class_name" style="min-width: 250px" ></BaseSelectMultiple>
+          <Btn cbinput="cbinput">Submit</Btn>
+        </div>
+       </li>  
      </ul>
   
      <transition>

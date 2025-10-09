@@ -1,5 +1,5 @@
 <template>
-  <button v-bind="$attrs" @click.stop="(e)=>$emit('click', e)" class="emb-buttons">
+  <button v-bind="$attrs" @click.stop="(e)=>$emit('click', e)" class="emb-buttons" :class="{'with-cbinput': cbinput}">
     <slot>
       Submit
     </slot>
@@ -8,6 +8,13 @@
 
 
 <script setup>
+import { defineProps, defineEmits } from 'vue'
+let props = defineProps({
+  cbinput: {
+    type: Boolean,
+    default: false
+  }
+})
 defineEmits(['click'])
 </script>
 
@@ -23,6 +30,9 @@ button {
   border: none; /* Removes default border for button */
   text-decoration: none;
   cursor: pointer; /* Adds pointer cursor on hover */
+}
+button.with-cbinput{
+  padding: 7px 15px; 
 }
 button.sm{
   padding: 6px 15px;
