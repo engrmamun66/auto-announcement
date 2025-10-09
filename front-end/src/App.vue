@@ -960,7 +960,8 @@ function __punchToSubmitAttendance(barcode='play-417-2024', {
     punch_time=moment(), // actually punch dateTime
 }={} ){
      try {
-          let punch__time = moment.isMoment(dateTime) ? dateTime : new Date(dateTime)
+          let punch__time = moment.isMoment(dateTime) ? dateTime : moment(new Date(dateTime))
+          let date = moment(punch__time).format(DATE_FORMAT)
 
           if(barcode == 'i' || barcode == 'I'){
                emergency_mode.value = !emergency_mode.value
@@ -1013,7 +1014,7 @@ function __punchToSubmitAttendance(barcode='play-417-2024', {
                         let payload = {
                             // id: null,
                             student_id: student.dakhela,
-                            date: moment(punch__time).format(DATE_FORMAT),
+                            date,
                             in_time: null,
                             out_time: null,
                             late_in_minute: 0, 
