@@ -34,6 +34,7 @@
                                         <span v-if="higlight_ids?.includes(item[valueKey] || '-1')" class="bg-success rounded-5 mx-1" style="width:10px;height:10px;"></span>
                                     </template>
                                     {{ (displayKey ? item[displayKey] : '') }} {{ (displayKey2 ? ('(' + item[displayKey2] + ')')  : '') }}  
+                                    <slot name="loopItem1" :item="item" :index="index"></slot>
                                     <i @click.stop="removeSingleItem(item, index)" class="bx bx-x close ms-1" /> 
                                 </a>
                             </template>

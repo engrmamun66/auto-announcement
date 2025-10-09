@@ -622,7 +622,14 @@ async function getAllStudents(){
 
    http.get('/students/all').then(response => {
      if(response.status == 200){
-       all_students.value = response.data
+       let data = response.data
+       if(data?.length){
+        data = data.map(student => {
+            student.full_name = `[${student.dakhela}] ${student.name?.split('||')[0]}`
+            return student
+        })
+       }
+       all_students.value = data
      }
    }).finally(()=>{
       

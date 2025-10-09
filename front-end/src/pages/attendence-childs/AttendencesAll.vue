@@ -6,8 +6,18 @@
           @searching="(search_text) => attPayload.classSearchText = search_text" >
         </BaseSelectMultiple>
 
-        <BaseSelectMultiple placeholder="Select Students" v-model="attPayload.students" :label="false" :data="filteredAllStudents" displayKey="name" displayKey2="class_short" valueKey="id" style="min-width: 250px" :search="true" :searchDelayTime="150" 
+        <BaseSelectMultiple placeholder="Select Students" v-model="attPayload.students" :label="false" :data="filteredAllStudents" displayKey="full_name" valueKey="id" style="min-width: 350px" :search="true" :searchDelayTime="150" 
           @searching="(studentnameorid) => attPayload.studentnameorid = studentnameorid" >
+          <template #loopItem1="{item, index}">
+            <span class="badge text-dark bg-body-secondary ms-1">
+              {{ item.class_short }}
+            </span>
+          </template>
+          <template #loopItem="{item, index}">
+            <span class="badge text-dark bg-body-secondary">
+              {{ item.class_short }}
+            </span>
+          </template>
         </BaseSelectMultiple>
 
         <div class="position-relative">
@@ -106,6 +116,7 @@ import Ahelper from "./attendacnceHelper";
 const CONFIG = inject("CONFIG");
 const classes = inject("classes");
 const all_students = inject("all_students");
+const helper = inject("helper");
 const callbacks = inject("callbacks");
 const attendenceList = inject("attendenceList");
 const attendenceParams = inject("attendenceParams");
@@ -115,7 +126,6 @@ import Pagination from '../../components/Pagination.vue'
 import BaseSelectMultiple from './../../components/BaseSelectMultiple.vue'
 import EmDateTimePicker from './../../components/EmDateTimePicker.vue'
 import Btn from './../../components/Btn.vue'
-import { all } from 'axios';
 
 const pagiation_positon = CONFIG.value?.settings?.attendance?.pagination?.pagiation_positon || 'bottom_center'
 
@@ -167,24 +177,21 @@ let pickerModelValue = reactive({
 
 let filteredAllStudents = computed(() => {
   let selected_class_shorts = attPayload.classes.map(cls => cls.class_short)
-
-  if(!attPayload.studentnameorid && !selected_class_shorts?.length) return all_students.value
+  let students = helper.clone(all_students.value)
   
-  let selectedClassesStudents = all_students.value.filter(student => {
-    return selected_class_shorts.includes(student.class_short) || selected_class_shorts?.length === 0
-  })
-
-  let exactResult = selectedClassesStudents.filter(student => {
-
-    if(/\d+/.test(attPayload.studentnameorid)){
-      let id_matched = student.dakhela.toString().includes(attPayload.studentnameorid)
-      return (id_matched)
+  if(selected_class_shorts?.length){
+    students = students.filter(student => selected_class_shorts.includes(student.class_short))
+  }
+  if(attPayload.studentnameorid){
+    let is_id = /\d+/.test(attPayload.studentnameorid)
+    if(is_id){
+      students = students.filter(student => student.dakhela.toString().includes(attPayload.studentnameorid))
     } else {
-      return student.name.toLowerCase().includes(attPayload.classSearchText.toLowerCase())
+      students = students.filter(student => student.name.toLowerCase().includes(attPayload.studentnameorid.toLowerCase()))
     }
-  })
+  }
 
-  return exactResult
+  return students
 })
 let filteredClasses = computed(() => {
   if(!attPayload.classSearchText) return classes.value
