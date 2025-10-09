@@ -30,6 +30,17 @@ const Ahelper = {
             return times_text
         }
     },
+    count: {
+        in(data){
+            return (data || []).filter(s => s?.in_time).length || 0
+        },
+        out(data){
+            return (data || []).filter(s => s?.out_time).length || 0
+        },
+        late(data){
+            return (data || []).filter(s => s?.status === 'Late').length || 0
+        },
+    }
      
 }
 

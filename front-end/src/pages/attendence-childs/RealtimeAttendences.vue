@@ -207,7 +207,7 @@ li{
   margin-bottom: 6px;
 }
 .max-heigt-for-live-attendace{
-    max-height: calc(100vh - 180px);
+    max-height: calc(100vh - 200px);
     overflow-y: auto;
     box-shadow: inset 5px 22px 44px #00000045;
     padding: 15px;

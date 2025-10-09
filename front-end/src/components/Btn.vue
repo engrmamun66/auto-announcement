@@ -43,8 +43,13 @@ button.xsm{
   font-size: 10px;
 }
 button.red{
-  background: #fa6548;
-  background-color: #fa6548;
+  background: #e25e16;
+  background-color: #e25e16;
+}
+button.white{
+  color: var(--primaryColor);
+  background: #ffffff;
+  background-color: #ffffff;
 }
 button.sound{
   color: black;
@@ -68,6 +73,7 @@ button.sound:active {
   background-color: #bbf3e1;
 }
 
+
  
 button:hover {
   background: var(--secondaryColor);
@@ -79,6 +85,13 @@ button.red:hover {
  
 button.sound:hover {
   background: #bbf3e1;
+}
+
+button.white:hover{
+  color: var(--primaryColor);
+  background: #ffffff;
+  background-color: #ffffff;
+  cursor: default;
 }
  
 

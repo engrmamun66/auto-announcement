@@ -6,6 +6,7 @@ import RealtimeAttendences from './attendence-childs/RealtimeAttendences.vue'
 import BaseSelectMultiple from './../components/BaseSelectMultiple.vue'
 import EmDateTimePicker from './../components/EmDateTimePicker.vue'
 import Btn from './../components/Btn.vue'
+import Ahelper from './attendence-childs/attendacnceHelper';
  
 const route = inject('route');
 const router = inject('router');
@@ -37,15 +38,25 @@ onMounted(()=>{
 <template>
 
   <div class="page-contents">
+    <div class="d-flex justify-content-between align-items-center">
+      <ul class="nav nav-tabs mt-0 mb-3 bottom-borderless">
+         <li class="nav-item">
+           <a @click.stop="tab = 1" @auxclick.stop="clearAllAndRelaod()" class="nav-link cp text-black" :class="{'active': tab==1}" >Realtime&nbsp;Attendence</a>
+         </li>
+         <li class="nav-item">
+           <a @click.stop="tab = 2" class="nav-link cp text-black" :class="{'active': tab==2}" >Attendence&nbsp;History</a>
+         </li>   
+      </ul>
+      <div v-if="tab==1">
+        <div class="d-flex justify-content-center align-items-center gap-2">
+            <Btn class="white">In: {{ Ahelper.count.in(liveAttendenceList) }}</Btn>
+            <Btn class="white">Out: {{ Ahelper.count.out(liveAttendenceList) }}</Btn>
+            <Btn class="white">Late: {{ Ahelper.count.late(liveAttendenceList) }}</Btn>
+            <Btn class="white">Total: {{ liveAttendenceList?.length }}</Btn>
+        </div>
+      </div>   
 
-    <ul class="nav nav-tabs mt-0 mb-3 bottom-borderless">
-       <li class="nav-item">
-         <a @click.stop="tab = 1" @auxclick.stop="clearAllAndRelaod()" class="nav-link cp text-black" :class="{'active': tab==1}" >Realtime&nbsp;Attendence</a>
-       </li>
-       <li class="nav-item">
-         <a @click.stop="tab = 2" class="nav-link cp text-black" :class="{'active': tab==2}" >Attendence&nbsp;History</a>
-       </li>   
-     </ul>
+    </div>
   
      <transition>
        <template v-if="tab == 1">
