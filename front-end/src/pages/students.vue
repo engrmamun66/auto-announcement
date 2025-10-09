@@ -797,6 +797,7 @@ function onChange_dateTimePicker(data){
         :use24FormatTimeForEvents="true"
         :invisible="true"
         displayIn="modal" 
+        :buttons="{applyBtn: 'Set-Attendace', todayBtn: false}"
         >
     </EmDateTimePicker>
 
