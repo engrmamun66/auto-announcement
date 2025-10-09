@@ -15,6 +15,7 @@ import Player from '../components/Player.vue'
 import AudioRecorAndUpload from '../components/AudioRecorAndUpload.vue'
 import RecoringAnimation from '../components/RecoringAnimation.vue'
 import Tabset from '../components/Tabset.vue'
+import EmDateTimePicker from '../components/EmDateTimePicker.vue'
 
 
 const route = inject('route');
@@ -334,6 +335,18 @@ onMounted(async()=>{
 const log = console.log 
 
 
+let dateTimePickerRef = ref(null)
+let targetStudent = ref(null)
+let pickerModelValue = reactive({
+  startDate: new Date(),
+  endDate: new Date(),
+  startTime: '07:00',
+  endTime: '11:00',
+})
+
+function onChange_dateTimePicker(data){
+  punchToSubmitAttendance(makeCarcode(targetStudent.value), {source: 'manual_button', delay: 0, punch_time: data.startDateTime })
+}
 
 
 
@@ -342,6 +355,10 @@ const log = console.log
 <template>
     <div class="d-flex justify-content-between align-items-center flex-wrap">
       <h1>{{ !addMode ? 'Students' : 'Add Student'}}</h1> 
+
+      <pre>
+        {{ pickerModelValue }}
+      </pre>
       
       <div class="d-flex justify-content-end">
         <Btn @click="showSearchForm = !showSearchForm;editModeTabIndex=1" class="me-2"><i class='bx bx-search transformY-2px size-1' ></i> {{ showSearchForm ? "Hide" : 'Show' }} search</Btn>
@@ -664,19 +681,20 @@ const log = console.log
                         </button>
                       </template> 
                       <template v-else>
-                        <button class="class-short-btn px-2 for-attendence" 
-                        @auxclick.stop="punchToSubmitAttendance(makeCarcode(std), {message: 'কার্ডটি সফলভাবে পাঞ্চ হয়েছে।', source: 'manual_button', delay: 0, source: 'button'})"
-                        @click.stop="punchToSubmitAttendance(makeCarcode(std), {message: 'কার্ডটি সফলভাবে পাঞ্চ হয়েছে।', source: 'manual_button', delay: 4000, source: 'button'})"
-                        >
-                            <!-- For Students Attendence -->
-                            Attendence
-                        </button>
-                        <button class="class-short-btn px-2 for-attendence" 
-                        @click.stop="showCalendarForAttendance = true"
-                        >
-                            <!-- For Students Attendence calendar-->
-                            <i class='bx bxs-calendar'></i> 
-                        </button>
+                        <div class="d-flex justify-content-between gap-0">
+                          <button class="class-short-btn px-2 for-attendence" 
+                          @auxclick.stop="punchToSubmitAttendance(makeCarcode(std), {source: 'manual_button', delay: 0})"
+                          @click.stop="punchToSubmitAttendance(makeCarcode(std), {source: 'manual_button', delay: 4000})"
+                          >
+                              <!-- For Students Attendence -->
+                              Attendence
+                          </button>
+                          <!-- For Students Attendence calendar-->
+                          <button class="class-short-btn px-2 for-attendence" @click.stop="targetStudent = std; $refs.dateTimePickerRef.toggle()" >
+                              <i class='bx bxs-calendar'></i> 
+                          </button>
+
+                        </div>
                       </template> 
                     </template> 
                     <template v-else>
@@ -767,6 +785,24 @@ const log = console.log
         </div>
       </modal>
      </template>
+
+
+     <EmDateTimePicker ref="dateTimePickerRef"
+        v-model="pickerModelValue"
+        @change="onChange_dateTimePicker"
+        @close="false"
+        :displayFormat="'DD MMM, Y'"
+        :rangePicker="false" 
+        :timePicker="true" 
+        :minDate="moment().subtract(1, 'month')"
+        :isDisabled="false"
+        :autoOpen="false"
+        :timePickerButtons="true"
+        :use24FormatTimeForEvents="true"
+        :invisible="true"
+        displayIn="modal" 
+        >
+    </EmDateTimePicker>
 
  
 

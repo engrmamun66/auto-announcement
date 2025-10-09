@@ -949,7 +949,7 @@ function punchToSubmitAttendance(barcode='play-417-2024', {
     delay=0,
     punch_time=moment(),
 }={} ){
-    setTimeout(() => __punchToSubmitAttendance(barcode, { message, source, device_index, date, remarks }), delay);
+    setTimeout(() => __punchToSubmitAttendance(barcode, { message, source, device_index, remarks, punch_time }), delay);
 }
 
 function __punchToSubmitAttendance(barcode='play-417-2024', { 
@@ -960,7 +960,11 @@ function __punchToSubmitAttendance(barcode='play-417-2024', {
     punch_time=moment(), // actually punch dateTime
 }={} ){
      try {
-          let punch__time = moment.isMoment(dateTime) ? dateTime : moment(new Date(dateTime))
+
+          let DATE_FORMAT = 'YYYY-MM-DD'
+          let TIME_FORMAT = 'HH:mm:ss'
+          
+          let punch__time = moment.isMoment(punch_time) ? punch_time : moment(new Date(punch_time))
           let date = moment(punch__time).format(DATE_FORMAT)
 
           if(barcode == 'i' || barcode == 'I'){
@@ -1007,9 +1011,6 @@ function __punchToSubmitAttendance(barcode='play-417-2024', {
                         return emitter.emit('toaster-success', {message: `${class_name} এর জন্য শিফট নির্ধারণ করা হয়নি`})
                         
                     } else {
-
-                        let DATE_FORMAT = 'YYYY-MM-DD'
-                        let TIME_FORMAT = 'HH:mm:ss'
 
                         let payload = {
                             // id: null,
