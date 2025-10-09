@@ -53,6 +53,7 @@
             <th>ID</th>
             <th>Name</th>
             <th>Class</th>  
+            <th>Date</th>  
             <th>Status</th>  
             <th>Shift</th>  
           </tr>
@@ -66,6 +67,7 @@
               <td> {{ item.id }} </td> 
               <td @auxclick.stop="log(item)"> {{ getStudent(item)?.name }} </td>                   
               <td> {{ getStudent(item)?.class }} </td>                   
+              <td style="width: 130px;"> <span class="inline">{{ item.date }}</span> </td>                   
               <td> 
                 <div style="width: 160px" class="d-flex justify-content-between">
                   <span class="badge text-white bg-secondary">
