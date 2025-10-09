@@ -138,4 +138,7 @@ onMounted(()=>{
 .page-link:focus {
     box-shadow: 0 0 0 0.25rem #21851400;;
 }
+.page-item a{
+    line-height: 18px;
+}
 </style>

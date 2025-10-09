@@ -1,36 +1,38 @@
 <template>
   <div>
-    <div v-if="pagiation_positon.startsWith('top')" class="d-flex" :class="[getPositionClass]">
-        <Pagination v-if="attendenceParams?.totalPages > 1" v-model="attendenceParams" @jumpToPage="(page_no) => {
-          callbacks.getAttendeceList({page_no})
-        }" ></Pagination>
+    
+    <div class="d-flex justify-content-start align-items-center gap-2">
+      <input ref="SearchBox" type="text" placeholder="Search by Name/ID" class="cb-input py-1 px-2 radius-5">
+        <BaseSelectMultiple placeholder="Select Class" v-model="attPayload.classes" :label="false" :data="filteredClasses" displayKey="class_name" valueKey="class_name" style="min-width: 250px" :search="true" :searchDelayTime="150" 
+          @searching="(search_text) => attPayload.searchText = search_text" >
+        </BaseSelectMultiple>
 
-        <div class="d-flex justify-content-start align-items-center gap-2 ms-2">
-          <input ref="SearchBox" type="text" placeholder="Search by Name/ID" class="cb-input py-1 px-2 radius-5">
-          <BaseSelectMultiple placeholder="Select Class" v-model="attPayload.classes" :label="false" :data="filteredClasses" displayKey="class_name" valueKey="class_name" style="min-width: 250px" :search="true" :searchDelayTime="150" 
-            @searching="(search_text) => attPayload.searchText = search_text" ></BaseSelectMultiple>
-            <EmDateTimePicker ref="dateRangePickerRef"
-              v-model="pickerModelValue"
-              @change="onChangeDateRangePicker"
-              @close="false"
-              :displayFormat="'DD MMM, Y'"
-              :rangePicker="true" 
-              :timePicker="false" 
-              :minDate="moment().subtract(1, 'month')"
-              :isDisabled="false"
-              :autoOpen="false"
-              :timePickerButtons="true"
-              :use24FormatTimeForEvents="true"
-              :invisible="false"
-              displayIn="bottom_right" 
-              :buttons="{applyBtn: 'Apply', todayBtn: false}"
-              style="width: 240px"
-              >
+        <div class="position-relative">
+          <EmDateTimePicker ref="dateRangePickerRef"
+            v-model="pickerModelValue"
+            @change="onChangeDateRangePicker"
+            @close="false"
+            :displayFormat="'DD MMM, Y'"
+            :rangePicker="true" 
+            :timePicker="false" 
+            :minDate="null"
+            :isDisabled="false"
+            :autoOpen="false"
+            :timePickerButtons="true"
+            :use24FormatTimeForEvents="true"
+            :invisible="false"
+            displayIn="bottom_right" 
+            :buttons="{applyBtn: 'Apply', todayBtn: true}"
+            style="width: 250px"
+            :useCustomRange="CONFIG?.date_range_list ?? true"
+            >
           </EmDateTimePicker>
-          <Btn cbinput="cbinput">Submit</Btn>
-          <Btn cbinput="cbinput" class="red">Clear</Btn>
+          <i  class='bx bxs-calendar-x' ></i>
         </div>
-    </div> 
+      <Btn cbinput="cbinput">Submit</Btn>
+      <Btn cbinput="cbinput" class="red">Clear</Btn>
+    </div>  
+    
     <myTable >
       <template #thead>
         <thead>
@@ -273,4 +275,13 @@ span[status]{
 li{
   margin-bottom: 6px;
 }
+.bxs-calendar-x{
+  position: absolute;
+  right: 5px;
+  top: 10px;
+  font-size: 20px;
+  cursor: pointer;
+  color: var(--primaryColor)
+}
+
 </style>

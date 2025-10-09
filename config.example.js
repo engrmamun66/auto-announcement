@@ -93,10 +93,20 @@ module.exports = {
                maximum_live_attedence: 50, 
                pagination: {
                     perpage: 20,
-                    pagiation_positon: 'top_left', // top_left | top_center | top_right ||| left_left | left_center | left_right
+                    pagiation_positon: 'bottom_center', // bottom_left | bottom_center | bottom_right
                } 
           },
      },
+     date_range_list: [
+          "This Week",
+          "Last Week",
+          // "Next Week",
+          "This Month",
+          "Last Month",
+          // "Next Month", 
+          "Last Year",
+          "Auto Months",
+     ],
      logo: {
           width: '200px',
           image_url: 'logo.example.jpeg',
