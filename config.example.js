@@ -92,7 +92,7 @@ module.exports = {
                late_consideration_minute: 5, 
                maximum_live_attedence: 50, 
                pagination: {
-                    perpage: 2,
+                    perpage: 20,
                     pagiation_positon: 'top_left', // top_left | top_center | top_right ||| left_left | left_center | left_right
                } 
           },
