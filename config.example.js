@@ -4,8 +4,8 @@ const port_number = 2323
 // shifts must be 24 hours format
 const SHIFTS = {
      first: {
-          start: '07:30',
-          end: '08:00', 
+          start: '08:30',
+          end: '10:00', 
      },
      second: {
           start: '14:30',
@@ -78,7 +78,7 @@ module.exports = {
                 * otherwise shift will be selected automatically 
                 */
               
-               strict_boundary_time: false, // true | false
+               strict_boundary_time: true, // true | false
                punch_separator_gap_in_seconds: 10,
                // ====================================================== //
                /**
