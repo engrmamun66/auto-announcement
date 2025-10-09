@@ -188,7 +188,7 @@ async function onClickClone(std){
     std._cloning = true
 
     if(!std.sound1){
-      emitter.emit('toaster-warning', {message: 'কপি করার আগে সাউন্ড রেকর্ড করুন'})
+      emitter.emit('toaster-warning', { message: 'কপি করার আগে সাউন্ড রেকর্ড করুন' })
       return
     }
 

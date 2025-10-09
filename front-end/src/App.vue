@@ -944,10 +944,10 @@ function punchToCallStudent(barcode='play-417-2024', { message='', source='devic
 function punchToSubmitAttendance(barcode='play-417-2024', { 
     message='', 
     source='device', 
-    date=moment().format('Y-MM-DD'), 
     device_index=0,
     remarks='',
     delay=0,
+    punch_time=moment(),
 }={} ){
     setTimeout(() => __punchToSubmitAttendance(barcode, { message, source, device_index, date, remarks }), delay);
 }
@@ -955,12 +955,13 @@ function punchToSubmitAttendance(barcode='play-417-2024', {
 function __punchToSubmitAttendance(barcode='play-417-2024', { 
     message='', 
     source='device', 
-    date=moment().format('Y-MM-DD'), 
     device_index=0,
-    remarks='', 
+    remarks='',
+    punch_time=moment(), // actually punch dateTime
 }={} ){
      try {
-          
+          let punch__time = moment.isMoment(dateTime) ? dateTime : new Date(dateTime)
+
           if(barcode == 'i' || barcode == 'I'){
                emergency_mode.value = !emergency_mode.value
                return
@@ -1012,7 +1013,7 @@ function __punchToSubmitAttendance(barcode='play-417-2024', {
                         let payload = {
                             // id: null,
                             student_id: student.dakhela,
-                            date: moment(date || new Date()).format(DATE_FORMAT),
+                            date: moment(punch__time).format(DATE_FORMAT),
                             in_time: null,
                             out_time: null,
                             late_in_minute: 0, 
@@ -1028,15 +1029,15 @@ function __punchToSubmitAttendance(barcode='play-417-2024', {
                         const max_permitte_entry = shifts?.length * 2
                         const late_consideration_minute = CONFIG.value?.settings?.attendance?.late_consideration_minute || 0
                         const punch_separator_gap_in_seconds = CONFIG.value?.settings?.attendance?.punch_separator_gap_in_seconds || 5
-                        const punch_not_allowed_message = "শিফটের বাহিরে উপস্থিতি গ্রহণযোগ্য নয়"
+                        const punch_not_allowed_message = "শিফটের বাহিরে উপস্থিতি গ্রহণযোগ্য নয়!"
 
 
                         if(!today_entries?.length){
 
                             // When no entry today, just create an entry
-                            payload.in_time = moment().format(TIME_FORMAT)
+                            payload.in_time = moment(punch__time).format(TIME_FORMAT)
                             
-                            let runningShift = getRunningShift(shifts) 
+                            let runningShift = getRunningShift(shifts, punch__time) 
                             if(!runningShift){
                                 emitter.emit('toaster-error', {message: punch_not_allowed_message})
                                 return
@@ -1044,7 +1045,7 @@ function __punchToSubmitAttendance(barcode='play-417-2024', {
                             
                             payload.shift_number = runningShift.shift_number
                             payload.shift_duration = `${runningShift.start} - ${runningShift.end}`
-                            payload.late_in_minute = moment().diff(runningShift.start_datetime, "minutes");
+                            payload.late_in_minute = moment(punch__time).diff(runningShift.start_datetime, "minutes");
                             
                             if(late_consideration_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_consideration_minute){
                                 payload.late_in_minute = 0
@@ -1052,12 +1053,12 @@ function __punchToSubmitAttendance(barcode='play-417-2024', {
                             if(payload.late_in_minute > 0) payload.status = 'Late'
                             payload.remarks = 'First In Today' 
                             addAttendance(payload)
-                            
+
                         } else {
                             let last_enty = today_entries.at(-1)
 
-                            let last_punch_time = moment().format(DATE_FORMAT) + ' ' + (last_enty.in_time || last_enty.out_time)
-                            let gap_seconds = moment(new Date()).diff(moment(last_punch_time), 'seconds')
+                            let last_punch_time = moment(punch__time).format(DATE_FORMAT) + ' ' + (last_enty.in_time || last_enty.out_time)
+                            let gap_seconds = moment(punch__time).diff(moment(last_punch_time), 'seconds')
                                 
 
 
@@ -1066,7 +1067,7 @@ function __punchToSubmitAttendance(barcode='play-417-2024', {
                                 payload = { ...payload, ...last_enty }
 
 
-                                let runningShift = getRunningShift(shifts)
+                                let runningShift = getRunningShift(shifts, punch__time)
                                 if(!runningShift){
                                     emitter.emit('toaster-error', {message: punch_not_allowed_message})
                                     return
@@ -1075,11 +1076,11 @@ function __punchToSubmitAttendance(barcode='play-417-2024', {
                                 payload.shift_number = runningShift.shift_number
                                 payload.shift_duration = `${runningShift.start} - ${runningShift.end}`
 
-                                payload.late_in_minute = moment().diff(runningShift.start_datetime, "minutes");
+                                payload.late_in_minute = moment(punch__time).diff(runningShift.start_datetime, "minutes");
                                 
 
                                 if(last_enty.in_time){
-                                    payload.in_time = moment().format(TIME_FORMAT)
+                                    payload.in_time = moment(punch__time).format(TIME_FORMAT)
 
                                     if(late_consideration_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_consideration_minute){
                                         payload.late_in_minute = 0
@@ -1091,7 +1092,7 @@ function __punchToSubmitAttendance(barcode='play-417-2024', {
                                     }
                                 }
                                 else if(last_enty.out_time){
-                                    payload.out_time = moment().format(TIME_FORMAT)
+                                    payload.out_time = moment(punch__time).format(TIME_FORMAT)
                                     payload.status = '' // no status
                                     payload.late_in_minute = 0
                                 }
@@ -1105,7 +1106,7 @@ function __punchToSubmitAttendance(barcode='play-417-2024', {
                                     // Create a new entry 
                                     // ==================
 
-                                    let runningShift = getRunningShift(shifts)
+                                    let runningShift = getRunningShift(shifts, punch__time)
                                     if(!runningShift){
                                         emitter.emit('toaster-error', {message: punch_not_allowed_message})
                                         return
@@ -1120,20 +1121,20 @@ function __punchToSubmitAttendance(barcode='play-417-2024', {
                                         return
                                     }
 
-                                    payload.late_in_minute = moment().diff(runningShift.start_datetime, "minutes");
+                                    payload.late_in_minute = moment(punch__time).diff(runningShift.start_datetime, "minutes");
 
 
                                     if(last_enty.in_time){ 
                                         // if last is in_time, now will be out_time
                                         payload.in_time = null
-                                        payload.out_time = moment().format(TIME_FORMAT)
+                                        payload.out_time = moment(punch__time).format(TIME_FORMAT)
                                         payload.remarks = 'Added Out Time' 
                                         payload.late_in_minute = 0
                                     }
                                     else if(last_enty.out_time){
                                         // if last is out_time, now will be in_time
                                         payload.out_time = null
-                                        payload.in_time = moment().format(TIME_FORMAT)
+                                        payload.in_time = moment(punch__time).format(TIME_FORMAT)
 
                                         if(late_consideration_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_consideration_minute){
                                             payload.late_in_minute = 0
@@ -1166,11 +1167,11 @@ function __punchToSubmitAttendance(barcode='play-417-2024', {
                         
                 
 
-                        function getRunningShift(shifts = []) {
+                        function getRunningShift(shifts = [], punch__time=moment()) {
                             let all_shifts = shifts.map((shift, shift_index) => {
                                 // use shift.start / shift.end instead of in_time/out_time
-                                let in_time = moment(moment().format("YYYY-MM-DD") + ' ' + shift.start, "YYYY-MM-DD HH:mm");
-                                let out_time = moment(moment().format("YYYY-MM-DD") + ' ' + shift.end, "YYYY-MM-DD HH:mm");
+                                let in_time = moment(moment(punch__time).format("YYYY-MM-DD") + ' ' + shift.start, "YYYY-MM-DD HH:mm");
+                                let out_time = moment(moment(punch__time).format("YYYY-MM-DD") + ' ' + shift.end, "YYYY-MM-DD HH:mm");
 
                                 // pick shift-specific boundary if defined
                             
@@ -1181,8 +1182,8 @@ function __punchToSubmitAttendance(barcode='play-417-2024', {
                                 let left_boundary = moment(in_time).subtract(time, unit);
                                 let right_boundary = moment(out_time).add(time2, unit2);
 
-                                let is_between = moment().isBetween(left_boundary, right_boundary); 
-                                let is_over_right_boundary = moment().isAfter(right_boundary);
+                                let is_between = moment(punch__time).isBetween(left_boundary, right_boundary); 
+                                let is_over_right_boundary = moment(punch__time).isAfter(right_boundary);
 
 
                                 return {
