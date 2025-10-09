@@ -14,8 +14,17 @@
                     </template>
                 <template v-else >
                     <button :tooltip="(modelValue?.length ? tooltip : '') || (disabled ? 'Disabled' : '')" ref="ref_button" :disabled="disabled" @click="()=>{
-                        if(!disabled) showOptions = !showOptions                    
+                        if(!disabled) showOptions = !showOptions;
+                        H.delay(() => { 
+                            if($refs.searchInput) $refs.searchInput.focus()
+                        }, 100)
                     }" class="form-control padding-as-input text-start cb-input">
+                        
+                        <span v-if="modelValue?.length" tooltip="Remove All Items" @click.stop="removeAllItems()" class="clearAllItem">
+                            <i class="bx bx-x" ></i>
+                        </span>
+
+
                         <div v-if="(modelValue?.length && typeof modelValue[0] != 'number')" class="selected-items">
                             <template v-for="(item, index) in modelValue" :key="index">
                                 <a v-if="item" :value="valueKey ? item[valueKey] : item" class="selected-item" :class="{'animation-showing': (!item?.removing), 'animation-removing': item?.removing}"
@@ -24,8 +33,8 @@
                                     <template v-if="higlight_ids?.length">
                                         <span v-if="higlight_ids?.includes(item[valueKey] || '-1')" class="bg-success rounded-5 mx-1" style="width:10px;height:10px;"></span>
                                     </template>
-                                    {{ (displayKey ? item[displayKey] : '') }} {{ (displayKey2 ? item[displayKey2] : '') }}  
-                                    <i @click.stop="$emit('removeItem', item);item.removing=true;H.delay(()=>removeValue(index, item), 390)" class="bx bx-x close ms-1" /> 
+                                    {{ (displayKey ? item[displayKey] : '') }} {{ (displayKey2 ? ('(' + item[displayKey2] + ')')  : '') }}  
+                                    <i @click.stop="removeSingleItem(item, index)" class="bx bx-x close ms-1" /> 
                                 </a>
                             </template>
                         </div>
@@ -40,7 +49,7 @@
                 <!-- <ul v-if="true" class="option-box py-2"  -->
                 <ul v-if="!disabled && (data?.length || search) && showOptions" class="option-box py-2" 
                 :class="{'--animate-show': (showOptions || search), '--animate-hide': (!showOptions && !search)}">
-                    <input v-if="search" :placeholder="placeholder2" type="search" class="form-control mb-2" v-model="searchText" @keyup="handleSearching" style="border-radius: 20px;height: 30px;" />
+                    <input v-if="search" :placeholder="placeholder2" ref="searchInput" type="search" class="form-control mb-2" v-model="searchText" @keyup="handleSearching" style="border-radius: 20px;height: 30px;" />
                     <template v-if="data?.length" >
                         <template v-for="(item, index) in (data || [])" :key="index" >                            
                             <li class="ps-2"
@@ -48,7 +57,7 @@
                             @click="item?.isDisabled ? false : updateValue($event, item[valueKey], item, index)" 
                             :class="{selected: modelValue?.map(i => i[valueKey])?.includes(item[valueKey]), 'grayscale pointer-events-none': item?.isDisabled}"> 
                                 <div class="px-1 d-flex justify-content-between">
-                                    <a> {{ (displayKey ? item[displayKey] : '') }} {{ (displayKey2 ? item[displayKey2] : '') }} </a>
+                                    <a> {{ (displayKey ? item[displayKey] : '') }} {{ (displayKey2 ? ('(' + item[displayKey2] + ')') : '') }} </a>
                                     <div class="px-1 d-flex justify-content-between">
                                         <slot name="loopItem" :item="item" :data="data"></slot>
                                     </div>
@@ -133,7 +142,7 @@ let props = defineProps({
     },
     displayKey2:{
         type: [Boolean, String], 
-        default:'',
+        default: false,
         required: false,
     },
     charLimit:{
@@ -212,13 +221,37 @@ let props = defineProps({
 })
 const searchText = ref(null);
 const showOptions = ref(false);
+const log = console.log
+
 
 const H = inject('helper')
+
+function onkeupEscape(event){
+    if(event.key == 'Escape'){
+        showOptions.value = false;
+        searchText.value = '';
+        myEmit('searching', '')
+    }
+}
+function removeSingleItem(item, index){
+    myEmit('removeItem', item);
+    item.removing=true;
+    H.delay(()=>removeValue(index, item), 390)
+}
+function removeAllItems(){
+    props.modelValue.forEach((item, index) => {
+        removeSingleItem(item, index)
+    })
+
+}
 
 watch(showOptions, (a, b) => {
     if(a === false){
         searchText.value = '';
         myEmit('searching', '')
+        document.removeEventListener('keyup', onkeupEscape)
+    } else {
+        document.addEventListener('keyup', onkeupEscape)
     }
 })
 
@@ -478,5 +511,22 @@ a.add-new-item{
     background-color: black;
     box-shadow: 0px 4px 8px #0000006e;
     cursor: pointer;
+}
+.clearAllItem{
+    position: absolute;
+    top: 8px;
+    right: 5px;
+    background-color: white;
+    padding: 1px;
+    border-radius: 4px;
+    cursor: pointer;
+    z-index: 11;
+    color: black;
+    height: 22px;
+    box-shadow: inset -1px -1px 2px #000000ad;
+    transition: all 0.2s ease;
+}
+.clearAllItem:hover{ 
+    box-shadow: 1px 3px 4px #00000059, inset -1px -1px 2px #000000ad;
 }
 </style>

@@ -2,9 +2,12 @@
   <div>
     
     <div class="d-flex justify-content-start align-items-center gap-2">
-      <input ref="SearchBox" type="text" placeholder="Search by Name/ID" class="cb-input py-1 px-2 radius-5">
-        <BaseSelectMultiple placeholder="Select Class" v-model="attPayload.classes" :label="false" :data="filteredClasses" displayKey="class_name" valueKey="class_name" style="min-width: 250px" :search="true" :searchDelayTime="150" 
-          @searching="(search_text) => attPayload.searchText = search_text" >
+        <BaseSelectMultiple placeholder="Select Classes" v-model="attPayload.classes" :label="false" :data="filteredClasses" displayKey="class_name" valueKey="class_name" :displayKey2="false" style="min-width: 250px" :search="true" :searchDelayTime="150" 
+          @searching="(search_text) => attPayload.classSearchText = search_text" >
+        </BaseSelectMultiple>
+
+        <BaseSelectMultiple placeholder="Select Students" v-model="attPayload.students" :label="false" :data="filteredAllStudents" displayKey="name" displayKey2="class_short" valueKey="id" style="min-width: 250px" :search="true" :searchDelayTime="150" 
+          @searching="(studentnameorid) => attPayload.studentnameorid = studentnameorid" >
         </BaseSelectMultiple>
 
         <div class="position-relative">
@@ -21,7 +24,7 @@
             :timePickerButtons="true"
             :use24FormatTimeForEvents="true"
             :invisible="false"
-            displayIn="bottom_right" 
+            displayIn="bottom_center" 
             :buttons="{applyBtn: 'Apply', todayBtn: true}"
             style="width: 250px"
             :useCustomRange="CONFIG?.date_range_list ?? true"
@@ -40,6 +43,7 @@
             <th>ID</th>
             <th>Name</th>
             <th>Class</th> 
+            <th>Shift</th> 
             <th>Shift</th> 
             <th>Action</th> 
           </tr>
@@ -96,7 +100,7 @@
 
 <script setup>
 import moment from 'moment/moment'
-import { inject, ref, reactive, onMounted, onBeforeUnmount, computed } from "vue";
+import { inject, ref, reactive, onMounted, onBeforeUnmount, computed, watch } from "vue";
 import Ahelper from "./attendacnceHelper";
 
 const CONFIG = inject("CONFIG");
@@ -111,6 +115,7 @@ import Pagination from '../../components/Pagination.vue'
 import BaseSelectMultiple from './../../components/BaseSelectMultiple.vue'
 import EmDateTimePicker from './../../components/EmDateTimePicker.vue'
 import Btn from './../../components/Btn.vue'
+import { all } from 'axios';
 
 const pagiation_positon = CONFIG.value?.settings?.attendance?.pagination?.pagiation_positon || 'bottom_center'
 
@@ -141,9 +146,17 @@ const getStudent = ({ student_id }) =>
 
 let attPayload = reactive({
   classes: [],
-  searchText: '',
-
+  students: [],
+  studentnameorid: '',
+  classSearchText: '',
 }) 
+
+watch(()=> attPayload.classes, (_classes) => {
+  if(_classes?.length === 0){
+    attPayload.students = []
+    attPayload.studentnameorid = ''
+  }
+},{deep: true})
 
 let dateRangePickerRef = ref(null)
 let pickerModelValue = reactive({
@@ -152,9 +165,30 @@ let pickerModelValue = reactive({
 })
 
 
+let filteredAllStudents = computed(() => {
+  let selected_class_shorts = attPayload.classes.map(cls => cls.class_short)
+
+  if(!attPayload.studentnameorid && !selected_class_shorts?.length) return all_students.value
+  
+  let selectedClassesStudents = all_students.value.filter(student => {
+    return selected_class_shorts.includes(student.class_short) || selected_class_shorts?.length === 0
+  })
+
+  let exactResult = selectedClassesStudents.filter(student => {
+
+    if(/\d+/.test(attPayload.studentnameorid)){
+      let id_matched = student.dakhela.toString().includes(attPayload.studentnameorid)
+      return (id_matched)
+    } else {
+      return student.name.toLowerCase().includes(attPayload.classSearchText.toLowerCase())
+    }
+  })
+
+  return exactResult
+})
 let filteredClasses = computed(() => {
-  if(!attPayload.searchText) return classes.value
-  let result = classes.value.filter(cls => cls.class_name.toLowerCase().includes(attPayload.searchText.toLowerCase()))
+  if(!attPayload.classSearchText) return classes.value
+  let result = classes.value.filter(cls => cls.class_name.toLowerCase().includes(attPayload.classSearchText.toLowerCase()))
   return result
 })
 
