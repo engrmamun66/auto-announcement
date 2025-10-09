@@ -34,7 +34,7 @@
 
                   <ul class="list-unstyled mb-2">
                       <li><strong>Class :</strong> <span class="ms-1">{{ getStudent(item)?.class || "Unknown" }}</span></li>
-                      <li :tooltip="(late_conderation_minute && item?.in_time) ? `${late_conderation_minute} minutes of consideration given.` : ''">
+                      <li :tooltip="(late_consideration_minute && item?.in_time) ? `${late_consideration_minute} minutes of consideration given.` : ''">
                           <strong>Status :</strong> 
                           <span status class="ms-1">{{ item?.in_time ? item?.status : 'Just-Out' }}</span>
                           <span v-if="item?.in_time && item?.late_in_minute" class="ms-1">{{ item?.late_in_minute > 0 ? `${item?.late_in_minute} min` : `before ${Math.abs(item?.late_in_minute)} min` }}</span>
@@ -91,7 +91,7 @@ const liveAttendenceList = inject("liveAttendenceList");
 
 let log = console.log
 
-const late_conderation_minute = CONFIG.value?.settings?.attendance?.late_conderation_minute || 0
+const late_consideration_minute = CONFIG.value?.settings?.attendance?.late_consideration_minute || 0
 let isMounted = ref(false)
 
 const getStudent = ({ student_id }) =>

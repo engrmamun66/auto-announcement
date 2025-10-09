@@ -1026,8 +1026,9 @@ function __punchToSubmitAttendance(barcode='play-417-2024', {
 
                         let today_entries = entires 
                         const max_permitte_entry = shifts?.length * 2
-                        const late_conderation_minute = CONFIG.value?.settings?.attendance?.late_conderation_minute || 0
+                        const late_consideration_minute = CONFIG.value?.settings?.attendance?.late_consideration_minute || 0
                         const punch_separator_gap_in_seconds = CONFIG.value?.settings?.attendance?.punch_separator_gap_in_seconds || 5
+                        const punch_not_allowed_message = "শিফটের বাহিরে উপস্থিতি গ্রহণযোগ্য নয়"
 
 
                         if(!today_entries?.length){
@@ -1036,18 +1037,22 @@ function __punchToSubmitAttendance(barcode='play-417-2024', {
                             payload.in_time = moment().format(TIME_FORMAT)
                             
                             let runningShift = getRunningShift(shifts) 
-
+                            if(!runningShift){
+                                emitter.emit('toaster-error', {message: punch_not_allowed_message})
+                                return
+                            }
                             
                             payload.shift_number = runningShift.shift_number
                             payload.shift_duration = `${runningShift.start} - ${runningShift.end}`
                             payload.late_in_minute = moment().diff(runningShift.start_datetime, "minutes");
                             
-                            if(late_conderation_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_conderation_minute){
+                            if(late_consideration_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_consideration_minute){
                                 payload.late_in_minute = 0
                             }
                             if(payload.late_in_minute > 0) payload.status = 'Late'
                             payload.remarks = 'First In Today' 
                             addAttendance(payload)
+                            
                         } else {
                             let last_enty = today_entries.at(-1)
 
@@ -1062,6 +1067,11 @@ function __punchToSubmitAttendance(barcode='play-417-2024', {
 
 
                                 let runningShift = getRunningShift(shifts)
+                                if(!runningShift){
+                                    emitter.emit('toaster-error', {message: punch_not_allowed_message})
+                                    return
+                                }
+
                                 payload.shift_number = runningShift.shift_number
                                 payload.shift_duration = `${runningShift.start} - ${runningShift.end}`
 
@@ -1071,7 +1081,7 @@ function __punchToSubmitAttendance(barcode='play-417-2024', {
                                 if(last_enty.in_time){
                                     payload.in_time = moment().format(TIME_FORMAT)
 
-                                    if(late_conderation_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_conderation_minute){
+                                    if(late_consideration_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_consideration_minute){
                                         payload.late_in_minute = 0
                                     }
 
@@ -1096,6 +1106,11 @@ function __punchToSubmitAttendance(barcode='play-417-2024', {
                                     // ==================
 
                                     let runningShift = getRunningShift(shifts)
+                                    if(!runningShift){
+                                        emitter.emit('toaster-error', {message: punch_not_allowed_message})
+                                        return
+                                    }
+
                                     payload.shift_number = runningShift.shift_number
                                     payload.shift_duration = `${runningShift.start} - ${runningShift.end}`
 
@@ -1120,7 +1135,7 @@ function __punchToSubmitAttendance(barcode='play-417-2024', {
                                         payload.out_time = null
                                         payload.in_time = moment().format(TIME_FORMAT)
 
-                                        if(late_conderation_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_conderation_minute){
+                                        if(late_consideration_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_consideration_minute){
                                             payload.late_in_minute = 0
                                         }
 
@@ -1158,27 +1173,37 @@ function __punchToSubmitAttendance(barcode='play-417-2024', {
                                 let out_time = moment(moment().format("YYYY-MM-DD") + ' ' + shift.end, "YYYY-MM-DD HH:mm");
 
                                 // pick shift-specific boundary if defined
-                                let [time, unit] = CONFIG.value.settings?.attendance?.boundary_time || [0, 'minutes'];
+                            
+                                let { start_before, end_after } = CONFIG.value.settings?.attendance?.boundary_time || { start_before: [30, 'minutes'], end_after: [30, 'minutes'] }
+                                let [time, unit] = start_before;
+                                let [time2, unit2] = end_after;
 
                                 let left_boundary = moment(in_time).subtract(time, unit);
-                                let right_boundary = moment(out_time).add(time, unit); 
+                                let right_boundary = moment(out_time).add(time2, unit2);
 
                                 let is_between = moment().isBetween(left_boundary, right_boundary); 
+                                let is_over_right_boundary = moment().isAfter(right_boundary);
+
 
                                 return {
-                                ...shift,
-                                start_datetime: in_time.format('YYYY-MM-DD HH:mm'),
-                                end_datetime: out_time.format('YYYY-MM-DD HH:mm'),
-                                is_between,
-                                shift_number: shift_index + 1,
+                                    ...shift,
+                                    start_datetime: in_time.format('YYYY-MM-DD HH:mm'),
+                                    end_datetime: out_time.format('YYYY-MM-DD HH:mm'),
+                                    is_between,
+                                    shift_number: shift_index + 1,
+                                    is_over_right_boundary,
                                 };
                             });
 
-                            let currentShift = all_shifts.reverse().find(s => s.is_between)
-                            if(!currentShift) currentShift = shifts[0]
-                            delete currentShift.is_between
+                            let currentShift = all_shifts.toReversed().find(s => s.is_between)
 
-                            // return the last matching shift
+                            const strict_boundary_time = CONFIG.value.settings?.attendance?.strict_boundary_time ?? false
+                            // if not strict mode, shift auto detect 
+                            if(strict_boundary_time === false && !currentShift){
+                                currentShift = all_shifts.toReversed().find(s => s.is_over_right_boundary)
+                                // if no shift is over, set first shift of day as current shift
+                                if(!currentShift) currentShift = all_shifts[0]
+                            }
                             return currentShift
                         }
 

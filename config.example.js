@@ -4,12 +4,12 @@ const port_number = 2323
 // shifts must be 24 hours format
 const SHIFTS = {
      first: {
-          start: '08:30', 
-          end: '12:20',
+          start: '07:30',
+          end: '08:00', 
      },
      second: {
           start: '14:30',
-          end: '15:20', 
+          end: '16:00', 
      },
 }
 
@@ -63,19 +63,33 @@ module.exports = {
           attendance: {
                status: true,
                only_attendance_feature: false,
-               // boundary_time: [30, 'minutes'], // using in getRunningShift() function
-               boundary_time: [30, 'minutes'], // using in getRunningShift() function,
+               /**
+                * using in getRunningShift() function
+                * example: if boundary_time = 30
+                * To fix boundary for a shift: (shift.start - 30min, shift.end + 30min)
+                */
+               boundary_time: { 
+                    start_before: [10, 'minutes'], 
+                    end_after: [15, 'minutes'] 
+               },  
+               /**
+                * if strict_boundary_time = true, 
+                * out of boundary time nobody can be submit attendance, 
+                * otherwise shift will be selected automatically 
+                */
+              
+               strict_boundary_time: false, // true | false
                punch_separator_gap_in_seconds: 10,
                // ====================================================== //
                /**
                 * [ It's only for shift start time ]
-                * If user come before over late_conderation_minute, late time will be 0 minute,
+                * If user come before over late_consideration_minute, late time will be 0 minute,
                 * example:
                 * =======================================
-                * When late_conderation_minute = 5
+                * When late_consideration_minute = 5
                 * shift start: 08:00, student come: 08:05
                 */
-               late_conderation_minute: 5, 
+               late_consideration_minute: 5, 
                maximum_live_attedence: 50, 
                pagination: {
                     perpage: 2,
