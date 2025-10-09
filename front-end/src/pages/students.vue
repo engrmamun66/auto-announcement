@@ -356,10 +356,6 @@ function onChange_dateTimePicker(data){
     <div class="d-flex justify-content-between align-items-center flex-wrap">
       <h1>{{ !addMode ? 'Students' : 'Add Student'}}</h1> 
 
-      <pre>
-        {{ pickerModelValue }}
-      </pre>
-      
       <div class="d-flex justify-content-end">
         <Btn @click="showSearchForm = !showSearchForm;editModeTabIndex=1" class="me-2"><i class='bx bx-search transformY-2px size-1' ></i> {{ showSearchForm ? "Hide" : 'Show' }} search</Btn>
         <Btn v-if="!addMode" class="me-2" @click="addMode = !addMode;editModeTabIndex=1;clearParams();payload.id = null" ><i class='bx bx-plus'></i> Add Student</Btn>
