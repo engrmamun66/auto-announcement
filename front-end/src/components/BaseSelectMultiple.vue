@@ -349,6 +349,7 @@ let random_id = computed(() => ('random_' + H.randomBetween(333, 294444)))
     flex-wrap: wrap;
     gap: 3px;
     column-gap: 5px;
+    font-size: 14px;
 }
 .btn-options-toggler button .selected-items .selected-item {
     display: flex;

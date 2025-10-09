@@ -1,7 +1,7 @@
 <template>
   <!-- Attendance Cards -->
    
-  <div class="mt-3">
+  <div class="mt-3 max-heigt-for-live-attendace">
     <template v-if="liveAttendenceList?.length">
         <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
             <template v-for="(item, i) in liveAttendenceList" :key="i">
@@ -205,5 +205,12 @@ span[status]{
 } 
 li{
   margin-bottom: 6px;
+}
+.max-heigt-for-live-attendace{
+    max-height: calc(100vh - 180px);
+    overflow-y: auto;
+    box-shadow: inset 5px 22px 44px #00000045;
+    padding: 15px;
+    border-radius: 20px;
 }
 </style>

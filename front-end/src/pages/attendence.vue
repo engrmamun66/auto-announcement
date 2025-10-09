@@ -4,6 +4,7 @@ import { onMounted, inject, ref, watch, computed, onBeforeUnmount, reactive } fr
 import AttendencesAll from './attendence-childs/AttendencesAll.vue'
 import RealtimeAttendences from './attendence-childs/RealtimeAttendences.vue'
 import BaseSelectMultiple from './../components/BaseSelectMultiple.vue'
+import EmDateTimePicker from './../components/EmDateTimePicker.vue'
 import Btn from './../components/Btn.vue'
  
 const route = inject('route');
@@ -19,25 +20,10 @@ const classes = inject('classes');
 const attendenceList = inject('attendenceList');
 const liveAttendenceList = inject('liveAttendenceList');
 
-let tab = ref(1) 
-let searchText = ref('') 
-let filterPayload = reactive({
-  classes: []
-}) 
-
-let filteredClasses = computed(() => {
-  if(!searchText.value) return classes.value
-  let result = classes.value.filter(cls => cls.class_name.toLowerCase().includes(searchText.value.toLowerCase()))
-  return result
+let tab = ref(Number(storage('attendance_tab').value || '1'))  
+watch(tab, (index) => {
+  storage('attendance_tab').value = index
 })
-
-
-
-function clearAllAndRelaod(){
-  if(!confirm('Clear-all and relaod?')) return
-  liveAttendenceList.value = []
-  window.location.reload()
-}
   
 
 
@@ -58,15 +44,7 @@ onMounted(()=>{
        </li>
        <li class="nav-item">
          <a @click.stop="tab = 2" class="nav-link cp text-black" :class="{'active': tab==2}" >Attendence&nbsp;History</a>
-       </li> 
-       <li class="nav-item">
-        <div class="d-flex justify-content-start align-items-center gap-2 ms-2">
-          <input ref="SearchBox" type="text" placeholder="Search by Name/ID" class="cb-input py-1 px-2 radius-5">
-          <BaseSelectMultiple placeholder="Select Class" v-model="filterPayload.classes" :label="false" :data="filteredClasses" displayKey="class_name" valueKey="class_name" style="min-width: 250px" :search="true" :searchDelayTime="150" 
-            @searching="(search_text) => searchText = search_text" ></BaseSelectMultiple>
-          <Btn cbinput="cbinput">Submit</Btn>
-        </div>
-       </li>  
+       </li>   
      </ul>
   
      <transition>

@@ -4,6 +4,31 @@
         <Pagination v-if="attendenceParams?.totalPages > 1" v-model="attendenceParams" @jumpToPage="(page_no) => {
           callbacks.getAttendeceList({page_no})
         }" ></Pagination>
+
+        <div class="d-flex justify-content-start align-items-center gap-2 ms-2">
+          <input ref="SearchBox" type="text" placeholder="Search by Name/ID" class="cb-input py-1 px-2 radius-5">
+          <BaseSelectMultiple placeholder="Select Class" v-model="attPayload.classes" :label="false" :data="filteredClasses" displayKey="class_name" valueKey="class_name" style="min-width: 250px" :search="true" :searchDelayTime="150" 
+            @searching="(search_text) => attPayload.searchText = search_text" ></BaseSelectMultiple>
+            <EmDateTimePicker ref="dateRangePickerRef"
+              v-model="pickerModelValue"
+              @change="onChangeDateRangePicker"
+              @close="false"
+              :displayFormat="'DD MMM, Y'"
+              :rangePicker="true" 
+              :timePicker="false" 
+              :minDate="moment().subtract(1, 'month')"
+              :isDisabled="false"
+              :autoOpen="false"
+              :timePickerButtons="true"
+              :use24FormatTimeForEvents="true"
+              :invisible="false"
+              displayIn="bottom_right" 
+              :buttons="{applyBtn: 'Apply', todayBtn: false}"
+              style="width: 240px"
+              >
+          </EmDateTimePicker>
+          <Btn cbinput="cbinput">Submit</Btn>
+        </div>
     </div> 
     <myTable >
       <template #thead>
@@ -67,7 +92,8 @@
 </template>
 
 <script setup>
-import { inject, ref, onMounted, onBeforeUnmount, computed } from "vue";
+import moment from 'moment/moment'
+import { inject, ref, reactive, onMounted, onBeforeUnmount, computed } from "vue";
 import Ahelper from "./attendacnceHelper";
 
 const CONFIG = inject("CONFIG");
@@ -79,6 +105,9 @@ const attendenceParams = inject("attendenceParams");
 const liveAttendenceList = inject("liveAttendenceList");
 import myTable from '../../components/myTable.vue'
 import Pagination from '../../components/Pagination.vue'
+import BaseSelectMultiple from './../../components/BaseSelectMultiple.vue'
+import EmDateTimePicker from './../../components/EmDateTimePicker.vue'
+import Btn from './../../components/Btn.vue'
 
 const pagiation_positon = CONFIG.value?.settings?.attendance?.pagination?.pagiation_positon || 'bottom_center'
 
@@ -103,6 +132,44 @@ let isMounted = ref(false)
 
 const getStudent = ({ student_id }) =>
   all_students.value.find((std) => std.dakhela == student_id);
+
+
+
+
+let attPayload = reactive({
+  classes: [],
+  searchText: '',
+
+}) 
+
+let dateRangePickerRef = ref(null)
+let pickerModelValue = reactive({
+  startDate: new Date(),
+  endDate: new Date(),
+})
+
+
+let filteredClasses = computed(() => {
+  if(!attPayload.searchText) return classes.value
+  let result = classes.value.filter(cls => cls.class_name.toLowerCase().includes(attPayload.searchText.toLowerCase()))
+  return result
+})
+
+
+
+function clearAllAndRelaod(){
+  if(!confirm('Clear-all and relaod?')) return
+  liveAttendenceList.value = []
+  window.location.reload()
+}
+
+
+function onChangeDateRangePicker(){
+  let params = {
+
+  }
+  console.log();
+}
 
 
 onMounted(()=>{

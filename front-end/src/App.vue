@@ -25,6 +25,15 @@ let route = useRoute();
 let router = useRouter();  
 let CONFIG = ref(storage('CONFIG').value || {});  
 
+watch(
+  () => route.fullPath,
+    (newPath, oldPath) => { 
+        if(newPath !== '/attendence'){
+            storage('attendance_tab').value = 1
+        } 
+    }
+)
+
 let internet = ref(true) 
 /**
  * When internet is not connected, 
