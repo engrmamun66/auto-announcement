@@ -963,7 +963,7 @@ function __punchToSubmitAttendance(barcode='play-417-2024', {
 
           let DATE_FORMAT = 'YYYY-MM-DD'
           let TIME_FORMAT = 'HH:mm:ss'
-          
+
           let punch__time = moment.isMoment(punch_time) ? punch_time : moment(new Date(punch_time))
           let date = moment(punch__time).format(DATE_FORMAT)
 
@@ -1006,7 +1006,7 @@ function __punchToSubmitAttendance(barcode='play-417-2024', {
 
 
                     
-                    let shifts = classes.value.find(cls => cls.class_short == class_short)?.shifts;
+                    let shifts = helper.getShifts(classes.value, class_short, false)
                     if (!shifts?.length) {
                         return emitter.emit('toaster-success', {message: `${class_name} এর জন্য শিফট নির্ধারণ করা হয়নি`})
                         
@@ -1031,7 +1031,8 @@ function __punchToSubmitAttendance(barcode='play-417-2024', {
                         const max_permitte_entry = shifts?.length * 2
                         const late_consideration_minute = CONFIG.value?.settings?.attendance?.late_consideration_minute || 0
                         const punch_separator_gap_in_seconds = CONFIG.value?.settings?.attendance?.punch_separator_gap_in_seconds || 5
-                        const punch_not_allowed_message = "শিফটের বাহিরে উপস্থিতি গ্রহণযোগ্য নয়!"
+                        let ___concatedShifts = helper.getShifts(classes.value, class_short, true)
+                        const punch_not_allowed_message = `শিফটের বাহিরে উপস্থিতি গ্রহণযোগ্য নয়! (${___concatedShifts})`
 
 
                         if(!today_entries?.length){

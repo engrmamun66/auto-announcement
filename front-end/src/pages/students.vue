@@ -677,6 +677,7 @@ function onChange_dateTimePicker(data){
                         </button>
                       </template> 
                       <template v-else>
+
                         <div class="d-flex justify-content-between gap-0">
                           <button class="class-short-btn px-2 for-attendence" 
                           @auxclick.stop="punchToSubmitAttendance(makeCarcode(std), {source: 'manual_button', delay: 0})"
@@ -696,6 +697,7 @@ function onChange_dateTimePicker(data){
                           </button>
 
                         </div>
+                        {{ helper.getShifts(classes, std.class_short, true) }}
                       </template> 
                     </template> 
                     <template v-else>

@@ -221,7 +221,15 @@ const helper = {
       }
       return dateText
 
-    }
+    },
+    getShifts: function(classes, class_short, as_message){
+      let shifts = classes.find(cls => cls.class_short == class_short)?.shifts
+      if(as_message){
+        return shifts.map(s => s.start + ' - ' + s.end).join(', ')
+      } else {
+        return shifts
+      }
+    },
      
 }
 
