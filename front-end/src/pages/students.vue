@@ -656,18 +656,28 @@ const log = console.log
 
                   <td>
                     <template v-if="CONFIG?.settings?.attendance?.status">
-                      <button v-if="std.name.indexOf('Copied') > -1" class="class-short-btn px-2 for-call" 
+                      <template v-if="std.name.indexOf('Copied') > -1">
+                        <button class="class-short-btn px-2 for-call" 
                         @click.stop="punchToCallStudent(makeCarcode(std), {message: 'কার্ডটি সফলভাবে পাঞ্চ হয়েছে।', source: 'manual_button', for_attendence: false})">
                           <!-- For Guardian -->
                           Call&nbsp;Punch
                         </button>
-                      <button v-else class="class-short-btn px-2 for-attendence" 
-                      @auxclick.stop="punchToSubmitAttendance(makeCarcode(std), {message: 'কার্ডটি সফলভাবে পাঞ্চ হয়েছে।', source: 'manual_button', delay: 0, source: 'button'})"
-                      @click.stop="punchToSubmitAttendance(makeCarcode(std), {message: 'কার্ডটি সফলভাবে পাঞ্চ হয়েছে।', source: 'manual_button', delay: 4000, source: 'button'})"
-                      >
-                          <!-- For Students Attendence -->
-                          Attendence
-                      </button>
+                      </template> 
+                      <template v-else>
+                        <button class="class-short-btn px-2 for-attendence" 
+                        @auxclick.stop="punchToSubmitAttendance(makeCarcode(std), {message: 'কার্ডটি সফলভাবে পাঞ্চ হয়েছে।', source: 'manual_button', delay: 0, source: 'button'})"
+                        @click.stop="punchToSubmitAttendance(makeCarcode(std), {message: 'কার্ডটি সফলভাবে পাঞ্চ হয়েছে।', source: 'manual_button', delay: 4000, source: 'button'})"
+                        >
+                            <!-- For Students Attendence -->
+                            Attendence
+                        </button>
+                        <button class="class-short-btn px-2 for-attendence" 
+                        @click.stop="showCalendarForAttendance = true"
+                        >
+                            <!-- For Students Attendence calendar-->
+                            <i class='bx bxs-calendar'></i> 
+                        </button>
+                      </template> 
                     </template> 
                     <template v-else>
                       <button class="class-short-btn px-2" @click.stop="punchToCallStudent(makeCarcode(std), {message: 'কার্ডটি সফলভাবে পাঞ্চ হয়েছে।', source: 'manual_button'})">

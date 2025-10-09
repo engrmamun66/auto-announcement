@@ -98,7 +98,7 @@ onMounted(()=>{
 <template>
     <div v-if="totalPage > 1" class="d-flex justify-content-center" v-bind="$attrs">
         <nav aria-label="Page navigation">
-            <ul class="pagination retnmy-pagination">
+            <ul class="pagination">
                 <li class="page-item cp" :class="{'disabled': current_page == 1}" @click="current_page == 1 ? false : goToPage(parseInt(current_page) - 1)" :disabled="current_page == 1">
                     <a class="page-link cp" aria-label="Previous">
                         <span>&laquo;</span>

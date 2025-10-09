@@ -3,7 +3,7 @@ export function send_css_in_header(minified_css){
         var head = document.getElementsByTagName('head')[0];
         var s = document.createElement('style');
         s.setAttribute('type', 'text/css');
-        s.setAttribute('rentmy-cdn-css', true);
+        s.setAttribute('calling-bird-cdn-css', true);
         if (s.styleSheet) {   // IE
             s.styleSheet.cssText = minified_css;
         } else {                // the world
