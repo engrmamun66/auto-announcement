@@ -505,7 +505,7 @@ function onChange_dateTimePicker(data){
             <div class="col-md-3 col-12">
               <div class="form-group">
                 <label for="email">Class</label>
-                <select v-model="params.class_name" class="form-control" id="ClassId">
+                <select v-model="params.class_name" class="form-control cb-input" id="ClassId">
                   <option :value="null">-class-</option>
                   <template v-for="(cls, index) in classes" :key="index">
                     <option :value="cls.class_name">{{cls.class_name}}</option>
@@ -526,25 +526,25 @@ function onChange_dateTimePicker(data){
                     }" >
                   </span>
                 </label>
-                <input v-model="params.dakhela" type="number" class="form-control">
+                <input v-model="params.dakhela" type="number" class="form-control cb-input">
               </div> 
             </div>
             <!-- <div class="col-md-2 col-12">
               <div class="form-group">
                 <label for="email">Card</label>
-                <input v-model="params.card_no" type="text" class="form-control">
+                <input v-model="params.card_no" type="text" class="form-control cb-input">
               </div>
             </div> -->
             <div class="col-md-3 col-12">
               <div class="form-group">
                 <label for="name">Name</label>
-                <input v-model="params.name" type="text" class="form-control">
+                <input v-model="params.name" type="text" class="form-control cb-input">
               </div>
             </div>
             <div class="col-md-3 col-12">
               <div class="form-group">
                 <label for="email">Media</label>
-                <select v-model="params.sound1" class="form-control">
+                <select v-model="params.sound1" class="form-control cb-input">
                   <option :value="null">-All-</option>
                   <option value="no_sound">No Sound</option> 
                   <option value="has_sound">Has Sound</option> 
