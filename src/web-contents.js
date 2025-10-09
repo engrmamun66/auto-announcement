@@ -17,7 +17,7 @@ module.exports = `
     </script>
     <link rel="stylesheet" href="/dist/assets/my-announcement.min.css">
     <script src="/dist/assets/my-announcement.min.js"></script>
-    <script src="./../em-datetimepicker.min.js"></script>
+    <script src="./../em-datetimepicker.min.js" async="true" defer="true"></script>
     <!-- CSS_VARS -->
 </head>
 

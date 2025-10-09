@@ -19,6 +19,10 @@ const Ahelper = {
         return moment(dateTime).format('hh:mm:ss A')
     },
     printShift(times_text){
+        if(typeof times_text == 'object' && times_text?.start && times_text?.end){
+            times_text = times_text?.start + ' - ' + times_text?.end
+        }
+
         let [ startTime, endTime ] = times_text.split(' - ')
         if(startTime && endTime){
             return `${moment(moment().format('Y-MM-DD ') + startTime).format('hh:mm A')} - ${moment(moment().format('Y-MM-DD ') + endTime).format('hh:mm A')}`

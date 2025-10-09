@@ -16,6 +16,7 @@ import AudioRecorAndUpload from '../components/AudioRecorAndUpload.vue'
 import RecoringAnimation from '../components/RecoringAnimation.vue'
 import Tabset from '../components/Tabset.vue'
 import EmDateTimePicker from '../components/EmDateTimePicker.vue'
+import Ahelper from './../pages/attendence-childs/attendacnceHelper'
 
 
 const route = inject('route');
@@ -678,7 +679,7 @@ function onChange_dateTimePicker(data){
                       </template> 
                       <template v-else>
 
-                        <div class="d-flex justify-content-between gap-0">
+                        <div class="d-flex justify-content-start gap-1">
                           <button class="class-short-btn px-2 for-attendence" 
                           @auxclick.stop="punchToSubmitAttendance(makeCarcode(std), {source: 'manual_button', delay: 0})"
                           @click.stop="punchToSubmitAttendance(makeCarcode(std), {source: 'manual_button', delay: 4000})"
@@ -697,7 +698,11 @@ function onChange_dateTimePicker(data){
                           </button>
 
                         </div>
-                        {{ helper.getShifts(classes, std.class_short, true) }}
+                        <ul>
+                          <li v-for="shift in helper.getShifts(classes, std.class_short, false)">
+                            {{ Ahelper.printShift(shift) }}
+                          </li>
+                        </ul>
                       </template> 
                     </template> 
                     <template v-else>
@@ -708,16 +713,17 @@ function onChange_dateTimePicker(data){
                   </td>
                   <td> 
                     <div class="d-flex justify-content-center action-icons">
-                      <i @click.stop="targetStdForBarcode=std" class='bx bx-barcode cp size-1p5' ></i>
+                      <!-- <i @click.stop="targetStdForBarcode=std" class='bx bx-barcode cp size-1p5' ></i> -->
                       
-                      <span tooltip="Copy barcode">
+                      <!-- <span tooltip="Copy barcode">
                         <i @click="({target}) => helper.copyToClipboard(makeCarcode(std), {el: target.parentElement})" class='bx bxs-copy-alt cp px-1' style="font-size: 18px" ></i>
-                      </span>
+                      </span> -->
                      
-
-                      <span tooltip="Delete student">
-                       <i @click="deleteStudent(std.id, i)" class='bx bx-trash text-danger cp' ></i>
-                      </span>
+                      <ul>
+                        <li tooltip="Delete student">
+                          <i @click="deleteStudent(std.id, i)" class='bx bx-trash text-danger cp' ></i>
+                        </li>
+                      </ul>
           
                     </div>
                   </td> 
