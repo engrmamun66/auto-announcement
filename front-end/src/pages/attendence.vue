@@ -49,10 +49,10 @@ onMounted(()=>{
       </ul>
       <div v-if="tab==1">
         <div class="d-flex justify-content-center align-items-center gap-2">
-            <Btn class="white">In: {{ Ahelper.count.in(liveAttendenceList) }}</Btn>
-            <Btn class="white">Out: {{ Ahelper.count.out(liveAttendenceList) }}</Btn>
-            <Btn class="white">Late: {{ Ahelper.count.late(liveAttendenceList) }}</Btn>
-            <Btn class="white">Total: {{ liveAttendenceList?.length }}</Btn>
+            <Btn class="white">In: <span class="badge text-white bg-secondary">{{ Ahelper.count.in(liveAttendenceList) }}</span></Btn>
+            <Btn class="white">Out: <span class="badge text-white bg-warning">{{ Ahelper.count.out(liveAttendenceList) }}</span></Btn>
+            <Btn class="white">Late: <span class="badge text-white bg-danger">{{ Ahelper.count.late(liveAttendenceList) }}</span></Btn>
+            <Btn class="white">Total: <span class="badge text-white bg-success">{{ liveAttendenceList?.length }}</span></Btn>
         </div>
       </div>   
 

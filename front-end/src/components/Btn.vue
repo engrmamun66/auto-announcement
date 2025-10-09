@@ -46,7 +46,9 @@ button.red{
   background: #e25e16;
   background-color: #e25e16;
 }
-button.white{
+button.white,
+button.white:active
+{
   color: var(--primaryColor);
   background: #ffffff;
   background-color: #ffffff;
