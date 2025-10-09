@@ -52,10 +52,9 @@
           <tr> 
             <th>ID</th>
             <th>Name</th>
-            <th>Class</th> 
-            <th>Shift</th> 
-            <th>Shift</th> 
-            <th>Action</th> 
+            <th>Class</th>  
+            <th>Status</th>  
+            <th>Shift</th>  
           </tr>
         </thead>
       </template>
@@ -65,10 +64,35 @@
             <tr>
                 
               <td> {{ item.id }} </td> 
-              <td> {{ getStudent(item)?.name }} </td>                   
+              <td @auxclick.stop="log(item)"> {{ getStudent(item)?.name }} </td>                   
               <td> {{ getStudent(item)?.class }} </td>                   
-              <td> {{ Ahelper.printShift(item?.shift_duration) }} </td>                   
               <td> 
+                <div style="width: 160px" class="d-flex justify-content-between">
+                  <span class="badge text-white bg-secondary">
+                    {{ item.in_time ? 'IN' : 'OUT' }}
+                  </span> 
+                  <template v-if="item.status == 'Late'" >
+                    <span class="badge text-white bg-danger">
+                      {{ item.status }}
+                    </span> 
+                    <span class="badge text-white bg-danger">
+                      {{ item?.late_in_minute || 0 }} {{ helper.wordForm('minute', item?.late_in_minute ) }}
+                    </span> 
+                  </template>
+
+                  <template v-else>
+                    <span class="badge text-white bg-success">
+                      {{ item.status }}
+                    </span> 
+                    <span class="badge text-white bg-success">
+                      {{ item?.late_in_minute || 0 }} {{ helper.wordForm('minute', item?.late_in_minute ) }}
+                    </span> 
+                  </template>
+                </div>
+              </td>                   
+              <td>{{ Ahelper.printShift(item?.shift_duration) }}</td> 
+                              
+              <!-- <td> 
                 <div class="d-flex justify-content-center action-icons">
                     <i  class='bx bx-barcode cp size-1p5' ></i>
                     
@@ -82,7 +106,7 @@
                     </span>
         
                   </div>  
-              </td>                   
+              </td>                    -->
                                
         
               
