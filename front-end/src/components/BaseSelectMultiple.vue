@@ -1,7 +1,7 @@
 <template>
     <div v-bind="$attrs" @mouseleave="showOptions = false">
         <div :class="{'form-group': useFormGroup}">
-            <div class="btn-options-toggler" :style="(width ? ('width:' + width) : '')">
+            <div class="btn-options-toggler  px-0" :style="(width ? ('width:' + width) : '')">
                 <label v-if="label"> {{ label }} </label>
                 <template v-if="showEffect" >
                     <!-- <ShimmerEffect 
@@ -15,7 +15,7 @@
                 <template v-else >
                     <button :tooltip="(modelValue?.length ? tooltip : '') || (disabled ? 'Disabled' : '')" ref="ref_button" :disabled="disabled" @click="()=>{
                         if(!disabled) showOptions = !showOptions                    
-                    }" class="form-control padding-as-input text-start">
+                    }" class="form-control padding-as-input text-start cb-input">
                         <div v-if="(modelValue?.length && typeof modelValue[0] != 'number')" class="selected-items">
                             <template v-for="(item, index) in modelValue" :key="index">
                                 <a v-if="item" :value="valueKey ? item[valueKey] : item" class="selected-item" :class="{'animation-showing': (!item?.removing), 'animation-removing': item?.removing}"
@@ -337,13 +337,17 @@ let random_id = computed(() => ('random_' + H.randomBetween(333, 294444)))
 }
 .btn-options-toggler button {
     position: relative;
-    min-height: 40px;
+    min-height: 38px;
     height: auto;
     width: 100% !important;
     padding-right: 25px;
 }
 .btn-options-toggler button .selected-items {
-    float: left;
+    padding: 5px 0px;
+    display: flex;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 3px;
 }
 .btn-options-toggler button .selected-items .selected-item {
     display: flex;
@@ -351,11 +355,11 @@ let random_id = computed(() => ('random_' + H.randomBetween(333, 294444)))
     align-items: center;
     border: none;
     background-color: var(--border-dark);
-    background-color: #d5fdd7;
-    padding: 0px 3px !important;
+    background-color: #188778;
+    padding: 0 3px 0 8px!important;
     position: relative;
-    color: #414141;
-    margin-right: 0.5rem;
+    color: #ffffff;
+    margin-right: .5rem;
     margin-bottom: 2px;
     border-radius: 3px;
     text-decoration: none;
@@ -403,14 +407,14 @@ let random_id = computed(() => ('random_' + H.randomBetween(333, 294444)))
     width: 100%;
     margin: 0;
     border-radius: 0;
-    background-color: #e4dbdb;
+    background-color: #0c82948a;
 }
 .btn-options-toggler .option-box li.selected {
     width: 100%;
     margin: 0;
     border-radius: 0;
     background-color: #cdcdcd;
-    background: var(--borderColor);
+    background: #048473;
 }
 .btn-options-toggler .option-box li a,
 .btn-options-toggler .option-box li i,
@@ -421,6 +425,10 @@ let random_id = computed(() => ('random_' + H.randomBetween(333, 294444)))
     background-color: transparent;
     cursor: pointer;
     font-size: 14px;
+}
+
+.btn-options-toggler .option-box li.selected a {
+    color: white;
 }
 .animation-showing {
     animation-name: frame-showing;

@@ -829,7 +829,7 @@ function onChange_dateTimePicker(data){
   width: 600px;
   padding: 20px;
   border: 1px solid rgba(255, 255, 255, 0.545);
-  margin-top: 100px;
+  margin-top: 70px;
   border-radius: 10px;
   background: var(--grad2);
   box-shadow: 0px 43px 50px #00000061;

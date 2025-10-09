@@ -10,6 +10,7 @@ import moment from 'moment/moment'
 import Playlist from './components/Playlist.vue'
 import accessCheckAnimation from './components/accessCheckAnimation.vue'
 import Lockscreen from './components/Lockscreen.vue'
+import DevicesPreloader from './components/DevicesPreloader.vue'
 
 const socketInit = inject('socketInit');
 
@@ -1289,6 +1290,7 @@ function __punchToSubmitAttendance(barcode='play-417-2024', {
             </div>
         </template>
     </template>
+    <!-- <DevicesPreloader></DevicesPreloader> -->
 
     
 </template>

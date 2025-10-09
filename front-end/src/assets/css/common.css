@@ -343,7 +343,7 @@ audio{
 }
 
 input::placeholder{
-    color: #6e968cb2 !important;
+    color: #818181 !important;
 
 }
 
@@ -367,6 +367,7 @@ input[type="checkbox"]{
   }
   ::-webkit-scrollbar-thumb {
     background: var(--primaryColor);
+    background: #e2e2e2;
     border: 0px none #ffffff;
     border-radius: 0px;
   }
@@ -483,12 +484,17 @@ kbd {
     border-bottom: unset !important;
 }
 
-.cb-text-input{
+.cb-input,
+.cb-input:focus,
+.cb-input:active,
+.cb-input:focus-visible
+{
     border: 1px solid #ffffff61;
     height: 38px;
-    border-radius: 30px;
-    margin-left: 20px;
-    padding: 2px 20px !important;
+    border-radius: 4px;
+    padding: 2px 10px;
     background: #f0f0f0;
     box-shadow: 1px 1px 2px #0000006e, inset 1px 1px 2px #0000006e;
-  }
+} 
+
+ 

@@ -189,7 +189,7 @@ function deleteSchedule(id, i, type=1){
               <div class="col-12">
                 <div class="form-group">
                   <label for="name">Type</label>
-                  <select v-model="payload.type" class="form-control">
+                  <select v-model="payload.type" class="form-control cb-input">
                     <option value="1">Punch</option>
                     <option value="2">Call</option>
                   </select>
@@ -199,7 +199,7 @@ function deleteSchedule(id, i, type=1){
               <div class="col-12">
                 <div class="form-group">
                   <label for="name">Title</label>
-                  <input v-model="payload.title" type="text" class="form-control">
+                  <input v-model="payload.title" type="text" class="form-control cb-input">
                 </div>
               </div>
               
@@ -217,14 +217,14 @@ function deleteSchedule(id, i, type=1){
               <div class="col-6">
                 <div class="form-group">
                   <label for="name">Start</label>
-                  <input v-model="payload.start_time" type="time" class="form-control">
+                  <input v-model="payload.start_time" type="time" class="form-control cb-input">
                 </div>
               </div>
 
               <div class="col-6">
                 <div class="form-group">
                   <label for="name">End</label>
-                  <input v-model="payload.end_time" type="time" class="form-control">
+                  <input v-model="payload.end_time" type="time" class="form-control cb-input">
                 </div>
               </div>
 

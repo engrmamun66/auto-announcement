@@ -134,10 +134,11 @@ let emergency_mode = inject('emergency_mode')
 }
 
 .preloader-scan li {
-    width: 2px;
-    height: 34px;
-    background-color: #444444;
-    margin-right: 2px;
+  width: 2px;
+  height: 34px;
+  background-color: #ffffff;
+  margin-right: 2px;
+  box-shadow: 1px 1px 0px #00000054;
 }
 
 .preloader-scan .diode {

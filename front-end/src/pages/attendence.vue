@@ -1,8 +1,9 @@
 <script setup>
 import moment from 'moment/moment'
-import { onMounted, inject, ref, watch, computed, onBeforeUnmount } from 'vue';
+import { onMounted, inject, ref, watch, computed, onBeforeUnmount, reactive } from 'vue';
 import AttendencesAll from './attendence-childs/AttendencesAll.vue'
 import RealtimeAttendences from './attendence-childs/RealtimeAttendences.vue'
+import BaseSelectMultiple from './../components/BaseSelectMultiple.vue'
  
 const route = inject('route');
 const router = inject('router');
@@ -18,6 +19,9 @@ const attendenceList = inject('attendenceList');
 const liveAttendenceList = inject('liveAttendenceList');
 
 let tab = ref(1) 
+let filterPayload = reactive({
+  classes: []
+}) 
 
 
 function clearAllAndRelaod(){
@@ -47,7 +51,10 @@ onMounted(()=>{
          <a @click.stop="tab = 2" class="nav-link cp text-black" :class="{'active': tab==2}" >Attendence&nbsp;History</a>
        </li> 
        <li class="nav-item">
-        <input ref="SearchBox" type="text" placeholder="Search by Name/ID" class="cb-text-input py-1 px-2 radius-5">
+        <input ref="SearchBox" type="text" placeholder="Search by Name/ID" class="cb-input py-1 px-2 radius-5">
+       </li> 
+       <li class="nav-item ms-1">
+        <BaseSelectMultiple v-model="filterPayload.classes" :label="false" :data="classes" displayKey="class_name" valueKey="class_name" style="width: 200px" ></BaseSelectMultiple>
        </li> 
      </ul>
   
