@@ -209,7 +209,7 @@ function deleteSchedule(id, i, type=1){
                     <button class="btn btn-sm bg-success text-white p-0 px-2 mb-1 me-1" @click.stop="payload.classes = helper.clone(classes)" >All</button>  
                     <button class="btn btn-sm bg-danger text-white p-0 px-2 mb-1" @click.stop="payload.classes = []" >Clear</button>  
                   </label>
-                  <BaseSelectMultiple v-model="payload.classes" :label="false" :data="classes" displayKey="class_name" valueKey="class_name" ></BaseSelectMultiple>
+                  <BaseSelectMultiple placeholder="Select Class" v-model="payload.classes" :label="false" :data="classes" displayKey="class_name" valueKey="class_name" ></BaseSelectMultiple>
                 </div>
               </div>
 

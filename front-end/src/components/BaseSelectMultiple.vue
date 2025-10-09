@@ -29,7 +29,7 @@
                                 </a>
                             </template>
                         </div>
-                        <p v-else class="fw-500 text-white-50" > {{ placeholder }} </p>
+                        <p v-else class="fw-500 m-0 text-black-50" > {{ placeholder }} </p>
                         <i class="bx bxs-chevron-down" style="position:absolute;right:8px;top:15px;font-size: 12px" />
                     </button>
                 </template>

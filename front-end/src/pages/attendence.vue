@@ -53,9 +53,9 @@ onMounted(()=>{
        </li> 
        <li class="nav-item">
 
-        <div class="d-flex justify-content-start align-items-center gap-1">
+        <div class="d-flex justify-content-start align-items-center gap-2 ms-2">
           <input ref="SearchBox" type="text" placeholder="Search by Name/ID" class="cb-input py-1 px-2 radius-5">
-          <BaseSelectMultiple v-model="filterPayload.classes" :label="false" :data="classes" displayKey="class_name" valueKey="class_name" style="min-width: 250px" ></BaseSelectMultiple>
+          <BaseSelectMultiple placeholder="Select Class" v-model="filterPayload.classes" :label="false" :data="classes" displayKey="class_name" valueKey="class_name" style="min-width: 250px" ></BaseSelectMultiple>
           <Btn cbinput="cbinput">Submit</Btn>
         </div>
        </li>  
