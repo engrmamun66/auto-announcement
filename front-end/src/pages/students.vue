@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, inject, ref, reactive } from 'vue';
+import { onMounted, inject, ref, reactive, watch } from 'vue';
 import moment from 'moment/moment'
 import { useRouter, useRoute } from 'vue-router';
 import Note from '../components/note.vue'
@@ -55,6 +55,28 @@ let targetStd = ref(null)
 let columnName = ref('sound1')
 let targetStdForBarcode = ref(null)
 let editModeTabIndex = ref(1)
+
+function hide_modals(event){
+  if (event.key === 'Escape') { 
+    targetStd.value = null
+    addMode.value = false
+  }
+}
+watch(addMode, (bool) => {
+  if(bool){
+    console.log('asdfasdf=');
+    document.addEventListener('keyup', hide_modals)
+  }else {
+    document.removeEventListener('keyup', hide_modals)
+  }
+})
+watch(targetStd, (_targetStd) => {
+  if(_targetStd){
+    document.addEventListener('keyup', hide_modals)
+  }else {
+    document.removeEventListener('keyup', hide_modals)
+  }
+})
 // let filterForm
 
 async function getStudents({id=null}={}){
