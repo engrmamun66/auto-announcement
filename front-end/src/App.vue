@@ -679,8 +679,7 @@ onMounted(async ()=>{
         
     
     await getAllStudents()
-    await getSchedules()
-    callbacks.getAttendeceList()
+    await getSchedules() 
 
     await getConfig()
 

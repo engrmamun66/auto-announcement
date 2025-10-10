@@ -2,6 +2,10 @@
 import moment from 'moment/moment'
 import { inject, ref, reactive, onMounted, onBeforeUnmount, computed, watch } from "vue";
 import Ahelper from "./attendacnceHelper";
+import myTable from '../../components/myTable.vue'
+import Pagination from '../../components/Pagination.vue'
+import AdvanceSearchForm from './AdvanceSearchForm.vue'
+import NormalSearchForm from './NormalSearchForm.vue'
 
 const CONFIG = inject("CONFIG");
 const classes = inject("classes");
@@ -11,10 +15,6 @@ const callbacks = inject("callbacks");
 const attendenceList = inject("attendenceList");
 const attendenceParams = inject("attendenceParams");
 const liveAttendenceList = inject("liveAttendenceList");
-import myTable from '../../components/myTable.vue'
-import Pagination from '../../components/Pagination.vue'
-import AdvanceSearchForm from './AdvanceSearchForm.vue'
-import NormalSearchForm from './NormalSearchForm.vue'
 
 const pagiation_positon = CONFIG.value?.settings?.attendance?.pagination?.pagiation_positon || 'bottom_center'
 
@@ -75,7 +75,14 @@ onMounted(()=>{
       @onBtnSubmit="(other_params) => {
         callbacks.getAttendeceList({page_no: 1, other_params})
       }"
-      ></NormalSearchForm>
+      >
+      <div v-if="pagiation_positon.startsWith('bottom')" class="d-flex mt-4" :class="[getPositionClass]">
+          <Pagination v-if="attendenceParams?.totalPages > 1" v-model="attendenceParams" @jumpToPage="(page_no) => {
+            callbacks.getAttendeceList({page_no})
+          }" ></Pagination>
+      </div> 
+    
+    </NormalSearchForm>
     </div>
     
      
@@ -161,11 +168,7 @@ onMounted(()=>{
         </template>
       </myTable> 
 
-      <div v-if="pagiation_positon.startsWith('bottom')" class="d-flex" :class="[getPositionClass]">
-          <Pagination v-if="attendenceParams?.totalPages > 1" v-model="attendenceParams" @jumpToPage="(page_no) => {
-            callbacks.getAttendeceList({page_no})
-          }" ></Pagination>
-      </div> 
+      
     </div>
   </div>
 </template>

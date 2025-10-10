@@ -1,6 +1,6 @@
 <script setup>
 import moment from 'moment/moment'
-import { onMounted, inject, ref, watch, computed, onBeforeUnmount, reactive } from 'vue';
+import { onMounted, inject, ref, watch, computed, onBeforeUnmount, reactive, provide } from 'vue';
 import AttendencesAll from './attendence-childs/AttendencesAll.vue'
 import RealtimeAttendences from './attendence-childs/RealtimeAttendences.vue'
 import BaseSelectMultiple from './../components/BaseSelectMultiple.vue'
@@ -21,9 +21,18 @@ const classes = inject('classes');
 const attendenceList = inject('attendenceList');
 const liveAttendenceList = inject('liveAttendenceList');
 
+
+let limits = [ 10, 15, 20, 25, 50, 100 ]
+let attendanceAllLimitPerPage = ref(Number(storage('attendanceAllLimitPerPage').value || 0) || CONFIG.value?.settings?.attendance?.pagination?.perpage || 20)
+provide('attendanceAllLimitPerPage', attendanceAllLimitPerPage)
+
 let tab = ref(Number(storage('attendance_tab').value || '1'))  
 watch(tab, (index) => {
   storage('attendance_tab').value = index
+})
+
+watch(attendanceAllLimitPerPage, (limit) => {
+  storage('attendanceAllLimitPerPage').value = limit
 })
   
 
@@ -53,6 +62,18 @@ onMounted(()=>{
             <Btn class="white">Out: <span class="badge text-white bg-warning">{{ Ahelper.count.out(liveAttendenceList) }}</span></Btn>
             <Btn class="white">Late: <span class="badge text-white bg-danger">{{ Ahelper.count.late(liveAttendenceList) }}</span></Btn>
             <Btn class="white">Total: <span class="badge text-white bg-success">{{ liveAttendenceList?.length }}</span></Btn>
+        </div>
+      </div>   
+      <div v-if="tab==2">
+        <div class="d-flex justify-content-center align-items-center gap-2">
+          <Btn class="white">Limit per page</Btn>
+          <div class="form-group">
+            <select v-model="attendanceAllLimitPerPage" class="form-control cb-input" style="width: 100px">
+              <template v-for="(limit, index) in limits" :key="index">
+                <option :value="limit">{{ limit }}</option>
+              </template>                  
+            </select>
+          </div>
         </div>
       </div>   
 

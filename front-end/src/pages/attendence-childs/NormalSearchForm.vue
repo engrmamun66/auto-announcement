@@ -2,6 +2,11 @@
 import moment from 'moment/moment'
 import { inject, ref, reactive, onMounted, onBeforeUnmount, computed, watch } from "vue";
 import Ahelper from "./attendacnceHelper";
+import myTable from '../../components/myTable.vue'
+import Pagination from '../../components/Pagination.vue'
+import BaseSelectMultiple from './../../components/BaseSelectMultiple.vue'
+import EmDateTimePicker from './../../components/EmDateTimePicker.vue'
+import Btn from './../../components/Btn.vue'
 
 const CONFIG = inject("CONFIG");
 const classes = inject("classes");
@@ -11,16 +16,14 @@ const callbacks = inject("callbacks");
 const attendenceList = inject("attendenceList");
 const attendenceParams = inject("attendenceParams");
 const liveAttendenceList = inject("liveAttendenceList");
-import myTable from '../../components/myTable.vue'
-import Pagination from '../../components/Pagination.vue'
-import BaseSelectMultiple from './../../components/BaseSelectMultiple.vue'
-import EmDateTimePicker from './../../components/EmDateTimePicker.vue'
-import Btn from './../../components/Btn.vue'
+const attendanceAllLimitPerPage = inject("attendanceAllLimitPerPage");
 
  
 
 const emit = defineEmits(['onBtnSubmit', 'onBtnClear']);
 let log = console.log
+
+
 
 let attPayload = reactive({ 
   //-------------
@@ -36,6 +39,10 @@ watch(()=> attPayload.class_short, (_class_short) => {
     attPayload.student_id = null
   }
 },{deep: true})
+
+watch(attendanceAllLimitPerPage, (newVal) => {
+  submitSearch()
+})
 
 
 let dateRangePickerRef = ref(null)
@@ -75,6 +82,9 @@ function submitSearch(eventData={}) {
     sort_by: attPayload.sort_by,
     sort_direction: attPayload.sort_direction,
   } 
+  if(attendanceAllLimitPerPage.value){
+    data.limit = attendanceAllLimitPerPage.value
+  }
   emit('onBtnSubmit', data)
 }
 
@@ -96,7 +106,7 @@ defineExpose({
     
     <div class="row">
       <div class="col-12">
-        <div class="d-flex flex-column gap-3 overflow-x-auto">
+        <div class="d-flex flex-column gap-2 overflow-x-auto">
           <EmDateTimePicker ref="dateRangePickerRef"
             v-model="pickerModelValue"
             modelValueType="object"
@@ -122,6 +132,7 @@ defineExpose({
             style="width: 232px"
             >
           </EmDateTimePicker>
+
           <div class="form-group">
             <select v-model="attPayload.class_short" class="form-control cb-input" @change="submitSearch" >
               <option :value="null">-class-</option>
@@ -130,7 +141,8 @@ defineExpose({
               </template>                  
             </select>
           </div> 
-          <div class="form-group">
+
+          <div v-if="false" class="form-group">
             <select v-model="attPayload.student_id" class="form-control cb-input" @change="submitSearch" >
               <option :value="null">-Student-</option>
               <template v-for="(student, index) in filteredAllStudents" :key="index">
@@ -147,6 +159,8 @@ defineExpose({
           <Btn @click.stop="clearSearch" cbinput="cbinput" class="red">Clear</Btn>
         </div>
       </div>
+
+      <slot></slot>
 
     </div>   
   </div>
