@@ -13,6 +13,12 @@
                     ></ShimmerEffect> -->
                     </template>
                 <template v-else >
+                    <span v-if="modelValue?.length" tooltip="Remove All Items" flow="left" style="--tbg:#ffffff" @click.stop="removeAllItems()" class="clearAllItem">
+                        <i class="bx bx-x" ></i>
+                    </span>
+                    <span v-else tooltip="Select All" flow="left" style="--tbg:#ffffff" @click.stop="selectAll()" class="clearAllItem">
+                        <i class='bx bx-check-double' ></i>
+                    </span>
                     <button :tooltip="(modelValue?.length ? tooltip : '') || (disabled ? 'Disabled' : '')" ref="ref_button" :disabled="disabled" @click="()=>{
                         if(!disabled) showOptions = !showOptions;
                         H.delay(() => { 
@@ -20,12 +26,6 @@
                         }, 100)
                     }" class="form-control padding-as-input text-start cb-input overflo-height">
                         
-                        <span v-if="modelValue?.length" tooltip="Remove All Items" flow="left" style="--tbg:#ffffff" @click.stop="removeAllItems()" class="clearAllItem">
-                            <i class="bx bx-x" ></i>
-                        </span>
-                        <span v-else tooltip="Select All" flow="left" style="--tbg:#ffffff" @click.stop="selectAll()" class="clearAllItem">
-                            <i class='bx bx-check-double' ></i>
-                        </span>
 
 
                         <div v-if="(modelValue?.length && typeof modelValue[0] != 'number')" class="selected-items">
@@ -243,9 +243,8 @@ function removeSingleItem(item, index){
     H.delay(()=>removeValue(index, item), 390)
 }
 function removeAllItems(){
-    props.modelValue.forEach((item, index) => {
-        removeSingleItem(item, index)
-    })
+    myEmit('update:modelValue', []) 
+    update_v_validation()
 
 }
 function selectAll(){ 

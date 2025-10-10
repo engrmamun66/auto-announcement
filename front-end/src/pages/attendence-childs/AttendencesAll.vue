@@ -1,51 +1,8 @@
 <template>
   <div>
     
-    <div class="d-flex justify-content-start align-items-center gap-2">
-        <BaseSelectMultiple placeholder="Select Classes" v-model="attPayload.classes" :label="false" :data="filteredClasses" displayKey="class_name" valueKey="class_name" :displayKey2="false" style="min-width: 250px" :search="true" :searchDelayTime="150" 
-          @searching="(search_text) => attPayload.classSearchText = search_text" >
-        </BaseSelectMultiple>
-
-        <BaseSelectMultiple placeholder="Select Students" v-model="attPayload.students" :label="false" :data="filteredAllStudents" displayKey="full_name" valueKey="id" style="min-width: 350px" :search="true" :searchDelayTime="150" 
-          @searching="(studentnameorid) => attPayload.studentnameorid = studentnameorid" >
-          <template #loopItem1="{item, index}">
-            <span class="badge text-dark bg-body-secondary ms-1">
-              {{ item.class_short }}
-            </span>
-          </template>
-          <template #loopItem="{item, index}">
-            <span class="badge text-dark bg-body-secondary">
-              {{ item.class_short }}
-            </span>
-          </template>
-        </BaseSelectMultiple>
-
-        <div class="position-relative">
-          <EmDateTimePicker ref="dateRangePickerRef"
-            v-model="pickerModelValue"
-            @change="onChangeDateRangePicker"
-            @close="false"
-            :displayFormat="'DD MMM, Y'"
-            :rangePicker="true" 
-            :timePicker="false" 
-            :minDate="null"
-            :isDisabled="false"
-            :autoOpen="false"
-            :timePickerButtons="true"
-            :use24FormatTimeForEvents="true"
-            :invisible="false"
-            displayIn="bottom_center" 
-            :buttons="{applyBtn: 'Apply', todayBtn: true}"
-            style="width: 250px"
-            :useCustomRange="CONFIG?.date_range_list ?? true"
-            >
-          </EmDateTimePicker>
-          <i  class='bx bxs-calendar-x' ></i>
-        </div>
-      <Btn cbinput="cbinput">Submit</Btn>
-      <Btn cbinput="cbinput" class="red">Clear</Btn>
-    </div>  
-
+    <AdvanceSearchForm></AdvanceSearchForm>
+     
     
     <myTable >
       <template #thead>
@@ -150,9 +107,7 @@ const attendenceParams = inject("attendenceParams");
 const liveAttendenceList = inject("liveAttendenceList");
 import myTable from '../../components/myTable.vue'
 import Pagination from '../../components/Pagination.vue'
-import BaseSelectMultiple from './../../components/BaseSelectMultiple.vue'
-import EmDateTimePicker from './../../components/EmDateTimePicker.vue'
-import Btn from './../../components/Btn.vue'
+import AdvanceSearchForm from './AdvanceSearchForm.vue'
 
 const pagiation_positon = CONFIG.value?.settings?.attendance?.pagination?.pagiation_positon || 'bottom_center'
 
@@ -179,70 +134,13 @@ const getStudent = ({ student_id }) =>
   all_students.value.find((std) => std.dakhela == student_id);
 
 
-
-
 let attPayload = reactive({
   classes: [],
   students: [],
   studentnameorid: '',
   classSearchText: '',
 }) 
-
-watch(()=> attPayload.classes, (_classes) => {
-  if(_classes?.length === 0){
-    attPayload.students = []
-    attPayload.studentnameorid = ''
-  }
-},{deep: true})
-
-let dateRangePickerRef = ref(null)
-let pickerModelValue = reactive({
-  startDate: new Date(),
-  endDate: new Date(),
-})
-
-
-let filteredAllStudents = computed(() => {
-  let selected_class_shorts = attPayload.classes.map(cls => cls.class_short)
-  let students = helper.clone(all_students.value)
-  
-  if(selected_class_shorts?.length){
-    students = students.filter(student => selected_class_shorts.includes(student.class_short))
-  }
-  if(attPayload.studentnameorid){
-    let is_id = /\d+/.test(attPayload.studentnameorid)
-    if(is_id){
-      students = students.filter(student => student.dakhela.toString().includes(attPayload.studentnameorid))
-    } else {
-      students = students.filter(student => student.name.toLowerCase().includes(attPayload.studentnameorid.toLowerCase()))
-    }
-  }
-
-  return students
-})
-let filteredClasses = computed(() => {
-  if(!attPayload.classSearchText) return classes.value
-  let result = classes.value.filter(cls => cls.class_name.toLowerCase().includes(attPayload.classSearchText.toLowerCase()))
-  return result
-})
-
-
-
-function clearAllAndRelaod(){
-  if(!confirm('Clear-all and relaod?')) return
-  liveAttendenceList.value = []
-  window.location.reload()
-}
-
-
-function onChangeDateRangePicker(){
-  let params = {
-
-  }
-  console.log();
-}
-
-
+ 
 onMounted(()=>{
 
   callbacks.getAttendeceList()
