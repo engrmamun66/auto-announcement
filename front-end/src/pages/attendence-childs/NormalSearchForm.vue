@@ -78,10 +78,12 @@ function submitSearch(eventData={}) {
   let data = { 
     student_ids: [attPayload.student_id].filter(Boolean),
     class_shorts: [attPayload.class_short].filter(Boolean),
-    date: moment(pickerModelValue.value.startDate).format('YYYY-MM-DD'), 
     sort_by: attPayload.sort_by,
     sort_direction: attPayload.sort_direction,
   } 
+  if(pickerModelValue.value.startDate){
+    data.date = moment(pickerModelValue.value.startDate).format('YYYY-MM-DD')
+  }
   if(attendanceAllLimitPerPage.value){
     data.limit = attendanceAllLimitPerPage.value
   }
@@ -90,6 +92,7 @@ function submitSearch(eventData={}) {
 
 function clearPicker(){
   dateRangePickerRef.value.clearPicker()
+  pickerModelValue.value.startDate = null
 }
  
 

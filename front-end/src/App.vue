@@ -340,7 +340,7 @@ async function controlSounds({student=null, ports=[], openAll=false}={}){
 
 }
 
-const pagination_perpage = CONFIG.value?.settings?.attendance?.pagination?.perpage || 20
+const pagination_perpage = Number(storage('attendanceAllLimitPerPage').value || 0) || CONFIG.value?.settings?.attendance?.pagination?.perpage || 20
 
 let attendenceParams = ref({
     "page_no": 1,
