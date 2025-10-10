@@ -15,6 +15,7 @@ import AudioRecorAndUpload from '../components/AudioRecorAndUpload.vue'
 import RecoringAnimation from '../components/RecoringAnimation.vue'
 import BaseSelectMultiple from '../components/BaseSelectMultiple.vue'
 import TimePicker from '../components/EmDateTimePicker.vue'
+import { template } from 'lodash';
 
 let route = useRoute()
 let router = useRouter()
@@ -42,18 +43,36 @@ let payload = reactive({
     id: null,
     type: 1,
     title: null,
-    start_time: null,
-    end_time: null,
+    start_time: '12:00 AM',
+    end_time: '12:00 AM',
     classes: [],
 })
 
 let startTimePicker = ref(null)
 let endTimePicker = ref(null)
 
-watch(addUpdateMode, (a, b)=>{
+function hide_modals(event){
+  if (event.key === 'Escape') {  
+    addUpdateMode.value = false
+  }
+}
+
+watch(addUpdateMode, (bool)=>{
   payload.type = tab.value
-  if(a === true){
+  if(bool === true){
     updatePickersTime(10)
+  }
+
+  if(bool){ 
+    document.addEventListener('keyup', hide_modals)
+    setTimeout(() => {
+      payload.start_time = '08:00'
+      payload.end_time = '10:00'
+      updatePickersTime()
+    }, 100);
+
+  }else {
+    document.removeEventListener('keyup', hide_modals)
   }
 })
 
@@ -74,8 +93,8 @@ function clearPayload(){
   payload.id =  null
   payload.type =  1
   payload.title =  null
-  payload.start_time =  null
-  payload.end_time =  null
+  payload.start_time = '12:00 AM'
+  payload.end_time = '12:00 AM',
   payload.classes =  []
   addUpdateMode.value = false;
   is___adding.value = false
@@ -101,9 +120,14 @@ function addSchedule(){
       emitter.emit('toaster-warning', { message: 'সকল ফিল্ড পূরণ করা গুরুত্বপূর্ণ' })
       return  
     }
+
+    
     let _payload = helper.clone(payload)
     _payload.classes = JSON.stringify(_payload.classes)
 
+    _payload.start_time = makeDate(payload.start_time, 'HH:mm') // makeDate is comming from em-DateTimePicker.js
+    _payload.end_time = makeDate(payload.end_time, 'HH:mm') // makeDate is comming from em-DateTimePicker.js
+    
     is___adding.value = true
     http.post('/schedules/add', _payload).then(response => {
       if(response.status == 200){
@@ -312,9 +336,9 @@ function deleteSchedule(id, i, type=1){
         <li class="nav-item">
           <a @click.stop="tab = 2" class="nav-link cp text-black" :class="{'active': tab==2}" >Call Times</a>
         </li>
-        <li v-if="CONFIG?.settings?.with_speaker_controls?.status" class="nav-item">
+        <!-- <li v-if="CONFIG?.settings?.with_speaker_controls?.status" class="nav-item">
           <a @click.stop="tab = 3" class="nav-link cp text-black" :class="{'active': tab==3}" >Speaker Ports</a>
-        </li>
+        </li> -->
          
       </ul>
 
@@ -343,9 +367,9 @@ function deleteSchedule(id, i, type=1){
                     <ul v-if="item.classes">
                       <template v-if="item.showClasses">
                         <li> <a @click.stop.prevent="item.showClasses = false" href="#">Less...</a> </li>
-                        <li v-for="cls in item.classes">
+                        <!-- <li v-for="cls in item.classes">
                           {{ cls.class_name }}
-                        </li>
+                        </li> -->
                       </template>
                       <template v-else>
                        <li> 
@@ -358,8 +382,8 @@ function deleteSchedule(id, i, type=1){
                     </ul>
                   </td>                   
             
-                  <td> 
-                    <div class="d-flex justify-content-center">
+                  <td class="text-center"> 
+                    <div class="d-flex justify-content-start">
                     
   
                       <span tooltip="Update Schedule" class="me-2">
@@ -371,6 +395,19 @@ function deleteSchedule(id, i, type=1){
           
                     </div>
                   </td> 
+              </tr> 
+              <tr v-if="item.showClasses">
+                <td></td>
+                <td colspan="2">
+                  <div class="d-flex justify-content-center align-content-center gap-2 flex-wrap">
+                    <template v-for="cls in item.classes">
+                      <div class="badge bg-body-secondary text-black p-1 px-2">
+                        {{ cls.class_name }}
+                      </div>
+                    </template>
+                  </div>
+                </td>  
+                <td></td>
               </tr> 
   
               

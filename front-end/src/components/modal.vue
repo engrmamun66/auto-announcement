@@ -56,7 +56,7 @@ function close(){
   justify-content: center;
   background: rgba(77, 77, 77, .7);
   transition: all .4s;
-  z-index: 99999999999999999999999999;
+  z-index: 999;
 }
  
 .modal__content {

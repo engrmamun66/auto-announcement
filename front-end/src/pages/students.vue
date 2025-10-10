@@ -63,8 +63,7 @@ function hide_modals(event){
   }
 }
 watch(addMode, (bool) => {
-  if(bool){
-    console.log('asdfasdf=');
+  if(bool){ 
     document.addEventListener('keyup', hide_modals)
   }else {
     document.removeEventListener('keyup', hide_modals)
