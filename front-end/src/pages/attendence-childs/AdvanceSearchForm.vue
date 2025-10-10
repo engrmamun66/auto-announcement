@@ -1,56 +1,3 @@
-<template>
-  <div>
-    
-    <div class="d-flex justify-content-start align-items-baseline gap-2">
-        <BaseSelectMultiple placeholder="Select Classes" v-model="attPayload.classes" :label="false" :data="filteredClasses" displayKey="class_name" valueKey="class_name" :displayKey2="false" style="width: 250px" :search="true" :searchDelayTime="100" 
-          @searching="(search_text) => attPayload.classSearchText = search_text" >
-        </BaseSelectMultiple>
-
-        <BaseSelectMultiple placeholder="Select Students" v-model="attPayload.students" :label="false" :data="filteredAllStudents" displayKey="full_name" valueKey="id" style="width: 400px" :search="true" :searchDelayTime="100" 
-          @searching="(studentnameorid) => attPayload.studentnameorid = studentnameorid" >
-          <template #loopItem1="{item, index}">
-            <span class="badge text-dark bg-body-secondary ms-1">
-              {{ item.class_short }}
-            </span>
-          </template>
-          <template #loopItem="{item, index}">
-            <span class="badge text-dark bg-body-secondary">
-              {{ item.class_short }}
-            </span>
-          </template>
-        </BaseSelectMultiple>
-
-        <div class="position-relative">
-          <EmDateTimePicker ref="dateRangePickerRef"
-            v-model="pickerModelValue"
-            @change="onChangeDateRangePicker"
-            @close="false"
-            :displayFormat="'DD MMM, Y'"
-            :rangePicker="true" 
-            :timePicker="false" 
-            :startDate="pickerModelValue.startDate" 
-            :endDate="pickerModelValue.endDate" 
-            :minDate="null"
-            :isDisabled="false"
-            :autoOpen="false"
-            :timePickerButtons="true"
-            :use24FormatTimeForEvents="true"
-            :invisible="false"
-            displayIn="bottom_center" 
-            :buttons="{applyBtn: 'Apply', todayBtn: true}"
-            :useCustomRange="CONFIG?.date_range_list ?? true"
-            style="width: 232px"
-            >
-          </EmDateTimePicker>
-          <i @click.stop="$refs.dateRangePickerRef.toggle()" class='bx bxs-calendar tooglerIcon' ></i>
-        </div>
-      <Btn cbinput="cbinput">Submit</Btn>
-      <Btn cbinput="cbinput" class="red">Clear</Btn>
-    </div>   
- 
-  </div>
-</template>
-
 <script setup>
 import moment from 'moment/moment'
 import { inject, ref, reactive, onMounted, onBeforeUnmount, computed, watch } from "vue";
@@ -70,8 +17,6 @@ import BaseSelectMultiple from './../../components/BaseSelectMultiple.vue'
 import EmDateTimePicker from './../../components/EmDateTimePicker.vue'
 import Btn from './../../components/Btn.vue'
 
-const pagiation_positon = CONFIG.value?.settings?.attendance?.pagination?.pagiation_positon || 'bottom_center'
- 
 let log = console.log
 
 let attPayload = reactive({
@@ -126,6 +71,61 @@ defineExpose({
 
 
 </script>
+
+
+<template>
+  <div>
+    
+    <div class="d-flex justify-content-start align-items-baseline flex-wrap gap-2">
+        <BaseSelectMultiple placeholder="Select Classes" v-model="attPayload.classes" :label="false" :data="filteredClasses" displayKey="class_name" valueKey="class_name" :displayKey2="false" style="width: 250px" :search="true" :searchDelayTime="100" 
+          @searching="(search_text) => attPayload.classSearchText = search_text" >
+        </BaseSelectMultiple>
+
+        <BaseSelectMultiple placeholder="Select Students" v-model="attPayload.students" :label="false" :data="filteredAllStudents" displayKey="full_name" valueKey="id" style="width: 400px" :search="true" :searchDelayTime="100" 
+          @searching="(studentnameorid) => attPayload.studentnameorid = studentnameorid" >
+          <template #loopItem1="{item, index}">
+            <span class="badge text-dark bg-body-secondary ms-1">
+              {{ item.class_short }}
+            </span>
+          </template>
+          <template #loopItem="{item, index}">
+            <span class="badge text-dark bg-body-secondary">
+              {{ item.class_short }}
+            </span>
+          </template>
+        </BaseSelectMultiple>
+
+        <div class="position-relative">
+          <EmDateTimePicker ref="dateRangePickerRef"
+            v-model="pickerModelValue"
+            @change="onChangeDateRangePicker"
+            @close="false"
+            :displayFormat="'DD MMM, Y'"
+            :rangePicker="true" 
+            :timePicker="false" 
+            :startDate="pickerModelValue.startDate" 
+            :endDate="pickerModelValue.endDate" 
+            :minDate="null"
+            :isDisabled="false"
+            :autoOpen="false"
+            :timePickerButtons="true"
+            :use24FormatTimeForEvents="true"
+            :invisible="false"
+            displayIn="bottom_center" 
+            :buttons="{applyBtn: 'Apply', todayBtn: true}"
+            :useCustomRange="CONFIG?.date_range_list ?? true"
+            style="width: 232px"
+            >
+          </EmDateTimePicker>
+          <i @click.stop="$refs.dateRangePickerRef.toggle()" class='bx bxs-calendar tooglerIcon' ></i>
+        </div>
+      <Btn cbinput="cbinput">Submit</Btn>
+      <Btn cbinput="cbinput" class="red">Clear</Btn>
+    </div>   
+ 
+  </div>
+</template>
+
 
 <style scoped>
 .attendance-card {
