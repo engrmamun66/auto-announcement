@@ -67,9 +67,9 @@
         <div
         class="text-center no-data-card d-flex flex-column justify-content-center align-items-center"
         >
-        <h5 class="text-muted mb-2">No Attendance Records Found</h5>
+        <h5 class="text-muted mb-2 fs-4">No Attendance Records Found</h5>
         <p class="text-secondary mb-0">
-            Live attendance list is currently empty.
+            <span class="badge bg-white text-danger fs-5">Live attendance list is currently empty.</span>
         </p>
         </div>
     </div>
