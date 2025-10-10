@@ -104,7 +104,8 @@ defineExpose({
           :use24FormatTimeForEvents="true"
           :invisible="false"
           displayIn="bottom_left" 
-          :buttons="{applyBtn: 'Apply', todayBtn: true}"
+          :_buttons="{applyBtn: 'Apply', todayBtn: true}"
+          :buttons="false"
           :useCustomRange="CONFIG?.date_range_list ?? true"
           style="width: 232px"
           >
