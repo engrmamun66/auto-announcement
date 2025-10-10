@@ -42,6 +42,7 @@ let attendenceParams = ref({
     "limit": pagination_perpage.value, 
 })
 
+provide('pagination_perpage', pagination_perpage)
 provide('getAttendeceList', getAttendeceList)
 
 function getAttendeceList({ page_no = null, reset = false, other_params = {} } = {}) {

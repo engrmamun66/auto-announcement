@@ -46,7 +46,7 @@ watch(pagination_perpage, (newVal) => {
 
 
 let dateRangePickerRef = ref(null)
-let pickerModelValue = ref(moment().format('Y-MM-DD'))
+let pickerModelValue = ref({startDate: null})
 
 
 let filteredAllStudents = computed(() => {
@@ -73,21 +73,26 @@ function clearSearch() {
 }
 
 function submitSearch(eventData={}) { 
-  pickerModelValue.value = eventData
+  try {
+    if(eventData) pickerModelValue.value = eventData
 
-  let data = { 
-    student_ids: [attPayload.student_id].filter(Boolean),
-    class_shorts: [attPayload.class_short].filter(Boolean),
-    sort_by: attPayload.sort_by,
-    sort_direction: attPayload.sort_direction,
-  } 
-  if(pickerModelValue.value.startDate){
-    data.date = moment(pickerModelValue.value.startDate).format('YYYY-MM-DD')
+    let data = { 
+      student_ids: [attPayload.student_id].filter(Boolean),
+      class_shorts: [attPayload.class_short].filter(Boolean),
+      sort_by: attPayload.sort_by,
+      sort_direction: attPayload.sort_direction,
+    } 
+    if(pickerModelValue.value?.startDate){
+      data.date = moment(pickerModelValue.value.startDate).format('YYYY-MM-DD')
+    }
+    if(pagination_perpage.value){
+      data.limit = pagination_perpage.value
+    }
+    emit('onBtnSubmit', data)
+  } catch (submitSearch_error) {
+    console.warn({submitSearch_error});
+    
   }
-  if(pagination_perpage.value){
-    data.limit = pagination_perpage.value
-  }
-  emit('onBtnSubmit', data)
 }
 
 function clearPicker(){

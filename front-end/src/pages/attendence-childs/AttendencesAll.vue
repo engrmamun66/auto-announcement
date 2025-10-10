@@ -72,14 +72,14 @@ onMounted(()=>{
 
     <div class="col-md-4">
       <NormalSearchForm
-      @onBtnClear=" callbacks.getAttendeceList({page_no: 1})"
+      @onBtnClear="getAttendeceList({page_no: 1})"
       @onBtnSubmit="(other_params) => {
-        callbacks.getAttendeceList({page_no: 1, other_params})
+        getAttendeceList({page_no: 1, other_params})
       }"
       >
       <div v-if="pagiation_positon.startsWith('bottom')" class="d-flex mt-4" :class="[getPositionClass]">
           <Pagination v-if="attendenceParams?.totalPages > 1" v-model="attendenceParams" @jumpToPage="(page_no) => {
-            callbacks.getAttendeceList({page_no})
+            getAttendeceList({page_no})
           }" ></Pagination>
       </div> 
     
