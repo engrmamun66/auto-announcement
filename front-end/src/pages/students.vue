@@ -369,7 +369,7 @@ function onChange_dateTimePicker(data){
       <div class="w-100 d-flex justify-content-center" >
 
         <div class="cb-form">
-          <form @submit.prevent="false" @click.stop.prevent="false">
+          <div @click.stop.prevent="false">
             <div class="row" :class="[payload?.id ? 'mt-2' : 'mt-4']">
 
               <div class="col-12 d-flex justify-content-between align-items-center">
@@ -490,7 +490,7 @@ function onChange_dateTimePicker(data){
 
 
             </div>
-          </form>
+          </div>
         </div>
 
       </div>
