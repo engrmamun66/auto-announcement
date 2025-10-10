@@ -340,23 +340,6 @@ async function controlSounds({student=null, ports=[], openAll=false}={}){
 
 }
 
-const pagination_perpage = Number(storage('attendanceAllLimitPerPage').value || 0) || CONFIG.value?.settings?.attendance?.pagination?.perpage || 20
-
-let attendenceParams = ref({
-    "page_no": 1,
-    "total": 3,
-    "totalPages": 1,
-    "limit": pagination_perpage,
-
-    // class_name: null,
-    // name: null,
-    // card_no: null,
-    // dakhela: route.query?.dakhela || null,
-    // sound1: null,
-})
-
-
-
 
 provide('route', route)
 provide('router', router)
@@ -366,7 +349,6 @@ provide('schedule_timeout', schedule_timeout)
 provide('classes', classes)
 provide('wattingList', wattingList)
 provide('attendenceList', attendenceList)
-provide('attendenceParams', attendenceParams)
 provide('liveAttendenceList', liveAttendenceList)
 provide('getSchedules', getSchedules)
 provide('speakText', speakText)
@@ -507,36 +489,7 @@ const callbacks = {
     getCardOwnerName(id){
         if(!CONFIG.value?.card_owners?.length) return 1
         return CONFIG.value?.card_owners.find(owner => owner.id == id)?.name
-    },
-    getAttendeceList({page_no=null, reset=false, other_params={}}={}){
-        try {
-
-            if(reset){
-                attendenceParams.value.page_no = 1
-                attendenceParams.value.total = 3
-                attendenceParams.value.totalPages = 1
-                attendenceParams.value.limit = 50 
-            }
-            let queryParams = {...attendenceParams.value}
-            if(page_no){
-                queryParams.page_no = page_no
-            }
-            queryParams = {...queryParams, ...other_params}
-            
-            http.get('/attendence-list', { params: queryParams }).then(response => {
-                if(response.status == 200){
-                    let data = response.data
-                    attendenceList.value = data.data
-                    attendenceParams.value = data.pagination
-                }
-            }).finally(()=>{
-                
-            })
-        } catch (error) {
-            
-        }
-  
-    },
+    }, 
     fixOverflowOfLiveAttendence(){
         let live_attences = helper.clone(liveAttendenceList.value)
         let maximum_live_attedence = CONFIG.value?.settings?.attendance?.maximum_live_attedence || 50

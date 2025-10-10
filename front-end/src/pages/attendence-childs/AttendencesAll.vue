@@ -15,6 +15,7 @@ const callbacks = inject("callbacks");
 const attendenceList = inject("attendenceList");
 const attendenceParams = inject("attendenceParams");
 const liveAttendenceList = inject("liveAttendenceList");
+const getAttendeceList = inject("getAttendeceList");
 
 const pagiation_positon = CONFIG.value?.settings?.attendance?.pagination?.pagiation_positon || 'bottom_center'
 
@@ -53,7 +54,7 @@ let queryparams = {
  
 onMounted(()=>{
 
-  callbacks.getAttendeceList()
+  getAttendeceList()
 
   setTimeout(() => {
     isMounted.value = true

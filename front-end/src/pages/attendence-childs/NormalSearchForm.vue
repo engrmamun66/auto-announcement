@@ -16,7 +16,7 @@ const callbacks = inject("callbacks");
 const attendenceList = inject("attendenceList");
 const attendenceParams = inject("attendenceParams");
 const liveAttendenceList = inject("liveAttendenceList");
-const attendanceAllLimitPerPage = inject("attendanceAllLimitPerPage");
+const pagination_perpage = inject("pagination_perpage");
 
  
 
@@ -40,7 +40,7 @@ watch(()=> attPayload.class_short, (_class_short) => {
   }
 },{deep: true})
 
-watch(attendanceAllLimitPerPage, (newVal) => {
+watch(pagination_perpage, (newVal) => {
   submitSearch()
 })
 
@@ -84,8 +84,8 @@ function submitSearch(eventData={}) {
   if(pickerModelValue.value.startDate){
     data.date = moment(pickerModelValue.value.startDate).format('YYYY-MM-DD')
   }
-  if(attendanceAllLimitPerPage.value){
-    data.limit = attendanceAllLimitPerPage.value
+  if(pagination_perpage.value){
+    data.limit = pagination_perpage.value
   }
   emit('onBtnSubmit', data)
 }

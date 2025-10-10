@@ -22,18 +22,54 @@ const attendenceList = inject('attendenceList');
 const liveAttendenceList = inject('liveAttendenceList');
 
 
-let limits = [ 10, 15, 20, 25, 50, 100 ]
-let attendanceAllLimitPerPage = ref(Number(storage('attendanceAllLimitPerPage').value || 0) || CONFIG.value?.settings?.attendance?.pagination?.perpage || 20)
-provide('attendanceAllLimitPerPage', attendanceAllLimitPerPage)
+let perpage_limits = [ 10, 15, 20, 25, 50, 100 ]
 
 let tab = ref(Number(storage('attendance_tab').value || '1'))  
 watch(tab, (index) => {
   storage('attendance_tab').value = index
 })
 
-watch(attendanceAllLimitPerPage, (limit) => {
-  storage('attendanceAllLimitPerPage').value = limit
+
+const pagination_perpage = ref(Number(storage('pagination_perpage').value || 0) || CONFIG.value?.settings?.attendance?.pagination?.perpage || 20)
+watch(pagination_perpage, (limit) => {
+  storage('pagination_perpage').value = limit
 })
+
+let attendenceParams = ref({
+    "page_no": 1,
+    // "total": 3,
+    // "totalPages": 1,
+    "limit": pagination_perpage.value, 
+})
+
+provide('getAttendeceList', getAttendeceList)
+
+function getAttendeceList({ page_no = null, reset = false, other_params = {} } = {}) {
+  try {
+    if (reset) {
+      attendenceParams.value.page_no = 1;
+      attendenceParams.value.total = 3;
+      attendenceParams.value.totalPages = 1;
+      attendenceParams.value.limit = 50;
+    }
+    let queryParams = { ...attendenceParams.value };
+    if (page_no) {
+      queryParams.page_no = page_no;
+    }
+    queryParams = { ...queryParams, ...other_params };
+
+    http
+      .get("/attendence-list", { params: queryParams })
+      .then((response) => {
+        if (response.status == 200) {
+          let data = response.data;
+          attendenceList.value = data.data;
+          attendenceParams.value = data.pagination;
+        }
+      })
+      .finally(() => {});
+  } catch (error) {}
+}
   
 
 
@@ -68,8 +104,8 @@ onMounted(()=>{
         <div class="d-flex justify-content-center align-items-center gap-2">
           <Btn class="white">Limit per page</Btn>
           <div class="form-group">
-            <select v-model="attendanceAllLimitPerPage" class="form-control cb-input" style="width: 100px">
-              <template v-for="(limit, index) in limits" :key="index">
+            <select v-model="pagination_perpage" class="form-control cb-input" style="width: 100px">
+              <template v-for="(limit, index) in perpage_limits" :key="index">
                 <option :value="limit">{{ limit }}</option>
               </template>                  
             </select>
