@@ -579,237 +579,210 @@ function onChange_dateTimePicker(data){
     </div>
 
 
-      <myTable>
-        <template #thead>
-          <thead>
+    <myTable>
+      <template #thead>
+        <thead>
+          <tr>
+            <th>{{ CONFIG?.studentTableColumns?.class || 'Class' }}</th>
+            <th>{{ CONFIG?.studentTableColumns?.name || 'Name' }}</th>
+            <th>{{ CONFIG?.studentTableColumns?.card_owner || 'Card Owner' }}</th>
+            <!-- <th>Card</th> -->
+            <th>{{ CONFIG?.studentTableColumns?.dakhela || 'Dakhela' }}</th>
+            <th>{{ CONFIG?.studentTableColumns?.year || 'Year' }}</th>
+            <th>{{ CONFIG?.studentTableColumns?.sound || 'Sound' }}</th>
+            <!-- <th>Sound-2</th> -->
+            <th>{{ CONFIG?.studentTableColumns?.status || 'Status' }}</th>
+            <th>{{ CONFIG?.studentTableColumns?.punch || 'Punch' }}</th>
+            <th>{{ CONFIG?.studentTableColumns?.action || 'Action' }}</th> 
+          </tr>
+        </thead>
+      </template>
+      <template #rows>
+        <template v-if="students?.length">
+          <template v-for="(std, i) in students.toReversed()">
             <tr>
-              <th>{{ CONFIG?.studentTableColumns?.class || 'Class' }}</th>
-              <th>{{ CONFIG?.studentTableColumns?.name || 'Name' }}</th>
-              <th>{{ CONFIG?.studentTableColumns?.card_owner || 'Card Owner' }}</th>
-              <!-- <th>Card</th> -->
-              <th>{{ CONFIG?.studentTableColumns?.dakhela || 'Dakhela' }}</th>
-              <th>{{ CONFIG?.studentTableColumns?.year || 'Year' }}</th>
-              <th>{{ CONFIG?.studentTableColumns?.sound || 'Sound' }}</th>
-              <!-- <th>Sound-2</th> -->
-              <th>{{ CONFIG?.studentTableColumns?.status || 'Status' }}</th>
-              <th>{{ CONFIG?.studentTableColumns?.punch || 'Punch' }}</th>
-              <th>{{ CONFIG?.studentTableColumns?.action || 'Action' }}</th> 
-            </tr>
-          </thead>
-        </template>
-        <template #rows>
-          <template v-if="students?.length">
-            <template v-for="(std, i) in students.toReversed()">
-              <tr>
-                <td class="text-left"> {{ std.class }} </td> 
-                <td class="text-left cp" @click.stop="prepareToEdit(std)" :student-id="std.id" >{{ std.name.split('||')?.[0] }}</td>
-                <td> 
-                  <p class="mb-1">{{ callbacks.getCardOwnerName(std?.card_owner) }}</p>
-                  <div class="student-note" tooltip="Note" v-if="std?.note">{{ std?.note }}</div>
-                </td> 
-                <td> 
-                  <div class="align-items-center d-flex">
-                    <span class="p-1" @dblclick="params.dakhela = std.dakhela">{{ std.dakhela }}</span>
-                    <span tooltip="Cone Student">
-                    <i v-if="std.name && String(std.name)?.indexOf('||dakhela') > -1 === false" @click.stop="()=>{
-                      std.cloneMode = !(!!(std.cloneMode));
-                    }" class="bx bxs-copy-alt cp px-1"></i>
-                    </span>
+              <td class="text-left"> {{ std.class }} </td> 
+              <td class="text-left cp" @click.stop="prepareToEdit(std)" :student-id="std.id" >{{ std.name.split('||')?.[0] }}</td>
+              <td> 
+                <p class="mb-1">{{ callbacks.getCardOwnerName(std?.card_owner) }}</p>
+                <div class="student-note" tooltip="Note" v-if="std?.note">{{ std?.note }}</div>
+              </td> 
+              <td> 
+                <div class="align-items-center d-flex">
+                  <span class="p-1" @dblclick="params.dakhela = std.dakhela">{{ std.dakhela }}</span>
+                  <span tooltip="Cone Student">
+                  <i v-if="std.name && String(std.name)?.indexOf('||dakhela') > -1 === false" @click.stop="()=>{
+                    std.cloneMode = !(!!(std.cloneMode));
+                  }" class="bx bxs-copy-alt cp px-1"></i>
+                  </span>
+                </div>
+                
+                <template v-if="std?.cloneMode">
+                  <div class="std-clone-area">
+                    <input type="number" @input="std.dakhela_new = $event.target.value" />
+                    <button @click="onClickClone(std)">Copy</button>
                   </div>
-                  
-                  <template v-if="std?.cloneMode">
-                    <div class="std-clone-area">
-                      <input type="number" @input="std.dakhela_new = $event.target.value" />
-                      <button @click="onClickClone(std)">Copy</button>
-                    </div>
-                    <p v-if="std?.error_message" class="text-danger">
-                      {{ std.error_message }} 
-                    </p>
-                  </template>
-                  
-                </td> 
-                
-                <td> {{ std.year }} </td> 
-                <template v-for="column in ['sound1']">
-                  <td> 
-                    <!-- Sound -->
-                    <template v-if="std[column]">            
-                      <template v-if="!std[`isPlaying_${column}`]">            
-                        <div class="d-flex align-items-center">
-                          <Btn  @click.stop="playThis(i, `isPlaying_${column}`, std); " class="radius-10 sm sound w-100" style="padding: 2px auto;" >
-                            <i class='bx bx-play size-1 transformY-3px'></i>&nbsp;Play
-                          </Btn>
-                          <!-- <span v-if="std.name.indexOf('||dakhela') > -1 === false" class="ms-2 me-1 cp" @click.stop="deleteAudio(std, column)" > -->
-                          <span class="ms-2 me-1 cp" @click.stop="deleteAudio(std, column)" >
-                            <i class='bx bxs-trash-alt text-danger size-1' ></i>
-                          </span>
-                        </div> 
-                      </template>
-                      <template v-else>
-                        <Player  :src="std[column]" @close="std[`isPlaying_${column}`] = false"></Player>
-                      </template>
-                    </template>  
-                    <template v-else>
-
-                      <div class="d-flex align-items-center">
-                        <AudioUpload :student="std" :column="column" @change="({audio_path, audio_url})=>{
-                          std[column] = audio_url
-                        }" ></AudioUpload>
-                        <span tooltip="Rcord Sound" @click="targetStd=std;columnName=column">
-                          <i class='bx bxs-microphone p-1 ms-1 cp' ></i>
-                        </span>
-                      </div>
-
-                    </template>  
-                  </td> 
+                  <p v-if="std?.error_message" class="text-danger">
+                    {{ std.error_message }} 
+                  </p>
                 </template>
-                <td> <Switch size="sm" v-model="std.status" @change="async (status) => {
-                  await http.post('/students/update-status', {id: std.id, status} );
                 
-                }"></Switch> </td> 
-
-                <td>
-                  <template v-if="CONFIG?.settings?.attendance?.status">
-                    <template v-if="std.name.indexOf('Copied') > -1">
-                      <button class="class-short-btn px-2 for-call" 
-                      @click.stop="punchToCallStudent(makeCarcode(std), {message: 'কার্ডটি সফলভাবে পাঞ্চ হয়েছে।', source: 'manual_button', for_attendence: false})">
-                        <!-- For Guardian -->
-                        Call&nbsp;Punch
-                      </button>
-                    </template> 
+              </td> 
+              
+              <td> {{ std.year }} </td> 
+              <template v-for="column in ['sound1']">
+                <td> 
+                  <!-- Sound -->
+                  <template v-if="std[column]">            
+                    <template v-if="!std[`isPlaying_${column}`]">            
+                      <div class="d-flex align-items-center">
+                        <Btn  @click.stop="playThis(i, `isPlaying_${column}`, std); " class="radius-10 sm sound w-100" style="padding: 2px auto;" >
+                          <i class='bx bx-play size-1 transformY-3px'></i>&nbsp;Play
+                        </Btn>
+                        <!-- <span v-if="std.name.indexOf('||dakhela') > -1 === false" class="ms-2 me-1 cp" @click.stop="deleteAudio(std, column)" > -->
+                        <span class="ms-2 me-1 cp" @click.stop="deleteAudio(std, column)" >
+                          <i class='bx bxs-trash-alt text-danger size-1' ></i>
+                        </span>
+                      </div> 
+                    </template>
                     <template v-else>
-
-                      <div class="d-flex justify-content-start gap-1">
-                        <button class="class-short-btn px-2 for-attendence" 
-                        @auxclick.stop="punchToSubmitAttendance(makeCarcode(std), {source: 'manual_button', delay: 0})"
-                        @click.stop="punchToSubmitAttendance(makeCarcode(std), {source: 'manual_button', delay: 4000})"
-                        >
-                            <!-- For Students Attendence -->
-                            Attendence
-                        </button>
-                        <!-- For Students Attendence calendar-->
-                        <button class="class-short-btn px-2 for-attendence" @click.stop="() => {
-                          targetStudent = std; 
-                          $refs.dateTimePickerRef.setTime(moment().format('HH:mm'))
-                          $refs.dateTimePickerRef.toggle()
-
-                        }" >
-                            <i class='bx bxs-calendar'></i> 
-                        </button>
-
-                      </div>
-                      <ul>
-                        <li v-for="shift in helper.getShifts(classes, std.class_short, false)">
-                          {{ Ahelper.printShift(shift) }}
-                        </li>
-                      </ul>
-                    </template> 
-                  </template> 
+                      <Player  :src="std[column]" @close="std[`isPlaying_${column}`] = false"></Player>
+                    </template>
+                  </template>  
                   <template v-else>
-                    <button class="class-short-btn px-2" @click.stop="punchToCallStudent(makeCarcode(std), {message: 'কার্ডটি সফলভাবে পাঞ্চ হয়েছে।', source: 'manual_button'})">
-                      Punch
+
+                    <div class="d-flex align-items-center">
+                      <AudioUpload :student="std" :column="column" @change="({audio_path, audio_url})=>{
+                        std[column] = audio_url
+                      }" ></AudioUpload>
+                      <span tooltip="Rcord Sound" @click="targetStd=std;columnName=column">
+                        <i class='bx bxs-microphone p-1 ms-1 cp' ></i>
+                      </span>
+                    </div>
+
+                  </template>  
+                </td> 
+              </template>
+              <td> <Switch size="sm" v-model="std.status" @change="async (status) => {
+                await http.post('/students/update-status', {id: std.id, status} );
+              
+              }"></Switch> </td> 
+
+              <td>
+                <template v-if="CONFIG?.settings?.attendance?.status">
+                  <template v-if="std.name.indexOf('Copied') > -1">
+                    <button class="class-short-btn px-2 for-call" 
+                    @click.stop="punchToCallStudent(makeCarcode(std), {message: 'কার্ডটি সফলভাবে পাঞ্চ হয়েছে।', source: 'manual_button', for_attendence: false})">
+                      <!-- For Guardian -->
+                      Call&nbsp;Punch
                     </button>
                   </template> 
-                </td>
-                <td> 
-                  <div class="d-flex justify-content-center action-icons">
-                    <!-- <i @click.stop="targetStdForBarcode=std" class='bx bx-barcode cp size-1p5' ></i> -->
-                    
-                    <!-- <span tooltip="Copy barcode">
-                      <i @click="({target}) => helper.copyToClipboard(makeCarcode(std), {el: target.parentElement})" class='bx bxs-copy-alt cp px-1' style="font-size: 18px" ></i>
-                    </span> -->
-                    
+                  <template v-else>
+
+                    <div class="d-flex justify-content-start gap-1">
+                      <button class="class-short-btn px-2 for-attendence" 
+                      @auxclick.stop="punchToSubmitAttendance(makeCarcode(std), {source: 'manual_button', delay: 0})"
+                      @click.stop="punchToSubmitAttendance(makeCarcode(std), {source: 'manual_button', delay: 4000})"
+                      >
+                          <!-- For Students Attendence -->
+                          Attendence
+                      </button>
+                      <!-- For Students Attendence calendar-->
+                      <button class="class-short-btn px-2 for-attendence" @click.stop="() => {
+                        targetStudent = std; 
+                        $refs.dateTimePickerRef.setTime(moment().format('HH:mm'))
+                        $refs.dateTimePickerRef.toggle()
+
+                      }" >
+                          <i class='bx bxs-calendar'></i> 
+                      </button>
+
+                    </div>
                     <ul>
-                      <li tooltip="Delete student" class="fs-5 transformY-3px">
-                        <i @click="deleteStudent(std.id, i)" class='bx bx-trash text-danger cp' ></i>
+                      <li v-for="shift in helper.getShifts(classes, std.class_short, false)">
+                        {{ Ahelper.printShift(shift) }}
                       </li>
                     </ul>
-        
-                  </div>
-                </td> 
-            </tr> 
+                  </template> 
+                </template> 
+                <template v-else>
+                  <button class="class-short-btn px-2" @click.stop="punchToCallStudent(makeCarcode(std), {message: 'কার্ডটি সফলভাবে পাঞ্চ হয়েছে।', source: 'manual_button'})">
+                    Punch
+                  </button>
+                </template> 
+              </td>
+              <td> 
+                <div class="d-flex justify-content-center action-icons">
+                  <ul>
+                    <li tooltip="Delete student" class="fs-5 transformY-3px">
+                      <i @click="deleteStudent(std.id, i)" class='bx bx-trash text-danger cp' ></i>
+                    </li>
+                  </ul>
+      
+                </div>
+              </td> 
+          </tr> 
 
+          
             
-              
-            </template>
-          </template>
-          <template v-else>
-            <tr>
-                <td colspan="88" class="text-center">No student found</td>                 
-            </tr>
           </template>
         </template>
-      </myTable>
+        <template v-else>
+          <tr>
+              <td colspan="88" class="text-center">No student found</td>                 
+          </tr>
+        </template>
+      </template>
+    </myTable>
 
-      <div class="d-flex justify-content-center">
-        <Pagination v-if="params?.totalPages > 1" v-model="params" @jumpToPage="(page) => {
-          params.page_no = page
-          getStudents()
-        }" ></Pagination>
-      </div> 
-      <div v-if="route.query.barcode" class="d-flex justify-content-center mt-3 ">
-        <router-link :to="{name: 'home', query: {barcode: route.query.barcode}}" class="bg1 border2 radius-5 text-center text-black-50" style="width: 200px">Back And Push Barcode</router-link>
-      </div>  
+    <div class="d-flex justify-content-center">
+      <Pagination v-if="params?.totalPages > 1" v-model="params" @jumpToPage="(page) => {
+        params.page_no = page
+        getStudents()
+      }" ></Pagination>
+    </div> 
+    <div v-if="route.query.barcode" class="d-flex justify-content-center mt-3 ">
+      <router-link :to="{name: 'home', query: {barcode: route.query.barcode}}" class="bg1 border2 radius-5 text-center text-black-50" style="width: 200px">Back And Push Barcode</router-link>
+    </div>  
 
-    
-     <!-- Audio Recorder Modal -->
-     <template v-if="targetStd && columnName">
-      <modal @close="targetStd=null" :title="false">
-        <div style="height:100px" class="d-flex justify-content-center align-items-center">
+  
+    <!-- Audio Recorder Modal -->
+    <template v-if="targetStd && columnName">
+    <modal @close="targetStd=null" :title="false">
+      <div style="height:100px" class="d-flex justify-content-center align-items-center">
 
-          <AudioRecorAndUpload :student="targetStd" :column="columnName" @uploaded="({audio_path, audio_url})=>{
-            students.forEach(student => {
-              if(student.id == targetStd.id){
-                student[columnName] = audio_url;
-              }
-            })
-            targetStd = null;
-            columnName = null;
-          }">
-          </AudioRecorAndUpload>
-        </div>
-      </modal>
-     </template>
+        <AudioRecorAndUpload :student="targetStd" :column="columnName" @uploaded="({audio_path, audio_url})=>{
+          students.forEach(student => {
+            if(student.id == targetStd.id){
+              student[columnName] = audio_url;
+            }
+          })
+          targetStd = null;
+          columnName = null;
+        }">
+        </AudioRecorAndUpload>
+      </div>
+    </modal>
+    </template>
 
-    
-     <!-- Barcode Modal View -->
-     <template v-if="targetStdForBarcode">
-      <modal @close="targetStdForBarcode=null" :title="false">
-        <div style="height:220px" class="d-flex justify-content-center align-items-center">
-          <div class="d-flex justify-content-center align-items-center flex-column w-100">
-              <div id="PRINTABLE_AREA">
-                <Barcode :data="makeCarcode(targetStdForBarcode)"  @load="printDiv('PRINTABLE_AREA')"></Barcode>
-              </div>
-              <div class="d-flex justify-content-center align-items-center mt-3">
-                <span class="print-buton cp px-5" @click="printDiv('PRINTABLE_AREA')">
-                  <i class='bx bx-printer px-1' style="font-size: 18px" ></i> Print
-                </span>        
-                <span tooltip="Copy barcode">
-                    <i @click="({target}) => helper.copyToClipboard(makeCarcode(targetStdForBarcode), {el: target.parentElement})" class='bx bxs-copy-alt cp px-1' style="font-size: 18px" ></i>
-                </span> 
-              </div>     
-            </div>
-        </div>
-      </modal>
-     </template>
+  
 
-
-     <EmDateTimePicker ref="dateTimePickerRef"
-        v-model="pickerModelValue"
-        @change="onChange_dateTimePicker"
-        @close="false"
-        :displayFormat="'DD MMM, Y'"
-        :rangePicker="false" 
-        :timePicker="true" 
-        :minDate="moment().subtract(1, 'month')"
-        :isDisabled="false"
-        :autoOpen="false"
-        :timePickerButtons="true"
-        :use24FormatTimeForEvents="true"
-        :invisible="true"
-        displayIn="modal" 
-        :buttons="{applyBtn: 'Set-Attendace', todayBtn: false}"
-        >
+    <EmDateTimePicker ref="dateTimePickerRef"
+      v-model="pickerModelValue"
+      @change="onChange_dateTimePicker"
+      @close="false"
+      :displayFormat="'DD MMM, Y'"
+      :rangePicker="false" 
+      :timePicker="true" 
+      :minDate="moment().subtract(1, 'month')"
+      :isDisabled="false"
+      :autoOpen="false"
+      :timePickerButtons="true"
+      :use24FormatTimeForEvents="true"
+      :invisible="true"
+      displayIn="modal" 
+      :buttons="{applyBtn: 'Set-Attendace', todayBtn: false}"
+      >
     </EmDateTimePicker>
 
  
