@@ -67,9 +67,11 @@ function clearSearch() {
 function submitSearch() { 
 
   let data = { 
-    student_ids: [attPayload.student_id],
-    class_shorts: [attPayload.class_short],
+    student_ids: [attPayload.student_id].filter(Boolean),
+    class_shorts: [attPayload.class_short].filter(Boolean),
     date: attPayload.date, 
+    sort_by: attPayload.sort_by,
+    sort_direction: attPayload.sort_direction,
   } 
   emit('onBtnSubmit', data)
 }
@@ -118,13 +120,13 @@ defineExpose({
         <select v-model="attPayload.class_short" class="form-control cb-input"  >
           <option :value="null">-class-</option>
           <template v-for="(cls, index) in classes" :key="index">
-            <option :value="cls.class_name">{{cls.class_name}}</option>
+            <option :value="cls.class_short">{{cls.class_name}}</option>
           </template>                  
         </select>
       </div> 
  
       <div class="form-group">
-        <select v-model="attPayload.class_short" class="form-control cb-input"  >
+        <select v-model="attPayload.student_id" class="form-control cb-input"  >
           <option :value="null">-Student-</option>
           <template v-for="(student, index) in filteredAllStudents" :key="index">
             <option :value="student.id">[{{ student.id }}] {{student.name}} ({{ student.class_short }})</option>
