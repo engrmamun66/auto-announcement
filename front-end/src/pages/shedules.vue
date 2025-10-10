@@ -251,6 +251,7 @@ function deleteSchedule(id, i, type=1){
                     :minuteStep="5"
                     displayIn="top_left"
                     :adjustY="-205" 
+                    :openigAimationClass="'none-'"
                     style="width: 232px"
                     >
                    </TimePicker>
@@ -276,6 +277,7 @@ function deleteSchedule(id, i, type=1){
                     :minuteStep="5"
                     displayIn="top_left"
                     :adjustY="-205" 
+                    :openigAimationClass="'none-'"
                     style="width: 232px"
                     >
                    </TimePicker>
