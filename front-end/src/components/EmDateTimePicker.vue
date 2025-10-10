@@ -6,6 +6,7 @@
     :style="inputStyles"
     :disabled="isDisabled"
     v-bind="$attrs"
+    @click="$emit('click', $event)"
   />
 </template>
 
@@ -48,7 +49,7 @@ let props = defineProps({
   },
 });
 
-let emits = defineEmits(["update:modelValue", "change", "nextPrev", "opening", "changeTime"]);
+let emits = defineEmits(["update:modelValue", "change", "nextPrev", "opening", "changeTime", 'click']);
 
 let inputElement = ref(null);
 

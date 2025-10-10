@@ -1,7 +1,76 @@
+<script setup>
+import moment from 'moment/moment'
+import { inject, ref, reactive, onMounted, onBeforeUnmount, computed, watch } from "vue";
+import Ahelper from "./attendacnceHelper";
+
+const CONFIG = inject("CONFIG");
+const classes = inject("classes");
+const all_students = inject("all_students");
+const helper = inject("helper");
+const callbacks = inject("callbacks");
+const attendenceList = inject("attendenceList");
+const attendenceParams = inject("attendenceParams");
+const liveAttendenceList = inject("liveAttendenceList");
+import myTable from '../../components/myTable.vue'
+import Pagination from '../../components/Pagination.vue'
+import AdvanceSearchForm from './AdvanceSearchForm.vue'
+
+const pagiation_positon = CONFIG.value?.settings?.attendance?.pagination?.pagiation_positon || 'bottom_center'
+
+let getPositionClass = computed(() => {
+  if(pagiation_positon.endsWith('left')){
+    return 'justify-content-left'
+  }
+  else if(pagiation_positon.endsWith('center')){
+    return 'justify-content-center'
+  }
+  else if(pagiation_positon.endsWith('right')){
+    return 'justify-content-right'
+  }
+  else{
+    return 'justify-content-center'
+  }
+})
+
+let log = console.log
+
+let isMounted = ref(false)
+
+const getStudent = ({ student_id }) =>
+  all_students.value.find((std) => std.dakhela == student_id);
+
+
+let queryparams = {
+    student_id: null,
+    class_short: null,
+    start_date: null,
+    end_date: null,
+    date: null,
+    sort_by : "late_in_minute",  // default sort
+    sort_direction : "ASC"  // default order
+}
+ 
+onMounted(()=>{
+
+  callbacks.getAttendeceList()
+
+  setTimeout(() => {
+    isMounted.value = true
+  }, 500);
+})
+
+
+
+</script>
+
+
+
 <template>
   <div>
     
-    <AdvanceSearchForm></AdvanceSearchForm>
+    <AdvanceSearchForm
+    vm
+    ></AdvanceSearchForm>
      
     
     <myTable >
@@ -92,67 +161,6 @@
   </div>
 </template>
 
-<script setup>
-import moment from 'moment/moment'
-import { inject, ref, reactive, onMounted, onBeforeUnmount, computed, watch } from "vue";
-import Ahelper from "./attendacnceHelper";
-
-const CONFIG = inject("CONFIG");
-const classes = inject("classes");
-const all_students = inject("all_students");
-const helper = inject("helper");
-const callbacks = inject("callbacks");
-const attendenceList = inject("attendenceList");
-const attendenceParams = inject("attendenceParams");
-const liveAttendenceList = inject("liveAttendenceList");
-import myTable from '../../components/myTable.vue'
-import Pagination from '../../components/Pagination.vue'
-import AdvanceSearchForm from './AdvanceSearchForm.vue'
-
-const pagiation_positon = CONFIG.value?.settings?.attendance?.pagination?.pagiation_positon || 'bottom_center'
-
-let getPositionClass = computed(() => {
-  if(pagiation_positon.endsWith('left')){
-    return 'justify-content-left'
-  }
-  else if(pagiation_positon.endsWith('center')){
-    return 'justify-content-center'
-  }
-  else if(pagiation_positon.endsWith('right')){
-    return 'justify-content-right'
-  }
-  else{
-    return 'justify-content-center'
-  }
-})
-
-let log = console.log
-
-let isMounted = ref(false)
-
-const getStudent = ({ student_id }) =>
-  all_students.value.find((std) => std.dakhela == student_id);
-
-
-let attPayload = reactive({
-  classes: [],
-  students: [],
-  studentnameorid: '',
-  classSearchText: '',
-}) 
- 
-onMounted(()=>{
-
-  callbacks.getAttendeceList()
-
-  setTimeout(() => {
-    isMounted.value = true
-  }, 500);
-})
-
-
-
-</script>
 
 <style scoped>
 .attendance-card {

@@ -833,6 +833,7 @@ function onChange_dateTimePicker(data){
   border-radius: 10px;
   background: var(--grad2);
   box-shadow: 0px 43px 50px #00000061;
+  background-color: white;
 }
 @media screen and (max-width: 500px) {
   .add-form-wrapper{ 

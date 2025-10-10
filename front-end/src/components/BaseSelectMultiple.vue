@@ -24,7 +24,7 @@
                         H.delay(() => { 
                             if($refs.searchInput) $refs.searchInput.focus()
                         }, 100)
-                    }" class="form-control padding-as-input text-start cb-input overflo-height">
+                    }" class="form-control padding-as-input text-start cb-input overflow-height" :style="`--maxbaseheight:${maxHeight}`">
                         
 
 
@@ -220,6 +220,10 @@ let props = defineProps({
     },
     limit: {
         default: 999,
+        required: false,
+    },
+    maxHeight: {
+        default: '60px',
         required: false,
     },
 })
@@ -536,8 +540,8 @@ a.add-new-item{
 .clearAllItem:hover{ 
     box-shadow: 1px 3px 4px #00000059, inset -1px -1px 2px #000000ad;
 }
-.overflo-height{
-    max-height: 60px;
+.overflow-height{
+    max-height: var(--maxbaseheight);
     overflow-y: auto;
 }
 </style>

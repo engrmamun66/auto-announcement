@@ -14,6 +14,7 @@ import Player from '../components/Player.vue'
 import AudioRecorAndUpload from '../components/AudioRecorAndUpload.vue'
 import RecoringAnimation from '../components/RecoringAnimation.vue'
 import BaseSelectMultiple from '../components/BaseSelectMultiple.vue'
+import TimePicker from '../components/EmDateTimePicker.vue'
 
 let route = useRoute()
 let router = useRouter()
@@ -46,11 +47,28 @@ let payload = reactive({
     classes: [],
 })
 
+let startTimePicker = ref(null)
+let endTimePicker = ref(null)
+
 watch(addUpdateMode, (a, b)=>{
   payload.type = tab.value
-   
+  if(a === true){
+    updatePickersTime(10)
+  }
 })
 
+
+function updatePickersTime(delay=0){ 
+  setTimeout(() => {
+    startTimePicker.value.setTime(payload.start_time)
+    endTimePicker.value.setTime(payload.end_time)
+  }, delay);
+}
+
+
+function clickOnDocumentBody(){
+  document.body.click()
+}
 
 function clearPayload(){
   payload.id =  null
@@ -61,6 +79,7 @@ function clearPayload(){
   payload.classes =  []
   addUpdateMode.value = false;
   is___adding.value = false
+  clickOnDocumentBody()
 }
 
 function prepareEdit(item){
@@ -206,10 +225,8 @@ function deleteSchedule(id, i, type=1){
               <div class="col-12">
                 <div class="form-group">
                   <label for="">Classes 
-                    <button class="btn btn-sm bg-success text-white p-0 px-2 mb-1 me-1" @click.stop="payload.classes = helper.clone(classes)" >All</button>  
-                    <button class="btn btn-sm bg-danger text-white p-0 px-2 mb-1" @click.stop="payload.classes = []" >Clear</button>  
                   </label>
-                  <BaseSelectMultiple placeholder="Select Class" v-model="payload.classes" :label="false" :data="classes" displayKey="class_name" valueKey="class_name" ></BaseSelectMultiple>
+                  <BaseSelectMultiple placeholder="Select Class" v-model="payload.classes" :label="false" :data="classes" displayKey="class_name" valueKey="class_name" maxHeight="200px" ></BaseSelectMultiple>
                 </div>
               </div>
 
@@ -217,16 +234,53 @@ function deleteSchedule(id, i, type=1){
               <div class="col-6">
                 <div class="form-group">
                   <label for="name">Start</label>
-                  <input v-model="payload.start_time" type="time" class="form-control cb-input">
+                  <!-- <input v-model="payload.start_time" type="time" class="form-control cb-input"> -->
+                   <TimePicker ref="startTimePicker"
+                    v-model="payload.start_time"
+                    modelValueType="string"
+                    @change="log"
+                    @close="false"
+                    :displayFormat="'DD MMM, Y'"
+                    :rangePicker="false" 
+                    :onlyTimePicker="true" 
+                    :startTime="payload.start_time"  
+                    @click="updatePickersTime()"
+                    :timePickerButtons="true"
+                    :use24FormatTimeForEvents="true"
+                    :invisible="false"
+                    :minuteStep="5"
+                    displayIn="top_left"
+                    :adjustY="-205" 
+                    style="width: 232px"
+                    >
+                   </TimePicker>
                 </div>
               </div>
 
               <div class="col-6">
                 <div class="form-group">
                   <label for="name">End</label>
-                  <input v-model="payload.end_time" type="time" class="form-control cb-input">
+                  <TimePicker ref="endTimePicker"
+                    v-model="payload.end_time"
+                    modelValueType="string"
+                    @change="log"
+                    @close="false"
+                    :displayFormat="'DD MMM, Y'"
+                    :rangePicker="false" 
+                    :onlyTimePicker="true" 
+                    :startTime="payload.end_time"  
+                    @click="updatePickersTime()"
+                    :timePickerButtons="true"
+                    :use24FormatTimeForEvents="true"
+                    :invisible="false"
+                    :minuteStep="5"
+                    displayIn="top_left"
+                    :adjustY="-205" 
+                    style="width: 232px"
+                    >
+                   </TimePicker>
                 </div>
-              </div>
+              </div> 
 
 
          
@@ -234,7 +288,11 @@ function deleteSchedule(id, i, type=1){
 
               <div class="col-12 d-flex justify-content-center">
                 <Btn @click.stop="clearPayload()" class="red me-2" >Cancel</Btn>
-                <Btn class="me-0" @click.stop="payload.id ? updateSchedule() : addSchedule()" > {{ payload.id ? 'Update' : 'Submit' }} <BtnLoader v-if="is___adding"></BtnLoader> </Btn>
+                <Btn class="me-0" @click.stop="() => {
+                  clickOnDocumentBody()
+                  if(payload.id) updateSchedule()
+                  else addSchedule()
+                }" > {{ payload.id ? 'Update' : 'Submit' }} <BtnLoader v-if="is___adding"></BtnLoader> </Btn>
               </div> 
 
             </div>
