@@ -508,7 +508,7 @@ const callbacks = {
         if(!CONFIG.value?.card_owners?.length) return 1
         return CONFIG.value?.card_owners.find(owner => owner.id == id)?.name
     },
-    getAttendeceList({page_no=null, reset=false}={}){
+    getAttendeceList({page_no=null, reset=false, other_params={}}={}){
         try {
 
             if(reset){
@@ -521,6 +521,7 @@ const callbacks = {
             if(page_no){
                 queryParams.page_no = page_no
             }
+            queryParams = {...queryParams, ...other_params}
             
             http.get('/attendence-list', { params: queryParams }).then(response => {
                 if(response.status == 200){

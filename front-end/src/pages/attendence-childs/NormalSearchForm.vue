@@ -1,0 +1,239 @@
+<script setup>
+import moment from 'moment/moment'
+import { inject, ref, reactive, onMounted, onBeforeUnmount, computed, watch } from "vue";
+import Ahelper from "./attendacnceHelper";
+
+const CONFIG = inject("CONFIG");
+const classes = inject("classes");
+const all_students = inject("all_students");
+const helper = inject("helper");
+const callbacks = inject("callbacks");
+const attendenceList = inject("attendenceList");
+const attendenceParams = inject("attendenceParams");
+const liveAttendenceList = inject("liveAttendenceList");
+import myTable from '../../components/myTable.vue'
+import Pagination from '../../components/Pagination.vue'
+import BaseSelectMultiple from './../../components/BaseSelectMultiple.vue'
+import EmDateTimePicker from './../../components/EmDateTimePicker.vue'
+import Btn from './../../components/Btn.vue'
+
+ 
+
+const emit = defineEmits(['onBtnSubmit', 'onBtnClear']);
+let log = console.log
+
+let attPayload = reactive({ 
+  //-------------
+  date: null,
+  student_id: null, 
+  class_short: null,
+  sort_by : "late_in_minute",  // default sort
+  sort_direction : "ASC"  // default order
+}) 
+
+watch(()=> attPayload.class_short, (_class_short) => {
+  if(!_class_short){
+    attPayload.student_id = null
+  }
+},{deep: true})
+
+
+let dateRangePickerRef = ref(null)
+let pickerModelValue = ref(moment().format('Y-MM-DD'))
+
+
+let filteredAllStudents = computed(() => {
+  let students = helper.clone(all_students.value)
+  if(!attPayload.class_short) return students
+  if(attPayload.class_short){
+    return students.filter(student => student.class_short === attPayload.class_short)
+  } 
+  return students
+}) 
+
+
+ 
+
+
+function clearSearch() {  
+  attPayload.date = null,
+  attPayload.student_id = null, 
+  attPayload.class_short = null,
+  attPayload.sort_by = "late_in_minute", 
+  attPayload.sort_direction = "DESC"  
+  emit('onBtnClear', {...attPayload})
+}
+
+function submitSearch() { 
+
+  let data = { 
+    student_ids: [attPayload.student_id],
+    class_shorts: [attPayload.class_short],
+    date: attPayload.date, 
+  } 
+  emit('onBtnSubmit', data)
+}
+ 
+
+defineExpose({
+  
+})
+
+
+</script>
+
+
+<template>
+  <div>
+    
+    <div class="d-flex justify-content-start align-items-baseline flex-wrap gap-2">
+      <div class="position-relative">
+        <EmDateTimePicker ref="dateRangePickerRef"
+          v-model="pickerModelValue"
+          modelValueType="string"
+          @change="submitSearch"
+          @close="false"
+          :displayFormat="'DD-MMM-Y'"
+          :rangePicker="false" 
+          :timePicker="false" 
+          :startDate="pickerModelValue.startDate"  
+          :minDate="null"
+          :isDisabled="false"
+          :autoOpen="false"
+          :timePickerButtons="true"
+          :use24FormatTimeForEvents="true"
+          :invisible="false"
+          displayIn="bottom_left" 
+          :buttons="{applyBtn: 'Apply', todayBtn: true}"
+          :useCustomRange="CONFIG?.date_range_list ?? true"
+          style="width: 232px"
+          >
+        </EmDateTimePicker>
+        <i @click.stop="$refs.dateRangePickerRef.toggle()" class='bx bxs-calendar tooglerIcon' ></i>
+      </div>
+
+ 
+      <div class="form-group">
+        <select v-model="attPayload.class_short" class="form-control cb-input"  >
+          <option :value="null">-class-</option>
+          <template v-for="(cls, index) in classes" :key="index">
+            <option :value="cls.class_name">{{cls.class_name}}</option>
+          </template>                  
+        </select>
+      </div> 
+ 
+      <div class="form-group">
+        <select v-model="attPayload.class_short" class="form-control cb-input"  >
+          <option :value="null">-Student-</option>
+          <template v-for="(student, index) in filteredAllStudents" :key="index">
+            <option :value="student.id">[{{ student.id }}] {{student.name}} ({{ student.class_short }})</option>
+          </template>                  
+        </select>
+      </div> 
+ 
+      
+      <Btn @click.stop="submitSearch" cbinput="cbinput">Submit</Btn>
+      <Btn @click.stop="clearSearch" cbinput="cbinput" class="red">Clear</Btn>
+    </div>   
+  </div>
+</template>
+
+
+
+<style scoped>
+.attendance-card {
+  background: #fff;
+  border-radius: 10px;
+  padding: 1rem 1.2rem;
+  border: 1px solid #e2e2e2;
+  transition: all 0.25s ease;
+  color: #333;
+  padding-top: 40px;
+}
+
+.attendance-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.student-name{
+  margin-bottom: 10px;
+  font-weight: 700;
+  border: 1px solid;
+  border-bottom: 2px double;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 5px;
+  width: 100%;
+  text-align: center;
+}
+
+.status-present {
+  background-color: #198754; /* Bootstrap success green */
+  color: #fff !important;
+}
+
+.status-absent {
+  background-color: #dc3545; /* Bootstrap danger red */
+  color: #fff !important;
+}
+
+.status-outtime {
+  background-color: #0095b7; /* Bootstrap danger red */
+  color: #fff !important;
+}
+
+.status-outtime .badge,
+.status-present .badge,
+.status-absent .badge {
+  background: rgba(255, 255, 255, 0.2) !important;
+  color: #fff !important;
+}
+
+.remarks {
+  border-top: 1px dashed rgba(255, 255, 255, 0.4);
+  padding-top: 6px;
+  font-style: italic;
+}
+
+.no-data-card {
+  min-height: 250px;
+  background-color: #f8f9fa;
+  border: 1px dashed #ccc;
+}
+span[status]{
+  background-color: rgba(255, 255, 255, 0.161);
+    padding: 1px 8px 3px 6px;
+    border-radius: 6px;
+    color: #ffffff;
+    transform: translateY(-2px);
+    border: 1px solid white;
+}
+.popup{
+    position: absolute;
+    padding: 5px 15px;
+    text-align: center;
+    background-color: rgb(255, 255, 255);
+    border-radius: 0px 0px 5px 5px;
+    top: 1px;
+    box-shadow: 0px 1px 0px rgba(0, 0, 0, 0.489), inset 1px 1px 0px rgba(0, 0, 0, 0.175);
+    z-index: 1;
+  } 
+.popup.in-out{  
+    left: 50%;
+    top: 1px;
+    transform: translateX(-50%);
+    border-radius: 0px 0px 5px 5px;
+} 
+li{
+  margin-bottom: 6px;
+}
+.tooglerIcon{
+  position: absolute;
+  right: 5px;
+  top: 10px;
+  font-size: 20px;
+  cursor: pointer;
+  color: var(--primaryColor)
+}
+
+</style>

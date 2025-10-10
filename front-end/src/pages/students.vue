@@ -792,7 +792,7 @@ function onChange_dateTimePicker(data){
       v-model="pickerModelValue"
       @change="onChange_dateTimePicker"
       @close="false"
-      :displayFormat="'DD MMM, Y'"
+      :displayFormat="'DD-MMM-Y'"
       :rangePicker="false" 
       :timePicker="true" 
       :minDate="moment().subtract(1, 'month')"

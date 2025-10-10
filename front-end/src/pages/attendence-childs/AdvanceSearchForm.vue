@@ -17,21 +17,51 @@ import BaseSelectMultiple from './../../components/BaseSelectMultiple.vue'
 import EmDateTimePicker from './../../components/EmDateTimePicker.vue'
 import Btn from './../../components/Btn.vue'
 
+const props = defineProps({
+  modelValue: {
+    type: Object,
+    default: () => ({}),
+  },
+});
+
+const emit = defineEmits(['update:modelValue', 'onBtnSubmit', 'onBtnClear']);
+
+
+
 let log = console.log
 
-let attPayload = reactive({
-  classes: [],
-  students: [],
-  studentnameorid: '',
-  classSearchText: '',
+
+let queryparams = {
+    
+    start_date: null,
+    end_date: null, 
+    
+}
+
+let selectedClasses = ref([])
+let selectedStudents = ref([])
+let studentnameorid = ref('')
+let classSearchText = ref('')
+
+
+
+let attPayload = reactive({ 
+  //-------------
+  student_ids: null,
+  start_date: null,
+  end_date: null,
+  class_shorts: null,
+  sort_by : "late_in_minute",  // default sort
+  sort_direction : "ASC"  // default order
 }) 
 
-watch(()=> attPayload.classes, (_classes) => {
+watch(()=> selectedClasses, (_classes) => {
   if(_classes?.length === 0){
-    attPayload.students = []
+    selectedStudents.value = []
     attPayload.studentnameorid = ''
   }
 },{deep: true})
+
 
 let dateRangePickerRef = ref(null)
 let pickerModelValue = reactive({
@@ -41,28 +71,67 @@ let pickerModelValue = reactive({
 
 
 let filteredAllStudents = computed(() => {
-  let selected_class_shorts = attPayload.classes.map(cls => cls.class_short)
+  let selected_class_shorts = selectedClasses.value.map(cls => cls.class_short)
   let students = helper.clone(all_students.value)
   
   if(selected_class_shorts?.length){
     students = students.filter(student => selected_class_shorts.includes(student.class_short))
   }
-  if(attPayload.studentnameorid){
-    let is_id = /\d+/.test(attPayload.studentnameorid)
+  if(studentnameorid.value){
+    let is_id = /\d+/.test(studentnameorid.value)
     if(is_id){
-      students = students.filter(student => student.dakhela.toString().includes(attPayload.studentnameorid))
+      students = students.filter(student => student.dakhela.toString().includes(studentnameorid.value))
     } else {
-      students = students.filter(student => student.name.toLowerCase().includes(attPayload.studentnameorid.toLowerCase()))
+      students = students.filter(student => student.name.toLowerCase().includes(studentnameorid.value.toLowerCase()))
     }
   }
 
   return students
 })
 let filteredClasses = computed(() => {
-  if(!attPayload.classSearchText) return classes.value
-  let result = classes.value.filter(cls => cls.class_name.toLowerCase().includes(attPayload.classSearchText.toLowerCase()))
+  if(!classSearchText.value) return classes.value
+  let result = classes.value.filter(cls => cls.class_name.toLowerCase().includes(classSearchText.value.toLowerCase()))
   return result
 })
+
+
+ 
+
+
+function clearSearch() {
+  selectedClasses.value = [];
+  selectedStudents.value = [];
+  studentnameorid.value = '';
+  classSearchText.value = '';
+  pickerModelValue.startDate = moment().startOf('month');
+  pickerModelValue.endDate = new Date();
+  emit('update:modelValue', {
+    student_ids: null,
+    class_shorts: null,
+    start_date: null,
+    end_date: null,
+    date: null,
+    sort_by: 'late_in_minute',
+    sort_direction: 'ASC',
+  });
+  emit('onBtnClear', true)
+}
+
+function submitSearch() {
+  const studentIds = selectedStudents.value.map(s => s.id);
+  const classShorts = selectedClasses.value.map(c => c.class_short);
+
+  let data = {
+    ...props.modelValue,
+    student_ids: studentIds,
+    class_shorts: classShorts,
+    start_date: moment(pickerModelValue.startDate).format('YYYY-MM-DD'),
+    end_date: moment(pickerModelValue.endDate).format('YYYY-MM-DD'),
+  }
+
+  emit('update:modelValue', data); 
+  emit('onBtnSubmit', data)
+}
  
 
 defineExpose({
@@ -77,12 +146,37 @@ defineExpose({
   <div>
     
     <div class="d-flex justify-content-start align-items-baseline flex-wrap gap-2">
-        <BaseSelectMultiple placeholder="Select Classes" v-model="attPayload.classes" :label="false" :data="filteredClasses" displayKey="class_name" valueKey="class_name" :displayKey2="false" style="width: 250px" :search="true" :searchDelayTime="100" 
-          @searching="(search_text) => attPayload.classSearchText = search_text" >
+        <div class="position-relative">
+          <EmDateTimePicker ref="dateRangePickerRef"
+            v-model="pickerModelValue"
+            @change="submitSearch"
+            @close="false"
+            :displayFormat="'DD-MMM-Y'"
+            :rangePicker="true" 
+            :timePicker="false" 
+            :startDate="pickerModelValue.startDate" 
+            :endDate="pickerModelValue.endDate" 
+            :minDate="null"
+            :isDisabled="false"
+            :autoOpen="false"
+            :timePickerButtons="true"
+            :use24FormatTimeForEvents="true"
+            :invisible="false"
+            displayIn="bottom_left" 
+            :buttons="{applyBtn: 'Apply', todayBtn: true}"
+            :useCustomRange="CONFIG?.date_range_list ?? true"
+            style="width: 232px"
+            >
+          </EmDateTimePicker>
+          <i @click.stop="$refs.dateRangePickerRef.toggle()" class='bx bxs-calendar tooglerIcon' ></i>
+        </div>
+
+        <BaseSelectMultiple placeholder="Select Classes" v-model="selectedClasses" :label="false" :data="filteredClasses" displayKey="class_name" valueKey="class_name" :displayKey2="false" style="width: 250px" :search="true" :searchDelayTime="100" 
+          @searching="(search_text) => classSearchText = search_text" >
         </BaseSelectMultiple>
 
-        <BaseSelectMultiple placeholder="Select Students" v-model="attPayload.students" :label="false" :data="filteredAllStudents" displayKey="full_name" valueKey="id" style="width: 400px" :search="true" :searchDelayTime="100" 
-          @searching="(studentnameorid) => attPayload.studentnameorid = studentnameorid" >
+        <BaseSelectMultiple placeholder="Select Students" v-model="selectedStudents" :label="false" :data="filteredAllStudents" displayKey="full_name" valueKey="id" style="width: 400px" :search="true" :searchDelayTime="100" 
+          @searching="(search_text) => studentnameorid = search_text" >
           <template #loopItem1="{item, index}">
             <span class="badge text-dark bg-body-secondary ms-1">
               {{ item.class_short }}
@@ -95,32 +189,9 @@ defineExpose({
           </template>
         </BaseSelectMultiple>
 
-        <div class="position-relative">
-          <EmDateTimePicker ref="dateRangePickerRef"
-            v-model="pickerModelValue"
-            @change="onChangeDateRangePicker"
-            @close="false"
-            :displayFormat="'DD MMM, Y'"
-            :rangePicker="true" 
-            :timePicker="false" 
-            :startDate="pickerModelValue.startDate" 
-            :endDate="pickerModelValue.endDate" 
-            :minDate="null"
-            :isDisabled="false"
-            :autoOpen="false"
-            :timePickerButtons="true"
-            :use24FormatTimeForEvents="true"
-            :invisible="false"
-            displayIn="bottom_center" 
-            :buttons="{applyBtn: 'Apply', todayBtn: true}"
-            :useCustomRange="CONFIG?.date_range_list ?? true"
-            style="width: 232px"
-            >
-          </EmDateTimePicker>
-          <i @click.stop="$refs.dateRangePickerRef.toggle()" class='bx bxs-calendar tooglerIcon' ></i>
-        </div>
-      <Btn cbinput="cbinput">Submit</Btn>
-      <Btn cbinput="cbinput" class="red">Clear</Btn>
+       
+      <Btn @click.stop="submitSearch" cbinput="cbinput">Submit</Btn>
+      <Btn @click.stop="clearSearch" cbinput="cbinput" class="red">Clear</Btn>
     </div>   
  
   </div>

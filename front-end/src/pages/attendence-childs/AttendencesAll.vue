@@ -14,6 +14,7 @@ const liveAttendenceList = inject("liveAttendenceList");
 import myTable from '../../components/myTable.vue'
 import Pagination from '../../components/Pagination.vue'
 import AdvanceSearchForm from './AdvanceSearchForm.vue'
+import NormalSearchForm from './NormalSearchForm.vue'
 
 const pagiation_positon = CONFIG.value?.settings?.attendance?.pagination?.pagiation_positon || 'bottom_center'
 
@@ -68,9 +69,11 @@ onMounted(()=>{
 <template>
   <div>
     
-    <AdvanceSearchForm
-    vm
-    ></AdvanceSearchForm>
+    <NormalSearchForm
+    v-model="queryparams"
+    @onBtnClear="callbacks.getAttendeceList({page_no: 1, other_params: queryparams})"
+    @onBtnSubmit="log"
+    ></NormalSearchForm>
      
     
     <myTable >

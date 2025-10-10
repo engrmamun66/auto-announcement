@@ -223,7 +223,7 @@ let props = defineProps({
         required: false,
     },
     maxHeight: {
-        default: '60px',
+        default: '200px',
         required: false,
     },
 })
