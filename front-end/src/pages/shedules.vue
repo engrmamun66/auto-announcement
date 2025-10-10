@@ -197,11 +197,10 @@ function deleteSchedule(id, i, type=1){
 
 
 
- <template v-if="addUpdateMode">
-      <div class="w-100 d-flex justify-content-center">
-
-        <div class="add-form-wrapper">
-          <form @submit.prevent="false">
+      <Modal v-model="addUpdateMode" :title="payload?.id ? `Update Schedule` : `Add Schedule`">
+        <div class="w-100 d-flex justify-content-center">
+  
+          <form @submit.prevent="false" class="cb-form">
             <div class="row mt-4">
 
         
@@ -288,7 +287,7 @@ function deleteSchedule(id, i, type=1){
          
 
 
-              <div class="col-12 d-flex justify-content-center">
+              <div class="col-12 d-flex justify-content-center mt-3">
                 <Btn @click.stop="clearPayload()" class="red me-2" >Cancel</Btn>
                 <Btn class="me-0" @click.stop="() => {
                   clickOnDocumentBody()
@@ -298,16 +297,14 @@ function deleteSchedule(id, i, type=1){
               </div> 
 
             </div>
-          </form>
+          </form> 
+  
         </div>
-
-      </div>
-    </template>
+      </Modal> 
 
 
-
-
-    <template v-else>
+ 
+    <template v-if="true">
 
       <ul class="nav nav-tabs mt-4 bottom-borderless">
         <li class="nav-item">

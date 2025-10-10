@@ -497,4 +497,6 @@ kbd {
     box-shadow: 1px 1px 2px #0000006e, inset 1px 1px 2px #0000006e;
 } 
 
- 
+.cb-form .form-group{
+    margin-bottom: 15px;
+}
