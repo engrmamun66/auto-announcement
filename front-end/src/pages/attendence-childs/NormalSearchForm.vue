@@ -94,56 +94,60 @@ defineExpose({
 <template>
   <div>
     
-    <div class="d-flex justify-content-start align-items-baseline flex-wrap gap-2">
-      <div class="position-relative">
-        <EmDateTimePicker ref="dateRangePickerRef"
-          v-model="pickerModelValue"
-          modelValueType="object"
-          @change="submitSearch"
-          @initialized="helper.delay(clearPicker, 0)"
-          @close="false"
-          :displayFormat="'DD-MMM-Y'"
-          :rangePicker="false" 
-          :timePicker="false" 
-          :startDate="pickerModelValue"  
-          :minDate="null"
-          :isDisabled="false"
-          :autoOpen="false"
-          :pickerHideEachClick="true"
-          :use24FormatTimeForEvents="true"
-          :invisible="false"
-          displayIn="bottom_left" 
-          :_buttons="{applyBtn: 'Apply', todayBtn: true}"
-          :buttons="false"
-          :useCustomRange="CONFIG?.date_range_list ?? true"
-          style="width: 232px"
-          >
-        </EmDateTimePicker>
-        <i @click.stop="$refs.dateRangePickerRef.toggle()" class='bx bxs-calendar tooglerIcon' ></i>
+    <div class="row">
+      <div class="col-12">
+        <div class="d-flex flex-column gap-3 overflow-x-auto">
+          <EmDateTimePicker ref="dateRangePickerRef"
+            v-model="pickerModelValue"
+            modelValueType="object"
+            @change="submitSearch"
+            @initialized="helper.delay(clearPicker, 0)"
+            @close="false"
+            :displayFormat="'DD-MMM-Y'"
+            :rangePicker="false" 
+            :timePicker="false" 
+            :startDate="pickerModelValue"  
+            :minDate="null"
+            :isDisabled="false"
+            :autoOpen="false"
+            :pickerHideEachClick="true"
+            :use24FormatTimeForEvents="true"
+            :invisible="true"
+            :sticky="true"
+            displayIn_="bottom_left" 
+            displayIn="inline_center" 
+            :_buttons="{applyBtn: 'Apply', todayBtn: true}"
+            :buttons="false"
+            :useCustomRange="CONFIG?.date_range_list ?? true"
+            style="width: 232px"
+            >
+          </EmDateTimePicker>
+          <div class="form-group">
+            <select v-model="attPayload.class_short" class="form-control cb-input" @change="submitSearch" >
+              <option :value="null">-class-</option>
+              <template v-for="(cls, index) in classes" :key="index">
+                <option :value="cls.class_short">{{cls.class_name}}</option>
+              </template>                  
+            </select>
+          </div> 
+          <div class="form-group">
+            <select v-model="attPayload.student_id" class="form-control cb-input" @change="submitSearch" >
+              <option :value="null">-Student-</option>
+              <template v-for="(student, index) in filteredAllStudents" :key="index">
+                <option :value="student.id">[{{ student.id }}] {{student.name}} ({{ student.class_short }})</option>
+              </template>                  
+            </select>
+          </div> 
+        </div> 
+      </div> 
+ 
+      <div class="col-12 mt-3">
+        <div class="d-flex justify-content-center gap-3">
+          <Btn @click.stop="submitSearch" cbinput="cbinput">Submit</Btn>
+          <Btn @click.stop="clearSearch" cbinput="cbinput" class="red">Clear</Btn>
+        </div>
       </div>
 
- 
-      <div class="form-group">
-        <select v-model="attPayload.class_short" class="form-control cb-input"  >
-          <option :value="null">-class-</option>
-          <template v-for="(cls, index) in classes" :key="index">
-            <option :value="cls.class_short">{{cls.class_name}}</option>
-          </template>                  
-        </select>
-      </div> 
- 
-      <div class="form-group">
-        <select v-model="attPayload.student_id" class="form-control cb-input"  >
-          <option :value="null">-Student-</option>
-          <template v-for="(student, index) in filteredAllStudents" :key="index">
-            <option :value="student.id">[{{ student.id }}] {{student.name}} ({{ student.class_short }})</option>
-          </template>                  
-        </select>
-      </div> 
- 
-      
-      <Btn @click.stop="submitSearch" cbinput="cbinput">Submit</Btn>
-      <Btn @click.stop="clearSearch" cbinput="cbinput" class="red">Clear</Btn>
     </div>   
   </div>
 </template>

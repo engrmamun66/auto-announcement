@@ -67,101 +67,106 @@ onMounted(()=>{
 
 
 <template>
-  <div>
+  <div class="row">
+
+    <div class="col-md-4">
+      <NormalSearchForm
+      @onBtnClear=" callbacks.getAttendeceList({page_no: 1})"
+      @onBtnSubmit="(other_params) => {
+        callbacks.getAttendeceList({page_no: 1, other_params})
+      }"
+      ></NormalSearchForm>
+    </div>
     
-    <NormalSearchForm
-    @onBtnClear=" callbacks.getAttendeceList({page_no: 1})"
-    @onBtnSubmit="(other_params) => {
-      callbacks.getAttendeceList({page_no: 1, other_params})
-    }"
-    ></NormalSearchForm>
      
     
-    <myTable >
-      <template #thead>
-        <thead>
-          <tr> 
-            <th>ID</th>
-            <th>Name</th>
-            <th>Class</th>  
-            <th>Date</th>  
-            <th>Status</th>  
-            <th>Shift</th>  
-          </tr>
-        </thead>
-      </template>
-      <template #rows>
-        <template v-if="attendenceList?.length">
-          <template v-for="(item, i) in attendenceList">
-            <tr>
+    <div class="col-md-8">
+      <myTable class="transformY-5px" style="--transformY: -8px">
+        <template #thead>
+          <thead>
+            <tr> 
+              <th>ID</th>
+              <th>Name</th>
+              <th>Class</th>  
+              <th>Date</th>  
+              <th>Status</th>  
+              <th>Shift</th>  
+            </tr>
+          </thead>
+        </template>
+        <template #rows>
+          <template v-if="attendenceList?.length">
+            <template v-for="(item, i) in attendenceList">
+              <tr>
+                  
+                <td> {{ item.id }} </td> 
+                <td @auxclick.stop="log(item)"> {{ getStudent(item)?.name }} </td>                   
+                <td> {{ getStudent(item)?.class }} </td>                   
+                <td style="width: 130px;"> <span class="inline">{{ item.date }}</span> </td>                   
+                <td> 
+                  <div style="width: 170px" class="d-flex justify-content-between">
+                    <span class="badge text-white bg-secondary">
+                      {{ item.in_time ? 'IN' : 'OUT' }}
+                    </span> 
+                    <template v-if="item.status == 'Late'" >
+                      <span class="badge text-white bg-danger">
+                        {{ item.status }}
+                      </span> 
+                      <span class="badge text-white bg-danger">
+                        {{ item?.late_in_minute || 0 }} {{ helper.wordForm('minute', item?.late_in_minute ) }}
+                      </span> 
+                    </template>
+
+                    <template v-else>
+                      <span class="badge text-white bg-success">
+                        {{ item.status }}
+                      </span> 
+                      <span class="badge text-white bg-success">
+                        {{ item?.late_in_minute || 0 }} {{ helper.wordForm('minute', item?.late_in_minute ) }}
+                      </span> 
+                    </template>
+                  </div>
+                </td>                   
+                <td>{{ Ahelper.printShift(item?.shift_duration) }}</td> 
+                                
+                <!-- <td> 
+                  <div class="d-flex justify-content-center action-icons">
+                      <i  class='bx bx-barcode cp size-1p5' ></i>
+                      
+                      <span tooltip="Copy barcode">
+                        <i  class='bx bxs-copy-alt cp px-1' style="font-size: 18px" ></i>
+                      </span>
+                      
+
+                      <span tooltip="Delete student">
+                        <i   class='bx bx-trash text-danger cp' ></i>
+                      </span>
+          
+                    </div>  
+                </td>                    -->
+                                
+          
                 
-              <td> {{ item.id }} </td> 
-              <td @auxclick.stop="log(item)"> {{ getStudent(item)?.name }} </td>                   
-              <td> {{ getStudent(item)?.class }} </td>                   
-              <td style="width: 130px;"> <span class="inline">{{ item.date }}</span> </td>                   
-              <td> 
-                <div style="width: 160px" class="d-flex justify-content-between">
-                  <span class="badge text-white bg-secondary">
-                    {{ item.in_time ? 'IN' : 'OUT' }}
-                  </span> 
-                  <template v-if="item.status == 'Late'" >
-                    <span class="badge text-white bg-danger">
-                      {{ item.status }}
-                    </span> 
-                    <span class="badge text-white bg-danger">
-                      {{ item?.late_in_minute || 0 }} {{ helper.wordForm('minute', item?.late_in_minute ) }}
-                    </span> 
-                  </template>
+            </tr> 
 
-                  <template v-else>
-                    <span class="badge text-white bg-success">
-                      {{ item.status }}
-                    </span> 
-                    <span class="badge text-white bg-success">
-                      {{ item?.late_in_minute || 0 }} {{ helper.wordForm('minute', item?.late_in_minute ) }}
-                    </span> 
-                  </template>
-                </div>
-              </td>                   
-              <td>{{ Ahelper.printShift(item?.shift_duration) }}</td> 
-                              
-              <!-- <td> 
-                <div class="d-flex justify-content-center action-icons">
-                    <i  class='bx bx-barcode cp size-1p5' ></i>
-                    
-                    <span tooltip="Copy barcode">
-                      <i  class='bx bxs-copy-alt cp px-1' style="font-size: 18px" ></i>
-                    </span>
-                    
-
-                    <span tooltip="Delete student">
-                      <i   class='bx bx-trash text-danger cp' ></i>
-                    </span>
-        
-                  </div>  
-              </td>                    -->
-                               
-        
-              
-          </tr> 
-
-          
-          
+            
+            
+            </template>
+          </template>
+          <template v-else>
+            <tr>
+                <td colspan="88" class="text-center">No Attendance Found</td>                 
+            </tr>
           </template>
         </template>
-        <template v-else>
-          <tr>
-              <td colspan="88" class="text-center">No Attendance Found</td>                 
-          </tr>
-        </template>
-      </template>
-    </myTable> 
+      </myTable> 
 
-    <div v-if="pagiation_positon.startsWith('bottom')" class="d-flex" :class="[getPositionClass]">
-        <Pagination v-if="attendenceParams?.totalPages > 1" v-model="attendenceParams" @jumpToPage="(page_no) => {
-          callbacks.getAttendeceList({page_no})
-        }" ></Pagination>
-    </div> 
+      <div v-if="pagiation_positon.startsWith('bottom')" class="d-flex" :class="[getPositionClass]">
+          <Pagination v-if="attendenceParams?.totalPages > 1" v-model="attendenceParams" @jumpToPage="(page_no) => {
+            callbacks.getAttendeceList({page_no})
+          }" ></Pagination>
+      </div> 
+    </div>
   </div>
 </template>
 
