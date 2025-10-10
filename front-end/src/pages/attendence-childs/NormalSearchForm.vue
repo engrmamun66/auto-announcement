@@ -62,6 +62,7 @@ function clearSearch() {
   attPayload.sort_by = "late_in_minute", 
   attPayload.sort_direction = "DESC"  
   emit('onBtnClear', {...attPayload})
+  clearPicker()
 }
 
 function submitSearch(eventData={}) { 
@@ -75,6 +76,10 @@ function submitSearch(eventData={}) {
     sort_direction: attPayload.sort_direction,
   } 
   emit('onBtnSubmit', data)
+}
+
+function clearPicker(){
+  dateRangePickerRef.value.clearPicker()
 }
  
 
@@ -95,7 +100,7 @@ defineExpose({
           v-model="pickerModelValue"
           modelValueType="object"
           @change="submitSearch"
-          @initialized="helper.delay(()=>$refs.dateRangePickerRef.clearPicker(), 0)"
+          @initialized="helper.delay(clearPicker, 0)"
           @close="false"
           :displayFormat="'DD-MMM-Y'"
           :rangePicker="false" 

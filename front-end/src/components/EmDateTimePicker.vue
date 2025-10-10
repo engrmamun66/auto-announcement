@@ -239,7 +239,7 @@ defineExpose({
     inputElement.value.emDateTimePicker("update_options", options);
   },
   clearPicker: function () {
-    inputElement.value.value = ''
+    inputElement.value.emDateTimePicker("clear");
   },
   setHolidays: setHolidays,
 });
