@@ -49,7 +49,7 @@ let props = defineProps({
   },
 });
 
-let emits = defineEmits(["update:modelValue", "change", "nextPrev", "opening", "changeTime", 'click']);
+let emits = defineEmits(["update:modelValue", "change", "nextPrev", "opening", "changeTime", 'click', 'initialized']);
 
 let inputElement = ref(null);
 
@@ -168,6 +168,7 @@ onMounted(() => {
       ...useAttrs(),
     })
     .onEvent("initialized", (data) => {
+      emits('initialized', data)
       if(props.fireNextPrevOnMount){
         setTimeout(() => {
           inputElement.value.triggerEvent('next')
@@ -236,6 +237,9 @@ defineExpose({
   },
   updateOptions: function (options) {
     inputElement.value.emDateTimePicker("update_options", options);
+  },
+  clearPicker: function () {
+    inputElement.value.value = ''
   },
   setHolidays: setHolidays,
 });

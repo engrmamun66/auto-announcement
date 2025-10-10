@@ -95,6 +95,7 @@ defineExpose({
           v-model="pickerModelValue"
           modelValueType="object"
           @change="submitSearch"
+          @initialized="helper.delay(()=>$refs.dateRangePickerRef.clearPicker(), 0)"
           @close="false"
           :displayFormat="'DD-MMM-Y'"
           :rangePicker="false" 

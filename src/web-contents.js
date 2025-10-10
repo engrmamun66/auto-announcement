@@ -23,7 +23,7 @@ module.exports = `
     <script src="/dist/assets/my-announcement.min.js"></script>
     ${laod_date_picker_from_http_server 
         ? '<script src="http://localhost:4545/assets/em-datetimepicker.min.js" async="true" defer="true"></script>' 
-        : '<scriptsrc="./../em-datetimepicker.min.js" async="true" defer="true"></scriptsrc=>'
+        : '<script src="./../em-datetimepicker.min.js" async="true" defer="true"></script>'
     }
     <!-- CSS_VARS -->
 </head>
