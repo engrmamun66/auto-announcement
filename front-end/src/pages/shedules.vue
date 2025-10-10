@@ -224,7 +224,7 @@ function deleteSchedule(id, i, type=1){
       <Modal v-model="addUpdateMode" :title="payload?.id ? `Update Schedule` : `Add Schedule`">
         <div class="w-100 d-flex justify-content-center">
   
-          <form @submit.prevent="false" class="cb-form">
+          <form @submit.prevent="false" class="cb-form" @click="clickOnDocumentBody">
             <div class="row mt-4">
 
         
@@ -267,12 +267,12 @@ function deleteSchedule(id, i, type=1){
                     :onlyTimePicker="true" 
                     :startTime="payload.start_time"  
                     @click="updatePickersTime()"
-                    :timePickerButtons="true"
+                    :timePickerButtons="false"
                     :use24FormatTimeForEvents="true"
                     :invisible="false"
                     :minuteStep="5"
                     displayIn="top_left"
-                    :adjustY="-205" 
+                    :adjustY="-144" 
                     :openigAimationClass="'none-'"
                     style="width: 232px"
                     >
@@ -293,12 +293,12 @@ function deleteSchedule(id, i, type=1){
                     :onlyTimePicker="true" 
                     :startTime="payload.end_time"  
                     @click="updatePickersTime()"
-                    :timePickerButtons="true"
+                    :timePickerButtons="false"
                     :use24FormatTimeForEvents="true"
                     :invisible="false"
                     :minuteStep="5"
                     displayIn="top_left"
-                    :adjustY="-205" 
+                    :adjustY="-144" 
                     :openigAimationClass="'none-'"
                     style="width: 232px"
                     >
@@ -398,7 +398,7 @@ function deleteSchedule(id, i, type=1){
               </tr> 
               <tr v-if="item.showClasses">
                 <td></td>
-                <td colspan="2">
+                <td colspan="3">
                   <div class="d-flex justify-content-center align-content-center gap-2 flex-wrap">
                     <template v-for="cls in item.classes">
                       <div class="badge bg-body-secondary text-black p-1 px-2">

@@ -23,6 +23,7 @@ let emits = defineEmits(['update:modelValue', 'close'])
 function close(){
     emits("update:modelValue", false);
     emits("close", false);
+    document.body.click() // it will hide all pickers
 }
 
 </script>
