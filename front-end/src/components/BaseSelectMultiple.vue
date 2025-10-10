@@ -18,10 +18,13 @@
                         H.delay(() => { 
                             if($refs.searchInput) $refs.searchInput.focus()
                         }, 100)
-                    }" class="form-control padding-as-input text-start cb-input">
+                    }" class="form-control padding-as-input text-start cb-input overflo-height">
                         
-                        <span v-if="modelValue?.length" tooltip="Remove All Items" @click.stop="removeAllItems()" class="clearAllItem">
+                        <span v-if="modelValue?.length" tooltip="Remove All Items" flow="left" style="--tbg:#ffffff" @click.stop="removeAllItems()" class="clearAllItem">
                             <i class="bx bx-x" ></i>
+                        </span>
+                        <span v-else tooltip="Select All" flow="left" style="--tbg:#ffffff" @click.stop="selectAll()" class="clearAllItem">
+                            <i class='bx bx-check-double' ></i>
                         </span>
 
 
@@ -245,6 +248,10 @@ function removeAllItems(){
     })
 
 }
+function selectAll(){ 
+    myEmit('update:modelValue', props.data) 
+    update_v_validation()
+}
 
 watch(showOptions, (a, b) => {
     if(a === false){
@@ -260,7 +267,7 @@ const myEmit = defineEmits(['update:modelValue', 'changed-item', 'clicked', 'cli
 const updateValue = (event, id, item) => {
     let {valueKey, modelValue} = props
     try {
-        event.stopPropagation();
+        if(event) event.stopPropagation();
         if(item){
             if(!modelValue?.map(i => i[valueKey]).includes(id)){
                 var new_data = H.clone(modelValue)
@@ -374,7 +381,7 @@ let random_id = computed(() => ('random_' + H.randomBetween(333, 294444)))
     min-height: 38px;
     height: auto;
     width: 100% !important;
-    padding-right: 25px;
+    padding-right: 33px;
 }
 .btn-options-toggler button .selected-items {
     padding: 5px 0px;
@@ -518,7 +525,7 @@ a.add-new-item{
     top: 8px;
     right: 5px;
     background-color: white;
-    padding: 1px;
+    padding: 1px 4px;
     border-radius: 4px;
     cursor: pointer;
     z-index: 11;
@@ -529,5 +536,9 @@ a.add-new-item{
 }
 .clearAllItem:hover{ 
     box-shadow: 1px 3px 4px #00000059, inset -1px -1px 2px #000000ad;
+}
+.overflo-height{
+    max-height: 60px;
+    overflow-y: auto;
 }
 </style>

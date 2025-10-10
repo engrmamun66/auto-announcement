@@ -45,6 +45,7 @@
       <Btn cbinput="cbinput">Submit</Btn>
       <Btn cbinput="cbinput" class="red">Clear</Btn>
     </div>  
+
     
     <myTable >
       <template #thead>

@@ -123,11 +123,12 @@ class myDB {
               `
               CREATE TABLE IF NOT EXISTS class_holidays (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+                type TEXT NOT NULL, -- e.g., 'holiday', 'leave', 'event'
                 holi_by TEXT NOT NULL DEFAULT class_short, -- class_short | student
                 class_short TEXT DEFAULT NULL, -- refers to class or class_short from students
                 student_id INTEGER DEFAULT NULL, -- refers to class or class_short from students
-                holiday_date DATE NOT NULL,
-                type TEXT NOT NULL, -- e.g., 'holiday', 'leave', 'event'
+                weekday DATE NOT NULL,
+                date DATE NOT NULL,
                 reason TEXT DEFAULT NULL,
                 device_index INTEGER DEFAULT 1, -- zkteco punching device index
                 created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
