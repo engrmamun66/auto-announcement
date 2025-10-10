@@ -2,11 +2,11 @@
   <div>
     
     <div class="d-flex justify-content-start align-items-center gap-2">
-        <BaseSelectMultiple placeholder="Select Classes" v-model="attPayload.classes" :label="false" :data="filteredClasses" displayKey="class_name" valueKey="class_name" :displayKey2="false" style="min-width: 250px" :search="true" :searchDelayTime="150" 
+        <BaseSelectMultiple placeholder="Select Classes" v-model="attPayload.classes" :label="false" :data="filteredClasses" displayKey="class_name" valueKey="class_name" :displayKey2="false" style="min-width: 250px" :search="true" :searchDelayTime="100" 
           @searching="(search_text) => attPayload.classSearchText = search_text" >
         </BaseSelectMultiple>
 
-        <BaseSelectMultiple placeholder="Select Students" v-model="attPayload.students" :label="false" :data="filteredAllStudents" displayKey="full_name" valueKey="id" style="min-width: 350px" :search="true" :searchDelayTime="150" 
+        <BaseSelectMultiple placeholder="Select Students" v-model="attPayload.students" :label="false" :data="filteredAllStudents" displayKey="full_name" valueKey="id" style="min-width: 350px" :search="true" :searchDelayTime="100" 
           @searching="(studentnameorid) => attPayload.studentnameorid = studentnameorid" >
           <template #loopItem1="{item, index}">
             <span class="badge text-dark bg-body-secondary ms-1">
@@ -28,6 +28,8 @@
             :displayFormat="'DD MMM, Y'"
             :rangePicker="true" 
             :timePicker="false" 
+            :startDate="pickerModelValue.startDate" 
+            :endDate="pickerModelValue.endDate" 
             :minDate="null"
             :isDisabled="false"
             :autoOpen="false"
@@ -36,11 +38,11 @@
             :invisible="false"
             displayIn="bottom_center" 
             :buttons="{applyBtn: 'Apply', todayBtn: true}"
-            style="width: 250px"
             :useCustomRange="CONFIG?.date_range_list ?? true"
+            style="width: 232px"
             >
           </EmDateTimePicker>
-          <i  class='bx bxs-calendar-x' ></i>
+          <i @click.stop="$refs.dateRangePickerRef.toggle()" class='bx bxs-calendar tooglerIcon' ></i>
         </div>
       <Btn cbinput="cbinput">Submit</Btn>
       <Btn cbinput="cbinput" class="red">Clear</Btn>
@@ -69,31 +71,8 @@ import EmDateTimePicker from './../../components/EmDateTimePicker.vue'
 import Btn from './../../components/Btn.vue'
 
 const pagiation_positon = CONFIG.value?.settings?.attendance?.pagination?.pagiation_positon || 'bottom_center'
-
-let getPositionClass = computed(() => {
-  if(pagiation_positon.endsWith('left')){
-    return 'justify-content-left'
-  }
-  else if(pagiation_positon.endsWith('center')){
-    return 'justify-content-center'
-  }
-  else if(pagiation_positon.endsWith('right')){
-    return 'justify-content-right'
-  }
-  else{
-    return 'justify-content-center'
-  }
-})
-
+ 
 let log = console.log
-
-let isMounted = ref(false)
-
-const getStudent = ({ student_id }) =>
-  all_students.value.find((std) => std.dakhela == student_id);
-
-
-
 
 let attPayload = reactive({
   classes: [],
@@ -111,8 +90,8 @@ watch(()=> attPayload.classes, (_classes) => {
 
 let dateRangePickerRef = ref(null)
 let pickerModelValue = reactive({
-  startDate: new Date(),
-  endDate: new Date(),
+  startDate: moment().startOf('month'),
+  endDate: new Date()
 })
 
 
@@ -139,33 +118,11 @@ let filteredClasses = computed(() => {
   let result = classes.value.filter(cls => cls.class_name.toLowerCase().includes(attPayload.classSearchText.toLowerCase()))
   return result
 })
+ 
 
-
-
-function clearAllAndRelaod(){
-  if(!confirm('Clear-all and relaod?')) return
-  liveAttendenceList.value = []
-  window.location.reload()
-}
-
-
-function onChangeDateRangePicker(){
-  let params = {
-
-  }
-  console.log();
-}
-
-
-onMounted(()=>{
-
-  callbacks.getAttendeceList()
-
-  setTimeout(() => {
-    isMounted.value = true
-  }, 500);
+defineExpose({
+  
 })
-
 
 
 </script>
@@ -257,7 +214,7 @@ span[status]{
 li{
   margin-bottom: 6px;
 }
-.bxs-calendar-x{
+.tooglerIcon{
   position: absolute;
   right: 5px;
   top: 10px;

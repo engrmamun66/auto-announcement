@@ -14,7 +14,7 @@ class Attendance {
     }
 
      // Get attendance records
-     list(req, res) {
+     ___list(req, res) {
       const page_no = parseInt(req.query.page_no) || 1;
       const limit = parseInt(req.query.limit) || 100;
       const offset = (page_no - 1) * limit;
