@@ -1,12 +1,12 @@
 <template>
   <div>
     
-    <div class="d-flex justify-content-start align-items-center gap-2">
-        <BaseSelectMultiple placeholder="Select Classes" v-model="attPayload.classes" :label="false" :data="filteredClasses" displayKey="class_name" valueKey="class_name" :displayKey2="false" style="min-width: 250px" :search="true" :searchDelayTime="100" 
+    <div class="d-flex justify-content-start align-items-baseline gap-2">
+        <BaseSelectMultiple placeholder="Select Classes" v-model="attPayload.classes" :label="false" :data="filteredClasses" displayKey="class_name" valueKey="class_name" :displayKey2="false" style="width: 250px" :search="true" :searchDelayTime="100" 
           @searching="(search_text) => attPayload.classSearchText = search_text" >
         </BaseSelectMultiple>
 
-        <BaseSelectMultiple placeholder="Select Students" v-model="attPayload.students" :label="false" :data="filteredAllStudents" displayKey="full_name" valueKey="id" style="min-width: 350px" :search="true" :searchDelayTime="100" 
+        <BaseSelectMultiple placeholder="Select Students" v-model="attPayload.students" :label="false" :data="filteredAllStudents" displayKey="full_name" valueKey="id" style="width: 400px" :search="true" :searchDelayTime="100" 
           @searching="(studentnameorid) => attPayload.studentnameorid = studentnameorid" >
           <template #loopItem1="{item, index}">
             <span class="badge text-dark bg-body-secondary ms-1">

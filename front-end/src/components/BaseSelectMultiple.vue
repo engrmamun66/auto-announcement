@@ -13,10 +13,10 @@
                     ></ShimmerEffect> -->
                     </template>
                 <template v-else >
-                    <span v-if="modelValue?.length" tooltip="Remove All Items" flow="left" style="--tbg:#ffffff" @click.stop="removeAllItems()" class="clearAllItem">
+                    <span v-if="modelValue?.length" tooltip="Remove All Items" flow="left" style="--tbg:#e25e16;--tcolor:white" @click.stop="removeAllItems()" class="clearAllItem">
                         <i class="bx bx-x" ></i>
                     </span>
-                    <span v-else tooltip="Select All" flow="left" style="--tbg:#ffffff" @click.stop="selectAll()" class="clearAllItem">
+                    <span v-else tooltip="Select All" flow="left" style="--tbg:#e25e16;--tcolor:white" @click.stop="selectAll()" class="clearAllItem">
                         <i class='bx bx-check-double' ></i>
                     </span>
                     <button :tooltip="(modelValue?.length ? tooltip : '') || (disabled ? 'Disabled' : '')" ref="ref_button" :disabled="disabled" @click="()=>{
