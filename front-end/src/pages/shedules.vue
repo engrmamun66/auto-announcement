@@ -206,7 +206,7 @@ function deleteSchedule(id, i, type=1){
         
               <div class="col-12">
                 <div class="form-group">
-                  <label for="name">Type</label>
+                  <label for="">Type</label>
                   <select v-model="payload.type" class="form-control cb-input">
                     <option value="1">Punch</option>
                     <option value="2">Call</option>
@@ -216,15 +216,14 @@ function deleteSchedule(id, i, type=1){
         
               <div class="col-12">
                 <div class="form-group">
-                  <label for="name">Title</label>
+                  <label for="">Title</label>
                   <input v-model="payload.title" type="text" class="form-control cb-input">
                 </div>
               </div>
               
               <div class="col-12">
                 <div class="form-group">
-                  <label for="">Classes 
-                  </label>
+                  <label for="">Classes </label>
                   <BaseSelectMultiple placeholder="Select Class" v-model="payload.classes" :label="false" :data="classes" displayKey="class_name" valueKey="class_name" maxHeight="200px" ></BaseSelectMultiple>
                 </div>
               </div>
@@ -232,7 +231,7 @@ function deleteSchedule(id, i, type=1){
 
               <div class="col-6">
                 <div class="form-group">
-                  <label for="name">Start</label>
+                  <label for="">Start</label>
                   <!-- <input v-model="payload.start_time" type="time" class="form-control cb-input"> -->
                    <TimePicker ref="startTimePicker"
                     v-model="payload.start_time"
@@ -259,7 +258,7 @@ function deleteSchedule(id, i, type=1){
 
               <div class="col-6">
                 <div class="form-group">
-                  <label for="name">End</label>
+                  <label for="">End</label>
                   <TimePicker ref="endTimePicker"
                     v-model="payload.end_time"
                     modelValueType="string"
