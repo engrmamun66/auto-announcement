@@ -70,9 +70,10 @@ onMounted(()=>{
   <div>
     
     <NormalSearchForm
-    v-model="queryparams"
-    @onBtnClear="callbacks.getAttendeceList({page_no: 1, other_params: queryparams})"
-    @onBtnSubmit="log"
+    @onBtnClear=" callbacks.getAttendeceList({page_no: 1})"
+    @onBtnSubmit="(other_params) => {
+      callbacks.getAttendeceList({page_no: 1, other_params})
+    }"
     ></NormalSearchForm>
      
     

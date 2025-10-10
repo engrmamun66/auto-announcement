@@ -1,3 +1,7 @@
+
+
+let laod_date_picker_from_http_server = false
+
 module.exports = `
 <!DOCTYPE html>
 <html lang="en">
@@ -17,7 +21,10 @@ module.exports = `
     </script>
     <link rel="stylesheet" href="/dist/assets/my-announcement.min.css">
     <script src="/dist/assets/my-announcement.min.js"></script>
-    <script src="./../em-datetimepicker.min.js" async="true" defer="true"></script>
+    ${laod_date_picker_from_http_server 
+        ? '<script src="http://localhost:4545/assets/em-datetimepicker.min.js" async="true" defer="true"></script>' 
+        : '<scriptsrc="./../em-datetimepicker.min.js" async="true" defer="true"></scriptsrc=>'
+    }
     <!-- CSS_VARS -->
 </head>
 

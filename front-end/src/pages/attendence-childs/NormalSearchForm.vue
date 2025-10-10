@@ -64,12 +64,13 @@ function clearSearch() {
   emit('onBtnClear', {...attPayload})
 }
 
-function submitSearch() { 
+function submitSearch(eventData={}) { 
+  pickerModelValue.value = eventData
 
   let data = { 
     student_ids: [attPayload.student_id].filter(Boolean),
     class_shorts: [attPayload.class_short].filter(Boolean),
-    date: attPayload.date, 
+    date: moment(pickerModelValue.value.startDate).format('YYYY-MM-DD'), 
     sort_by: attPayload.sort_by,
     sort_direction: attPayload.sort_direction,
   } 
@@ -92,17 +93,17 @@ defineExpose({
       <div class="position-relative">
         <EmDateTimePicker ref="dateRangePickerRef"
           v-model="pickerModelValue"
-          modelValueType="string"
+          modelValueType="object"
           @change="submitSearch"
           @close="false"
           :displayFormat="'DD-MMM-Y'"
           :rangePicker="false" 
           :timePicker="false" 
-          :startDate="pickerModelValue.startDate"  
+          :startDate="pickerModelValue"  
           :minDate="null"
           :isDisabled="false"
           :autoOpen="false"
-          :timePickerButtons="true"
+          :pickerHideEachClick="true"
           :use24FormatTimeForEvents="true"
           :invisible="false"
           displayIn="bottom_left" 
