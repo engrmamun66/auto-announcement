@@ -1,9 +1,11 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue' 
+import { ref, computed, onMounted, inject } from 'vue' 
 import { useRoute, useRouter } from 'vue-router' 
 
 let route = useRoute()
 let router = useRouter()
+let emitter = inject('emitter')
+let liElements = ref([])
 
 let helper = {
     setQuery: function(params, url = globalThis.location.href, _return=false){
@@ -92,6 +94,9 @@ onMounted(()=>{
         current_page.value = currentPage;
         set_start(currentPage);
     }
+    emitter.on('reset_pagination', ()=>{
+        current_page.value = 1
+    })
 })
 </script>
 
@@ -108,7 +113,7 @@ onMounted(()=>{
                     <template v-for="(page_no, index) in rangeArray" :key="index">
                         <slot name="pageNumbers">
                             <template v-if="page_no <= totalPage">
-                                <li class="page-item cp" :class="{'active': page_no == current_page}" @click.prevent="goToPage(page_no)"><a class="page-link cp" :href="pageKey ? getLink(page_no) : false"> {{ page_no }} </a></li>
+                                <li ref="liElements" class="page-item cp" :class="{'active': page_no == current_page}" @click.prevent="goToPage(page_no)"><a class="page-link cp" :href="pageKey ? getLink(page_no) : false"> {{ page_no }} </a></li>
                             </template>
                         </slot>
                     </template>                        
@@ -127,12 +132,14 @@ onMounted(()=>{
 <style scoped>
 .page-link {
     color: var(--textcolor-white);
-    background-color: var(--bg-dark);
+    background-color: var(--bg-dark, #ffffff3a);
 }
 .page-item.active .page-link{  
-    background: var(--grad1);
-    border-radius: 50%;
-    margin: 0px 3px;
+    background: var(--grad3);
+    /* border-radius: 50%; */
+    margin: 0px 0px;
+    color: white;
+    border: 1px solid rgb(229, 229, 229);
     box-shadow: 0px 2px 3px 1px rgba(232, 225, 152, 0.281); 
 }
 .page-link:focus {

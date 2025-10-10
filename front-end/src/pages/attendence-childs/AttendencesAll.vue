@@ -77,11 +77,11 @@ onMounted(()=>{
         getAttendeceList({page_no: 1, other_params})
       }"
       >
-      <div v-if="pagiation_positon.startsWith('bottom')" class="d-flex mt-4" :class="[getPositionClass]">
+      <!-- <div v-if="pagiation_positon.startsWith('bottom')" class="d-flex mt-4" :class="[getPositionClass]">
           <Pagination v-if="attendenceParams?.totalPages > 1" v-model="attendenceParams" @jumpToPage="(page_no) => {
             getAttendeceList({page_no})
           }" ></Pagination>
-      </div> 
+      </div>  -->
     
     </NormalSearchForm>
     </div>

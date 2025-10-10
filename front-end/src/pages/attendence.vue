@@ -7,6 +7,7 @@ import BaseSelectMultiple from './../components/BaseSelectMultiple.vue'
 import EmDateTimePicker from './../components/EmDateTimePicker.vue'
 import Btn from './../components/Btn.vue'
 import Ahelper from './attendence-childs/attendacnceHelper';
+import Pagination from '../components/Pagination.vue'
  
 const route = inject('route');
 const router = inject('router');
@@ -33,15 +34,17 @@ watch(tab, (index) => {
 const pagination_perpage = ref(Number(storage('pagination_perpage').value || 0) || CONFIG.value?.settings?.attendance?.pagination?.perpage || 20)
 watch(pagination_perpage, (limit) => {
   storage('pagination_perpage').value = limit
+  emitter.emit('reset_pagination', true)
 })
 
 let attendenceParams = ref({
     "page_no": 1,
-    // "total": 3,
-    // "totalPages": 1,
+    "total": 3,
+    "totalPages": 1,
     "limit": pagination_perpage.value, 
 })
 
+provide('attendenceParams', attendenceParams)
 provide('pagination_perpage', pagination_perpage)
 provide('getAttendeceList', getAttendeceList)
 
@@ -103,6 +106,13 @@ onMounted(()=>{
       </div>   
       <div v-if="tab==2">
         <div class="d-flex justify-content-center align-items-center gap-2">
+
+          <div class="d-flex"  >
+            <Pagination v-if="attendenceParams?.totalPages > 1" v-model="attendenceParams" @jumpToPage="(page_no) => {
+              getAttendeceList({page_no})
+            }" ></Pagination>
+        </div> 
+
           <Btn class="white">Limit per page</Btn>
           <div class="form-group">
             <select v-model="pagination_perpage" class="form-control cb-input" style="width: 100px">
