@@ -386,11 +386,11 @@ function deleteSchedule(id, i, type=1){
                     <div class="d-flex justify-content-start">
                     
   
-                      <span tooltip="Update Schedule" class="me-2">
-                        <i @click.stop="prepareEdit(item)" class='bx bx-pencil text-danger cp' ></i>
+                      <span tooltip="Update Schedule" class="me-2 badge bg-white p-2 cp" @click.stop="prepareEdit(item)">
+                        <i class='bx bxs-edit text-danger cp size-1' ></i>
                       </span>
-                      <span tooltip="Delete Schedule">
-                        <i @click.stop="deleteSchedule(item.id, i, item.type)" class='bx bx-trash text-danger cp' ></i>
+                      <span tooltip="Delete Schedule" class="badge bg-white p-2 cp" @click.stop="deleteSchedule(item.id, i, item.type)">
+                        <i class='bx bx-trash text-danger cp size-1' ></i>
                       </span>
           
                     </div>
