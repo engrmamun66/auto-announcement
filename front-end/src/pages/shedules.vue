@@ -397,9 +397,9 @@ function deleteSchedule(id, i, type=1){
                   </td> 
               </tr> 
               <tr v-if="item.showClasses">
-                <td></td>
-                <td colspan="3">
-                  <div class="d-flex justify-content-center align-content-center gap-2 flex-wrap">
+                <td :colspan="item?.classes?.length <=3 ? 3 : 1"></td>
+                <td :colspan="item?.classes?.length <=3 ? 1 : 3">
+                  <div class="d-flex align-content-center gap-2 flex-wrap" :class="[item?.classes?.length <=3 ? 'justify-content-start' : 'justify-content-center']">
                     <template v-for="cls in item.classes">
                       <div class="badge bg-body-secondary text-black p-1 px-2">
                         {{ cls.class_name }}
