@@ -773,7 +773,7 @@ function onChange_dateTimePicker(data){
     <modal @close="targetStd=null" :title="false">
       <div style="height:100px" class="d-flex justify-content-center align-items-center">
 
-        <AudioRecorAndUpload :student="targetStd" :column="columnName" @uploaded="({audio_path, audio_url})=>{
+        <AudioRecorAndUpload :student="targetStd" :column="columnName" :uploadAfterRecord="true" @uploaded="({audio_path, audio_url})=>{
           students.forEach(student => {
             if(student.id == targetStd.id){
               student[columnName] = audio_url;

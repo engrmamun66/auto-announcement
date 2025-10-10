@@ -62,7 +62,7 @@
   import BtnLoader from './BtnLoader.vue'
   import RecoringAnimation from './RecoringAnimation.vue'
 
-  let props = defineProps(['student', 'column'])
+  let props = defineProps(['student', 'column', 'uploadAfterRecord'])
   
   // Refs to store recording state and data
   const isRecording = ref(false)
@@ -123,6 +123,9 @@
         audioBlob.value = recorder.getBlob()
         audioUrl.value = URL.createObjectURL(audioBlob.value)
         isRecording.value = false
+        if(props.uploadAfterRecord){
+          uploadNow()
+        }
       })
     }
   }
