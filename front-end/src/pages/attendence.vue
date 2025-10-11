@@ -3,6 +3,7 @@ import moment from 'moment/moment'
 import { onMounted, inject, ref, watch, computed, onBeforeUnmount, reactive, provide } from 'vue';
 import AttendencesAll from './attendence-childs/AttendencesAll.vue'
 import RealtimeAttendences from './attendence-childs/RealtimeAttendences.vue'
+import WeekendAndHolidays from './attendence-childs/WeekendAndHolidays.vue'
 import BaseSelectMultiple from './../components/BaseSelectMultiple.vue'
 import EmDateTimePicker from './../components/EmDateTimePicker.vue'
 import Btn from './../components/Btn.vue'
@@ -191,6 +192,9 @@ onMounted(()=>{
        </template>
        <template v-else-if="tab == 2">
            <AttendencesAll ></AttendencesAll>
+       </template>
+       <template v-else-if="tab == 3">
+           <WeekendAndHolidays ></WeekendAndHolidays>
        </template>
      </transition>
   </div>
