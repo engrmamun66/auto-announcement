@@ -151,8 +151,8 @@ defineExpose({
             >
           </EmDateTimePicker>
 
-          <div class="form-group">
-            <select v-model="attPayload.class_short" class="form-control cb-input" @change="submitSearch" >
+          <div class="form-group d-flex justify-content-center">
+            <select v-model="attPayload.class_short" class="form-control cb-input" @change="submitSearch" style="width:350px">
               <option :value="null">-class-</option>
               <template v-for="(cls, index) in classes" :key="index">
                 <option :value="cls.class_short">{{cls.class_name}}</option>

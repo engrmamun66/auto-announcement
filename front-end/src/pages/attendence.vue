@@ -58,11 +58,7 @@ let sortby_columns = [
   {
     id: 'status',
     title: 'Status',
-  },
-  {
-    id: 'remarks',
-    title: 'Remarks',
-  },
+  }, 
   {
     id: 'shift_duration',
     title: 'Shift Duration',

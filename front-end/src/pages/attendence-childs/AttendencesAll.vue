@@ -97,7 +97,7 @@ onMounted(()=>{
               <th>Name</th>
               <th>Class</th>  
               <th>Date</th>  
-              <th>Status</th>  
+              <th>In-out/Status/Late-time</th>  
               <th>Shift</th>  
             </tr>
           </thead>
@@ -113,27 +113,27 @@ onMounted(()=>{
                 <td style="width: 130px;"> <span class="inline">{{ item.date }}</span> </td>                   
                 <td> 
                   <div style="width: 170px" class="d-flex justify-content-between">
-                    <span class="badge text-white bg-secondary">
+                    <span class="badge text-white bg-secondary" tooltip="In/Out">
                       {{ item.in_time ? 'IN' : 'OUT' }}
                     </span> 
-                    <template v-if="item.status == 'Late'" >
-                      <span class="badge text-white bg-danger">
+                    <template v-if="item.status == 'Late'">
+                      <span class="badge text-white bg-danger" tooltip="Status">
                         {{ item.status }}
                       </span> 
-                      <span class="badge text-white bg-danger">
+                      <span class="badge text-white bg-danger" tooltip="Late Time">
                         {{ item?.late_in_minute || 0 }} {{ helper.wordForm('minute', item?.late_in_minute ) }}
                       </span> 
                     </template>
 
                     <template v-else>
-                      <span class="badge text-white bg-success">
+                      <span class="badge text-white bg-success" tooltip="Status">
                         {{ item.status }}
                       </span> 
-                      <span class="badge text-white bg-success">
+                      <span class="badge text-white bg-success" tooltip="Late Time">
                         {{ item?.late_in_minute || 0 }} {{ helper.wordForm('minute', item?.late_in_minute ) }}
                       </span> 
                     </template>
-                  </div>
+                  </div> 
                 </td>                   
                 <td>{{ Ahelper.printShift(item?.shift_duration) }}</td> 
                                 
