@@ -584,9 +584,11 @@ async function getAllStudents(){
             student.full_name = `[${student.dakhela}] ${student.name?.split('||')[0]}`
             return student
         })
+       } else {
+        data = []
        }
        all_students.value = data
-       all_students_non_copied.value = data.filter(std => std.name.lowerCase().indexOf('copied') === -1)
+       all_students_non_copied.value = data.filter(std => std.name.toLowerCase().indexOf('copied') === -1)
      }
    }).finally(()=>{
       
