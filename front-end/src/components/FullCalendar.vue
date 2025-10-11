@@ -21,7 +21,7 @@ export default {
         headerToolbar: {
           left: 'myCustomButton',
           center: 'title',
-          right: 'dayGridMonth today prev,next'
+          right: 'today prev,next'
         },
         dayCellContent: this.renderDayCellContent,
         eventContent: this.renderEventContent,
@@ -47,7 +47,7 @@ export default {
           ],
           customButtons: {
             myCustomButton: {
-              text: 'custom!',
+              text: 'custom!', 
               click: function() {
                 alert('clicked the custom button!');
               }
