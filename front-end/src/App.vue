@@ -582,6 +582,7 @@ async function getAllStudents(){
        if(data?.length){
         data = data.map(student => {
             student.full_name = `[${student.dakhela}] ${student.name?.split('||')[0]}`
+            student.full_name2 = `[ID:${student.id},(${student.dakhela})] ${student.name?.split('||')[0]}`
             return student
         })
        } else {

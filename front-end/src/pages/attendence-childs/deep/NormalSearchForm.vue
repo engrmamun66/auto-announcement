@@ -96,11 +96,9 @@ function clearSearch() {
 
 function submitSearch(eventData={}) { 
   try {
-    if(eventData) pickerModelValue.value = eventData
-
     let data = { 
       // student_ids: [attPayload.student_id].filter(Boolean),
-      student_ids: selectedStudents.value.map(s => s.id).filter(Boolean),
+      student_ids: selectedStudents.value.map(s => (typeof s ==='number' ? s : s.dakhela)).filter(Boolean),
       class_shorts: [attPayload.class_short].filter(Boolean),
       sort_by: attPayload.sort_by,
       sort_direction: attPayload.sort_direction,
@@ -110,7 +108,7 @@ function submitSearch(eventData={}) {
     }
     if(pagination_perpage.value){
       data.limit = pagination_perpage.value
-    }
+    } 
     emit('onBtnSubmit', data)
   } catch (submitSearch_error) {
     console.warn({submitSearch_error});
@@ -155,9 +153,8 @@ defineExpose({
           <div class="w-100 d-flex justify-content-center">
             <BaseSelectMultiple v-model="selectedStudents" :data="filteredAllStudents" :search="true" 
               @searching="(text) => search_text = text" 
-              @change--dd="helper.delay(submitSearch, 100)" 
-              @change="log(selectedStudents)" 
-              :searchDelayTime="50" displayKey="full_name" :limit="1" style="width:350px" placeholder="-Select Student-">
+              @change="submitSearch()" 
+              :searchDelayTime="50" displayKey="full_name" valueKey="dakhela" :limit="1" style="width:350px" placeholder="-Select Student-">
               <template #loopItem1="{item, index}">
                 <span class="badge text-dark bg-body-secondary ms-1">
                   {{ item.class_short }}
