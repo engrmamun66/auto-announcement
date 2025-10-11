@@ -1,6 +1,6 @@
 <template>
     <div v-bind="$attrs" @mouseleave="showOptions = false">
-        <div :class="{'form-group': useFormGroup}">
+        <div class="position-relative" :class="{'form-group': useFormGroup}">
             <div class="btn-options-toggler  px-0" :style="(width ? ('width:' + width) : '')">
                 <label v-if="label"> {{ label }} </label>
                 <template v-if="showEffect" >
@@ -42,7 +42,7 @@
                                 </a>
                             </template>
                         </div>
-                        <p v-else class="fw-500 m-0 text-black-50" > {{ placeholder }} </p>
+                        <p v-else class="fw-500 m-0 text-black-50" > {{ placeholder }} (use Enter & Arrow) </p>
                         <i class="bx bxs-chevron-down" style="position:absolute;right:8px;top:15px;font-size: 12px" />
                     </button>
                 </template>
@@ -53,13 +53,14 @@
                 <!-- <ul v-if="true" class="option-box py-2"  -->
                 <ul v-if="!disabled && (data?.length || search) && showOptions" class="option-box py-2" 
                 :class="{'--animate-show': (showOptions || search), '--animate-hide': (!showOptions && !search)}">
-                    <input v-if="search" :placeholder="placeholder2" ref="searchInput" type="search" class="form-control mb-2" v-model="searchText" @keyup="handleSearching" style="border-radius: 20px;height: 30px;" />
+                    <input v-if="search" :placeholder="placeholder2" ref="searchInput" type="search" class="form-control mb-2" v-model="searchText" @keyup="handleSearching" @search="handleSearching" style="border-radius: 20px;height: 30px;" />
                     <template v-if="data?.length" >
                         <template v-for="(item, index) in (data || [])" :key="index" >                            
                             <li class="ps-2"
                              :value="valueKey ? item[valueKey] : item" 
-                            @click="item?.isDisabled ? false : updateValue($event, item[valueKey], item, index)" 
-                            :class="{selected: modelValue?.map(i => i[valueKey])?.includes(item[valueKey]), 'grayscale pointer-events-none': item?.isDisabled}"> 
+                            @click="item?.isDisabled ? false : updateValue($event, item[valueKey], item)" 
+                            :proxyHoverIndex="index"
+                            :class="{'proxyHoverIndex': proxyHoverIndex == index, 'selected': modelValue?.map(i => i[valueKey])?.includes(item[valueKey]), 'grayscale pointer-events-none': item?.isDisabled}"> 
                                 <div class="px-1 d-flex justify-content-between">
                                     <a> {{ (displayKey ? item[displayKey] : '') }} {{ (displayKey2 ? ('(' + item[displayKey2] + ')') : '') }} </a>
                                     <div class="px-1 d-flex justify-content-between">
@@ -115,7 +116,7 @@ let props = defineProps({
     },
     label:{
         type: [Boolean, String], 
-        default:'',
+        default: false,
         required: false,
     },
     disabled: {
@@ -229,7 +230,12 @@ let props = defineProps({
 })
 const searchText = ref(null);
 const showOptions = ref(false);
+let proxyHoverIndex = ref(0)
 const log = console.log
+
+watch(searchText, (a, b) => {
+    proxyHoverIndex.value = 0
+})
 
 
 const H = inject('helper')
@@ -294,8 +300,40 @@ const updateValue = (event, id, item) => {
 let _timeout = ref(null);
 let inputValue = ref('');
 let showCreateNewConfirmation = ref(false)
+
+
 function handleSearching(event){
     if(_timeout.value) clearTimeout(_timeout.value)
+    if(event?.key){
+
+        const scrollToView = () => {
+            H.delay(() => {
+                let el = document.querySelector(`li[proxyHoverIndex="${proxyHoverIndex.value}"]`)
+                if(el) el.scrollIntoView({behavior: "smooth", block: "nearest", inline: "nearest"});
+            }, 0);
+        }
+
+        if(event.key === 'ArrowUp'){
+            if(proxyHoverIndex.value > 0){
+                proxyHoverIndex.value -= 1
+            }
+            
+            scrollToView()
+            return
+        }
+        if(event.key === 'ArrowDown'){
+            if(proxyHoverIndex.value < (props.data?.length - 1)){
+                proxyHoverIndex.value += 1
+            }
+            scrollToView()
+            return
+        }
+        if(event.key === 'Enter' && props.data?.length){
+            let targetItem = props.data[proxyHoverIndex.value][props.valueKey]
+            updateValue(null, targetItem[props.valueKey], targetItem)
+            return
+        }
+    }
     _timeout.value = setTimeout(() => {
         inputValue.value = event.target.value;
         myEmit('searching', event.target.value)
@@ -469,6 +507,10 @@ let random_id = computed(() => ('random_' + H.randomBetween(333, 294444)))
     background-color: transparent;
     cursor: pointer;
     font-size: 14px;
+}
+.btn-options-toggler .proxyHoverIndex {
+    color: #048473 !important; 
+    border: 1px dashed #048473;
 }
 
 .btn-options-toggler .option-box li.selected a {

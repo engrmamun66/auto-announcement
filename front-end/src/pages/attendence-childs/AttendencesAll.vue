@@ -86,7 +86,7 @@ function deleteAttedence(item, note_text = null){
 
 
 <template>
-  <div class="row">
+  <div class="row mt-3">
 
     <div class="col-md-4">
       <NormalSearchForm
@@ -94,20 +94,14 @@ function deleteAttedence(item, note_text = null){
       @onBtnSubmit="(other_params) => {
         getAttendeceList({page_no: 1, other_params})
       }"
-      >
-      <!-- <div v-if="pagiation_positon.startsWith('bottom')" class="d-flex mt-4" :class="[getPositionClass]">
-          <Pagination v-if="attendenceParams?.totalPages > 1" v-model="attendenceParams" @jumpToPage="(page_no) => {
-            getAttendeceList({page_no})
-          }" ></Pagination>
-      </div>  -->
-    
-    </NormalSearchForm>
+      > 
+      </NormalSearchForm>
     </div>
     
      
     
     <div class="col-md-8">
-      <myTable class="transformY-5px" style="--transformY: 8px" topMarginClass="">
+      <myTable topMarginClass="">
         <template #thead>
           <thead>
             <tr> 

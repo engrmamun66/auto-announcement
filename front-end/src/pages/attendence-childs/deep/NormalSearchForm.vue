@@ -25,7 +25,9 @@ const sortby_column = inject("sortby_column");
 const emit = defineEmits(['onBtnSubmit', 'onBtnClear']);
 let log = console.log
 
-
+// For multiple select of students
+let selectedStudents = ref([])
+let search_text = ref('')
 
 let attPayload = reactive({ 
   //-------------
@@ -40,6 +42,8 @@ watch(()=> attPayload.class_short, (_class_short) => {
   if(!_class_short){
     attPayload.student_id = null
   }
+  selectedStudents.value = []
+  search_text.value = ''
 },{deep: true})
 
 watch(pagination_perpage, (newVal) => {
@@ -61,10 +65,18 @@ let pickerModelValue = ref({startDate: null})
 
 let filteredAllStudents = computed(() => {
   let students = helper.clone(all_students.value)
-  if(!attPayload.class_short) return students
+  
   if(attPayload.class_short){
-    return students.filter(student => student.class_short === attPayload.class_short)
-  } 
+    students = students.filter(student => student.class_short === attPayload.class_short)
+  }  
+  if(search_text.value){
+    console.log('asfasf', search_text.value);
+    let text = search_text.value.toLowerCase()
+    students = students.filter(student => 
+      student.name.toLowerCase().includes(text) ||   
+      (student.dakhela + '').toLowerCase().includes(text) 
+    )
+  }  
   return students
 }) 
 
@@ -78,6 +90,8 @@ function clearSearch() {
   attPayload.class_short = null,
   attPayload.sort_by = "late_in_minute", 
   attPayload.sort_direction = "ASC"  
+  selectedStudents.value = []
+  search_text.value = ''
   emit('onBtnClear', {...attPayload})
   clearPicker()
 }
@@ -87,7 +101,8 @@ function submitSearch(eventData={}) {
     if(eventData) pickerModelValue.value = eventData
 
     let data = { 
-      student_ids: [attPayload.student_id].filter(Boolean),
+      // student_ids: [attPayload.student_id].filter(Boolean),
+      student_ids: selectedStudents.value.map(s => s.id).filter(Boolean),
       class_shorts: [attPayload.class_short].filter(Boolean),
       sort_by: attPayload.sort_by,
       sort_direction: attPayload.sort_direction,
@@ -129,6 +144,42 @@ defineExpose({
     <div class="row">
       <div class="col-12">
         <div class="d-flex flex-column gap-2 overflow-x-auto">
+
+          <div class="form-group d-flex justify-content-center">
+            <select v-model="attPayload.class_short" class="form-control cb-input" @change="submitSearch" style="width:350px">
+              <option :value="null">-class-</option>
+              <template v-for="(cls, index) in classes" :key="index">
+                <option :value="cls.class_short">{{cls.class_name}}</option>
+              </template>                  
+            </select>
+          </div> 
+
+          <div class="w-100 d-flex justify-content-center">
+            <BaseSelectMultiple v-model="selectedStudents" :data="filteredAllStudents" :search="true" @searching="(text) => search_text = text" :searchDelayTime="50" displayKey="full_name" :limit="1" style="width:350px" placeholder="-Select Student-">
+              <template #loopItem1="{item, index}">
+                <span class="badge text-dark bg-body-secondary ms-1">
+                  {{ item.class_short }}
+                </span>
+              </template>
+              <template #loopItem="{item, index}">
+                <span class="badge text-dark bg-body-secondary">
+                  {{ item.class_short }}
+                </span>
+              </template>
+            </BaseSelectMultiple> 
+
+          </div>
+
+          <div v-if="false" class="form-group">
+            <select v-model="attPayload.student_id" class="form-control cb-input" @change="submitSearch" >
+              <option :value="null">-Student-</option>
+              <template v-for="(student, index) in filteredAllStudents" :key="index">
+                <option :value="student.id">[{{ student.id }}] {{student.name}} ({{ student.class_short }})</option>
+              </template>                  
+            </select>
+          </div> 
+
+
           <EmDateTimePicker ref="dateRangePickerRef"
             v-model="pickerModelValue"
             modelValueType="object"
@@ -155,23 +206,7 @@ defineExpose({
             >
           </EmDateTimePicker>
 
-          <div class="form-group d-flex justify-content-center">
-            <select v-model="attPayload.class_short" class="form-control cb-input" @change="submitSearch" style="width:350px">
-              <option :value="null">-class-</option>
-              <template v-for="(cls, index) in classes" :key="index">
-                <option :value="cls.class_short">{{cls.class_name}}</option>
-              </template>                  
-            </select>
-          </div> 
-
-          <div v-if="false" class="form-group">
-            <select v-model="attPayload.student_id" class="form-control cb-input" @change="submitSearch" >
-              <option :value="null">-Student-</option>
-              <template v-for="(student, index) in filteredAllStudents" :key="index">
-                <option :value="student.id">[{{ student.id }}] {{student.name}} ({{ student.class_short }})</option>
-              </template>                  
-            </select>
-          </div> 
+          
         </div> 
       </div> 
  
