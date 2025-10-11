@@ -10,6 +10,9 @@
     "doc": "cd dist && php -S localhost:3200"
   },
   "dependencies": {
+    "@fullcalendar/daygrid": "^6.1.19",
+    "@fullcalendar/interaction": "^6.1.19",
+    "@fullcalendar/vue3": "^6.1.19",
     "axios": "^1.7.9",
     "jquery": "^3.7.1",
     "jsbarcode": "^3.11.6",

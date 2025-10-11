@@ -140,6 +140,9 @@ onMounted(()=>{
          <li class="nav-item">
            <a @click.stop="tab = 2" class="nav-link cp text-black" :class="{'active': tab==2}" >Attendence&nbsp;History</a>
          </li>   
+         <li class="nav-item">
+           <a @click.stop="tab = 3" class="nav-link cp text-black" :class="{'active': tab==3}" >Weekend And Vacations</a>
+         </li>   
       </ul>
       <div v-if="tab==1">
         <div class="d-flex justify-content-center align-items-center gap-2">
