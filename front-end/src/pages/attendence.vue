@@ -127,6 +127,16 @@ function getAttendeceList({ page_no = null, reset = false, other_params = {} } =
 
 
 
+// ====================================================== //
+// ====================================================== //
+// ====================================================== //
+// ====================================================== //
+// ====================================================== //
+// ============= For Weekends And Vacations ============= //
+// ====================================================== //
+
+let leaveAndWeekendSubTab = ref(1)
+
 function addLeaveOrVacation({}) {
   try {
 
@@ -149,16 +159,8 @@ function addLeaveOrVacation({}) {
   } catch (error) {}
 }
 
+provide('leaveAndWeekendSubTab', leaveAndWeekendSubTab)
 provide('addLeaveOrVacation', addLeaveOrVacation)
-
-// ====================================================== //
-// ====================================================== //
-// ====================================================== //
-// ====================================================== //
-// ====================================================== //
-// ============= For Weekends And Vacations ============= //
-// ====================================================== //
-
 
 
 
@@ -182,13 +184,13 @@ onMounted(()=>{
     <div class="d-flex justify-content-between align-items-center">
       <ul class="nav nav-tabs mt-0 mb-3 bottom-borderless">
          <li class="nav-item">
-           <a @click.stop="tab = 1" @auxclick.stop="clearAllAndRelaod()" class="nav-link cp text-black" :class="{'active': tab==1}" >Realtime&nbsp;Attendence</a>
+           <a @click.stop="tab = 1" @auxclick.stop="clearAllAndRelaod()" class="nav-link cp text-black" :class="{'active': tab==1}" ><i class='bx bx-time-five transformY-2px' ></i> Realtime&nbsp;Attendence</a>
          </li>
          <li class="nav-item">
-           <a @click.stop="tab = 2" class="nav-link cp text-black" :class="{'active': tab==2}" >Attendence&nbsp;History</a>
+           <a @click.stop="tab = 2" class="nav-link cp text-black" :class="{'active': tab==2}" ><i class='bx bx-history transformY-2px' ></i> Attendence&nbsp;History</a>
          </li>   
          <li class="nav-item">
-           <a @click.stop="tab = 3" class="nav-link cp text-black" :class="{'active': tab==3}" >Weekend And Vacations</a>
+           <a @click.stop="tab = 3" class="nav-link cp text-black" :class="{'active': tab==3}" ><i class='bx bx-run transformY-2px' ></i> Leaves And Vacations</a>
          </li>   
       </ul>
       <div v-if="tab==1">
@@ -235,6 +237,16 @@ onMounted(()=>{
           </div>
         </div>
       </div>   
+      <div v-if="tab==3">
+        <ul class="nav nav-tabs d2 mt-0 mb-3 bottom-borderless">
+         <li class="nav-item">
+           <a @click.stop="leaveAndWeekendSubTab = 1" class="nav-link cp text-black" :class="{'active': leaveAndWeekendSubTab==1}" >Class Wise</a>
+         </li>
+         <li class="nav-item">
+           <a @click.stop="leaveAndWeekendSubTab = 2" class="nav-link cp text-black" :class="{'active': leaveAndWeekendSubTab==2}" >Student Wise</a>
+         </li>       
+      </ul>
+      </div>
 
     </div>
   

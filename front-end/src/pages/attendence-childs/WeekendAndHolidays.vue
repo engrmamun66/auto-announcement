@@ -5,9 +5,13 @@ import Ahelper from "./attendacnceHelper";
 import myTable from '../../components/myTable.vue'
 import FullCalendar from '../../components/FullCalendar.vue'
 import Rightbar from '../../components/Rightbar.vue'
+import Btn from '../../components/Btn.vue'
 import Pagination from '../../components/Pagination.vue'
+import BaseSelectMultiple from '../../components/BaseSelectMultiple.vue'
 import AdvanceSearchForm from './deep/AdvanceSearchForm.vue'
 import NormalSearchForm from './deep/NormalSearchForm.vue'
+import ClasswiseLeavesAndVacationsCalendar from './deep/ClasswiseLeavesAndVacationsCalendar.vue'
+import StudentwiseLeavesAndVacationsCalendar from './deep/StudentwiseLeavesAndVacationsCalendar.vue'
 
 const CONFIG = inject("CONFIG");
 const classes = inject("classes");
@@ -18,11 +22,15 @@ const attendenceList = inject("attendenceList");
 const attendenceParams = inject("attendenceParams");
 const liveAttendenceList = inject("liveAttendenceList");
 const getAttendeceList = inject("getAttendeceList");
+const leaveAndWeekendSubTab = inject("leaveAndWeekendSubTab");
 
 const pagiation_positon = CONFIG.value?.settings?.attendance?.pagination?.pagiation_positon || 'bottom_center'
 const weekends = CONFIG.value?.settings?.attendance?.weekends || []
 
 let showRightbar = ref(false)
+const getTitle = computed(()=> leaveAndWeekendSubTab.value == 1 ? 'Add Class Wise Vacation' : 'Add Student Leave')
+
+ 
  
 onMounted(()=>{
 
@@ -38,29 +46,29 @@ onMounted(()=>{
 
 
 <template>
+ 
 
-  <button class="btn btn-secondary position-absolute" @click="showRightbar = true">Show Calendar View</button>
-
-
-  <div class="class-items">
-     
-    <template v-for="(item, i) in classes" :key="i">
-      <div class="class-item">
-        <div class="left-side">
-          <i class='bx bx-calendar'></i>
-          <h4>{{ item.class_name }}</h4>
+   <Transition name="fade">
+    <div class="mt-3">
+      <template v-if="leaveAndWeekendSubTab == 1"">
+        <div class="row row-cols-2 row-cols-md-1">
+          <ClasswiseLeavesAndVacationsCalendar></ClasswiseLeavesAndVacationsCalendar> 
         </div>
-        <div class="right-side">
-          <i class='bx bx-calendar'></i>
-          <h4>{{ item.class_name }}</h4>
-        </div>
+      </template>
+      <template v-else-if="leaveAndWeekendSubTab == 2"">
+        <StudentwiseLeavesAndVacationsCalendar></StudentwiseLeavesAndVacationsCalendar> 
+      </template>
+    </div>
+   </Transition>
+
+
+  <Rightbar v-if="showRightbar" @unmount="showRightbar = false" :title="getTitle"> 
+    <div class="row">
+      <div class="form-group">
+        <label for="">Title</label>
+        <input type="text" class="form-control cb-input">
       </div>
-    </template> 
-  </div>
-
-
-  <Rightbar v-if="showRightbar" @unmount="showRightbar = false">
-    <FullCalendar ></FullCalendar> 
+    </div>
   </Rightbar>
 </template>
 
@@ -76,27 +84,5 @@ onMounted(()=>{
   border-radius: 6px;
   max-height: calc(100vh - 230px);
   overflow-y: auto;
-}
-.class-item{
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center; 
-  gap: 20px;
-  margin-bottom: 15px;
-}
-.class-item .left-side,
-.class-item .right-side{
-  background-color: white;
-  padding: 20px;
-  border-radius: 5px;
-}
-.class-item .left-side{
-  width: 40%;
-}
-.class-item .right-side{
-  width: 60%;
-}
-
-
+} 
 </style>

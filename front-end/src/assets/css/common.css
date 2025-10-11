@@ -530,3 +530,20 @@ td a {
   color: black;
   text-decoration: none;
 }
+
+.nav-tabs.d2 .nav-link {
+  border-top-left-radius: 0px !important;
+  border-top-right-radius: 0px !important;
+  border-bottom-left-radius: 0px !important;
+  border-bottom-right-radius: 0px !important; 
+  border-radius: 0px !important;
+}
+.nav-tabs.d2 li:first-child .nav-link{
+  border-top-left-radius: var(--bs-nav-tabs-border-radius) !important;
+  border-bottom-left-radius: var(--bs-nav-tabs-border-radius) !important;
+}
+.nav-tabs.d2 li:last-child .nav-link{
+  border-top-right-radius: var(--bs-nav-tabs-border-radius) !important;
+  border-bottom-right-radius: var(--bs-nav-tabs-border-radius) !important;
+  
+}
