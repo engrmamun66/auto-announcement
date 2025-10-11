@@ -97,7 +97,7 @@ onMounted(()=>{
               <th>Name</th>
               <th>Class</th>  
               <th>Date</th>  
-              <th>In-out/Status/Late-time</th>  
+              <th>Summarised Status</th>  
               <th>Shift</th>  
             </tr>
           </thead>
