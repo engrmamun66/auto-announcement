@@ -42,7 +42,7 @@
                                 </a>
                             </template>
                         </div>
-                        <p v-else class="fw-500 m-0 text-black-50" > {{ placeholder }} (use Enter & Arrow) </p>
+                        <p v-else class="fw-500 m-0 text-black-50" > {{ placeholder }} </p>
                         <i class="bx bxs-chevron-down" style="position:absolute;right:8px;top:15px;font-size: 12px" />
                     </button>
                 </template>
@@ -53,7 +53,7 @@
                 <!-- <ul v-if="true" class="option-box py-2"  -->
                 <ul v-if="!disabled && (data?.length || search) && showOptions" class="option-box py-2" 
                 :class="{'--animate-show': (showOptions || search), '--animate-hide': (!showOptions && !search)}">
-                    <input v-if="search" :placeholder="placeholder2" ref="searchInput" type="search" class="form-control mb-2" v-model="searchText" @keyup="handleSearching" @search="handleSearching" style="border-radius: 20px;height: 30px;" tooltip="use Enter & Arrow to select" />
+                    <input v-if="search" :placeholder="placeholder2 + ' (use Enter & Arrow to select)'" ref="searchInput" type="search" class="form-control mb-2" v-model="searchText" @keyup="handleSearching" @search="handleSearching" style="border-radius: 20px;height: 30px;"  />
                     <template v-if="data?.length" >
                         <template v-for="(item, index) in (data || [])" :key="index" >                            
                             <li class="ps-2"

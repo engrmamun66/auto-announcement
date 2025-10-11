@@ -57,6 +57,9 @@ watch(sortby_column, (newVal) => {
   attPayload.sort_by = newVal
   submitSearch()
 })
+watch(selectedStudents, (newVal) => { 
+  submitSearch()
+})
 
 
 let dateRangePickerRef = ref(null)
