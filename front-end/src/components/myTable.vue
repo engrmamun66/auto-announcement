@@ -59,23 +59,21 @@ td{
 th{
   padding: 10px 20px !important;
 }
-
-
  
 th { 
-  /* background: var(--primaryColor) !important; */
+  background: rgba(255, 255, 255, 0.301) !important;
   color: black;
 }
 
 thead tr {
-  background: var(--grad2)
-}
- 
+  /* background: rgba(255, 255, 255, 0.301) !important; */
+}   
 
-tbody tr {
-  background: var(--grad2)
-}
  
+th a, td a {
+  color: black;
+  text-decoration: none;
+}
 
 
 </style>

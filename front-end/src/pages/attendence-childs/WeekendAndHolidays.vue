@@ -35,9 +35,7 @@ onMounted(()=>{
 
 <template>
   <div class="row">
-    <FullCalendar></FullCalendar>
-    <h1>dfd</h1>
-     
+    <FullCalendar></FullCalendar> 
   </div>
 </template>
 
