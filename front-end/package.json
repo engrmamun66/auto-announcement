@@ -7,9 +7,11 @@
     "build": "vite build",
     "watch": "vite build",
     "preview": "vite preview",
+    "install-fullcalendar": "npm install @fullcalendar/core@6 @fullcalendar/vue3@6 @fullcalendar/daygrid@6 @fullcalendar/interaction@6",
     "doc": "cd dist && php -S localhost:3200"
   },
   "dependencies": {
+    "@fullcalendar/core": "^6.1.19",
     "@fullcalendar/daygrid": "^6.1.19",
     "@fullcalendar/interaction": "^6.1.19",
     "@fullcalendar/vue3": "^6.1.19",

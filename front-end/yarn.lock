@@ -32,7 +32,7 @@
   resolved "https://registry.npmjs.org/@esbuild/darwin-arm64/-/darwin-arm64-0.18.20.tgz"
   integrity sha512-bxRHW5kHU38zS2lPTPOyuyTm+S+eobPUnTNkdJEfAddYgEcll4xkT8DB9d2008DtTbl7uJag2HuE5NZAZgnNEA==
 
-"@fullcalendar/core@~6.1.19":
+"@fullcalendar/core@^6.1.19", "@fullcalendar/core@~6.1.19":
   version "6.1.19"
   resolved "https://registry.npmjs.org/@fullcalendar/core/-/core-6.1.19.tgz"
   integrity sha512-z0aVlO5e4Wah6p6mouM0UEqtRf1MZZPt4mwzEyU6kusaNL+dlWQgAasF2cK23hwT4cmxkEmr4inULXgpyeExdQ==
