@@ -23,13 +23,57 @@ const attendenceList = inject('attendenceList');
 const liveAttendenceList = inject('liveAttendenceList');
 
 
-let perpage_limits = [ 10, 15, 20, 25, 50, 100 ]
-
 let tab = ref(Number(storage('attendance_tab').value || '1'))  
 watch(tab, (index) => {
   storage('attendance_tab').value = index
 })
 
+// ====================================================== //
+// ====================================================== //
+// ====================================================== //
+// ====================================================== //
+// ====================================================== //
+// =============== For AttendencesAll.vue =============== //
+// ====================================================== //
+
+let perpage_limits = [ 10, 15, 20, 25, 30, 40, 50, 100, 200, 500 ]
+
+let sortby_columns = [
+  {
+    id: 'student_id',
+    title: 'Student ID',
+  },
+  {
+    id: 'in_time',
+    title: 'In Time',
+  },
+  {
+    id: 'out_time',
+    title: 'Out Time',
+  },
+  {
+    id: 'late_in_minute',
+    title: 'Late Time',
+  },
+  {
+    id: 'status',
+    title: 'Status',
+  },
+  {
+    id: 'remarks',
+    title: 'Remarks',
+  },
+  {
+    id: 'shift_duration',
+    title: 'Shift Duration',
+  },
+  {
+    id: 'device_index',
+    title: 'Device Index',
+  },
+]
+let sort_direction = ref('DESC')
+let sortby_column = ref('late_in_minute')
 
 const pagination_perpage = ref(Number(storage('pagination_perpage').value || 0) || CONFIG.value?.settings?.attendance?.pagination?.perpage || 20)
 watch(pagination_perpage, (limit) => {
@@ -45,6 +89,8 @@ let attendenceParams = ref({
 })
 
 provide('attendenceParams', attendenceParams)
+provide('sortby_column', sortby_column)
+provide('sort_direction', sort_direction)
 provide('pagination_perpage', pagination_perpage)
 provide('getAttendeceList', getAttendeceList)
 
@@ -74,7 +120,10 @@ function getAttendeceList({ page_no = null, reset = false, other_params = {} } =
       .finally(() => {});
   } catch (error) {}
 }
-  
+// ============= End For AttendencesAll.vue ============= //
+// ====================================================== // 
+// ====================================================== // 
+// ====================================================== // 
 
 
 onMounted(()=>{
@@ -111,13 +160,24 @@ onMounted(()=>{
             <Pagination v-if="attendenceParams?.totalPages > 1" v-model="attendenceParams" @jumpToPage="(page_no) => {
               getAttendeceList({page_no})
             }" ></Pagination>
-        </div> 
+          </div> 
 
-          <Btn class="white">Limit per page</Btn>
+
           <div class="form-group">
-            <select v-model="pagination_perpage" class="form-control cb-input" style="width: 100px">
+            <select class="form-control cb-input" v-model="sortby_column">
+              <template v-for="(column, index) in sortby_columns" :key="index">
+                <option :value="column.id">{{ column.title }}</option>
+              </template>                  
+            </select>
+          </div>
+          <Btn class="white cp" @click="sort_direction = 'ASC'" :class="{'bg-success text-white': sort_direction === 'ASC'}">ASC</Btn>
+          <Btn class="white cp" @click="sort_direction = 'DESC'" :class="{'bg-success text-white': sort_direction === 'DESC'}">DESC</Btn>
+
+
+          <div class="form-group">
+            <select v-model="pagination_perpage" class="form-control cb-input" style="width: 110px">
               <template v-for="(limit, index) in perpage_limits" :key="index">
-                <option :value="limit">{{ limit }}</option>
+                <option :value="limit">Limit {{ limit }}</option>
               </template>                  
             </select>
           </div>

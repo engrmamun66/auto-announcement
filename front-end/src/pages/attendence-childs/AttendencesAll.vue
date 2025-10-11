@@ -54,7 +54,7 @@ let queryparams = {
  
 onMounted(()=>{
 
-  getAttendeceList()
+  getAttendeceList({other_params: {date: moment().format('YYYY-MM-DD')}})
 
   setTimeout(() => {
     isMounted.value = true

@@ -17,6 +17,8 @@ const attendenceList = inject("attendenceList");
 const attendenceParams = inject("attendenceParams");
 const liveAttendenceList = inject("liveAttendenceList");
 const pagination_perpage = inject("pagination_perpage");
+const sort_direction = inject("sort_direction");
+const sortby_column = inject("sortby_column");
 
  
 
@@ -31,7 +33,7 @@ let attPayload = reactive({
   student_id: null, 
   class_short: null,
   sort_by : "late_in_minute",  // default sort
-  sort_direction : "ASC"  // default order
+  sort_direction : sort_direction.value  // default order
 }) 
 
 watch(()=> attPayload.class_short, (_class_short) => {
@@ -41,6 +43,14 @@ watch(()=> attPayload.class_short, (_class_short) => {
 },{deep: true})
 
 watch(pagination_perpage, (newVal) => {
+  submitSearch()
+})
+watch(sort_direction, (newVal) => {
+  attPayload.sort_direction = newVal
+  submitSearch()
+})
+watch(sortby_column, (newVal) => {
+  attPayload.sort_by = newVal
   submitSearch()
 })
 
@@ -119,7 +129,7 @@ defineExpose({
             v-model="pickerModelValue"
             modelValueType="object"
             @change="submitSearch"
-            @initialized="helper.delay(clearPicker, 0)"
+            @initialized_="helper.delay(clearPicker, 0)"
             @close="false"
             :displayFormat="'DD-MMM-Y'"
             :rangePicker="false" 
@@ -163,8 +173,8 @@ defineExpose({
  
       <div class="col-12 mt-3">
         <div class="d-flex justify-content-center gap-3">
-          <Btn @click.stop="submitSearch" cbinput="cbinput">Submit</Btn>
-          <Btn @click.stop="clearSearch" cbinput="cbinput" class="red">Clear</Btn>
+          <Btn @click.stop="clearPicker(); submitSearch()" cbinput="cbinput">Clear Date</Btn> 
+          <Btn @click.stop="clearSearch" cbinput="cbinput" class="red">Reset Search</Btn>
         </div>
       </div>
 
