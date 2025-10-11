@@ -509,17 +509,20 @@ td {
 th {
   padding: 10px 20px !important;
 }
-
-th {
-  background: rgba(255, 255, 255, 0.301) !important;
-  color: black;
-}
-
+ 
 thead tr {
-  background-color: #ffffff !important;
+    background-color: #fff!important;
+    box-shadow: inset -0px -2px 4px 0px #00000057;
+}
+thead tr thead tr {
+    background-color: transparent!important;
+    box-shadow: none;
 }
 tbody td {
   background-color: #ffffffb0 !important;
+}
+tbody td tbody td {
+  background-color: transparent !important;
 }
 
 th a,

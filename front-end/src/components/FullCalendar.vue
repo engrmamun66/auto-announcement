@@ -1,5 +1,8 @@
 <script>
 // https://fullcalendar.io/docs
+// Stable Versions installation command: 
+// npm install @fullcalendar/core@6 @fullcalendar/vue3@6 @fullcalendar/daygrid@6 @fullcalendar/interaction@6
+
 import moment from 'moment/moment';
 import FullCalendar from '@fullcalendar/vue3'
 import dayGridPlugin from '@fullcalendar/daygrid'
