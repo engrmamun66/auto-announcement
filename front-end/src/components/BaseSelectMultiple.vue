@@ -247,14 +247,12 @@ function onkeupEscape(event){
         showOptions.value = false;
         searchText.value = '';
         myEmit('searching', '')
-        myEmit('change', props.modelValue)
     }
 }
 function removeSingleItem(item, index){
     myEmit('removeItem', item);
     item.removing=true;
     H.delay(()=>removeValue(index, item), 390)
-    myEmit('change', props.modelValue)
 }
 function removeAllItems(){
     myEmit('update:modelValue', []) 
@@ -297,7 +295,7 @@ const updateValue = (event, id, item) => {
         }
         myEmit('update:modelValue', new_data)
         myEmit('changed-item', new_data)
-        myEmit('change', props.modelValue)
+        myEmit('change', new_data)
         update_v_validation()
     } catch (error) {
         log(error)
@@ -406,7 +404,8 @@ const removeValue = (i, loopItem) => {
     let {valueKey, modelValue} = props
     let new_data = H.clone(modelValue)?.filter(item => item[valueKey] != loopItem[valueKey])
     myEmit('update:modelValue', new_data)
-    myEmit('changed-item', new_data?.map(i => i[valueKey]))
+    myEmit('changed-item', new_data)
+    myEmit('change', new_data)
     update_v_validation()
 }
 let update_model_value = () => {
@@ -440,21 +439,11 @@ let update_v_validation = () => {
         }            
     }, 10);
 }
-watchEffect(()=>{
-    if(props.modelValue == null) myEmit('update:modelValue', [])
+
+watch(() => props.modelValue, (a, b) => {
+    update_model_value()
     update_v_validation()
-    H.delay(update_model_value, 0)
-    H.delay(update_model_value, 500)
-    H.delay(update_model_value, 1000)
-    H.delay(update_model_value, 1500)
-    H.delay(update_model_value, 2000)
-    H.delay(update_model_value, 2500)
-    H.delay(update_model_value, 3000)
-    H.delay(update_model_value, 3500)
-    H.delay(update_model_value, 4000)
-    H.delay(update_model_value, 4500)
-    H.delay(update_model_value, 5000)
-})
+}, {deep: true, immediate: true})
 
 function clickedOnItem(item){
     myEmit('clicked-added-item', item)
