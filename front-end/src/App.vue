@@ -91,6 +91,7 @@ let palylistComponent = ref(null)
 provide('palylistComponent', palylistComponent)
 
 let all_students = ref([])
+let all_students_non_copied = ref([])
 
 
 let checking_accessibility = ref(false)
@@ -362,6 +363,7 @@ provide('emergency_mode', emergency_mode)
 provide('punchToCallStudent', punchToCallStudent) 
 provide('punchToSubmitAttendance', punchToSubmitAttendance) 
 provide('all_students', all_students) 
+provide('all_students_non_copied', all_students_non_copied) 
 provide('getAllStudents', getAllStudents) 
 provide('appAccessData', appAccessData)
 provide('appUseForbiddened', appUseForbiddened)
@@ -584,6 +586,7 @@ async function getAllStudents(){
         })
        }
        all_students.value = data
+       all_students_non_copied.value = data.filter(std => std.name.lowerCase().indexOf('copied') === -1)
      }
    }).finally(()=>{
       

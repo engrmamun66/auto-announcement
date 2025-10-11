@@ -58,7 +58,9 @@ watch(sortby_column, (newVal) => {
   submitSearch()
 })
 watch(selectedStudents, (newData) => { 
-  submitSearch() 
+   setTimeout(() => {
+    submitSearch()
+   }, 100);
 })
 
 

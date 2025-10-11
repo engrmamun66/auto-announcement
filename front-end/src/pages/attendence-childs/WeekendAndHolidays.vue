@@ -11,7 +11,7 @@ import NormalSearchForm from './deep/NormalSearchForm.vue'
 
 const CONFIG = inject("CONFIG");
 const classes = inject("classes");
-const all_students = inject("all_students");
+const all_students_non_copied = inject("all_students_non_copied");
 const helper = inject("helper");
 const callbacks = inject("callbacks");
 const attendenceList = inject("attendenceList");

@@ -86,7 +86,7 @@ const CONFIG = inject("CONFIG");
 const emitter = inject('emitter');
 const classes = inject("classes");
 const attendenceList = inject("attendenceList");
-const all_students = inject("all_students");
+const all_students_non_copied = inject("all_students_non_copied");
 const liveAttendenceList = inject("liveAttendenceList");
 
 let log = console.log
@@ -95,7 +95,7 @@ const late_consideration_minute = CONFIG.value?.settings?.attendance?.late_consi
 let isMounted = ref(false)
 
 const getStudent = ({ student_id }) =>
-  all_students.value.find((std) => std.dakhela == student_id);
+  all_students_non_copied.value.find((std) => std.dakhela == student_id);
 
 onMounted(()=>{
   setTimeout(() => {

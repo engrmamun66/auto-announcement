@@ -8,7 +8,7 @@ import NormalSearchForm from './deep/NormalSearchForm.vue'
 
 const CONFIG = inject("CONFIG");
 const classes = inject("classes");
-const all_students = inject("all_students");
+const all_students_non_copied = inject("all_students_non_copied");
 const http = inject("http");
 const helper = inject("helper");
 const emitter = inject("emitter");
@@ -40,7 +40,7 @@ let log = console.log
 let isMounted = ref(false)
 
 const getStudent = ({ student_id }) =>
-  all_students.value.find((std) => std.dakhela == student_id);
+  all_students_non_copied.value.find((std) => std.dakhela == student_id);
 
 
 let queryparams = {
