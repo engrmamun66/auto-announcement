@@ -8,12 +8,15 @@ import FullCalendar from '@fullcalendar/vue3'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from '@fullcalendar/interaction'
 
+import RightBar from './RightBar.vue'
+
 export default {
   components: {
     FullCalendar // make the <FullCalendar> tag available
   },
   data() {
     return {
+      showRightbar: true,
       calendarOptions: {
         themeSystem: 'bootstrap5',
         plugins: [ dayGridPlugin, interactionPlugin ],        
@@ -59,13 +62,14 @@ export default {
               }
             }
           },
-      }
+      },
     }
   },
   methods: {
     handleDateClick: function(data) {
       let date__ = data.dateStr
-      console.log({date__})
+      console.log({date__, data})
+      console.log(data.jsEvent.target.outerHTML)
     },
     toggleWeekends: function() {
       this.calendarOptions.weekends = !this.calendarOptions.weekends // toggle the boolean!
@@ -88,7 +92,7 @@ export default {
       if(arg.isFuture){
         return {html: ''}
       } else {
-        html_array.push('<div class="fc-daygrid-day-events">Hello</div>')
+        html_array.push('<span class="badge bg-secondary" >Add Weekday</span>')
       }
       return {html: html_array.join('')}
     },

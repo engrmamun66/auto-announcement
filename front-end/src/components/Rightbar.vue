@@ -21,7 +21,7 @@ let props = defineProps({
         type: Boolean,
     },
     largestMode: {
-        default: false,
+        default: true,
         required: false,
         type: Boolean,
     },
