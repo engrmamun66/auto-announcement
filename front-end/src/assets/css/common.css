@@ -492,6 +492,12 @@ kbd {
   background-color: #f0f0f0;
   box-shadow: 1px 1px 2px #0000006e, inset 1px 1px 2px #0000006e;
 }
+.cb-textarea,
+.cb-textarea:focus,
+.cb-textarea:active,
+.cb-textarea:focus-visible { 
+  height: auto; 
+}
 
 .cb-form .form-group {
   margin-bottom: 15px;

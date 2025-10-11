@@ -48,8 +48,8 @@ onMounted(()=>{
 <template>
  
 
+  <div class="mt-3">
    <Transition name="fade">
-    <div class="mt-3">
       <template v-if="leaveAndWeekendSubTab == 1"">
         <div class="row row-cols-2 row-cols-md-1">
           <ClasswiseLeavesAndVacationsCalendar></ClasswiseLeavesAndVacationsCalendar> 
@@ -58,18 +58,11 @@ onMounted(()=>{
       <template v-else-if="leaveAndWeekendSubTab == 2"">
         <StudentwiseLeavesAndVacationsCalendar></StudentwiseLeavesAndVacationsCalendar> 
       </template>
-    </div>
-   </Transition>
+    </Transition>
+  </div>
 
 
-  <Rightbar v-if="showRightbar" @unmount="showRightbar = false" :title="getTitle"> 
-    <div class="row">
-      <div class="form-group">
-        <label for="">Title</label>
-        <input type="text" class="form-control cb-input">
-      </div>
-    </div>
-  </Rightbar>
+  
 </template>
 
 

@@ -14,10 +14,10 @@
                     </template>
                 <template v-else >
                     <template v-if="limit !== 1">
-                        <span v-if="modelValue?.length" tooltip="Remove All Items" flow="left" style="--tbg:#e25e16;--tcolor:white" @click.stop="removeAllItems()" class="clearAllItem">
+                        <span v-if="modelValue?.length" tooltip="Remove All Items" flow="left" style="--tbg:#e25e16;--tcolor:white" @click.stop="removeAllItems()" class="clearAllItem" :class="{'haslable': label}">
                             <i class="bx bx-x" ></i>
                         </span>
-                        <span v-else tooltip="Select All" flow="left" style="--tbg:#e25e16;--tcolor:white" @click.stop="selectAll()" class="clearAllItem">
+                        <span v-else tooltip="Select All" flow="left" style="--tbg:#e25e16;--tcolor:white" @click.stop="selectAll()" class="clearAllItem" :class="{'haslable': label}">
                             <i class='bx bx-check' ></i>
                         </span>
                     </template>
@@ -62,7 +62,7 @@
                              :value="valueKey ? item[valueKey] : item" 
                             @click="item?.isDisabled ? false : updateValue($event, item[valueKey], item)" 
                             :proxyHoverIndex="index"
-                            :class="{'proxyHoverIndex': proxyHoverIndex == index, 'selected': modelValue?.map(i => i[valueKey])?.includes(item[valueKey]), 'grayscale pointer-events-none': item?.isDisabled}"> 
+                            :class="{'proxyHoverIndex': search && proxyHoverIndex == index, 'selected': modelValue?.map(i => i[valueKey])?.includes(item[valueKey]), 'grayscale pointer-events-none': item?.isDisabled}"> 
                                 <div class="px-1 d-flex justify-content-between">
                                     <a> {{ (displayKey ? item[displayKey] : '') }} {{ (displayKey2 ? ('(' + item[displayKey2] + ')') : '') }} </a>
                                     <div class="px-1 d-flex justify-content-between">
@@ -618,6 +618,9 @@ a.add-new-item{
     height: 22px;
     box-shadow: inset -1px -1px 2px #000000ad;
     transition: all 0.2s ease;
+}
+.clearAllItem.haslable{ 
+    top: 30px; 
 }
 .clearAllItem:hover{ 
     box-shadow: 1px 3px 4px #00000059, inset -1px -1px 2px #000000ad;

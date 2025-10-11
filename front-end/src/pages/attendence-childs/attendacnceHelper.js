@@ -18,6 +18,9 @@ const Ahelper = {
         let dateTime = moment().format('Y-MM-DD ') + time_text
         return moment(dateTime).format('hh:mm:ss A')
     },
+    generateUniqueString() {
+        return Math.random().toString(36).substring(2, 14) + Date.now().toString(36).substring(0, 2);
+    },
     printShift(times_text){
         if(typeof times_text == 'object' && times_text?.start && times_text?.end){
             times_text = times_text?.start + ' - ' + times_text?.end

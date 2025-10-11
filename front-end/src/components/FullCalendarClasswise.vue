@@ -7,24 +7,25 @@ import moment from 'moment/moment';
 import FullCalendar from '@fullcalendar/vue3'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from '@fullcalendar/interaction'
-
-import RightBar from './RightBar.vue'
+import { inject, ref, reactive, onMounted, onBeforeUnmount, computed, watch } from "vue";
 
 export default {
-  components: {
-    RightBar,
+  components: { 
     FullCalendar // make the <FullCalendar> tag available
+  },
+  emits: ['add-vacation'],
+  props: {
+    modelValue: {
+      type: Object,
+      default: () => ({}),
+    },
   },
   data() {
     return {
-      showRightbar: false,
       calendarOptions: {
-        themeSystem: 'bootstrap5',
         plugins: [ dayGridPlugin, interactionPlugin ],        
         initialView: 'dayGridMonth', // values: dayGridMonth | dayGridDay 
-
         weekends: true,
-        dateClick: this.handleDateClick, 
         headerToolbar: {
           left: 'myCustomButton',
           center: 'title',
@@ -32,6 +33,7 @@ export default {
         },
         dayCellContent: this.renderDayCellContent,
         eventContent: this.renderEventContent,
+        dateClick: this.handleDateClick, 
         eventClick: ({ event }) => {
           console.log({event});
         },
@@ -57,9 +59,9 @@ export default {
           ],
           customButtons: {
             myCustomButton: {
-              text: 'Add Vacation', 
-              click: function() {
-                this.$emit('add-vacation')
+              text: 'Add New Vacation', 
+              click: ()=>{
+                this.$emit('add-vacation', 'this.$props')
               }
             }
           },
