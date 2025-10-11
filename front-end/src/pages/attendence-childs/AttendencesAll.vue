@@ -119,7 +119,12 @@ function deleteAttedence(item, note_text = null){
             <template v-for="(item, i) in attendenceList">
               <tr>
                   
-                <td @auxclick.stop="log(item)"> <span class="badge text-white bg-secondary" tooltip="Student ID">{{ getStudent(item)?.dakhela }}</span> {{ getStudent(item)?.name }} </td>                   
+                <td @auxclick.stop="log(item)"> 
+                  <span class="badge text-white bg-secondary" tooltip="Student ID">
+                    {{ getStudent(item)?.dakhela }}
+                  </span>
+                  {{ getStudent(item)?.name }}
+                </td>                   
                 <td> {{ getStudent(item)?.class }} </td>                   
                 <td style="width: 130px;"> <span class="inline">{{ item.date }}</span> </td>                   
                 <td> 
