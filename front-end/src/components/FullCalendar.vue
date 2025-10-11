@@ -8,12 +8,16 @@ import FullCalendar from '@fullcalendar/vue3'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from '@fullcalendar/interaction'
 
+import RightBar from './RightBar.vue'
+
 export default {
   components: {
+    RightBar,
     FullCalendar // make the <FullCalendar> tag available
   },
   data() {
     return {
+      showRightbar: false,
       calendarOptions: {
         themeSystem: 'bootstrap5',
         plugins: [ dayGridPlugin, interactionPlugin ],        
@@ -59,7 +63,7 @@ export default {
               }
             }
           },
-      }
+      },
     }
   },
   methods: {
@@ -131,4 +135,5 @@ export default {
 </script>
 <template>
   <FullCalendar :options="calendarOptions" />
+  <RightBar v-if="showRightbar" ref="rightbar" @unmount="showRightbar = false"></RightBar>
 </template>
