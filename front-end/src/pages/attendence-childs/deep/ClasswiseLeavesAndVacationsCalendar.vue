@@ -61,8 +61,8 @@ let payload = reactive({
       <div class="row">
 
         <div class="col-12 mb-3">
+          <label for="">Select Date Range</label>
           <div class="position-relative">
-            <label for="">Select Date Range</label>
             <EmDateTimePicker ref="dateRangePickerRef"
               v-model="pickerModelValue"
               @change="false"
@@ -103,11 +103,20 @@ let payload = reactive({
         <div class="col-12 mb-3">
            <div class="form-group">
             <label>Note</label>
-            <textarea  v-model="payload.reason" class="form-control cb-input cb-textarea"></textarea>
+            <textarea v-model="payload.reason" class="form-control cb-input cb-textarea"></textarea>
            </div>
         </div>
         
       </div>
+
+      <template #footer>
+        <div class="d-flex justify-content-start pt-2 gap-3">
+          <Btn class="red">Cancel</Btn>
+          <Btn>Submit</Btn>
+        </div>
+      </template>
+
+
   </Rightbar>
     
     

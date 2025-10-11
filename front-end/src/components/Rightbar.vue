@@ -153,7 +153,7 @@ defineExpose({unmount})
 
 <style scoped>
 .rightbar {
-    --bg-light: #f0f0f0;
+    --bg-light: #e1e1e1;
 }
 .rightbar {
     position: fixed;
