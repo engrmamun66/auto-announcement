@@ -69,7 +69,7 @@ let sortby_columns = [
     title: 'Device Index',
   },
 ]
-let sort_direction = ref('DESC')
+let sort_direction = ref('ASC')
 let sortby_column = ref('late_in_minute')
 
 const pagination_perpage = ref(Number(storage('pagination_perpage').value || 0) || CONFIG.value?.settings?.attendance?.pagination?.perpage || 20)
@@ -209,18 +209,22 @@ onMounted(()=>{
           </div> 
 
 
-          <div class="form-group">
-            <select class="form-control cb-input" v-model="sortby_column">
+          <div class="form-group" tooltip="Sort By">
+            <select class="form-control cb-input" v-model="sortby_column" >
               <template v-for="(column, index) in sortby_columns" :key="index">
                 <option :value="column.id">{{ column.title }}</option>
               </template>                  
             </select>
           </div>
-          <Btn class="white cp" @click="sort_direction = 'ASC'" :class="{'bg-success text-white': sort_direction === 'ASC'}">ASC</Btn>
-          <Btn class="white cp" @click="sort_direction = 'DESC'" :class="{'bg-success text-white': sort_direction === 'DESC'}">DESC</Btn>
+          <div class="form-group" tooltip="Sort Direction">
+            <select class="form-control cb-input" v-model="sort_direction" >
+              <template v-for="(direction, index) in ['ASC', 'DESC']" :key="index">
+                <option :value="direction">{{ direction }}</option>
+              </template>                  
+            </select>
+          </div>
 
-
-          <div class="form-group">
+          <div class="form-group" tooltip="Per Page">
             <select v-model="pagination_perpage" class="form-control cb-input" style="width: 110px">
               <template v-for="(limit, index) in perpage_limits" :key="index">
                 <option :value="limit">Limit {{ limit }}</option>

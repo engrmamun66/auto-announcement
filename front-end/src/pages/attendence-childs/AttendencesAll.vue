@@ -3,13 +3,15 @@ import moment from 'moment/moment'
 import { inject, ref, reactive, onMounted, onBeforeUnmount, computed, watch } from "vue";
 import Ahelper from "./attendacnceHelper";
 import myTable from '../../components/myTable.vue'
-import Pagination from '../../components/Pagination.vue'
+import Confirm from '../../components/Confirm.vue'
 import NormalSearchForm from './deep/NormalSearchForm.vue'
 
 const CONFIG = inject("CONFIG");
 const classes = inject("classes");
 const all_students = inject("all_students");
+const http = inject("http");
 const helper = inject("helper");
+const emitter = inject("emitter");
 const callbacks = inject("callbacks");
 const attendenceList = inject("attendenceList");
 const attendenceParams = inject("attendenceParams");
@@ -51,14 +53,31 @@ let queryparams = {
     sort_direction : "ASC"  // default order
 }
  
-onMounted(()=>{
-
-  getAttendeceList({other_params: {date: moment().format('YYYY-MM-DD')}})
-
-  setTimeout(() => {
-    isMounted.value = true
-  }, 500);
+onMounted(()=>{ 
+  isMounted.value = true 
 })
+
+let targetItem = ref(null)
+let showDeleteConfirmationModal = ref(false)
+
+function prepareToDelete(item){
+  targetItem.value = item
+  showDeleteConfirmationModal.value = true
+  console.log('prepareToDeleteprepareToDelete');
+
+}
+function deleteAttedence(item, note_text = null){
+  // if(prompt("Delete this attendance?").toLocaleLowerCase() !== 'd') return
+  console.log({note_text});
+  // http.delete(`/attendence-delete/${item.id}`).then(response => {
+  //   if(response.status === 200){
+  //     liveAttendenceList.value = liveAttendenceList.value.filter(_item => _item.id != item.id)
+  //     attendenceList.value = attendenceList.value.filter(_item => _item.id != item.id)
+  //     emitter.emit('toaster-success', {message: 'Attendence Deleted!'})
+  //   }
+  // })
+}
+
 
 
 
@@ -88,7 +107,7 @@ onMounted(()=>{
      
     
     <div class="col-md-8">
-      <myTable class="transformY-5px" style="--transformY: -8px">
+      <myTable class="transformY-5px" style="--transformY: 8px" topMarginClass="">
         <template #thead>
           <thead>
             <tr> 
@@ -98,6 +117,7 @@ onMounted(()=>{
               <th>Date</th>  
               <th>Summarised Status</th>  
               <th>Shift</th>  
+              <th>Action</th>  
             </tr>
           </thead>
         </template>
@@ -136,23 +156,13 @@ onMounted(()=>{
                 </td>                   
                 <td>{{ Ahelper.printShift(item?.shift_duration) }}</td> 
                                 
-                <!-- <td> 
+                <td> 
                   <div class="d-flex justify-content-center action-icons">
-                      <i  class='bx bx-barcode cp size-1p5' ></i>
-                      
-                      <span tooltip="Copy barcode">
-                        <i  class='bx bxs-copy-alt cp px-1' style="font-size: 18px" ></i>
-                      </span>
-                      
-
                       <span tooltip="Delete student">
-                        <i   class='bx bx-trash text-danger cp' ></i>
+                        <i @click.stop="prepareToDelete(item)" class='bx bx-trash text-danger cp' ></i>
                       </span>
-          
                     </div>  
-                </td>                    -->
-                                
-          
+                </td>                   
                 
             </tr> 
 
@@ -170,6 +180,11 @@ onMounted(()=>{
 
       
     </div>
+    <Confirm v-model="showDeleteConfirmationModal" @yes="(note_text) => {
+      deleteAttedence(targetItem, note_text)
+    }" :tekeNote="true" >
+            আপনি কি উপস্থিতিটিকে সম্পূর্ণ বাতিল করতে চান?
+    </Confirm>
   </div>
 </template>
 

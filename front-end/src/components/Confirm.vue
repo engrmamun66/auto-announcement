@@ -35,6 +35,7 @@
                       </slot>
                     </template>
                   </h4>
+                  <input v-if="tekeNote" v-model="note_text" type="text" class="form-control cb-input" placeholder="আনুগ্রহ করে বাতিলের কারণ লিখুন...">
               </div>
             </div>
             <hr>
@@ -44,8 +45,8 @@
                 <shimmer-effect height="42px" width="110px" radius="50px" bg="dark" ></shimmer-effect>
               </template>
               <template v-else>
-                <button @click="no()" type="button" class="btn-cb red px-5 ">{{noText}} </button>
-                <button @click="yes()" type="button" class="btn-cb green px-5 me-3">{{yesText}} <slot name="btn-yes"></slot> </button>
+                <button @click.stop="no()" type="button" class="btn-cb red px-5 ">{{noText}} </button>
+                <button @click.stop="yes()" type="button" class="btn-cb green px-5 me-3">{{yesText}} <slot name="btn-yes"></slot> </button>
               </template>
             </div>
           </div>
@@ -56,7 +57,7 @@
 </template>
 
 <script setup>
-import { onBeforeMount, onBeforeUnmount, onMounted, ref } from 'vue';
+import { onBeforeMount, onBeforeUnmount, onMounted, ref, inject } from 'vue';
 
 let props = defineProps({
   modelValue: {
@@ -89,10 +90,26 @@ let props = defineProps({
     default: 'No',
     required: false,
   },
+  tekeNote: {
+    type: Boolean,
+    default: false,
+    required: false,
+  },
 });
 let emit = defineEmits(['update:modelValue', 'yes', 'no', ' close'])
+
+let note_text = ref(null)
+let emitter = inject('emitter')
+
+
 let yes = (event) => {
-  emit('yes')
+  if(props.tekeNote){
+    if(!note_text.value){
+      emitter.emit('toaster-error', {message: 'আনুগ্রহ করে বাতিলের কারণ লিখুন!'})
+      return
+    }
+  }
+  emit('yes', note_text.value)
   if(!props.skipAutoClose){
     emit('update:modelValue', false)
   }
@@ -105,6 +122,8 @@ let close = (event) => {
   emit('close')
   emit('update:modelValue', false)
 }
+
+
 
 let effect = ref(true);
 onMounted(()=>{

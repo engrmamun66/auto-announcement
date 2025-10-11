@@ -39,7 +39,7 @@ onMounted(()=>{
 
 <template>
 
-  <button class="btn btn-secondary" @click="showRightbar = true">Show Calendar View</button>
+  <button class="btn btn-secondary position-absolute" @click="showRightbar = true">Show Calendar View</button>
 
 
   <div class="class-items">
@@ -72,8 +72,10 @@ onMounted(()=>{
   align-items: center;
   flex-direction: column;
   padding: 20px;
-  background-color: #e0e0e0;
+  background-color: #ffffff2b;
   border-radius: 6px;
+  max-height: calc(100vh - 230px);
+  overflow-y: auto;
 }
 .class-item{
   width: 100%;

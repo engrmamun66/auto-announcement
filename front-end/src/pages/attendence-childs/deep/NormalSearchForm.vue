@@ -77,7 +77,7 @@ function clearSearch() {
   attPayload.student_id = null, 
   attPayload.class_short = null,
   attPayload.sort_by = "late_in_minute", 
-  attPayload.sort_direction = "DESC"  
+  attPayload.sort_direction = "ASC"  
   emit('onBtnClear', {...attPayload})
   clearPicker()
 }
@@ -109,6 +109,10 @@ function clearPicker(){
   dateRangePickerRef.value.clearPicker()
   pickerModelValue.value.startDate = null
 }
+
+onMounted(()=>{
+  submitSearch()
+})
  
 
 defineExpose({
