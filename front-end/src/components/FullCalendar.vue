@@ -90,11 +90,11 @@ export default {
         "dayNumberText": string (localized) day number of the cell
        */
       let html_array = ['<div class="fc-daygrid-day-number">' + arg.dayNumberText + '</div>']
-      if(arg.isFuture){
-        return {html: ''}
-      } else {
-        html_array.push('<span class="badge bg-secondary" >Add Weekday</span>')
-      }
+      html_array.push(`
+        <div>
+          <span class="badge bg-secondary cp" tooltip="Add Event" >+</span>
+        </div>
+      `)
       return {html: html_array.join('')}
     },
     renderEventContent: function(arg) {

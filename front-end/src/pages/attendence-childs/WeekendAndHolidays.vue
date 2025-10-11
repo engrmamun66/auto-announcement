@@ -4,9 +4,10 @@ import { inject, ref, reactive, onMounted, onBeforeUnmount, computed, watch } fr
 import Ahelper from "./attendacnceHelper";
 import myTable from '../../components/myTable.vue'
 import FullCalendar from '../../components/FullCalendar.vue'
+import Rightbar from '../../components/Rightbar.vue'
 import Pagination from '../../components/Pagination.vue'
-import AdvanceSearchForm from './AdvanceSearchForm.vue'
-import NormalSearchForm from './NormalSearchForm.vue'
+import AdvanceSearchForm from './deep/AdvanceSearchForm.vue'
+import NormalSearchForm from './deep/NormalSearchForm.vue'
 
 const CONFIG = inject("CONFIG");
 const classes = inject("classes");
@@ -35,7 +36,9 @@ onMounted(()=>{
 
 <template>
   <div class="row">
-    <FullCalendar></FullCalendar> 
+    <Rightbar>
+      <FullCalendar ></FullCalendar> 
+    </Rightbar>
   </div>
 </template>
 

@@ -1,7 +1,7 @@
 <script setup>
 import moment from 'moment/moment'
 import { inject, ref, reactive, onMounted, onBeforeUnmount, computed, watch } from "vue";
-import Ahelper from "./attendacnceHelper";
+import Ahelper from "./../attendacnceHelper";
 
 const CONFIG = inject("CONFIG");
 const classes = inject("classes");
@@ -11,11 +11,11 @@ const callbacks = inject("callbacks");
 const attendenceList = inject("attendenceList");
 const attendenceParams = inject("attendenceParams");
 const liveAttendenceList = inject("liveAttendenceList");
-import myTable from '../../components/myTable.vue'
-import Pagination from '../../components/Pagination.vue'
-import BaseSelectMultiple from './../../components/BaseSelectMultiple.vue'
-import EmDateTimePicker from './../../components/EmDateTimePicker.vue'
-import Btn from './../../components/Btn.vue'
+import myTable from '../../../components/myTable.vue'
+import Pagination from '../../../components/Pagination.vue'
+import BaseSelectMultiple from './../../../components/BaseSelectMultiple.vue'
+import EmDateTimePicker from './../../../components/EmDateTimePicker.vue'
+import Btn from './../../../components/Btn.vue'
 
 const props = defineProps({
   modelValue: {

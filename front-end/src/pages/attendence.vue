@@ -127,22 +127,17 @@ function getAttendeceList({ page_no = null, reset = false, other_params = {} } =
 
 
 
-function getWeedayAndByDateRange({ page_no = null, reset = false, other_params = {} } = {}) {
+function addLeaveOrVacation({}) {
   try {
-    if (reset) {
-      attendenceParams.value.page_no = 1;
-      attendenceParams.value.total = 3;
-      attendenceParams.value.totalPages = 1;
-      attendenceParams.value.limit = 50;
-    }
-    let queryParams = { ...attendenceParams.value };
-    if (page_no) {
-      queryParams.page_no = page_no;
-    }
-    queryParams = { ...queryParams, ...other_params };
+
+
+    let payload = {  };
+
+    console.log(payload);
+    return
 
     http
-      .get("/attendence-list", { params: queryParams })
+      .post("/leave-and-vacation-add-bulk", payload)
       .then((response) => {
         if (response.status == 200) {
           let data = response.data;
@@ -154,6 +149,7 @@ function getWeedayAndByDateRange({ page_no = null, reset = false, other_params =
   } catch (error) {}
 }
 
+provide('addLeaveOrVacation', addLeaveOrVacation)
 
 // ====================================================== //
 // ====================================================== //

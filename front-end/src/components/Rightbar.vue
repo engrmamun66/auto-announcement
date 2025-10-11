@@ -153,7 +153,7 @@ defineExpose({unmount})
 
 <style scoped>
 .rightbar {
-    --bg-light: white;
+    --bg-light: #f0f0f0;
 }
 .rightbar {
     position: fixed;
@@ -215,7 +215,7 @@ defineExpose({unmount})
     padding: 8px;
     background: var(--primaryColor);
     border-radius: 10px;
-    color: #ffffff;
+    color: #f0f0f0;
     text-shadow: 1px 1px 3px #0000008c;
     transition: all 0.2s;
 }

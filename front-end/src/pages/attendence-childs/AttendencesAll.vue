@@ -4,8 +4,7 @@ import { inject, ref, reactive, onMounted, onBeforeUnmount, computed, watch } fr
 import Ahelper from "./attendacnceHelper";
 import myTable from '../../components/myTable.vue'
 import Pagination from '../../components/Pagination.vue'
-import AdvanceSearchForm from './AdvanceSearchForm.vue'
-import NormalSearchForm from './NormalSearchForm.vue'
+import NormalSearchForm from './deep/NormalSearchForm.vue'
 
 const CONFIG = inject("CONFIG");
 const classes = inject("classes");

@@ -123,6 +123,7 @@ class myDB {
               `
               CREATE TABLE IF NOT EXISTS leave_and_vacation (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+                indentity_string TEXT DEFAULT NULL, -- unique identity string for each record, it will help to update bulk records
                 type TEXT NOT NULL,                -- e.g., 'leave', 'vacation'
                 class_short TEXT DEFAULT 'ALL',    -- class short or 'ALL'
                 student_id INTEGER DEFAULT NULL,   -- refers to student_id
