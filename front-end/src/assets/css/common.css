@@ -515,9 +515,11 @@ th {
   color: black;
 }
 
-thead tre,
+thead tr {
+  background-color: #ffffff !important;
+}
 tbody td {
-  background-color: #ffffff;
+  background-color: #ffffffb0 !important;
 }
 
 th a,

@@ -38,42 +38,4 @@ defineProps({
 </div>
 </template>
 
-<style>
-
-/**
-border-right: 4px solid #fff;
-border-right: 4px solid #5dceff;
-border-right: 4px solid #5dceff;
-*/
-
-.table-container{
-  max-width: 100%;
-  overflow-y: auto;
-}
-
-
-td{
-  padding: 5px 20px !important;  
-}
-
-th{
-  padding: 10px 20px !important;
-}
  
-th { 
-  background: rgba(255, 255, 255, 0.301) !important;
-  color: black;
-}
-
-thead tr {
-  /* background: rgba(255, 255, 255, 0.301) !important; */
-}   
-
- 
-th a, td a {
-  color: black;
-  text-decoration: none;
-}
-
-
-</style>
