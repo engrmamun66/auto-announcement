@@ -197,10 +197,12 @@ onMounted(()=>{
             <Btn class="white">Out: <span class="badge text-white bg-warning">{{ Ahelper.count.out(liveAttendenceList) }}</span></Btn>
             <Btn class="white">Late: <span class="badge text-white bg-danger">{{ Ahelper.count.late(liveAttendenceList) }}</span></Btn>
             <Btn class="white">Total: <span class="badge text-white bg-success">{{ liveAttendenceList?.length }}</span></Btn>
-        </div>
-      </div>   
-      <div v-if="tab==2">
-        <div class="d-flex justify-content-center align-items-center gap-2">
+          </div>
+        </div>   
+        <div v-if="tab==2">
+          <div class="d-flex justify-content-center align-items-center gap-2">
+            
+          <Btn class="white">Total: <span class="badge text-white bg-success">{{ attendenceList?.length }}</span></Btn>
 
           <div class="d-flex"  >
             <Pagination v-if="attendenceParams?.totalPages > 1" v-model="attendenceParams" @jumpToPage="(page_no) => {

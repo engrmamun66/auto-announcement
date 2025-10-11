@@ -38,6 +38,7 @@ let getPositionClass = computed(() => {
 let log = console.log
 
 let isMounted = ref(false)
+let NormalSearchFormRef = ref(null)
 
 const getStudent = ({ student_id }) =>
   all_students_non_copied.value.find((std) => std.dakhela == student_id);
@@ -89,7 +90,7 @@ function deleteAttedence(item, note_text = null){
   <div class="row mt-3">
 
     <div class="col-md-4">
-      <NormalSearchForm
+      <NormalSearchForm ref="NormalSearchFormRef"
       @onBtnClear="getAttendeceList({page_no: 1})"
       @onBtnSubmit="(other_params) => {
         getAttendeceList({page_no: 1, other_params})
@@ -120,7 +121,7 @@ function deleteAttedence(item, note_text = null){
               <tr>
                   
                 <td @auxclick.stop="log(item)"> 
-                  <span class="badge text-white bg-secondary" tooltip="Student ID">
+                  <span @click.stop="NormalSearchFormRef.udpateSelectedStudentAndSearch(getStudent(item))" class="badge text-white bg-secondary cp" tooltip="Student ID">
                     {{ getStudent(item)?.dakhela }}
                   </span>
                   {{ getStudent(item)?.name }}

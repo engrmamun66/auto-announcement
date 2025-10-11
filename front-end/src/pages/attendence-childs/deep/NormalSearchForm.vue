@@ -127,7 +127,11 @@ onMounted(()=>{
  
 
 defineExpose({
-  
+  udpateSelectedStudentAndSearch(student){
+    selectedStudents.value = [student]
+    search_text.value = ''
+    submitSearch()
+  }
 })
 
 
