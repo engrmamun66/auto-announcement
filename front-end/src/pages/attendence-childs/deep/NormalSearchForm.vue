@@ -57,12 +57,7 @@ watch(sortby_column, (newVal) => {
   attPayload.sort_by = newVal
   submitSearch()
 })
-watch(selectedStudents, (newData) => { 
-   setTimeout(() => {
-    submitSearch()
-   }, 100);
-})
-
+ 
 
 let dateRangePickerRef = ref(null)
 let pickerModelValue = ref({startDate: null})
@@ -97,7 +92,6 @@ function clearSearch() {
   selectedStudents.value = []
   search_text.value = ''
   emit('onBtnClear', {...attPayload})
-  clearPicker()
 }
 
 function submitSearch(eventData={}) { 
@@ -159,7 +153,11 @@ defineExpose({
           </div> 
 
           <div class="w-100 d-flex justify-content-center">
-            <BaseSelectMultiple v-model="selectedStudents" :data="filteredAllStudents" :search="true" @searching="(text) => search_text = text" :searchDelayTime="50" displayKey="full_name" :limit="1" style="width:350px" placeholder="-Select Student-">
+            <BaseSelectMultiple v-model="selectedStudents" :data="filteredAllStudents" :search="true" 
+              @searching="(text) => search_text = text" 
+              @change--dd="helper.delay(submitSearch, 100)" 
+              @change="log(selectedStudents)" 
+              :searchDelayTime="50" displayKey="full_name" :limit="1" style="width:350px" placeholder="-Select Student-">
               <template #loopItem1="{item, index}">
                 <span class="badge text-dark bg-body-secondary ms-1">
                   {{ item.class_short }}
@@ -216,8 +214,8 @@ defineExpose({
  
       <div class="col-12 mt-3">
         <div class="d-flex justify-content-center gap-3">
-          <Btn @click.stop="clearPicker(); submitSearch()" cbinput="cbinput">Clear Date</Btn> 
-          <Btn @click.stop="clearSearch" cbinput="cbinput" class="red">Reset Search</Btn>
+          <Btn @click.stop="clearPicker(); submitSearch()" cbinput="cbinput" class="red">Clear All</Btn> 
+          <Btn @click.stop="clearSearch()" cbinput="cbinput" class="red">Clear</Btn>
         </div>
       </div>
 

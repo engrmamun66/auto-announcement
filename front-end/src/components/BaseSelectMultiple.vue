@@ -13,12 +13,14 @@
                     ></ShimmerEffect> -->
                     </template>
                 <template v-else >
-                    <span v-if="modelValue?.length" tooltip="Remove All Items" flow="left" style="--tbg:#e25e16;--tcolor:white" @click.stop="removeAllItems()" class="clearAllItem">
-                        <i class="bx bx-x" ></i>
-                    </span>
-                    <span v-else tooltip="Select All" flow="left" style="--tbg:#e25e16;--tcolor:white" @click.stop="selectAll()" class="clearAllItem">
-                        <i class='bx bx-check' ></i>
-                    </span>
+                    <template v-if="limit !== 1">
+                        <span v-if="modelValue?.length" tooltip="Remove All Items" flow="left" style="--tbg:#e25e16;--tcolor:white" @click.stop="removeAllItems()" class="clearAllItem">
+                            <i class="bx bx-x" ></i>
+                        </span>
+                        <span v-else tooltip="Select All" flow="left" style="--tbg:#e25e16;--tcolor:white" @click.stop="selectAll()" class="clearAllItem">
+                            <i class='bx bx-check' ></i>
+                        </span>
+                    </template>
                     <button :tooltip="(modelValue?.length ? tooltip : '') || (disabled ? 'Disabled' : '')" ref="ref_button" :disabled="disabled" @click="()=>{
                         if(!disabled) showOptions = !showOptions;
                         H.delay(() => { 
@@ -245,20 +247,24 @@ function onkeupEscape(event){
         showOptions.value = false;
         searchText.value = '';
         myEmit('searching', '')
+        myEmit('change', props.modelValue)
     }
 }
 function removeSingleItem(item, index){
     myEmit('removeItem', item);
     item.removing=true;
     H.delay(()=>removeValue(index, item), 390)
+    myEmit('change', props.modelValue)
 }
 function removeAllItems(){
     myEmit('update:modelValue', []) 
+    myEmit('change', [])
     update_v_validation()
 
 }
 function selectAll(){ 
     myEmit('update:modelValue', props.data) 
+    myEmit('change', props.modelValue)
     update_v_validation()
 }
 
@@ -272,7 +278,7 @@ watch(showOptions, (a, b) => {
     }
 })
 
-const myEmit = defineEmits(['update:modelValue', 'changed-item', 'clicked', 'clicked-added-item', 'searching', 'onClickCreateNew', 'removeItem'])
+const myEmit = defineEmits(['update:modelValue', 'changed-item', 'clicked', 'clicked-added-item', 'searching', 'onClickCreateNew', 'removeItem', 'change'])
 const updateValue = (event, id, item) => {
     let {valueKey, modelValue} = props
     try {
@@ -291,6 +297,7 @@ const updateValue = (event, id, item) => {
         }
         myEmit('update:modelValue', new_data)
         myEmit('changed-item', new_data)
+        myEmit('change', props.modelValue)
         update_v_validation()
     } catch (error) {
         log(error)
