@@ -53,7 +53,7 @@
                 <!-- <ul v-if="true" class="option-box py-2"  -->
                 <ul v-if="!disabled && (data?.length || search) && showOptions" class="option-box py-2" 
                 :class="{'--animate-show': (showOptions || search), '--animate-hide': (!showOptions && !search)}">
-                    <input v-if="search" :placeholder="placeholder2 + ' (use Enter & Arrow to select)'" ref="searchInput" type="search" class="form-control mb-2" v-model="searchText" @keyup="handleSearching" @search="handleSearching" style="border-radius: 20px;height: 30px;"  />
+                    <input v-if="search" :placeholder="placeholder2 + ' (use Enter & Arrow to select)'" ref="searchInput" type="search" class="form-control mb-2" v-model="searchText" @keyup="handleSearching" @keydown="handleSearchingForKeyDown" @search="handleSearching" style="border-radius: 20px;height: 30px;"  />
                     <template v-if="data?.length" >
                         <template v-for="(item, index) in (data || [])" :key="index" >                            
                             <li class="ps-2"
@@ -301,8 +301,15 @@ let _timeout = ref(null);
 let inputValue = ref('');
 let showCreateNewConfirmation = ref(false)
 
+let keydownCount = ref(0)
+
 
 function handleSearching(event){
+    if(keydownCount.value > 4){
+        keydownCount.value = 0
+        return
+    }
+    keydownCount.value = 0
     if(_timeout.value) clearTimeout(_timeout.value)
     if(event?.key){
 
@@ -338,6 +345,43 @@ function handleSearching(event){
         inputValue.value = event.target.value;
         myEmit('searching', event.target.value)
     }, props.searchDelayTime);
+}
+
+
+
+function handleSearchingForKeyDown(event){
+    keydownCount.value += 1 
+    if(keydownCount.value < 4) return
+
+
+
+    if(_timeout.value) clearTimeout(_timeout.value)
+    if(event?.key){
+
+        const scrollToView = () => {
+            H.delay(() => {
+                let el = document.querySelector(`li[proxyHoverIndex="${proxyHoverIndex.value}"]`)
+                if(el) el.scrollIntoView({behavior: "smooth", block: "nearest", inline: "nearest"});
+            }, 0);
+        }
+
+        if(event.key === 'ArrowUp'){
+            if(proxyHoverIndex.value > 0){
+                proxyHoverIndex.value -= 1
+            }
+            
+            scrollToView()
+            return
+        }
+        if(event.key === 'ArrowDown'){
+            if(proxyHoverIndex.value < (props.data?.length - 1)){
+                proxyHoverIndex.value += 1
+            }
+            scrollToView()
+            return
+        } 
+    }
+     
 }
 
 

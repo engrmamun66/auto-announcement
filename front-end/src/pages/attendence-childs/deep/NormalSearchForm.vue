@@ -57,8 +57,8 @@ watch(sortby_column, (newVal) => {
   attPayload.sort_by = newVal
   submitSearch()
 })
-watch(selectedStudents, (newVal) => { 
-  submitSearch()
+watch(selectedStudents, (newData) => { 
+  submitSearch() 
 })
 
 
@@ -73,7 +73,6 @@ let filteredAllStudents = computed(() => {
     students = students.filter(student => student.class_short === attPayload.class_short)
   }  
   if(search_text.value){
-    console.log('asfasf', search_text.value);
     let text = search_text.value.toLowerCase()
     students = students.filter(student => 
       student.name.toLowerCase().includes(text) ||   
@@ -173,14 +172,14 @@ defineExpose({
 
           </div>
 
-          <div v-if="false" class="form-group">
+          <!-- <div v-if="true" class="form-group">
             <select v-model="attPayload.student_id" class="form-control cb-input" @change="submitSearch" >
               <option :value="null">-Student-</option>
               <template v-for="(student, index) in filteredAllStudents" :key="index">
                 <option :value="student.id">[{{ student.id }}] {{student.name}} ({{ student.class_short }})</option>
               </template>                  
             </select>
-          </div> 
+          </div>  -->
 
 
           <EmDateTimePicker ref="dateRangePickerRef"
