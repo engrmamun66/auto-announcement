@@ -177,7 +177,7 @@ defineExpose({unmount})
 }
 .rightbar.show {
     transform: translateX(0);
-    box-shadow: -15px 0px 20px 0px #0000008a;
+    box-shadow: -15px 0px 20px 0px #00000047;
 }
 
 .rightbar .contents {
@@ -203,7 +203,7 @@ defineExpose({unmount})
     border-left: 2px solid var(--primaryColor);
     border-right: 1px solid #000000;
     cursor: pointer;
-    box-shadow: -15px 0px 20px 0px #0000008a;
+    box-shadow: -15px 0px 20px 0px #00000047;
     overflow: hidden;
     transition: left 0.4s; 
 }

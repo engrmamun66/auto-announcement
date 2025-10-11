@@ -156,8 +156,8 @@ export default {
 .fc .fc-button {
   text-transform: capitalize;
 }
-.fc-scrollgrid-sync-table{
+/* .fc-scrollgrid-sync-table{
   width: 100% !important;
   height: auto !important;
-}
+} */
 </style>

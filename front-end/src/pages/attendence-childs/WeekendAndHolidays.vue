@@ -21,6 +21,8 @@ const getAttendeceList = inject("getAttendeceList");
 
 const pagiation_positon = CONFIG.value?.settings?.attendance?.pagination?.pagiation_positon || 'bottom_center'
 const weekends = CONFIG.value?.settings?.attendance?.weekends || []
+
+let showRightbar = ref(false)
  
 onMounted(()=>{
 
@@ -30,20 +32,69 @@ onMounted(()=>{
 
 
 
+
 </script>
 
 
 
 <template>
-  <div class="row">
-    <Rightbar>
-      <FullCalendar ></FullCalendar> 
-    </Rightbar>
+
+  <button class="btn btn-secondary" @click="showRightbar = true">Show Calendar View</button>
+
+
+  <div class="class-items">
+     
+    <template v-for="(item, i) in classes" :key="i">
+      <div class="class-item">
+        <div class="left-side">
+          <i class='bx bx-calendar'></i>
+          <h4>{{ item.class_name }}</h4>
+        </div>
+        <div class="right-side">
+          <i class='bx bx-calendar'></i>
+          <h4>{{ item.class_name }}</h4>
+        </div>
+      </div>
+    </template> 
   </div>
+
+
+  <Rightbar v-if="showRightbar" @unmount="showRightbar = false">
+    <FullCalendar ></FullCalendar> 
+  </Rightbar>
 </template>
 
 
 <style scoped>
- 
+.class-items{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-direction: column;
+  padding: 20px;
+  background-color: #e0e0e0;
+  border-radius: 6px;
+}
+.class-item{
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center; 
+  gap: 20px;
+  margin-bottom: 15px;
+}
+.class-item .left-side,
+.class-item .right-side{
+  background-color: white;
+  padding: 20px;
+  border-radius: 5px;
+}
+.class-item .left-side{
+  width: 40%;
+}
+.class-item .right-side{
+  width: 60%;
+}
+
 
 </style>
