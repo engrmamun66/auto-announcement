@@ -17,7 +17,7 @@ export default {
   },
   data() {
     return {
-      showRightbar: true,
+      showRightbar: false,
       calendarOptions: {
         themeSystem: 'bootstrap5',
         plugins: [ dayGridPlugin, interactionPlugin ],        
@@ -138,3 +138,26 @@ export default {
   <FullCalendar :options="calendarOptions" />
   <RightBar v-if="showRightbar" ref="rightbar" @unmount="showRightbar = false"></RightBar>
 </template>
+
+
+<style>
+.fc .fc-toolbar {
+    align-items: center !important;
+    background-color: white;
+    padding: 6px;
+}
+.fc .fc-button { 
+    padding: 3px 5px !important; 
+}
+.fc .fc-toolbar-title {
+    font-size: 20px !important; 
+}
+.fc .fc-today-button,
+.fc .fc-button {
+  text-transform: capitalize;
+}
+.fc-scrollgrid-sync-table{
+  width: 100% !important;
+  height: auto !important;
+}
+</style>

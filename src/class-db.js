@@ -119,27 +119,27 @@ class myDB {
             );
 
             this.db.run(
-              // DROP TABLE IF EXISTS class_holidays;
+              // DROP TABLE IF EXISTS leave_and_vacation;
               `
-              CREATE TABLE IF NOT EXISTS class_holidays (
+              CREATE TABLE IF NOT EXISTS leave_and_vacation (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                type TEXT NOT NULL, -- e.g., 'holiday', 'leave', 'event'
-                holi_by TEXT NOT NULL DEFAULT class_short, -- class_short | student
-                class_short TEXT DEFAULT NULL, -- refers to class or class_short from students
-                student_id INTEGER DEFAULT NULL, -- refers to class or class_short from students
-                weekday DATE NOT NULL,
+                type TEXT NOT NULL,                -- e.g., 'leave', 'vacation'
+                class_short TEXT DEFAULT 'ALL',    -- class short or 'ALL'
+                student_id INTEGER DEFAULT NULL,   -- refers to student_id
                 date DATE NOT NULL,
                 reason TEXT DEFAULT NULL,
-                device_index INTEGER DEFAULT 1, -- zkteco punching device index
                 created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-              );`,
+                updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY(student_id) REFERENCES students(id)
+              );
+              `,
               (err) => {
                 if (err) {
                   console.error("Error creating table:", err.message);
                 }
               }
-            ); 
+            );
+            
             
             
         } catch (error) {

@@ -94,7 +94,8 @@ module.exports = {
                pagination: {
                     perpage: 20,
                     pagiation_positon: 'bottom_center', // bottom_left | bottom_center | bottom_right
-               } 
+               },
+               weekends: ['Friday']
           },
      },
      date_range_list: [

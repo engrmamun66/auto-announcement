@@ -1,5 +1,5 @@
 
-class ClassHolidays {
+class LeaveAndVacations {
     constructor(db) {
       this.tableName = "class_holidays";
       this.db = db;
@@ -67,5 +67,5 @@ class ClassHolidays {
     }
   }
   
-  module.exports = ClassHolidays;
+  module.exports = LeaveAndVacations;
   

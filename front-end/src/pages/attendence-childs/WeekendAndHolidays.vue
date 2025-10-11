@@ -19,7 +19,7 @@ const liveAttendenceList = inject("liveAttendenceList");
 const getAttendeceList = inject("getAttendeceList");
 
 const pagiation_positon = CONFIG.value?.settings?.attendance?.pagination?.pagiation_positon || 'bottom_center'
- 
+const weekends = CONFIG.value?.settings?.attendance?.weekends || []
  
 onMounted(()=>{
 

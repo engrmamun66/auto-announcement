@@ -41,7 +41,7 @@ const students = require('./src/class-students');
 const schedules = require('./src/class-schedules');
 const PunchLoogClass = require('./src/class-punchlog');
 const AttendenceClass = require('./src/class-attendence');
-const HolydaysClass = require('./src/class-holidays');
+const LeavAndVacationsClass = require('./src/class-leave-and-vacations');
 const Backup = require('./src/backup');
 const Updater = require('./src/updater');
 const utils = require('./src/utls');
@@ -50,7 +50,7 @@ const Students = new students(DB.db)
 const Schedules = new schedules(DB.db)
 const PunchLog = new PunchLoogClass() 
 const Attendence = new AttendenceClass(DB.db) 
-const Holidays = new HolydaysClass(DB.db) 
+const LeavAndVacations = new LeavAndVacationsClass(DB.db) 
 
 
 Updater.getUpdateVersion()

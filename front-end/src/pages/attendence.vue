@@ -123,6 +123,56 @@ function getAttendeceList({ page_no = null, reset = false, other_params = {} } =
 // ====================================================== // 
 
 
+
+
+
+
+function getWeedayAndByDateRange({ page_no = null, reset = false, other_params = {} } = {}) {
+  try {
+    if (reset) {
+      attendenceParams.value.page_no = 1;
+      attendenceParams.value.total = 3;
+      attendenceParams.value.totalPages = 1;
+      attendenceParams.value.limit = 50;
+    }
+    let queryParams = { ...attendenceParams.value };
+    if (page_no) {
+      queryParams.page_no = page_no;
+    }
+    queryParams = { ...queryParams, ...other_params };
+
+    http
+      .get("/attendence-list", { params: queryParams })
+      .then((response) => {
+        if (response.status == 200) {
+          let data = response.data;
+          attendenceList.value = data.data;
+          attendenceParams.value = data.pagination;
+        }
+      })
+      .finally(() => {});
+  } catch (error) {}
+}
+
+
+// ====================================================== //
+// ====================================================== //
+// ====================================================== //
+// ====================================================== //
+// ====================================================== //
+// ============= For Weekends And Vacations ============= //
+// ====================================================== //
+
+
+
+
+// ============= End Weekends And Vacations ============= //
+// ====================================================== // 
+// ====================================================== // 
+// ====================================================== // 
+
+
+
 onMounted(()=>{
  
  
