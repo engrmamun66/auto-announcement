@@ -124,6 +124,5 @@ export default {
 }
 </script>
 <template>
-   <button @click="toggleWeekends">toggle weekends</button>
   <FullCalendar :options="calendarOptions" />
 </template>
