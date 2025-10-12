@@ -1,6 +1,6 @@
 <script setup>
 import moment from 'moment/moment'
-import { onMounted, inject, ref, watch, computed, onBeforeUnmount, reactive, provide } from 'vue';
+import { onMounted, inject, ref, watch, computed, onBeforeUnmount, reactive, provide, Transition } from 'vue';
 import AttendencesAll from './attendence-childs/AttendencesAll.vue'
 import RealtimeAttendences from './attendence-childs/RealtimeAttendences.vue'
 import WeekendAndHolidays from './attendence-childs/WeekendAndHolidays.vue'
@@ -193,6 +193,7 @@ onMounted(()=>{
            <a @click.stop="tab = 3" class="nav-link cp text-black" :class="{'active': tab==3}" ><i class='bx bx-run transformY-2px' ></i> Leaves And Vacations</a>
          </li>   
       </ul>
+
       <div v-if="tab==1">
         <div class="d-flex justify-content-center align-items-center gap-2">
             <Btn class="white">In: <span class="badge text-white bg-secondary">{{ Ahelper.count.in(liveAttendenceList) }}</span></Btn>
@@ -201,7 +202,7 @@ onMounted(()=>{
             <Btn class="white">Total: <span class="badge text-white bg-success">{{ liveAttendenceList?.length }}</span></Btn>
           </div>
         </div>   
-        <div v-if="tab==2">
+      <div v-else-if="tab==2">
           <div class="d-flex justify-content-center align-items-center gap-2">
             
           <Btn class="white">Total: <span class="badge text-white bg-success">{{ attendenceList?.length }}</span></Btn>
@@ -237,16 +238,16 @@ onMounted(()=>{
           </div>
         </div>
       </div>   
-      <div v-if="tab==3">
+      <div v-else-if="tab==3">
         <ul class="nav nav-tabs d2 mt-0 mb-3 bottom-borderless">
-         <li class="nav-item">
-           <a @click.stop="leaveAndWeekendSubTab = 1" class="nav-link cp text-black" :class="{'active': leaveAndWeekendSubTab==1}" >Class Wise</a>
-         </li>
-         <li class="nav-item">
-           <a @click.stop="leaveAndWeekendSubTab = 2" class="nav-link cp text-black" :class="{'active': leaveAndWeekendSubTab==2}" >Student Wise</a>
-         </li>       
-      </ul>
-      </div>
+          <li class="nav-item">
+            <a @click.stop="leaveAndWeekendSubTab = 1" class="nav-link cp text-black" :class="{'active': leaveAndWeekendSubTab==1}" >Class Wise</a>
+          </li>
+          <li class="nav-item">
+            <a @click.stop="leaveAndWeekendSubTab = 2" class="nav-link cp text-black" :class="{'active': leaveAndWeekendSubTab==2}" >Student Wise</a>
+          </li>       
+        </ul>
+      </div> 
 
     </div>
   
