@@ -50,7 +50,7 @@ function remvoeSpaces(str){
 
 let payload = reactive({
   type: 'leave', // leave | vacation
-  indentity_string: Ahelper.generateUniqueString(),
+  identity_string: Ahelper.generateUniqueString(),
   class_short: null,
   student_id: null,
   date: null,
@@ -92,7 +92,7 @@ async function onSubmit(){
   let end_date =  moment(pickerModelValue.value.endDate).format('YYYY-MM-DD')
   let class_shorts = selectedClasses.value.map(c=>c.class_short)
   let reason = payload.reason
-  let indentity_string = payload.indentity_string
+  let identity_string = payload.identity_string
 
 
   let is_for_all_classes = class_shorts.length == classes.value.length
@@ -106,7 +106,7 @@ async function onSubmit(){
     dates.forEach(date => {
       records.push({
         type: 'vacation',
-        indentity_string,
+        identity_string,
         class_short,
         student_id: null,
         date,
