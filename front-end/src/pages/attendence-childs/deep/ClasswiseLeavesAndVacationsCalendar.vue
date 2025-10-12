@@ -8,6 +8,8 @@ const classes = inject("classes");
 const all_students = inject("all_students");
 const helper = inject("helper");
 const callbacks = inject("callbacks");
+const http = inject("http");
+const emitter = inject("emitter");
 const attendenceList = inject("attendenceList");
 const attendenceParams = inject("attendenceParams");
 const liveAttendenceList = inject("liveAttendenceList");
@@ -19,6 +21,7 @@ import EmDateTimePicker from './../../../components/EmDateTimePicker.vue'
 import Rightbar from './../../../components/Rightbar.vue'
 import Btn from './../../../components/Btn.vue'
 import Switch from './../../../components/Switch.vue'
+import BtnLoader from './../../../components/BtnLoader.vue'
 
 const props = defineProps({
   modelValue: {
@@ -34,7 +37,16 @@ let showRightbar = ref(false)
 let selectedClasses = ref([...classes.value])
 console.log('helper.generateUniqueString()', Ahelper.generateUniqueString());
 
+let RightbarRef = ref(null)
+let showTextArea = ref(false)
 let pickerModelValue = ref({})
+
+let vacation_types = CONFIG.value?.settings?.attendance?.vacation_types || []
+
+function remvoeSpaces(str){
+  return str ? str.replace(/\s+/g, '') : str
+}
+
 
 let payload = reactive({
   type: 'leave', // leave | vacation
@@ -42,9 +54,82 @@ let payload = reactive({
   class_short: null,
   student_id: null,
   date: null,
-  reason: '',
+  reason: 'Exam',
 })
 
+watch(showTextArea, (bool)=> {
+  if(bool === false){
+    payload.reason = 'Exam'
+  }
+})
+
+
+function onCancel(){
+  payload.reason = ''
+  payload.student_id = null
+  payload.reason = 'Exam'
+  selectedClasses.value = [...classes.value]
+  emit('onBtnClear')
+  RightbarRef.value.unmount()
+}
+
+let showBtnLoader = ref(false)
+
+async function onSubmit(){
+  if(!pickerModelValue.value?.startDate || !pickerModelValue.value?.endDate){
+    emitter.emit('toaster-error', {message: 'Please select date range'})
+    return
+  } 
+  if(!selectedClasses.value.length){ 
+    emitter.emit('toaster-error', {message: 'Please select classes'})
+    return
+  } 
+  if(!payload.reason.length){ 
+    emitter.emit('toaster-error', {message: 'Please select or write vacation reason'})
+    return
+  } 
+  let start_date =  moment(pickerModelValue.value.startDate).format('YYYY-MM-DD')
+  let end_date =  moment(pickerModelValue.value.endDate).format('YYYY-MM-DD')
+  let class_shorts = selectedClasses.value.map(c=>c.class_short)
+  let reason = payload.reason
+  let indentity_string = payload.indentity_string
+
+
+  let is_for_all_classes = class_shorts.length == classes.value.length
+  if(is_for_all_classes){
+    class_shorts = ['_all_']
+  }
+
+  let records = []
+  class_shorts.forEach(class_short => {
+    let dates = helper.createDateRange(start_date, end_date)
+    dates.forEach(date => {
+      records.push({
+        type: 'vacation',
+        indentity_string,
+        class_short,
+        student_id: null,
+        date,
+        reason
+      })
+    })
+  })
+
+  http.post('/leave-and-vacation-add-bulk', { records }).then(response => {
+    if(response.status == 200){
+      let data = response.data
+    }
+  }).finally(()=>{
+    onCancel()
+  })
+
+
+  
+  
+
+  showBtnLoader.value = true
+  helper.delay(()=>showBtnLoader.value = false, 1200)
+}
  
 
 
@@ -57,7 +142,7 @@ let payload = reactive({
       @add-vacation="showRightbar = true"
     ></FullCalendarClasswise>
 
-    <Rightbar v-if="showRightbar" @unmount="showRightbar = false" title="Add Class Wise Vacation" :largestMode="false"> 
+    <Rightbar ref="RightbarRef" v-if="showRightbar" @unmount="showRightbar = false" title="Add Class Wise Vacation" :largestMode="false"> 
       <div class="row">
 
         <div class="col-12 mb-3">
@@ -67,6 +152,7 @@ let payload = reactive({
               v-model="pickerModelValue"
               @change="false"
               @close="false"
+              @initialized="$refs.dateRangePickerRef.clearPicker()"
               :displayFormat="'DD-MMM-Y'"
               :rangePicker="true" 
               :timePicker="false" 
@@ -90,31 +176,46 @@ let payload = reactive({
         
         <div class="col-12 mb-3">
           <BaseSelectMultiple placeholder="Select Classes" v-model="selectedClasses" :label="'Select Classes (By default selected all)'" :data="classes" displayKey="class_name" valueKey="class_short" style="width: 100%" >
-          </BaseSelectMultiple>
-          <!-- <small class="p-1 bg-body-secondary text-black-50 text-break">
-            স্বাভাবিকভাবেই প্রতিষ্ঠান থেকে কোনও বন্ধ দেয়া হলে সকল ক্লাসের জন্যই দেয়া হয়।  
-            তবে আপনি ছাইলে কোন ক্লাসকে এখান থেকে বাদ দিয়ে ছুটির সময়সীমা নির্ধারণ করতে পারেন। 
-          </small>  -->
-          <small class="p-1 bg-body-secondary text-black-50 text-break">
-            Normally, if an institution gives a holiday, it is given to all classes. However, you can exclude any class from this list and set the holiday period.
-          </small> 
+          </BaseSelectMultiple> 
         </div>
         
         <div class="col-12 mb-3">
-           <div class="form-group">
-            <label>Note</label>
-            <textarea v-model="payload.reason" class="form-control cb-input cb-textarea"></textarea>
-           </div>
+          <label class="form-check-label" >
+            Select Vacation Type
+          </label>
+          <div class="vacationtypes">
+            <div class="d-flex justify-content-start align-items-center flex-wrap gap-1 column-gap-3">
+              <template v-for="vacationType in vacation_types" :key="value">
+                <div class="form-check">
+                  <input v-model="payload.reason" class="form-check-input" :id="remvoeSpaces(vacationType)" type="radio" name="vacation_type" :value="vacationType">
+                  <label class="form-check-label" :for="remvoeSpaces(vacationType)">
+                    {{ vacationType }}
+                  </label>
+                </div>
+
+              </template>
+              <div class="form-check">
+                <input v-model="payload.reason" @click="showTextArea = !showTextArea" class="form-check-input" id="other" type="radio" name="vacation_type" :value="''">
+                <label class="form-check-label" for="other">
+                  Other
+                </label>
+              </div>
+            </div>
+            <div v-if="showTextArea" class="form-group mt-2">
+             <label>Write custom note for vacation type</label>
+             <textarea ref="textAreaRef" v-model="payload.reason" class="form-control cb-input cb-textarea"></textarea>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-start mt-3 pt-2 gap-2">
+            <Btn class="red" @click="onCancel">Cancel</Btn>
+            <Btn @click="onSubmit">Save Now <BtnLoader v-if="showBtnLoader"></BtnLoader> </Btn>
+          </div>
+
         </div>
         
       </div>
-
-      <template #footer>
-        <div class="d-flex justify-content-start pt-2 gap-3">
-          <Btn class="red">Cancel</Btn>
-          <Btn>Submit</Btn>
-        </div>
-      </template>
+ 
 
 
   </Rightbar>
@@ -219,5 +320,9 @@ li{
   cursor: pointer;
   color: var(--primaryColor)
 }
-
+.vacationtypes{
+  border: 1px solid #ffffff;
+  border-radius: 6px;
+  padding: 10px;
+}
 </style>

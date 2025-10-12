@@ -95,7 +95,16 @@ module.exports = {
                     perpage: 20,
                     pagiation_positon: 'bottom_center', // bottom_left | bottom_center | bottom_right
                },
-               weekends: ['Friday']
+               weekends: ['Friday'],
+               vacation_types: [
+                    'Exam',
+                    'After Exam',
+                    'Public Holiday',
+                    'School Vacation',
+                    'Teacher Training',
+                    'Special Holiday',
+               ],
+               
           },
      },
      date_range_list: [

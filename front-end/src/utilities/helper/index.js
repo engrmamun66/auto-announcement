@@ -230,6 +230,18 @@ const helper = {
         return shifts
       }
     },
+    createDateRange(startDate = '2025-09-10', endDate = '2025-09-15') {
+      const start = moment(startDate);
+      const end = moment(endDate);
+      const range = [];
+
+      while (start.isSameOrBefore(end)) {
+        range.push(start.format('YYYY-MM-DD'));
+        start.add(1, 'day');
+      }
+      return range;
+    }
+
      
 }
 

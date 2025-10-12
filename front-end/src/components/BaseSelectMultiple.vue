@@ -480,7 +480,7 @@ let random_id = computed(() => ('random_' + H.randomBetween(333, 294444)))
     border: none;
     background-color: var(--border-dark);
     background-color: #188778;
-    padding: 0 3px 0 8px!important;
+    padding: 3px 7px 3px 11px!important;
     position: relative;
     color: #ffffff;
     border-radius: 3px;

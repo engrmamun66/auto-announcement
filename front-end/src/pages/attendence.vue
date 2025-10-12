@@ -9,6 +9,7 @@ import EmDateTimePicker from './../components/EmDateTimePicker.vue'
 import Btn from './../components/Btn.vue'
 import Ahelper from './attendence-childs/attendacnceHelper';
 import Pagination from '../components/Pagination.vue'
+import BtnLoader from '../components/BtnLoader.vue'
  
 const route = inject('route');
 const router = inject('router');
