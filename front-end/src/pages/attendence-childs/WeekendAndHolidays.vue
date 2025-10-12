@@ -51,7 +51,7 @@ onMounted(()=>{
   <div class="mt-3">
    <Transition name="fade">
       <template v-if="leaveAndWeekendSubTab == 1"">
-        <div class="row row-cols-2 row-cols-md-1">
+        <div class="row">
           <ClasswiseLeavesAndVacationsCalendar></ClasswiseLeavesAndVacationsCalendar> 
         </div>
       </template>
