@@ -391,7 +391,7 @@ app.get(`/api/_ac`, async (req, res) => {
   // =================== With Attendence ================== //
   // ====================================================== //
   app.post(prefix + '/leave-and-vacation-add-bulk', (req, res) => {
-    LeavAndVacations.api_addMultiple(req, res) .ap(req, res)
+    LeavAndVacations.api_addMultiple(req, res)
   }); 
   
 
