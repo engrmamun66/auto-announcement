@@ -8,16 +8,31 @@ import FullCalendar from '@fullcalendar/vue3'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import { inject, ref, reactive, onMounted, onBeforeUnmount, computed, watch } from "vue";
+import helper from './../utilities/helper/index'
 
 export default {
   components: { 
     FullCalendar // make the <FullCalendar> tag available
   },
-  emits: ['add-vacation'],
+  emits: ['initAndNextPrev', 'add-vacation'],
   props: {
     modelValue: {
       type: Object,
       default: () => ({}),
+    },
+    events: {
+      type: Array,
+      default: () => [
+        {
+          id: 'a',
+          title: 'loading...',
+          start: moment().startOf('month').format('YYYY-MM-DD'),
+          end: moment().endOf('month').format('YYYY-MM-DD'),
+          backgroundColor: 'green',
+          borderColor: 'green',
+          isMirror: true,
+        }
+      ],
     },
   },
   data() {
@@ -38,37 +53,55 @@ export default {
           console.log({event});
         },
         datesSet: (data) => {
-          console.log('datesSet', {data});
+          // It will call initially and every next/previous click
+          let date_range = { start_date: moment(data.start).format('YYYY-MM-DD'), end_date: moment(data.end).format('YYYY-MM-DD') }
+          this.$emit('initAndNextPrev', date_range)
         },
-        events: [
-            {
-              id: 'a',
-              title: 'my event',
-              start: moment().format('YYYY-MM-DD'),
-              end: moment().add(4, 'days').format('YYYY-MM-DD'),
-              backgroundColor: 'green',
-              borderColor: 'green',
-              isMirror: true,
-            },
-            {
-              id: 'b',
-              title: 'my event 2',
-              start: moment().format('YYYY-MM-DD'),
-              end: moment().add(6, 'days').format('YYYY-MM-DD'),
-            },
-          ],
-          customButtons: {
-            myCustomButton: {
-              text: 'Add New Vacation', 
-              click: ()=>{
-                this.$emit('add-vacation', 'this.$props')
-              }
+        events: this.$props.events, 
+        customButtons: {
+          myCustomButton: {
+            text: 'Add New Vacation', 
+            click: ()=>{
+              this.$emit('add-vacation', 'this.$props')
             }
-          },
+          }
+        },
       },
     }
   },
+  watch: {
+    events: {
+      handler(newVal) {
+        if(!this.isFirstTime){
+          this.isFirstTime = true
+          this.viewLoading()
+        }else{
+          this.calendarOptions.events = newVal
+        }
+      },
+      deep: true,
+      immediate: true
+    }
+  },
   methods: {
+    viewLoading: function() {
+      let dateArray =  helper.createDateRange(moment().startOf('month').format('YYYY-MM-DD'), moment().endOf('month').format('YYYY-MM-DD'), 'day')
+      let _events = []
+      dateArray.forEach((date)=>{
+        _events.push({
+          id: 'a',
+          title: `<span class="spinner-border text-secondary ms-1 fs-6" style="--bs-spinner-width: 20px;--bs-spinner-height:20px;--bs-spinner-border-width: 2px;"></span>`,
+          start: date,
+          end: date,
+          backgroundColor: '#b5666600',
+          borderColor: 'transparent',
+          textColor: 'black',
+          isMirror: false,
+          is___custom: true
+        })
+      })
+      this.calendarOptions.events = _events
+    },
     handleDateClick: function(data) {
       let date__ = data.dateStr
       console.log({date__, data})
@@ -130,7 +163,6 @@ export default {
           "isResizing": false
         }
        */
-      console.log(arg);
       return { html: '<b class="ps-2">' + arg.event.title + '</b>' }
     }
   }

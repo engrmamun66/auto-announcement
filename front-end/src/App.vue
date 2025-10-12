@@ -496,7 +496,22 @@ const callbacks = {
         let live_attences = helper.clone(liveAttendenceList.value)
         let maximum_live_attedence = CONFIG.value?.settings?.attendance?.maximum_live_attedence || 50
         liveAttendenceList.value = live_attences.slice(-(maximum_live_attedence))
-    }
+    },
+    async getLeavesAndVacations({type='vacation', start_date='', end_date='', student_id=null}={}){
+        try { 
+
+            let params = { type, start_date, end_date, student_id }
+
+            let response = await http.get('/leave-and-vacation-list', { params }) 
+            if(response.status == 200){
+                let all_data = response.data?.data
+                return all_data
+            }else{
+                return []
+            }
+       
+        } catch (error) { return [] }
+    },
 }
 provide('callbacks', callbacks) 
  

@@ -162,54 +162,7 @@ class Schedules {
       if (err) {
         res.status(500).send({ error: "Error fetching the newly added student." });
         return;
-      } 
-
-
-      /**  */ 
-
-      // if(true){
-      if(false){
-        
-        data = []
-
-        let play = classes.find(c =>  c.class_name === 'Play')  
-        let nursery = classes.find(c =>  c.class_name === 'Nursery')  
-        let one = classes.find(c =>  c.class_name === 'One/Saffe Awal')  
-        
-  
-        data.push({
-            "id": 6,
-            "type": 1,
-            "title": " puch test",
-            "start_time": "5:10",
-            "end_time": "23:00",
-            "classes": JSON.stringify([ play, nursery ]), 
-        }) 
-
-        let D = new Date()
-        let H = D.getHours()
-        let M = D.getMinutes()
-        let pad2 = (n) => String(n).padStart(2, '0')
-
-
-        data.push({
-            "id": 6,
-            "type": 2,
-            "title": " call test - 2",
-            "start_time": `${pad2(H)}:${pad2(M + 1)}`,
-            "end_time": `${pad2(H)}:${pad2(M + 2)}`,
-            "classes": JSON.stringify([ play ]), 
-        }) 
-        data.push({
-            "id": 6,
-            "type": 2,
-            "title": " call test - 1",
-            "start_time": `${pad2(H)}:${pad2(M + 2)}`,
-            "end_time": `${pad2(H)}:${pad2(M + 3)}`,
-            "classes": JSON.stringify([ nursery ]), 
-        }) 
-
-      }
+      }  
 
 
       data.forEach(item => {

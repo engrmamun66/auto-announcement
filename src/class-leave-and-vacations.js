@@ -14,6 +14,45 @@ class LeaveAndVacations {
     });
   }
 
+  async list(req, res) {
+    const { type, start_date, end_date, date, class_short, student_id } = req.query;
+  
+    let query = `SELECT * FROM leave_and_vacation WHERE 1=1`;
+    const queryParams = [];
+
+    if(type) {
+      query += ` AND type = ?`;
+      queryParams.push(type);
+    }
+  
+    if (start_date && end_date) {
+      query += ` AND date BETWEEN ? AND ?`;
+      queryParams.push(start_date, end_date);
+    } else if (date) {
+      query += ` AND date = ?`;
+      queryParams.push(date);
+    }
+  
+    if (class_short) {
+      query += ` AND (class_short = ? OR class_short = '_all_')`;
+      queryParams.push(class_short);
+    }
+  
+    if (student_id) {
+      query += ` AND student_id = ?`;
+      queryParams.push(student_id);
+    }
+  
+    this.db.all(query, queryParams, (err, rows) => {
+      if (err) {
+        res.status(500).send({ error: err.message, query, queryParams });
+        return;
+      }
+      res.send({ data: rows });
+    });
+  }
+  
+
  
 
 

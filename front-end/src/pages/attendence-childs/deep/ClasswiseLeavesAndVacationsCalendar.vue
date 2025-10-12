@@ -47,6 +47,35 @@ function remvoeSpaces(str){
   return str ? str.replace(/\s+/g, '') : str
 }
 
+let calendarEvents = ref([])
+
+
+function updateEvents(){
+  calendarEvents.value = [
+    {
+      id: 'a',
+      title: 'my event',
+      start: moment().format('YYYY-MM-DD'),
+      end: moment().add(4, 'days').format('YYYY-MM-DD'),
+      backgroundColor: 'green',
+      borderColor: 'green',
+      isMirror: true,
+    },
+    {
+      id: 'b',
+      title: 'my event 2',
+      start: moment().format('YYYY-MM-DD'),
+      end: moment().add(6, 'days').format('YYYY-MM-DD'),
+    },
+  ]
+
+  console.log('calendarEvents', calendarEvents.value);
+}
+
+let queryParams = {
+  // start
+}
+
 
 let payload = reactive({
   type: 'leave', // leave | vacation
@@ -121,14 +150,17 @@ async function onSubmit(){
     }
   }).finally(()=>{
     onCancel()
+    callbacks.getLeavesAndVacations()
   })
-
-
-  
-  
 
   showBtnLoader.value = true
   helper.delay(()=>showBtnLoader.value = false, 1200)
+}
+
+async function onInitAndNextPrev({start_date, end_date}){
+  queryParams = { start_date, end_date }
+  let vacation_data = await callbacks.getLeavesAndVacations(queryParams)
+  console.log({vacation_data});
 }
  
 
@@ -138,8 +170,12 @@ async function onSubmit(){
 
 <template>
   <div>
+    <button @click="updateEvents" >Update Events</button>
+
     <FullCalendarClasswise 
-      @add-vacation="showRightbar = true"
+    :events="calendarEvents"
+    @initAndNextPrev="onInitAndNextPrev" 
+    @add-vacation="showRightbar = true" 
     ></FullCalendarClasswise>
 
     <Rightbar ref="RightbarRef" v-if="showRightbar" @unmount="showRightbar = false" title="Add Class Wise Vacation" :largestMode="false"> 
