@@ -59,7 +59,7 @@ export default {
           if(target.hasAttribute('deleteicon')){
             this.$emit('delete', eventData.event.extendedProps)
           } else {
-            if(target.hasAttribute('tooltip')){
+            if(target.hasAttribute('tooltip') && !eventData.event.extendedProps?.__isWeekend){
               this.$emit('viewDetails', eventData.event.extendedProps)
             }
           }
