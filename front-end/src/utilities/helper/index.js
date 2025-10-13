@@ -271,7 +271,7 @@ const helper = {
         constraint: { start: '2025-10-10', end: '2025-10-20' },
       })
     },
-    createVacationEvent(date, vacations, reason, classes=[]){
+    createVacationEvent(date, vacations, reason, classes=[], {backgroundColor}){
       if(vacations.length === 1){
         let vacation = vacations[0]
         return ({
@@ -289,19 +289,20 @@ const helper = {
 
 
         let class_shorts = vacations.map(v => v.class_short) 
-        let class_shorts_text = class_shorts.join(', ')
-
         return ({
           title: reason + `(${class_shorts?.length} cls)`,
           start: date,
           end: date,
           allDay: true,
           display: 'block',
-          classNames: ['calendar-vacation-bg'],
+          // classNames: ['calendar-vacation-bg'],
           editable: false,
           overlap: false,
           constraint: reason, // this is group ID as my widh=
+          backgroundColor,
           tooltip: reason + ` For (${class_shorts?.length} class${class_shorts.length > 1 ? 'es' : ''})`,
+          identity_string: vacations[0].identity_string,
+          vacations: vacations,
         })
       }
     },

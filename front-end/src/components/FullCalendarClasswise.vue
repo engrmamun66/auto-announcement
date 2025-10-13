@@ -163,9 +163,9 @@ export default {
           "isResizing": false
         }
        */
-      console.log('arg.event.tooltip', arg.event.extendedProps.tooltip);
+      // console.log('arg.event.tooltip', arg.event.extendedProps.tooltip);
       let tooltip = arg.event.extendedProps.tooltip
-      return { html: `<b class="ps-2" tooltip="${tooltip || ''}">` + arg.event.title + '</b>' }
+      return { html: `<span class="ps-2" tooltip="${tooltip || ''}">` + arg.event.title + '</span>' }
     }
   }
 }
@@ -205,6 +205,6 @@ export default {
   overflow: hidden;
 }
 .fc-event-main{
-  overflow-x: hidden;
+  /* overflow-x: hidden; */
 }
 </style>

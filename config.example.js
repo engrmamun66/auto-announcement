@@ -97,12 +97,12 @@ module.exports = {
                },
                weekends: ['Friday'], // Saturday, 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'
                vacation_types: [
-                    'Exam',
-                    'After Exam',
-                    'Public Holiday',
-                    'School Vacation',
-                    'Teacher Training',
-                    'Special Holiday',
+                    { title: 'Exam', bgcolor: '#ebac0b' },                    
+                    { title: 'After Exam', bgcolor: '#e74a3b' },  // red
+                    { title: 'Public Holiday', bgcolor: '#858796' }, // deep gray
+                    { title: 'School Vacation', bgcolor: '#09ab71' }, // green type
+                    { title: 'Teacher Training', bgcolor: '#4e73df' }, // blue
+                    { title: 'Special Holiday', bgcolor: '#a944e8' }, // violet
                ],
                
           },

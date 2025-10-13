@@ -166,10 +166,13 @@ async function createAndDisplayEventList(){
   //   vacation_events.push(helper.createVacationEvent(vacation, classes.value))
   // })
   let goruped = helper.listGroupBy(vacationData.value, 'reason_and_date')
-  console.log({goruped});
-  Object.entries(goruped).forEach(([reason_and_date, vacations])=>{
+  Object.entries(goruped).forEach(([reason_and_date, vacations], i)=>{
     let [reason, date] = reason_and_date.split('') 
-    vacation_events.push(helper.createVacationEvent(date, vacations, reason, classes.value))
+    let backgroundColor = vacation_types.find(vt => {
+      console.log({title: vt.title, reason});
+      return vt.title == reason
+    })?.bgcolor || 'tomato'
+    vacation_events.push(helper.createVacationEvent(date, vacations, reason, classes.value, {backgroundColor}))
   })
 
  
@@ -239,9 +242,9 @@ async function createAndDisplayEventList(){
             <div class="d-flex justify-content-start align-items-center flex-wrap gap-1 column-gap-3">
               <template v-for="vacationType in vacation_types" :key="value">
                 <div class="form-check">
-                  <input v-model="payload.reason" class="form-check-input" :id="remvoeSpaces(vacationType)" type="radio" name="vacation_type" :value="vacationType">
+                  <input v-model="payload.reason" class="form-check-input" :id="remvoeSpaces(vacationType)" type="radio" name="vacation_type" :value="vacationType.title">
                   <label class="form-check-label" :for="remvoeSpaces(vacationType)">
-                    {{ vacationType }}
+                    {{ vacationType.title }}
                   </label>
                 </div>
 
