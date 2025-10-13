@@ -274,11 +274,17 @@ const helper = {
           constraint: 'vacationSlot', // this is group ID as my widh=
         })
       }else{
-        let class_info = classes.value.find(c => c.class_short == vacation.class_short)
-        console.log({class_info});
-        if(class_info){
-          vacation_events.push(helper.createWeekdayEvent(vacation.date, `${vacation.reason} (${class_info.class_name})`, false))
-        }
+        return ({
+          title: vacation.reason + ` (${vacation.class_short})`,
+          start: vacation.date,
+          allDay: true,
+          display: 'block',
+          classNames: ['calendar-vacation-bg'],
+          editable: false,
+          overlap: false,
+          constraint: 'vacationSlot', // this is group ID as my widh=
+          tooltip: vacation.reason + ` (${vacation.class_short})`,
+        })
       }
     },
     // =============== End With Full Calendar =============== //

@@ -163,7 +163,9 @@ export default {
           "isResizing": false
         }
        */
-      return { html: '<b class="ps-2">' + arg.event.title + '</b>' }
+      console.log('arg.event.tooltip', arg.event.extendedProps.tooltip);
+      let tooltip = arg.event.extendedProps.tooltip
+      return { html: `<b class="ps-2" tooltip="${tooltip || ''}">` + arg.event.title + '</b>' }
     }
   }
 }

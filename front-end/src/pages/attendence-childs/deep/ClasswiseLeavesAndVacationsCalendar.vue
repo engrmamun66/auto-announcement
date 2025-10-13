@@ -158,7 +158,7 @@ async function createAndDisplayEventList(){
 
   // with vacations/holidays
   vacationData.value.forEach(vacation => {
-    vacation_events.push(helper.createVacationEvent(vacation))
+    vacation_events.push(helper.createVacationEvent(vacation, classes.value))
   })
 
 
