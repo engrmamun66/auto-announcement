@@ -48,6 +48,7 @@ let emits = defineEmits(['unmount']);
 let toggling = ref(false);
 
 function unmount(){
+    document.body.click() // to hide datePickers
     isMounted.value = false;
     setTimeout(()=> emits('unmount', null), 750);
 }

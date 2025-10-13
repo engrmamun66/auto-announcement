@@ -7,14 +7,15 @@ import moment from 'moment/moment';
 import FullCalendar from '@fullcalendar/vue3'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from '@fullcalendar/interaction'
-import { inject, ref, reactive, onMounted, onBeforeUnmount, computed, watch } from "vue";
 import helper from './../utilities/helper/index'
+import { inject, ref, reactive, onMounted, onBeforeUnmount, computed, watch } from "vue";
+import Modal from './modal.vue'
 
 export default {
   components: { 
     FullCalendar // make the <FullCalendar> tag available
   },
-  emits: ['initAndNextPrev', 'add-vacation'],
+  emits: ['initAndNextPrev', 'advacation'],
   props: {
     modelValue: {
       type: Object,
@@ -37,6 +38,8 @@ export default {
   },
   data() {
     return {
+      showDetailsModal: false,
+
       calendarOptions: {
         plugins: [ dayGridPlugin, interactionPlugin ],        
         initialView: 'dayGridMonth', // values: dayGridMonth | dayGridDay 
@@ -53,8 +56,9 @@ export default {
           console.log({event});
         },
         datesSet: (data) => {
-          // It will call initially and every next/previous click
-          let date_range = { start_date: moment(data.start).format('YYYY-MM-DD'), end_date: moment(data.end).format('YYYY-MM-DD') }
+          let start_date = moment(data.start).format('YYYY-MM-DD')
+          let end_date = moment(data.end).format('YYYY-MM-DD')
+          let date_range = { start_date, end_date }
           this.$emit('initAndNextPrev', date_range)
         },
         events: this.$props.events, 
@@ -62,7 +66,7 @@ export default {
           myCustomButton: {
             text: 'Add New Vacation', 
             click: ()=>{
-              this.$emit('add-vacation', 'this.$props')
+              this.$emit('advacation', 'this.$props')
             }
           }
         },
@@ -103,9 +107,11 @@ export default {
       this.calendarOptions.events = _events
     },
     handleDateClick: function(data) {
-      let date__ = data.dateStr
-      console.log({date__, data})
-      console.log(data.jsEvent.target.outerHTML)
+      let date = data.dateStr
+      let target = data.jsEvent.target
+      if(target.hasAttribute('plusicon')){
+        this.$emit('advacation', {date, target})
+      }
     },
     toggleWeekends: function() {
       this.calendarOptions.weekends = !this.calendarOptions.weekends // toggle the boolean!
@@ -127,7 +133,7 @@ export default {
       let html_array = ['<div class="fc-daygrid-day-number">' + arg.dayNumberText + '</div>']
       html_array.push(`
         <div>
-          <span class="badge bg-secondary cp" tooltip="Add Event" >+</span>
+          <span class="badge bg-secondary cp" tooltip="Add Event" plusicon="true" >+</span>
         </div>
       `)
       return {html: html_array.join('')}
@@ -166,13 +172,14 @@ export default {
       // console.log('arg.event.tooltip', arg.event.extendedProps.tooltip);
       let tooltip = arg.event.extendedProps.tooltip
       return { html: `<span class="ps-2" tooltip="${tooltip || ''}">` + arg.event.title + '</span>' }
-    }
+    },
   }
 }
 </script>
 <template>
   <FullCalendar :options="calendarOptions" />
   <RightBar v-if="showRightbar" ref="rightbar" @unmount="showRightbar = false"></RightBar>
+  <Modal v-if="showDetailsModal" v-model="showDetailsModal" ></Modal>
 </template>
 
 
@@ -198,11 +205,16 @@ export default {
 .calendar-weekend-bg{
   background-color: #e28e95db !important;  
 }
-.calendar-vacation-bg{
+.calendar-vacation-bg,
+.fc-bg-event{
   background-color: #f3828b !important;  
 }
+
 .fc .fc-daygrid-day-bg .fc-bg-event{
   overflow: hidden;
+}
+.fc-event-main{
+  cursor: pointer;
 }
 .fc-event-main{
   /* overflow-x: hidden; */

@@ -161,15 +161,13 @@ async function createAndDisplayEventList(){
                       .filter(date => weekends.includes(moment(date).format('dddd')))
   weekends_array.forEach(date => vacation_events.push(helper.createWeekdayEvent(date)))
 
-  // with vacations/holidays
-  // vacationData.value.forEach(vacation => {
-  //   vacation_events.push(helper.createVacationEvent(vacation, classes.value))
-  // })
-  let goruped = helper.listGroupBy(vacationData.value, 'reason_and_date')
+  // Excluding weekends because already added above
+  let vacation_dates = vacationData.value.filter(v => !weekends_array.includes(v.date))
+
+  let goruped = helper.listGroupBy(vacation_dates, 'reason_and_date')
   Object.entries(goruped).forEach(([reason_and_date, vacations], i)=>{
     let [reason, date] = reason_and_date.split('') 
     let backgroundColor = vacation_types.find(vt => {
-      console.log({title: vt.title, reason});
       return vt.title == reason
     })?.bgcolor || 'tomato'
     vacation_events.push(helper.createVacationEvent(date, vacations, reason, classes.value, {backgroundColor}))
@@ -181,6 +179,14 @@ async function createAndDisplayEventList(){
 
   calendarEvents.value = vacation_events
 
+}
+
+let initiallyClear = ref(true)
+
+function onAdVacation({date}){
+  initiallyClear.value = false
+  pickerModelValue.value = {startDate: date, endDate: date}
+  showRightbar.value = true
 }
  
 
@@ -194,10 +200,10 @@ async function createAndDisplayEventList(){
     <FullCalendarClasswise 
     :events="calendarEvents"
     @initAndNextPrev="onInitAndNextPrev" 
-    @add-vacation="showRightbar = true" 
+    @advacation="onAdVacation" 
     ></FullCalendarClasswise>
 
-    <Rightbar ref="RightbarRef" v-if="showRightbar" @unmount="showRightbar = false" title="Add Class Wise Vacation" :largestMode="false"> 
+    <Rightbar ref="RightbarRef" v-if="showRightbar" @unmount="showRightbar = false;initiallyClear=true" title="Add Class Wise Vacation" :largestMode="false"> 
       <div class="row">
 
         <div class="col-12 mb-3">
@@ -207,12 +213,13 @@ async function createAndDisplayEventList(){
               v-model="pickerModelValue"
               @change="false"
               @close="false"
-              @initialized="$refs.dateRangePickerRef.clearPicker()"
+              @initialized="initiallyClear ? $refs.dateRangePickerRef.clearPicker() : false"
               :displayFormat="'DD-MMM-Y'"
               :rangePicker="true" 
               :timePicker="false" 
               :minDate="null"
               :isDisabled="false"
+              :startDate="pickerModelValue?.startDate"
               :autoOpen="false"
               :use24FormatTimeForEvents="true"
               :invisible="false"
@@ -242,8 +249,8 @@ async function createAndDisplayEventList(){
             <div class="d-flex justify-content-start align-items-center flex-wrap gap-1 column-gap-3">
               <template v-for="vacationType in vacation_types" :key="value">
                 <div class="form-check">
-                  <input v-model="payload.reason" class="form-check-input" :id="remvoeSpaces(vacationType)" type="radio" name="vacation_type" :value="vacationType.title">
-                  <label class="form-check-label" :for="remvoeSpaces(vacationType)">
+                  <input v-model="payload.reason" class="form-check-input" :id="remvoeSpaces(vacationType.title)" type="radio" name="vacation_type" :value="vacationType.title">
+                  <label class="form-check-label" :for="remvoeSpaces(vacationType.title)">
                     {{ vacationType.title }}
                   </label>
                 </div>
