@@ -272,12 +272,12 @@ const helper = {
         overlap: false,
         constraint: 'meetingSlot', // this is group ID as my widh=
         constraint: { start: '2025-10-10', end: '2025-10-20' },
+        __isWeekend: true,
       })
     },
     createVacationEvent(date, vacations, reason, classes=[], {backgroundColor='#e74a3b'}={}){
       if(vacations.length === 1){
         let vacation = vacations[0]
-        console.log('backgroundColor', backgroundColor);
         return ({
           title: vacation.reason,
           start: vacation.date,

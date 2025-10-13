@@ -9,6 +9,7 @@ import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import helper from './../utilities/helper/index'
 import { inject, ref, reactive, onMounted, onBeforeUnmount, computed, watch } from "vue";
+let CONFIG = inject('CONFIG')
 
 export default {
   components: { 
@@ -34,6 +35,10 @@ export default {
         }
       ],
     },
+    weekends: {
+      type: Array,
+      default: () => [],
+    },
   },
   data() {
     return {
@@ -54,7 +59,9 @@ export default {
           if(target.hasAttribute('deleteicon')){
             this.$emit('delete', eventData.event.extendedProps)
           } else {
-            this.$emit('viewDetails', eventData.event.extendedProps)
+            if(target.hasAttribute('tooltip')){
+              this.$emit('viewDetails', eventData.event.extendedProps)
+            }
           }
         },
         datesSet: (eventData) => {
@@ -119,66 +126,27 @@ export default {
       this.calendarOptions.weekends = !this.calendarOptions.weekends // toggle the boolean!
     },
     renderDayCellContent: function(arg) {
-      /** 
-       * Available properties in arg:
-        "date" : ddate object of the day cell
-        "view" : the current view object
-        "dow" : day of week, 0=Sun, 1=Mon, ..., 6=Sat
-        "isDisabled" : boolean
-        "isOther" : boolean
-        "isToday": boolean
-        "isPast": boolean
-        "isFuture": boolean
-        "isMonthStart": boolean
-        "dayNumberText": string (localized) day number of the cell
-       */
+      
       let html_array = ['<div class="fc-daygrid-day-number">' + arg.dayNumberText + '</div>']
-      html_array.push(`
-        <div>
-          <span class="badge bg-secondary cp" tooltip="Add Event" plusicon="true" >+</span>
-        </div>
-      `)
+      let weekends = this.$props.weekends
+      let day_fullname = moment(arg.date).format('dddd')
+      if(!weekends.includes(day_fullname)){
+        html_array.push(`
+          <div>
+            <span class="badge bg-secondary cp" tooltip="Add New" plusicon="true" >+</span>
+          </div>
+        `)
+      }
       return {html: html_array.join('')}
     },
     renderEventContent: function(arg) {
-      /**
-       * Available properties in arg:
-       * ============================
-        {
-          "event": {
-            "allDay": true,
-            "title": "my event",
-            "start": "2025-10-11",
-            "end": "2025-10-15",
-            "id": "a"
-          },
-          "view": {},
-          "timeText": "",
-          "textColor": "",
-          "backgroundColor": "",
-          "borderColor": "",
-          "isDraggable": false,
-          "isStartResizable": false,
-          "isEndResizable": false,
-          "isMirror": false,
-          "isStart": false,
-          "isEnd": true,
-          "isPast": false,
-          "isFuture": false,
-          "isToday": true,
-          "isSelected": false,
-          "isDragging": false,
-          "isResizing": false
-        }
-       */
-      // console.log('arg.event.tooltip', arg.event.extendedProps.tooltip);
       let tooltip = arg.event.extendedProps.tooltip
-      return { html: `
-          <div class="cal-day-event-item" >
-            <span class="event-transh-icon" deleteicon><i class='bx bxs-trash' deleteicon></i></span>
-            <span class="textcontent" tooltip="${tooltip || ''}">${arg.event.title}</span>  
-          </div>
-        ` }
+      let htmlArray = []
+      htmlArray.push('<div class="cal-day-event-item" >')
+      htmlArray.push(`<span class="event-transh-icon" deleteicon><i class='bx bxs-trash' deleteicon></i></span>`)
+      htmlArray.push(`<span class="textcontent" tooltip="${tooltip || ''}">${arg.event.title}</span>  `)
+      htmlArray.push('</div>')
+      return { html: htmlArray.join('') }
     },
   }
 }
@@ -248,5 +216,8 @@ export default {
   position: relative;
   pointer-events: all;
   opacity: 1;
+} 
+.calendar-weekday-bg .event-transh-icon{
+  display: none !important;
 } 
 </style>

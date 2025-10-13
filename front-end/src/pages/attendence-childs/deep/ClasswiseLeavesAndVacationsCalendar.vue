@@ -196,8 +196,8 @@ function onAdVacation({date}){
 
 async function deleteVacations(){
   if(!targetedVacationToDelete.value) return
-  let identity_strings = helper.uniqueArray(targetedVacationToDelete.value.vacations.map(v=>v.identity_string))
-
+  let identity_strings = helper.uniqueArray((targetedVacationToDelete.value?.vacations || []).map(v=>v.identity_string))
+  if(identity_strings?.length == 0) return
   http.post('/leave-and-vacation-delete', { identity_strings }).then(response => {
     if(response.status == 200){
       onInitAndNextPrev(dateRange.value)
@@ -214,6 +214,7 @@ async function deleteVacations(){
   <div>
     <FullCalendarClasswise 
     :events="calendarEvents"
+    :weekends="CONFIG.settings?.attendance?.weekends || []"
     @initAndNextPrev="onInitAndNextPrev" 
     @advacation="onAdVacation" 
     @delete="(vacations)=>{
@@ -258,6 +259,12 @@ async function deleteVacations(){
           </tbody>
         </table>
       </div>
+
+      <div class="d-flex justify-content-end column-gap-2">
+        <Btn @click="showDetailsModal = false">Close</Btn>
+        <Btn @click="deleteVacations();showDetailsModal = false" class="red">Delete Now</Btn>
+      </div>
+
     </Modal>
     
     <Rightbar ref="RightbarRef" v-if="showRightbar" @unmount="showRightbar = false;initiallyClear=true" title="Add Class Wise Vacation" :largestMode="false"> 
