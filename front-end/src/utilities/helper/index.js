@@ -278,7 +278,7 @@ const helper = {
       if(vacations.length === 1){
         let vacation = vacations[0]
         return ({
-          title: vacation.reason + ' (All)',
+          title: vacation.reason,
           start: vacation.date,
           allDay: true,
           display: 'block',
@@ -294,7 +294,7 @@ const helper = {
 
         let class_shorts = vacations.map(v => v.class_short) 
         return ({
-          title: reason + `(${class_shorts?.length} cls)`,
+          title: reason,
           start: date,
           end: date,
           allDay: true,

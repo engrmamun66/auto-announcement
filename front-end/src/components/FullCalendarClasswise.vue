@@ -14,7 +14,7 @@ export default {
   components: { 
     FullCalendar // make the <FullCalendar> tag available
   },
-  emits: ['initAndNextPrev', 'advacation', 'delete'],
+  emits: ['initAndNextPrev', 'advacation', 'delete', 'viewDetails'],
   props: {
     modelValue: {
       type: Object,
@@ -53,7 +53,9 @@ export default {
           let target = eventData.jsEvent.target
           if(target.hasAttribute('deleteicon')){
             this.$emit('delete', eventData.event.extendedProps)
-          } 
+          } else {
+            this.$emit('viewDetails', eventData.event.extendedProps)
+          }
         },
         datesSet: (eventData) => {
           let start_date = moment(eventData.start).format('YYYY-MM-DD')

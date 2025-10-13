@@ -46,6 +46,7 @@ let vacationData = ref([])
 let dateRange = ref({ start_date: null, end_date: null })
 let targetedVacationToDelete = ref(null)
 let showDeleteModal = ref(null)
+let showDetailsModal = ref(null)
 
 let vacation_types = CONFIG.value?.settings?.attendance?.vacation_types || []
 
@@ -219,6 +220,10 @@ async function deleteVacations(){
       targetedVacationToDelete = vacations
       showDeleteModal = true
     }"
+    @viewDetails="(vacations)=>{
+      targetedVacationToDelete = vacations
+      showDetailsModal = true
+    }"
     ></FullCalendarClasswise>
 
     <Confirm v-model="showDeleteModal" @yes="deleteVacations">
@@ -227,16 +232,33 @@ async function deleteVacations(){
           <tbody>
             <template v-for="item in targetedVacationToDelete?.vacations">
               <tr>
-                <td>{{ item?.date }}</td>
-                <td>{{ item?.reason }}</td>
-                <td>{{ item?.class_short == '_all_' ? 'All' : item?.class_short }}</td>
+                <td class="size-09"><span class="badge bg-secondary">{{ item?.reason }}</span></td>
+                <td class="size-09">{{ item?.date }}</td>
+                <td class="size-09">{{ item?.class_short == '_all_' ? 'All' : item?.class_short }}</td>
               </tr>
             </template>
           </tbody>
         </table>
       </div>
-      <p class="mb-3"><strong>Do you want to delete?</strong></p>
+      <p class="mb-0"><strong>Do you want to delete all?</strong></p>
     </confirm>
+    <Modal v-model="showDetailsModal" @yes="deleteVacations">
+      <template #title>Details View</template>
+      <div class="overflow-y-auto modal-table" style="max-height: 400px;">
+        <table>
+          <tbody>
+            <template v-for="item in targetedVacationToDelete?.vacations">
+              <tr>
+                <td class="size-09"><span class="badge bg-secondary">{{ item?.reason }}</span></td>
+                <td class="size-09">{{ item?.date }}</td>
+                <td class="size-09">{{ item?.class_short == '_all_' ? 'All' : item?.class_short }}</td>
+                <td class="size-09"><span class="badge bg-secondary">{{ item?.type }}</span></td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+    </Modal>
     
     <Rightbar ref="RightbarRef" v-if="showRightbar" @unmount="showRightbar = false;initiallyClear=true" title="Add Class Wise Vacation" :largestMode="false"> 
       <div class="row">
