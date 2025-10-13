@@ -51,6 +51,23 @@ class LeaveAndVacations {
       res.send({ data: rows });
     });
   }
+
+  async api_delete(req, res) {
+
+    let identity_strings = req.body.identity_strings;
+    if (!identity_strings) {
+      return res.status(400).json({ error: "Missing identity_strings in request body" });
+    }
+
+
+    this.delete(identity_strings, (err, result) => {
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
+      res.send(result);
+    })
+     
+  }
   
 
  
@@ -139,27 +156,18 @@ class LeaveAndVacations {
   }
 
   // ❌ Delete (single or bulk via identity_string)
-  delete(identifier, callback) {
+  delete(identity_strings, callback) {
     let sql = "";
     let params = [];
 
-    if (Array.isArray(identifier)) {
-      sql = `DELETE FROM ${this.tableName} WHERE identity_string IN (${identifier.map(() => "?").join(",")})`;
-      params = identifier;
-    } else if (typeof identifier === "string") {
-      sql = `DELETE FROM ${this.tableName} WHERE identity_string = ?`;
-      params = [identifier];
-    } else if (typeof identifier === "number") {
-      sql = `DELETE FROM ${this.tableName} WHERE id = ?`;
-      params = [identifier];
-    } else {
-      return callback?.(new Error("Invalid identifier type"));
-    }
-
-    this.db.run(sql, params, function (err) {
-      if (err) return callback?.(err);
-      callback?.(null, { deleted: this.changes });
-    });
+    if (Array.isArray(identity_strings)) {
+      sql = `DELETE FROM ${this.tableName} WHERE identity_string IN (${identity_strings.map(() => "?").join(",")})`;
+      params = identity_strings;
+      this.db.run(sql, params, function (err) {
+        if (err) return callback?.(err);
+        callback?.(null, { deleted: this.changes });
+      });
+    } 
   }
 }
 

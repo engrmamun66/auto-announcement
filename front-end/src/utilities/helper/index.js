@@ -241,6 +241,9 @@ const helper = {
         return shifts
       }
     },
+    uniqueArray(arr) {
+      return [...new Set(arr)];
+    },
     // ====================================================== //
     // ================= With Full Calendar ================= //
     // ====================================================== //
@@ -283,6 +286,7 @@ const helper = {
           editable: false,
           overlap: false,
           constraint: reason, // this is group ID as my widh=
+          vacations,
         })
       } else{
 
@@ -300,9 +304,9 @@ const helper = {
           overlap: false,
           constraint: reason, // this is group ID as my widh=
           backgroundColor,
+          // Extra data
           tooltip: reason + ` For (${class_shorts?.length} class${class_shorts.length > 1 ? 'es' : ''})`,
-          identity_string: vacations[0].identity_string,
-          vacations: vacations,
+          vacations,
         })
       }
     },

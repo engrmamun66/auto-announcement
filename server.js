@@ -396,6 +396,9 @@ app.get(`/api/_ac`, async (req, res) => {
   app.get(prefix + '/leave-and-vacation-list', (req, res) => {
     LeavAndVacations.list(req, res)
   }); 
+  app.post(prefix + '/leave-and-vacation-delete', (req, res) => {
+    LeavAndVacations.api_delete(req, res)
+  }); 
   
 
    

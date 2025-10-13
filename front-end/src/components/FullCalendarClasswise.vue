@@ -9,13 +9,12 @@ import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import helper from './../utilities/helper/index'
 import { inject, ref, reactive, onMounted, onBeforeUnmount, computed, watch } from "vue";
-import Modal from './modal.vue'
 
 export default {
   components: { 
     FullCalendar // make the <FullCalendar> tag available
   },
-  emits: ['initAndNextPrev', 'advacation'],
+  emits: ['initAndNextPrev', 'advacation', 'delete'],
   props: {
     modelValue: {
       type: Object,
@@ -38,8 +37,6 @@ export default {
   },
   data() {
     return {
-      showDetailsModal: false,
-
       calendarOptions: {
         plugins: [ dayGridPlugin, interactionPlugin ],        
         initialView: 'dayGridMonth', // values: dayGridMonth | dayGridDay 
@@ -52,12 +49,15 @@ export default {
         dayCellContent: this.renderDayCellContent,
         eventContent: this.renderEventContent,
         dateClick: this.handleDateClick, 
-        eventClick: ({ event }) => {
-          console.log({event});
+        eventClick: (eventData) => {
+          let target = eventData.jsEvent.target
+          if(target.hasAttribute('deleteicon')){
+            this.$emit('delete', eventData.event.extendedProps)
+          } 
         },
-        datesSet: (data) => {
-          let start_date = moment(data.start).format('YYYY-MM-DD')
-          let end_date = moment(data.end).format('YYYY-MM-DD')
+        datesSet: (eventData) => {
+          let start_date = moment(eventData.start).format('YYYY-MM-DD')
+          let end_date = moment(eventData.end).format('YYYY-MM-DD')
           let date_range = { start_date, end_date }
           this.$emit('initAndNextPrev', date_range)
         },
@@ -171,7 +171,12 @@ export default {
        */
       // console.log('arg.event.tooltip', arg.event.extendedProps.tooltip);
       let tooltip = arg.event.extendedProps.tooltip
-      return { html: `<span class="ps-2" tooltip="${tooltip || ''}">` + arg.event.title + '</span>' }
+      return { html: `
+          <div class="cal-day-event-item" >
+            <span class="event-transh-icon" deleteicon><i class='bx bxs-trash' deleteicon></i></span>
+            <span class="textcontent" tooltip="${tooltip || ''}">${arg.event.title}</span>  
+          </div>
+        ` }
     },
   }
 }
@@ -179,7 +184,6 @@ export default {
 <template>
   <FullCalendar :options="calendarOptions" />
   <RightBar v-if="showRightbar" ref="rightbar" @unmount="showRightbar = false"></RightBar>
-  <Modal v-if="showDetailsModal" v-model="showDetailsModal" ></Modal>
 </template>
 
 
@@ -219,4 +223,31 @@ export default {
 .fc-event-main{
   /* overflow-x: hidden; */
 }
+.cal-day-event-item{
+  padding: 0px 5px;
+  padding-left: 5px;
+  transition: all 0.3s ease;
+} 
+ 
+.cal-day-event-item .event-transh-icon{
+  position: absolute;
+  pointer-events: none;
+  pointer-events: none;
+  left: -5px;
+  pointer-events: none; 
+  left: -5px;
+  opacity: 0;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  padding: 0px 2px;
+  color: rgb(221, 80, 10);
+  background-color: white;
+  border-radius: 3px;
+  left: 0px;
+}
+.cal-day-event-item:hover .event-transh-icon{
+  position: relative;
+  pointer-events: all;
+  opacity: 1;
+} 
 </style>

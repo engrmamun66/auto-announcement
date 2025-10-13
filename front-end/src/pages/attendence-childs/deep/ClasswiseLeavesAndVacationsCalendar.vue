@@ -22,6 +22,8 @@ import Rightbar from './../../../components/Rightbar.vue'
 import Btn from './../../../components/Btn.vue'
 import Switch from './../../../components/Switch.vue'
 import BtnLoader from './../../../components/BtnLoader.vue'
+import Modal from './../../../components/modal.vue'
+import Confirm from './../../../components/Confirm.vue'
 
 const props = defineProps({
   modelValue: {
@@ -35,7 +37,6 @@ const emit = defineEmits(['update:modelValue', 'onBtnSubmit', 'onBtnClear']);
 let log = console.log
 let showRightbar = ref(false)
 let selectedClasses = ref([...classes.value])
-console.log('helper.generateUniqueString()', Ahelper.generateUniqueString());
 
 let RightbarRef = ref(null)
 let showTextArea = ref(false)
@@ -43,6 +44,8 @@ let pickerModelValue = ref({})
 let calendarEvents = ref([])
 let vacationData = ref([])
 let dateRange = ref({ start_date: null, end_date: null })
+let targetedVacationToDelete = ref(null)
+let showDeleteModal = ref(null)
 
 let vacation_types = CONFIG.value?.settings?.attendance?.vacation_types || []
 
@@ -190,19 +193,51 @@ function onAdVacation({date}){
 }
  
 
+async function deleteVacations(){
+  if(!targetedVacationToDelete.value) return
+  let identity_strings = helper.uniqueArray(targetedVacationToDelete.value.vacations.map(v=>v.identity_string))
+
+  http.post('/leave-and-vacation-delete', { identity_strings }).then(response => {
+    if(response.status == 200){
+      onInitAndNextPrev(dateRange.value)
+    }
+  }).finally(()=>{
+     
+  })
+}
 
 </script>
 
 
 <template>
   <div>
-
     <FullCalendarClasswise 
     :events="calendarEvents"
     @initAndNextPrev="onInitAndNextPrev" 
     @advacation="onAdVacation" 
+    @delete="(vacations)=>{
+      targetedVacationToDelete = vacations
+      showDeleteModal = true
+    }"
     ></FullCalendarClasswise>
 
+    <Confirm v-model="showDeleteModal" @yes="deleteVacations">
+      <div class="overflow-y-auto modal-table" style="max-height: 200px;">
+        <table>
+          <tbody>
+            <template v-for="item in targetedVacationToDelete?.vacations">
+              <tr>
+                <td>{{ item?.date }}</td>
+                <td>{{ item?.reason }}</td>
+                <td>{{ item?.class_short == '_all_' ? 'All' : item?.class_short }}</td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+      <p class="mb-3"><strong>Do you want to delete?</strong></p>
+    </confirm>
+    
     <Rightbar ref="RightbarRef" v-if="showRightbar" @unmount="showRightbar = false;initiallyClear=true" title="Add Class Wise Vacation" :largestMode="false"> 
       <div class="row">
 
@@ -281,7 +316,7 @@ function onAdVacation({date}){
 
 
   </Rightbar>
-    
+
     
   </div>
 </template>
@@ -386,5 +421,12 @@ li{
   border: 1px solid #ffffff;
   border-radius: 6px;
   padding: 10px;
+}
+.modal-table{
+  max-height: 200px;
+  border: 1px solid #e2e2e2;
+  padding: 10px;
+  margin-block: 10px;
+  border-radius: 10px;
 }
 </style>
