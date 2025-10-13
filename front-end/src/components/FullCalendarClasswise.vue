@@ -193,4 +193,13 @@ export default {
 .fc .fc-toolbar.fc-header-toolbar {
     margin-bottom: 0px;
 }
+.calendar-weekend-bg{
+  background-color: #e28e95db !important;  
+}
+.calendar-vacation-bg{
+  background-color: #f3828b !important;  
+}
+.fc .fc-daygrid-day-bg .fc-bg-event{
+  overflow: hidden;
+}
 </style>

@@ -230,7 +230,13 @@ const helper = {
         return shifts
       }
     },
-    createDateRange(startDate = '2025-09-10', endDate = '2025-09-15') {
+    // ====================================================== //
+    // ================= With Full Calendar ================= //
+    // ====================================================== //
+
+    createDateRange(
+      startDate = moment().startOf('month').subtract(10, 'days').format('YYYY-MM-DD'), 
+      endDate = moment().endOf('month').add(10, 'days').format('YYYY-MM-DD')) {
       const start = moment(startDate);
       const end = moment(endDate);
       const range = [];
@@ -240,7 +246,43 @@ const helper = {
         start.add(1, 'day');
       }
       return range;
-    }
+    },
+    createWeekdayEvent(date=moment().format('YYYY-MM-DD')) { 
+      return ({
+        title: 'Weekend',
+        start: date,
+        allDay: true,
+        display: 'background', // "auto" | "block" | "background" | "inverse-background" | "none"
+        classNames: ['calendar-weekday-bg'],
+        editable: false,
+        overlap: false,
+        constraint: 'meetingSlot', // this is group ID as my widh=
+        constraint: { start: '2025-10-10', end: '2025-10-20' },
+      })
+    },
+    createVacationEvent(vacation) { 
+      let is_for_all_classes = vacation.class_short == '_all_'
+      if(is_for_all_classes){
+        return ({
+          title: vacation.reason + ' (All)',
+          start: vacation.date,
+          allDay: true,
+          display: 'block',
+          classNames: ['calendar-vacation-bg'],
+          editable: false,
+          overlap: false,
+          constraint: 'vacationSlot', // this is group ID as my widh=
+        })
+      }else{
+        let class_info = classes.value.find(c => c.class_short == vacation.class_short)
+        console.log({class_info});
+        if(class_info){
+          vacation_events.push(helper.createWeekdayEvent(vacation.date, `${vacation.reason} (${class_info.class_name})`, false))
+        }
+      }
+    },
+    // =============== End With Full Calendar =============== //
+    // ====================================================== //
 
      
 }

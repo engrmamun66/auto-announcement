@@ -95,7 +95,7 @@ module.exports = {
                     perpage: 20,
                     pagiation_positon: 'bottom_center', // bottom_left | bottom_center | bottom_right
                },
-               weekends: ['Friday'],
+               weekends: ['Friday'], // Saturday, 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'
                vacation_types: [
                     'Exam',
                     'After Exam',

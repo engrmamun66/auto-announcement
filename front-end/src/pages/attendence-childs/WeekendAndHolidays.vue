@@ -25,7 +25,7 @@ const getAttendeceList = inject("getAttendeceList");
 const leaveAndWeekendSubTab = inject("leaveAndWeekendSubTab");
 
 const pagiation_positon = CONFIG.value?.settings?.attendance?.pagination?.pagiation_positon || 'bottom_center'
-const weekends = CONFIG.value?.settings?.attendance?.weekends || []
+
 
 let showRightbar = ref(false)
 const getTitle = computed(()=> leaveAndWeekendSubTab.value == 1 ? 'Add Class Wise Vacation' : 'Add Student Leave')

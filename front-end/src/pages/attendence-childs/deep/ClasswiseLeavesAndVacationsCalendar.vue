@@ -40,6 +40,9 @@ console.log('helper.generateUniqueString()', Ahelper.generateUniqueString());
 let RightbarRef = ref(null)
 let showTextArea = ref(false)
 let pickerModelValue = ref({})
+let calendarEvents = ref([])
+let vacationData = ref([])
+let dateRange = ref({ start_date: null, end_date: null })
 
 let vacation_types = CONFIG.value?.settings?.attendance?.vacation_types || []
 
@@ -47,30 +50,6 @@ function remvoeSpaces(str){
   return str ? str.replace(/\s+/g, '') : str
 }
 
-let calendarEvents = ref([])
-
-
-function updateEvents(){
-  calendarEvents.value = [
-    {
-      id: 'a',
-      title: 'my event',
-      start: moment().format('YYYY-MM-DD'),
-      end: moment().add(4, 'days').format('YYYY-MM-DD'),
-      backgroundColor: 'green',
-      borderColor: 'green',
-      isMirror: true,
-    },
-    {
-      id: 'b',
-      title: 'my event 2',
-      start: moment().format('YYYY-MM-DD'),
-      end: moment().add(6, 'days').format('YYYY-MM-DD'),
-    },
-  ]
-
-  console.log('calendarEvents', calendarEvents.value);
-}
 
 let queryParams = {
   // start
@@ -157,10 +136,35 @@ async function onSubmit(){
   helper.delay(()=>showBtnLoader.value = false, 1200)
 }
 
+
+
 async function onInitAndNextPrev({start_date, end_date}){
   queryParams = { start_date, end_date }
+  dateRange.value = { start_date, end_date }
   let vacation_data = await callbacks.getLeavesAndVacations(queryParams)
-  console.log({vacation_data});
+  vacationData.value = vacation_data
+  createAndDisplayEventList()
+}
+
+async function createAndDisplayEventList(){
+  let vacation_events = []
+
+  // With weekends
+  const weekends = CONFIG.value?.settings?.attendance?.weekends || []
+  let {start_date, end_date} = dateRange.value
+  let weekends_array = helper.createDateRange(start_date, end_date)
+                      .filter(date => weekends.includes(moment(date).format('dddd')))
+  weekends_array.forEach(date => vacation_events.push(helper.createWeekdayEvent(date)))
+
+  // with vacations/holidays
+  vacationData.value.forEach(vacation => {
+    vacation_events.push(helper.createVacationEvent(vacation))
+  })
+
+
+
+  calendarEvents.value = vacation_events
+
 }
  
 
@@ -170,7 +174,6 @@ async function onInitAndNextPrev({start_date, end_date}){
 
 <template>
   <div>
-    <button @click="updateEvents" >Update Events</button>
 
     <FullCalendarClasswise 
     :events="calendarEvents"
