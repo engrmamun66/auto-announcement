@@ -274,17 +274,18 @@ const helper = {
         constraint: { start: '2025-10-10', end: '2025-10-20' },
       })
     },
-    createVacationEvent(date, vacations, reason, classes=[], {backgroundColor}){
+    createVacationEvent(date, vacations, reason, classes=[], {backgroundColor='#e74a3b'}={}){
       if(vacations.length === 1){
         let vacation = vacations[0]
+        console.log('backgroundColor', backgroundColor);
         return ({
           title: vacation.reason,
           start: vacation.date,
           allDay: true,
           display: 'block',
-          classNames: ['calendar-vacation-bg'],
           editable: false,
           overlap: false,
+          backgroundColor,
           constraint: reason, // this is group ID as my widh=
           vacations,
         })
@@ -299,7 +300,6 @@ const helper = {
           end: date,
           allDay: true,
           display: 'block',
-          // classNames: ['calendar-vacation-bg'],
           editable: false,
           overlap: false,
           constraint: reason, // this is group ID as my widh=

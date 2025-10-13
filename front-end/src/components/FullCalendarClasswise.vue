@@ -208,11 +208,8 @@ export default {
 .fc .fc-toolbar.fc-header-toolbar {
     margin-bottom: 0px;
 }
-.calendar-weekend-bg{
-  background-color: #e28e95db !important;  
-}
-.calendar-vacation-bg,
-.fc-bg-event{
+ 
+.calendar-weekday-bg {
   background-color: #f3828b !important;  
 }
 
