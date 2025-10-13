@@ -133,7 +133,7 @@ export default {
       if(!weekends.includes(day_fullname)){
         html_array.push(`
           <div>
-            <span class="badge bg-secondary cp" tooltip="Add New" plusicon="true" >+</span>
+            <span class="badge add-vacation-badge cp" tooltip="Add New" plusicon="true" >+</span>
           </div>
         `)
       }
@@ -219,5 +219,13 @@ export default {
 } 
 .calendar-weekday-bg .event-transh-icon{
   display: none !important;
-} 
+}
+.add-vacation-badge{
+  font-size: 14px;
+  color: #8d8b8b;
+  cursor: pointer;
+  border: 1px solid #c8c8c8;
+  line-height: 8px;
+  padding-bottom: 5px;
+}
 </style>
