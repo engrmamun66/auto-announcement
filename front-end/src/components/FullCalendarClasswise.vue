@@ -204,4 +204,7 @@ export default {
 .fc .fc-daygrid-day-bg .fc-bg-event{
   overflow: hidden;
 }
+.fc-event-main{
+  overflow-x: hidden;
+}
 </style>

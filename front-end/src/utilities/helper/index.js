@@ -2,6 +2,17 @@ import moment from 'moment/moment';
 
 const helper = { 
     log: console.log,
+    listGroupBy: function (array, property) {
+      if (!array?.length || !property) return {};
+      return array.reduce((result, obj) => {
+        const key = obj[property];
+        if (!result[key]) {
+          result[key] = [];
+        }
+        result[key].push(obj);
+        return result;
+      }, {});
+    },
     randomBetween: function (min, max) {
         return Math.floor(Math.random() * (max - min + 1) + min)
     }, 
@@ -260,9 +271,9 @@ const helper = {
         constraint: { start: '2025-10-10', end: '2025-10-20' },
       })
     },
-    createVacationEvent(vacation) { 
-      let is_for_all_classes = vacation.class_short == '_all_'
-      if(is_for_all_classes){
+    createVacationEvent(date, vacations, reason, classes=[]){
+      if(vacations.length === 1){
+        let vacation = vacations[0]
         return ({
           title: vacation.reason + ' (All)',
           start: vacation.date,
@@ -271,19 +282,26 @@ const helper = {
           classNames: ['calendar-vacation-bg'],
           editable: false,
           overlap: false,
-          constraint: 'vacationSlot', // this is group ID as my widh=
+          constraint: reason, // this is group ID as my widh=
         })
-      }else{
+      } else{
+
+
+
+        let class_shorts = vacations.map(v => v.class_short) 
+        let class_shorts_text = class_shorts.join(', ')
+
         return ({
-          title: vacation.reason + ` (${vacation.class_short})`,
-          start: vacation.date,
+          title: reason + `(${class_shorts?.length} cls)`,
+          start: date,
+          end: date,
           allDay: true,
           display: 'block',
           classNames: ['calendar-vacation-bg'],
           editable: false,
           overlap: false,
-          constraint: 'vacationSlot', // this is group ID as my widh=
-          tooltip: vacation.reason + ` (${vacation.class_short})`,
+          constraint: reason, // this is group ID as my widh=
+          tooltip: reason + ` For (${class_shorts?.length} class${class_shorts.length > 1 ? 'es' : ''})`,
         })
       }
     },

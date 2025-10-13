@@ -130,6 +130,7 @@ async function onSubmit(){
   }).finally(()=>{
     onCancel()
     callbacks.getLeavesAndVacations()
+    onInitAndNextPrev(dateRange.value)
   })
 
   showBtnLoader.value = true
@@ -142,6 +143,10 @@ async function onInitAndNextPrev({start_date, end_date}){
   queryParams = { start_date, end_date }
   dateRange.value = { start_date, end_date }
   let vacation_data = await callbacks.getLeavesAndVacations(queryParams)
+  vacation_data = vacation_data.map(vacation => {
+    vacation['reason_and_date'] = vacation.reason + '' + vacation.date
+    return vacation
+  })
   vacationData.value = vacation_data
   createAndDisplayEventList()
 }
@@ -157,9 +162,17 @@ async function createAndDisplayEventList(){
   weekends_array.forEach(date => vacation_events.push(helper.createWeekdayEvent(date)))
 
   // with vacations/holidays
-  vacationData.value.forEach(vacation => {
-    vacation_events.push(helper.createVacationEvent(vacation, classes.value))
+  // vacationData.value.forEach(vacation => {
+  //   vacation_events.push(helper.createVacationEvent(vacation, classes.value))
+  // })
+  let goruped = helper.listGroupBy(vacationData.value, 'reason_and_date')
+  console.log({goruped});
+  Object.entries(goruped).forEach(([reason_and_date, vacations])=>{
+    let [reason, date] = reason_and_date.split('') 
+    vacation_events.push(helper.createVacationEvent(date, vacations, reason, classes.value))
   })
+
+ 
 
 
 
