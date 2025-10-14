@@ -625,8 +625,8 @@ emitter.on('is_connected_socket_server', (bool) => {
     socketServerIsRunning.value = bool
 })
 
-onMounted(async ()=>{   
-
+onMounted(async ()=>{ 
+    
     setTimeout(() => {
         Socket.value = socketInit({emitter, toaster: true})
     }, 1000);
@@ -658,6 +658,9 @@ onMounted(async ()=>{
     await getSchedules() 
 
     await getConfig()
+    if(CONFIG.value?.settings?.click_me_to_allow_sound === false){
+        document.body.classList.add('user-interacted')
+    }
 
     isMountedAppDotVue.value = true
 

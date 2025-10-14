@@ -40,6 +40,7 @@ module.exports = {
      settings: {
           log_backup_days: 7,
           punch_log_indent: 0, // for developer,
+          click_me_to_allow_sound: false,
           auto_focus_student_card: {
                status: false,
                delay_in_seconds: 3
