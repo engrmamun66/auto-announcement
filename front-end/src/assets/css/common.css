@@ -25,7 +25,7 @@ body:not([forbidden]):not(.user-interacted) * {
 }
 body[forbidden="false"]:not(.user-interacted)::after,
 body:not([forbidden]):not(.user-interacted)::after {
-  content: "Click me to allow sound";
+  content:attr(data-msg, 'Click me to allow sound');
   position: fixed;
   width: calc(100% - 20%);
   text-align: center;

@@ -658,8 +658,12 @@ onMounted(async ()=>{
     await getSchedules() 
 
     await getConfig()
-    if(CONFIG.value?.settings?.click_me_to_allow_sound === false){
+    if(CONFIG.value?.settings?.click_me_to_allow_sound?.status === false){
         document.body.classList.add('user-interacted')
+    }
+    let custom_message = CONFIG.value?.settings?.click_me_to_allow_sound?.custom_message
+    if(custom_message && typeof custom_message === 'string'){
+        document.body.setAttribute('data-msg', custom_message)
     }
 
     isMountedAppDotVue.value = true
