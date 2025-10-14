@@ -224,7 +224,7 @@ onMounted(()=>{
         <div class="d-flex justify-content-end column-gap-3">
           <div class="form-group" tooltip="Sort By">
             <select class="form-control cb-input" v-model="tab3_class_short" >
-              <option :value="null">--Select Class--</option>
+              <option :value="null">-All Classes-</option>
               <template v-for="(eachClass, index) in classes" :key="index">
                 <option :value="eachClass.class_short">{{ eachClass.class_name }}</option>
               </template>                  

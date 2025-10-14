@@ -557,3 +557,7 @@ td a {
 .form-check-input:focus {
   box-shadow: unset !important;
 }
+
+.nav-tabs .nav-link {
+  padding: 6px 10px !important;
+}

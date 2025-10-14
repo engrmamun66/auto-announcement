@@ -275,10 +275,10 @@ const helper = {
         __isWeekend: true,
       })
     },
-    createVacationEvent(start_date, end_date, vacations, reason, {backgroundColor='#e74a3b'}={}){
+    createVacationEvent(start_date, end_date, vacations, reason, {backgroundColor='#e74a3b', class__short=null}={}){
       let class_shorts = vacations.map(v => v.class_short) 
       let unique_class_shorts = helper.uniqueArray(class_shorts)
-      return ({
+      let event = {
         title: reason,
         start: start_date,
         end: end_date,
@@ -291,7 +291,12 @@ const helper = {
         // Extra data
         tooltip: reason + ` For (${unique_class_shorts?.length} class${unique_class_shorts.length > 1 ? 'es' : ''})`,
         vacations,
-      })
+      }
+      if(class__short){
+        event.title = reason + ` - ${class__short}`
+        event.tooltip = reason + ` For (${class__short})`
+      }
+      return event
        
     },
     // =============== End With Full Calendar =============== //
