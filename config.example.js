@@ -99,6 +99,7 @@ module.exports = {
                vacation_types: [
                     { title: 'Exam', bgcolor: '#ebac0b' },                    
                     { title: 'After Exam', bgcolor: '#e74a3b' },   
+                    { title: 'Summer', bgcolor: '#e74a3b' },   
                     { title: 'Miladunnabi', bgcolor: '#e74a3b' },                    
                     { title: 'Public Holiday', bgcolor: '#4e73df' },  
                     { title: 'Ramadan', bgcolor: '#e74a3b' },                    
