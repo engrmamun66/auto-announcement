@@ -75,12 +75,6 @@ let payload = reactive({
   reason: 'Exam',
 })
 
-watch(showTextArea, (bool)=> {
-  if(bool === false){
-    payload.reason = 'Exam'
-  }
-})
-
 
 function onCancel(){
   payload.reason = ''
@@ -352,23 +346,29 @@ async function deleteVacations(){
             Select Vacation Type
           </label>
           <div class="vacationtypes">
-            <div class="d-flex justify-content-start align-items-center flex-wrap gap-1 column-gap-3">
+            <div class="row">
               <template v-for="vacationType in vacation_types" :key="value">
-                <div class="form-check">
-                  <input v-model="payload.reason" class="form-check-input" :id="remvoeSpaces(vacationType.title)" type="radio" name="vacation_type" :value="vacationType.title">
-                  <label class="form-check-label" :for="remvoeSpaces(vacationType.title)">
-                    {{ vacationType.title }}
-                  </label>
+                <div class="col-md-6">
+                  <div class="form-check">
+                    <input v-model="payload.reason" class="form-check-input" :id="remvoeSpaces(vacationType.title)" type="radio" name="vacation_type" :value="vacationType.title" @click="showTextArea = false">
+                    <label class="form-check-label" :for="remvoeSpaces(vacationType.title)">
+                      {{ vacationType.title }}
+                    </label>
+                  </div>
                 </div>
 
               </template>
-              <div class="form-check">
-                <input v-model="payload.reason" @click="showTextArea = !showTextArea" class="form-check-input" id="other" type="radio" name="vacation_type" :value="''">
-                <label class="form-check-label" for="other">
-                  Other
-                </label>
+
+              <div class="col-md-6">
+                <div class="form-check">
+                  <input v-model="payload.reason" @click="showTextArea = true" class="form-check-input" id="other" type="radio" name="vacation_type" :value="''">
+                  <label class="form-check-label" for="other">
+                    Other Vacation
+                  </label>
+                </div>
               </div>
             </div>
+
             <div v-if="showTextArea" class="form-group mt-2">
              <label>Write custom note for vacation type</label>
              <textarea ref="textAreaRef" v-model="payload.reason" class="form-control cb-input cb-textarea"></textarea>
