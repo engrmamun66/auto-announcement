@@ -23,17 +23,7 @@ export default {
     },
     events: {
       type: Array,
-      default: () => [
-        {
-          id: 'a',
-          title: 'loading...',
-          start: moment().startOf('month').format('YYYY-MM-DD'),
-          end: moment().endOf('month').format('YYYY-MM-DD'),
-          backgroundColor: 'green',
-          borderColor: 'green',
-          isMirror: true,
-        }
-      ],
+      default: () => [],
     },
     weekends: {
       type: Array,

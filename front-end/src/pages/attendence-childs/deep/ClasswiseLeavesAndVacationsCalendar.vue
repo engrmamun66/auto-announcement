@@ -187,13 +187,36 @@ async function createAndDisplayEventList(){
   }) 
 
    
+
+  calendarEvents.value = [{
+    id: 'a',
+    title: 'loading...',
+    start: dateRange.value.start_date,
+    end: dateRange.value.end_date,
+    backgroundColor: 'green',
+    borderColor: 'green',
+    isMirror: true,
+  }]
+
+  let loading_events =  helper.createDateRange(dateRange.value.start_date, dateRange.value.end_date, 'day').map(date => {
+    return {
+      title: `<span class="spinner-border text-secondary ms-1 fs-6" style="--bs-spinner-width: 20px;--bs-spinner-height:20px;--bs-spinner-border-width: 2px;"></span>`,
+      start: date,
+      end: date,
+      backgroundColor: '#b5666600',
+      borderColor: 'transparent',
+      textColor: 'black',
+      isMirror: false,
+      is___custom: true
+    }
+  })
+  calendarEvents.value = loading_events
+
   setTimeout(() => {
     calendarEvents.value = vacation_events
   }, 500);
-   
-  
-
 }
+
 
 let initiallyClear = ref(true)
 
