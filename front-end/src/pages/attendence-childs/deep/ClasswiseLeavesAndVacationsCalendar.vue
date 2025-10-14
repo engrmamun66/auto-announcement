@@ -185,19 +185,10 @@ async function createAndDisplayEventList(){
       vacation_events.push(vaction_slot)
     })
   }) 
-
-   
-
-  calendarEvents.value = [{
-    id: 'a',
-    title: 'loading...',
-    start: dateRange.value.start_date,
-    end: dateRange.value.end_date,
-    backgroundColor: 'green',
-    borderColor: 'green',
-    isMirror: true,
-  }]
-
+ 
+  // ====================================================== //
+  // ================= Create Loader Event ================ //
+  // ====================================================== //
   let loading_events =  helper.createDateRange(dateRange.value.start_date, dateRange.value.end_date, 'day').map(date => {
     return {
       title: `<span class="spinner-border text-secondary ms-1 fs-6" style="--bs-spinner-width: 20px;--bs-spinner-height:20px;--bs-spinner-border-width: 2px;"></span>`,
@@ -211,6 +202,8 @@ async function createAndDisplayEventList(){
     }
   })
   calendarEvents.value = loading_events
+  // ================= Create Loader Event ================ //
+  // ====================================================== //
 
   setTimeout(() => {
     calendarEvents.value = vacation_events
