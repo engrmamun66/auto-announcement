@@ -137,31 +137,11 @@ function getAttendeceList({ page_no = null, reset = false, other_params = {} } =
 // ====================================================== //
 
 let leaveAndWeekendSubTab = ref(1)
-
-function addLeaveOrVacation({}) {
-  try {
-
-
-    let payload = {  };
-
-    console.log(payload);
-    return
-
-    http
-      .post("/leave-and-vacation-add-bulk", payload)
-      .then((response) => {
-        if (response.status == 200) {
-          let data = response.data;
-          attendenceList.value = data.data;
-          attendenceParams.value = data.pagination;
-        }
-      })
-      .finally(() => {});
-  } catch (error) {}
-}
+let tab3_class_short = ref(null)
 
 provide('leaveAndWeekendSubTab', leaveAndWeekendSubTab)
-provide('addLeaveOrVacation', addLeaveOrVacation)
+provide('tab3_class_short', tab3_class_short)
+ 
 
 
 
@@ -240,14 +220,30 @@ onMounted(()=>{
         </div>
       </div>   
       <div v-else-if="tab==3">
-        <ul class="nav nav-tabs d2 mt-0 mb-3 bottom-borderless">
-          <li class="nav-item">
-            <a @click.stop="leaveAndWeekendSubTab = 1" class="nav-link cp text-black" :class="{'active': leaveAndWeekendSubTab==1}" >Class Wise</a>
-          </li>
-          <li class="nav-item">
-            <a @click.stop="leaveAndWeekendSubTab = 2" class="nav-link cp text-black" :class="{'active': leaveAndWeekendSubTab==2}" >Student Wise</a>
-          </li>       
-        </ul>
+
+        <div class="d-flex justify-content-end column-gap-3">
+          <div class="form-group" tooltip="Sort By">
+            <select class="form-control cb-input" v-model="tab3_class_short" >
+              <option :value="null">--Select Class--</option>
+              <template v-for="(eachClass, index) in classes" :key="index">
+                <option :value="eachClass.class_short">{{ eachClass.class_name }}</option>
+              </template>                  
+            </select>
+          </div>
+          <ul class="nav nav-tabs d2 mt-0 mb-3 bottom-borderless">
+            <li class="nav-item">
+              <a @click.stop="leaveAndWeekendSubTab = 1" class="nav-link cp text-black" :class="{'active': leaveAndWeekendSubTab==1}" >Class Wise</a>
+            </li>
+            <li class="nav-item">
+              <a @click.stop="leaveAndWeekendSubTab = 2" class="nav-link cp text-black" :class="{'active': leaveAndWeekendSubTab==2}" >Student Wise</a>
+            </li>       
+          </ul>
+        </div>
+
+
+
+       
+        
       </div> 
 
     </div>

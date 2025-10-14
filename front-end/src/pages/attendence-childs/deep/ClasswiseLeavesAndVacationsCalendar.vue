@@ -48,6 +48,12 @@ let targetedVacationToDelete = ref(null)
 let showDeleteModal = ref(null)
 let showDetailsModal = ref(null)
 
+let tab3_class_short = inject('tab3_class_short')
+
+watch(tab3_class_short, (classShort) => {
+  onInitAndNextPrev(dateRange.value)
+})
+
 let vacation_types = CONFIG.value?.settings?.attendance?.vacation_types || []
 
 function remvoeSpaces(str){
@@ -147,10 +153,6 @@ async function onInitAndNextPrev({start_date, end_date}){
   queryParams = { start_date, end_date }
   dateRange.value = { start_date, end_date }
   let vacation_data = await callbacks.getLeavesAndVacations(queryParams)
-  vacation_data = vacation_data.map(vacation => {
-    vacation['reason_and_date'] = vacation.reason + '' + vacation.date
-    return vacation
-  })
   vacationData.value = vacation_data
   createAndDisplayEventList()
 }
@@ -158,6 +160,8 @@ async function onInitAndNextPrev({start_date, end_date}){
 
 async function createAndDisplayEventList(){
   let vacation_events = []
+
+  let class__short = tab3_class_short.value
 
   // With weekends
   const weekends = CONFIG.value?.settings?.attendance?.weekends || []
@@ -175,13 +179,22 @@ async function createAndDisplayEventList(){
     // grouped_by_identity
     let vacation_slots = helper.listGroupBy(__vacations, 'identity_string')
     Object.entries(vacation_slots).forEach(([_, vacations]) => {
+
+
+      // Filter by class short
+      if(class__short && class__short != '_all_'){
+        vacations = vacations.filter(v => v.class_short == class__short || v.class_short == '_all_')
+        if(vacations.length == 0) return
+      }
+
+
       let first_item = vacations[0]
       let last_item = vacations[vacations.length - 1]
       let backgroundColor = vacation_types.find(vt => {
         return vt.title == reason
       })?.bgcolor || 'tomato'
 
-      let vaction_slot = helper.createVacationEvent(first_item.date, last_item.date, vacations, first_item.reason, { backgroundColor })
+      let vaction_slot = helper.createVacationEvent(first_item.date, last_item.date, vacations, first_item.reason, { backgroundColor, class__short })
       vacation_events.push(vaction_slot)
     })
   }) 
@@ -207,7 +220,7 @@ async function createAndDisplayEventList(){
 
   setTimeout(() => {
     calendarEvents.value = vacation_events
-  }, 500);
+  }, 300);
 }
 
 
@@ -232,6 +245,9 @@ async function deleteVacations(){
      
   })
 }
+
+
+
 
 </script>
 

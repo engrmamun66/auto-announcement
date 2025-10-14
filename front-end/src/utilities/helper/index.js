@@ -277,6 +277,7 @@ const helper = {
     },
     createVacationEvent(start_date, end_date, vacations, reason, {backgroundColor='#e74a3b'}={}){
       let class_shorts = vacations.map(v => v.class_short) 
+      let unique_class_shorts = helper.uniqueArray(class_shorts)
       return ({
         title: reason,
         start: start_date,
@@ -288,7 +289,7 @@ const helper = {
         constraint: reason, // this is group ID as my widh=
         backgroundColor,
         // Extra data
-        tooltip: reason + ` For (${class_shorts?.length} class${class_shorts.length > 1 ? 'es' : ''})`,
+        tooltip: reason + ` For (${unique_class_shorts?.length} class${unique_class_shorts.length > 1 ? 'es' : ''})`,
         vacations,
       })
        
