@@ -155,6 +155,7 @@ async function onInitAndNextPrev({start_date, end_date}){
   createAndDisplayEventList()
 }
 
+
 async function createAndDisplayEventList(){
   let vacation_events = []
 
@@ -185,7 +186,12 @@ async function createAndDisplayEventList(){
     })
   }) 
 
-  calendarEvents.value = vacation_events
+   
+  setTimeout(() => {
+    calendarEvents.value = vacation_events
+  }, 500);
+   
+  
 
 }
 
