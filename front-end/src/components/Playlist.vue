@@ -139,7 +139,9 @@
  
 
   onMounted(() => {
-    console.log('playlist mounted');
+    if(query.dev === 'true'){
+      console.log('playlist mounted');
+    }
     playNext()
 
     emitter.on('pushed_a_student__or__rechecktoPlay', ()=>{
