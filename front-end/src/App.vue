@@ -28,9 +28,11 @@ let CONFIG = ref(storage('CONFIG').value || {});
 watch(
   () => route.fullPath,
     (newPath, oldPath) => { 
-        if(newPath !== '/attendence'){
-            storage('attendance_tab').value = 1
-        } 
+        if(isMountedAppDotVue.value){
+            if(newPath !== '/attendence'){
+                storage('attendance_tab').value = 1
+            } 
+        }
     }
 )
 
@@ -340,7 +342,7 @@ async function controlSounds({student=null, ports=[], openAll=false}={}){
  }
 
 }
-
+let isMountedAppDotVue = ref(false)
 
 provide('route', route)
 provide('router', router)
@@ -656,6 +658,8 @@ onMounted(async ()=>{
     await getSchedules() 
 
     await getConfig()
+
+    isMountedAppDotVue.value = true
 
     if(CONFIG.value?.settings?.attendance?.status && CONFIG.value?.settings?.attendance?.only_attendance_feature){
         document.body.classList.add('user-interacted')
