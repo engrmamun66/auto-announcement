@@ -49,14 +49,9 @@ export default {
           if(target.hasAttribute('deleteicon')){
             this.$emit('delete', eventData.event.extendedProps)
           } else {
-            if(target.hasAttribute('tooltip') && !eventData.event.extendedProps?.__isWeekend){
+            if(eventData.event.extendedProps?.vacations?.length){
               this.$emit('viewDetails', eventData.event.extendedProps)
-            } else {
-              // console.log('// do nothing', target.outerHTML);
-              if(target.outerHTML.includes('tooltip=')){
-                this.$emit('viewDetails', eventData.event.extendedProps)
-              }
-            }
+            }  
           }
         },
         datesSet: (eventData) => {

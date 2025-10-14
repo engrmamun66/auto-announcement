@@ -286,7 +286,7 @@ async function deleteVacations(){
         </table>
       </div>
 
-      <div class="d-flex justify-content-start column-gap-2">
+      <div class="d-flex justify-content-end column-gap-2">
         <Btn @click="showDetailsModal = false">Close</Btn>
         <Btn @click="deleteVacations();showDetailsModal = false" class="red">Delete Now</Btn>
       </div>
