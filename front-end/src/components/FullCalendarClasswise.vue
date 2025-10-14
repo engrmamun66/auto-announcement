@@ -210,6 +210,7 @@ export default {
   color: rgb(221, 80, 10);
   background-color: white;
   border-radius: 3px;
+  margin-right: 3px;
   left: 0px;
 }
 .cal-day-event-item:hover .event-transh-icon{

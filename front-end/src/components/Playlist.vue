@@ -6,6 +6,7 @@
   
   <script setup>
   import { ref, watch, inject, onMounted } from 'vue';
+  import { useRoute, useRouter } from 'vue-router';
   
   
   // Refs and state
@@ -133,6 +134,8 @@
     playNext()
   }
   
+
+  let query = useRoute().query
  
 
   onMounted(() => {
@@ -143,7 +146,9 @@
         if(is__playing.value == false){
           playNext()          
         }
-        console.log('watching playlist...');
+        if(query.dev === 'true'){
+          console.log('watching playlist...');
+        }
     })
     emitter.on('stop_playing_and_clear_current_item_and_playnext', ()=>{
         currentItem.value = null

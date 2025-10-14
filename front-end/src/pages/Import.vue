@@ -10,8 +10,6 @@ import FileUpload from '../components/FileUpload.vue'
 import BtnLoader from '../components/BtnLoader.vue'
 
 
-let router = useRouter()
- 
 const emitter = inject('emitter');
 let http = inject('http'); 
 let moment = inject('moment'); 
