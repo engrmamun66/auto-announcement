@@ -168,18 +168,22 @@ async function createAndDisplayEventList(){
   // Excluding weekends because already added above
   let vacation_dates = vacationData.value.filter(v => !weekends_array.includes(v.date))
 
-  let goruped = helper.listGroupBy(vacation_dates, 'reason_and_date')
-  Object.entries(goruped).forEach(([reason_and_date, vacations], i)=>{
-    let [reason, date] = reason_and_date.split('') 
-    let backgroundColor = vacation_types.find(vt => {
-      return vt.title == reason
-    })?.bgcolor || 'tomato'
-    vacation_events.push(helper.createVacationEvent(date, vacations, reason, classes.value, {backgroundColor}))
-  })
+  let grouped = helper.listGroupBy(vacation_dates, 'reason')
 
- 
+  Object.entries(grouped).forEach(([reason, __vacations]) => {
+    // grouped_by_identity
+    let vacation_slots = helper.listGroupBy(__vacations, 'identity_string')
+    Object.entries(vacation_slots).forEach(([_, vacations]) => {
+      let first_item = vacations[0]
+      let last_item = vacations[vacations.length - 1]
+      let backgroundColor = vacation_types.find(vt => {
+        return vt.title == reason
+      })?.bgcolor || 'tomato'
 
-
+      let vaction_slot = helper.createVacationEvent(first_item.date, last_item.date, vacations, first_item.reason, { backgroundColor })
+      vacation_events.push(vaction_slot)
+    })
+  }) 
 
   calendarEvents.value = vacation_events
 

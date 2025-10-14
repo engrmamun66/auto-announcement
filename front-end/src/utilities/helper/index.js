@@ -275,40 +275,23 @@ const helper = {
         __isWeekend: true,
       })
     },
-    createVacationEvent(date, vacations, reason, classes=[], {backgroundColor='#e74a3b'}={}){
-      if(vacations.length === 1){
-        let vacation = vacations[0]
-        return ({
-          title: vacation.reason,
-          start: vacation.date,
-          allDay: true,
-          display: 'block',
-          editable: false,
-          overlap: false,
-          backgroundColor,
-          constraint: reason, // this is group ID as my widh=
-          vacations,
-        })
-      } else{
-
-
-
-        let class_shorts = vacations.map(v => v.class_short) 
-        return ({
-          title: reason,
-          start: date,
-          end: date,
-          allDay: true,
-          display: 'block',
-          editable: false,
-          overlap: false,
-          constraint: reason, // this is group ID as my widh=
-          backgroundColor,
-          // Extra data
-          tooltip: reason + ` For (${class_shorts?.length} class${class_shorts.length > 1 ? 'es' : ''})`,
-          vacations,
-        })
-      }
+    createVacationEvent(start_date, end_date, vacations, reason, {backgroundColor='#e74a3b'}={}){
+      let class_shorts = vacations.map(v => v.class_short) 
+      return ({
+        title: reason,
+        start: start_date,
+        end: end_date,
+        allDay: true,
+        display: 'block',
+        editable: false,
+        overlap: false,
+        constraint: reason, // this is group ID as my widh=
+        backgroundColor,
+        // Extra data
+        tooltip: reason + ` For (${class_shorts?.length} class${class_shorts.length > 1 ? 'es' : ''})`,
+        vacations,
+      })
+       
     },
     // =============== End With Full Calendar =============== //
     // ====================================================== //
