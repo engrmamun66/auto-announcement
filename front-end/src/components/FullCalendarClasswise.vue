@@ -51,6 +51,11 @@ export default {
           } else {
             if(target.hasAttribute('tooltip') && !eventData.event.extendedProps?.__isWeekend){
               this.$emit('viewDetails', eventData.event.extendedProps)
+            } else {
+              // console.log('// do nothing', target.outerHTML);
+              if(target.outerHTML.includes('tooltip=')){
+                this.$emit('viewDetails', eventData.event.extendedProps)
+              }
             }
           }
         },
