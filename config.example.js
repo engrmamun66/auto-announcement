@@ -112,6 +112,13 @@ module.exports = {
                     { title: 'Special Holiday', bgcolor: '#a944e8' },  
                     { title: 'Teacher Training', bgcolor: '#4e73df' },  
                ],
+               stuents_leave_types: [
+                    { title: 'Sick Leave', bgcolor: '#e74a3b' },                    
+                    { title: 'Casual Leave', bgcolor: '#4e73df' },   
+                    { title: 'Annual Leave', bgcolor: '#0b8e1a' },   
+                    { title: 'Bereavement Leave', bgcolor: '#6c757d' },              
+                    { title: 'Other', bgcolor: '#343a40' },  
+               ],
                
           },
      },

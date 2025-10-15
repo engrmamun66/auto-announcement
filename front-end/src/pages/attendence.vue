@@ -136,11 +136,9 @@ function getAttendeceList({ page_no = null, reset = false, other_params = {} } =
 // ============= For Weekends And Vacations ============= //
 // ====================================================== //
 
-let leaveAndWeekendSubTab = ref(1)
-let tab3_class_short = ref(null)
+let leaveAndWeekendSubTab = ref(1) 
 
-provide('leaveAndWeekendSubTab', leaveAndWeekendSubTab)
-provide('tab3_class_short', tab3_class_short)
+provide('leaveAndWeekendSubTab', leaveAndWeekendSubTab) 
  
 
 
@@ -222,14 +220,6 @@ onMounted(()=>{
       <div v-else-if="tab==3">
 
         <div class="d-flex justify-content-end column-gap-3">
-          <!-- <div class="form-group" tooltip="Select Class">
-            <select class="form-control cb-input" v-model="tab3_class_short" >
-              <option :value="null">-All Classes-</option>
-              <template v-for="(eachClass, index) in classes" :key="index">
-                <option :value="eachClass.class_short">{{ eachClass.class_name }}</option>
-              </template>                  
-            </select>
-          </div> -->
           <ul class="nav nav-tabs d2 mt-0 mb-3 bottom-borderless">
             <li class="nav-item">
               <a @click.stop="leaveAndWeekendSubTab = 1" class="nav-link cp text-black" :class="{'active': leaveAndWeekendSubTab==1}" >Class Wise</a>

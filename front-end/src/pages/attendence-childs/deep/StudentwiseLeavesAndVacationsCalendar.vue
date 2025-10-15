@@ -49,13 +49,7 @@ let targetedVacationToDelete = ref(null)
 let showDeleteModal = ref(null)
 let showDetailsModal = ref(null)
 
-// let tab3_class_short = inject('tab3_class_short')
-let tab3_class_short = ref(null)
-
-watch(tab3_class_short, (classShort) => {
-  onInitAndNextPrev(dateRange.value)
-})
-
+ 
 let vacation_types = CONFIG.value?.settings?.attendance?.vacation_types || []
 
 function remvoeSpaces(str){
@@ -243,10 +237,46 @@ async function deleteVacations(){
   })
 }
 
+let tab3_class_short = ref(null)
+
+watch(tab3_class_short, (classShort) => {
+  onInitAndNextPrev(dateRange.value)
+})
+
+let studentnameorid = ref('')
+let selectedStudents = ref([])
+
+let filteredAllStudents = computed(() => {
+  let selected_class_shorts = [tab3_class_short.value].filter(Boolean)
+  let students = helper.clone(all_students.value)
+  
+  if(selected_class_shorts?.length){
+    students = students.filter(student => selected_class_shorts.includes(student.class_short))
+  }
+  if(studentnameorid.value){
+    let is_id = /\d+/.test(studentnameorid.value)
+    if(is_id){
+      students = students.filter(student => student.dakhela.toString().includes(studentnameorid.value))
+    } else {
+      students = students.filter(student => student.name.toLowerCase().includes(studentnameorid.value.toLowerCase()))
+    }
+  }
+
+  return students
+})
 
 
 
 </script>
+
+
+
+
+
+
+
+
+
 
 
 <template>
@@ -254,14 +284,27 @@ async function deleteVacations(){
 
 
     <div class="d-flex justify-content-center column-gap-3 mb-2">
-        <div class="form-group" tooltip="Select Class">
-          <select class="form-control cb-input" v-model="tab3_class_short" >
-            <option :value="null">-All Classes-</option>
-            <template v-for="(eachClass, index) in classes" :key="index">
-              <option :value="eachClass.class_short">{{ eachClass.class_name }}</option>
-            </template>                  
-          </select>
-        </div>
+      <select class="form-control cb-input" v-model="tab3_class_short" style="max-width: 400px;" >
+        <option :value="null">-All Classes-</option>
+        <template v-for="(eachClass, index) in classes" :key="index">
+          <option :value="eachClass.class_short">{{ eachClass.class_name }}</option>
+        </template>                  
+      </select>
+
+
+      <BaseSelectMultiple placeholder="Select Students" v-model="selectedStudents" :label="false" :data="filteredAllStudents" displayKey="full_name" valueKey="id" style="width: 400px" :search="true" :searchDelayTime="100" 
+        @searching="(search_text) => studentnameorid = search_text" >
+        <template #loopItem1="{item, index}">
+          <span class="badge text-dark bg-body-secondary ms-1">
+            {{ item.class_short }}
+          </span>
+        </template>
+        <template #loopItem="{item, index}">
+          <span class="badge text-dark bg-body-secondary">
+            {{ item.class_short }}
+          </span>
+        </template>
+      </BaseSelectMultiple> 
     </div>
     <FullCalendarEvents 
     :events="calendarEvents"
@@ -414,6 +457,13 @@ async function deleteVacations(){
     
   </div>
 </template>
+
+
+
+
+
+
+
 
 
 <style scoped>
