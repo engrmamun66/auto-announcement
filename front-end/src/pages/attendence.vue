@@ -222,14 +222,14 @@ onMounted(()=>{
       <div v-else-if="tab==3">
 
         <div class="d-flex justify-content-end column-gap-3">
-          <div class="form-group" tooltip="Sort By">
+          <!-- <div class="form-group" tooltip="Select Class">
             <select class="form-control cb-input" v-model="tab3_class_short" >
               <option :value="null">-All Classes-</option>
               <template v-for="(eachClass, index) in classes" :key="index">
                 <option :value="eachClass.class_short">{{ eachClass.class_name }}</option>
               </template>                  
             </select>
-          </div>
+          </div> -->
           <ul class="nav nav-tabs d2 mt-0 mb-3 bottom-borderless">
             <li class="nav-item">
               <a @click.stop="leaveAndWeekendSubTab = 1" class="nav-link cp text-black" :class="{'active': leaveAndWeekendSubTab==1}" >Class Wise</a>
@@ -248,17 +248,15 @@ onMounted(()=>{
 
     </div>
   
-     <transition>
-       <template v-if="tab == 1">
-           <RealtimeAttendences ></RealtimeAttendences>
-       </template>
-       <template v-else-if="tab == 2">
-           <AttendencesAll ></AttendencesAll>
-       </template>
-       <template v-else-if="tab == 3">
-           <WeekendAndHolidays ></WeekendAndHolidays>
-       </template>
-     </transition>
+    <template v-if="tab == 1">
+        <RealtimeAttendences ></RealtimeAttendences>
+    </template>
+    <template v-else-if="tab == 2">
+        <AttendencesAll ></AttendencesAll>
+    </template>
+    <template v-else-if="tab == 3">
+        <WeekendAndHolidays ></WeekendAndHolidays>
+    </template> 
   </div>
 
 

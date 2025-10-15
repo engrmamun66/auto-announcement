@@ -16,7 +16,7 @@ const liveAttendenceList = inject("liveAttendenceList");
 import myTable from '../../../components/myTable.vue'
 import Pagination from '../../../components/Pagination.vue'
 import BaseSelectMultiple from './../../../components/BaseSelectMultiple.vue'
-import FullCalendarClasswise from './../../../components/FullCalendarClasswise.vue'
+import FullCalendarEvents from './../../../components/FullCalendarEvents.vue'
 import EmDateTimePicker from './../../../components/EmDateTimePicker.vue'
 import Rightbar from './../../../components/Rightbar.vue'
 import Btn from './../../../components/Btn.vue'
@@ -49,7 +49,8 @@ let targetedVacationToDelete = ref(null)
 let showDeleteModal = ref(null)
 let showDetailsModal = ref(null)
 
-let tab3_class_short = inject('tab3_class_short')
+// let tab3_class_short = inject('tab3_class_short')
+let tab3_class_short = ref(null)
 
 watch(tab3_class_short, (classShort) => {
   onInitAndNextPrev(dateRange.value)
@@ -250,7 +251,19 @@ async function deleteVacations(){
 
 <template>
   <div>
-    <FullCalendarClasswise 
+
+
+    <div class="d-flex justify-content-center column-gap-3 mb-2">
+        <div class="form-group" tooltip="Select Class">
+          <select class="form-control cb-input" v-model="tab3_class_short" >
+            <option :value="null">-All Classes-</option>
+            <template v-for="(eachClass, index) in classes" :key="index">
+              <option :value="eachClass.class_short">{{ eachClass.class_name }}</option>
+            </template>                  
+          </select>
+        </div>
+    </div>
+    <FullCalendarEvents 
     :events="calendarEvents"
     :weekends="CONFIG.settings?.attendance?.weekends || []"
     @initAndNextPrev="onInitAndNextPrev" 
@@ -263,7 +276,7 @@ async function deleteVacations(){
       targetedVacationToDelete = vacations
       showDetailsModal = true
     }"
-    ></FullCalendarClasswise>
+    ></FullCalendarEvents>
 
     <Confirm v-model="showDeleteModal" @yes="deleteVacations">
       <div class="overflow-y-auto modal-table" style="max-height: 200px;">
