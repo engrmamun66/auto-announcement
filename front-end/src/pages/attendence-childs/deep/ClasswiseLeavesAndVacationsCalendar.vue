@@ -322,6 +322,7 @@ async function deleteVacations(){
               :minDate="null"
               :isDisabled="false"
               :startDate="pickerModelValue?.startDate"
+              :endDate="pickerModelValue?.endDate"
               :autoOpen="false"
               :use24FormatTimeForEvents="true"
               :invisible="false"
