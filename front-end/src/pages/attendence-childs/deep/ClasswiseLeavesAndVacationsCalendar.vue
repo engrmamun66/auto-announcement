@@ -300,7 +300,7 @@ async function deleteVacations(){
 
       <div class="d-flex justify-content-end column-gap-2">
         <Btn @click="showDetailsModal = false">Close</Btn>
-        <Btn @click="deleteVacations();showDetailsModal = false" class="red">Delete Now</Btn>
+        <Btn @click="deleteVacations();showDetailsModal = false" class="red">Delete</Btn>
       </div>
 
     </Modal>
