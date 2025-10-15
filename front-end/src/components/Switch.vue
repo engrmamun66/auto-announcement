@@ -127,6 +127,16 @@ let sw = computed(() => {
         ...props.attr
       }
       break;
+    case 'xlg':
+      return {
+        height: '36px',
+        width: '160px',
+        boxWidth: '60px',
+        boxHeight: '30px',
+        left: '96px',
+        ...props.attr
+      }
+      break;
     case 'sm':
       return {
         height: '26px',
@@ -226,8 +236,8 @@ let sw = computed(() => {
   content: attr(data-off);
   right: 12px;
   color: #252525;
-  text-shadow: 0 1px rgba(255, 255, 255, 0.2);
-  font-weight: 400;
+  text-shadow: 0 1px rgba(0, 0, 0, 0.125);
+  font-weight: 500;
   font-size: 12px;
 }
 
@@ -242,10 +252,10 @@ let sw = computed(() => {
 
 .switch-label:after {
   content: attr(data-on);
-  font-weight: 400;
+  font-weight: 500;
   left: 10px;
   /* color: #f7f7f7; */
-  text-shadow: 0 1px rgba(0, 0, 0, 0.2);
+  text-shadow: 0 1px rgba(0, 0, 0, 0.125);
   opacity: 0;
   font-size: 13px;
 }
