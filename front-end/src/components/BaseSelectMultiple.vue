@@ -459,7 +459,7 @@ let random_id = computed(() => ('random_' + H.randomBetween(333, 294444)))
 }
 .btn-options-toggler button {
     position: relative;
-    min-height: 38px;
+    min-height: 43px;
     height: auto;
     width: 100% !important;
     padding-right: 33px;

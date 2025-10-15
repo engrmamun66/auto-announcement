@@ -486,7 +486,7 @@ kbd {
 .cb-input:active,
 .cb-input:focus-visible {
   border: 1px solid #ffffff61;
-  height: 38px;
+  height: 43px;
   border-radius: 6px;
   padding: 2px 12px;
   background-color: #f0f0f0;
@@ -560,4 +560,8 @@ td a {
 
 .nav-tabs .nav-link {
   padding: 6px 10px !important;
+}
+
+.pointer-none {
+  pointer-events: none !important;
 }

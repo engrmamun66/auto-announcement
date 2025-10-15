@@ -37,7 +37,6 @@ const emit = defineEmits(['update:modelValue', 'onBtnSubmit', 'onBtnClear']);
 
 let log = console.log
 let showRightbar = ref(false) 
-let selectedClasses = ref([...classes.value])
 
 let RightbarRef = ref(null)
 let showTextArea = ref(false)
@@ -76,7 +75,6 @@ function onCancel(){
   payload.reason = ''
   payload.student_id = null
   payload.reason = 'Exam'
-  selectedClasses.value = [...classes.value]
   emit('onBtnClear')
   RightbarRef.value.unmount()
 }
@@ -88,26 +86,18 @@ async function onSubmit(){
     emitter.emit('toaster-error', {message: 'Please select date range'})
     return
   } 
-  if(!selectedClasses.value.length){ 
-    emitter.emit('toaster-error', {message: 'Please select classes'})
-    return
-  } 
+ 
   if(!payload.reason.length){ 
     emitter.emit('toaster-error', {message: 'Please select or write vacation reason'})
     return
   } 
   let start_date =  moment(pickerModelValue.value.startDate).format('YYYY-MM-DD')
   let end_date =  moment(pickerModelValue.value.endDate).format('YYYY-MM-DD')
-  let class_shorts = selectedClasses.value.map(c=>c.class_short)
   let reason = payload.reason
   let identity_string = payload.identity_string
 
 
-  let is_for_all_classes = class_shorts.length == classes.value.length
-  if(is_for_all_classes){
-    class_shorts = ['_all_']
-  }
-
+ 
   let student_ids = selectedStudents.value.map(s => (typeof s == 'object' ? s.dakhela : s))
   if(student_ids.length == 0){
     emitter.emit('toaster-error', {message: 'Please select students'})
@@ -250,7 +240,7 @@ async function deleteVacations(){
 let tab3_class_short = ref(null)
 
 watch(tab3_class_short, (classShort) => {
-  onInitAndNextPrev(dateRange.value)
+  selectedStudents.value = []
 })
 
 let studentnameorid = ref('')
@@ -297,15 +287,17 @@ let filteredAllStudents = computed(() => {
 
 
     <div class="d-flex justify-content-center column-gap-3 mb-2">
-      <select class="form-control cb-input" v-model="tab3_class_short" style="max-width: 400px;" >
-        <option :value="null">-All Classes-</option>
-        <template v-for="(eachClass, index) in classes" :key="index">
-          <option :value="eachClass.class_short">{{ eachClass.class_name }}</option>
-        </template>                  
-      </select>
+      <div class="form-group" tooltip="Select A Class">
+        <select class="form-control cb-input" v-model="tab3_class_short" style="min-width: 400px" >
+          <option :value="null">-All Classes-</option>
+          <template v-for="(eachClass, index) in classes" :key="index">
+            <option :value="eachClass.class_short">{{ eachClass.class_name }}</option>
+          </template>                  
+        </select>
+      </div>
 
 
-      <BaseSelectMultiple placeholder="Select Students" v-model="selectedStudents" :label="false" :data="filteredAllStudents" displayKey="full_name" valueKey="id" style="width: 400px" :search="true" :searchDelayTime="100" 
+      <BaseSelectMultiple placeholder="Select Students" v-model="selectedStudents" :label="false" :data="filteredAllStudents" displayKey="full_name" valueKey="id" style="width: 400px" :search="true" :searchDelayTime="100" :limit="1"
         @searching="(search_text) => studentnameorid = search_text" >
         <template #loopItem1="{item, index}">
           <span class="badge text-dark bg-body-secondary ms-1">
@@ -319,20 +311,24 @@ let filteredAllStudents = computed(() => {
         </template>
       </BaseSelectMultiple> 
     </div>
-    <FullCalendarEvents 
-    :events="calendarEvents"
-    :weekends="CONFIG.settings?.attendance?.weekends || []"
-    @initAndNextPrev="onInitAndNextPrev" 
-    @advacation="onAdVacation" 
-    @delete="(vacations)=>{
-      targetedVacationToDelete = vacations
-      showDeleteModal = true
-    }"
-    @viewDetails="(vacations)=>{
-      targetedVacationToDelete = vacations
-      showDetailsModal = true
-    }"
-    ></FullCalendarEvents>
+
+
+    <div :class="{'opacity-25 pointer-none': selectedStudents?.length == 0}">
+      <FullCalendarEvents 
+      :events="calendarEvents"
+      :weekends="CONFIG.settings?.attendance?.weekends || []"
+      @initAndNextPrev="onInitAndNextPrev" 
+      @advacation="onAdVacation" 
+      @delete="(vacations)=>{
+        targetedVacationToDelete = vacations
+        showDeleteModal = true
+      }"
+      @viewDetails="(vacations)=>{
+        targetedVacationToDelete = vacations
+        showDetailsModal = true
+      }"
+      ></FullCalendarEvents>
+    </div>
 
     <Confirm v-model="showDeleteModal" @yes="deleteVacations">
       <div class="overflow-y-auto modal-table" style="max-height: 200px;">

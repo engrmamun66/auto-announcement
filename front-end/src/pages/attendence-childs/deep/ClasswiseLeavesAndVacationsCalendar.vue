@@ -254,8 +254,8 @@ async function deleteVacations(){
 
 
     <div class="d-flex justify-content-center column-gap-3 mb-2">
-        <div class="form-group" tooltip="Select Class">
-          <select class="form-control cb-input" v-model="tab3_class_short" >
+        <div class="form-group" tooltip="Select A Class">
+          <select class="form-control cb-input" v-model="tab3_class_short" style="min-width: 400px;height:44px" >
             <option :value="null">-All Classes-</option>
             <template v-for="(eachClass, index) in classes" :key="index">
               <option :value="eachClass.class_short">{{ eachClass.class_name }}</option>
