@@ -366,14 +366,11 @@ function deleteSchedule(id, i, type=1){
                   <td>
                     <ul v-if="item.classes">
                       <template v-if="item.showClasses">
-                        <li> <a @click.stop.prevent="item.showClasses = false" href="#">Less...</a> </li>
-                        <!-- <li v-for="cls in item.classes">
-                          {{ cls.class_name }}
-                        </li> -->
+                        <li> <a @click.stop.prevent="item.showClasses = false" href="#" class="badge size-08 bg-secondary"><i class='bx bxs-hand-down' ></i> Less...</a> </li>
                       </template>
                       <template v-else>
                        <li> 
-                          <a @click.stop.prevent="item.showClasses = true" class="ms-1" href=""> More...</a>   
+                          <a @click.stop.prevent="item.showClasses = true" href="" class="badge bg-secondary size-08 ms-1"><i class='bx bxs-hand-up' ></i> More...</a>   
                         </li>
                        <li>  
                           <a > {{ item.classes.length == 16 ? 'All' :  item.classes.length }} Classes</a>  
@@ -401,7 +398,7 @@ function deleteSchedule(id, i, type=1){
                 <td :colspan="item?.classes?.length <=3 ? 1 : 3">
                   <div class="d-flex align-content-center gap-2 flex-wrap" :class="[item?.classes?.length <=3 ? 'justify-content-start' : 'justify-content-center']">
                     <template v-for="cls in item.classes">
-                      <div class="badge bg-body-secondary text-black p-1 px-2">
+                      <div class="badge bg-secondary text-white size-08 p-1 px-2 shadow" style="color: var(--primaryColor)">
                         {{ cls.class_name }}
                       </div>
                     </template>
