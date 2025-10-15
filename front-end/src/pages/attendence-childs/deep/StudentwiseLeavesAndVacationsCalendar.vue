@@ -247,6 +247,10 @@ let studentnameorid = ref('')
 let selectedStudents = ref(storage('studentwise_vacation_selected_students').value || [])
 watch(selectedStudents, (val) => {
   storage('studentwise_vacation_selected_students').value = val
+  onInitAndNextPrev(dateRange.value)
+  if(val?.length == 0){
+    showRightbar.value = false
+  }
 })
 
 let filteredAllStudents = computed(() => {
@@ -297,7 +301,7 @@ let filteredAllStudents = computed(() => {
       </div>
 
 
-      <BaseSelectMultiple placeholder="Select Students" v-model="selectedStudents" :label="false" :data="filteredAllStudents" displayKey="full_name" valueKey="id" style="width: 400px" :search="true" :searchDelayTime="100" :limit="1"
+      <BaseSelectMultiple placeholder="-Select a student to active calendar-" v-model="selectedStudents" :label="false" :data="filteredAllStudents" displayKey="full_name" valueKey="id" style="width: 400px" :search="true" :searchDelayTime="100" :limit="1"
         @searching="(search_text) => studentnameorid = search_text" >
         <template #loopItem1="{item, index}">
           <span class="badge text-dark bg-body-secondary ms-1">

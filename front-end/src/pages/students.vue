@@ -370,6 +370,11 @@ function onChange_dateTimePicker(data){
   punchToSubmitAttendance(makeCarcode(targetStudent.value), {source: 'manual_button', delay: 0, punch_time: data.startDateTime })
 }
 
+function onClickAttendance(std){
+  if(!confirm('Are you sure to submit attendance?')) return;
+  punchToSubmitAttendance(makeCarcode(std), {source: 'manual_button', delay: 0})
+}
+
 
 
 </script>
@@ -702,11 +707,11 @@ function onChange_dateTimePicker(data){
 
                     <div class="d-flex justify-content-start gap-1">
                       <button class="class-short-btn px-2 for-attendence" 
-                      @auxclick.stop="punchToSubmitAttendance(makeCarcode(std), {source: 'manual_button', delay: 0})"
-                      @click.stop="punchToSubmitAttendance(makeCarcode(std), {source: 'manual_button', delay: 4000})"
+                      @auxclick.stop="onClickAttendance(std)"
+                      @click.stop="onClickAttendance(std)"
                       >
                           <!-- For Students Attendence -->
-                          Attendence
+                          Attendance
                       </button>
                       <!-- For Students Attendence calendar-->
                       <button class="class-short-btn px-2 for-attendence" @click.stop="() => {
@@ -719,11 +724,10 @@ function onChange_dateTimePicker(data){
                       </button>
 
                     </div>
-                    <ul>
-                      <li v-for="shift in helper.getShifts(classes, std.class_short, false)">
-                        {{ Ahelper.printShift(shift) }}
-                      </li>
-                    </ul>
+                
+                      <small v-for="shift in helper.getShifts(classes, std.class_short, false)">
+                        {{ Ahelper.printShift(shift) }}<br>
+                      </small> 
                   </template> 
                 </template> 
                 <template v-else>

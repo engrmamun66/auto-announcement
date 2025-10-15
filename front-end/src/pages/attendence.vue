@@ -163,7 +163,7 @@ onMounted(()=>{
 <template>
 
   <div class="page-contents">
-    <div class="d-flex justify-content-between align-items-center">
+    <div class="d-flex justify-content-between align-items-start">
       <ul class="nav nav-tabs mt-0 mb-3 bottom-borderless">
          <li class="nav-item">
            <a @click.stop="tab = 1" @auxclick.stop="clearAllAndRelaod()" class="nav-link cp text-black" :class="{'active': tab==1}" ><i class='bx bx-time-five transformY-2px' ></i> Realtime&nbsp;Attendence</a>
