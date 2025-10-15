@@ -135,13 +135,13 @@ module.exports = {
      /* === Pick color from >> module.css ===*/
 
      /* === Black & White Theme */
-     --primaryColor: #222322;
+     --primaryColor: #323232;
      --secondaryColor: #3a3a3a;
      --borderColor: #d5fdd7;
-     --fontColor: #222322;
+     --fontColor: #323232;
      --grad1: linear-gradient(90deg, rgba(137, 137, 137, 0.636) 0%, #b3c6d2 100%);
      --grad2: linear-gradient(90deg, rgba(118, 118, 118, 0.348) 0%, rgba(246, 231, 255, 0.486) 100%);
-     --grad3: linear-gradient(90deg, #222322 0%, #3a3a3a 100%); 
+     --grad3: linear-gradient(90deg, #323232 0%, #3a3a3a 100%); 
      `,
     
      classes: [

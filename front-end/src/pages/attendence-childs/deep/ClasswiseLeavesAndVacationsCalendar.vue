@@ -36,6 +36,7 @@ const emit = defineEmits(['update:modelValue', 'onBtnSubmit', 'onBtnClear']);
 
 let log = console.log
 let showRightbar = ref(false)
+let isSelectedAllClasses = ref(1)
 let selectedClasses = ref([...classes.value])
 
 let RightbarRef = ref(null)
@@ -80,6 +81,7 @@ function onCancel(){
   payload.reason = ''
   payload.student_id = null
   payload.reason = 'Exam'
+  isSelectedAllClasses.value = 1
   selectedClasses.value = [...classes.value]
   emit('onBtnClear')
   RightbarRef.value.unmount()
@@ -337,8 +339,15 @@ async function deleteVacations(){
 
         
         <div class="col-12 mb-3">
-          <BaseSelectMultiple placeholder="Select Classes" v-model="selectedClasses" :label="'Select Classes (By default selected all)'" :data="classes" displayKey="class_name" valueKey="class_short" style="width: 100%" >
-          </BaseSelectMultiple> 
+          
+          <div class="d-flex justify-content-between align-items-center" style="line-height: 40px;">
+            <label for="" class="form-check-label">Vacation Applying For (By default selected all)</label>
+          </div>
+          <Switch v-model="isSelectedAllClasses" size="xlg" yes="All Classes" no="Select Classes"></Switch>
+          <template v-if="!isSelectedAllClasses"> 
+            <BaseSelectMultiple placeholder="Select Classes" class="mt-2" v-model="selectedClasses" :label="false" :data="classes" displayKey="class_name" valueKey="class_short" style="width: 100%" >
+            </BaseSelectMultiple> 
+          </template>
         </div>
         
         <div class="col-12 mb-3">
@@ -349,7 +358,7 @@ async function deleteVacations(){
             <div class="row">
               <template v-for="vacationType in vacation_types" :key="value">
                 <div class="col-md-6">
-                  <div class="form-check">
+                  <div class="form-check cp" :class="{checked: payload.reason == vacationType.title}" @click="showTextArea = false;payload.reason = vacationType.title">
                     <input v-model="payload.reason" class="form-check-input" :id="remvoeSpaces(vacationType.title)" type="radio" name="vacation_type" :value="vacationType.title" @click="showTextArea = false">
                     <label class="form-check-label" :for="remvoeSpaces(vacationType.title)">
                       {{ vacationType.title }}
@@ -360,8 +369,8 @@ async function deleteVacations(){
               </template>
 
               <div class="col-md-6">
-                <div class="form-check">
-                  <input v-model="payload.reason" @click="showTextArea = true" class="form-check-input" id="other" type="radio" name="vacation_type" :value="''">
+                <div class="form-check" @click="showTextArea = true;payload.reason = ''">
+                  <input @click="showTextArea = true; payload.reason = ''" class="form-check-input" type="radio" name="vacation_type" :value="''" :checked="!vacation_types.map(vt=>vt.title).includes(payload.reason)" >
                   <label class="form-check-label" for="other">
                     Other Vacation
                   </label>
@@ -489,9 +498,19 @@ li{
   color: var(--primaryColor)
 }
 .vacationtypes{
-  border: 1px solid #ffffff;
+  border: 1px solid #bdbdbd;
   border-radius: 6px;
   padding: 10px;
+}
+.vacationtypes .form-check{ 
+  border: 1px solid #dcdcdc;
+  background-color: #eeeeee;
+  padding: 2px 5px 5px 30px;
+  border-radius: 5px;
+  margin-bottom: 3px;
+}
+.vacationtypes .form-check.checked{ 
+  border: 1px solid #1a8778;
 }
 .modal-table{
   max-height: 200px;

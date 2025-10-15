@@ -130,10 +130,10 @@ let sw = computed(() => {
     case 'xlg':
       return {
         height: '36px',
-        width: '160px',
+        width: '166px',
         boxWidth: '60px',
         boxHeight: '30px',
-        left: '96px',
+        left: '102px',
         ...props.attr
       }
       break;
@@ -210,7 +210,7 @@ let sw = computed(() => {
   font-size: 10px;
   /* text-transform: uppercase; */
   background: #0c0c0c;
-  background: var(--grad1);
+  background: white;
   border-radius: inherit;
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.12), inset 0 0 2px rgba(0, 0, 0, 0.15);
   -webkit-transition: 0.15s ease-out;
