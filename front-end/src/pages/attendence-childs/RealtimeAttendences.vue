@@ -56,7 +56,7 @@
                         <span class="badge text-dark bg-body-secondary">
                           {{ Ahelper.printDate(item) }}
                         </span>
-                        <span class="badge cp" @click.stop="deleteAttedence(item)" style="background-color: white !important;color: var(--primaryColor) !important;">
+                        <span class="badge cp" @click.stop="deleteAttedence(item)">
                             <i class='bx bxs-trash' ></i>
                         </span>
                       </div>
