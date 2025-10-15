@@ -52,9 +52,14 @@
 
                   <div v-if="item?.remarks" class="remarks small d-flex justify-content-between align-items-center"> 
                       <span>“{{ item.remarks }}”</span>
-                      <span class="badge text-dark bg-body-secondary">
+                      <div class="d-flex justify-content-end column-gap-1">
+                        <span class="badge text-dark bg-body-secondary">
                           {{ Ahelper.printDate(item) }}
-                      </span>
+                        </span>
+                        <span class="badge cp" @click.stop="deleteAttedence(item)" style="background-color: white !important;color: var(--primaryColor) !important;">
+                            <i class='bx bxs-trash' ></i>
+                        </span>
+                      </div>
                     </div>
                 </div>
               </div>
