@@ -9,6 +9,7 @@ const all_students = inject("all_students");
 const helper = inject("helper");
 const callbacks = inject("callbacks");
 const http = inject("http");
+const storage = inject("storage");
 const emitter = inject("emitter");
 const attendenceList = inject("attendenceList");
 const attendenceParams = inject("attendenceParams");
@@ -35,8 +36,7 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'onBtnSubmit', 'onBtnClear']);
 
 let log = console.log
-let showRightbar = ref(false)
-let isSelectedAllClasses = ref(1)
+let showRightbar = ref(false) 
 let selectedClasses = ref([...classes.value])
 
 let RightbarRef = ref(null)
@@ -50,7 +50,7 @@ let showDeleteModal = ref(null)
 let showDetailsModal = ref(null)
 
  
-let vacation_types = CONFIG.value?.settings?.attendance?.vacation_types || []
+let stuents_leave_types = CONFIG.value?.settings?.attendance?.stuents_leave_types || []
 
 function remvoeSpaces(str){
   return str ? str.replace(/\s+/g, '') : str
@@ -76,7 +76,6 @@ function onCancel(){
   payload.reason = ''
   payload.student_id = null
   payload.reason = 'Exam'
-  isSelectedAllClasses.value = 1
   selectedClasses.value = [...classes.value]
   emit('onBtnClear')
   RightbarRef.value.unmount()
@@ -109,20 +108,31 @@ async function onSubmit(){
     class_shorts = ['_all_']
   }
 
+  let student_ids = selectedStudents.value.map(s => (typeof s == 'object' ? s.dakhela : s))
+  if(student_ids.length == 0){
+    emitter.emit('toaster-error', {message: 'Please select students'})
+    return
+  }
+
   let records = []
-  class_shorts.forEach(class_short => {
-    let dates = helper.createDateRange(start_date, end_date)
-    dates.forEach(date => {
-      records.push({
-        type: 'vacation',
-        identity_string,
-        class_short,
-        student_id: null,
-        date,
-        reason
-      })
+
+  let dates = helper.createDateRange(start_date, end_date)
+  dates.forEach(date => {
+    records.push({
+      type: 'leave',
+      identity_string,
+      class_short: null,
+      student_id: student_ids[0],
+      date,
+      reason 
     })
   })
+
+
+
+  console.log({records});
+  return
+   
 
   http.post('/leave-and-vacation-add-bulk', { records }).then(response => {
     if(response.status == 200){
@@ -141,7 +151,7 @@ async function onSubmit(){
 
 
 async function onInitAndNextPrev({start_date, end_date}){
-  queryParams = { start_date, end_date }
+  queryParams = { type: 'leave', start_date, end_date }
   dateRange.value = { start_date, end_date }
   let vacation_data = await callbacks.getLeavesAndVacations(queryParams)
   vacationData.value = vacation_data
@@ -181,7 +191,7 @@ async function createAndDisplayEventList(){
 
       let first_item = vacations[0]
       let last_item = vacations[vacations.length - 1]
-      let backgroundColor = vacation_types.find(vt => {
+      let backgroundColor = stuents_leave_types.find(vt => {
         return vt.title == reason
       })?.bgcolor || 'tomato'
 
@@ -244,7 +254,10 @@ watch(tab3_class_short, (classShort) => {
 })
 
 let studentnameorid = ref('')
-let selectedStudents = ref([])
+let selectedStudents = ref(storage('studentwise_vacation_selected_students').value || [])
+watch(selectedStudents, (val) => {
+  storage('studentwise_vacation_selected_students').value = val
+})
 
 let filteredAllStudents = computed(() => {
   let selected_class_shorts = [tab3_class_short.value].filter(Boolean)
@@ -361,7 +374,7 @@ let filteredAllStudents = computed(() => {
 
     </Modal>
     
-    <Rightbar ref="RightbarRef" v-if="showRightbar" @unmount="showRightbar = false;initiallyClear=true" title="Add Class Wise Vacation" :largestMode="false"> 
+    <Rightbar ref="RightbarRef" v-if="showRightbar" @unmount="showRightbar = false;initiallyClear=true" title="Add Student Wise Vacation" :largestMode="false"> 
       <div class="row">
 
         <div class="col-12 mb-3">
@@ -392,20 +405,7 @@ let filteredAllStudents = computed(() => {
          </div>
         </div>
 
-
-
-        
-        <div class="col-12 mb-3">
-          
-          <div class="d-flex justify-content-between align-items-center" style="line-height: 40px;">
-            <label for="" class="form-check-label">Vacation Applying For (By default selected all)</label>
-          </div>
-          <Switch v-model="isSelectedAllClasses" size="xlg" yes="All Classes" no="Select Classes"></Switch>
-          <template v-if="!isSelectedAllClasses"> 
-            <BaseSelectMultiple placeholder="Select Classes" class="mt-2" v-model="selectedClasses" :label="false" :data="classes" displayKey="class_name" valueKey="class_short" style="width: 100%" >
-            </BaseSelectMultiple> 
-          </template>
-        </div>
+       
         
         <div class="col-12 mb-3">
           <label class="form-check-label" >
@@ -413,7 +413,7 @@ let filteredAllStudents = computed(() => {
           </label>
           <div class="vacationtypes">
             <div class="row">
-              <template v-for="vacationType in vacation_types" :key="value">
+              <template v-for="vacationType in stuents_leave_types" :key="value">
                 <div class="col-md-6">
                   <div class="form-check cp" :class="{checked: payload.reason == vacationType.title}" @click="showTextArea = false;payload.reason = vacationType.title">
                     <input v-model="payload.reason" class="form-check-input" :id="remvoeSpaces(vacationType.title)" type="radio" name="vacation_type" :value="vacationType.title" @click="showTextArea = false">
@@ -427,7 +427,7 @@ let filteredAllStudents = computed(() => {
 
               <div class="col-md-6">
                 <div class="form-check" @click="showTextArea = true;payload.reason = ''">
-                  <input @click="showTextArea = true; payload.reason = ''" class="form-check-input" type="radio" name="vacation_type" :value="''" :checked="!vacation_types.map(vt=>vt.title).includes(payload.reason)" >
+                  <input @click="showTextArea = true; payload.reason = ''" class="form-check-input" type="radio" name="vacation_type" :value="''" :checked="!stuents_leave_types.map(vt=>vt.title).includes(payload.reason)" >
                   <label class="form-check-label" for="other">
                     Other Vacation
                   </label>

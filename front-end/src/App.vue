@@ -504,6 +504,11 @@ const callbacks = {
 
             let params = { type, start_date, end_date, student_id }
 
+            if(!type){
+                emitter.emit('toaster-error', { message: 'Type is required' })
+                return 
+            }
+
             let response = await http.get('/leave-and-vacation-list', { params }) 
             if(response.status == 200){
                 let all_data = response.data?.data

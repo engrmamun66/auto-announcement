@@ -136,7 +136,10 @@ function getAttendeceList({ page_no = null, reset = false, other_params = {} } =
 // ============= For Weekends And Vacations ============= //
 // ====================================================== //
 
-let leaveAndWeekendSubTab = ref(1) 
+let leaveAndWeekendSubTab = ref(storage('attendance_leave_and_weekend_sub_tab').value || 1) 
+watch(leaveAndWeekendSubTab, (index) => {
+  storage('attendance_leave_and_weekend_sub_tab').value = index
+})
 
 provide('leaveAndWeekendSubTab', leaveAndWeekendSubTab) 
  
