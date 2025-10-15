@@ -350,7 +350,7 @@ function deleteSchedule(id, i, type=1){
                 <th>Title</th>
                 <th>Stat Time</th>
                 <th>End Time</th>
-                <th>Classes</th>
+                <th class="text-center">Classes</th>
                 <th>Action</th> 
               </tr>
             </thead>
@@ -363,20 +363,22 @@ function deleteSchedule(id, i, type=1){
                   <td> {{ item.title }} </td> 
                   <td> {{ helper.formatTime(item.start_time) }} </td>                   
                   <td> {{ helper.formatTime(item.end_time) }} </td>                   
-                  <td>
-                    <ul v-if="item.classes">
-                      <template v-if="item.showClasses">
-                        <li> <a @click.stop.prevent="item.showClasses = false" href="#" class="badge size-08 bg-secondary"><i class='bx bxs-hand-down' ></i> Less...</a> </li>
-                      </template>
-                      <template v-else>
-                       <li> 
-                          <a @click.stop.prevent="item.showClasses = true" href="" class="badge bg-secondary size-08 ms-1"><i class='bx bxs-hand-up' ></i> More...</a>   
-                        </li>
-                       <li>  
-                          <a > {{ item.classes.length == 16 ? 'All' :  item.classes.length }} Classes</a>  
-                        </li>
-                      </template>
-                    </ul>
+                  <td style="max-width: 500px;">
+                    <div class="d-flex justify-content-center">
+                      <ul v-if="item.classes">
+                        <template v-if="item.showClasses">
+                          <li> <a @click.stop.prevent="item.showClasses = false" href="#" class="badge bg-secondary size-08"><i class='bx bxs-hand-down' ></i> Less...</a> </li>
+                        </template>
+                        <template v-else>
+                         <li> 
+                            <a @click.stop.prevent="item.showClasses = true" href="" class="badge bg-secondary size-08 ms-1"><i class='bx bxs-hand-up' ></i> More...</a>   
+                          </li>
+                         <li>  
+                            <a > {{ item.classes.length == 16 ? 'All' :  item.classes.length }} Classes</a>  
+                          </li>
+                        </template>
+                      </ul>
+                    </div>
                   </td>                   
             
                   <td class="text-center"> 
@@ -394,14 +396,16 @@ function deleteSchedule(id, i, type=1){
                   </td> 
               </tr> 
               <tr v-if="item.showClasses">
-                <td :colspan="item?.classes?.length <=3 ? 3 : 1"></td>
-                <td :colspan="item?.classes?.length <=3 ? 1 : 3">
-                  <div class="d-flex align-content-center gap-2 flex-wrap" :class="[item?.classes?.length <=3 ? 'justify-content-start' : 'justify-content-center']">
-                    <template v-for="cls in item.classes">
-                      <div class="badge bg-secondary text-white size-08 p-1 px-2 shadow" style="color: var(--primaryColor)">
-                        {{ cls.class_name }}
-                      </div>
-                    </template>
+                <td :colspan="3"></td>
+                <td :colspan="1" style="max-width: 500px;">
+                  <div class="p-2 border bg-white shadow radius-10">
+                    <div class="d-flex justify-content-center align-content-center gap-2 flex-wrap" :class="[item?.classes?.length <=3 ? 'justify-content-start' : 'justify-content-center']">
+                      <template v-for="cls in item.classes">
+                        <div class="badge bg-secondary text-white size-08 p-1 px-2 shadow" style="color: var(--primaryColor)">
+                          {{ cls.class_name }}
+                        </div>
+                      </template>
+                  </div>
                   </div>
                 </td>  
                 <td></td>
