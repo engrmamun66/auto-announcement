@@ -117,11 +117,6 @@ async function onSubmit(){
       reason 
     })
   })
-
-
-
-  console.log({records});
-  return
    
 
   http.post('/leave-and-vacation-add-bulk', { records }).then(response => {
@@ -130,7 +125,7 @@ async function onSubmit(){
     }
   }).finally(()=>{
     onCancel()
-    callbacks.getLeavesAndVacations()
+    callbacks.getLeavesAndVacations('leave', dateRange.value)
     onInitAndNextPrev(dateRange.value)
   })
 
@@ -143,7 +138,7 @@ async function onSubmit(){
 async function onInitAndNextPrev({start_date, end_date}){
   queryParams = { type: 'leave', start_date, end_date }
   dateRange.value = { start_date, end_date }
-  let vacation_data = await callbacks.getLeavesAndVacations(queryParams)
+  let vacation_data = await callbacks.getLeavesAndVacations('leave', queryParams)
   vacationData.value = vacation_data
   createAndDisplayEventList()
 }
@@ -245,6 +240,7 @@ watch(tab3_class_short, (classShort) => {
 
 let studentnameorid = ref('')
 let selectedStudents = ref(storage('studentwise_vacation_selected_students').value || [])
+let getStudent = computed(()=>selectedStudents.value?.length ? (typeof selectedStudents.value[0] == 'object' ? selectedStudents.value[0] : all_students.value.find(s => s.dakhela == selectedStudents.value[0])) : null)
 watch(selectedStudents, (val) => {
   storage('studentwise_vacation_selected_students').value = val
   onInitAndNextPrev(dateRange.value)
@@ -374,9 +370,11 @@ let filteredAllStudents = computed(() => {
 
     </Modal>
     
-    <Rightbar ref="RightbarRef" v-if="showRightbar" @unmount="showRightbar = false;initiallyClear=true" title="Add Student Wise Vacation" :largestMode="false"> 
+    <Rightbar ref="RightbarRef" v-if="showRightbar" 
+      :title="`Add Vacation For, ${getStudent?.name} [${getStudent?.dakhela}]`" @unmount="showRightbar = false;initiallyClear=true" :largestMode="false"> 
+     
+      
       <div class="row">
-
         <div class="col-12 mb-3">
           <label for="">Select Date Range</label>
           <div class="position-relative">

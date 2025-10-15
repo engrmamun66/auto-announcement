@@ -136,7 +136,7 @@ async function onSubmit(){
     }
   }).finally(()=>{
     onCancel()
-    callbacks.getLeavesAndVacations()
+    callbacks.getLeavesAndVacations('vacation', dateRange.value),
     onInitAndNextPrev(dateRange.value)
   })
 
@@ -149,7 +149,7 @@ async function onSubmit(){
 async function onInitAndNextPrev({start_date, end_date}){
   queryParams = { start_date, end_date }
   dateRange.value = { start_date, end_date }
-  let vacation_data = await callbacks.getLeavesAndVacations(queryParams)
+  let vacation_data = await callbacks.getLeavesAndVacations('vacation', queryParams)
   vacationData.value = vacation_data
   createAndDisplayEventList()
 }
