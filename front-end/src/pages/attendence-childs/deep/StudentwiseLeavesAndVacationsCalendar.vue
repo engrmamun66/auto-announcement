@@ -175,7 +175,6 @@ let totalEventsCount = computed(() => {
   let not_weekends = calculatedVacations.value.filter(v => v.title !== 'Weekend') 
   let vacations = not_weekends.map(item => item.vacations || []).flat().map(v => v.date)
   let weekends_and_vacations = helper.uniqueArray([...weekends, ...vacations]) 
-  // let weekends_and_vacations = helper.uniqueArray([...vacations]) 
   return weekends_and_vacations
 })
 
