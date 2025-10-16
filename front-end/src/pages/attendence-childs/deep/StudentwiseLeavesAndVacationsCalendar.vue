@@ -131,6 +131,7 @@ async function onSubmit(){
     }
   }).finally(()=>{
     onCancel()
+    leave_filter_type.value = 1; 
     onInitAndNextPrev(dateRange.value)
   })
 
@@ -420,7 +421,10 @@ let filteredAllStudents = computed(() => {
     </Modal>
     
     <Rightbar ref="RightbarRef" v-if="showRightbar" 
-      :title="`Add Vacation For, ${getStudent?.name} [${getStudent?.dakhela}]`" @unmount="showRightbar = false;initiallyClear=true" :largestMode="false"> 
+      :title="`Add Vacation For, ${getStudent?.name} [${getStudent?.dakhela}]`" @unmount="()=>{
+        showRightbar = false;
+        initiallyClear=true;
+      }" :largestMode="false"> 
      
       
       <div class="row">
