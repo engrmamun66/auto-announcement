@@ -50,10 +50,13 @@ let showDetailsModal = ref(null)
 
 
 let tab3_class_short = ref(null)
-let leave_filter_type = ref(1)
+let leave_filter_type = ref(storage('studentwise_vacation_filter_type').value || 1) // 1=Person Leaves, 2=Institute Leaves, 3=All Leaves
 
 watch(tab3_class_short, (classShort) => {
   selectedStudents.value = []
+}) 
+watch(leave_filter_type, (lft) => {
+  storage('studentwise_vacation_filter_type').value = lft
 }) 
 
  
@@ -70,14 +73,14 @@ let payload = reactive({
   class_short: null,
   student_id: null,
   date: null,
-  reason: 'Exam',
+  reason: stuents_leave_types[0]?.title || ''
 })
 
 
 function onCancel(){
   payload.reason = ''
   payload.student_id = null
-  payload.reason = 'Exam'
+  payload.reason = stuents_leave_types[0]?.title || ''
   emit('onBtnClear')
   RightbarRef.value.unmount()
 }
@@ -152,14 +155,14 @@ async function onInitAndNextPrev({start_date, end_date}){
     queryParams.class_short = class_short
   } else {
     // All Leaves
-    queryParams.type = ''
+    queryParams.type = null
     queryParams.student_id = student_id
     queryParams.class_short = class_short
   }
 
 
   dateRange.value = { start_date, end_date }
-  let vacation_data = await callbacks.getLeavesAndVacations('leave', queryParams)
+  let vacation_data = await callbacks.getLeavesAndVacations(queryParams)
   vacationData.value = vacation_data
   createAndDisplayEventList()
 }

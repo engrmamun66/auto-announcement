@@ -499,9 +499,9 @@ const callbacks = {
         let maximum_live_attedence = CONFIG.value?.settings?.attendance?.maximum_live_attedence || 50
         liveAttendenceList.value = live_attences.slice(-(maximum_live_attedence))
     },
-    async getLeavesAndVacations(type=null, params={}){
+    async getLeavesAndVacations(params={}){
         try { 
-            let response = await http.get('/leave-and-vacation-list', { params: {type, ...params} }) 
+            let response = await http.get('/leave-and-vacation-list', { params }) 
             if(response.status == 200){
                 let all_data = response.data?.data
                 return all_data

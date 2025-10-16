@@ -136,9 +136,9 @@ export default {
     renderEventContent: function(arg) {
       let tooltip = arg.event.extendedProps.tooltip
       let htmlArray = []
-      htmlArray.push('<div class="cal-day-event-item" >')
+      htmlArray.push(`<div class="cal-day-event-item" >`)
       htmlArray.push(`<span class="event-transh-icon" deleteicon><i class='bx bxs-trash' deleteicon></i></span>`)
-      htmlArray.push(`<span class="textcontent" tooltip="${tooltip || ''}">${arg.event.title}</span>  `)
+      htmlArray.push(`<span class="textcontent" tooltip="${tooltip || ''}" flow="top">${arg.event.title}</span>  `)
       htmlArray.push('</div>')
       return { html: htmlArray.join('') }
     },

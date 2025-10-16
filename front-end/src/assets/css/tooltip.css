@@ -9,11 +9,24 @@ variable:
 */
 :root{
     --tbg : #ffffff;
-    --tcolor: #000000;
-    --tmaxW: 21em;
+    --tcolor: #000000; 
     --tfsize: 0.8em;
+    --tminW: 3em;
+    --tmaxW: 21em;
+    --ttpading: 1ch 1.5ch;
 }
 
+/**
+Example
+=======
+<button tooltip="Settings">TEST</button>
+<button tooltip="Settings" flow="top">TEST</button>
+<button tooltip="Settings" flow="bottom">TEST</button>
+<button tooltip="Settings" flow="left">TEST</button>
+<button tooltip="Settings" flow="right">TEST</button>
+<button tooltip="Settings" flow="top-left">TEST</button>
+<button tooltip="Settings" flow="top-right">TEST</button>
+**/
 
 [tooltip] {
     position: relative;
@@ -57,18 +70,21 @@ variable:
     Let the content set the size of the tooltips 
     but this will also keep them from being obnoxious
     */
-    min-width: 3em;
+    min-width: var(--tminW, 3em);
     max-width: var(--tmaxW, 21em);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    padding: 1ch 1.5ch;
+    padding: var(--ttpading, 1ch 1.5ch);
     border-radius: .3ch;
     box-shadow: 0 1em 2em -.5em rgba(0, 0, 0, 0.35);
     background: var(--tbg, rgb(0, 0, 0));
     color: var(--tcolor, rgb(165, 165, 165));
     z-index: 1000;
     /* absurdity 2 */
+}
+[tooltip][wrape]::after{
+    white-space: normal;
 }
 
 /* Make the tooltips respond to hover */
@@ -151,6 +167,35 @@ variable:
     transform: translate(.5em, -50%);
 }
 
+/* FLOW: Leftup */
+[tooltip][flow^="top-left"]::before {
+    transform: translate(-50%);
+    left: 50%;
+    bottom: 100%;
+    border-bottom-width: 0;
+    border-top-color: var(--tbg, rgb(0, 0, 0));
+}
+
+[tooltip][flow^="top-left"]::after {
+    left: 0%;
+    transform: translate(0%) !important;
+    bottom: calc(100% + 5px);
+}
+/* FLOW: Righttup */
+[tooltip][flow^="top-right"]::before {
+    transform: translate(-100%) !important;
+    right: 0%;
+    bottom: 100%;
+    border-bottom-width: 0;
+    border-top-color: var(--tbg, rgb(0, 0, 0));
+}
+
+[tooltip][flow^="top-right"]::after {
+    right: 0%;
+    transform: translate(0%) !important;
+    bottom: calc(100% + 5px);
+}
+
 /* KEYFRAMES */
 @keyframes tooltips-vert {
     to {
@@ -171,6 +216,10 @@ variable:
 [tooltip]:not([flow]):hover::after,
 [tooltip][flow^="up"]:hover::before,
 [tooltip][flow^="up"]:hover::after,
+[tooltip][flow^="top-right"]:hover::after,
+[tooltip][flow^="top-right"]:hover::before,
+[tooltip][flow^="top-left"]:hover::after,
+[tooltip][flow^="top-left"]:hover::before,
 [tooltip][flow^="down"]:hover::before,
 [tooltip][flow^="down"]:hover::after {
     animation: tooltips-vert 300ms ease-out forwards;
