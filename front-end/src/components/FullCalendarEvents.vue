@@ -29,6 +29,10 @@ export default {
       type: Array,
       default: () => [],
     },
+    targetStudent: {
+      type: [Object, null],
+      default: () => null,
+    },
   },
   data() {
     return {

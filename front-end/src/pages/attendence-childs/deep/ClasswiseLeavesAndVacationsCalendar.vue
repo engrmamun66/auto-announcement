@@ -62,12 +62,6 @@ function remvoeSpaces(str){
   return str ? str.replace(/\s+/g, '') : str
 }
 
-
-let queryParams = {
-  // start
-}
-
-
 let payload = reactive({
   type: 'leave', // leave | vacation
   identity_string: Ahelper.generateUniqueString(),
@@ -147,7 +141,7 @@ async function onSubmit(){
 
 
 async function onInitAndNextPrev({start_date, end_date}){
-  queryParams = { start_date, end_date }
+  let queryParams = { start_date, end_date }
   dateRange.value = { start_date, end_date }
   let vacation_data = await callbacks.getLeavesAndVacations('vacation', queryParams)
   vacationData.value = vacation_data

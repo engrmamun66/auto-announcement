@@ -117,7 +117,6 @@ module.exports = {
                     { title: 'Casual Leave', bgcolor: '#4e73df' },   
                     { title: 'Annual Leave', bgcolor: '#0b8e1a' },   
                     { title: 'Bereavement Leave', bgcolor: '#6c757d' },              
-                    { title: 'Other', bgcolor: '#343a40' },  
                ],
                
           },

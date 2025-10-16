@@ -89,7 +89,7 @@ class LeaveAndVacations {
     for (const r of records) {
       values.push(
         r.type || "leave",
-        r.class_short || "ALL",
+        r.class_short,
         r.student_id || null,
         r.date,
         r.reason || null,

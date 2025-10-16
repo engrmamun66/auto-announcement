@@ -275,7 +275,7 @@ const helper = {
         __isWeekend: true,
       })
     },
-    createVacationEvent(start_date, end_date, vacations, reason, {backgroundColor='#e74a3b', class__short=null}={}){
+    createVacationEvent(start_date, end_date, vacations, reason, {backgroundColor='#e74a3b', class__short=null, student=null}={}){
       let class_shorts = vacations.map(v => v.class_short) 
       let unique_class_shorts = helper.uniqueArray(class_shorts)
       let event = {
@@ -295,6 +295,10 @@ const helper = {
       if(class__short){
         event.title = reason + ` - ${class__short}`
         event.tooltip = reason + ` For (${class__short})`
+      }
+      if(student?.name){
+        event.title = reason
+        event.tooltip = reason + ` For (${student?.name})`
       }
       return event
        

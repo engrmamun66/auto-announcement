@@ -499,21 +499,9 @@ const callbacks = {
         let maximum_live_attedence = CONFIG.value?.settings?.attendance?.maximum_live_attedence || 50
         liveAttendenceList.value = live_attences.slice(-(maximum_live_attedence))
     },
-    async getLeavesAndVacations(type=null, {start_date='', end_date='', student_id=null}={}){
+    async getLeavesAndVacations(type=null, params={}){
         try { 
-
-            let params = { type, start_date, end_date, student_id }
-
-            if(!type){
-                emitter.emit('toaster-error', { message: 'Type is required' })
-                return 
-            }
-            if(!start_date || !end_date){
-                emitter.emit('toaster-error', { message: 'start_date and end_date is required' })
-                return 
-            }
-
-            let response = await http.get('/leave-and-vacation-list', { params }) 
+            let response = await http.get('/leave-and-vacation-list', { params: {type, ...params} }) 
             if(response.status == 200){
                 let all_data = response.data?.data
                 return all_data

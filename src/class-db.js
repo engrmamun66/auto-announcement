@@ -125,7 +125,7 @@ class myDB {
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 identity_string TEXT DEFAULT NULL, -- unique identity string for each record, it will help to update bulk records
                 type TEXT NOT NULL,                -- e.g., 'leave', 'vacation'
-                class_short TEXT DEFAULT NULL,    -- class_short or 'ALL'
+                class_short TEXT DEFAULT NULL,    -- class_short or '_all_'
                 student_id INTEGER DEFAULT NULL,   -- refers to student_id/dakhela
                 date DATE NOT NULL,
                 reason TEXT DEFAULT NULL,

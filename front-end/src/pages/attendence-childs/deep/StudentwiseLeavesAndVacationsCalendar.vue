@@ -125,7 +125,6 @@ async function onSubmit(){
     }
   }).finally(()=>{
     onCancel()
-    callbacks.getLeavesAndVacations('leave', dateRange.value)
     onInitAndNextPrev(dateRange.value)
   })
 
@@ -180,7 +179,7 @@ async function createAndDisplayEventList(){
         return vt.title == reason
       })?.bgcolor || 'tomato'
 
-      let vaction_slot = helper.createVacationEvent(first_item.date, last_item.date, vacations, first_item.reason, { backgroundColor, class__short })
+      let vaction_slot = helper.createVacationEvent(first_item.date, last_item.date, vacations, first_item.reason, { backgroundColor, class__short, student: getStudent.value })
       vacation_events.push(vaction_slot)
     })
   }) 
@@ -317,6 +316,7 @@ let filteredAllStudents = computed(() => {
       <FullCalendarEvents 
       :events="calendarEvents"
       :weekends="CONFIG.settings?.attendance?.weekends || []"
+      :targetStudent="getStudent"
       @initAndNextPrev="onInitAndNextPrev" 
       @advacation="onAdVacation" 
       @delete="(vacations)=>{
