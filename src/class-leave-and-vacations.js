@@ -15,11 +15,10 @@ class LeaveAndVacations {
   }
 
   async list(req, res) {
-    const { type, start_date, end_date, date, class_short, student_id } = req.query;
+    const { type, start_date, end_date, date, class_short, student_id, vacation_and_leave_of_student } = req.query;
   
     let query = `SELECT * FROM leave_and_vacation WHERE 1=1`;
     const queryParams = [];
-
     if(type) {
       query += ` AND type = ?`;
       queryParams.push(type);
@@ -33,15 +32,23 @@ class LeaveAndVacations {
       queryParams.push(date);
     }
   
+    if(vacation_and_leave_of_student && student_id && class_short) {
+      query += ` AND (student_id = ? OR (class_short = ? OR class_short = '_all_'))`;
+      queryParams.push(student_id, class_short);
+    } else {
     if (class_short) {
       query += ` AND (class_short = ? OR class_short = '_all_')`;
-      queryParams.push(class_short);
+        queryParams.push(class_short);
+      }
+    
+      if (student_id) {
+        query += ` AND student_id = ?`;
+        queryParams.push(student_id);
+      }
     }
-  
-    if (student_id) {
-      query += ` AND student_id = ?`;
-      queryParams.push(student_id);
-    }
+
+    console.log({start_date, end_date, date, class_short, student_id});
+    console.log({query, queryParams});
   
     this.db.all(query, queryParams, (err, rows) => {
       if (err) {

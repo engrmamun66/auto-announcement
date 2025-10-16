@@ -158,6 +158,7 @@ async function onInitAndNextPrev({start_date, end_date}){
     queryParams.type = null
     queryParams.student_id = student_id
     queryParams.class_short = class_short
+    queryParams.vacation_and_leave_of_student = true
   }
 
 
