@@ -354,7 +354,7 @@ let filteredAllStudents = computed(() => {
                 <td class="size-09"><span class="badge bg-secondary">{{ item?.reason }}</span></td>
                 <td class="size-09">{{ item?.date }}</td>
                 <td class="size-09">{{ item?.class_short == '_all_' ? 'All Class' : item?.class_short }}</td>
-                <td class="size-09"><span class="badge bg-secondary">{{ item?.type }}</span></td>
+                <td class="size-09 text-end"><span class="badge bg-secondary">{{ item?.type }}</span></td>
               </tr>
             </template>
           </tbody>
