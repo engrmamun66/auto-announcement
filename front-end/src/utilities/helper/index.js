@@ -281,16 +281,16 @@ const helper = {
       let event = {
         title: reason,
         start: start_date,
-        end: end_date,
+        end: moment(end_date).add(1, 'day').format('YYYY-MM-DD'), // 1 din na barale calndar e shesh din ta dekhabe na
         allDay: true,
         display: 'block',
         editable: false,
-        overlap: false,
+        overlap: true,
         constraint: reason, // this is group ID as my widh=
         backgroundColor,
         // Extra data
         tooltip: reason + ` For (${unique_class_shorts?.length} class${unique_class_shorts.length > 1 ? 'es' : ''})`,
-        vacations,
+        vacations: vacations || [],
       }
       if(class__short){
         event.title = reason + ` - ${class__short}`

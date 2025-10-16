@@ -149,6 +149,17 @@ async function onInitAndNextPrev({start_date, end_date}){
 }
 
 
+// let calculatedVacations = ref([])
+
+// let totalEventsCount = computed(() => {
+//   let weekends = calculatedVacations.value.filter(v => v.title === 'Weekend').map(v => v.start)
+//   let not_weekends = calculatedVacations.value.filter(v => v.title !== 'Weekend') 
+//   let vacations = not_weekends.map(item => item.vacations || []).flat().map(v => v.date)
+//   let weekends_and_vacations = helper.uniqueArray([...weekends, ...vacations])  
+//   return weekends_and_vacations
+// })
+
+
 async function createAndDisplayEventList(){
   let vacation_events = []
 
@@ -211,6 +222,7 @@ async function createAndDisplayEventList(){
 
   setTimeout(() => {
     calendarEvents.value = vacation_events
+    // calculatedVacations.value = vacation_events
   }, 300);
 }
 

@@ -9,7 +9,6 @@ import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import helper from './../utilities/helper/index'
 import { inject, ref, reactive, onMounted, onBeforeUnmount, computed, watch } from "vue";
-let CONFIG = inject('CONFIG')
 
 export default {
   components: { 
@@ -34,8 +33,9 @@ export default {
       default: () => null,
     },
   },
+  inject: ['CONFIG'],
   data() {
-    return {
+    return { 
       calendarOptions: {
         plugins: [ dayGridPlugin, interactionPlugin ],        
         initialView: 'dayGridMonth', // values: dayGridMonth | dayGridDay 
@@ -134,11 +134,23 @@ export default {
       return {html: html_array.join('')}
     },
     renderEventContent: function(arg) {
+      
+      let vacation_types = this.CONFIG?.settings?.attendance?.vacation_types || []
+
       let tooltip = arg.event.extendedProps.tooltip
+      let title = arg.event.title
+
+      let is_loader = title.includes('--bs-spinner-width:')
+      let is_institute_vacation = vacation_types.map(v => v.title).some(_title => title.includes(_title))
+
       let htmlArray = []
       htmlArray.push(`<div class="cal-day-event-item" >`)
       htmlArray.push(`<span class="event-transh-icon" deleteicon><i class='bx bxs-trash' deleteicon></i></span>`)
-      htmlArray.push(`<span class="textcontent" tooltip="${tooltip || ''}" flow="top">${arg.event.title}</span>  `)
+      if(!is_loader){
+        if(is_institute_vacation) htmlArray.push(`<i class='bx bxs-building-house fullcalendar-fix-event-icon-position' ></i>`)
+        else htmlArray.push(`<i class='bx bxs-user fullcalendar-fix-event-icon-position'></i>`)
+      }
+      htmlArray.push(`<span class="textcontent" tooltip="${tooltip || ''}" flow="top">${title}</span>`)
       htmlArray.push('</div>')
       return { html: htmlArray.join('') }
     },
@@ -222,5 +234,8 @@ export default {
   border: 1px solid #c8c8c8;
   line-height: 8px;
   padding-bottom: 5px;
+}
+.fullcalendar-fix-event-icon-position{
+  transform: translateY(1px);
 }
 </style>
