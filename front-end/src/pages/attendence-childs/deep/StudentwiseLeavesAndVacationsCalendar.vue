@@ -56,11 +56,6 @@ function remvoeSpaces(str){
 }
 
 
-let queryParams = {
-  // start
-}
-
-
 let payload = reactive({
   type: 'leave', // leave | vacation
   identity_string: Ahelper.generateUniqueString(),
@@ -135,9 +130,12 @@ async function onSubmit(){
 
 
 async function onInitAndNextPrev({start_date, end_date}){
-  queryParams = { type: 'leave', start_date, end_date }
+  let student_id = getStudent.value?.dakhela
+  let class_short = getStudent.value?.class_short
+  let queryParams = { start_date, end_date, class_short, student_id }
+  // let queryParams = { start_date, end_date, class_short }
   dateRange.value = { start_date, end_date }
-  let vacation_data = await callbacks.getLeavesAndVacations('leave', queryParams)
+  let vacation_data = await callbacks.getLeavesAndVacations('', queryParams)
   vacationData.value = vacation_data
   createAndDisplayEventList()
 }
@@ -349,13 +347,13 @@ let filteredAllStudents = computed(() => {
     <Modal v-model="showDetailsModal" @yes="deleteVacations">
       <template #title>Details View</template>
       <div class="overflow-y-auto modal-table" style="max-height: 400px;">
-        <table>
+        <table class="w-100">
           <tbody>
             <template v-for="item in targetedVacationToDelete?.vacations">
               <tr>
                 <td class="size-09"><span class="badge bg-secondary">{{ item?.reason }}</span></td>
                 <td class="size-09">{{ item?.date }}</td>
-                <td class="size-09">{{ item?.class_short == '_all_' ? 'All' : item?.class_short }}</td>
+                <td class="size-09">{{ item?.class_short == '_all_' ? 'All Class' : item?.class_short }}</td>
                 <td class="size-09"><span class="badge bg-secondary">{{ item?.type }}</span></td>
               </tr>
             </template>

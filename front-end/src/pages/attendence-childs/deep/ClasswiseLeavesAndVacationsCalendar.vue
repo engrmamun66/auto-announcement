@@ -291,13 +291,13 @@ async function deleteVacations(){
     <Modal v-model="showDetailsModal" @yes="deleteVacations">
       <template #title>Details View</template>
       <div class="overflow-y-auto modal-table" style="max-height: 400px;">
-        <table>
+        <table class="w-100">
           <tbody>
             <template v-for="item in targetedVacationToDelete?.vacations">
               <tr>
                 <td class="size-09"><span class="badge bg-secondary">{{ item?.reason }}</span></td>
                 <td class="size-09">{{ item?.date }}</td>
-                <td class="size-09">{{ item?.class_short == '_all_' ? 'All' : item?.class_short }}</td>
+                <td class="size-09">{{ item?.class_short == '_all_' ? 'All Class' : item?.class_short }}</td>
                 <td class="size-09"><span class="badge bg-secondary">{{ item?.type }}</span></td>
               </tr>
             </template>
