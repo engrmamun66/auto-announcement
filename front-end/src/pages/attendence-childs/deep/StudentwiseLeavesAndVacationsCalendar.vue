@@ -331,13 +331,13 @@ let filteredAllStudents = computed(() => {
       <div class="d-flex justify-content-center column-gap-3 mb-2">
         <ul class="nav nav-tabs d2 mt-0 mb-3 bottom-borderless">
             <li class="nav-item">
-              <a @click.stop="leave_filter_type = 1; onInitAndNextPrev(dateRange.value)" class="nav-link cp text-black button-group" :class="{'active': leave_filter_type==1}" >Person Leaves</a>
+              <a @click.stop="leave_filter_type = 1; onInitAndNextPrev(dateRange)" class="nav-link cp text-black button-group" :class="{'active': leave_filter_type==1}" >Person Leaves</a>
             </li>
             <li class="nav-item">
-              <a @click.stop="leave_filter_type = 2; onInitAndNextPrev(dateRange.value)" class="nav-link cp text-black button-group" :class="{'active': leave_filter_type==2}" >Institute Leaves</a>
+              <a @click.stop="leave_filter_type = 2; onInitAndNextPrev(dateRange)" class="nav-link cp text-black button-group" :class="{'active': leave_filter_type==2}" >Institute Leaves</a>
             </li>       
             <li class="nav-item">
-              <a @click.stop="leave_filter_type = 3; onInitAndNextPrev(dateRange.value)" class="nav-link cp text-black button-group" :class="{'active': leave_filter_type==3}" >All Leaves</a>
+              <a @click.stop="leave_filter_type = 3; onInitAndNextPrev(dateRange)" class="nav-link cp text-black button-group" :class="{'active': leave_filter_type==3}" >All Leaves</a>
             </li>       
           </ul>
       </div>
