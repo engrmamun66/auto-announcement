@@ -48,6 +48,14 @@ let targetedVacationToDelete = ref(null)
 let showDeleteModal = ref(null)
 let showDetailsModal = ref(null)
 
+
+let tab3_class_short = ref(null)
+let leave_filter_type = ref(1)
+
+watch(tab3_class_short, (classShort) => {
+  selectedStudents.value = []
+})
+
  
 let stuents_leave_types = CONFIG.value?.settings?.attendance?.stuents_leave_types || []
 
@@ -132,10 +140,26 @@ async function onSubmit(){
 async function onInitAndNextPrev({start_date, end_date}){
   let student_id = getStudent.value?.dakhela
   let class_short = getStudent.value?.class_short
-  let queryParams = { start_date, end_date, class_short, student_id }
-  // let queryParams = { start_date, end_date, class_short }
+  let queryParams = { start_date, end_date }
+
+  if(leave_filter_type.value == 1){
+    // Person Leaves
+    queryParams.type = 'leave'
+    queryParams.student_id = student_id
+  } else if(leave_filter_type.value == 2){
+    // Instuttute Leaves
+    queryParams.type = 'vacation'
+    queryParams.class_short = class_short
+  } else {
+    // All Leaves
+    queryParams.type = ''
+    queryParams.student_id = student_id
+    queryParams.class_short = class_short
+  }
+
+
   dateRange.value = { start_date, end_date }
-  let vacation_data = await callbacks.getLeavesAndVacations('', queryParams)
+  let vacation_data = await callbacks.getLeavesAndVacations('leave', queryParams)
   vacationData.value = vacation_data
   createAndDisplayEventList()
 }
@@ -229,12 +253,6 @@ async function deleteVacations(){
   })
 }
 
-let tab3_class_short = ref(null)
-
-watch(tab3_class_short, (classShort) => {
-  selectedStudents.value = []
-})
-
 let studentnameorid = ref('')
 let selectedStudents = ref(storage('studentwise_vacation_selected_students').value || [])
 let getStudent = computed(()=>selectedStudents.value?.length ? (typeof selectedStudents.value[0] == 'object' ? selectedStudents.value[0] : all_students.value.find(s => s.dakhela == selectedStudents.value[0])) : null)
@@ -283,30 +301,48 @@ let filteredAllStudents = computed(() => {
   <div>
 
 
-    <div class="d-flex justify-content-center column-gap-3 mb-2">
-      <div class="form-group" tooltip="Select A Class">
-        <select class="form-control cb-input" v-model="tab3_class_short" style="min-width: 400px" >
-          <option :value="null">-All Classes-</option>
-          <template v-for="(eachClass, index) in classes" :key="index">
-            <option :value="eachClass.class_short">{{ eachClass.class_name }}</option>
-          </template>                  
-        </select>
+    <div class="d-flex justify-content-between column-gap-3 flex-wrap mb-2">
+      <div class="d-flex justify-content-center column-gap-3 mb-2">
+        <div class="form-group" tooltip="Select A Class">
+          <select class="form-control cb-input" v-model="tab3_class_short" style="min-width: 350px" >
+            <option :value="null">-All Classes-</option>
+            <template v-for="(eachClass, index) in classes" :key="index">
+              <option :value="eachClass.class_short">{{ eachClass.class_name }}</option>
+            </template>                  
+          </select>
+        </div>
+
+
+        <BaseSelectMultiple placeholder="-Select a student to active calendar-" v-model="selectedStudents" :label="false" :data="filteredAllStudents" displayKey="full_name" valueKey="id" style="width: 350px" :search="true" :searchDelayTime="100" :limit="1"
+          @searching="(search_text) => studentnameorid = search_text" >
+          <template #loopItem1="{item, index}">
+            <span class="badge text-dark bg-body-secondary ms-1">
+              {{ item.class_short }}
+            </span>
+          </template>
+          <template #loopItem="{item, index}">
+            <span class="badge text-dark bg-body-secondary">
+              {{ item.class_short }}
+            </span>
+          </template>
+        </BaseSelectMultiple> 
+      </div>
+
+      <div class="d-flex justify-content-center column-gap-3 mb-2">
+        <ul class="nav nav-tabs d2 mt-0 mb-3 bottom-borderless">
+            <li class="nav-item">
+              <a @click.stop="leave_filter_type = 1" class="nav-link cp text-black button-group" :class="{'active': leave_filter_type==1}" >Person Leaves</a>
+            </li>
+            <li class="nav-item">
+              <a @click.stop="leave_filter_type = 2" class="nav-link cp text-black button-group" :class="{'active': leave_filter_type==2}" >Institute Leaves</a>
+            </li>       
+            <li class="nav-item">
+              <a @click.stop="leave_filter_type = 3" class="nav-link cp text-black button-group" :class="{'active': leave_filter_type==3}" >All Leaves</a>
+            </li>       
+          </ul>
       </div>
 
 
-      <BaseSelectMultiple placeholder="-Select a student to active calendar-" v-model="selectedStudents" :label="false" :data="filteredAllStudents" displayKey="full_name" valueKey="id" style="width: 400px" :search="true" :searchDelayTime="100" :limit="1"
-        @searching="(search_text) => studentnameorid = search_text" >
-        <template #loopItem1="{item, index}">
-          <span class="badge text-dark bg-body-secondary ms-1">
-            {{ item.class_short }}
-          </span>
-        </template>
-        <template #loopItem="{item, index}">
-          <span class="badge text-dark bg-body-secondary">
-            {{ item.class_short }}
-          </span>
-        </template>
-      </BaseSelectMultiple> 
     </div>
 
 
