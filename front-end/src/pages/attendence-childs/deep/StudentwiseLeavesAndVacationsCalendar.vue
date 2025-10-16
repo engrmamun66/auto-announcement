@@ -168,6 +168,16 @@ async function onInitAndNextPrev({start_date, end_date}){
   createAndDisplayEventList()
 }
 
+let calculatedVacations = ref([])
+
+let totalEventsCount = computed(() => {
+  let weekends = calculatedVacations.value.filter(v => v.title === 'Weekend').map(v => v.start)
+  let not_weekends = calculatedVacations.value.filter(v => v.title !== 'Weekend') 
+  let vacations = not_weekends.map(item => item.vacations || []).flat().map(v => v.date)
+  let weekends_and_vacations = helper.uniqueArray([...weekends, ...vacations]) 
+  return weekends_and_vacations.length
+})
+
 
 async function createAndDisplayEventList(){
   let vacation_events = []
@@ -231,6 +241,7 @@ async function createAndDisplayEventList(){
 
   setTimeout(() => {
     calendarEvents.value = vacation_events
+    calculatedVacations.value = vacation_events 
   }, 300);
 }
 
@@ -335,13 +346,13 @@ let filteredAllStudents = computed(() => {
       <div class="d-flex justify-content-center column-gap-3 mb-2">
         <ul class="nav nav-tabs d2 mt-0 mb-3 bottom-borderless">
             <li class="nav-item">
-              <a @click.stop="leave_filter_type = 1; onInitAndNextPrev(dateRange)" class="nav-link cp text-black button-group" :class="{'active': leave_filter_type==1}" >Person Leaves</a>
+              <a @click.stop="leave_filter_type = 1; onInitAndNextPrev(dateRange)" class="nav-link cp text-black button-group" :class="{'active': leave_filter_type==1}" >Person Leaves <span class="badge bg-secondary" v-if="leave_filter_type==1">{{ totalEventsCount }}</span> </a>
             </li>
             <li class="nav-item">
-              <a @click.stop="leave_filter_type = 2; onInitAndNextPrev(dateRange)" class="nav-link cp text-black button-group" :class="{'active': leave_filter_type==2}" >Institute Leaves</a>
+              <a @click.stop="leave_filter_type = 2; onInitAndNextPrev(dateRange)" class="nav-link cp text-black button-group" :class="{'active': leave_filter_type==2}" >Institute Leaves <span class="badge bg-secondary" v-if="leave_filter_type==2">{{ totalEventsCount }}</span> </a>
             </li>       
             <li class="nav-item">
-              <a @click.stop="leave_filter_type = 3; onInitAndNextPrev(dateRange)" class="nav-link cp text-black button-group" :class="{'active': leave_filter_type==3}" >All Leaves</a>
+              <a @click.stop="leave_filter_type = 3; onInitAndNextPrev(dateRange)" class="nav-link cp text-black button-group" :class="{'active': leave_filter_type==3}" >All Leaves <span class="badge bg-secondary" v-if="leave_filter_type==3">{{ totalEventsCount }}</span> </a>
             </li>       
           </ul>
       </div>

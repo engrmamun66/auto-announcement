@@ -46,10 +46,7 @@ class LeaveAndVacations {
         queryParams.push(student_id);
       }
     }
-
-    console.log({start_date, end_date, date, class_short, student_id});
-    console.log({query, queryParams});
-  
+    
     this.db.all(query, queryParams, (err, rows) => {
       if (err) {
         res.status(500).send({ error: err.message, query, queryParams });
