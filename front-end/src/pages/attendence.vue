@@ -195,7 +195,6 @@ onMounted(()=>{
             }" ></Pagination>
           </div> 
 
-
           <div class="form-group" tooltip="Sort By">
             <select class="form-control cb-input" v-model="sortby_column" >
               <template v-for="(column, index) in sortby_columns" :key="index">

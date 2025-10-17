@@ -47,20 +47,20 @@ watch(()=> attPayload.class_short, (_class_short) => {
 },{deep: true})
 
 watch(pagination_perpage, (newVal) => {
-  submitSearch()
+  submitSearch({...pickerModelValue.value})
 })
 watch(sort_direction, (newVal) => {
   attPayload.sort_direction = newVal
-  submitSearch()
+  submitSearch({...pickerModelValue.value})
 })
 watch(sortby_column, (newVal) => {
   attPayload.sort_by = newVal
-  submitSearch()
+  submitSearch({...pickerModelValue.value})
 })
  
 
 let dateRangePickerRef = ref(null)
-let pickerModelValue = ref({startDate: null})
+let pickerModelValue = ref({startDate: moment().format('YYYY-MM-DD')})
 
 
 let filteredAllStudents = computed(() => {
@@ -96,6 +96,9 @@ function clearSearch() {
 
 function submitSearch(eventData={}) { 
   try {
+    if(eventData){
+      pickerModelValue.value = eventData || pickerModelValue.value
+    }
     let data = { 
       // student_ids: [attPayload.student_id].filter(Boolean),
       student_ids: selectedStudents.value.map(s => (typeof s ==='number' ? s : s.dakhela)).filter(Boolean),
@@ -122,7 +125,7 @@ function clearPicker(){
 }
 
 onMounted(()=>{
-  submitSearch()
+  submitSearch({...pickerModelValue.value})
 })
  
 

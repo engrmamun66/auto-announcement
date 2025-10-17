@@ -69,14 +69,13 @@ function prepareToDelete(item){
 }
 function deleteAttedence(item, note_text = null){
   // if(prompt("Delete this attendance?").toLocaleLowerCase() !== 'd') return
-  console.log({note_text});
-  // http.delete(`/attendence-delete/${item.id}`).then(response => {
-  //   if(response.status === 200){
-  //     liveAttendenceList.value = liveAttendenceList.value.filter(_item => _item.id != item.id)
-  //     attendenceList.value = attendenceList.value.filter(_item => _item.id != item.id)
-  //     emitter.emit('toaster-success', {message: 'Attendence Deleted!'})
-  //   }
-  // })
+  http.delete(`/attendence-delete/${item.id}`).then(response => {
+    if(response.status === 200){
+      liveAttendenceList.value = liveAttendenceList.value.filter(_item => _item.id != item.id)
+      attendenceList.value = attendenceList.value.filter(_item => _item.id != item.id)
+      emitter.emit('toaster-success', {message: 'Attendence Deleted!'})
+    }
+  })
 }
 
 
@@ -93,7 +92,7 @@ function deleteAttedence(item, note_text = null){
       <NormalSearchForm ref="NormalSearchFormRef"
       @onBtnClear="getAttendeceList({page_no: 1})"
       @onBtnSubmit="(other_params) => {
-        getAttendeceList({page_no: 1, other_params})
+          getAttendeceList({page_no: 1, other_params: {...other_params} }) 
       }"
       > 
       </NormalSearchForm>
@@ -180,7 +179,7 @@ function deleteAttedence(item, note_text = null){
     </div>
     <Confirm v-model="showDeleteConfirmationModal" @yes="(note_text) => {
       deleteAttedence(targetItem, note_text)
-    }" :tekeNote="true" >
+    }" :tekeNote="false" >
             আপনি কি উপস্থিতিটিকে সম্পূর্ণ বাতিল করতে চান?
     </Confirm>
   </div>
