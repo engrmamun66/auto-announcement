@@ -131,7 +131,7 @@ async function onSubmit(){
     }
   }).finally(()=>{
     onCancel()
-    leave_filter_type.value = 1; 
+    if(leave_filter_type.value == 2) leave_filter_type.value = 1; 
     onInitAndNextPrev(dateRange.value)
   })
 

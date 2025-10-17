@@ -4,6 +4,7 @@ import { onMounted, inject, ref, watch, computed, onBeforeUnmount, reactive, pro
 import AttendencesAll from './attendence-childs/AttendencesAll.vue'
 import RealtimeAttendences from './attendence-childs/RealtimeAttendences.vue'
 import WeekendAndHolidays from './attendence-childs/WeekendAndHolidays.vue'
+import Reporting from './attendence-childs/Reporting.vue'
 import BaseSelectMultiple from './../components/BaseSelectMultiple.vue'
 import EmDateTimePicker from './../components/EmDateTimePicker.vue'
 import Btn from './../components/Btn.vue'
@@ -143,14 +144,31 @@ watch(leaveAndWeekendSubTab, (index) => {
 
 provide('leaveAndWeekendSubTab', leaveAndWeekendSubTab) 
  
-
-
-
 // ============= End Weekends And Vacations ============= //
 // ====================================================== // 
 // ====================================================== // 
 // ====================================================== // 
 
+
+
+// ====================================================== //
+// ====================================================== //
+// ====================================================== //
+// ====================================================== //
+// ====================================================== //
+// ===================== For Reporting ================== //
+// ====================================================== //
+
+let reportingViewTab = ref(storage('attendance_reporting_view_tab').value || 1)
+watch(reportingViewTab, (index) => {
+  storage('attendance_reporting_view_tab').value = index
+})
+provide('reportingViewTab', reportingViewTab)
+
+// ===================== End Reporting ================== //
+// ====================================================== // 
+// ====================================================== // 
+// ====================================================== // 
 
 
 onMounted(()=>{
@@ -173,6 +191,9 @@ onMounted(()=>{
          </li>   
          <li class="nav-item">
            <a @click.stop="tab = 3" class="nav-link cp text-black" :class="{'active': tab==3}" ><i class='bx bx-run transformY-2px' ></i> Leaves And Vacations</a>
+         </li>   
+         <li class="nav-item">
+           <a @click.stop="tab = 4" class="nav-link cp text-black" :class="{'active': tab==4}" ><i class='bx bx-timer transformY-2px'></i> Reporting </a>
          </li>   
       </ul>
 
@@ -231,11 +252,21 @@ onMounted(()=>{
             </li>       
           </ul>
         </div>
-
-
-
-       
         
+      </div> 
+      <div v-else-if="tab==4">
+
+        <div class="d-flex justify-content-end column-gap-3">
+          <ul class="nav nav-tabs d2 mt-0 mb-3 bottom-borderless">
+            <li class="nav-item">
+              <a @click.stop="reportingViewTab = 1" class="nav-link cp text-black" :class="{'active': reportingViewTab==1}" >Overview</a>
+            </li>
+            <li class="nav-item">
+              <a @click.stop="reportingViewTab = 2" class="nav-link cp text-black" :class="{'active': reportingViewTab==2}" >Class Wise</a>
+            </li>       
+          </ul>
+        </div>
+
       </div> 
 
     </div>
@@ -248,6 +279,9 @@ onMounted(()=>{
     </template>
     <template v-else-if="tab == 3">
         <WeekendAndHolidays ></WeekendAndHolidays>
+    </template> 
+    <template v-else-if="tab == 4">
+        <Reporting ></Reporting>
     </template> 
   </div>
 
