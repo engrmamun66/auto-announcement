@@ -144,7 +144,14 @@ defineExpose({
     
     <div class="row">
       <div class="col-3">
-        
+        <div class="form-group d-flex justify-content-center">
+          <select v-model="attPayload.class_short" class="form-control cb-input" @change="submitSearch" style="width:100%">
+            <option :value="null">-class-</option>
+            <template v-for="(cls, index) in classes" :key="index">
+              <option :value="cls.class_short">{{cls.class_name}}</option>
+            </template>                  
+          </select>
+        </div> 
 
         
       </div> 
