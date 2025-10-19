@@ -9,38 +9,38 @@ const routes = [
     {
         path: "/",
         name: 'home',
-        component: HomeView,         
+        component: HomeView,
     },
     {
         path: "/students",
         name: 'students',
-        component: StudentsView,         
+        component: StudentsView,
     },
     {
         path: "/attendence",
         name: 'attendence',
-        component: AttendenceView,         
+        component: AttendenceView,
     },
     {
         path: "/shedules",
         name: 'shedules',
-        component: SchedulesView,         
+        component: SchedulesView,
     },
     {
         path: "/import",
         name: 'import',
-        component: ImportView,         
+        component: ImportView,
     },
     {
         path: "/*",
         name: 'error',
-        component: ErrorView,
+        component: ErrorView
     },
     // Catch-all route for 404 errors
     { 
         path: '/:pathMatch(.*)*',
         name: 'NotFound', 
-        component: ErrorView
+        component: ErrorView,
     },
 ];
 

@@ -4,18 +4,18 @@
             <img alt="site-logo" ref="logoEl" id="LOGO" src="" style="width: 200px;">
           </a>
         <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
-          <RouterLink :to="{name: 'home'}" :class="{'active': route.name === 'home'}"><i class='bx bxs-home pre-icon'></i> Dashboard</RouterLink>
+          <RouterLink :to="{name: 'home', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active': route.name === 'home'}"><i class='bx bxs-home pre-icon'></i> Dashboard</RouterLink>
         </template>
         <template v-if="CONFIG?.settings?.attendance?.status">
-          <RouterLink :to="{name: 'attendence'}" :class="{'active attendence-tab': route.name === 'attendence'}"><i class='bx bx-user-pin pre-icon'></i> Attendence</RouterLink>
+          <RouterLink :to="{name: 'attendence', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active attendence-tab': route.name === 'attendence'}"><i class='bx bx-user-pin pre-icon'></i> Attendence</RouterLink>
         </template>
-        <RouterLink :to="{name: 'students'}" :class="{'active students-tab': route.name === 'students'}"><i class='bx bxs-user pre-icon'></i> Students</RouterLink>
-        <RouterLink :to="{name: 'shedules'}" :class="{'active': route.name === 'shedules'}"><i class='bx bxs-calendar pre-icon' ></i> Shedules</RouterLink>
-        <RouterLink :to="{name: 'import'}" :class="{'active': route.name === 'import'}"><i class='bx bxs-file-import pre-icon' ></i> Import</RouterLink>
-
-        <a @click.prevent.stop="show_bulk_attedance_component = true" v-if="useRoute().query.dev === 'true'">
-          <Btn> Bulk Attendance </Btn>
-        </a> 
+        <RouterLink :to="{name: 'students', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active students-tab': route.name === 'students'}"><i class='bx bxs-user pre-icon'></i> Students</RouterLink>
+        <RouterLink :to="{name: 'shedules', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active': route.name === 'shedules'}"><i class='bx bxs-calendar pre-icon' ></i> Shedules</RouterLink>
+        <RouterLink :to="{name: 'import', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active': route.name === 'import'}"><i class='bx bxs-file-import pre-icon' ></i> Import</RouterLink>
+        <a>
+          <Btn @click.prevent.stop="show_bulk_attedance_component = true" v-if="useRoute().query.dev === 'true'"> Bulk Attendance {{ show_bulk_attedance_component }} </Btn>
+        </a>
+        
         
     </div>
 </template>
@@ -33,7 +33,7 @@ let route = useRoute()
 const emitter = inject('emitter'); 
 const CONFIG = inject('CONFIG'); 
 const show_bulk_attedance_component = inject('show_bulk_attedance_component'); 
- 
+
 onMounted(()=>{
   if(typeof GLOBAL_DATA !== 'undefined'){
     if(GLOBAL_DATA?.logo){

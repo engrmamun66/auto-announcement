@@ -212,12 +212,13 @@ async function AddBulkAttendanceNow() {
     if(!payload.shifts?.length){
         return emitter.emit('toaster-error', { message: 'Please select shifts', duration: 1000 })
     }
-    if(!payload.dates.startDate || !payload.dates.endDate){
-        return emitter.emit('toaster-error', { message: 'Please select date range', duration: 1000 })
-    }
-
+    
     if(!payload.selected_students?.length){
         return emitter.emit('toaster-error', { message: `No students found in ${getSelectedClass.value.class_name}`, duration: 1000 })
+    }
+    
+    if(!payload.dates.startDate || !payload.dates.endDate){
+        return emitter.emit('toaster-error', { message: 'Please select date range', duration: 1000 })
     }
   
     if(!payload.dates?.startDate?.length){

@@ -94,7 +94,7 @@ module.exports = {
                 * shift start: 08:00, student come: 08:05
                 */
                late_consideration_minute: 5, 
-               maximum_live_attedence: 50, 
+               maximum_live_attedence: 500, 
                pagination: {
                     perpage: 20,
                     pagiation_positon: 'bottom_center', // bottom_left | bottom_center | bottom_right
