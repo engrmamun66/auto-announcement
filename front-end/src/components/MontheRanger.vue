@@ -209,7 +209,7 @@ onBeforeUnmount(() => {
 }
 @media (min-width: 1200px) {
   .slider-track {
-    margin: 16px calc(6% - 30px);
+    margin: 16px calc(6% - 24px);
   }
 }
 @media (min-width: 1600px) {
@@ -223,7 +223,7 @@ onBeforeUnmount(() => {
   height: 100%;
   background: var(--primaryColor);
   border-radius: 0px;
-  transition: all 0.3s;
+  transition: all 0.2s;
 }
 
 .handle {
@@ -237,7 +237,7 @@ onBeforeUnmount(() => {
   transform: translate(-50%,-50%);
   cursor: pointer;
   z-index: 2;
-  transition: all 0.3s;;
+  transition: all 0.2s;
 }
 .handle:hover {  
   width: 10px;

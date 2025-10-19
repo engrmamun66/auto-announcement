@@ -12,6 +12,10 @@
         <RouterLink :to="{name: 'students'}" :class="{'active students-tab': route.name === 'students'}"><i class='bx bxs-user pre-icon'></i> Students</RouterLink>
         <RouterLink :to="{name: 'shedules'}" :class="{'active': route.name === 'shedules'}"><i class='bx bxs-calendar pre-icon' ></i> Shedules</RouterLink>
         <RouterLink :to="{name: 'import'}" :class="{'active': route.name === 'import'}"><i class='bx bxs-file-import pre-icon' ></i> Import</RouterLink>
+
+        <a @click.prevent.stop="show_bulk_attedance_component = true" v-if="useRoute().query.dev === 'true'">
+          <Btn> Bulk Attendance </Btn>
+        </a> 
         
     </div>
 </template>
@@ -19,6 +23,7 @@
 <script setup>
 import { ref, inject, onMounted } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
+import Btn from './Btn.vue'
 
 
 let logoEl = ref(null)
@@ -27,6 +32,7 @@ let route = useRoute()
 
 const emitter = inject('emitter'); 
 const CONFIG = inject('CONFIG'); 
+const show_bulk_attedance_component = inject('show_bulk_attedance_component'); 
  
 onMounted(()=>{
   if(typeof GLOBAL_DATA !== 'undefined'){

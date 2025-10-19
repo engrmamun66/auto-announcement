@@ -68,7 +68,7 @@ let LockscreenRef = ref(null)
 let disabilityAlretRef = ref(null)
 let manually_paused_the_playlist = ref(false)
 let showSwithBoardModal = ref(false)
-let show_bulk_attedance_component = ref(true)
+let show_bulk_attedance_component = ref(false)
 let switches_PreviewInHomePage = ref(localStorage.getItem('switches_PreviewInHomePage') === 'true' ? true : false)
 let borad_image_url = globalThis.GLOBAL_DATA?.env.BASE_URL + '/electric-board.png'
 let isUsingSpeakerAutoControl = computed(()=>CONFIG.value?.settings?.with_speaker_controls?.status)
@@ -519,6 +519,9 @@ const callbacks = {
 provide('callbacks', callbacks) 
  
   
+function _______SEAPRATOR______(){}
+
+
 function focusBarcodeInput__and__startAnnoucement(){
     callbacks.clearWattingList()
     if(is_started_schedule.value){

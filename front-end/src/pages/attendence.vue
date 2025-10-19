@@ -119,6 +119,28 @@ function getAttendeceList({ page_no = null, reset = false, other_params = {} } =
       .finally(() => {});
   } catch (error) {}
 }
+
+provide('getAttendeceListFullHistory', getAttendeceListFullHistory)
+
+async function getAttendeceListFullHistory({ start_date, end_date }) {
+  try {
+    let queryParams = {
+      "page_no": 1,
+      "totalPages": 1,
+      "total": 0,
+      "limit": -1, // -1 == 'all'
+      start_date,
+      end_date
+    }
+
+    let response = await http.get("/attendence-list", { params: queryParams })
+      if (response.status == 200) {
+        let data = response.data?.data;
+        return data
+      } 
+      
+  } catch (error) {}
+}
 // ============= End For AttendencesAll.vue ============= //
 // ====================================================== // 
 // ====================================================== // 

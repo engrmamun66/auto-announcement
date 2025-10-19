@@ -43,16 +43,6 @@ let NormalSearchFormRef = ref(null)
 const getStudent = ({ student_id }) =>
   all_students_non_copied.value.find((std) => std.dakhela == student_id);
 
-
-let queryparams = {
-    student_id: null,
-    class_short: null,
-    start_date: null,
-    end_date: null,
-    date: null,
-    sort_by : "late_in_minute",  // default sort
-    sort_direction : "ASC"  // default order
-}
  
 onMounted(()=>{ 
   isMounted.value = true 
