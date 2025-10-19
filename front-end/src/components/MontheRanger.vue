@@ -2,7 +2,7 @@
   <div class="month-range-slider" ref="sliderRef">
 
     <!-- Display Value -->
-    <div class="selection-display mb-3">
+    <div class="selection-display mb-2">
         {{ displayValue }}
     </div>
 
