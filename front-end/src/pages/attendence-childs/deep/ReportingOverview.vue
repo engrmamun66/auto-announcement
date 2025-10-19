@@ -24,13 +24,15 @@ const sortby_column = inject("sortby_column");
 
 const emit = defineEmits(['onBtnSubmit', 'onBtnClear']);
 let log = console.log
-let attendanceStore = useAttendanceStore()
+let attendanceStore = useAttendanceStore(['hello'])
 
 // For multiple select of students
-
+async function asMounted(){
+  // await attendanceStore.calculationAttendanceSummary()
+}
 
 onMounted(() => {
-  attendanceStore.test()
+  
 })
  
  

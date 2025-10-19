@@ -23,6 +23,7 @@ let http = inject('http')
 let storage = inject('storage')
 let route = useRoute();
 let router = useRouter();  
+let makeCarcode = inject('makeCarcode')
 let CONFIG = ref(storage('CONFIG').value || {});  
 
 watch(

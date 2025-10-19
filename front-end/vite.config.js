@@ -23,6 +23,7 @@ export default defineConfig({
     assetsDir: 'assets',
     emptyOutDir: true,
     minify: true,
+    sourcemap: true,
     chunkSizeWarningLimit: 1600,
     watch: {
       include: ['src/**'],

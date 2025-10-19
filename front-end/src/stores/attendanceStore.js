@@ -5,14 +5,22 @@ import http from '@utils/http';
 
 export const useAttendanceStore = defineStore('Attendance', () => {
 
-  async function test(){
-    console.log({http});
+  async function createBulkAttendance({
+    // punchToSubmitAttendance, 
+    // getLeavesAndVacations, 
+    // makeCarcode, 
+    // class_short 
+  }={}){
+    try { 
+        
+    
+    } catch (error) {  }
   }  
   
   
  
   
   return {    
-    test,    
+    getClassWiseData,    
   }
 })

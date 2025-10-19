@@ -25,10 +25,7 @@ let reportingViewTab = inject('reportingViewTab')
 let log = console.log
 
 let isMounted = ref(false)
-let NormalSearchFormRef = ref(null)
-
-const getStudent = ({ student_id }) =>
-  all_students_non_copied.value.find((std) => std.dakhela == student_id);
+ 
  
 onMounted(()=>{ 
   isMounted.value = true 
