@@ -4,7 +4,6 @@ import { inject, ref, reactive, onMounted, onBeforeUnmount, computed, watch } fr
 import Ahelper from "./attendacnceHelper";
 import myTable from '../../components/myTable.vue'
 import Confirm from '../../components/Confirm.vue'
-import MontheRanger from '../../components/MontheRanger.vue'
 import ReportingOverview from './deep/ReportingOverview.vue'
 
 const CONFIG = inject("CONFIG");
@@ -45,8 +44,6 @@ onMounted(()=>{
 
 <template>
   <div class="row mt-3">
-
-    <MontheRanger></MontheRanger>
 
      <template v-if="reportingViewTab == 1">
       <ReportingOverview></ReportingOverview>

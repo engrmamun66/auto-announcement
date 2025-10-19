@@ -7,6 +7,8 @@ import Pagination from '../../../components/Pagination.vue'
 import BaseSelectMultiple from './../../../components/BaseSelectMultiple.vue'
 import EmDateTimePicker from './../../../components/EmDateTimePicker.vue'
 import Btn from './../../../components/Btn.vue'
+import MontheRanger from './../../../components/MontheRanger.vue'
+import { useAttendanceStore } from '../../../stores/attendanceStore'
 
 const CONFIG = inject("CONFIG");
 const classes = inject("classes");
@@ -22,118 +24,18 @@ const sortby_column = inject("sortby_column");
 
 const emit = defineEmits(['onBtnSubmit', 'onBtnClear']);
 let log = console.log
+let attendanceStore = useAttendanceStore()
 
 // For multiple select of students
-let selectedStudents = ref([])
-let search_text = ref('')
 
-let attPayload = reactive({ 
-  //-------------
-  date: null,
-  student_id: null, 
-  class_short: null,
-  sort_by : "late_in_minute",  // default sort
-  sort_direction : sort_direction.value  // default order
-}) 
 
-watch(()=> attPayload.class_short, (_class_short) => {
-  if(!_class_short){
-    attPayload.student_id = null
-  }
-  selectedStudents.value = []
-  search_text.value = ''
-},{deep: true})
-
-watch(pagination_perpage, (newVal) => {
-  submitSearch({...pickerModelValue.value})
-})
-watch(sort_direction, (newVal) => {
-  attPayload.sort_direction = newVal
-  submitSearch({...pickerModelValue.value})
-})
-watch(sortby_column, (newVal) => {
-  attPayload.sort_by = newVal
-  submitSearch({...pickerModelValue.value})
+onMounted(() => {
+  attendanceStore.test()
 })
  
+ 
 
-let dateRangePickerRef = ref(null)
-let pickerModelValue = ref({startDate: moment().format('YYYY-MM-DD')})
-
-
-let filteredAllStudents = computed(() => {
-  let students = helper.clone(all_students.value)
   
-  if(attPayload.class_short){
-    students = students.filter(student => student.class_short === attPayload.class_short)
-  }  
-  if(search_text.value){
-    let text = search_text.value.toLowerCase()
-    students = students.filter(student => 
-      student.name.toLowerCase().includes(text) ||   
-      (student.dakhela + '').toLowerCase().includes(text) 
-    )
-  }  
-  return students
-}) 
-
-
- 
-
-
-function clearSearch() {  
-  attPayload.date = null,
-  attPayload.student_id = null, 
-  attPayload.class_short = null,
-  attPayload.sort_by = "late_in_minute", 
-  attPayload.sort_direction = "ASC"  
-  selectedStudents.value = []
-  search_text.value = ''
-  emit('onBtnClear', {...attPayload})
-}
-
-function submitSearch(eventData={}) { 
-  try {
-    if(eventData){
-      pickerModelValue.value = eventData || pickerModelValue.value
-    }
-    let data = { 
-      // student_ids: [attPayload.student_id].filter(Boolean),
-      student_ids: selectedStudents.value.map(s => (typeof s ==='number' ? s : s.dakhela)).filter(Boolean),
-      class_shorts: [attPayload.class_short].filter(Boolean),
-      sort_by: attPayload.sort_by,
-      sort_direction: attPayload.sort_direction,
-    } 
-    if(pickerModelValue.value?.startDate){
-      data.date = moment(pickerModelValue.value.startDate).format('YYYY-MM-DD')
-    }
-    if(pagination_perpage.value){
-      data.limit = pagination_perpage.value
-    } 
-    emit('onBtnSubmit', data)
-  } catch (submitSearch_error) {
-    console.warn({submitSearch_error});
-    
-  }
-}
-
-function clearPicker(){
-  dateRangePickerRef.value.clearPicker()
-  pickerModelValue.value.startDate = null
-}
-
-onMounted(()=>{
-  submitSearch({...pickerModelValue.value})
-})
- 
-
-defineExpose({
-  udpateSelectedStudentAndSearch(student){
-    selectedStudents.value = [student]
-    search_text.value = ''
-    submitSearch()
-  }
-})
 
 
 </script>
@@ -143,11 +45,9 @@ defineExpose({
   <div>
     
     <div class="row">
-      <div class="col-3">
-        
-
-        
-      </div> 
+      <div class="col-6">
+        <MontheRanger @change="log"></MontheRanger>
+      </div>
 
     </div>   
   </div>

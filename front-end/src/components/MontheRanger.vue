@@ -222,20 +222,26 @@ onBeforeUnmount(() => {
   position: absolute;
   height: 100%;
   background: var(--primaryColor);
-  border-radius: 5px;
+  border-radius: 0px;
+  transition: all 0.3s;
 }
 
 .handle {
   position: absolute;
   top: 50%;
-  width: 20px;
+  width: 6px;
   height: 20px;
-  background: white;
+  background: var(--primaryColor);
   border: 2px solid var(--primaryColor);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
+  border-radius: 2px;
+  transform: translate(-50%,-50%);
   cursor: pointer;
   z-index: 2;
+  transition: all 0.3s;;
+}
+.handle:hover {  
+  width: 10px;
+  background: linear-gradient(45deg, var(--primaryColor), #ffffff);
 }
 
 .selection-display {
