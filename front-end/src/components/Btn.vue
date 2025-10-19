@@ -1,5 +1,5 @@
 <template>
-  <button v-bind="$attrs" @click.stop="(e)=>$emit('click', e)" class="emb-buttons" :class="{'with-cbinput': cbinput}">
+  <button v-bind="$attrs" @click.stop="(e)=>$emit('click', e)" class="emb-buttons" :class="{'with-cbinput': cbinput}" type="button"> 
     <slot>
       Submit
     </slot>

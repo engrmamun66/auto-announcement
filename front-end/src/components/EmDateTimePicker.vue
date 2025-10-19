@@ -49,7 +49,7 @@ let props = defineProps({
   },
 });
 
-let emits = defineEmits(["update:modelValue", "change", "nextPrev", "opening", "changeTime", 'click', 'initialized']);
+let emits = defineEmits(["update:modelValue", "change", "nextPrev", "opening", "changeTime", 'click', 'initialized', 'close']);
 
 let inputElement = ref(null);
 
@@ -211,7 +211,13 @@ onMounted(() => {
 
       setHolidays({startDateOfCalendar, endDateOfCalendar}) 
 
-    });
+    })
+    .onEvent("cancel", () => {
+      emits('close', true)
+    })
+    .onEvent("close", () => {
+      emits('close', true)
+    })
 });
 
 defineExpose({

@@ -11,6 +11,7 @@ import Playlist from './components/Playlist.vue'
 import accessCheckAnimation from './components/accessCheckAnimation.vue'
 import Lockscreen from './components/Lockscreen.vue'
 import DevicesPreloader from './components/DevicesPreloader.vue'
+import AddBulkAttendaceForDev from './components/AddBulkAttendaceForDev.vue'
 
 const socketInit = inject('socketInit');
 
@@ -67,6 +68,7 @@ let LockscreenRef = ref(null)
 let disabilityAlretRef = ref(null)
 let manually_paused_the_playlist = ref(false)
 let showSwithBoardModal = ref(false)
+let show_bulk_attedance_component = ref(false)
 let switches_PreviewInHomePage = ref(localStorage.getItem('switches_PreviewInHomePage') === 'true' ? true : false)
 let borad_image_url = globalThis.GLOBAL_DATA?.env.BASE_URL + '/electric-board.png'
 let isUsingSpeakerAutoControl = computed(()=>CONFIG.value?.settings?.with_speaker_controls?.status)
@@ -374,6 +376,7 @@ provide('manually_paused_the_playlist', manually_paused_the_playlist)
 provide('getConfig', getConfig)
 provide('controlSounds', controlSounds)
 provide('showSwithBoardModal', showSwithBoardModal)
+provide('show_bulk_attedance_component', show_bulk_attedance_component)
 provide('borad_image_url', borad_image_url)
 provide('switches_PreviewInHomePage', switches_PreviewInHomePage)
 provide('isUsingSpeakerAutoControl', isUsingSpeakerAutoControl)
@@ -1276,6 +1279,7 @@ function __punchToSubmitAttendance(barcode='play-417-2024', {
             <routerView />
             <SwitchBoard v-if="showSwithBoardModal" @close="showSwithBoardModal = false"></SwitchBoard>
             <Playlist ref="palylistComponent"></Playlist> 
+            <AddBulkAttendaceForDev v-if="show_bulk_attedance_component" @unmount="show_bulk_attedance_component = false"></AddBulkAttendaceForDev>
 
         </div>
     

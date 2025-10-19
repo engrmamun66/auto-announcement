@@ -26,6 +26,7 @@ const printDiv = inject('printDiv');
 const helper = inject('helper');
 const classes = inject('classes');
 const CONFIG = inject('CONFIG');
+let show_bulk_attedance_component = inject('show_bulk_attedance_component')
 let http = inject('http'); 
 const punchToCallStudent = inject('punchToCallStudent');
 const punchToSubmitAttendance = inject('punchToSubmitAttendance');
@@ -380,6 +381,7 @@ function onClickAttendance(std){
 </script>
 
 <template>
+
     <div class="d-flex justify-content-between align-items-center flex-wrap">
       <h1>{{ !addMode ? 'Students' : 'Add Student'}}</h1> 
 
@@ -602,6 +604,11 @@ function onClickAttendance(std){
       
         
       </form>
+      
+    </div>
+
+    <div v-if="useRoute().query.dev === 'true'" class="d-flex mt-2 justify-content-end">
+      <Btn @click.stop="show_bulk_attedance_component = true" class="me-2">Add Bulk Attendance</Btn>
     </div>
 
 
@@ -810,7 +817,6 @@ function onClickAttendance(std){
       >
     </EmDateTimePicker>
 
- 
 
 </template>
 
