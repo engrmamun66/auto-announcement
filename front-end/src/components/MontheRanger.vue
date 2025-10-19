@@ -176,6 +176,7 @@ import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue';
     padding: 4px 0;
     border-radius: 0px;
     transition: all 0.2s;
+    cursor: pointer;
     user-select: none;
   }
   
