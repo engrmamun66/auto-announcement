@@ -867,7 +867,7 @@ function onClickAttendance(std){
   box-shadow: 0px 3px 10px rgba(252, 210, 0, 0.881), 0px 6px 4px rgba(0, 0, 0, 0.465), inset 0px 3px 2px rgba(252, 210, 0, 0.881);
   text-shadow: -1px 1px 0px black; 
   /* scale: 1.1; */
-  z-index: 1123223;
+  z-index: 1;
 }
 .std-clone-area{
   display: flex;
