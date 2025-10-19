@@ -8,13 +8,16 @@
     >
         <div class="row">
             <div class="col-6">
-                <label for="">Select Class</label>
+                <label for="">Select Class </label>
                 <select v-model="payload.class_short" class="form-control cb-input" @change="submitSearch" style="width:350px">
                     <option :value="null">-class-</option>
                     <template v-for="(cls, index) in classes" :key="index">
-                        <option :value="cls.class_short">{{cls.class_name}}</option>
+                        <option :value="cls.class_short">{{cls?.class_name}}</option>
                     </template>                  
                 </select> 
+                <span v-if="payload.class_short && payload.class_short != 'null' && payload.dates?.startDate && payload.dates?.endDate" @click="deleteAllDataForSelectedClass" class="badge bg-danger cp"> 
+                    <i class='bx bxs-trash' ></i> Delete Data for {{ payload.class_short }}
+                </span>
             </div>
             <div class="col-6">
                 <label for="">Attendance For Shifts</label>
@@ -58,10 +61,16 @@
 
             <div class="col-6 mt-3">
                 <div class="row">
-                    <div class="col-12">
+                    <div class="col-6">
                         <div class="form-group">
                             <label for="">With Random Time</label>
-                            <Switch v-model="payload.with_random_time"></Switch>
+                            <Switch v-model="payload.with_random_time" size="lg"></Switch>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="form-group">
+                            <label for="">Punch Out Times</label>
+                            <Switch v-model="payload.out_time_punch" size="lg"></Switch>
                         </div>
                     </div>
                     <template v-if="payload.with_random_time">
@@ -121,19 +130,25 @@ let props = defineProps({
 let emits = defineEmits(['change', 'unmount']) 
 
 let classes = inject('classes')
+let all_students = inject('all_students')
 let all_students_non_copied = inject('all_students_non_copied')
+let makeCarcode = inject('makeCarcode')
+let punchToSubmitAttendance = inject('punchToSubmitAttendance')
+
+// punchToSubmitAttendance(makeCarcode(targetStudent.value), {source: 'manual_button', delay: 0, punch_time: data.startDateTime })
 
 let showRightbar = ref(true)
 let pickerModelValueRef = ref(null)
 
 let payload = reactive({
-    class_short: null,
+    class_short: 'play',
     shifts: [],
     dates: {
         startDate: null,
         endDate: null,
     },
     with_random_time: 0,
+    out_time_punch: 1,
     times: {
         before: 15,
         after: 15,
@@ -201,10 +216,29 @@ async function AddBulkAttendanceNow() {
         students: students_in_class.map(s => s.dakhela)
     }
 
-
     console.log({final_payload});
-
      
+}
+
+
+async function deleteAllDataForSelectedClass(){
+
+    if(!confirm(`Are you sure to delete all attendance data for ${payload.class_short} from ${payload.dates?.startDate} to ${payload.dates?.endDate}?`)) return
+    let params = {
+        student_ids: all_students.value.filter(s => s.class_short == payload.class_short).map(s => s.dakhela),
+        start_date: payload.dates?.startDate,
+        end_date: payload.dates?.endDate,
+    }
+    try {
+        let response = await http.delete('/attendence-delete-bulk', { params })
+        if(response.status == 200){
+            emitter.emit('toaster-success', { message: 'Deleted Successful'})
+        } else {
+            emitter.emit('toaster-error', { message: 'Deleted failed!'})
+        }
+    } catch (error) {
+        emitter.emit('toaster-error', { message: 'Deleted Successful'})
+    }
 }
 
  

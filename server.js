@@ -385,6 +385,9 @@ app.get(`/api/_ac`, async (req, res) => {
   app.delete(prefix + '/attendence-delete/:id', (req, res) => {
     Attendence.delete(req, res)
   }); 
+  app.delete(prefix + '/attendence-delete-bulk', (req, res) => {
+    Attendence.deleteBulk(req, res)
+  }); 
 
   
   // ====================================================== //

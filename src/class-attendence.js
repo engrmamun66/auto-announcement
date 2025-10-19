@@ -239,6 +239,36 @@ class Attendance {
         res.send({ message: "Attendance deleted.", deleted: this.changes });
       });
     }
+
+
+    // Delete attendance
+    deleteBulk(req, res) {
+
+      const { student_ids, start_date, end_date } = req.query;
+      if (!student_ids || !start_date || !end_date) {
+        return res.status(400).send({ error: "student_ids, start_date, and end_date are required for bulk deletion." });
+      }
+
+      const ids = Array.isArray(student_ids)
+        ? student_ids.map(Number).filter(Boolean)
+        : String(student_ids).split(",").map(Number).filter(Boolean);
+
+      if (ids.length === 0) {
+        return res.status(400).send({ error: "No valid student IDs provided." });
+      }
+
+      const placeholders = ids.map(() => '?').join(',');
+      const query = `DELETE FROM ${this.tableName} WHERE student_id IN (${placeholders}) AND date BETWEEN ? AND ?`;
+      const params = [...ids, start_date, end_date];
+
+      this.db.run(query, params, function (err) {
+        if (err) {
+          return res.status(500).send({ error: err.message });
+        }
+        res.send({ message: `Deleted ${this.changes} attendance records.`, deletedCount: this.changes });
+      });
+ 
+    }
   }
   
   module.exports = Attendance;

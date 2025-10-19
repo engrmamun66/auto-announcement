@@ -56,6 +56,7 @@ let targetStd = ref(null)
 let columnName = ref('sound1')
 let targetStdForBarcode = ref(null)
 let editModeTabIndex = ref(1)
+let only_attendance_feature = CONFIG.value?.settings?.attendance?.only_attendance_feature === true
 
 function hide_modals(event){
   if (event.key === 'Escape') { 
@@ -643,10 +644,12 @@ function onClickAttendance(std){
               <td> 
                 <div class="align-items-center d-flex">
                   <span class="p-1" @dblclick="params.dakhela = std.dakhela">{{ std.dakhela }}</span>
-                  <span tooltip="Cone Student">
-                  <i v-if="std.name && String(std.name)?.indexOf('||dakhela') > -1 === false" @click.stop="()=>{
-                    std.cloneMode = !(!!(std.cloneMode));
-                  }" class="bx bxs-copy-alt cp px-1"></i>
+                  <!-- No need multiple card Access If using only for attendance -->
+                  <span v-if="only_attendance_feature === false" tooltip="Cone Student">
+                    <i v-if="std.name && String(std.name)?.indexOf('||dakhela') > -1 === false" @click.stop="()=>{
+                      std.cloneMode = !(!!(std.cloneMode));
+                    }" class="bx bxs-copy-alt cp px-1">
+                    </i>
                   </span>
                 </div>
                 

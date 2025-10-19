@@ -606,8 +606,22 @@ async function getAllStudents(){
        } else {
         data = []
        }
+
+       let attendanceAllowed = CONFIG.value?.settings?.attendance?.status === true
+       let allowOnlyAttendance = CONFIG.value?.settings?.attendance?.only_attendance_feature === true
+       let no_copied_students = data.filter(std => std.name.toLowerCase().indexOf('copied') === -1)
+ 
+
        all_students.value = data
-       all_students_non_copied.value = data.filter(std => std.name.toLowerCase().indexOf('copied') === -1)
+
+       
+       if(attendanceAllowed){
+        if(allowOnlyAttendance){
+            all_students_non_copied.value = data // allow attendance for all students
+        } else {
+            all_students_non_copied.value = no_copied_students // else, only permit the non-copied/real students
+        }
+       }
      }
    }).finally(()=>{
       
