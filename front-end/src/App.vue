@@ -68,7 +68,7 @@ let LockscreenRef = ref(null)
 let disabilityAlretRef = ref(null)
 let manually_paused_the_playlist = ref(false)
 let showSwithBoardModal = ref(false)
-let show_bulk_attedance_component = ref(false)
+let show_bulk_attedance_component = ref(true)
 let switches_PreviewInHomePage = ref(localStorage.getItem('switches_PreviewInHomePage') === 'true' ? true : false)
 let borad_image_url = globalThis.GLOBAL_DATA?.env.BASE_URL + '/electric-board.png'
 let isUsingSpeakerAutoControl = computed(()=>CONFIG.value?.settings?.with_speaker_controls?.status)
@@ -614,7 +614,7 @@ async function getAllStudents(){
 
        all_students.value = data
 
-       
+
        if(attendanceAllowed){
         if(allowOnlyAttendance){
             all_students_non_copied.value = data // allow attendance for all students
@@ -958,7 +958,7 @@ function punchToCallStudent(barcode='play-417-2024', { message='', source='devic
 
 }
 
-function punchToSubmitAttendance(barcode='play-417-2024', { 
+async function punchToSubmitAttendance(barcode='play-417-2024', { 
     message='', 
     source='device', 
     device_index=0,
@@ -966,10 +966,16 @@ function punchToSubmitAttendance(barcode='play-417-2024', {
     delay=0,
     punch_time=moment(),
 }={} ){
-    setTimeout(() => __punchToSubmitAttendance(barcode, { message, source, device_index, remarks, punch_time }), delay);
+    if(!delay){
+        await __punchToSubmitAttendance(barcode, { message, source, device_index, remarks, punch_time });
+    } else {
+        setTimeout(async () => {
+            await __punchToSubmitAttendance(barcode, { message, source, device_index, remarks, punch_time });
+        }, delay);
+    }
 }
 
-function __punchToSubmitAttendance(barcode='play-417-2024', { 
+async function __punchToSubmitAttendance(barcode='play-417-2024', { 
     message='', 
     source='device', 
     device_index=0,
@@ -978,294 +984,292 @@ function __punchToSubmitAttendance(barcode='play-417-2024', {
 }={} ){
      try {
 
-          let DATE_FORMAT = 'YYYY-MM-DD'
-          let TIME_FORMAT = 'HH:mm:ss'
+        let DATE_FORMAT = 'YYYY-MM-DD'
+        let TIME_FORMAT = 'HH:mm:ss'
 
-          let punch__time = moment.isMoment(punch_time) ? punch_time : moment(new Date(punch_time))
-          let date = moment(punch__time).format(DATE_FORMAT)
+        let punch__time = moment.isMoment(punch_time) ? punch_time : moment(new Date(punch_time))
+        let date = moment(punch__time).format(DATE_FORMAT)
 
-          if(barcode == 'i' || barcode == 'I'){
-               emergency_mode.value = !emergency_mode.value
-               return
-          }
+        if(barcode == 'i' || barcode == 'I'){
+            emergency_mode.value = !emergency_mode.value
+            return
+        }
 
-          if(!emergency_mode.value){
-               if(!(/^[a-z_0-9]+-\d{1,}-sound(1|2|3)/gi.test(barcode))){
-                    emitter.emit('toaster-error', { message: `বারকোড সঠিক নয় (${barcode})`, duration: 5000})
-                    return
-               }
-          }
-
-
-          let [ class_short ] = barcode.split('-') // nursary-23-sound1-2024
-          let class_object = classes.value.find(c => c.class_short === class_short)
-          let class_name = class_object?.class_name
+        if(!emergency_mode.value){
+            if(!(/^[a-z_0-9]+-\d{1,}-sound(1|2|3)/gi.test(barcode))){
+                emitter.emit('toaster-error', { message: `বারকোড সঠিক নয় (${barcode})`, duration: 5000})
+                return
+            }
+        }
 
 
-          if(source === 'device'){
+        let [ class_short ] = barcode.split('-') // nursary-23-sound1-2024
+        let class_object = classes.value.find(c => c.class_short === class_short)
+        let class_name = class_object?.class_name
+
+
+        if(source === 'device'){
             // Without internet device punch not allowed
             if(appAccessData.value?.internet === false){
                 emitter.emit('toaster-error', { message: 'ইন্টারনেট সংযোগ ছাড়া, ডিভাইস পাঞ্চ করার অনুমতি নেই'})
                 return
             }
-          }
+        }
 
 
-          http.get('/single-student', { params: { barcode, date, with_attendance: true } }).then(response => {
-               if(response.status == 200){
-                    let student = response.data.data;
-                    let entires = response.data.entries;
-                     
+        let response = await http.get('/single-student', { params: { barcode, date, with_attendance: true } })
+        if(response.status == 200){
+            let student = response.data.data;
+            let entires = response.data.entries;
+                
+            
+            if(student.status !== 1){
+                return emitter.emit('toaster-error', { message: 'এই স্টুডেন্টটি আপাতত নিষ্ক্রিয় আছে'})
+            } 
+
+
+            
+            let shifts = helper.getShifts(classes.value, class_short, false)
+            if (!shifts?.length) {
+                return emitter.emit('toaster-success', {message: `${class_name} এর জন্য শিফট নির্ধারণ করা হয়নি`})
+                
+            } else {
+
+                let payload = {
+                    // id: null,
+                    student_id: student.dakhela,
+                    date,
+                    in_time: null,
+                    out_time: null,
+                    late_in_minute: 0, 
+                    status: 'Present', // 'Present' | 'Late' | 'Leave' | 'Absent' | 'over-stay' | 'Gone-fast',
+                    remarks,
+                    shift_duration: '', // 08:00 - 12:00
+                    device_index,
+                    shift_count: shifts?.length,
+                    shift_number: 1,
+                }
+
+                let today_entries = entires 
+                const max_permitte_entry = shifts?.length * 2
+                const late_consideration_minute = CONFIG.value?.settings?.attendance?.late_consideration_minute || 0
+                const punch_separator_gap_in_seconds = CONFIG.value?.settings?.attendance?.punch_separator_gap_in_seconds || 5
+                let ___concatedShifts = helper.getShifts(classes.value, class_short, true)
+                const punch_not_allowed_message = `শিফটের বাহিরে উপস্থিতি গ্রহণযোগ্য নয়! (${___concatedShifts})`
+
+
+                if(!today_entries?.length){
+
+                    // When no entry today, just create an entry
+                    payload.in_time = moment(punch__time).format(TIME_FORMAT)
                     
-                    if(student.status !== 1){
-                        return emitter.emit('toaster-error', { message: 'এই স্টুডেন্টটি আপাতত নিষ্ক্রিয় আছে'})
-                    } 
-
-
+                    let runningShift = getRunningShift(shifts, punch__time) 
+                    if(!runningShift){
+                        emitter.emit('toaster-error', {message: punch_not_allowed_message})
+                        return
+                    }
                     
-                    let shifts = helper.getShifts(classes.value, class_short, false)
-                    if (!shifts?.length) {
-                        return emitter.emit('toaster-success', {message: `${class_name} এর জন্য শিফট নির্ধারণ করা হয়নি`})
+                    payload.shift_number = runningShift.shift_number
+                    payload.shift_duration = `${runningShift.start} - ${runningShift.end}`
+                    payload.late_in_minute = moment(punch__time).diff(runningShift.start_datetime, "minutes");
+                    
+                    if(late_consideration_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_consideration_minute){
+                        payload.late_in_minute = 0
+                    }
+                    if(payload.late_in_minute > 0) payload.status = 'Late'
+                    payload.remarks = 'First In Today' 
+                    await addAttendance(payload)
+
+                } else {
+                    let last_enty = today_entries.at(-1)
+
+                    let last_punch_time = moment(punch__time).format(DATE_FORMAT) + ' ' + (last_enty.in_time || last_enty.out_time)
+                    let gap_seconds = moment(punch__time).diff(moment(last_punch_time), 'seconds')
                         
-                    } else {
 
-                        let payload = {
-                            // id: null,
-                            student_id: student.dakhela,
-                            date,
-                            in_time: null,
-                            out_time: null,
-                            late_in_minute: 0, 
-                            status: 'Present', // 'Present' | 'Late' | 'Leave' | 'Absent' | 'over-stay' | 'Gone-fast',
-                            remarks,
-                            shift_duration: '', // 08:00 - 12:00
-                            device_index,
-                            shift_count: shifts?.length,
-                            shift_number: 1,
+
+                    if(gap_seconds < punch_separator_gap_in_seconds || today_entries?.length === max_permitte_entry){
+                        // need to update last punch, right now
+                        payload = { ...payload, ...last_enty }
+
+
+                        let runningShift = getRunningShift(shifts, punch__time)
+                        if(!runningShift){
+                            emitter.emit('toaster-error', {message: punch_not_allowed_message})
+                            return
                         }
 
-                        let today_entries = entires 
-                        const max_permitte_entry = shifts?.length * 2
-                        const late_consideration_minute = CONFIG.value?.settings?.attendance?.late_consideration_minute || 0
-                        const punch_separator_gap_in_seconds = CONFIG.value?.settings?.attendance?.punch_separator_gap_in_seconds || 5
-                        let ___concatedShifts = helper.getShifts(classes.value, class_short, true)
-                        const punch_not_allowed_message = `শিফটের বাহিরে উপস্থিতি গ্রহণযোগ্য নয়! (${___concatedShifts})`
+                        payload.shift_number = runningShift.shift_number
+                        payload.shift_duration = `${runningShift.start} - ${runningShift.end}`
 
+                        payload.late_in_minute = moment(punch__time).diff(runningShift.start_datetime, "minutes");
+                        
 
-                        if(!today_entries?.length){
-
-                            // When no entry today, just create an entry
+                        if(last_enty.in_time){
                             payload.in_time = moment(punch__time).format(TIME_FORMAT)
-                            
-                            let runningShift = getRunningShift(shifts, punch__time) 
+
+                            if(late_consideration_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_consideration_minute){
+                                payload.late_in_minute = 0
+                            }
+
+
+                            if(payload.late_in_minute > 0){
+                                payload.status = 'Late'
+                            }
+                        }
+                        else if(last_enty.out_time){
+                            payload.out_time = moment(punch__time).format(TIME_FORMAT)
+                            payload.status = '' // no status
+                            payload.late_in_minute = 0
+                        }
+                        
+                        payload.remarks = 'Updated Existing Entry'
+
+                        await updateAttendance(payload)
+
+                    } else {
+                        if(today_entries?.length < max_permitte_entry){
+                            // Create a new entry 
+                            // ==================
+
+                            let runningShift = getRunningShift(shifts, punch__time)
                             if(!runningShift){
                                 emitter.emit('toaster-error', {message: punch_not_allowed_message})
                                 return
                             }
-                            
+
                             payload.shift_number = runningShift.shift_number
                             payload.shift_duration = `${runningShift.start} - ${runningShift.end}`
+
+                            let entry_count_by_shift = today_entries.filter(entry => entry.shift_duration === payload.shift_duration)
+                            if(entry_count_by_shift?.length === 2){
+                                emitter.emit('toaster-error', {message: `এই শিফটের জন্য ${entry_count_by_shift.length} টি এন্ট্রি আছে। আর নতুন এন্ট্রি সম্ভব নয়।`})
+                                return
+                            }
+
                             payload.late_in_minute = moment(punch__time).diff(runningShift.start_datetime, "minutes");
-                            
-                            if(late_consideration_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_consideration_minute){
+
+
+                            if(last_enty.in_time){ 
+                                // if last is in_time, now will be out_time
+                                payload.in_time = null
+                                payload.out_time = moment(punch__time).format(TIME_FORMAT)
+                                payload.remarks = 'Added Out Time' 
                                 payload.late_in_minute = 0
                             }
-                            if(payload.late_in_minute > 0) payload.status = 'Late'
-                            payload.remarks = 'First In Today' 
-                            addAttendance(payload)
+                            else if(last_enty.out_time){
+                                // if last is out_time, now will be in_time
+                                payload.out_time = null
+                                payload.in_time = moment(punch__time).format(TIME_FORMAT)
 
-                        } else {
-                            let last_enty = today_entries.at(-1)
-
-                            let last_punch_time = moment(punch__time).format(DATE_FORMAT) + ' ' + (last_enty.in_time || last_enty.out_time)
-                            let gap_seconds = moment(punch__time).diff(moment(last_punch_time), 'seconds')
-                                
-
-
-                            if(gap_seconds < punch_separator_gap_in_seconds || today_entries?.length === max_permitte_entry){
-                                // need to update last punch, right now
-                                payload = { ...payload, ...last_enty }
-
-
-                                let runningShift = getRunningShift(shifts, punch__time)
-                                if(!runningShift){
-                                    emitter.emit('toaster-error', {message: punch_not_allowed_message})
-                                    return
-                                }
-
-                                payload.shift_number = runningShift.shift_number
-                                payload.shift_duration = `${runningShift.start} - ${runningShift.end}`
-
-                                payload.late_in_minute = moment(punch__time).diff(runningShift.start_datetime, "minutes");
-                                
-
-                                if(last_enty.in_time){
-                                    payload.in_time = moment(punch__time).format(TIME_FORMAT)
-
-                                    if(late_consideration_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_consideration_minute){
-                                        payload.late_in_minute = 0
-                                    }
-
-
-                                    if(payload.late_in_minute > 0){
-                                        payload.status = 'Late'
-                                    }
-                                }
-                                else if(last_enty.out_time){
-                                    payload.out_time = moment(punch__time).format(TIME_FORMAT)
-                                    payload.status = '' // no status
+                                if(late_consideration_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_consideration_minute){
                                     payload.late_in_minute = 0
                                 }
+
+
+                                if(payload.late_in_minute > 0){
+                                    payload.status = 'Late'
+                                }
                                 
-                                payload.remarks = 'Updated Existing Entry'
-
-                                updateAttendance(payload)
-
-                            } else {
-                                if(today_entries?.length < max_permitte_entry){
-                                    // Create a new entry 
-                                    // ==================
-
-                                    let runningShift = getRunningShift(shifts, punch__time)
-                                    if(!runningShift){
-                                        emitter.emit('toaster-error', {message: punch_not_allowed_message})
-                                        return
-                                    }
-
-                                    payload.shift_number = runningShift.shift_number
-                                    payload.shift_duration = `${runningShift.start} - ${runningShift.end}`
-
-                                    let entry_count_by_shift = today_entries.filter(entry => entry.shift_duration === payload.shift_duration)
-                                    if(entry_count_by_shift?.length === 2){
-                                        emitter.emit('toaster-error', {message: `এই শিফটের জন্য ${entry_count_by_shift.length} টি এন্ট্রি আছে। আর নতুন এন্ট্রি সম্ভব নয়।`})
-                                        return
-                                    }
-
-                                    payload.late_in_minute = moment(punch__time).diff(runningShift.start_datetime, "minutes");
-
-
-                                    if(last_enty.in_time){ 
-                                        // if last is in_time, now will be out_time
-                                        payload.in_time = null
-                                        payload.out_time = moment(punch__time).format(TIME_FORMAT)
-                                        payload.remarks = 'Added Out Time' 
-                                        payload.late_in_minute = 0
-                                    }
-                                    else if(last_enty.out_time){
-                                        // if last is out_time, now will be in_time
-                                        payload.out_time = null
-                                        payload.in_time = moment(punch__time).format(TIME_FORMAT)
-
-                                        if(late_consideration_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_consideration_minute){
-                                            payload.late_in_minute = 0
-                                        }
-
-
-                                        if(payload.late_in_minute > 0){
-                                            payload.status = 'Late'
-                                        }
-                                        
-                                        payload.remarks = 'Added In Time'
-                                    }
-
-
-                                    addAttendance(payload)
-
-                                    
-                                } else {
-                                    console.log('==No action==')
-                                }
-                            } 
-                        }
-
-                        if(payload.remarks){
-                            emitter.emit('toaster-success', { message: payload.remarks })
-                        } else {
-                            emitter.emit('toaster-error', { message: 'Attendence Failed!' })
-
-                        }
-                        
-                
-
-                        function getRunningShift(shifts = [], punch__time=moment()) {
-                            let all_shifts = shifts.map((shift, shift_index) => {
-                                // use shift.start / shift.end instead of in_time/out_time
-                                let in_time = moment(moment(punch__time).format("YYYY-MM-DD") + ' ' + shift.start, "YYYY-MM-DD HH:mm");
-                                let out_time = moment(moment(punch__time).format("YYYY-MM-DD") + ' ' + shift.end, "YYYY-MM-DD HH:mm");
-
-                                // pick shift-specific boundary if defined
-                            
-                                let { start_before, end_after } = CONFIG.value.settings?.attendance?.boundary_time || { start_before: [30, 'minutes'], end_after: [30, 'minutes'] }
-                                let [time, unit] = start_before;
-                                let [time2, unit2] = end_after;
-
-                                let left_boundary = moment(in_time).subtract(time, unit);
-                                let right_boundary = moment(out_time).add(time2, unit2);
-
-                                let is_between = moment(punch__time).isBetween(left_boundary, right_boundary); 
-                                let is_over_right_boundary = moment(punch__time).isAfter(right_boundary);
-
-
-                                return {
-                                    ...shift,
-                                    start_datetime: in_time.format('YYYY-MM-DD HH:mm'),
-                                    end_datetime: out_time.format('YYYY-MM-DD HH:mm'),
-                                    is_between,
-                                    shift_number: shift_index + 1,
-                                    is_over_right_boundary,
-                                };
-                            });
-
-                            let currentShift = all_shifts.toReversed().find(s => s.is_between)
-
-                            const strict_boundary_time = CONFIG.value.settings?.attendance?.strict_boundary_time ?? false
-                            // if not strict mode, shift auto detect 
-                            if(strict_boundary_time === false && !currentShift){
-                                currentShift = all_shifts.toReversed().find(s => s.is_over_right_boundary)
-                                // if no shift is over, set first shift of day as current shift
-                                if(!currentShift) currentShift = all_shifts[0]
+                                payload.remarks = 'Added In Time'
                             }
-                            return currentShift
+
+
+                            await addAttendance(payload)
+
+                            
+                        } else {
+                            console.log('==No action==')
                         }
+                    } 
+                }
 
+                if(payload.remarks){
+                    emitter.emit('toaster-success', { message: payload.remarks })
+                } else {
+                    emitter.emit('toaster-error', { message: 'Attendence Failed!' })
 
+                }
+                
+        
 
+                function getRunningShift(shifts = [], punch__time=moment()) {
+                    let all_shifts = shifts.map((shift, shift_index) => {
+                        // use shift.start / shift.end instead of in_time/out_time
+                        let in_time = moment(moment(punch__time).format("YYYY-MM-DD") + ' ' + shift.start, "YYYY-MM-DD HH:mm");
+                        let out_time = moment(moment(punch__time).format("YYYY-MM-DD") + ' ' + shift.end, "YYYY-MM-DD HH:mm");
 
-                        function addAttendance(payload){
-                            http.post('/attendence-add', payload).then(response => {
-                                if(response.status === 200){
-                                    let attendenceData = response.data.data
-                                    liveAttendenceList.value.push({...attendenceData, live_data: true})
-                                    callbacks.fixOverflowOfLiveAttendence()
-                                    setTimeout(() => {
-                                        delete liveAttendenceList.value.at(-1).live_data
-                                    }, 700);
-                                }
-                            })
-                        }
-
-                        function updateAttendance(payload){
-                            http.post('/attendence-update', payload).then(response => {
-                                if(response.status === 200){
-                                    let targetIndex = liveAttendenceList.value.findIndex(item => item.id == payload.id)
-                                    if(targetIndex > -1){
-                                        liveAttendenceList.value[targetIndex] = {...liveAttendenceList.value[targetIndex], ...payload, updated_now: true}
-                                    } else {
-                                        liveAttendenceList.value.push(payload)
-                                    } 
-                                }
-                            })
-                        }
-     
-                   
-    
-                        if(source !== 'device'){
-                            // emitter.emit('toaster-success', { message: 'কার্ডটি সফলভাবে পাঞ্চ হয়েছে।'})
-                        }
-                    }
+                        // pick shift-specific boundary if defined
                     
-               }
-          })
+                        let { start_before, end_after } = CONFIG.value.settings?.attendance?.boundary_time || { start_before: [30, 'minutes'], end_after: [30, 'minutes'] }
+                        let [time, unit] = start_before;
+                        let [time2, unit2] = end_after;
+
+                        let left_boundary = moment(in_time).subtract(time, unit);
+                        let right_boundary = moment(out_time).add(time2, unit2);
+
+                        let is_between = moment(punch__time).isBetween(left_boundary, right_boundary); 
+                        let is_over_right_boundary = moment(punch__time).isAfter(right_boundary);
+
+
+                        return {
+                            ...shift,
+                            start_datetime: in_time.format('YYYY-MM-DD HH:mm'),
+                            end_datetime: out_time.format('YYYY-MM-DD HH:mm'),
+                            is_between,
+                            shift_number: shift_index + 1,
+                            is_over_right_boundary,
+                        };
+                    });
+
+                    let currentShift = all_shifts.toReversed().find(s => s.is_between)
+
+                    const strict_boundary_time = CONFIG.value.settings?.attendance?.strict_boundary_time ?? false
+                    // if not strict mode, shift auto detect 
+                    if(strict_boundary_time === false && !currentShift){
+                        currentShift = all_shifts.toReversed().find(s => s.is_over_right_boundary)
+                        // if no shift is over, set first shift of day as current shift
+                        if(!currentShift) currentShift = all_shifts[0]
+                    }
+                    return currentShift
+                }
+
+
+
+
+                async function addAttendance(payload){
+                    let response = await http.post('/attendence-add', payload)
+                    if(response.status === 200){
+                        let attendenceData = response.data.data
+                        liveAttendenceList.value.push({...attendenceData, live_data: true})
+                        callbacks.fixOverflowOfLiveAttendence()
+                        setTimeout(() => {
+                            delete liveAttendenceList.value.at(-1).live_data
+                        }, 700);
+                    } 
+                }
+
+                async function updateAttendance(payload){
+                    let response = await http.post('/attendence-update', payload)
+                    if(response.status === 200){
+                        let targetIndex = liveAttendenceList.value.findIndex(item => item.id == payload.id)
+                        if(targetIndex > -1){
+                            liveAttendenceList.value[targetIndex] = {...liveAttendenceList.value[targetIndex], ...payload, updated_now: true}
+                        } else {
+                            liveAttendenceList.value.push(payload)
+                        } 
+                    } 
+                }
+
+            
+
+                if(source !== 'device'){
+                    // emitter.emit('toaster-success', { message: 'কার্ডটি সফলভাবে পাঞ্চ হয়েছে।'})
+                }
+            }
+            
+        }
+          
      } catch (error) {
           console.warn('punchToSubmitAttendance_error::', error);
      }

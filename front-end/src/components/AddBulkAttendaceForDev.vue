@@ -15,9 +15,6 @@
                         <option :value="cls.class_short">{{cls?.class_name}}</option>
                     </template>                  
                 </select> 
-                <span v-if="payload.class_short && payload.class_short != 'null' && payload.dates?.startDate && payload.dates?.endDate" @click="deleteAllDataForSelectedClass" class="badge bg-danger cp"> 
-                    <i class='bx bxs-trash' ></i> Delete Data for {{ payload.class_short }}
-                </span>
             </div>
             <div class="col-6">
                 <label for="">Attendance For Shifts</label>
@@ -73,17 +70,17 @@
                             <Switch v-model="payload.out_time_punch" size="lg"></Switch>
                         </div>
                     </div>
-                    <template v-if="payload.with_random_time">
+                    <template v-if="true">
                         <div class="col-6 mt-3">
                             <div class="form-group">
                                 <label for="">Before</label>
-                                <input v-model="payload.times.before" type="number" class="form-control cb-input" > 
+                                <input v-model="payload.times.before" type="number" class="form-control cb-input" :disabled="!payload.with_random_time"> 
                             </div>
                         </div>
                         <div class="col-6 mt-3">
                             <div class="form-group">
                                 <label for="">After</label>
-                                <input v-model="payload.times.after" type="number" class="form-control cb-input" > 
+                                <input v-model="payload.times.after" type="number" class="form-control cb-input" :disabled="!payload.with_random_time"> 
                             </div>
                         </div>
                     </template>
@@ -100,8 +97,11 @@
             </div>
         </div>
         <template #footer>
-            <div class="col-12 mt-5">
+            <div class="col-12 mt-5 d-flex column-gap-2">
                 <Btn @click.stop="AddBulkAttendanceNow()">Add Bulk Attendance</Btn>
+                <Btn @click.stop="deleteAllDataForSelectedClass()" class="red" v-if="payload.class_short && payload.class_short != 'null' && payload.dates?.startDate && payload.dates?.endDate">
+                    <i class='bx bxs-trash' ></i> Delete Data for <span class="badge bg-danger shadow">{{ payload.class_short }}</span>
+                </Btn>
             </div>
         </template>
 
@@ -147,7 +147,7 @@ let payload = reactive({
         startDate: null,
         endDate: null,
     },
-    with_random_time: 0,
+    with_random_time: 1,
     out_time_punch: 1,
     times: {
         before: 15,
@@ -182,7 +182,7 @@ async function AddBulkAttendanceNow() {
     if(!payload.shifts?.length){
         return emitter.emit('toaster-error', { message: 'Please select shifts', duration: 1000 })
     }
-    if(!payload.dates.startDateTime || !payload.dates.endDateTime){
+    if(!payload.dates.startDate || !payload.dates.endDate){
         return emitter.emit('toaster-error', { message: 'Please select date range', duration: 1000 })
     }
 
@@ -207,16 +207,46 @@ async function AddBulkAttendanceNow() {
         return emitter.emit('toaster-error', { message: 'No valid dates found in the selected range (considering weekends)' })
     }
 
-    let final_payload = {
-        class_short: payload.class_short,
-        shifts: payload.shifts,
-        dates: all_dates,
-        with_random_time: payload.with_random_time,
-        times: payload.times,
-        students: students_in_class.map(s => s.dakhela)
-    }
+    // let final_payload = {
+    //     class_short: payload.class_short,
+    //     shifts: payload.shifts,
+    //     dates: all_dates,
+    //     with_random_time: payload.with_random_time,
+    //     times: payload.times,
+    //     students: students_in_class.map(s => s.dakhela)
+    // }
 
-    console.log({final_payload});
+    let date_range = helper.createDateRange(payload.dates.startDate, payload.dates.endDate)
+
+    let records = []
+    date_range.forEach(date => {
+        students_in_class.forEach(student => { 
+            let barcode = makeCarcode(student)
+            payload.shifts.forEach((shift) => {
+                let { times } = payload
+                let { start, end } = shift
+               
+                if(payload.with_random_time){
+                    let rand_minute = helper.randomBetween(0, Number(times.before) + Number(times.after))
+                    start = moment(start, 'HH:mm').subtract(times.before, 'minutes').add(rand_minute, 'minutes').format('HH:mm')
+                }
+                if(payload.out_time_punch){
+                    let rand_minute = helper.randomBetween(0, Number(times.after))
+                    end = moment(end, 'HH:mm').add(rand_minute, 'minutes').format('HH:mm')
+                }
+                let punch_time = date + ' ' + start
+                console.log({start});
+                 
+            })
+            // console.log({barcode});
+        })
+    })
+   
+
+
+    console.log({records});
+
+    // punchToSubmitAttendance(makeCarcode(targetStudent.value), {source: 'manual_button', delay: 0, punch_time: data.startDateTime })
      
 }
 
@@ -232,12 +262,12 @@ async function deleteAllDataForSelectedClass(){
     try {
         let response = await http.delete('/attendence-delete-bulk', { params })
         if(response.status == 200){
-            emitter.emit('toaster-success', { message: 'Deleted Successful'})
+            emitter.emit('toaster-success', { message: response.data?.message})
         } else {
             emitter.emit('toaster-error', { message: 'Deleted failed!'})
         }
     } catch (error) {
-        emitter.emit('toaster-error', { message: 'Deleted Successful'})
+        emitter.emit('toaster-error', { message: 'Deleted failed'})
     }
 }
 
