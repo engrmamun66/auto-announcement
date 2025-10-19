@@ -161,13 +161,33 @@ import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue';
     color: white;
     font-weight: bold;
   }
+
   
   .slider-track {
     position: relative;
     height: 10px;
     background: #e0e0e0;
     border-radius: 5px;
-    margin: 16px 0;
+    margin: 16px calc(6% - 20px);
+  }
+  .slider-track::before,
+  .slider-track::after
+   {
+    position: absolute;
+    content: "";
+    top: 0;
+    width: calc(6% + 20px);
+    height: 10px;
+    background-color: #e0e0e0;
+    opacity: 1;
+    pointer-events: none;
+  }
+  .slider-track::before 
+   { 
+    left: calc(-6% + 20px); 
+  }
+  .slider-track::after { 
+    right: calc(-6% + 20px); 
   }
   
   .slider-range {
