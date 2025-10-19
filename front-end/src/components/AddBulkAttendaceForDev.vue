@@ -111,10 +111,10 @@
            </div>
         </div>
         <template #footer>
-            <div class="col-12 mt-5 d-flex column-gap-2">
+            <div class="col-12 mt-5 d-flex column-gap-2 justify-content-between">
                 <Btn @click.stop="AddBulkAttendanceNow()">Add Bulk Attendance <BtnLoader v-if="inserting"></BtnLoader> </Btn>
-                <Btn @click.stop="deleteAllDataForSelectedClass()" class="red" v-if="payload.class_short && payload.class_short != 'null' && payload.dates?.startDate && payload.dates?.endDate">
-                    <i class='bx bxs-trash' ></i> Delete Data for <span class="badge bg-danger shadow">{{ payload.class_short }}</span>
+                <Btn @click.stop="deleteAllDataForSelectedClass()" class="red border" v-if="payload.class_short != 'null' && payload.dates?.startDate && payload.dates?.endDate">
+                    <i class='bx bxs-trash' ></i> Delete Data for <span class="badge bg-danger shadow">{{ payload.class_short || 'All Classes' }}</span>
                 </Btn>
             </div>
         </template>
@@ -168,7 +168,7 @@ let payload = reactive({
     source_device: 1,
     times: {
         before: 15,
-        after: 15,
+        after: 10,
     },
 })
 
@@ -216,7 +216,7 @@ async function AddBulkAttendanceNow() {
     if(!payload.selected_students?.length){
         return emitter.emit('toaster-error', { message: `No students found in ${getSelectedClass.value.class_name}`, duration: 1000 })
     }
-    
+
     if(!payload.dates.startDate || !payload.dates.endDate){
         return emitter.emit('toaster-error', { message: 'Please select date range', duration: 1000 })
     }
@@ -293,8 +293,10 @@ async function AddBulkAttendanceNow() {
 async function deleteAllDataForSelectedClass(){
 
     if(!confirm(`Are you sure to delete all attendance data for ${payload.class_short} from ${payload.dates?.startDate} to ${payload.dates?.endDate}?`)) return
+    if(!confirm(`2nd time confirmation: Delete all?`)) return
+    let student_ids = payload.class_short ? all_students.value.filter(s => s.class_short == payload.class_short).map(s => s.dakhela) : all_students.value.map(s => s.dakhela)
     let params = {
-        student_ids: all_students.value.filter(s => s.class_short == payload.class_short).map(s => s.dakhela),
+        student_ids,
         start_date: payload.dates?.startDate,
         end_date: payload.dates?.endDate,
     }
