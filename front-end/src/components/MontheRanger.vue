@@ -1,10 +1,17 @@
 <template>
     <div class="month-range-slider" ref="sliderRef">
+
+      <!-- Display Value -->
+      <div class="selection-display mb-3">
+         {{ displayValue }}
+      </div>
+
       <!-- Months labels -->
       <div class="months-grid">
         <div
           v-for="month in months"
           :key="month.value"
+          @click="onClickMontSort(month)"
           :class="['month', isInRange(month.value) ? 'selected' : '']"
         >
           {{ month.label }}
@@ -38,10 +45,7 @@
         ></div>
       </div>
   
-      <!-- Display Value -->
-      <div class="selection-display">
-        Selected Range: {{ displayValue }}
-      </div>
+      
     </div>
   </template>
   
@@ -50,7 +54,7 @@
 import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue';
   
   export default {
-    name: 'DualMonthSlider',
+    // name: 'DualMonthSlider',
     emits: ['update:modelValue'],
     setup(_, { emit }) {
       const months = [
@@ -83,7 +87,7 @@ import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue';
       const displayValue = computed(() => {
         const startLabel = months.find(m => m.value === state.startMonth)?.label;
         const endLabel = months.find(m => m.value === state.endMonth)?.label;
-        return `${startLabel} - ${endLabel}`;
+        return `${moment(startLabel, 'MMM').format('D MMMM')} - ${moment(endLabel, 'MMM').endOf('months').format('D MMMM')}`;
       });
   
       const isInRange = (month) => month >= state.startMonth && month <= state.endMonth;
@@ -120,6 +124,19 @@ import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue';
         window.addEventListener('touchmove', onDrag);
         window.addEventListener('touchend', stopDrag);
       };
+
+
+      const onClickMontSort = ({value}) => {
+        // value
+        // tate.startMonth
+        // tate.endMonth
+        if(value < state.startMonth){
+          state.startMonth = value
+        } else {
+          state.endMonth = value
+        }
+      };
+
   
       onBeforeUnmount(() => {
         stopDrag();
@@ -134,13 +151,19 @@ import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue';
         isInRange,
         sliderRef,
         trackRef,
-        startDrag
+        startDrag,
+        onClickMontSort,
       };
     }
   };
   </script>
   
   <style scoped>
+  .month-range-slider{
+    background-color: #ffffff47;
+    padding: 10px 10px 20px 10px;
+    border-radius: 10px;
+  }
   .months-grid {
     display: flex;
     justify-content: space-between;
@@ -160,35 +183,32 @@ import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue';
     background: var(--primaryColor);
     color: white;
     font-weight: bold;
+    border-radius: 0px;
   }
-
   
   .slider-track {
     position: relative;
     height: 10px;
-    background: #e0e0e0;
+    background: #f6f6f6;
     border-radius: 5px;
     margin: 16px calc(6% - 20px);
   }
-  .slider-track::before,
-  .slider-track::after
-   {
-    position: absolute;
-    content: "";
-    top: 0;
-    width: calc(6% + 20px);
-    height: 10px;
-    background-color: #e0e0e0;
-    opacity: 1;
-    pointer-events: none;
+  @media (min-width: 768px) {
+      .slider-track {
+          margin: 16px calc(6% - 16px);
+      }
   }
-  .slider-track::before 
-   { 
-    left: calc(-6% + 20px); 
+  @media (min-width: 1200px) {
+      .slider-track {
+          margin: 16px calc(6% - 30px);
+      }
   }
-  .slider-track::after { 
-    right: calc(-6% + 20px); 
+  @media (min-width: 1600px) {
+      .slider-track {
+          margin: 16px calc(6% - 122px);
+      }
   }
+   
   
   .slider-range {
     position: absolute;
@@ -213,6 +233,7 @@ import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue';
   .selection-display {
     font-weight: bold;
     font-size: 16px;
+    text-align: center;
   }
   </style>
   
