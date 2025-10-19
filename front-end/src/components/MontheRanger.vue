@@ -60,7 +60,7 @@ import {
   defineEmits,
   onBeforeUnmount,
 } from "vue";
-let emits = defineEmits(["update:modelValue"]);
+let emits = defineEmits(["update:modelValue", "change"]);
 
 const months = [
   { label: "Jan", value: 1 },
@@ -117,8 +117,20 @@ const onDrag = (event) => {
   } else if (state.dragging === "end") {
     state.endMonth = Math.max(value, state.startMonth);
   }
-  emit("update:modelValue", [state.startMonth, state.endMonth]);
+  updateModelValueAndChange()
 };
+
+
+function updateModelValueAndChange() {
+  let start_date = moment().month(state.startMonth - 1).startOf('month').format('Y-MM-DD');
+  let end_date = moment().month(state.endMonth - 1).endOf('month').format('Y-MM-DD');
+
+  
+  emits("change", [start_date, end_date]);
+  emits("update:modelValue", [start_date, end_date]);
+}
+
+
 
 function stopDrag() {
   state.dragging = null;
@@ -142,7 +154,12 @@ function onClickMontSort({ value }) {
   } else {
     state.endMonth = value;
   }
+  updateModelValueAndChange()
 }
+
+onMounted(() => {
+  updateModelValueAndChange()
+})
 
 onBeforeUnmount(() => {
   stopDrag();
