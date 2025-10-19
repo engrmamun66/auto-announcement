@@ -11,7 +11,8 @@
       <div
         v-for="month in months"
         :key="month.value"
-        @click="onClickMontSort(month)"
+        @click.stop="onClickMontSort(month)"
+        @dblclick.stop="state.startMonth = month.value; state.endMonth = month.value"
         :class="['month', isInRange(month.value) ? 'selected' : '']"
       >
         {{ month.label }}
