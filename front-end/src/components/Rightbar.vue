@@ -1,5 +1,6 @@
 <script setup>
 import { onMounted, inject, ref, watch, computed, onBeforeUnmount } from 'vue';
+import { useRoute } from 'vue-router';
 /**
  * How to call
  * ==========================================
@@ -54,6 +55,7 @@ function unmount(){
 }
 function toggle(){
     isMounted.value = !isMounted.value;
+    console.log('asdfasdf');
 }
 
 let isMounted = ref(false);
@@ -109,7 +111,7 @@ defineExpose({unmount})
                             <h2>{{ title ? title : '&nbsp;'}}</h2>
                         
                         <div class="button-area">
-                            <template v-if="router.query?.dev === 'true'">
+                            <template v-if="useRoute().query?.dev === 'true'">
                                 <div v-if="!toggling" class="toggle-button" :class="{ active: toggling}"  @click.stop="()=>{
                                     toggling = !toggling;
                                     if(toggling) toggle();
@@ -273,6 +275,7 @@ defineExpose({unmount})
  {
     background-color: var(--primaryColor);  
     border: 1px solid var(--primaryColor);
+    color: white !important;
 }
 .rightbar .contents .footer{
     position: absolute;

@@ -9,7 +9,7 @@
         <div class="row">
             <div class="col-6">
                 <label for="">Select Class </label>
-                <select v-model="payload.class_short" class="form-control cb-input" @change="submitSearch" style="width:350px">
+                <select v-model="payload.class_short" class="form-control cb-input" @change="submitSearch">
                     <option :value="null">-class-</option>
                     <template v-for="(cls, index) in classes" :key="index">
                         <option :value="cls.class_short">{{cls?.class_name}}</option>
@@ -177,11 +177,22 @@ let studentsByClass = computed(() => {
     if(!payload.class_short){
         return []
     }
-    return all_students_non_copied.value.filter(student => student.class_short == payload.class_short)
+    
+    let students = all_students_non_copied.value.filter(student => student.class_short == payload.class_short)
+    if(studentnameorid.value){
+        let is_id = /\d+/.test(studentnameorid.value)
+        if(is_id){
+            students = students.filter(student => student.dakhela.toString().includes(studentnameorid.value))
+        } else {
+            students = students.filter(student => student.name.toLowerCase().includes(studentnameorid.value.toLowerCase()))
+        }
+    }
+    return students
 })
 
 watch(()=>payload.class_short, () => {
     payload.selected_students = []
+    studentnameorid.value = ''
 })
 
 let getSelectedClass = computed(() => {
@@ -273,12 +284,7 @@ async function AddBulkAttendanceNow() {
    
     let all_records = records.flat()
 
-
-    window.addEventListener('unload', (event) => {
-        event.preventDefault();
-        event.returnValue = false;
-        return false
-    })
+    // console.log({all_records});
 
     if(!confirm(`Are you sure to add ${all_records.length} new records` )) return
 
