@@ -273,7 +273,7 @@ async function AddBulkAttendanceNow() {
                         punch_time: date + ' ' + end
                     }]
                     // Out punch
-                    shift_in_out_pucn.push(in_punch)
+                    shift_in_out_pucn.push(out_punch)
                 } 
 
                 records.push(shift_in_out_pucn)
@@ -284,13 +284,12 @@ async function AddBulkAttendanceNow() {
    
     let all_records = records.flat()
 
-    // console.log({all_records});
+    // console.log({records, all_records});
 
     if(!confirm(`Are you sure to add ${all_records.length} new records` )) return
 
     inserting.value = true
     for (const item of all_records){
-        // punchToSubmitAttendance(makeCarcode(targetStudent.value), {source: 'manual_button', delay: 0, punch_time: data.startDateTime })
         await punchToSubmitAttendance(item[0], item[1])
     }
     inserting.value = false 
