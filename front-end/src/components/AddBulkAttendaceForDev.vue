@@ -39,7 +39,7 @@
                 </div> 
             </div>
            <div class="row">
-               <div class="col-6 mt-3" >
+               <div class="col-md-6 col-12 mt-3" >
                    <div class="row">
                        <div class="col-12">
                            <label for="">Select Date Range</label>
@@ -74,28 +74,29 @@
                     
                </div>
    
-               <div class="col-6 mt-3">
+               <div class="col-md-6 col-12mt-3">
                    <div class="row">
-                       <div class="col-6">
-                           <div class="form-group">
-                               <label for="">With Random Time</label>
-                               <Switch v-model="payload.with_random_time" size="lg"></Switch>
-                           </div>
-                       </div>
-                       <div class="col-6">
+                        <div class="col-12">
                            <div class="form-group">
                                <label for="">Punch Out Times</label>
                                <Switch v-model="payload.out_time_punch" size="lg"></Switch>
                            </div>
                        </div>
+                       <div class="col-12 mt-3">
+                           <div class="form-group">
+                               <label for="">With Random Time</label>
+                               <Switch v-model="payload.with_random_time" size="lg"></Switch>
+                           </div>
+                       </div>
+                       
                        <template v-if="true">
-                           <div class="col-6 mt-3">
+                           <div class="col-12 mt-3">
                                <div class="form-group">
                                    <label for="">Before</label>
                                    <input v-model="payload.times.before" type="number" class="form-control cb-input" :disabled="!payload.with_random_time"> 
                                </div>
                            </div>
-                           <div class="col-6 mt-3">
+                           <div class="col-12 mt-3">
                                <div class="form-group">
                                    <label for="">After</label>
                                    <input v-model="payload.times.after" type="number" class="form-control cb-input" :disabled="!payload.with_random_time"> 
