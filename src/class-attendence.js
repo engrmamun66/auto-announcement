@@ -125,8 +125,8 @@ class Attendance {
       // data query
       const dataQuery = `
         SELECT a.*, s.class_short, s.name AS student_name
-        FROM ${this.tableName} a
-        LEFT JOIN students s ON a.student_id = s.id
+        FROM ${this.tableName} a 
+        LEFT JOIN students s ON a.student_id = s.dakhela
         ${whereClause}
         ${groupBy}
         ORDER BY a.${orderBy} ${direction}
