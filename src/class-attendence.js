@@ -12,154 +12,7 @@ class Attendance {
       this.tableName = "attendance";
       this.db = db;
     }
-
-     // Get attendance records
-     ___list(req, res) {
-      const page_no = parseInt(req.query.page_no) || 1;
-      const limit = parseInt(req.query.limit) || 100;
-      const offset = (page_no - 1) * limit;
-    
-      const { student_id, date } = req.query;
-      let query = `SELECT * FROM ${this.tableName} WHERE 1=1`;
-      let params = [];
-    
-      if (student_id) { query += " AND student_id = ?"; params.push(student_id); }
-      if (date) { query += " AND date = ?"; params.push(date); }
-    
-      // Add pagination
-      query += ` LIMIT ? OFFSET ?`;
-      params.push(limit, offset);
-    
-      this.db.all(query, params, (err, rows) => {
-        if (err) return res.status(500).send({ error: err.message });
-    
-        // Count query for pagination metadata
-        let countQuery = `SELECT COUNT(*) as total FROM ${this.tableName} WHERE 1=1`;
-        let countParams = [];
-        if (student_id) { countQuery += " AND student_id = ?"; countParams.push(student_id); }
-        if (date) { countQuery += " AND date = ?"; countParams.push(date); }
-    
-        this.db.get(countQuery, countParams, (err, result) => {
-          if (err) return res.status(500).send({ error: err.message });
-    
-          const total = result.total;
-          const totalPages = Math.ceil(total / limit);
-    
-          res.send({
-            data: rows,
-            pagination: {
-              page_no,
-              total,
-              limit,
-              totalPages,
-            },
-          });
-        });
-      });
-    }
-
  
-    list(req, res) {
-      const MAX_LIMIT = 1000;
-      const page_no = Math.max(1, parseInt(req.query.page_no) || 1);
-      let limit = Math.min(parseInt(req.query.limit) || 100, MAX_LIMIT);
-      const offset = (page_no - 1) * limit;
-    
-      const {
-        student_ids,
-        class_shorts,
-        start_date,
-        end_date,
-        date,
-        sort_by = "date",
-        sort_direction = "ASC",
-        group_by = null
-      } = req.query;
-    
-      const whereParts = [];
-      const params = [];
-    
-      // student_ids (array or comma-separated)
-      if (student_ids) {
-        const ids = Array.isArray(student_ids)
-          ? student_ids.map(Number).filter(Boolean)
-          : String(student_ids).split(",").map(Number).filter(Boolean);
-        if (ids.length) {
-          whereParts.push(`a.student_id IN (${ids.map(() => "?").join(",")})`);
-          params.push(...ids);
-        }
-      }
-    
-      // class_shorts (array or comma-separated)
-      if (class_shorts) {
-        const shorts = Array.isArray(class_shorts)
-          ? class_shorts
-          : String(class_shorts).split(",").map(s => s.trim()).filter(Boolean);
-        if (shorts.length) {
-          whereParts.push(`s.class_short IN (${shorts.map(() => "?").join(",")})`);
-          params.push(...shorts);
-        }
-      }
-    
-      // date or range
-      if (start_date && end_date) {
-        whereParts.push("a.date BETWEEN ? AND ?");
-        params.push(start_date, end_date);
-      } else if (date) {
-        whereParts.push("a.date = ?");
-        params.push(date);
-      }
-    
-      const whereClause = whereParts.length ? "WHERE " + whereParts.join(" AND ") : "";
-    
-      // safe sorting
-      const allowedSortBy = ["date", "in_time", "out_time", "created"];
-      const allowedSortDir = ["ASC", "DESC"];
-      const orderBy = allowedSortBy.includes(sort_by) ? sort_by : "date";
-      const direction = allowedSortDir.includes(sort_direction.toUpperCase()) ? sort_direction.toUpperCase() : "ASC";
-    
-      // optional group_by
-      const allowedGroupBy = ["student_id", "date"]; // class_short is from students table, so it can't be used directly in GROUP BY a.class_short
-      // const groupBy = allowedGroupBy.includes(group_by) ? `GROUP BY a.${group_by}` : "";
-      const groupBy = ''
-    
-      // data query
-      const dataQuery = `
-        SELECT a.*, s.class_short, s.name AS student_name
-        FROM ${this.tableName} a 
-        LEFT JOIN students s ON a.student_id = s.dakhela
-        ${whereClause}
-        ${groupBy}
-        ORDER BY a.${orderBy} ${direction}
-        LIMIT ? OFFSET ?
-      `;
-      const dataParams = [...params, limit, offset];
-    
-      this.db.all(dataQuery, dataParams, (err, rows) => {
-        if (err) return res.status(500).send({ error: err.message });
-    
-        const countQuery = `
-          SELECT COUNT(*) AS total
-          FROM ${this.tableName} a
-          LEFT JOIN students s ON a.student_id = s.dakhela
-          ${whereClause}
-        `;
-        this.db.get(countQuery, params, (err, result) => {
-          if (err) return res.status(500).send({ error: err.message });
-    
-          const total = result?.total || 0;
-          const totalPages = Math.max(1, Math.ceil(total / limit));
-    
-          res.send({
-            data: rows,
-            pagination: { page_no, total, limit, totalPages },
-          });
-        });
-      });
-    }
-      
-    
-    
   
     addNew(req, res) {
       const { student_id, date, in_time, out_time, status = 'present', remarks, late_in_minute = 0, device_index = 1, shift_duration = '', shift_count = 1, shift_number = 1 } = req.body;
@@ -270,6 +123,110 @@ class Attendance {
       });
  
     }
+
+
+
+
+    list(req, res) {
+      const MAX_LIMIT = 1000;
+      const page_no = Math.max(1, parseInt(req.query.page_no) || 1);
+      let limit = Math.min(parseInt(req.query.limit) || 100, MAX_LIMIT);
+      const offset = (page_no - 1) * limit;
+    
+      const {
+        student_ids,
+        class_shorts,
+        start_date,
+        end_date,
+        date,
+        sort_by = "date",
+        sort_direction = "ASC", 
+        action = '',
+      } = req.query;
+    
+      const whereParts = [];
+      const params = [];
+    
+      // student_ids (array or comma-separated)
+      if (student_ids) {
+        const ids = Array.isArray(student_ids)
+          ? student_ids.map(Number).filter(Boolean)
+          : String(student_ids).split(",").map(Number).filter(Boolean);
+        if (ids.length) {
+          whereParts.push(`a.student_id IN (${ids.map(() => "?").join(",")})`);
+          params.push(...ids);
+        }
+      }
+    
+      // class_shorts (array or comma-separated)
+      if (class_shorts) {
+        const shorts = Array.isArray(class_shorts)
+          ? class_shorts
+          : String(class_shorts).split(",").map(s => s.trim()).filter(Boolean);
+        if (shorts.length) {
+          whereParts.push(`s.class_short IN (${shorts.map(() => "?").join(",")})`);
+          params.push(...shorts);
+        }
+      }
+    
+      // date or range
+      if (start_date && end_date) {
+        whereParts.push("a.date BETWEEN ? AND ?");
+        params.push(start_date, end_date);
+      } else if (date) {
+        whereParts.push("a.date = ?");
+        params.push(date);
+      }
+    
+      const whereClause = whereParts.length ? "WHERE " + whereParts.join(" AND ") : "";
+    
+      // safe sorting
+      const allowedSortBy = ["date", "in_time", "out_time", "created"];
+      const allowedSortDir = ["ASC", "DESC"];
+      const orderBy = allowedSortBy.includes(sort_by) ? sort_by : "date";
+      const direction = allowedSortDir.includes(sort_direction.toUpperCase()) ? sort_direction.toUpperCase() : "ASC";
+    
+      
+    
+      // data query
+      const dataQuery = `
+        SELECT a.*, s.class_short, s.name AS student_name
+        FROM ${this.tableName} a 
+        LEFT JOIN students s ON a.student_id = s.dakhela
+        ${whereClause} 
+        ORDER BY a.${orderBy} ${direction}
+        LIMIT ? OFFSET ?
+      `;
+      const dataParams = [...params, limit, offset];
+    
+      this.db.all(dataQuery, dataParams, (err, rows) => {
+        if (err) return res.status(500).send({ error: err.message });
+    
+        const countQuery = `
+          SELECT COUNT(*) AS total
+          FROM ${this.tableName} a
+          LEFT JOIN students s ON a.student_id = s.dakhela
+          ${whereClause}
+        `;
+        this.db.get(countQuery, params, (err, result) => {
+          if (err) return res.status(500).send({ error: err.message });
+    
+          const total = result?.total || 0;
+          const totalPages = Math.max(1, Math.ceil(total / limit));
+    
+          res.send({
+            data: rows,
+            pagination: { page_no, total, limit, totalPages },
+          });
+        });
+      });
+    }
+
+
+
+
+
+    
   }
   
   module.exports = Attendance;

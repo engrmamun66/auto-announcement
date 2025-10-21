@@ -186,6 +186,7 @@ onBeforeUnmount(() => {
   transition: all 0.2s;
   cursor: pointer;
   user-select: none;
+  font-size: 15px;
 }
 
 .month.selected {
