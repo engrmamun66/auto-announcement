@@ -373,7 +373,7 @@ app.get(`/api/_ac`, async (req, res) => {
   // ====================================================== //
   // =================== With Attendence ================== //
   // ====================================================== //
-  app.get(prefix + '/attendence-list', (req, res) => {
+  app.post(prefix + '/attendence-list', (req, res) => {
     Attendence.list(req, res)
   }); 
   app.post(prefix + '/attendence-add', (req, res) => {

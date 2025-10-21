@@ -143,6 +143,8 @@ class Attendance {
         sort_direction = "ASC", 
         action = '',
       } = req.query;
+
+      const payload = req.body
     
       const whereParts = [];
       const params = [];
@@ -215,7 +217,7 @@ class Attendance {
           const totalPages = Math.max(1, Math.ceil(total / limit));
     
           res.send({
-            data: rows,
+            data: this.modify_data_by_action(rows, action, req),
             pagination: { page_no, total, limit, totalPages },
           });
         });
@@ -223,11 +225,76 @@ class Attendance {
     }
 
 
+    modify_data_by_action(rows, action, req){
 
+      
+      if(!action) return rows
+      else {
+        if(action === 'classwise_data'){
+          let { start_date, end_date } = req.query 
+          let { leaveData, weekends } = req.body
+
+          let groups = utils.listGroupBy(rows, 'class_short')
+          let date_range = utils.createDateRange(start_date, end_date)
+          
+          // ======  Main Report variable  ========
+          let MAIN_REPORT = {} 
+          // ======  Main Report variable  ========
+          
+          Object.entries(groups).forEach(([key, students]) => {
+
+            if(!MAIN_REPORT[key]) MAIN_REPORT[key] = []
+
+            for(let i=0; i <= students?.length; i++){
+              /**
+               * Student variable properties
+               * ===========================
+                id: 23893,
+                student_id: 23,
+                date: '2025-10-01',
+                in_time: '08:29:00',
+                out_time: null,
+                late_in_minute: -1,
+                status: 'Present',
+                remarks: 'First In Today',
+                shift_duration: '08:30 - 10:00',
+                shift_count: 2,
+                shift_number: 1,
+                device_index: 0,
+                created: '2025-10-21 00:50:47',
+                class_short: 'one',
+                student_name: 'Qanita Islam'
+               */
+              let student = students[i] 
+              // ====================================================== //
+              // =========== Generation Student Wise Report =========== //
+              // ====================================================== //
+
+              
+              
+
+
+            } // end for loop
+          }) // end Object.entries
+
+          return {groups, classes, weekends, leaveData}
+        }
+      }
+
+
+    }
 
 
     
+
+
+
+
+
+
   }
   
   module.exports = Attendance;
+
+  
   

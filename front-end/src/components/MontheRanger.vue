@@ -121,13 +121,17 @@ const onDrag = (event) => {
 };
 
 
+let ttout = null
+
 function updateModelValueAndChange() {
   let start_date = moment().month(state.startMonth - 1).startOf('month').format('Y-MM-DD');
   let end_date = moment().month(state.endMonth - 1).endOf('month').format('Y-MM-DD');
 
-  
-  emits("change", [start_date, end_date]);
-  emits("update:modelValue", [start_date, end_date]);
+  clearTimeout(ttout)
+  ttout = setTimeout(() => {
+    emits("change", [start_date, end_date]);
+    emits("update:modelValue", [start_date, end_date]);
+  }, 400);
 }
 
 

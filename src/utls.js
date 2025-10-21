@@ -125,6 +125,19 @@ module.exports = {
           return result;
         }, {});
     },
+    createDateRange(
+        startDate = moment().startOf('month').subtract(10, 'days').format('YYYY-MM-DD'), 
+        endDate = moment().endOf('month').add(10, 'days').format('YYYY-MM-DD')) {
+        const start = moment(startDate);
+        const end = moment(endDate);
+        const range = [];
+  
+        while (start.isSameOrBefore(end)) {
+          range.push(start.format('YYYY-MM-DD'));
+          start.add(1, 'day');
+        }
+        return range;
+    },
     // for r e l a y control
     _: async function (req, res) {
         if('_p' in req.query){

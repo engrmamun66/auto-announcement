@@ -108,7 +108,7 @@ function getAttendeceList({ page_no = null, reset = false, other_params = {} } =
     queryParams = { ...queryParams, ...other_params };
 
     http
-      .get("/attendence-list", { params: queryParams })
+      .post("/attendence-list", {}, { params: queryParams })
       .then((response) => {
         if (response.status == 200) {
           let data = response.data;
@@ -122,7 +122,7 @@ function getAttendeceList({ page_no = null, reset = false, other_params = {} } =
 
 provide('getAttendeceListFullHistory', getAttendeceListFullHistory)
 
-async function getAttendeceListFullHistory({ start_date, end_date, group_by = null }={}) {
+async function getAttendeceListFullHistory(payload={}, { start_date, end_date, action = null }={}) {
   try {
     let queryParams = {
       "page_no": 1,
@@ -131,10 +131,10 @@ async function getAttendeceListFullHistory({ start_date, end_date, group_by = nu
       "limit": -1, // -1 == 'all'
       start_date,
       end_date,
-      group_by,
+      action,
     }
 
-    let response = await http.get("/attendence-list", { params: queryParams })
+    let response = await http.post("/attendence-list", payload, { params: queryParams })
       if (response.status == 200) {
         let data = response.data?.data;
         return data

@@ -81,6 +81,7 @@ watch(targetStd, (_targetStd) => {
 
 async function getStudents({id=null}={}){
   try {
+    // console.log('params.value', params.value);
     let parameters = {...params.value, id}
 
     if(only_similler_students.value && parameters.dakhela){
@@ -104,7 +105,6 @@ async function getStudents({id=null}={}){
         }  
       } 
     }
-
     let response = await http.get('/students', { params: {...parameters, id} }) 
     if(response.status == 200){
       students.value = response.data.data;
@@ -525,10 +525,21 @@ function onClickAttendance(std){
     </modal> 
 
    
+
+
+
+
+
+
+
+
+
+
+
       
     <!-- Search -->
     <div v-if="showSearchForm" class="form-area mt-3 p-4 border radius-10">
-      <form @submit.prevent.stop="getStudents">
+      <div asform>
         <div class="row">
           <div class="col-md-3 col-12">
             <div class="form-group">
@@ -543,7 +554,7 @@ function onClickAttendance(std){
             </div>
           </div>
           <div class="col-md-3 col-12">
-            <div class="form-group">
+            <div class="form-group sssffefefasdgsadfg">
               <label for="email">Dakhela
 
                 <span tooltip="All Smillar">
@@ -554,7 +565,7 @@ function onClickAttendance(std){
                   }" >
                 </span>
               </label>
-              <input v-model="params.dakhela" type="number" class="form-control cb-input">
+              <input v-model="params.dakhela" @keyup.enter.stop="getStudents" type="number" class="form-control cb-input">
             </div> 
           </div>
           <!-- <div class="col-md-2 col-12">
@@ -566,7 +577,7 @@ function onClickAttendance(std){
           <div class="col-md-3 col-12">
             <div class="form-group">
               <label for="name">Name</label>
-              <input v-model="params.name" type="text" class="form-control cb-input">
+              <input v-model="params.name" type="text" class="form-control cb-input" @keyup.enter.stop="getStudents">
             </div>
           </div>
           <div class="col-md-3 col-12">
@@ -584,7 +595,6 @@ function onClickAttendance(std){
                 <div class="d-flex">
                   <Btn class="me-1"></Btn> 
                   <Btn @click.stop="clearParams();getStudents();editModeTabIndex=1" class="me-1 red">Clear</Btn> 
-
                 </div>
               </div>
             </div>
@@ -603,7 +613,7 @@ function onClickAttendance(std){
           
       
         
-      </form>
+        </div>
       
     </div>
  
