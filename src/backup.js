@@ -88,7 +88,7 @@ module.exports = {
         body: formdata,
       });
     
-      const result = await response.json(); 
+      const result = await response.json();
       // console.log("📤 Upload response:: === ", result);
       if(res){
         res.send({ 
