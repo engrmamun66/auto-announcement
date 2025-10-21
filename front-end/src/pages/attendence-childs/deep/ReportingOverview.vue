@@ -21,6 +21,7 @@ const pagination_perpage = inject("pagination_perpage");
 const sort_direction = inject("sort_direction");
 const sortby_column = inject("sortby_column");
 const getAttendeceListFullHistory = inject("getAttendeceListFullHistory");
+const all_students_non_copied = inject("all_students_non_copied");
 
 const emit = defineEmits(['onBtnSubmit', 'onBtnClear']);
 let log = console.log
@@ -33,10 +34,12 @@ let leaves_and_vacations = ref([])
 // For multiple select of students
 async function onChangeMonthRange([start_date, end_date]){
   leaves_and_vacations.value = await callbacks.getLeavesAndVacations({start_date, end_date})  
+  
 
   let payloadData = {
     weekends,
-    leaveData: leaves_and_vacations.value
+    leaveData: leaves_and_vacations.value,
+    classwise_students: helper.listGroupBy(all_students_non_copied.value, 'class_short'),
   }
   attendence_full_history.value = await getAttendeceListFullHistory(payloadData, {start_date, end_date, action: 'classwise_data' }) 
   calculateClassWiseData()

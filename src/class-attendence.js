@@ -235,19 +235,19 @@ class Attendance {
           let { leaveData, weekends } = req.body
 
           let groups = utils.listGroupBy(rows, 'class_short')
-          let date_range = utils.createDateRange(start_date, end_date)
+          // let date_range = utils.createDateRange(start_date, end_date)
           
           // ======  Main Report variable  ========
           let MAIN_REPORT = {} 
           // ======  Main Report variable  ========
           
-          Object.entries(groups).forEach(([key, students]) => {
+          Object.entries(groups).forEach(([key, classWiseAttendaceList]) => {
 
             if(!MAIN_REPORT[key]) MAIN_REPORT[key] = []
 
-            for(let i=0; i <= students?.length; i++){
+            for(let i=0; i <= classWiseAttendaceList?.length; i++){
               /**
-               * Student variable properties
+               * "attendanceItem" variable properties
                * ===========================
                 id: 23893,
                 student_id: 23,
@@ -265,10 +265,34 @@ class Attendance {
                 class_short: 'one',
                 student_name: 'Qanita Islam'
                */
-              let student = students[i] 
+              let attendanceItem = students[i] 
               // ====================================================== //
               // =========== Generation Student Wise Report =========== //
               // ====================================================== //
+              let leaves_of_students = leaveData.filter(vacItem => {
+                /**
+                 * Leave/Vacation item properties
+                 * ================================
+                 * {
+                  "id": 1,
+                  "identity_string": "tnqrforxzhqmg",
+                  "type": "vacation",
+                  "class_short": "_all_",
+                  "student_id": null,
+                  "date": "2025-10-05",
+                  "reason": "Eidul-Fitr",
+                  "created": "2025-10-16 00:24:22",
+                  "updated": "2025-10-16 00:24:22"
+                  }
+                 */
+
+                  // Important Note: No need to check vacItem date with date_range array (including or not)
+                  // --------------- Because already it's gotten by this start_date and end_date
+
+                  let is_leave_or_vacation_for_this_student = (vacItem.student_id)
+                
+
+              })
 
               
               

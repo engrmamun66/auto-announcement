@@ -9,10 +9,14 @@ class myDB {
         this.DB_ROOT_FOLDER = DB_ROOT_FOLDER;
         this.db = this._createDatabase(); 
         this._createTables(this.db);
-        // this._addColumn('students', 'device_index', 'INTEGER', '1')
-        // this._addColumn('students', 'card_owner', 'VARCHAR', 'NULL')
-        // this._addColumn('students', 'options', 'VARCHAR', 'NULL')
-        // this._addColumn('students', 'note', 'VARCHAR', 'NULL') 
+        // ========== Delete column ==============
+        this._removeColumn('students', 'sound2')
+        this._removeColumn('students', 'sound3')
+        // ========== New Column =================
+        this._addColumn('students', 'device_index', 'INTEGER', '1')
+        this._addColumn('students', 'card_owner', 'VARCHAR', 'NULL')
+        this._addColumn('students', 'options', 'VARCHAR', 'NULL')
+        this._addColumn('students', 'note', 'VARCHAR', 'NULL') 
     }
 
     _createDatabase(){
@@ -166,7 +170,7 @@ class myDB {
             `,
             (err) => {
               if (err) {
-                console.error("AddColumn Error creating table:", err.message);
+                console.error("AddColumn Error creating table:", err.message + '\n===========================\n');
               }
             }
         );
@@ -175,7 +179,7 @@ class myDB {
             `ALTER TABLE ${tableName} DROP COLUMN ${columnName}`,
             (err) => {
               if (err) {
-                console.error("DropColumn Error:", err.message);
+                console.error("DropColumn Error:", err.message + '\n===========================\n');
               }
             }
         );

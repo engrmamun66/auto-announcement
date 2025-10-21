@@ -97,6 +97,7 @@ module.exports = {
       }
     } catch (getBackupDetails_error) {
       console.log({getBackupDetails_error})
+      res.status(400).send({ success: true, message: "getBackupDetails() failed" });
     }
     
   },
