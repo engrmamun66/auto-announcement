@@ -72,7 +72,7 @@ module.exports = {
         await fs.promises.unlink(outputPath).catch(err => console.warn("Delete failed:", err))
       }
     } catch (createBackupAndSend_error) {
-        console.log({createBackupAndSend_error})
+        // console.log({createBackupAndSend_error})
     }
   },
   async getBackupDetails({req, res}={}) {

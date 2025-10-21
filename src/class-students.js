@@ -356,7 +356,7 @@ class Students {
           }
   
           const [id, name, dakhela, className, , card_no, year, status, sound1, device_index, card_owner, options, note] = row;
-  
+
           if (id) {
             // If `id` is provided, update the row
             this.db.run(
