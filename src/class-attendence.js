@@ -140,7 +140,7 @@ class Attendance {
         const countQuery = `
           SELECT COUNT(*) AS total
           FROM ${this.tableName} a
-          LEFT JOIN students s ON a.student_id = s.id
+          LEFT JOIN students s ON a.student_id = s.dakhela
           ${whereClause}
         `;
         this.db.get(countQuery, params, (err, result) => {
