@@ -119,8 +119,9 @@ class Attendance {
       const direction = allowedSortDir.includes(sort_direction.toUpperCase()) ? sort_direction.toUpperCase() : "ASC";
     
       // optional group_by
-      const allowedGroupBy = ["student_id", "date", "class_short"];
-      const groupBy = allowedGroupBy.includes(group_by) ? `GROUP BY ${group_by}` : "";
+      const allowedGroupBy = ["student_id", "date"]; // class_short is from students table, so it can't be used directly in GROUP BY a.class_short
+      // const groupBy = allowedGroupBy.includes(group_by) ? `GROUP BY a.${group_by}` : "";
+      const groupBy = ''
     
       // data query
       const dataQuery = `

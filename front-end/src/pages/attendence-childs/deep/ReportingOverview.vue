@@ -32,7 +32,7 @@ let leaves_and_vacations = ref([])
 
 // For multiple select of students
 async function onChangeMonthRange([start_date, end_date]){
-  attendence_list_full_history.value = await getAttendeceListFullHistory({start_date, end_date, group_by: 'class_short'}) 
+  attendence_list_full_history.value = await getAttendeceListFullHistory({start_date, end_date }) 
   leaves_and_vacations.value = await callbacks.getLeavesAndVacations({start_date, end_date})  
   calculateClassWiseData()
 }
