@@ -122,7 +122,7 @@ function getAttendeceList({ page_no = null, reset = false, other_params = {} } =
 
 provide('getAttendeceListFullHistory', getAttendeceListFullHistory)
 
-async function getAttendeceListFullHistory({ start_date, end_date }) {
+async function getAttendeceListFullHistory({ start_date, end_date, group_by = null }={}) {
   try {
     let queryParams = {
       "page_no": 1,
@@ -130,7 +130,8 @@ async function getAttendeceListFullHistory({ start_date, end_date }) {
       "total": 0,
       "limit": -1, // -1 == 'all'
       start_date,
-      end_date
+      end_date,
+      group_by,
     }
 
     let response = await http.get("/attendence-list", { params: queryParams })
