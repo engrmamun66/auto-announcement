@@ -1041,7 +1041,6 @@ async function __punchToSubmitAttendance(barcode='play-417-2024', {
                 let payload = {
                     // id: null,
                     student_id: student.dakhela,
-                    class_short: student.class_short,
                     date,
                     in_time: null,
                     out_time: null,

@@ -161,7 +161,7 @@ class Attendance {
     
   
     addNew(req, res) {
-      const { student_id, class_short, date, in_time, out_time, status = 'present', remarks, late_in_minute = 0, device_index = 1, shift_duration = '', shift_count = 1, shift_number = 1 } = req.body;
+      const { student_id, date, in_time, out_time, status = 'present', remarks, late_in_minute = 0, device_index = 1, shift_duration = '', shift_count = 1, shift_number = 1 } = req.body;
     
       if (!student_id || !date) {
         return res.status(400).send({ error: "student_id and date are required." });
@@ -170,12 +170,11 @@ class Attendance {
       const query = `
         INSERT INTO ${this.tableName} 
           (student_id, class_short, date, in_time, out_time, status, remarks, late_in_minute, device_index, shift_duration, shift_count, shift_number)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
     
       const params = [
         student_id,
-        class_short,
         date,
         in_time || null,
         out_time || null,

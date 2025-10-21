@@ -96,7 +96,6 @@ class myDB {
               CREATE TABLE IF NOT EXISTS attendance (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 student_id INTEGER NOT NULL, -- dakhela
-                class_short TEXT NOT NULL,
                 date DATE NOT NULL,
                 in_time TIME DEFAULT NULL, -- 23:05:08 | null
                 out_time TIME DEFAULT NULL, -- 23:05:08 | null
