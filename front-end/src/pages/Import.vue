@@ -45,6 +45,11 @@ async function eraseAll() {
      try {
           let confi = confirm('Deelete all data')
           if(!confi) return
+          let passKey = prompt('Enter pass key')
+          if(!['DD', 'dd'].includes(passKey)) {
+               alert('Wrong pass key')
+               return
+          }
           http.get('/students/erase-all').then(response => {
                if(response.status == 200){
                     emitter.emit('toaster-success', {message: 'সব ছাত্র মুছে ফেলা হয়েছে'})
