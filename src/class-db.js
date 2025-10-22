@@ -12,6 +12,7 @@ class myDB {
         // ========== Delete column ==============
         this._removeColumn('students', 'sound2')
         this._removeColumn('students', 'sound3')
+        this._removeColumn('students', 'branch_id')
         // ========== New Column =================
         this._addColumn('students', 'device_index', 'INTEGER', '1')
         this._addColumn('students', 'card_owner', 'VARCHAR', 'NULL')

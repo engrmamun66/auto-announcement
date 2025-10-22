@@ -12,11 +12,6 @@ let Backup = require("./backup");
 
 class Students { 
 
-  insertQuery = `
-        INSERT INTO students (name,	dakhela, class, class_short, year, status, sound1, sound2, sound3)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `;
-
   constructor(db) {
     this.tableName = "students";
     this.db = db;
@@ -111,9 +106,7 @@ class Students {
         // Send response with data and pagination info
         res.send({
           data: rows.map(row => {
-            if(row.sound1) row.sound1 = utils.audioFullUrl(req, row.sound1)
-            if(row.sound2) row.sound2 = utils.audioFullUrl(req, row.sound2)
-            if(row.sound3) row.sound3 = utils.audioFullUrl(req, row.sound3)
+            row.sound1 = utils.audioFullUrl(req, row.sound1)
             return row
           }),
           pagination: {
@@ -146,9 +139,7 @@ class Students {
       }
 
       const row = rows[rows.length - 1];   
-      if(row.sound1) row.sound1 = utils.audioFullUrl(req, row.sound1)
-      if(row.sound2) row.sound2 = utils.audioFullUrl(req, row.sound2)
-      if(row.sound3) row.sound3 = utils.audioFullUrl(req, row.sound3)
+      row.sound1 = utils.audioFullUrl(req, row.sound1)
 
       row['soundColName'] = soundColName
 
@@ -355,7 +346,7 @@ class Students {
             return;
           }
   
-          const [id, name, dakhela, className, , card_no, year, status, sound1, device_index, card_owner, options, note] = row;
+          const [id, name, dakhela, className, /* class_short */, card_no, year, status, sound1, /* created */, card_owner,	note,	options, device_index] = row;
 
           if (id) {
             // If `id` is provided, update the row
