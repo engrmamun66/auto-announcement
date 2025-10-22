@@ -345,7 +345,7 @@ class Students {
         data.forEach((row, i) => {
           if (i === 0) {
             // Skip the header row
-            console.log("Skipping header row:", row);
+            console.log("Skipping header row:", row, row.length, data[1].length, data[1]);
             return;
           }
   
