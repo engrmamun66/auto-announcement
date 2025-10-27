@@ -39,7 +39,7 @@ async function onChangeMonthRange([start_date, end_date]){
   let payloadData = {
     weekends,
     leaveData: leaves_and_vacations.value,
-    classwise_students: helper.listGroupBy(all_students_non_copied.value, 'class_short'),
+    classwise_students: all_students_non_copied.value.map(s => ({dakhela: s.dakhela, class_short: s.class_short})) 
   }
   attendence_full_history.value = await getAttendeceListFullHistory(payloadData, {start_date, end_date, action: 'classwise_data' }) 
   calculateClassWiseData()

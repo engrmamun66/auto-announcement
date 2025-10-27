@@ -11,10 +11,8 @@ module.exports = {
     async checkNetwork() {
         try {
             const res = await fetch("https://www.google.com", { method: "HEAD", timeout: 3000 });
-            console.log('res.ok');
             return res.ok;
-        } catch {
-            console.log('res.nok-');
+        } catch { 
             return false;
         }
     },
@@ -155,4 +153,8 @@ module.exports = {
 
         }
     },
+    isClassDay(weekends=['Friday'], date){
+        let weekday_fullname = moment(date).format('dddd')
+        return weekends.includes(weekday_fullname)
+    }, 
 };

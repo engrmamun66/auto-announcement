@@ -225,83 +225,97 @@ class Attendance {
     }
 
 
-    modify_data_by_action(rows, action, req){
+    modify_data_by_action(attendanceList, action, req){
 
       
-      if(!action) return rows
+      if(!action) return attendanceList
       else {
         if(action === 'classwise_data'){
           let { start_date, end_date } = req.query 
-          let { leaveData, weekends } = req.body
+          let date_duration = utils.createDateRange(start_date, end_date)
+          let { leaveData, weekends, classwise_students } = req.body 
+          let leaveData_group_by_date = utils.listGroupBy(leaveData, 'date')
+          let weekend_leaves = date_duration.filter(date => weekends.includes(moment(date).format('dddd')))
+          let leaveData_excluded_weekends = leaveData.filter(leave => !weekend_leaves.includes(leave.date))
+ 
 
-          let groups = utils.listGroupBy(rows, 'class_short')
-          // let date_range = utils.createDateRange(start_date, end_date)
+          let attendanceGroup = utils.listGroupBy(attendanceList, 'student_id')
+
+          let Reports = {}
           
-          // ======  Main Report variable  ========
-          let MAIN_REPORT = {} 
-          // ======  Main Report variable  ========
-          
-          Object.entries(groups).forEach(([key, classWiseAttendaceList]) => {
 
-            if(!MAIN_REPORT[key]) MAIN_REPORT[key] = []
+          let student_report = classwise_students.map((student, i) => {
+            let { dakhela, class_short } = student
+            let student_attendance = attendanceGroup?.[dakhela] || []
+            // let class_vacations = utils.
 
-            for(let i=0; i <= classWiseAttendaceList?.length; i++){
-              /**
-               * "attendanceItem" variable properties
-               * ===========================
-                id: 23893,
-                student_id: 23,
-                date: '2025-10-01',
-                in_time: '08:29:00',
-                out_time: null,
-                late_in_minute: -1,
-                status: 'Present',
-                remarks: 'First In Today',
-                shift_duration: '08:30 - 10:00',
-                shift_count: 2,
-                shift_number: 1,
-                device_index: 0,
-                created: '2025-10-21 00:50:47',
-                class_short: 'one',
-                student_name: 'Qanita Islam'
-               */
-              let attendanceItem = students[i] 
-              // ====================================================== //
-              // =========== Generation Student Wise Report =========== //
-              // ====================================================== //
-              let leaves_of_students = leaveData.filter(vacItem => {
-                /**
-                 * Leave/Vacation item properties
-                 * ================================
-                 * {
-                  "id": 1,
-                  "identity_string": "tnqrforxzhqmg",
-                  "type": "vacation",
-                  "class_short": "_all_",
-                  "student_id": null,
-                  "date": "2025-10-05",
-                  "reason": "Eidul-Fitr",
-                  "created": "2025-10-16 00:24:22",
-                  "updated": "2025-10-16 00:24:22"
-                  }
-                 */
+            let _targetStd = global.config.classes.find(eachClass => eachClass.class_short == class_short) || {}
+            let class_name = _targetStd?.class_name || ''
+            let student_shifts = _targetStd?.shifts || []
+        
+            // if(!i) console.log(student_attendance[0]); 
+            
 
-                  // Important Note: No need to check vacItem date with date_range array (including or not)
-                  // --------------- Because already it's gotten by this start_date and end_date
 
-                  let is_leave_or_vacation_for_this_student = (vacItem.student_id)
-                
 
+            // Calucating Every Single Date for a student
+            let date_wise_report = date_duration.map((date, j) => {
+
+              let date_wide_attendace = student_attendance.filter(att => att.date === date)
+
+              let shiftInfo = student_shifts.map(shift => {
+                let duration_text  = `${shift.start} - ${shift.end}`
+                let find = date_wide_attendace.find(att => att.shift_duration === duration_text)
+                shift['is_present'] = Boolean(find)
+                shift['attendance'] = find || null
+                return shift
               })
 
-              
-              
+              let leaves = leaveData_excluded_weekends[date] || []
+              let student_leaves = leaves.filter(leave => (leave.student_id == dakhela || leave.class_short == '_all_' || leave.class_short == class_short))
 
+              let data = {
+                serial: j + 1,
+                date,
+                dakhela,
+                class_short,
+                class_name,
+                shiftInfo, 
+                is_class_day: utils.isClassDay(weekends, date),
+                in_out_count: date_wide_attendace.length,
+                is_preset: shiftInfo?.[0]?.is_present, // first shift is the main shift of student
+                is_preset_all_shifts: shiftInfo.every(shift => shift.is_present),
+                totol_late_in_minute: 0,
+                totol_late_in_minute: 0,
+                leaves: {
+                  weekends: weekend_leaves.length,
+                  student_leaves: student_leaves,
+                  student_leaves_count: student_leaves.length,
+                },
+                weekend_leaves,
+              }
 
-            } // end for loop
-          }) // end Object.entries
+              if(!i && !j) console.log(leaveData_group_by_date[date]);
 
-          return {groups, classes, weekends, leaveData}
+              return data
+
+            })  
+            
+            
+            // if(!i) console.log(date_wise_report);
+
+            // let report = {...student, ...date_wise_report}
+            if(class_short == 'hifz'){
+              date_wise_report.sort((a, b) => (a.serial) - b.serial);
+              if(!Reports[class_short]) Reports[class_short] = []
+              Reports[class_short].push(date_wise_report) 
+            }
+          }) 
+
+          
+
+          // return {attendanceGroup, weekends, leaveData, classwise_students}
+          return Reports
         }
       }
 
