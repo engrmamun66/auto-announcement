@@ -1,12 +1,19 @@
+const fs = require('fs');
+const path = require('path');
 const sqlite3 = require("sqlite3").verbose();
+
+let config = require('./../config.example');
+const configPath = path.join(__dirname, './../config.js');
+if (fs.existsSync(configPath)) {
+  config = require(configPath);
+}
+global.config = config
 
 class myDB { 
     constructor({
-        DB_NAME='database.db',
-        DB_ROOT_FOLDER='database',
     }={}){
-        this.DB_NAME = DB_NAME
-        this.DB_ROOT_FOLDER = DB_ROOT_FOLDER;
+        let { env } = global.config
+        this.DATABASE_PATH = path.join(global.DIR, env.DATABASE_PATH);
         this.db = this._createDatabase(); 
         this._createTables(this.db);
         // ========== Delete column ==============
@@ -22,7 +29,7 @@ class myDB {
 
     _createDatabase(){
         // Initialize SQLite Database
-        const db = new sqlite3.Database(`${global.DIR}/${this.DB_ROOT_FOLDER}/${this.DB_NAME}`, (err) => {
+        const db = new sqlite3.Database(`${this.DATABASE_PATH}`, (err) => {
             if (err) {
                 console.error("Error connecting to database:", err.message);
                 return;
