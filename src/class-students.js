@@ -352,7 +352,7 @@ class Students {
             // If `id` is provided, update the row
             this.db.run(
               updateQuery,
-              [name, dakhela, className, utils.getClassShort(className), card_no, year, status || 1, sound1 || '', device_index || '', card_owner || '', options || '', note || '', id],
+              [name, dakhela, className, utils.getClassShort(className), card_no, year, status || 1, sound1 || '', device_index || null, card_owner || null, options || null, note || null, id],
               (err) => {
                 if (err) {
                   console.error(`Error updating data with ID ${id}:`, err);
@@ -373,7 +373,7 @@ class Students {
                 // Update the existing row
                 this.db.run(
                   updateQuery,
-                  [name, dakhela, className, utils.getClassShort(className), card_no, year, status || 1, sound1 || '', device_index || '', card_owner || '', options || '', note || '', existingRow.id],
+                  [name, dakhela, className, utils.getClassShort(className), card_no, year, status || 1, sound1 || null, device_index || null, card_owner || null, options || null, note || null, existingRow.id],
                   (err) => {
                     if (err) {
                       console.error(`Error updating data for dakhela: ${dakhela}, class: ${className}, year: ${year}:`, err);
@@ -385,7 +385,7 @@ class Students {
                 // Insert a new row
                 this.db.run(
                   insertQuery,
-                  [name, dakhela, className, utils.getClassShort(className), card_no, year, status || 1, sound1 || '', device_index || '', card_owner || '', options || '', note || ''],
+                  [name, dakhela, className, utils.getClassShort(className), card_no, year, status || 1, sound1 || null, device_index || null, card_owner || null, options || null, note || null],
                   (err) => {
                     if (err) {
                       console.error("Error inserting data:", err);
