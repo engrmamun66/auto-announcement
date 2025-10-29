@@ -234,9 +234,9 @@ class Attendance {
           let { start_date, end_date } = req.query 
           let date_duration = utils.createDateRange(start_date, end_date)
           let { leaveData, weekends, classwise_students } = req.body 
-          let leaveData_group_by_date = utils.listGroupBy(leaveData, 'date')
           let weekend_leaves = date_duration.filter(date => weekends.includes(moment(date).format('dddd')))
           let leaveData_excluded_weekends = leaveData.filter(leave => !weekend_leaves.includes(leave.date))
+          let leaveData_group_by_date = utils.listGroupBy(leaveData_excluded_weekends, 'date')
  
 
           let attendanceGroup = utils.listGroupBy(attendanceList, 'student_id')
@@ -271,8 +271,8 @@ class Attendance {
                 return shift
               })
 
-              let leaves = leaveData_excluded_weekends[date] || []
-              let student_leaves = leaves.filter(leave => (leave.student_id == dakhela || leave.class_short == '_all_' || leave.class_short == class_short))
+              let _leaves = leaveData_group_by_date[date] || []
+              let student_leaves = _leaves.filter(leave => (leave.student_id == dakhela || leave.class_short == '_all_' || leave.class_short == class_short))
 
               let data = {
                 serial: j + 1,
@@ -287,15 +287,18 @@ class Attendance {
                 is_preset_all_shifts: shiftInfo.every(shift => shift.is_present),
                 totol_late_in_minute: 0,
                 totol_late_in_minute: 0,
-                leaves: {
-                  weekends: weekend_leaves.length,
-                  student_leaves: student_leaves,
-                  student_leaves_count: student_leaves.length,
+                leaves: { 
+                  weekends: weekend_leaves,
+                  leavess: _leaves,
+                  personal_leaves: student_leaves,
                 },
-                weekend_leaves,
               }
 
-              if(!i && !j) console.log(leaveData_group_by_date[date]);
+              data['_leaves'] = _leaves
+
+              // if(date === '')
+
+              // if(!i && !j) console.log({leavesss: leaveData_group_by_date[date]});
 
               return data
 
