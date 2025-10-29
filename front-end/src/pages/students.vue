@@ -421,7 +421,7 @@ function onClickAttendance(std){
                   <div class="col-12">
                     <div class="form-group">
                       <label for="email">Class</label>
-                      <select v-model="payload.class" class="form-control cb-input" id="ClassId" :disabled="payload.name && payload.name.indexOf('||dakhela') > -1">
+                      <select v-model="payload.class" class="form-control cb-input" id="ClassId" :disabled="payload?.id && payload.name && payload.name.indexOf('||dakhela') > -1">
                         <option :value="null">-class-</option>
                         <template v-for="(cls, index) in classes" :key="index">
                           <option :value="cls.class_name">{{cls.class_name}}</option>
@@ -433,21 +433,21 @@ function onClickAttendance(std){
                   <div class="col-12">
                     <div class="form-group">
                       <label for="name">Name</label>
-                      <input v-model="payload.name" type="text" class="form-control cb-input" :disabled="payload.name && payload.name.indexOf('||dakhela') > -1">
+                      <input v-model="payload.name" type="text" class="form-control cb-input" :disabled="payload?.id && payload.name && payload.name.indexOf('||dakhela') > -1">
                     </div>
                   </div>
     
                   <div class="col-12">
                     <div class="form-group">
                       <label for="name">Dakhela</label>
-                      <input v-model="payload.dakhela" type="number" class="form-control cb-input" :disabled="payload.name && payload.name.indexOf('||dakhela') > -1">
+                      <input v-model="payload.dakhela" type="number" class="form-control cb-input" :disabled="payload?.id && payload.name && payload.name.indexOf('||dakhela') > -1">
                     </div>
                   </div>
     
                   <div class="col-12">
                     <div class="form-group">
                       <label for="year">Year</label> 
-                      <select v-model="payload.year" class="form-control cb-input" :disabled="payload.name && payload.name.indexOf('||dakhela') > -1">
+                      <select v-model="payload.year" class="form-control cb-input" :disabled="payload?.id && payload.name && payload.name.indexOf('||dakhela') > -1">
                         <option :value="new Date().getFullYear()">{{ new Date().getFullYear() }}</option>
                         <option :value="new Date().getFullYear() - 1">{{ new Date().getFullYear() - 1 }}</option>
                         <option :value="new Date().getFullYear() - 2">{{ new Date().getFullYear() - 2 }}</option>
@@ -459,7 +459,7 @@ function onClickAttendance(std){
                   <div class="col-12">
                     <div class="form-group">
                       <label for="name">Note</label>
-                      <input v-model="payload.note" type="text" class="form-control cb-input" :disabled="payload.name && payload.name.indexOf('||dakhela') > -1">
+                      <input v-model="payload.note" type="text" class="form-control cb-input" >
                     </div>
                   </div>
 
