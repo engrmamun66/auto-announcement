@@ -106,7 +106,7 @@ class Students {
         // Send response with data and pagination info
         res.send({
           data: rows.map(row => {
-            row.sound1 = utils.audioFullUrl(req, row.sound1)
+            row.sound1 = row.sound1 ? utils.audioFullUrl(req, row.sound1) : null
             return row
           }),
           pagination: {
