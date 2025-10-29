@@ -20,6 +20,7 @@ class myDB {
         this._removeColumn('students', 'sound2')
         this._removeColumn('students', 'sound3')
         this._removeColumn('students', 'branch_id')
+        this._removeColumn('students', 'id_type')
         // ========== New Column =================
         this._addColumn('students', 'device_index', 'INTEGER', '1')
         this._addColumn('students', 'card_owner', 'VARCHAR', 'NULL')
@@ -73,8 +74,7 @@ class myDB {
                 options TEXT DEFAULT NULL,
                 device_index INTEGER DEFAULT 1, -- zkteco punching device index
                 note TEXT DEFAULT NULL,
-                id_type INTEGER DEFAULT 1, -- when using attendence, 1 = students, 2 = guardians
-                    created TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                created TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );`,
                 (err) => {
                   if (err) {

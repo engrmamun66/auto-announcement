@@ -316,13 +316,13 @@ class Students {
         header: 1,
       });
       const insertQuery = `
-        INSERT INTO students (name, dakhela, class, class_short, card_no, year, status, sound1, device_index, card_owner, options, note)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO students (name, dakhela, class, class_short, card_no, year, status, sound1, device_index, note, card_owner, options, note)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
   
       const updateQuery = `
         UPDATE students
-        SET name = ?, dakhela = ?, class = ?, class_short = ?, card_no = ?, year = ?, status = ?, sound1 = ?, device_index = ?, card_owner = ?, options = ?, note = ?
+        SET name = ?, dakhela = ?, class = ?, class_short = ?, card_no = ?, year = ?, status = ?, sound1 = ?, device_index = ?, note = ?, card_owner = ?, options = ?, note = ?
         WHERE id = ?
       `;
   
@@ -346,7 +346,7 @@ class Students {
             return;
           }
   
-          const [id, name, dakhela, className, /* class_short */, card_no, year, status, sound1, /* created */, card_owner,	note,	options, device_index] = row;
+          const [id, name, dakhela, className, /* class_short */, card_no, year, status, sound1, card_owner,	options,	device_index, note, /* created */,] = row;
 
           if (id) {
             // If `id` is provided, update the row
@@ -382,7 +382,7 @@ class Students {
                   }
                 );
               } else {
-                // Insert a new row
+                // Insert a new row device_index
                 this.db.run(
                   insertQuery,
                   [name, dakhela, className, utils.getClassShort(className), card_no, year, status || 1, sound1 || null, device_index || null, card_owner || null, options || null, note || null],

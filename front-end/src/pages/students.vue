@@ -168,7 +168,6 @@ let payload = reactive({
   card_no: null,
   card_owner: null,
   note: null,
-  id_type: 1,
 })
 
 let is___adding = ref(false)
@@ -183,7 +182,6 @@ function clearPayload(){
   payload.card_no = null
   payload.card_owner = null
   payload.note = null
-  payload.id_type = 1
 
   addMode.value = false 
   is___adding.value = false 

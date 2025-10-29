@@ -495,7 +495,7 @@ const callbacks = {
         wattingList.value = newWaittinglist
     },
     getCardOwnerName(id){
-        if(!CONFIG.value?.card_owners?.length) return 1
+        if(!CONFIG.value?.card_owners?.length) return ''
         return CONFIG.value?.card_owners.find(owner => owner.id == id)?.name
     }, 
     fixOverflowOfLiveAttendence(){
