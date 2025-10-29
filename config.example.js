@@ -19,6 +19,7 @@ module.exports = {
           SOCKET_PORT: 2424,
           SECRET_KEY: 'YOUR_SECRET_KEY',
           PUNCH_LOG_FILENAME: 'punch.log.json', 
+          DATABASE_PATH: 'database/database.db', // For Client DB Example: './../clientdb-DHM101.db'
 
 
           /** ==== with-BioTime-app === */
