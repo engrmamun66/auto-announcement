@@ -287,11 +287,8 @@ class Attendance {
                 is_preset_all_shifts: shiftInfo.every(shift => shift.is_present),
                 totol_late_in_minute: 0,
                 totol_late_in_minute: 0,
-                leaves: { 
-                  weekends: weekend_leaves,
-                  leavess: _leaves,
-                  personal_leaves: student_leaves,
-                },
+                is_weekend: weekend_leaves.includes(date),
+                personal_leaves: student_leaves,
               }
 
               data['_leaves'] = _leaves
