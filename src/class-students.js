@@ -316,13 +316,13 @@ class Students {
         header: 1,
       });
       const insertQuery = `
-        INSERT INTO students (name, dakhela, class, class_short, card_no, year, status, sound1, device_index, note, card_owner, options, note)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO students (name, dakhela, class, class_short, card_no, year, status, sound1, device_index, card_owner, options, note)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
   
       const updateQuery = `
         UPDATE students
-        SET name = ?, dakhela = ?, class = ?, class_short = ?, card_no = ?, year = ?, status = ?, sound1 = ?, device_index = ?, note = ?, card_owner = ?, options = ?, note = ?
+        SET name = ?, dakhela = ?, class = ?, class_short = ?, card_no = ?, year = ?, status = ?, sound1 = ?, device_index = ?, card_owner = ?, options = ?, note = ?
         WHERE id = ?
       `;
   
@@ -415,7 +415,7 @@ class Students {
   
 
   exportAll(req, res) {
-    const query = `SELECT * FROM ${this.tableName}`;
+    const query = `SELECT * FROM ${this.tableName} ORDER BY id ASC`;
 
     this.db.all(query, [], (err, rows) => {
       if (err) {
