@@ -348,13 +348,13 @@ function recallAllPunchedStudents(){
                               </template>
                                <!-- Times up puch -->
                                <template v-if="true">
-                                  <h3 v-if="callbacks.timesup_call_schedules()?.length" class="p-2 border3 radius-5 my-2 shadow me-1" style="background:var(--grad1)">Times Up</h3>
+                                  <h3 v-if="callbacks.timesup_punch_schedules()?.length" class="p-2 border3 radius-5 my-2 shadow me-1" style="background:var(--grad1)">Times Up</h3>
                                   <template v-for="item in callbacks.timesup_punch_schedules()">
                                          <li class="mb-0" >                    
                                               <h4> 
                                                    {{ helper.ucfirst(item?.title) }} 
                                               </h4>
-                                              <p> 
+                                              <p class="time-duration"> 
                                                    {{ helper.formatTime(item.start_time) }} - {{ helper.formatTime(item.end_time) }}
                                               </p> 
                                          </li>
