@@ -255,7 +255,7 @@ function recallAllPunchedStudents(){
                                              <h3> 
                                                   {{ helper.ucfirst(item?.title) }}
                                              </h3>
-                                             <p> 
+                                             <p class="time-duration"> 
                                                   {{ helper.formatTime(item.start_time) }} - {{ helper.formatTime(item.end_time) }}
                                              </p>
                                              <div class="d-flex flex-wrap">
@@ -273,14 +273,17 @@ function recallAllPunchedStudents(){
                                              <h4> 
                                                   {{ helper.ucfirst(item?.title) }}  <kbd v-if="item.incoming_time" > {{ helper.ms_to_hour_minute(item.incoming_time) }} </kbd>
                                              </h4>
-                                             <p> 
+                                             <p class="time-duration"> 
                                                   {{ helper.formatTime(item.start_time) }} - {{ helper.formatTime(item.end_time) }}
                                              </p>
                                              <div class="d-flex flex-wrap mb-3">
-                                                  <span class="m-1" >{{ item.classes.map(cls => helper.ucfirst(cls.display_name)).join(', ') }}</span>
+                                                  <span class="m-1 classes-left" >
+                                                       <span v-for="cls in item.classes">
+                                                            {{ helper.ucfirst(cls.display_name) }}
+                                                       </span>
+                                                  </span>
                                              </div> 
                                         </li>
-                                        <!-- <li class="text-center text-black-50">No schedule at now</li> -->
                                    </template> 
                               </template>
                               <!-- Times up puch -->
@@ -291,14 +294,10 @@ function recallAllPunchedStudents(){
                                               <h4> 
                                                   {{ helper.ucfirst(item?.title) }}
                                               </h4>
-                                              <p> 
+                                              <p class="time-duration"> 
                                                    {{ helper.formatTime(item.start_time) }} - {{ helper.formatTime(item.end_time) }}
-                                              </p>
-                                              <!-- <div class="d-flex flex-wrap">
-                                                   <p class="m-1 p-1 border3 radius-5" v-for="cls in item.classes">{{ cls.class_short }}</p>
-                                              </div>                                     -->
+                                              </p>  
                                          </li>
-                                         <!-- <li class="text-center text-black-50">No schedule at now</li> -->
                                     </template>
                               </template>
                          </template>
@@ -310,12 +309,17 @@ function recallAllPunchedStudents(){
                                              <h3> 
                                                   {{ helper.ucfirst(item?.title) }}
                                              </h3>
-                                             <p> 
+                                             <p class="time-duration"> 
                                                   {{ helper.formatTime(item.start_time) }} - {{ helper.formatTime(item.end_time) }}
                                              </p>
                                              <div class="d-flex flex-wrap">
-                                                  <p class="m-1 p-1 border3 radius-5" v-for="cls in item.classes">{{ cls.display_name }}</p>
-                                             </div>                                    
+                                                  <span class="m-1 classes-left" >
+                                                       <span v-for="cls in item.classes">
+                                                            {{ helper.ucfirst(cls.display_name) }}
+                                                       </span>
+                                                  </span>
+                                             </div>   
+                                                                              
                                         </li>
                                         
                                    </template>
@@ -328,11 +332,15 @@ function recallAllPunchedStudents(){
                                              <h4> 
                                                   {{ helper.ucfirst(item?.title) }}  <kbd v-if="item.incoming_time" > {{ helper.ms_to_hour_minute(item.incoming_time) }} </kbd>
                                              </h4>
-                                             <p> 
+                                             <p class="time-duration"> 
                                                   {{ helper.formatTime(item.start_time) }} - {{ helper.formatTime(item.end_time) }}
                                              </p>
                                              <div class="d-flex flex-wrap mb-3" v-show="!item?.__hideClasses">
-                                                  <span class="m-1" >{{ item.classes.map(cls => helper.ucfirst(cls.display_name)).join(', ') }}</span>
+                                                  <span class="m-1 classes-left" >
+                                                       <span v-for="cls in item.classes">
+                                                            {{ helper.ucfirst(cls.display_name) }}
+                                                       </span>
+                                                  </span>
                                              </div> 
                                         </li>
                                          <!-- <li class="text-center text-black-50">No schedule at now</li> -->
@@ -348,12 +356,8 @@ function recallAllPunchedStudents(){
                                               </h4>
                                               <p> 
                                                    {{ helper.formatTime(item.start_time) }} - {{ helper.formatTime(item.end_time) }}
-                                              </p>
-                                              <!-- <div class="d-flex flex-wrap">
-                                                   <p class="m-1 p-1 border3 radius-5" v-for="cls in item.classes">{{ cls.class_short }}</p>
-                                              </div>                                     -->
+                                              </p> 
                                          </li>
-                                         <!-- <li class="text-center text-black-50">No schedule at now</li> -->
                                     </template>
                               </template>
                          </template>
@@ -745,5 +749,24 @@ function recallAllPunchedStudents(){
      opacity: 1;
      font-size: 10px;
      border: none;
+}
+.time-duration{
+     margin-bottom: 0;
+     border: 1px solid #999999;
+     padding: 2px 5px;
+     border-radius: 5px;
+     margin-right: 5px;
+     background-color: #c9c9c9;
+}
+.classes-left{
+     display: flex;
+     flex-direction: column;
+     gap: 5px;
+     max-height: 210px;
+     overflow-y: auto;
+     padding-right: 5px;
+}
+.classes-left > span{
+     border-bottom: 1px solid #999999;
 }
 </style>
