@@ -13,7 +13,7 @@ const SHIFTS = {
      },
 }
 
-module.exports = {
+const default_config = {
      env: {
           PORT: port_number,
           SOCKET_PORT: 2424,
@@ -321,4 +321,14 @@ module.exports = {
      ]
 
 }
+
+
+module.exports = {
+     ...default_config,
+     /**
+      * ==== connect [client config, included database] ======
+      */ 
+     // ...require('./../clients-configs/DHM101.config')
+}
+
 
