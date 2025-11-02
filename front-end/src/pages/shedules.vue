@@ -81,6 +81,12 @@ function updatePickersTime(delay=0, item = null){
   setTimeout(() => {
     startTimePicker.value.setTime((item || payload).start_time)
     endTimePicker.value.setTime((item || payload).end_time)
+
+    if(item?.start_time && item?.end_time){
+      payload.start_time = item.start_time
+      payload.end_time = item.end_time
+    }
+
   }, delay);
 }
 
