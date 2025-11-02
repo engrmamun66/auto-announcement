@@ -30,7 +30,8 @@ function close(){
 
 <template> 
     <Teleport to="body" >
-        <div class="an-modal" v-if="modelValue" @click.stop="close()">
+        <!-- <div class="an-modal" v-if="modelValue" @click.stop="close()"> -->
+        <div class="an-modal" v-if="modelValue" @click.stop="false">
             <div class="modal__content fadeUp" @click.stop="false">
                 <slot name="title">
                     <h3 v-if="title">{{title}}</h3> 
