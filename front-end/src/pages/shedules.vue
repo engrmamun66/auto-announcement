@@ -77,10 +77,10 @@ watch(addUpdateMode, (bool)=>{
 })
 
 
-function updatePickersTime(delay=0){ 
+function updatePickersTime(delay=0, item = null){ 
   setTimeout(() => {
-    startTimePicker.value.setTime(payload.start_time)
-    endTimePicker.value.setTime(payload.end_time)
+    startTimePicker.value.setTime((item || payload).start_time)
+    endTimePicker.value.setTime((item || payload).end_time)
   }, delay);
 }
 
@@ -109,6 +109,7 @@ function prepareEdit(item){
   payload.end_time = item.end_time
   payload.classes = item.classes
   addUpdateMode.value = true; 
+  updatePickersTime(300, item)
 }
 
 
