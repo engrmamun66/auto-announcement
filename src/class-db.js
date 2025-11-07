@@ -178,7 +178,7 @@ class myDB {
             `,
             (err) => {
               if (err) {
-                console.error("AddColumn Error creating table:", err.message + '\n===========================\n');
+                // console.error("AddColumn Error creating table:", err.message + '\n===========================\n');
               }
             }
         );
@@ -187,7 +187,7 @@ class myDB {
             `ALTER TABLE ${tableName} DROP COLUMN ${columnName}`,
             (err) => {
               if (err) {
-                console.error("DropColumn Error:", err.message + '\n===========================\n');
+                // console.error("DropColumn Error:", err.message + '\n===========================\n');
               }
             }
         );
