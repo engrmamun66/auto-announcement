@@ -43,11 +43,9 @@
                     <tbody>
                         <tr v-for="(quarter, quarterIndex) in year" :key="quarterIndex">
                             <td v-for="month in quarter" :key="month" :class="getTdClass(month, yearIndex)">
-                                <div @click="
-                                    onSelectMonth(month, getCurrentYear(yearIndex), 'click')
-                                    " @mouseenter="
-                    onSelectMonth(month, getCurrentYear(yearIndex), 'hover')
-                    " :class="getPickerControlClass(month, yearIndex)">
+                                <div @click="onSelectMonth(month, getCurrentYear(yearIndex), 'click')" 
+                                @mouseenter__eeeeeeee="onSelectMonth(month, getCurrentYear(yearIndex), 'hover')" 
+                                :class="getPickerControlClass(month, yearIndex)">
                                     <div :class="pickerControlInner">
                                         {{ months[month] }}
                                     </div>
@@ -260,18 +258,14 @@ export default {
                 endMonth,
                 endYear,
                 yearContext,
-            } = this;
+            } = this; 
 
             if (selectingStart) {
                 startMonth = newMonth;
                 startYear = newYear;
                 if (eventType === "click") {
-                    yearContext = newYear;
-                    // Since they are selecting the start month,
-                    // Go ahead and give them an end month that
-                    // is 11 months later
-                    endMonth = (startMonth + 11) % 12;
-                    endYear = endMonth === 11 ? startYear : startYear + 1;
+                    yearContext = newYear; 
+                    endMonth = startMonth 
                 }
             } else {
                 endMonth = newMonth;
@@ -374,24 +368,22 @@ export default {
 
             if (field === "start" || field === "all") {
                 const start = moment({ year: startYear, month: startMonth, day: dayOfMonth }).format('YYYY-MM-DD');
-                this.startValue = start;
-                this.onChange({ target: { name: this.startName, value: start } });
+                this.startValue = start; 
             }
 
             if (field === "end" || field === "all") {
                 // Always last day of month
                 const end = moment({ year: endYear, month: endMonth }).endOf('month').format('YYYY-MM-DD');
-                this.endValue = end;
-                this.onChange({ target: { name: this.endName, value: end } });
+                this.endValue = end; 
             }
         },
     },
     watch: {
         startValue(newVal) {
-            this.onChange({ target: { name: this.startName, value: newVal } });
+            this.onChange([this.startValue, this.endValue]);
         },
         endValue(newVal) {
-            this.onChange({ target: { name: this.endName, value: newVal } });
+            this.onChange([this.startValue, this.endValue]);
         },
     },
 };
@@ -437,7 +429,7 @@ export default {
   background-color: #137bb5;
 }
 .termInputControl.selecting.isEndMonth {
-  background-color: #ff2d55;
+  background-color: #137bb5;
 }
 
 .picker {
@@ -489,7 +481,7 @@ export default {
 }
  
 .pickerControl.selected.isEndMonth .pickerControlInner {
-  background-color: #ff2d55;
+  background-color: #137bb5;
 }
 .pickerControl.selected .pickerControlInner {
   color: white;

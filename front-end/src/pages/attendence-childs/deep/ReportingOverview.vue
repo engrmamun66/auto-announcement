@@ -33,6 +33,20 @@ let leaves_and_vacations = ref([])
 
 console.log('=====:::ReportingOverview.vue')
 
+let defaultStart = ref(moment().format('Y-MM-DD'))
+let defaultEnd = ref(moment().format('Y-MM-DD'))
+
+
+let mytimeout = null
+async function handleDateChange(event) {
+  clearTimeout(mytimeout)
+  mytimeout = setTimeout(async () => {
+    console.log(event)
+    // await onChangeMonthRange()
+  }, 400);
+}
+
+
 // For multiple select of students
 async function onChangeMonthRange([start_date, end_date]){
   leaves_and_vacations.value = await callbacks.getLeavesAndVacations({start_date, end_date})  
@@ -53,12 +67,7 @@ async function onChangeMonthRange([start_date, end_date]){
   }
 }  
 
- function handleDateChange(event) {
-    console.log(event.target.name, event.target.value)
-  }
-  
-let defaultStart = ref('2025-11-01')
-let defaultEnd = ref('2025-11-01')
+
 </script>
 
 
