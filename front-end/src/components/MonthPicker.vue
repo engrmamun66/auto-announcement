@@ -442,6 +442,7 @@ export default {
   background-color: white;
   border-radius: 3px;
   box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.2);
+  z-index: 99999;
   box-sizing: border-box;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
