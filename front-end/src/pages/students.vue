@@ -381,7 +381,8 @@ function onClickAttendance(std){
 <template>
 
     <div class="d-flex justify-content-between align-items-center flex-wrap">
-      <h1>{{ !addMode ? 'Students' : 'Add Student'}}</h1> 
+      <h1>{{ !addMode ? 'Students' : 'Add Student'}}  </h1> 
+      <kbd>Total: {{ params?.total || 0 }}</kbd>
 
       <div class="d-flex justify-content-end">
         <Btn @click="showSearchForm = !showSearchForm;editModeTabIndex=1" class="me-2"><i class='bx bx-search transformY-2px size-1' ></i> {{ showSearchForm ? "Hide" : 'Show' }} search</Btn>

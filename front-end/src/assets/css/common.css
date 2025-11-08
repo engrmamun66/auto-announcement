@@ -571,3 +571,7 @@ td a {
   color: white !important;
   box-shadow: 0px 3px 4px #0000006b;
 }
+
+.card-body{
+  overflow-x: auto;
+}

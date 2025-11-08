@@ -27,9 +27,6 @@ const emit = defineEmits(['onBtnSubmit', 'onBtnClear']);
 let log = console.log
 const weekends = CONFIG.value?.settings?.attendance?.weekends || [] // ['Friday']
 
-let attendence_full_history = ref([])
-let leaves_and_vacations = ref([])
-
 console.log('=====:::ReportingOverview.vue')
 
 let defaultStart = ref(moment().format('Y-MM-DD'))
@@ -45,7 +42,7 @@ async function handleDateChange(dates) {
 
 // For multiple select of students
 async function onChangeMonthRange([start_date, end_date]){
-  leaves_and_vacations.value = await callbacks.getLeavesAndVacations({start_date, end_date})  
+  let leaves_and_vacations = await callbacks.getLeavesAndVacations({start_date, end_date})  
 
   for(const eachClass of classes.value){
     let index = classes.value.indexOf(eachClass); 
@@ -55,7 +52,7 @@ async function onChangeMonthRange([start_date, end_date]){
     let payloadData = {
       weekends,
       class_short,
-      leaveData: leaves_and_vacations.value,
+      leaveData: leaves_and_vacations,
       classwise_students: all_students_non_copied.value.map(s => ({dakhela: s.dakhela, class_short: s.class_short})) 
     }
     let data = await getAttendeceListFullHistory(payloadData, {start_date, end_date, action: 'classwise_data' }) 
@@ -63,6 +60,10 @@ async function onChangeMonthRange([start_date, end_date]){
   }
 }  
 
+
+onMounted(()=>{
+  onChangeMonthRange([defaultStart.value, defaultEnd.value])
+})
 
 </script>
 
@@ -110,7 +111,7 @@ async function onChangeMonthRange([start_date, end_date]){
                   <td>{{ cls.attendance_data?.absent_count || 0 }}</td>
                   <td>{{ cls.attendance_data?.late_count || 0 }}</td>
                   <td>{{ cls.attendance_data?.leave_count || 0 }}</td>
-                  <td>{{ cls.attendance_data?.vacation_count || 0 }}</td>
+                  <td @click="log(cls)">{{ cls.attendance_data?.vacation_count || 0 }}</td>
                 </tr>
               </tbody>
             </table>
