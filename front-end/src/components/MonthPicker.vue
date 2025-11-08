@@ -269,7 +269,7 @@ export default {
                 }
             } else {
                 endMonth = newMonth;
-                endYear = newYear;
+                endYear = newYear;  
             }
 
             let nextState = {
@@ -380,7 +380,6 @@ export default {
     },
     watch: {
         startValue(newVal) {
-            this.onChange([this.startValue, this.endValue]);
         },
         endValue(newVal) {
             this.onChange([this.startValue, this.endValue]);
@@ -405,18 +404,20 @@ export default {
   border: 1px solid #ddd;
   outline: none;
   transition: box-shadow 200ms, border-color 200ms;
+  border-radius: 6px;
+  padding-right: 12px;
 }
 .termInput.active {
-  border-color: #137bb5;
-  box-shadow: inset 0 -3px 0 #137bb5;
+  border-color: var(--primaryColor);
+  box-shadow: inset 0 -3px 0 var(--primaryColor);
 }
 .termInput .fa {
-  color: #2b88bc;
+  color: var(--primaryColor);
 }
 .termInputControl {
   display: inline-block;
   min-width: 5em;
-  padding: 3px;
+  padding: 3px 15px;
   text-align: center;
   background-color: #eee;
   border-radius: 1em;
@@ -426,10 +427,10 @@ export default {
   color: white;
 }
 .termInputControl.selecting.isStartMonth {
-  background-color: #137bb5;
+  background-color: var(--primaryColor);
 }
 .termInputControl.selecting.isEndMonth {
-  background-color: #137bb5;
+  background-color: var(--primaryColor);
 }
 
 .picker {
@@ -477,11 +478,11 @@ export default {
 }
  
 .pickerControl.selected.isStartMonth .pickerControlInner {
-  background-color: #137bb5;
+  background-color: var(--primaryColor);
 }
  
 .pickerControl.selected.isEndMonth .pickerControlInner {
-  background-color: #137bb5;
+  background-color: var(--primaryColor);
 }
 .pickerControl.selected .pickerControlInner {
   color: white;
