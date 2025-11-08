@@ -125,7 +125,7 @@ onMounted(()=>{
   background-color: #ffffff5a; 
 }
 .card .info{
-    color: #f41fec;
+    color: #5b5b5b;
     font-weight: 700;
     background-color: #f1f1f1;
     padding: 2px 26px;
