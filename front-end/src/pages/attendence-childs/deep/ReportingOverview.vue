@@ -30,26 +30,31 @@ const weekends = CONFIG.value?.settings?.attendance?.weekends || [] // ['Friday'
 let attendence_full_history = ref([])
 let leaves_and_vacations = ref([])
 
+console.log('=====:::ReportingOverview.vue')
 
 // For multiple select of students
 async function onChangeMonthRange([start_date, end_date]){
   leaves_and_vacations.value = await callbacks.getLeavesAndVacations({start_date, end_date})  
-  
 
-  let payloadData = {
-    weekends,
-    leaveData: leaves_and_vacations.value,
-    classwise_students: all_students_non_copied.value.map(s => ({dakhela: s.dakhela, class_short: s.class_short})) 
+  for(const eachClass of classes.value){
+    let class_short = eachClass.class_short
+
+    let payloadData = {
+      weekends,
+      class_short,
+      leaveData: leaves_and_vacations.value,
+      classwise_students: all_students_non_copied.value.map(s => ({dakhela: s.dakhela, class_short: s.class_short})) 
+    }
+    let data = await getAttendeceListFullHistory(payloadData, {start_date, end_date, action: 'classwise_data' }) 
+    console.log({class_short}, data);
   }
-  attendence_full_history.value = await getAttendeceListFullHistory(payloadData, {start_date, end_date, action: 'classwise_data' }) 
-  calculateClassWiseData()
 }
+
+
 
 let classWiseData = ref({})
 
-async function calculateClassWiseData(){
-   console.log('=====:::', attendence_full_history.value);
-}
+ 
 
 onMounted(() => {
   
