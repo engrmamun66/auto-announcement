@@ -7,7 +7,6 @@ import Pagination from '../../../components/Pagination.vue'
 import BaseSelectMultiple from './../../../components/BaseSelectMultiple.vue'
 import EmDateTimePicker from './../../../components/EmDateTimePicker.vue'
 import Btn from './../../../components/Btn.vue'
-import MontheRanger from './../../../components/MontheRanger.vue'
 import MonthPicker from './../../../components/MonthPicker.vue'
 
 const CONFIG = inject("CONFIG");
@@ -82,6 +81,44 @@ async function onChangeMonthRange([start_date, end_date]){
       </div>
 
     </div>   
+     
+        
+    <div class="row mt-3">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="card-title">Class-wise Attendance Summary</h5>
+          </div>
+          <div class="card-body">
+            <table class="table table-bordered table-striped">
+              <thead>
+                <tr>
+                  <th>Class Name</th>
+                  <th>Total Students</th>
+                  <th>Present</th>
+                  <th>Absent</th>
+                  <th>Late</th>
+                  <th>Leaves</th>
+                  <th>Vacations</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="cls in classes" :key="cls.class_short">
+                  <td>{{ cls.class_name }}</td>
+                  <td>{{ cls.attendance_data?.total_students || 0 }}</td>
+                  <td>{{ cls.attendance_data?.present_count || 0 }}</td>
+                  <td>{{ cls.attendance_data?.absent_count || 0 }}</td>
+                  <td>{{ cls.attendance_data?.late_count || 0 }}</td>
+                  <td>{{ cls.attendance_data?.leave_count || 0 }}</td>
+                  <td>{{ cls.attendance_data?.vacation_count || 0 }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>
 
