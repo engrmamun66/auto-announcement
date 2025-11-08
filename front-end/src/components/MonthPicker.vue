@@ -492,18 +492,13 @@ export default {
   transition: background-color 200ms;
 }
 .pickerControlInner:hover {
-  background-color: rgba(0, 0, 0, 0.1);
   color: black;
 }
-.pickerControl.selected.isStartMonth {
-  box-shadow: inset -20px 0 0 0 #e8e8e8;
-}
+ 
 .pickerControl.selected.isStartMonth .pickerControlInner {
   background-color: #137bb5;
 }
-.pickerControl.selected.isEndMonth {
-  box-shadow: inset 20px 0 0 0 #e8e8e8, -10px 0 0 0 #e8e8e8;
-}
+ 
 .pickerControl.selected.isEndMonth .pickerControlInner {
   background-color: #ff2d55;
 }
@@ -548,12 +543,13 @@ export default {
 }
 .picker .yearOneContext td.cellWithinRange .pickerControl,
 .picker .yearTwoContext td.cellWithinRange .pickerControl {
-  background-color: #e8e8e8;
+  /* background-color: #e8e8e8; */
+  /* background-color: #e8e8e8; */
   color: #aaa;
 }
 .picker .yearOneContext td.cellWithinRange:not(:first-child) .pickerControl,
 .picker .yearTwoContext td.cellWithinRange:not(:first-child) .pickerControl {
-  box-shadow: -10px 0 0 0 #e8e8e8;
+  /* box-shadow: -10px 0 0 0 #e8e8e8; */
 }
 .picker .yearTwoContext {
   margin-left: 0.5em;
