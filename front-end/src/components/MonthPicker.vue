@@ -12,7 +12,8 @@
             {{ months[endMonth] }} {{ endYear }}
         </span>
 
-        <div v-if="picking || true" :class="picker" class="d-flex">
+        <!-- <div v-if="picking || true" :class="picker" class="d-flex"> -->
+        <div v-if="picking" :class="picker" class="d-flex">
             <div :style="{
                 left: selectingEnd ? endMonthCaretPosition : startMonthCaretPosition,
             }" :class="pickerCaret"></div>
@@ -408,113 +409,153 @@ export default {
 </script>
 
 <style scoped>
-/* Add your CSS styles here */
+ 
+ body {
+  margin: 10em;
+  line-height: 1.5em;
+  font-size: 1.125em;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+}
+
 .termInput {
-    position: relative;
-    display: inline-block;
+  position: relative;
+  display: inline-block;
+  padding: 0.5em;
+  border: 1px solid #ddd;
+  outline: none;
+  transition: box-shadow 200ms, border-color 200ms;
 }
-
+.termInput.active {
+  border-color: #137bb5;
+  box-shadow: inset 0 -3px 0 #137bb5;
+}
+.termInput .fa {
+  color: #2b88bc;
+}
 .termInputControl {
-    cursor: pointer;
-    padding: 4px 8px;
-    border-radius: 4px;
+  display: inline-block;
+  min-width: 5em;
+  padding: 3px;
+  text-align: center;
+  background-color: #eee;
+  border-radius: 1em;
+  cursor: pointer;
 }
-
-.termInputControl:hover {
-    background-color: #f0f0f0;
+.termInputControl.selecting {
+  color: white;
 }
-
-.selecting {
-    background-color: #e0e0e0;
+.termInputControl.selecting.isStartMonth {
+  background-color: #137bb5;
+}
+.termInputControl.selecting.isEndMonth {
+  background-color: #ff2d55;
 }
 
 .picker {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
-    padding: 16px;
-    margin-top: 8px;
+  position: absolute;
+  left: 0;
+  top: 2.9em;
+  min-width: 300px;
+  padding: 10px;
+  background-color: white;
+  border-radius: 3px;
+  box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.2);
+  box-sizing: border-box;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
 }
-
 .pickerCaret {
-    position: absolute;
-    top: -6px;
-    width: 0;
-    height: 0;
-    border-left: 6px solid transparent;
-    border-right: 6px solid transparent;
-    border-bottom: 6px solid #ddd;
+  position: absolute;
+  top: -0.9em;
+  width: 1.5em;
+  height: 1.5em;
+  background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAG4AAABMCAMAAAC74XL0AAAA+VBMVEX///8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADw8PAAAADj4+MAAAAAAAAAAAAAAAAAAACxsbEAAAAAAACAgID39/d1dXVra2vMzMy+vr719fXw8PCdnZ2amprCwsK8vLy3t7e0tLTm5ubd3d3JycnHx8fX19fV1dXS0tL8/Pz39/fj4+Pf39/d3d3b29vq6urk5OTj4+P////y8vLr6+vp6en////u7u79/f36+vrx8fH5+fn39/f19fX////39/f+/v79/f37+/v6+vr5+fn////8/Pz////+/v7///+FGs6FAAAAUnRSTlMAAQIDBAUGBwgJCgsMDQ4PEBEREhITFBUWFxcYGSAhIyYoKzIzNDU/QUNER0pRUl9gYWFjbG5vcHp9foCHi4yQmqGjqbS2t8DG0dLT1NXg4/DxJjbxaAAAAtxJREFUeNrt2el6k0AUgGHTsIQdxEyCVMUtilqtW7QubTSaRqXGOfd/MTKheqoDHZbxR2K/G3gfeDgHJrl00f9U70zbwyG1cxqS28AVVL+vKGqeovT7BbkN3C9K03R9kKfrmqYoCG4qh5iq6rpp2raTZ1mGUYCbzvXyGDYYWJbr+n6Q53m2zcDigdlMjseCgJDRiJDh0Pc5cCO5nR1FYQ+J64YhIeNxlDcaDYfshg4Gqtrv9/I2jUNM00zTcdiNjKI43t2NYwaGoedZFgfK5Saz5XIxTWRzON6aZhiO4/vsRsYzWLdKi+tzXcvSdRx3yVyuFdFUNocjYNueNxzm1zaF362SKCIkCBzHNHGdSeVSCtiC5ySNt+eF4WgUJSdwtsN4PCbE9x0Hx10mt4A/25fG4Xiz1bXGokP4KzrJr48bd0ncHnBlCc/JGm8KfHM524XnkgzKeing2m6TOZT3gNsuMrgpVEQTjuu+TVKobBnjuOM4dOISCtXNeK7beEcncF776+1SfEyoKoJtuRmcG015rsM2eQWCTpLW24XnUgqiFu04HAHcJskKxL3hpq8tt4A67TXn8OhhGLZ9uk0OoVZ0wq4vCFwXX7YtuH2oWcZzLbYJhbrN4ygSvGxFXJJB/aYCTjxxc2gQTQXjIOIOoFGrpAGHL1R2rGLX9hgatqx+t4u5hELT3pdz4hdqFMUZNO8pt13qcnNoEb0r4ASngaZlpycHbhyEp4F2zXlOPALJCtp2sJ4+3+fHoZpbQvtSnqt8TIIAD43twk9B0yweFxH3BDqViTm8lYTcp9CtGSFhiMvsfO5GBl17UZfz/fAzdI7eCwJuVZdzr0FC366JOfbJ4DwCKX1ybZs9KgLuFgU5veM4/qffwdWvIKuHBsNwEMq4jyAtehO5ij8knoPEvuBfG+XcHZDahzIOwSs/QG7PECvhjkF2t5HjyCOQ3vfLDCvt+vE/6G3OXbQF/QSAiT/qMlFuagAAAABJRU5ErkJggg==);
+  background-size: contain;
+  background-repeat: no-repeat;
+  transition: left 500ms;
 }
-
-.yearOneContext,
-.yearTwoContext {
-    display: inline-block;
-    vertical-align: top;
-    margin: 0 8px;
-}
-
 .pickerControl {
-    padding: 8px 12px;
-    cursor: pointer;
-    border-radius: 4px;
-    margin: 2px;
+  width: 2.9166666667em;
+  height: 2.9166666667em;
+  margin: 0 auto;
+  font-size: 0.6666666667em;
+  font-weight: bold;
+  line-height: 2.9166666667;
+  cursor: pointer;
+  transition: background-color 200ms, box-shadow 200ms;
 }
-
-.pickerControl:hover {
-    background-color: #f0f0f0;
-}
-
-.selected {
-    background-color: #007bff;
-    color: white;
-}
-
-.isStartMonth {
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
-}
-
-.isEndMonth {
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
-}
-
-.cellWithinRange {
-    background-color: #e8f4fd;
-}
-
 .pickerControlInner {
-    min-width: 40px;
-    text-align: center;
+  border-radius: 50%;
+  transition: background-color 200ms;
 }
-
-table {
-    width: 100%;
-    border-collapse: collapse;
+.pickerControlInner:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+  color: black;
 }
-
-th,
-td {
-    padding: 4px !important;
-    text-align: center;
+.pickerControl.selected.isStartMonth {
+  box-shadow: inset -20px 0 0 0 #e8e8e8;
 }
-
-th svg {
-    width: 12px;
-    height: 12px;
-    cursor: pointer;
+.pickerControl.selected.isStartMonth .pickerControlInner {
+  background-color: #137bb5;
 }
-
-th svg:hover {
-    opacity: 0.7;
+.pickerControl.selected.isEndMonth {
+  box-shadow: inset 20px 0 0 0 #e8e8e8, -10px 0 0 0 #e8e8e8;
 }
-
-.active {
-    z-index: 1001;
+.pickerControl.selected.isEndMonth .pickerControlInner {
+  background-color: #ff2d55;
+}
+.pickerControl.selected .pickerControlInner {
+  color: white;
+}
+.picker th svg {
+  display: block;
+  width: 75%;
+  margin: 0 auto;
+  fill: #666;
+  cursor: pointer;
+}
+.picker th svg:hover {
+  fill: black;
+}
+.picker .yearOneContext,
+.picker .yearTwoContext {
+  float: left;
+  width: calc(50% - .25em);
+}
+.picker .yearOneContext table,
+.picker .yearTwoContext table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.picker .yearOneContext tr + tr td,
+.picker .yearTwoContext tr + tr td {
+  padding-top: 5px;
+}
+.picker .yearOneContext td, .picker .yearOneContext th,
+.picker .yearTwoContext td,
+.picker .yearTwoContext th {
+  text-align: center;
+  color: #666;
+  font-weight: normal;
+}
+.picker .yearOneContext th,
+.picker .yearTwoContext th {
+  font-size: 0.875em;
+  letter-spacing: 2px;
+}
+.picker .yearOneContext td.cellWithinRange .pickerControl,
+.picker .yearTwoContext td.cellWithinRange .pickerControl {
+  background-color: #e8e8e8;
+  color: #aaa;
+}
+.picker .yearOneContext td.cellWithinRange:not(:first-child) .pickerControl,
+.picker .yearTwoContext td.cellWithinRange:not(:first-child) .pickerControl {
+  box-shadow: -10px 0 0 0 #e8e8e8;
+}
+.picker .yearTwoContext {
+  margin-left: 0.5em;
 }
 </style>
