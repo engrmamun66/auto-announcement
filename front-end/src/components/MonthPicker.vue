@@ -62,6 +62,9 @@
 </template>
 
 <script>
+
+import moment from 'moment/moment'
+
 const months = [
     "Jan",
     "Feb",
@@ -337,33 +340,25 @@ export default {
             startYear,
             endMonth,
             endYear,
-        }) {
+            }) {
             if (selectingStart) {
-                // Do not let the start year go past the end year
-                if (startYear > endYear) {
-                    endYear++;
-                }
-                // If they're now on the same year,
-                // do not let the end month be before the start month
-                if (startYear === endYear && startMonth >= endMonth) {
-                    endMonth = (startMonth + 1) % 12;
-                    //If this puts the end month in January, increment the year 1 as well
-                    if (endMonth === 0) endYear++;
+                // Don't let start year exceed end year
+                if (startYear > endYear) endYear = startYear;
+
+                // Allow same month/year — only adjust if start > end
+                if (startYear === endYear && startMonth > endMonth) {
+                endMonth = startMonth;
                 }
             } else {
-                // Must be selecting end month
-                // Do not let the end year go before the start year
-                if (endYear < startYear) {
-                    startYear--;
-                }
-                // If they're now on the same year,
-                // do not let the start month be after the end month
-                if (startYear === endYear && startMonth >= endMonth) {
-                    startMonth = (endMonth + 11) % 12;
-                    //If this puts the start month in December, decrement the year 1 as well
-                    if (startMonth === 11) startYear--;
+                // Don't let end year go before start year
+                if (endYear < startYear) endYear = startYear;
+
+                // Allow same month/year — only adjust if end < start
+                if (startYear === endYear && endMonth < startMonth) {
+                startMonth = endMonth;
                 }
             }
+
             return {
                 selectingStart,
                 selectingEnd,
@@ -373,27 +368,21 @@ export default {
                 endMonth,
                 endYear,
             };
-        },
+            },
         setDates(field = "all") {
             const { startYear, startMonth, endYear, endMonth, dayOfMonth } = this;
 
             if (field === "start" || field === "all") {
-                this.startValue = `${startYear}-${pad(
-                    "00",
-                    startMonth + 1,
-                    true
-                )}-${pad("00", dayOfMonth, true)}`;
-                this.onChange({
-                    target: { name: this.startName, value: this.startValue },
-                });
+                const start = moment({ year: startYear, month: startMonth, day: dayOfMonth }).format('YYYY-MM-DD');
+                this.startValue = start;
+                this.onChange({ target: { name: this.startName, value: start } });
             }
+
             if (field === "end" || field === "all") {
-                this.endValue = `${endYear}-${pad("00", endMonth + 1, true)}-${pad(
-                    "00",
-                    dayOfMonth,
-                    true
-                )}`;
-                this.onChange({ target: { name: this.endName, value: this.endValue } });
+                // Always last day of month
+                const end = moment({ year: endYear, month: endMonth }).endOf('month').format('YYYY-MM-DD');
+                this.endValue = end;
+                this.onChange({ target: { name: this.endName, value: end } });
             }
         },
     },

@@ -57,24 +57,27 @@ async function onChangeMonthRange([start_date, end_date]){
     console.log(event.target.name, event.target.value)
   }
   
-let defaultStart = ref('2024-01-01')
-let defaultEnd = ref('2024-12-01')
+let defaultStart = ref('2025-11-01')
+let defaultEnd = ref('2025-11-01')
 </script>
 
 
 <template>
   <div>
-    
+    {{ defaultStart }}
+    <hr>
+    {{ defaultEnd }}
     <div class="row">
       <div class="col-6">
         <MontheRanger @change="onChangeMonthRange"></MontheRanger>
       </div>
       <div class="col-6">
+
         <MonthPicker 
-        :on-change="handleDateChange"
-        :default-start-value="defaultStart"
-        :default-end-value="defaultEnd"
-        :day-of-month="1"
+        :onChange="handleDateChange"
+        :defaultStartValue="defaultStart"
+        :defaultEndValue="defaultEnd"
+        :dayOfMonth="1"
         ></MonthPicker>
       </div>
 
