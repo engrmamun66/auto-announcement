@@ -36,14 +36,11 @@ console.log('=====:::ReportingOverview.vue')
 let defaultStart = ref(moment().format('Y-MM-DD'))
 let defaultEnd = ref(moment().format('Y-MM-DD'))
 
-
-let mytimeout = null
-async function handleDateChange(event) {
-  clearTimeout(mytimeout)
-  mytimeout = setTimeout(async () => {
-    console.log(event)
-    // await onChangeMonthRange()
-  }, 400);
+ 
+async function handleDateChange(dates) {
+  defaultStart.value = dates[0]
+  defaultEnd.value = dates[1]
+  await onChangeMonthRange(dates) 
 }
 
 
@@ -72,14 +69,8 @@ async function onChangeMonthRange([start_date, end_date]){
 
 
 <template>
-  <div>
-    {{ defaultStart }}
-    <hr>
-    {{ defaultEnd }}
-    <div class="row">
-      <div class="col-6">
-        <MontheRanger @change="onChangeMonthRange"></MontheRanger>
-      </div>
+  <div> 
+    <div class="row"> 
       <div class="col-6">
 
         <MonthPicker 
