@@ -98,8 +98,16 @@ onMounted(()=>{
           <div class="card attendance-card">
             <div class="card-body text-center">
               <h4 class="card-title">{{ cls.class_name }}</h4>
-              <p class="card-text">Students: {{ all_students_non_copied.filter(s => s.class_short === cls.class_short).length }} </p>
-              <p class="card-text">Attendance: {{ cls?.data?.total_in || 0 }} </p>
+              <div class="w-100 d-flex justify-content-around">
+                <div class="side-of-card">
+                  <div class="sub-title">Students</div>
+                  <span class="info">{{ all_students_non_copied.filter(s => s.class_short === cls.class_short).length }}</span> 
+                </div>
+                <div class="side-of-card">
+                  <div class="sub-title">Attendance</div>
+                  <span class="info">{{ cls?.data?.total_in || 0 }}</span> 
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -112,6 +120,32 @@ onMounted(()=>{
 
 
 <style scoped>
- 
+.card{
+  border-radius: 30px;
+  background-color: #ffffff5a; 
+}
+.card .info{
+  color: #f41fec;
+    font-weight: 700;
+    background-color: #f1f1f1;
+    padding: 2px 26px;
+    border-radius: 4px;
+}
+.card .info.yellow{
+  color: #d19509; 
+}
+
+.side-of-card{
+  width: 50%;
+  text-align: center;
+  border-top: 1px solid #e2e2e2;
+}
+.side-of-card:first-child{
+  border-right: 1px solid #e2e2e2;
+}
+.sub-title{
+ color: #414141;
+ font-size: 14px;
+}
 
 </style>
