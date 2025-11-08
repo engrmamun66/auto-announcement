@@ -101,11 +101,11 @@ onMounted(()=>{
               <div class="w-100 d-flex justify-content-around">
                 <div class="side-of-card">
                   <div class="sub-title">Students</div>
-                  <span class="info">{{ all_students_non_copied.filter(s => s.class_short === cls.class_short).length }}</span> 
+                  <div class="info">{{ all_students_non_copied.filter(s => s.class_short === cls.class_short).length }}</div> 
                 </div>
                 <div class="side-of-card">
                   <div class="sub-title">Attendance</div>
-                  <span class="info">{{ cls?.data?.total_in || 0 }}</span> 
+                  <div class="info">{{ cls?.data?.total_in || 0 }}</div> 
                 </div>
               </div>
             </div>
@@ -125,11 +125,13 @@ onMounted(()=>{
   background-color: #ffffff5a; 
 }
 .card .info{
-  color: #f41fec;
+    color: #f41fec;
     font-weight: 700;
     background-color: #f1f1f1;
     padding: 2px 26px;
-    border-radius: 4px;
+    border-radius: 24px;
+    margin: 2px 14px;
+    font-size: 20px;
 }
 .card .info.yellow{
   color: #d19509; 
