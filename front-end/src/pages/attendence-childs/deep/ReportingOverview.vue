@@ -8,6 +8,7 @@ import BaseSelectMultiple from './../../../components/BaseSelectMultiple.vue'
 import EmDateTimePicker from './../../../components/EmDateTimePicker.vue'
 import Btn from './../../../components/Btn.vue'
 import MontheRanger from './../../../components/MontheRanger.vue'
+import MonthPicker from './../../../components/MonthPicker.vue'
 
 const CONFIG = inject("CONFIG");
 const classes = inject("classes");
@@ -37,6 +38,8 @@ async function onChangeMonthRange([start_date, end_date]){
   leaves_and_vacations.value = await callbacks.getLeavesAndVacations({start_date, end_date})  
 
   for(const eachClass of classes.value){
+    let index = classes.value.indexOf(eachClass); 
+
     let class_short = eachClass.class_short
 
     let payloadData = {
@@ -46,25 +49,16 @@ async function onChangeMonthRange([start_date, end_date]){
       classwise_students: all_students_non_copied.value.map(s => ({dakhela: s.dakhela, class_short: s.class_short})) 
     }
     let data = await getAttendeceListFullHistory(payloadData, {start_date, end_date, action: 'classwise_data' }) 
-    console.log({class_short}, data);
+    classes.value[index]["attendance_data"] = data
   }
-}
+}  
 
-
-
-let classWiseData = ref({})
-
- 
-
-onMounted(() => {
+ function handleDateChange(event) {
+    console.log(event.target.name, event.target.value)
+  }
   
-})
- 
- 
-
-  
-
-
+let defaultStart = ref('2024-01-01')
+let defaultEnd = ref('2024-12-01')
 </script>
 
 
@@ -74,6 +68,14 @@ onMounted(() => {
     <div class="row">
       <div class="col-6">
         <MontheRanger @change="onChangeMonthRange"></MontheRanger>
+      </div>
+      <div class="col-6">
+        <MonthPicker 
+        :on-change="handleDateChange"
+        :default-start-value="defaultStart"
+        :default-end-value="defaultEnd"
+        :day-of-month="1"
+        ></MonthPicker>
       </div>
 
     </div>   

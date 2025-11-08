@@ -40,7 +40,7 @@ onMounted(()=>{
 
 
 <template>
-  <div class="row mt-3">
+  <div class="row mt-3"> 
 
      <template v-if="reportingViewTab == 1">
       <ReportingOverview></ReportingOverview>

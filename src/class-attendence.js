@@ -316,7 +316,7 @@ class Attendance {
           
 
           // return {attendanceGroup, weekends, leaveData, classwise_students}
-          return Reports
+          return Reports?.[class___short] ?? []
         }
       }
 
