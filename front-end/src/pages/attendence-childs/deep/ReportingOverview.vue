@@ -96,6 +96,12 @@ onMounted(()=>{
       <template v-for="cls in classes" :key="cls.class_short">
         <div class="col-md-4 mb-3">
           <div class="card attendance-card">
+
+            <div class="overflow-div">
+              <button class="details-button btn btn-light">Show Details</button>
+            </div>
+
+
             <div class="card-body text-center">
               <h4 class="card-title">{{ cls.class_name }}</h4>
               <div class="w-100 d-flex justify-content-around">
@@ -122,7 +128,9 @@ onMounted(()=>{
 <style scoped>
 .card{
   border-radius: 30px;
-  background-color: #ffffff5a; 
+  background-color: #ffffffbe; 
+  position: relative;
+  overflow: hidden;
 }
 .card .info{
     color: #5b5b5b;
@@ -148,6 +156,24 @@ onMounted(()=>{
 .sub-title{
  color: #414141;
  font-size: 14px;
+}
+
+.card .overflow-div{
+  position:absolute;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--primaryColor);
+  z-index: 11;
+  top: 100%;
+  left: 0px;
+  /* top: 0;  */
+  transition: all 0.5s;
+}
+.card:hover .overflow-div{ 
+  top: 0; 
 }
 
 </style>
