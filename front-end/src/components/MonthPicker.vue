@@ -400,12 +400,12 @@ export default {
 .termInput {
   position: relative;
   display: inline-block;
-  padding: 0.5em;
+  padding: .5em 12px .5em .5em;
   border: 1px solid #ddd;
   outline: none;
-  transition: box-shadow 200ms, border-color 200ms;
+  transition: box-shadow .2s,border-color .2s;
   border-radius: 6px;
-  padding-right: 12px;
+  background-color: #c7c7c7;
 }
 .termInput.active {
   border-color: var(--primaryColor);

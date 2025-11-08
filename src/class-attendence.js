@@ -243,7 +243,7 @@ class Attendance {
 
           let attendanceGroup = utils.listGroupBy(attendanceList, 'student_id')
 
-          let Reports = {}
+          let DATA = []
           
 
           classwise_students.forEach((student, i) => {
@@ -306,17 +306,18 @@ class Attendance {
               })  
               
              
-              date_wise_report.sort((a, b) => (a.serial) - b.serial);
-              if(!Reports[class_short]) Reports[class_short] = []
-              Reports[class_short].push(date_wise_report) 
+              date_wise_report.sort((a, b) => (a.serial) - b.serial); 
+              DATA.push(date_wise_report) 
             } //===
             
           }) 
 
-          
-
-          // return {attendanceGroup, weekends, leaveData, classwise_students}
-          return Reports?.[class___short] ?? []
+          let class_attendance_data = attendanceList.filter(att => att.class_short == class___short)
+           
+          return { 
+            attendance: DATA,
+            total_in: class_attendance_data.filter(item => item?.in_time)?.length || 0,
+          }
         }
       }
 

@@ -29,8 +29,8 @@ const weekends = CONFIG.value?.settings?.attendance?.weekends || [] // ['Friday'
 
 console.log('=====:::ReportingOverview.vue')
 
-let defaultStart = ref(moment().format('Y-MM-DD'))
-let defaultEnd = ref(moment().format('Y-MM-DD'))
+let defaultStart = ref(moment().startOf('month').format('Y-MM-DD'))
+let defaultEnd = ref(moment().endOf('month').format('Y-MM-DD'))
 
  
 async function handleDateChange(dates) {
@@ -55,8 +55,8 @@ async function onChangeMonthRange([start_date, end_date]){
       leaveData: leaves_and_vacations,
       classwise_students: all_students_non_copied.value.map(s => ({dakhela: s.dakhela, class_short: s.class_short})) 
     }
-    let data = await getAttendeceListFullHistory(payloadData, {start_date, end_date, action: 'classwise_data' }) 
-    classes.value[index]["attendance_data"] = data
+    let data = await getAttendeceListFullHistory(payloadData, {start_date, end_date, action: 'classwise_data' })
+    classes.value[index]["data"] = data
   }
 }  
 
@@ -80,44 +80,30 @@ onMounted(()=>{
         :dayOfMonth="1"
         ></MonthPicker>
       </div>
+      <div class="col-6">
+        <select class="form-control">
+          <template v-for="cls in classes" :key="cls.class_short">
+            <option :value="cls.class_short">{{ cls.class_name }}</option> 
+          </template>
+
+        </select>
+      </div>
 
     </div>   
      
         
     <div class="row mt-3">
-      <div class="col-12">
-        <div class="card">
-          <div class="card-header">
-            <h5 class="card-title">Class-wise Attendance Summary</h5>
-          </div>
-          <div class="card-body">
-            <table class="table table-bordered table-striped">
-              <thead>
-                <tr>
-                  <th>Class Name</th>
-                  <th>Total Students</th>
-                  <th>Present</th>
-                  <th>Absent</th>
-                  <th>Late</th>
-                  <th>Leaves</th>
-                  <th>Vacations</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="cls in classes" :key="cls.class_short">
-                  <td>{{ cls.class_name }}</td>
-                  <td>{{ cls.attendance_data?.total_students || 0 }}</td>
-                  <td>{{ cls.attendance_data?.present_count || 0 }}</td>
-                  <td>{{ cls.attendance_data?.absent_count || 0 }}</td>
-                  <td>{{ cls.attendance_data?.late_count || 0 }}</td>
-                  <td>{{ cls.attendance_data?.leave_count || 0 }}</td>
-                  <td @click="log(cls)">{{ cls.attendance_data?.vacation_count || 0 }}</td>
-                </tr>
-              </tbody>
-            </table>
+      <template v-for="cls in classes" :key="cls.class_short">
+        <div class="col-md-4 mb-3">
+          <div class="card attendance-card">
+            <div class="card-body text-center">
+              <h4 class="card-title">{{ cls.class_name }}</h4>
+              <p class="card-text">Students: {{ all_students_non_copied.filter(s => s.class_short === cls.class_short).length }} </p>
+              <p class="card-text">Attendance: {{ cls?.data?.total_in || 0 }} </p>
+            </div>
           </div>
         </div>
-      </div>
+      </template> 
     </div>
 
   </div>
