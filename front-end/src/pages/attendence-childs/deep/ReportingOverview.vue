@@ -98,7 +98,7 @@ onMounted(()=>{
           <div class="card attendance-card">
 
             <div class="overflow-div">
-              <button class="details-button btn btn-light">Show Details</button>
+              <button class="btn btn-light bg-white">Show Details</button>
             </div>
 
 
@@ -165,12 +165,27 @@ onMounted(()=>{
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--primaryColor);
+  background-color: #2c3e50ab;
   z-index: 11;
   top: 100%;
   left: 0px;
   /* top: 0;  */
   transition: all 0.5s;
+}
+.card .overflow-div button{ 
+  box-shadow: 0px 3px 5px #00000057; 
+  transform: translateY(200px);
+  opacity: 0;
+  border-radius: 0px; 
+  transition: all 0.4s;
+}
+.card:hover .overflow-div button{ 
+  transform: translateY(0px);
+  opacity: 1;
+  border-radius: 20px; 
+}
+.card:hover .overflow-div{ 
+  top: 0; 
 }
 .card:hover .overflow-div{ 
   top: 0; 
