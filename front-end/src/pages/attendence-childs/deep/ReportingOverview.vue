@@ -8,6 +8,7 @@ import BaseSelectMultiple from './../../../components/BaseSelectMultiple.vue'
 import EmDateTimePicker from './../../../components/EmDateTimePicker.vue'
 import Btn from './../../../components/Btn.vue'
 import MonthPicker from './../../../components/MonthPicker.vue'
+import AttendanceDetailsPopup from './../../../components/AttendanceDetailsPopup.vue'
 
 const CONFIG = inject("CONFIG");
 const classes = inject("classes");
@@ -56,9 +57,17 @@ async function onChangeMonthRange([start_date, end_date]){
       classwise_students: all_students_non_copied.value.map(s => ({dakhela: s.dakhela, class_short: s.class_short})) 
     }
     let data = await getAttendeceListFullHistory(payloadData, {start_date, end_date, action: 'classwise_data' })
-    classes.value[index]["data"] = data
+    classes.value[index]["data"] = data?.attendance
   }
 }  
+
+let showDetails = ref(false)
+let targetData = ref(null)
+
+function onClickShowDetails(cls){
+  showDetails.value = true
+  targetData.value = cls
+}
 
 
 onMounted(()=>{
@@ -81,44 +90,57 @@ onMounted(()=>{
         ></MonthPicker>
       </div>
       <div class="col-6">
-        <select class="form-control">
+        <!-- <select class="form-control">
           <template v-for="cls in classes" :key="cls.class_short">
             <option :value="cls.class_short">{{ cls.class_name }}</option> 
           </template>
 
-        </select>
+        </select> -->
       </div>
 
     </div>   
      
-        
-    <div class="row mt-3">
-      <template v-for="cls in classes" :key="cls.class_short">
-        <div class="col-md-4 mb-3">
-          <div class="card attendance-card">
-
-            <div class="overflow-div">
-              <button class="btn btn-light bg-white">Show Details</button>
-            </div>
-
-
-            <div class="card-body text-center">
-              <h4 class="card-title">{{ cls.class_name }}</h4>
-              <div class="w-100 d-flex justify-content-around">
-                <div class="side-of-card">
-                  <div class="sub-title">Students</div>
-                  <div class="info">{{ all_students_non_copied.filter(s => s.class_short === cls.class_short).length }}</div> 
-                </div>
-                <div class="side-of-card">
-                  <div class="sub-title">Attendance</div>
-                  <div class="info">{{ cls?.data?.total_in || 0 }}</div> 
+    <template v-if="!showDetails">
+      <div class="row mt-3">
+        <template v-for="cls in classes" :key="cls.class_short">
+          <div class="col-md-4 mb-3">
+            <div class="card attendance-card">
+  
+              <div class="overflow-div">
+                <button @click.stop="onClickShowDetails(cls)" class="btn btn-light bg-white">Show Details</button>
+              </div>
+  
+  
+              <div class="card-body text-center">
+                <h4 class="card-title">{{ cls.class_name }}</h4>
+                <div class="w-100 d-flex justify-content-around">
+                  <div class="side-of-card">
+                    <div class="sub-title">Students</div>
+                    <div class="info">{{ all_students_non_copied.filter(s => s.class_short === cls.class_short).length }}</div> 
+                  </div>
+                  <div class="side-of-card">
+                    <div class="sub-title">Attendance</div>
+                    <div class="info">{{ cls?.data?.total_in || 0 }}</div> 
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </template> 
-    </div>
+        </template> 
+      </div> 
+
+    </template>  
+     
+    <template v-else> 
+  
+      <AttendanceDetailsPopup v-if="showDetails" 
+      :cls="targetData" 
+      :startDate="defaultStart"
+      :endDate="defaultEnd"
+      ></AttendanceDetailsPopup>
+
+    </template>  
+     
 
   </div>
 </template>
@@ -170,14 +192,13 @@ onMounted(()=>{
   top: 100%;
   left: 0px;
   /* top: 0;  */
-  transition: all 0.5s;
+  transition: all 0.2s;
 }
 .card .overflow-div button{ 
   box-shadow: 0px 3px 5px #00000057; 
   transform: translateY(200px);
   opacity: 0;
-  border-radius: 0px; 
-  transition: all 0.4s;
+  border-radius: 0px;
 }
 .card:hover .overflow-div button{ 
   transform: translateY(0px);

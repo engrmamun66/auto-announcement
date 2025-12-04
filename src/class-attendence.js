@@ -261,12 +261,16 @@ class Attendance {
               let date_wise_report = date_duration.map((date, j) => {
   
                 let date_wide_attendace = student_attendance.filter(att => att.date === date)
+                let attendance = null
   
                 let shiftInfo = student_shifts.map(shift => {
                   let duration_text  = `${shift.start} - ${shift.end}`
                   let find = date_wide_attendace.find(att => att.shift_duration === duration_text)
                   shift['is_present'] = Boolean(find)
                   shift['attendance'] = find || null
+                  if(!attendance){
+                    attendance = find || null
+                  }
                   return shift
                 })
   
@@ -281,8 +285,7 @@ class Attendance {
                 let is_present = (is_presentable_day && shiftInfo?.[0]?.is_present) ? true : false
                 let is_preset_all_shifts = is_presentable_day && shiftInfo.every(shift => shift.is_present)
                 let let_in_minute = shiftInfo[0]?.attendance?.late_in_minute || 0
-  
-  
+
                 let data = {
                   date,
                   dakhela,
@@ -297,6 +300,8 @@ class Attendance {
                   day_leaves,
                   let_in_minute, 
                   is_presentable_day,
+                  student_name: attendance?.student_name || null,
+                  class_short: attendance?.class_short || null,
                 } 
   
                 data['_leaves'] = _leaves 
@@ -312,11 +317,10 @@ class Attendance {
             
           }) 
 
-          let class_attendance_data = attendanceList.filter(att => att.class_short == class___short)
+          // let class_attendance_data = attendanceList.filter(att => att.class_short == class___short)
            
           return { 
-            attendance: DATA,
-            total_in: class_attendance_data.filter(item => item?.in_time)?.length || 0,
+            attendance: DATA, 
           }
         }
       }
