@@ -282,12 +282,13 @@ class Attendance {
                 let is_leave_or_weekend_day = is_leave_day || is_weekend
   
                 let is_presentable_day = is_leave_or_weekend_day === false
-                let is_present = (is_presentable_day && shiftInfo?.[0]?.is_present) ? true : false
-                let is_preset_all_shifts = is_presentable_day && shiftInfo.every(shift => shift.is_present)
+                let is_present = (!is_presentable_day || shiftInfo?.[0]?.is_present) ? true : false
+                let is_preset_all_shifts = !is_presentable_day || shiftInfo.every(shift => shift.is_present)
                 let let_in_minute = shiftInfo[0]?.attendance?.late_in_minute || 0
 
                 let data = {
                   date,
+                  month: moment(date).format('MMMM'),
                   dakhela,
                   class_short,
                   class_name,

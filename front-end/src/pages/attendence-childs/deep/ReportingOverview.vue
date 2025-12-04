@@ -31,7 +31,7 @@ const weekends = CONFIG.value?.settings?.attendance?.weekends || [] // ['Friday'
 console.log('=====:::ReportingOverview.vue')
 
 let defaultStart = ref(moment().startOf('month').format('Y-MM-DD'))
-let defaultEnd = ref(moment().endOf('month').format('Y-MM-DD'))
+let defaultEnd = ref(moment().add(0, 'month').endOf('month').format('Y-MM-DD'))
 
  
 async function handleDateChange(dates) {
@@ -40,6 +40,9 @@ async function handleDateChange(dates) {
   await onChangeMonthRange(dates) 
 }
 
+
+let showDetails = ref(false)
+let targetData = ref(null)
 
 // For multiple select of students
 async function onChangeMonthRange([start_date, end_date]){
@@ -58,11 +61,13 @@ async function onChangeMonthRange([start_date, end_date]){
     }
     let data = await getAttendeceListFullHistory(payloadData, {start_date, end_date, action: 'classwise_data' })
     classes.value[index]["data"] = data?.attendance
+    if(showDetails.value && targetData.value?.class_short === eachClass.class_short){
+      targetData.value = classes.value[index]
+    }
   }
 }  
 
-let showDetails = ref(false)
-let targetData = ref(null)
+
 
 function onClickShowDetails(cls){
   showDetails.value = true
@@ -79,25 +84,14 @@ onMounted(()=>{
 
 <template>
   <div> 
-    <div class="row"> 
-      <div class="col-6">
-
-        <MonthPicker 
-        :onChange="handleDateChange"
-        :defaultStartValue="defaultStart"
-        :defaultEndValue="defaultEnd"
-        :dayOfMonth="1"
-        ></MonthPicker>
-      </div>
-      <div class="col-6">
-        <!-- <select class="form-control">
-          <template v-for="cls in classes" :key="cls.class_short">
-            <option :value="cls.class_short">{{ cls.class_name }}</option> 
-          </template>
-
-        </select> -->
-      </div>
-
+    <div class="d-flex justify-content-between align-content-start"> 
+      <MonthPicker 
+      :onChange="handleDateChange"
+      :defaultStartValue="defaultStart"
+      :defaultEndValue="defaultEnd"
+      :dayOfMonth="1"
+      ></MonthPicker>
+      <Btn @click.stop="showDetails = false" class="red">Back</Btn>
     </div>   
      
     <template v-if="!showDetails">

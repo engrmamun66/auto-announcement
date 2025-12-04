@@ -102,6 +102,18 @@
                                    <input style="max-width:180px" v-model="payload.times.after" type="number" class="form-control cb-input" :disabled="!payload.with_random_time"> 
                                </div>
                            </div>
+                           <div class="col-12 mt-3">
+                               <div class="form-group float-end">
+                                   <label for="" >Day Miss Probability</label>
+                                   <input style="max-width:180px" v-model="payload.day_miss_probility" type="number" class="form-control cb-input" :disabled="!payload.with_random_time"> 
+                               </div>
+                           </div>
+                           <div class="col-12 mt-3">
+                               <div class="form-group float-end">
+                                   <label for="" >Shift Miss Probability</label>
+                                   <input style="max-width:180px" v-model="payload.shift_miss_probility" type="number" class="form-control cb-input" :disabled="!payload.with_random_time"> 
+                               </div>
+                           </div>
                        </template> 
    
                        
@@ -167,6 +179,8 @@ let payload = reactive({
     with_random_time: 1,
     out_time_punch: 1,
     source_device: 1,
+    day_miss_probility: 5, // Math.random() * 100 <= day_miss_probility, no entry will added for date
+    shift_miss_probility: 5, // Math.random() * 100 <= shift_miss_probility, no entry will added for curret shift
     times: {
         before: 15,
         after: 10,
@@ -241,45 +255,62 @@ async function AddBulkAttendanceNow() {
 
     let records = []
     date_range.forEach(date => {
+
+        let { day_miss_probility, shift_miss_probility } = payload
         payload.selected_students.forEach(student => { 
-            let barcode = makeCarcode(student)
-            payload.shifts.forEach((shift) => {
-                let { times } = payload
-                let { start, end } = shift
-               
-                if(payload.with_random_time){
-                    let rand_minute = helper.randomBetween(0, Number(times.before) + Number(times.after))
-                    start = moment(start, 'HH:mm').subtract(times.before, 'minutes').add(rand_minute, 'minutes').format('HH:mm')
-                }
+            let _dayRandVal = Math.random() * 100 
+            let miss_day =_dayRandVal <= Number(day_miss_probility)
+            if(!miss_day){
+                let barcode = makeCarcode(student)
+                payload.shifts.forEach((shift, i) => {
+                    let _shiftRandVal = Math.random() * 100 
+                    let miss_day_shift = _shiftRandVal <= Number(shift_miss_probility)
 
-                let shift_in_out_pucn = []
+                    if(!miss_day_shift){
 
-                let in_punch = [barcode, {
-                    source: payload.source_device ? 'device' : 'manual_button',
-                    punch_time: date + ' ' + start
-                }]
-
-                // In punch
-                shift_in_out_pucn.push(in_punch)
-
-
-
-                if(payload.out_time_punch){
-                    let rand_minute = helper.randomBetween(0, Number(times.after))
-                    end = moment(end, 'HH:mm').add(rand_minute, 'minutes').format('HH:mm')
-
-                    let out_punch = [barcode, {
-                        source: payload.source_device ? 'device' : 'manual_button',
-                        punch_time: date + ' ' + end
-                    }]
-                    // Out punch
-                    shift_in_out_pucn.push(out_punch)
-                } 
-
-                records.push(shift_in_out_pucn)
-                 
-            })
+                        let { times } = payload
+                        let { start, end } = shift
+                        
+                        if(payload.with_random_time){
+                            let rand_minute = helper.randomBetween(0, Number(times.before) + Number(times.after))
+                            start = moment(start, 'HH:mm').subtract(times.before, 'minutes').add(rand_minute, 'minutes').format('HH:mm')
+                        }
+        
+                        let shift_in_out_pucn = []
+        
+                        let in_punch = [barcode, {
+                            source: payload.source_device ? 'device' : 'manual_button',
+                            punch_time: date + ' ' + start
+                        }]
+        
+                        // In punch
+                        shift_in_out_pucn.push(in_punch)
+        
+        
+        
+                        if(payload.out_time_punch){
+                            let rand_minute = helper.randomBetween(0, Number(times.after))
+                            end = moment(end, 'HH:mm').add(rand_minute, 'minutes').format('HH:mm')
+        
+                            let out_punch = [barcode, {
+                                source: payload.source_device ? 'device' : 'manual_button',
+                                punch_time: date + ' ' + end
+                            }]
+                            // Out punch
+                            shift_in_out_pucn.push(out_punch)
+                        } 
+        
+                        records.push(shift_in_out_pucn)
+                    } else {
+                        console.log('Skip-shift', {i, _shiftRandVal})
+                    }
+                        
+                })
+            } else {
+                console.log('Skip-date', date);
+            }
         })
+ 
     })
    
     let all_records = records.flat()
@@ -299,7 +330,6 @@ async function AddBulkAttendanceNow() {
 async function deleteAllDataForSelectedClass(){
 
     if(!confirm(`Are you sure to delete all attendance data for ${payload.class_short} from ${payload.dates?.startDate} to ${payload.dates?.endDate}?`)) return
-    if(!confirm(`2nd time confirmation: Delete all?`)) return
     let student_ids = payload.class_short ? all_students.value.filter(s => s.class_short == payload.class_short).map(s => s.dakhela) : all_students.value.map(s => s.dakhela)
     let params = {
         student_ids,
