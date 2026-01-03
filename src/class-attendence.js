@@ -289,6 +289,7 @@ class Attendance {
                 let data = {
                   date,
                   month: moment(date).format('MMMM'),
+                  month_year: moment(date).format('MMM YY'),
                   dakhela,
                   class_short,
                   class_name,

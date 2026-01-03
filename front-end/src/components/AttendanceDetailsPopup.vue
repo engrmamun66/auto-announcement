@@ -23,7 +23,7 @@
         <tr>
             <td @click="log({item})">{{ studentData[0]?.class_name }}</td>
             <td>{{ studentData[0]?.student_name }}</td>
-            <td>{{ moment(studentData[0]?.date).format('MMMM') }}</td>
+            <td>{{ moment(studentData[0]?.date).format('MMM Y') }}</td>
             <td>{{ getPercent(studentData, 'preset') }}%</td>
         </tr>  
     </template>

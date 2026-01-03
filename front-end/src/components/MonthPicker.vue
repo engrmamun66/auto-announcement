@@ -1,5 +1,5 @@
 <template>
-    <div :class="[termInput, selectingStart || selectingEnd ? active : '']" tabindex="-1" @blur="closePicker">
+    <div :class="[termInput, selectingStart || selectingEnd ? active : '']" tabindex="-1">
         <i class="fa fa-calendar"></i>
         &nbsp;
         <span :class="[termInputControl, isStartMonth, selectingStart ? selecting : '']" ref="startMonthControl"
@@ -388,14 +388,7 @@ export default {
 };
 </script>
 
-<style scoped>
- 
- body {
-  margin: 10em;
-  line-height: 1.5em;
-  font-size: 1.125em;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
-}
+<style scoped> 
 
 .termInput {
   position: relative;
