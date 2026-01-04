@@ -23,7 +23,7 @@ const default_config = {
 
 
           /** ==== with-BioTime-app === */
-          BIO_TIME_APP_USERNAME: "admin",
+          BIO_TIME_APP_USERNAME: "Admin",
           BIO_TIME_APP_PASSWORD: "Admin@123",
           DEVICE_NAMES: ['Device 2'], // zktecho device name, which already connected by name in BioTime-8.0 server
           DATA_FETCH_BACK_SECONDS: 10,
