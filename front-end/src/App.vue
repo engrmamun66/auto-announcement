@@ -1305,7 +1305,7 @@ async function __punchToSubmitAttendance(barcode='play-417-2024', {
         </div>
     
         <template v-if="showAccessibilityAlert && appAccessData?.internet === true">
-            <div ref="disabilityAlretRef" class="disablitily-alert" @auxclick="log({getWarningMessage})" v-html="'<h5>Hello</h5>' + getWarningMessage">  
+            <div ref="disabilityAlretRef" class="disablitily-alert" @auxclick="log({getWarningMessage})" v-html="getWarningMessage">  
             </div>
         </template>
         <template v-else-if="appAccessData?.internet === false">
