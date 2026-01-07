@@ -209,7 +209,7 @@ function deleteSchedule(id, i, type=1){
 <template>
     <div>
         <div class="d-flex justify-content-between align-items-center flex-wrap">
-           <h1>{{ !addUpdateMode ? `${tab == 1 ? 'Punch' : 'Call'} Schedules` : (payload.id ? 'Update Schedule' : 'Add Schedule')}}</h1> 
+           <h1>{{ !addUpdateMode ? `${tab == 1 ? 'Punch Schedules' : 'Call Schedules'}` : (payload.id ? 'Update Schedule' : 'Add Schedule')}}</h1> 
        
            <div class="d-flex justify-content-end">
                <Btn v-if="!addUpdateMode" class="me-2" @click="addUpdateMode = true" ><i class='bx bx-plus'></i> Add Schedule</Btn>
