@@ -145,17 +145,11 @@ const helper = {
   }
     ,
     formatTime: function(time_24){
-      let dateObj = new Date()
-      
-      if(time_24){
-        let [hours, minutes] = time_24.split(":") 
-        dateObj.setHours(parseInt(hours))
-        dateObj.setMinutes(parseInt(minutes))
-        dateObj.setSeconds(0)      
+      if(/^\d{2}:\d{2}$/.test(time_24)){
+        return moment(time_24, 'HH:mm').format('hh:mm A')
+      } else {
+        return moment(time_24, 'hh:mm A').format('hh:mm A')
       }
-
-      return moment(dateObj).format('hh:mm A')
-       
     },
     ms_to_hour_minute: function (milliseconds = 23434) {
       const totalSeconds = Math.floor(milliseconds / 1000); // Convert milliseconds to seconds

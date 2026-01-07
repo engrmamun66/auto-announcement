@@ -100,7 +100,7 @@ let all_students_non_copied = ref([])
 
 
 let checking_accessibility = ref(false)
-let appAccessData = ref({...storage('appAccessData').value || {internet: true}}) 
+let appAccessData = ref({...storage('appAccessData').value || {internet: navigator.onLine}}) 
 
 
 
@@ -223,7 +223,7 @@ async function CheckAccess({loader=false}={}){
                  * static key only here
                  * It will be false if uer PC is not connected with internet
                  */
-                internet: true, 
+                internet: navigator.onLine, 
             }
 
 
@@ -240,9 +240,7 @@ async function CheckAccess({loader=false}={}){
                 accessdata.last_paid_month = moment(accessdata.last_paid_month).startOf('day').toISOString()
             }
             appAccessData.value = {...defaultData, ...accessdata}
-            if(appAccessData.value?.internet === false){
-                internet.value = false
-            }
+            internet.value = navigator.onLine
             
             storage('appAccessData').value = accessdata 
         }

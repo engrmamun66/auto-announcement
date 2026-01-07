@@ -37,6 +37,8 @@ let http = inject('http');
 let addUpdateMode = ref(false)
 let is___adding = ref(false)
 let tab = ref(1)
+let forBoth = ref(false)
+
 
 
 let payload = reactive({
@@ -47,6 +49,14 @@ let payload = reactive({
     end_time: '12:00 AM',
     classes: [],
 })
+
+watch(addUpdateMode, (bool) => {
+  forBoth.value = false
+  if(bool === false){
+    payload.id = null
+  }
+})
+
 
 let startTimePicker = ref(null)
 let endTimePicker = ref(null)
@@ -66,8 +76,6 @@ watch(addUpdateMode, (bool)=>{
   if(bool){ 
     document.addEventListener('keyup', hide_modals)
     setTimeout(() => {
-      payload.start_time = '08:00'
-      payload.end_time = '10:00'
       updatePickersTime()
     }, 100);
 
@@ -116,10 +124,13 @@ function prepareEdit(item){
   payload.classes = item.classes
   addUpdateMode.value = true; 
   updatePickersTime(300, item)
+  console.log('item.end_time', item.end_time);
+  console.log('payload', payload);
+  updatePickersTime()
 }
 
 
-function addSchedule(){
+function addSchedule(for__both=false){
 
   try {
 
@@ -141,8 +152,23 @@ function addSchedule(){
         getSchedules()
       }
     }).finally(()=>{
-      clearPayload()
-      is___adding.value = false
+
+      if(for__both){
+        let anotherPayload = _payload
+        anotherPayload.type = anotherPayload.type === 1 ? 2 : 1
+        http.post('/schedules/add', anotherPayload).then(response => {
+          if(response.status == 200){
+            getSchedules()
+          }
+        }).finally(()=>{
+          clearPayload()
+          is___adding.value = false
+        })
+      } else {
+        clearPayload()
+        is___adding.value = false
+
+      }
       
     })
     
@@ -215,7 +241,7 @@ function deleteSchedule(id, i, type=1){
 <template>
     <div>
         <div class="d-flex justify-content-between align-items-center flex-wrap">
-           <h1>{{ !addUpdateMode ? `${tab == 1 ? 'Punch' : 'Call'} Schedules` : (payload.id ? 'Update Schedule' : 'Add Schedule')}}</h1> 
+           <h1>{{ !addUpdateMode ? `${tab == 1 ? 'Punch Schedules' : 'Call Schedules'}` : (payload.id ? 'Update Schedule' : 'Add Schedule')}}</h1> 
        
            <div class="d-flex justify-content-end">
                <Btn v-if="!addUpdateMode" class="me-2" @click="addUpdateMode = true" ><i class='bx bx-plus'></i> Add Schedule</Btn>
@@ -237,8 +263,11 @@ function deleteSchedule(id, i, type=1){
         
               <div class="col-12">
                 <div class="form-group">
-                  <label for="">Type</label>
-                  <select v-model="payload.type" class="form-control cb-input">
+                  <div class="d-flex justify-content-between">
+                    <label for="PNC">Type </label>
+                    <label v-if="!payload?.id" for="both">  <input v-model="forBoth" type="checkbox" id="both"> For punch also</label>
+                  </div>
+                  <select id="PNC" v-model="payload.type" class="form-control cb-input">
                     <option value="1">Punch</option>
                     <option value="2">Call</option>
                   </select>
@@ -322,7 +351,7 @@ function deleteSchedule(id, i, type=1){
                 <Btn class="me-0" @click.stop="() => {
                   clickOnDocumentBody()
                   if(payload.id) updateSchedule()
-                  else addSchedule()
+                  else addSchedule(forBoth)
                 }" > {{ payload.id ? 'Update' : 'Submit' }} <BtnLoader v-if="is___adding"></BtnLoader> </Btn>
               </div> 
 
@@ -369,7 +398,7 @@ function deleteSchedule(id, i, type=1){
                     
                   <td> {{ item.title }} </td> 
                   <td> {{ helper.formatTime(item.start_time) }} </td>                   
-                  <td> {{ helper.formatTime(item.end_time) }} </td>                   
+                  <td> {{ helper.formatTime(item.end_time) }}</td>                   
                   <td style="max-width: 500px;">
                     <div class="d-flex justify-content-center">
                       <ul v-if="item.classes">
