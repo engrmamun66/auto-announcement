@@ -66,8 +66,6 @@ watch(addUpdateMode, (bool)=>{
   if(bool){ 
     document.addEventListener('keyup', hide_modals)
     setTimeout(() => {
-      payload.start_time = '08:00'
-      payload.end_time = '10:00'
       updatePickersTime()
     }, 100);
 
@@ -109,6 +107,9 @@ function prepareEdit(item){
   payload.end_time = item.end_time
   payload.classes = item.classes
   addUpdateMode.value = true; 
+  console.log('item.end_time', item.end_time);
+  console.log('payload', payload);
+  updatePickersTime()
 }
 
 
@@ -362,7 +363,7 @@ function deleteSchedule(id, i, type=1){
                     
                   <td> {{ item.title }} </td> 
                   <td> {{ helper.formatTime(item.start_time) }} </td>                   
-                  <td> {{ helper.formatTime(item.end_time) }} </td>                   
+                  <td> {{ helper.formatTime(item.end_time) }}</td>                   
                   <td style="max-width: 500px;">
                     <div class="d-flex justify-content-center">
                       <ul v-if="item.classes">
