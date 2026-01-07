@@ -124,8 +124,6 @@ function prepareEdit(item){
   payload.classes = item.classes
   addUpdateMode.value = true; 
   updatePickersTime(300, item)
-  console.log('item.end_time', item.end_time);
-  console.log('payload', payload);
   updatePickersTime()
 }
 
