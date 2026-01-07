@@ -37,6 +37,8 @@ let http = inject('http');
 let addUpdateMode = ref(false)
 let is___adding = ref(false)
 let tab = ref(1)
+let forBoth = ref(false)
+
 
 
 let payload = reactive({
@@ -47,6 +49,14 @@ let payload = reactive({
     end_time: '12:00 AM',
     classes: [],
 })
+
+watch(addUpdateMode, (bool) => {
+  forBoth.value = false
+  if(bool === false){
+    payload.id = null
+  }
+})
+
 
 let startTimePicker = ref(null)
 let endTimePicker = ref(null)
@@ -113,7 +123,7 @@ function prepareEdit(item){
 }
 
 
-function addSchedule(){
+function addSchedule(for__both=false){
 
   try {
 
@@ -135,8 +145,23 @@ function addSchedule(){
         getSchedules()
       }
     }).finally(()=>{
-      clearPayload()
-      is___adding.value = false
+
+      if(for__both){
+        let anotherPayload = _payload
+        anotherPayload.type = anotherPayload.type === 1 ? 2 : 1
+        http.post('/schedules/add', anotherPayload).then(response => {
+          if(response.status == 200){
+            getSchedules()
+          }
+        }).finally(()=>{
+          clearPayload()
+          is___adding.value = false
+        })
+      } else {
+        clearPayload()
+        is___adding.value = false
+
+      }
       
     })
     
@@ -231,8 +256,11 @@ function deleteSchedule(id, i, type=1){
         
               <div class="col-12">
                 <div class="form-group">
-                  <label for="">Type</label>
-                  <select v-model="payload.type" class="form-control cb-input">
+                  <div class="d-flex justify-content-between">
+                    <label for="PNC">Type </label>
+                    <label v-if="!payload?.id" for="both">  <input v-model="forBoth" type="checkbox" id="both"> For punch also</label>
+                  </div>
+                  <select id="PNC" v-model="payload.type" class="form-control cb-input">
                     <option value="1">Punch</option>
                     <option value="2">Call</option>
                   </select>
@@ -316,7 +344,7 @@ function deleteSchedule(id, i, type=1){
                 <Btn class="me-0" @click.stop="() => {
                   clickOnDocumentBody()
                   if(payload.id) updateSchedule()
-                  else addSchedule()
+                  else addSchedule(forBoth)
                 }" > {{ payload.id ? 'Update' : 'Submit' }} <BtnLoader v-if="is___adding"></BtnLoader> </Btn>
               </div> 
 
