@@ -121,16 +121,11 @@ function prepareEdit(item){
 }
 
 
-function isValidTimesInPayload(item){
+function isValidTimesInPayload(){
   let { start_time, end_time } = payload
   let t1 = moment(start_time, start_time.length === 5 ? 'HH:mm' : 'hh:mm A')
   let t2 = moment(end_time, end_time.length === 5 ? 'HH:mm' : 'hh:mm A')
-  let is_ok = t1.isBefore(t2)
-  if(!is_ok){
-    emitter.emit('toaster-error', { message: 'টাইম সঠিকভাবে সিলেক্ট করুন' })
-    return false
-  }
-  return true
+  return t1.isBefore(t2) 
 }
 
 
@@ -143,14 +138,23 @@ function addSchedule(for__both=false){
       return  
     }
 
-    
     let _payload = helper.clone(payload)
     _payload.classes = JSON.stringify(_payload.classes)
 
     _payload.start_time = makeDate(payload.start_time, 'HH:mm') // makeDate is comming from em-DateTimePicker.js
     _payload.end_time = makeDate(payload.end_time, 'HH:mm') // makeDate is comming from em-DateTimePicker.js
+
+    if(!isValidTimesInPayload()){
+      emitter.emit('toaster-error', { message: 'টাইম সঠিকভাবে সিলেক্ট করুন' })
+      return
+    }
+
+    if(for__both === false){
+      for__both = confirm('Add for both?')
+    }
     
     is___adding.value = true
+
     http.post('/schedules/add', _payload).then(response => {
       if(response.status == 200){
         getSchedules()
@@ -199,6 +203,11 @@ function updateSchedule(){
     }
     let _payload = helper.clone(payload)
     _payload.classes = JSON.stringify(_payload.classes)
+
+    if(!isValidTimesInPayload()){
+      emitter.emit('toaster-error', { message: 'টাইম সঠিকভাবে সিলেক্ট করুন' })
+      return
+    }
 
     is___adding.value = true
     http.post('/schedules/update', _payload).then(response => {
@@ -353,7 +362,6 @@ function deleteSchedule(id, i, type=1){
               <div class="col-12 d-flex justify-content-center mt-3">
                 <Btn @click.stop="clearPayload()" class="red me-2" >Cancel</Btn>
                 <Btn class="me-0" @click.stop="() => {
-                  if(!isValidTimesInPayload()) return
                   clickOnDocumentBody()
                   if(payload.id) updateSchedule()
                   else addSchedule(forBoth)
