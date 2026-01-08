@@ -259,8 +259,8 @@ function deleteSchedule(id, i, type=1){
                     <label v-if="!payload?.id" for="both">  <input v-model="forBoth" type="checkbox" id="both"> For punch also</label>
                   </div>
                   <select id="PNC" v-model="payload.type" class="form-control cb-input">
-                    <option value="1">Punch</option>
-                    <option value="2">Call</option>
+                    <option value="1">{{forBoth ? 'Call & Punch' : 'Punch'}}</option>
+                    <option value="2">{{forBoth ? 'Call & Punch' : 'Call'}}</option>
                   </select>
                 </div>
               </div>
