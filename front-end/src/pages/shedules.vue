@@ -101,7 +101,7 @@ function clearPayload(){
   payload.id =  null
   payload.type =  1
   payload.title =  null
-  payload.start_time = '12:00 AM'
+  payload.start_time = '08:00 AM'
   payload.end_time = '12:00 AM',
   payload.classes =  []
   addUpdateMode.value = false;
