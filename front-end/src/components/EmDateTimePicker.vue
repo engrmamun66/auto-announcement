@@ -2,7 +2,7 @@
   <input
     ref="inputElement"
     type="text"
-    class="form-control cb-input"
+    class="form-control cb-input w-100"
     :style="inputStyles"
     :disabled="isDisabled"
     v-bind="$attrs"
