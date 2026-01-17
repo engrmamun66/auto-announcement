@@ -593,7 +593,7 @@ function onClickAttendance(std){
           <div class="col-md-12 mt-2">
             <div class="form-group mt-md-3"> 
                 <div class="d-flex">
-                  <Btn class="me-1"></Btn> 
+                  <Btn @click.stop="getStudents()" class="me-1"></Btn> 
                   <Btn @click.stop="clearParams();getStudents();editModeTabIndex=1" class="me-1 red">Clear</Btn> 
                 </div>
               </div>
