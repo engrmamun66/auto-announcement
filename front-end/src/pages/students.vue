@@ -37,7 +37,9 @@ const getAllStudents = inject('getAllStudents', () => {})
 let students = ref([])
 let studentLogs = ref([])
 let only_similler_students = ref(false)
-let params = ref({
+
+
+let ___params = {
     "page_no": 1,
     "total": 3,
     "totalPages": 1,
@@ -48,7 +50,13 @@ let params = ref({
     card_no: null,
     dakhela: route.query?.dakhela || null,
     sound1: null,
-})
+}
+let params = ref(sessionStorage.getItem('students_params') ? JSON.parse(sessionStorage.getItem('students_params')) : ___params)
+
+watch(params, (newVal, oldVal) => {
+  sessionStorage.setItem('students_params', JSON.stringify(newVal))
+}, {deep: true, immediate: true});
+
 let addMode = ref(false)
 let showSearchForm = ref(true)
 let targetStd = ref(null)
