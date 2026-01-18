@@ -624,11 +624,11 @@ watch(fixedWidthSoundCol, (newVal) => {
           </div>
           <div class="col-md-3 col-12">
             <div class="form-group">
-              <label for="email">Media</label>
+              <label for="email">Sound</label>
               <select v-model="params.sound1" @change="getStudents" class="form-control cb-input">
                 <option :value="null">-All-</option>
-                <option value="no_sound">No Sound</option> 
-                <option value="has_sound">Has Sound</option> 
+                <option value="no_sound">No</option> 
+                <option value="has_sound">Yes</option> 
               </select>
             </div>
           </div>
