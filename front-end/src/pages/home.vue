@@ -241,11 +241,11 @@ function recallAllPunchedStudents(){
 
      <div class="sections mt-3">
           <div class="single-section class-list " v-if="toggleSettings">
+               <div class="tab-view" >
+                    <div :class="{'active': tab==1}" @click="tab=1">Punch</div>
+                    <div :class="{'active': tab==2}" @click="tab=2">Call</div>
+               </div>
                <div class="inner-list">
-                    <div class="tab-view" >
-                         <div :class="{'active': tab==1}" @click="tab=1">Punch</div>
-                         <div :class="{'active': tab==2}" @click="tab=2">Call</div>
-                    </div>
                     <ul>
                          
                          <template v-if="tab==1">
@@ -269,8 +269,8 @@ function recallAllPunchedStudents(){
                               <template v-if="callbacks.incoming_punch_schedules().length">                                    
                                    <h4 class="p-2 border3 radius-5 my-2 shadow me-1" style="background:var(--grad1)">Incoming punch...</h4>
                                    <template v-for="item in callbacks.incoming_punch_schedules()">
-                                        <li class="mb-0" >                    
-                                             <h4> 
+                                        <li class="mb-2" >                    
+                                             <h4 class="mb-1"> 
                                                   {{ helper.ucfirst(item?.title) }}  <kbd v-if="item.incoming_time" > {{ helper.ms_to_hour_minute(item.incoming_time) }} </kbd>
                                              </h4>
                                              <p class="time-duration"> 
@@ -290,8 +290,8 @@ function recallAllPunchedStudents(){
                               <template v-if="true">
                                   <h4 v-if="callbacks.timesup_punch_schedules()?.length" class="p-2 border3 radius-5 my-2 shadow me-1" style="background:var(--grad1)">Times Up</h4>
                                   <template v-for="item in callbacks.timesup_punch_schedules()">
-                                         <li class="mb-0" >                    
-                                              <h4> 
+                                         <li class="mb-2" >                    
+                                              <h4 class="mb-1"> 
                                                   {{ helper.ucfirst(item?.title) }}
                                               </h4>
                                               <p class="time-duration"> 
@@ -306,7 +306,7 @@ function recallAllPunchedStudents(){
                                    <!-- running call scheduls -->
                                    <template v-for="(item, i) in callbacks.running_call_schedules()">
                                         <li class="mb-2" >                    
-                                             <h3> 
+                                             <h3 class="mb-0"> 
                                                   {{ helper.ucfirst(item?.title) }}
                                              </h3>
                                              <p class="time-duration"> 
@@ -350,8 +350,8 @@ function recallAllPunchedStudents(){
                                <template v-if="true">
                                    <h4 v-if="callbacks.timesup_call_schedules()?.length" class="p-2 border3 radius-5 my-2 shadow me-1" style="background:var(--grad1)">Times Up</h4>
                                   <template v-for="item in callbacks.timesup_call_schedules()">
-                                         <li class="mb-0" >                    
-                                              <h4> 
+                                         <li class="mb-2" >                    
+                                              <h4 class="mb-1"> 
                                                    {{ helper.ucfirst(item?.title) }} 
                                               </h4>
                                               <p class="time-duration"> 
@@ -499,7 +499,7 @@ function recallAllPunchedStudents(){
   /* margin-right: 20px; */
 }
 .class-list .inner-list {
-  height: calc(100% - 20px);
+  height: calc(100% - 80px);
   overflow-y: auto;
 }
 .class-list .inner-list ul {
