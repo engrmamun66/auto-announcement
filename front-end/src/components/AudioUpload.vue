@@ -40,7 +40,6 @@ function onChangeFile(event){
 }
 
 async function uploadNow(){
-  alert('Uploading audio, please wait...++++')
   let { id } = props.student
   if(file.value){   
     const fileName = `${CONFIG.value.env.CODE_NUMBER || 'code_number'}-${file.value.name}`;
