@@ -681,7 +681,7 @@ watch(fixedWidthSoundCol, (newVal) => {
       <template #rows>
         <template v-if="students?.length">
           <template v-for="(std, i) in students.toReversed()">
-            <tr>
+            <tr @auxclick="log(std)">
               <td class="text-left"> {{ std.class }} </td> 
               <td class="text-left cp" @click.stop="prepareToEdit(std)" :student-id="std.id" >{{ std.name.split('||')?.[0] }}</td>
               <td> 
