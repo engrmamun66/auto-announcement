@@ -16,6 +16,7 @@ import { ref, inject } from "vue";
 import { useRouter } from "vue-router";
 let http = inject('http'); 
 let emitter = inject('emitter'); 
+let CONFIG = inject('CONFIG'); 
 import BtnLoader from './BtnLoader.vue'
 
 let props = defineProps(['student', 'column'])

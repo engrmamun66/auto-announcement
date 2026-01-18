@@ -57,6 +57,7 @@
   <script setup>
   import { computed, inject, ref, watch, onMounted } from 'vue'
   import RecordRTC from 'recordrtc'
+  let CONFIG = inject('CONFIG'); 
   let audioPlayer = ref(null)
   import Btn from './Btn.vue'
   import BtnLoader from './BtnLoader.vue'
