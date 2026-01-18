@@ -111,7 +111,7 @@ onMounted(() => {
      </div>
      <FileUpload></FileUpload>  
 
-     <template v-if="backupLinks?.length">
+     <template v-if="backupLinks?.length && false">
 
           <div class="d-flex flex-column align-items-center">
                <h1 class="text-start mt-3">Downlaod Backups Here</h1>  
