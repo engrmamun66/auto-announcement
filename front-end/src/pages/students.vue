@@ -670,7 +670,13 @@ watch(fixedWidthSoundCol, (newVal) => {
             <!-- <th>Card</th> -->
             <th>{{ CONFIG?.studentTableColumns?.dakhela || 'Dakhela' }}</th>
             <th>{{ CONFIG?.studentTableColumns?.year || 'Year' }}</th>
-            <th @dblclick="fixedWidthSoundCol = !fixedWidthSoundCol" :style="fixedWidthSoundCol ? 'width: 300px;' : ''" tooltip="Double Click" flow="down">{{ CONFIG?.studentTableColumns?.sound || 'Sound' }}</th>
+            <th @dblclick="fixedWidthSoundCol = !fixedWidthSoundCol" :style="fixedWidthSoundCol ? 'width: 300px;' : ''" tooltip="Double Click" flow="down">
+              {{ CONFIG?.studentTableColumns?.sound || 'Sound' }} 
+              <template v-if="fixedWidthSoundCol">
+                <i class='bx bx-arrow-from-right transformY-3px' ></i>
+                <i class='bx bx-arrow-from-left transformY-3px' ></i>
+              </template>
+            </th>
             <!-- <th>Sound-2</th> -->
             <th>{{ CONFIG?.studentTableColumns?.status || 'Status' }}</th>
             <th>{{ CONFIG?.studentTableColumns?.punch || 'Punch' }}</th>
