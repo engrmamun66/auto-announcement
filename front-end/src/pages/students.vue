@@ -252,14 +252,45 @@ async function onClickClone(std){
   }
 }
 
+async function isAddedStudentByDakhela(dakhela){
+  try {
+
+    let response = await http.get(`/student/by-dakhela/${dakhela}`)
+    if(response.status == 200){
+      let student = response.data;
+      if(student && student?.id){
+        return true
+      } else {
+        return false
+      }
+    }  
+  } catch (error) {
+    console.warn('getStudents_error::', error);
+  }
+}
+
 
 async function addStudent(){
   try {
 
+    if(payload.dakhela){
+      let isAdded = await isAddedStudentByDakhela(payload.dakhela)
+      if(isAdded){
+        emitter.emit('toaster-error', {message: `দাখেলা নাম্বার ${payload.dakhela} ইতিমধ্যে যুক্ত আছে`})
+        is___adding.value = false
+        return
+      }
+    }
+
     if(!payload.name) return emitter.emit('toaster-warning', {message: 'নাম লিখুন'})
     if(!payload.class) return emitter.emit('toaster-warning', {message: 'ক্লাস নির্বাচন করুন'})
     if(!payload.dakhela) return emitter.emit('toaster-warning', {message: 'দাখেল নাম্বার লিখুন'})
+
+
+
     is___adding.value = true
+    
+
     http.post('/students/add', payload).then(response => {
       if(response.status == 200){
         let { id } = response.data.data; 

@@ -3,6 +3,7 @@ import StudentsView from '../pages/students.vue'
 import ImportView from '../pages/Import.vue'
 import SchedulesView from '../pages/shedules.vue'
 import AttendenceView from '../pages/attendence.vue'
+import ContactUsView from '../pages/contactus.vue'
 import ErrorView from '../pages/error.vue'
 
 const routes = [ 
@@ -25,6 +26,11 @@ const routes = [
         path: "/shedules",
         name: 'shedules',
         component: SchedulesView,
+    },
+    {
+        path: "/contactus",
+        name: 'ContactUs',
+        component: ContactUsView,
     },
     {
         path: "/import",
