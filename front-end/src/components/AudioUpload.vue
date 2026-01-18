@@ -40,8 +40,12 @@ function onChangeFile(event){
 }
 
 async function uploadNow(){
+  alert('Uploading audio, please wait...++++')
   let { id } = props.student
-  if(file.value){    
+  if(file.value){   
+    const fileName = `${CONFIG.value.env.CODE_NUMBER || 'code_number'}-${file.value.name}`;
+    file.value = new File([file.value], fileName, { type: file.value.type });
+
     loading.value = true
     http.post('/students/upload-audio', {id, file: file.value, column: props.column}, {formData: true}).then(response => {
       emitter.emit('toaster-success', {message: 'আডিও আপলোড সম্পন্ন হয়েছে'})
