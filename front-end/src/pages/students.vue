@@ -156,8 +156,8 @@ async function clearParams({dakhela=null, id=null, get=true}={}){
 }
  
 async function deleteAudio(std, colName){
-  let text = prompt('Type secret pass code')
-  if(text === 'delete' || text === String(new Date().getDate()) || text === 'D'){
+  let is_confired = confirm('Do you want to delete this audio?')
+  if(is_confired){
     http.delete(`/students/delete-audio/${std.id}/${colName}`).then(()=>{
       std[colName] = null
     })
