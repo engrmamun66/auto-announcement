@@ -133,6 +133,8 @@ yarn-lock.json
 .vscode
 public/temp/
 public/media/
+public/media_*
+public/media-*
 public/exports/
 database/
 *DS_Store*
