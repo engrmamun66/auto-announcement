@@ -425,6 +425,7 @@ function onClickAttendance(std){
       <h1>{{ !addMode ? 'Students' : 'Add Student'}}</h1> 
 
       <div class="d-flex justify-content-end">
+        <Btn class="me-2" style="background: #673AB7;">Total: {{ params?.total || '000' }} </Btn>
         <Btn @click="showSearchForm = !showSearchForm;editModeTabIndex=1" class="me-2"><i class='bx bx-search transformY-2px size-1' ></i> {{ showSearchForm ? "Hide" : 'Show' }} search</Btn>
         <Btn v-if="!addMode" class="me-2" @click="addMode = !addMode;editModeTabIndex=1;clearParams();payload.id = null" ><i class='bx bx-plus'></i> Add Student</Btn>
         <Btn v-else class="me-2 red" @click="addMode = !addMode;editModeTabIndex=1;clearParams();payload.id = null" >Cancel</Btn>
