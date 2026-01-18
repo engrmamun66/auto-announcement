@@ -19,12 +19,22 @@
   const user_interacted = inject('user_interacted');
   const CONFIG = inject('CONFIG');
   const controlSounds = inject('controlSounds');
+  const playback_speed = inject('playback_speed');
   const isUsingSpeakerAutoControl = inject('isUsingSpeakerAutoControl');
   const isSpeakersAutoMode = inject('isSpeakersAutoMode');
   const currentItem = ref(null);
   const audio = ref(null);
   const is__playing = ref(false); 
 
+  watch(playback_speed, (p_speed, b)=>{
+    try {
+      if(audio.value){
+        audio.value.playbackRate = p_speed
+      }
+    } catch (error) {
+      
+    }
+  })
   watch(currentItem, (newData, b)=>{
     storage('currentItem').value = newData 
     emitter.emit('palylist__currentItem', newData)
@@ -34,6 +44,7 @@
   })
 
   function checkAudioControlAgain(){
+    audio.value.playbackRate = playback_speed.value || 1
     if(isSpeakersAutoMode.value && currentItem.value){
         controlSounds({student: helper.clone(currentItem.value)}) 
     }

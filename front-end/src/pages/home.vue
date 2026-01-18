@@ -23,6 +23,7 @@ const router = inject('router');
 const emitter = inject('emitter');
 const storage = inject('storage');
 const http = inject('http');
+const playback_speed = inject('playback_speed');
 const is_started_schedule = inject('is_started_schedule');
 const stop_clear_and_reload = inject('stop_clear_and_reload');
 const speakText = inject('speakText');
@@ -37,6 +38,12 @@ const CONFIG = inject('CONFIG');
 const switches_PreviewInHomePage = inject('switches_PreviewInHomePage');
 const isUsingSpeakerAutoControl = inject('isUsingSpeakerAutoControl');
 const isSpeakersAutoMode = inject('isSpeakersAutoMode');
+
+let speedList = [
+     {label: 'Normal', value: 1.0},
+     {label: 'Medium', value: 1.25},
+     {label: 'Faster', value: 1.5},
+]
 
 const log = console.log
 
@@ -226,10 +233,17 @@ function recallAllPunchedStudents(){
           <div v-if="!manually_paused_the_playlist" @click="handlePayPause()" class="me-2 p-1 play-pause"><i class='bx bx-pause'></i></div>
           <div v-else @click="handlePayPause()" class="me-2 p-1 play-pause"><i class='bx bx-play'></i></div>
 
+          <!-- Add here a button group (Normal & Faster) with icon prefix -->
+          <div class="btn-group me-2" role="group">
+               <template v-for="item in speedList">
+                    <button :tooltip="`Playback Speed(${item.value})`" type="button" class="btn btn-outline-primary playbackButton" :class="{'active': playback_speed === item.value }" @click="playback_speed = item.value">{{ item.label }}</button>
+               </template>
+          </div>
+
           <div v-if="isUsingSpeakerAutoControl" class="me-2 p-1 position-relative" @click.stop="showSwithBoardModal = !showSwithBoardModal">
                <img :src="borad_image_url" alt="" class="board-image">
                <span class="manual-mode" v-if="!isSpeakersAutoMode">manual</span>
-          </div>
+          </div> 
          
           <BarcodeScannigAnimation v-if="is_started_schedule" :scannig="is_started_schedule" class="me-1"  ></BarcodeScannigAnimation> 
           <Switch v-model="is_started_schedule" @click="checkSchedule" size="lg" yes="Started" no="Stopped" :bothVisible="false" class="me-2" ></Switch> 
@@ -768,5 +782,17 @@ function recallAllPunchedStudents(){
 }
 .classes-left > span{
      border-bottom: 1px solid #999999;
+}
+.playbackButton{
+     background: rgb(255, 255, 255);
+     color: black;
+     border-color: var(--primaryColor);
+}
+.playbackButton:hover,
+.playbackButton.active
+{
+     color: white;
+     background: var(--grad3);
+     border-color: var(--primaryColor);
 }
 </style>

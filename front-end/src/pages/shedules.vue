@@ -256,6 +256,14 @@ function deleteSchedule(id, i, type=1){
 }
 
 
+function toggleExpandCollapseAll(){
+  let targetSchedules = tab.value == 1 ? punch_schedules.value : call_schedules.value
+  let allExpanded = targetSchedules.every(item => item.showClasses)
+  targetSchedules.forEach(item => {
+    item.showClasses = !allExpanded
+  })
+}
+
 </script>
 
 <template>
@@ -406,7 +414,7 @@ function deleteSchedule(id, i, type=1){
                 <th>Title</th>
                 <th>Stat Time</th>
                 <th>End Time</th>
-                <th class="text-center">Classes</th>
+                <th class="text-center" tooltip="Click to toggle expand/collapse all" flow="down" @click="toggleExpandCollapseAll()">Classes</th>
                 <th>Action</th> 
               </tr>
             </thead>

@@ -26,6 +26,12 @@ let route = useRoute();
 let router = useRouter();  
 let makeCarcode = inject('makeCarcode')
 let CONFIG = ref(storage('CONFIG').value || {});  
+let playback_speed = ref(Number(storage('playback_speed').value) || 1)
+provide('playback_speed', playback_speed)
+
+watch(playback_speed, (newVal) => {
+    storage('playback_speed').value = newVal
+})
 
 watch(
   () => route.fullPath,
@@ -819,7 +825,7 @@ function punchToCallStudent(barcode='play-417-2024', { message='', source='devic
             let isAllowed = callbacks.isMatchedAnySchedule(class_short)
             
             if(!isAllowed){
-                    let prefix = class_name ? (class_name + ' এর ') : 'ddd '
+                    let prefix = class_name ? (class_name + ' এর ') : ' '
                     emitter.emit('toaster-error', { message: `${prefix}পাঞ্চ এর সময় শুরু হয়নি`})
                     return
             }
