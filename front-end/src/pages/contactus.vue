@@ -1,7 +1,19 @@
 <script setup>
 import { onMounted, watch, inject, ref, reactive } from "vue";
-import { useRouter, useRoute } from "vue-router";
-import Btn from "../components/Btn.vue";
+
+let selectedNumber = ref("8801951259460");
+let WhatsAppNumbers = ref([
+      {
+        number: "8801617207878",
+        display: "+880 1617-207878",
+      },
+      {
+        number: "8801951259460",
+        display: "+880 1951-259460",
+      },
+])
+
+
 </script>
 
 <template>
@@ -14,6 +26,38 @@ import Btn from "../components/Btn.vue";
         information below.
       </p>
     </div>
+
+
+
+
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="whatsapp-card">
+                <div class="whatsapp-content">
+                    <div class="whatsapp-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/>
+                        </svg>
+                    </div>
+                    <div class="whatsapp-text">
+                        <h4>Need instant help? Chat with us on WhatsApp!</h4>
+                        <p class="mb-0">Get quick responses to your queries. Our team is available during business hours to assist you.</p>
+                    </div>
+                    <div class="whatsapp-button">
+                        <a href="https://wa.me/8801951259460" target="_blank" class="btn btn-success btn-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="me-2" viewBox="0 0 16 16">
+                                <path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/>
+                            </svg>
+                            Open WhatsApp
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
 
     <div class="row g-4">
       <!-- Card 1: Information -->
@@ -36,11 +80,11 @@ import Btn from "../components/Btn.vue";
           <div class="card-body">
             <div class="contact-detail">
               <i class="bi bi-telephone-fill"></i>
-              <div>Mobile: <strong><a class="text-black" href="tel:+8801617207878">+8801617207878</a></strong></div>
+              <div>Mobile: <strong>01617-207878</strong></div>
             </div>
             <div class="contact-detail">
               <i class="bi bi-telephone-fill"></i>
-              <div>Mobile: <strong><a class="text-black" href="tel:+8801951258460">+8801951258460</a></strong></div>
+              <div>Mobile: <strong>01951-258460</strong></div>
             </div>
             <div class="contact-detail">
               <i class="bi bi-envelope-fill"></i>
@@ -72,6 +116,7 @@ import Btn from "../components/Btn.vue";
               House # 40, Road # 1, Block # C, Eastern Housing, Mirpur-12,
               Dhaka-1213, Bangladesh
             </p>
+            <a href="https://softproit.com/" target="_blank">softproit.com</a>
           </div>
         </div>
       </div>
@@ -149,9 +194,8 @@ import Btn from "../components/Btn.vue";
   <iframe
     src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3651.871814090255!2d90.3519066!3d23.8227541!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755c1dfeb618507:0x7d23bc082ebe9348!2sSOFT%20PRO%20IT!5e0!3m2!1sen!2sbd!4v1700000000000"
     width="100%"
-    height="350"
+    height="450"
     style="border: 0"
-    allowfullscreen
     loading="lazy"
   >
   </iframe>
@@ -278,5 +322,172 @@ body {
   .info-card {
     margin-bottom: 20px;
   }
+}
+
+
+
+
+
+/* WhatsApp Card Styles */
+.whatsapp-card {
+    width: 100%;
+    height: 120px;
+    background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+    border-radius: 12px;
+    padding: 0 30px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 8px 20px rgba(37, 211, 102, 0.2);
+    margin-bottom: 30px;
+    position: relative;
+    overflow: hidden;
+}
+
+.whatsapp-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 100%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 1%, transparent 1%);
+    background-size: 20px 20px;
+    opacity: 0.3;
+    z-index: 1;
+}
+
+.whatsapp-content {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    position: relative;
+    z-index: 2;
+}
+
+.whatsapp-icon {
+    width: 80px;
+    flex-shrink: 0;
+    color: white;
+    margin-right: 30px;
+}
+
+.whatsapp-text {
+    flex: 1;
+    color: white;
+    padding-right: 20px;
+}
+
+.whatsapp-text h4 {
+    font-weight: 600;
+    margin-bottom: 8px;
+    font-size: 1.4rem;
+}
+
+.whatsapp-text p {
+    opacity: 0.9;
+    font-size: 1rem;
+    max-width: 600px;
+}
+
+.whatsapp-button {
+    flex-shrink: 0;
+}
+
+.whatsapp-button .btn {
+    background-color: white;
+    color: #128C7E;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    padding: 12px 25px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.whatsapp-button .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+    background-color: #f8f9fa;
+    color: #0d6e5e;
+}
+
+.whatsapp-button .btn:active {
+    transform: translateY(0);
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+    .whatsapp-card {
+        height: auto;
+        padding: 25px;
+    }
+    
+    .whatsapp-content {
+        flex-wrap: wrap;
+    }
+    
+    .whatsapp-icon {
+        width: 60px;
+        margin-right: 20px;
+    }
+    
+    .whatsapp-text {
+        order: 3;
+        width: 100%;
+        margin-top: 20px;
+        text-align: center;
+        padding-right: 0;
+    }
+    
+    .whatsapp-button {
+        order: 2;
+        margin-left: auto;
+    }
+}
+
+@media (max-width: 768px) {
+    .whatsapp-card {
+        padding: 20px;
+    }
+    
+    .whatsapp-icon {
+        width: 50px;
+        margin-right: 15px;
+    }
+    
+    .whatsapp-text h4 {
+        font-size: 1.2rem;
+    }
+    
+    .whatsapp-text p {
+        font-size: 0.9rem;
+    }
+    
+    .whatsapp-button .btn {
+        padding: 10px 20px;
+        font-size: 0.95rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .whatsapp-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .whatsapp-icon {
+        margin-right: 0;
+        margin-bottom: 15px;
+    }
+    
+    .whatsapp-button {
+        margin-left: 0;
+        margin-top: 15px;
+        width: 100%;
+    }
+    
+    .whatsapp-button .btn {
+        width: 100%;
+    }
 }
 </style>
