@@ -413,6 +413,10 @@ function onClickAttendance(std){
   punchToSubmitAttendance(makeCarcode(std), {source: 'manual_button', delay: 0})
 }
 
+let fixedWidthSoundCol = ref(Boolean(sessionStorage.getItem('fixedWidthSoundCol_students') === 'true'))
+watch(fixedWidthSoundCol, (newVal) => {
+  sessionStorage.setItem('fixedWidthSoundCol_students', String(newVal))
+})
 
 
 </script>
@@ -666,7 +670,7 @@ function onClickAttendance(std){
             <!-- <th>Card</th> -->
             <th>{{ CONFIG?.studentTableColumns?.dakhela || 'Dakhela' }}</th>
             <th>{{ CONFIG?.studentTableColumns?.year || 'Year' }}</th>
-            <th>{{ CONFIG?.studentTableColumns?.sound || 'Sound' }}</th>
+            <th @dblclick="fixedWidthSoundCol = !fixedWidthSoundCol" :style="fixedWidthSoundCol ? 'width: 300px;' : ''" tooltip="Double Click" flow="down">{{ CONFIG?.studentTableColumns?.sound || 'Sound' }}</th>
             <!-- <th>Sound-2</th> -->
             <th>{{ CONFIG?.studentTableColumns?.status || 'Status' }}</th>
             <th>{{ CONFIG?.studentTableColumns?.punch || 'Punch' }}</th>
