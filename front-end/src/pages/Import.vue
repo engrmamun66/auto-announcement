@@ -43,7 +43,7 @@ async function getBackup(){
 
 async function eraseAll() {
      try {
-          let confi = confirm('Deelete all data')
+          let confi = confirm('Delete all students from DB. Are you sure?')
           if(!confi) return
           let passKey = prompt('Enter pass key')
           if(!['DD', 'dd'].includes(passKey)) {
@@ -111,7 +111,7 @@ onMounted(() => {
      </div>
      <FileUpload></FileUpload>  
 
-     <template v-if="backupLinks?.length">
+     <template v-if="backupLinks?.length && false">
 
           <div class="d-flex flex-column align-items-center">
                <h1 class="text-start mt-3">Downlaod Backups Here</h1>  

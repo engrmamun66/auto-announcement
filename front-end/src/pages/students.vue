@@ -424,6 +424,7 @@ function onClickAttendance(std){
       <kbd>Total: {{ params?.total || 0 }}</kbd>
 
       <div class="d-flex justify-content-end">
+        <Btn class="me-2" style="background: #673AB7;">Total: {{ params?.total || '000' }} </Btn>
         <Btn @click="showSearchForm = !showSearchForm;editModeTabIndex=1" class="me-2"><i class='bx bx-search transformY-2px size-1' ></i> {{ showSearchForm ? "Hide" : 'Show' }} search</Btn>
         <Btn v-if="!addMode" class="me-2" @click="addMode = !addMode;editModeTabIndex=1;clearParams();payload.id = null" ><i class='bx bx-plus'></i> Add Student</Btn>
         <Btn v-else class="me-2 red" @click="addMode = !addMode;editModeTabIndex=1;clearParams();payload.id = null" >Cancel</Btn>
@@ -582,7 +583,7 @@ function onClickAttendance(std){
           <div class="col-md-3 col-12">
             <div class="form-group">
               <label for="email">Class</label>
-              <select v-model="params.class_name" class="form-control cb-input" id="ClassId">
+              <select v-model="params.class_name" @change="getStudents" class="form-control cb-input" id="ClassId">
                 <option :value="null">-class-</option>
                 <template v-for="(cls, index) in classes" :key="index">
                   <option :value="cls.class_name">{{cls.class_name}}</option>
@@ -603,7 +604,7 @@ function onClickAttendance(std){
                   }" >
                 </span>
               </label>
-              <input v-model="params.dakhela" @keyup.enter.stop="getStudents" type="number" class="form-control cb-input">
+              <input v-model="params.dakhela" @keyup.enter="getStudents" type="number" class="form-control cb-input">
             </div> 
           </div>
           <!-- <div class="col-md-2 col-12">
@@ -615,13 +616,13 @@ function onClickAttendance(std){
           <div class="col-md-3 col-12">
             <div class="form-group">
               <label for="name">Name</label>
-              <input v-model="params.name" type="text" class="form-control cb-input" @keyup.enter.stop="getStudents">
+              <input v-model="params.name" type="text" class="form-control cb-input" @keyup.enter="getStudents">
             </div>
           </div>
           <div class="col-md-3 col-12">
             <div class="form-group">
               <label for="email">Media</label>
-              <select v-model="params.sound1" class="form-control cb-input">
+              <select v-model="params.sound1" @change="getStudents" class="form-control cb-input">
                 <option :value="null">-All-</option>
                 <option value="no_sound">No Sound</option> 
                 <option value="has_sound">Has Sound</option> 
