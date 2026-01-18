@@ -1,20 +1,20 @@
 <script setup>
 import { onMounted, watch, inject, ref, reactive } from "vue";
 import Btn from '../components/Btn.vue'
+import helper from '../utilities/helper'
+
+const emitter = inject('emitter');
 
 let CONFIG = inject('CONFIG');
-
-let selectedNumber = ref("8801951259460");
-let WhatsAppNumbers = ref([
-      {
-        number: "8801617207878",
-        display: "+880 1617-207878",
-      },
-      {
-        number: "8801951259460",
-        display: "+880 1951-259460",
-      },
-])
+ 
+function CopyCode() {
+  if(CONFIG.value?.env?.CODE_NUMBER){
+    helper.copyToClipboard(CONFIG.value?.env?.CODE_NUMBER);
+    emitter.emit('toaster-success', {message: 'Code number copied to clipboard!'});
+  } else {
+    emitter.emit('toaster-error', {message: 'Code number not found, please contact support.'});
+  }
+}
 
 
 </script>
@@ -182,7 +182,7 @@ let WhatsAppNumbers = ref([
               <div><strong>Nagad:</strong> 01951259460</div>
             </div>
 
-            <Btn>Code Number: 
+            <Btn @click.stop="CopyCode()">Code Number: 
               <strong style="color: #32ff00;">{{ CONFIG?.env?.CODE_NUMBER  }}</strong>
             </Btn>
 
