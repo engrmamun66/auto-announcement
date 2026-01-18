@@ -537,6 +537,11 @@ td a {
   text-decoration: none;
 }
 
+/* Adding table tar hover */
+tbody tr:hover td {
+  background-color: #ffffffd1 !important;
+}
+
 .nav-tabs.d2 .nav-link {
   border-top-left-radius: 0px !important;
   border-top-right-radius: 0px !important;
