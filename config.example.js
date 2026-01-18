@@ -18,6 +18,7 @@ const default_config = {
           PORT: port_number,
           SOCKET_PORT: 2424,
           SECRET_KEY: 'YOUR_SECRET_KEY',
+          CODE_NUMBER: 'DHM101', // Rrequeired for Client Identification
           PUNCH_LOG_FILENAME: 'punch.log.json', 
           DATABASE_PATH: 'database/database.db', // For Client DB Example: './../clientdb-DHM101.db'
 
