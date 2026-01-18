@@ -421,7 +421,6 @@ function onClickAttendance(std){
 
     <div class="d-flex justify-content-between align-items-center flex-wrap">
       <h1>{{ !addMode ? 'Students' : 'Add Student'}}  </h1> 
-      <kbd>Total: {{ params?.total || 0 }}</kbd>
 
       <div class="d-flex justify-content-end">
         <Btn class="me-2" style="background: #673AB7;">Total: {{ params?.total || '000' }} </Btn>
