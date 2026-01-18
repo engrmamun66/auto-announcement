@@ -1,6 +1,6 @@
 <template>
   <div class="audio-player-area" >
-    <audio ref="audioElement" controls>
+    <audio ref="audioElement" controls @ended="fireEndEvent ? emits('ended') : null">
       <source v-if="srcOgg" :src="srcOgg" type="audio/ogg" />
       <source v-if="srcMp3" :src="srcMp3" type="audio/mpeg" />
       Your browser does not support the audio element.
@@ -15,16 +15,21 @@
 <script setup>
 import { computed, onMounted, ref } from "vue"; 
 let emits = defineEmits([
-    'close',
+    'close', 'ended',
 ])
-
 // Define props
 let { src } = defineProps({
   src: {
     type: String,
     required: true,
   },
+  fireEndEvent: {
+    type: Boolean,
+    default: false,
+  },
 });
+const log =console.log
+ 
 
 // Compute audio sources based on the provided src
 const srcOgg = computed(() => src.replace(/\.\w+$/, ".ogg"));

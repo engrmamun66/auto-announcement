@@ -729,7 +729,7 @@ watch(fixedWidthSoundCol, (newVal) => {
                       </div> 
                     </template>
                     <template v-else>
-                      <Player  :src="std[column]" @close="std[`isPlaying_${column}`] = false"></Player>
+                      <Player  :src="std[column]" @close="std[`isPlaying_${column}`] = false" :fire-end-event="true" @ended="std[`isPlaying_${column}`] = false"></Player>
                     </template>
                   </template>  
                   <template v-else>
