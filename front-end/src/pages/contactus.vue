@@ -1,5 +1,8 @@
 <script setup>
 import { onMounted, watch, inject, ref, reactive } from "vue";
+import Btn from '../components/Btn.vue'
+
+let CONFIG = inject('CONFIG');
 
 let selectedNumber = ref("8801951259460");
 let WhatsAppNumbers = ref([
@@ -178,6 +181,10 @@ let WhatsAppNumbers = ref([
               <i class="bi bi-phone-fill" style="color: #e2136e"></i>
               <div><strong>Nagad:</strong> 01951259460</div>
             </div>
+
+            <Btn>Code Number: 
+              <strong style="color: #32ff00;">{{ CONFIG?.env?.CODE_NUMBER  }}</strong>
+            </Btn>
 
           </div>
         </div>
