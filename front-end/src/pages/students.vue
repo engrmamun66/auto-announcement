@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, inject, ref, reactive, watch } from 'vue';
+import { onMounted, inject, ref, reactive, watch, provide } from 'vue';
 import moment from 'moment/moment'
 import { useRouter, useRoute } from 'vue-router';
 import Note from '../components/note.vue'
@@ -63,6 +63,7 @@ let targetStd = ref(null)
 let columnName = ref('sound1')
 let targetStdForBarcode = ref(null)
 let editModeTabIndex = ref(1)
+provide('editModeTabIndex', editModeTabIndex)
 let only_attendance_feature = CONFIG.value?.settings?.attendance?.only_attendance_feature === true
 
 function hide_modals(event){
@@ -252,16 +253,16 @@ async function onClickClone(std){
   }
 }
 
-async function isAddedStudentByDakhela(dakhela){
+async function getStudentByDakhela(dakhela){
   try {
 
     let response = await http.get(`/student/by-dakhela/${dakhela}`)
     if(response.status == 200){
       let student = response.data;
       if(student && student?.id){
-        return true
+        return student
       } else {
-        return false
+        return null
       }
     }  
   } catch (error) {
@@ -274,7 +275,7 @@ async function addStudent(){
   try {
 
     if(payload.dakhela){
-      let isAdded = await isAddedStudentByDakhela(payload.dakhela)
+      let isAdded = await getStudentByDakhela(payload.dakhela)
       if(isAdded){
         emitter.emit('toaster-error', {message: `দাখেলা নাম্বার ${payload.dakhela} ইতিমধ্যে যুক্ত আছে`})
         is___adding.value = false
@@ -383,13 +384,13 @@ onMounted(async()=>{
 
   await getStudents()
 
-  if(route.query.log === 'true' && route.query.dakhela){
-      let student = students.value.find(std => Number(std.dakhela) === Number(route.query.dakhela))
-      if(student){
-        prepareToEdit(student)
-        editModeTabIndex.value = 2
-        getStudentPuchLogs()
-      }
+  if(route.query.dakhela){
+    let student = await getStudentByDakhela(route.query.dakhela)
+    if(student){
+      prepareToEdit(student)
+      editModeTabIndex.value = route.query.log === 'true' ? 2 : 1
+      getStudentPuchLogs()
+    } 
   }
 })
 const log = console.log 

@@ -481,7 +481,7 @@ function toggleOnOffAll(){
                   </td> 
               </tr> 
               <tr v-if="item.showClasses">
-                <td :colspan="5" style="max-width: 500px;">
+                <td :colspan="5" >
                   <div class="p-2 border bg-white shadow radius-10">
                     <div class="d-flex justify-content-center align-content-center gap-2 flex-wrap" :class="[item?.classes?.length <=3 ? 'justify-content-start' : 'justify-content-center']">
                       <template v-for="cls in item.classes">

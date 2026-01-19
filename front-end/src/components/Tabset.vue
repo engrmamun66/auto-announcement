@@ -1,11 +1,11 @@
 <template>
   <div class="tabset">
     <!-- Tab 1 -->
-    <input type="radio" name="tabset" id="tab1" aria-controls="marzen" checked @click.stop="emits('onTab', 1)" />
+    <input :checked="editModeTabIndex == 1" ref="tabRadio" type="radio" name="tabset" id="tab1" aria-controls="marzen" checked @click.stop="emits('onTab', 1)" />
     <label for="tab1" @click.stop="emits('onTab', 1)">General</label>
 
     <!-- Tab 2 -->
-    <input type="radio" name="tabset" id="tab2" aria-controls="rauchbier" @click.stop="emits('onTab', 2)" />
+    <input :checked="editModeTabIndex == 2" ref="tabRadio" type="radio" name="tabset" id="tab2" aria-controls="rauchbier" @click.stop="emits('onTab', 2)" />
     <label for="tab2" @click.stop="emits('onTab', 2)">Punch History</label>
 
 
@@ -18,7 +18,14 @@
 </template>
 
 <script setup>
+import { onMounted, inject, ref, reactive, watch } from 'vue';
 let emits = defineEmits('onTab')
+
+let tabRadio = ref([])
+
+let editModeTabIndex = inject('editModeTabIndex', ref(1))
+ 
+
 </script>
 
 
@@ -77,7 +84,7 @@ body {
   bottom: 10px;
   width: 60%;
   height: 2px;
-  background: #6c6c6c99;
+  background: #6c6c6c3d;
 }
 
 input:focus-visible + label {
