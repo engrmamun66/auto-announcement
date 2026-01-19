@@ -347,6 +347,9 @@ async function deleteStudent(id, i){
       }
     }).catch(() => {}).finally(()=>{ 
 
+    }).finally(() => {
+      getStudents()
+      getAllStudents()
     })
   } catch (error) {
     console.warn('getStudents_error::', error);

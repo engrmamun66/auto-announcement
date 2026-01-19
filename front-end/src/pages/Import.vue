@@ -45,8 +45,8 @@ async function eraseAll() {
      try {
           let confi = confirm('Delete all students from DB. Are you sure?')
           if(!confi) return
-          let passKey = prompt('Enter pass key')
-          if(!['DD', 'dd'].includes(passKey)) {
+          let passKey = prompt('Type passcode to confirm')
+          if(!['DD', 'dd', 'delete'].includes(passKey)) {
                alert('Wrong pass key')
                return
           }
@@ -104,7 +104,8 @@ onMounted(() => {
      <div class="d-flex justify-content-between align-items-center mb-4">
           <h1>Import Students</h1>  
           <div class="right-align" >
-               <Btn v-if="useRoute().query.dev == 'true'" @click="eraseAll" class="red me-1" ><i class='bx bxs-eraser' ></i> Erase All <BtnLoader v-if="loading"></BtnLoader> </Btn>
+               <!-- <Btn v-if="useRoute().query.dev == 'true'" @click="eraseAll" class="red me-1" ><i class='bx bxs-eraser' ></i> Delete All Students <BtnLoader v-if="loading"></BtnLoader> </Btn> -->
+               <Btn @click="eraseAll" class="red me-1" ><i class='bx bxs-eraser' ></i> Delete All Students <BtnLoader v-if="loading"></BtnLoader> </Btn>
                <Btn @click="getBackup" ><i class='bx bxs-file-export' ></i> Export All <BtnLoader v-if="loading"></BtnLoader> </Btn>
 
           </div>
