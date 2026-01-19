@@ -47,7 +47,7 @@ async function eraseAll() {
           if(!confi) return
           let passKey = prompt('Type passcode to confirm')
           if(!['DD', 'dd', 'delete'].includes(passKey)) {
-               alert('Wrong pass key')
+               alert('Wrong passcode!')
                return
           }
           http.get('/students/erase-all').then(response => {
