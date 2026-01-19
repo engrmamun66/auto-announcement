@@ -333,6 +333,11 @@ app.get(`/api/_ac`, async (req, res) => {
   app.post(prefix + '/schedules/update', (req, res) => {
     Schedules.updateSchedule(req, res);
   });
+
+
+  app.post(prefix + '/schedules/update-status', (req, res) => {
+    Schedules.updateScheduleStatus(req, res);
+  });
   
   app.get(prefix + '/schedules/list', (req, res) => {
     Schedules.list(req, res);

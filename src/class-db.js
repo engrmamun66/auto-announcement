@@ -26,6 +26,7 @@ class myDB {
         this._addColumn('students', 'card_owner', 'VARCHAR', 'NULL')
         this._addColumn('students', 'options', 'VARCHAR', 'NULL')
         this._addColumn('students', 'note', 'VARCHAR', 'NULL') 
+        this._addColumn('schedules', 'status', 'INTEGER', '1') 
     }
 
     _createDatabase(){
@@ -92,6 +93,7 @@ class myDB {
                   title TEXT DEFAULT NULL, 
                   start_time TEXT NOT NULL, -- 24 hour format time as string (e.g. 20:40)
                   end_time TEXT NOT NULL,  -- 24 hour format time as string (e.g. 20:40)
+                  status INTEGER DEFAULT 1, -- 1=active | 0=inactive
                   classes TEXT DEFAULT NULL,  -- JSON string          
                   created TIMESTAMP DEFAULT CURRENT_TIMESTAMP
               );`,

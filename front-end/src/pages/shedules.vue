@@ -47,6 +47,7 @@ let payload = reactive({
     title: null,
     start_time: '12:00 AM',
     end_time: '12:00 AM',
+    status: 1,
     classes: [],
 })
 
@@ -106,6 +107,7 @@ function clickOnDocumentBody(){
 function clearPayload(){
   payload.id =  null
   payload.type =  1
+  payload.status =  1
   payload.title =  null
   payload.start_time = '12:00 AM'
   payload.end_time = '12:00 AM',
@@ -122,6 +124,7 @@ function prepareEdit(item){
   payload.start_time = item.start_time
   payload.end_time = item.end_time
   payload.classes = item.classes
+  payload.status = item.status
   addUpdateMode.value = true; 
   updatePickersTime(300, item)
   updatePickersTime()
@@ -262,6 +265,15 @@ function toggleExpandCollapseAll(){
   targetSchedules.forEach(item => {
     item.showClasses = !allExpanded
   })
+}
+
+function toggleOnOffAll(){
+  let targetSchedules = tab.value == 1 ? punch_schedules.value : call_schedules.value
+  let status = targetSchedules.every(item => item.status == 1)
+  for(const item of targetSchedules){
+    item.status = status ? 0 : 1
+    http.post('/schedules/update-status', {id: item.id, status: item.status} )
+  }
 }
 
 </script>
@@ -415,6 +427,7 @@ function toggleExpandCollapseAll(){
                 <th>Stat Time</th>
                 <th>End Time</th>
                 <th class="text-center" tooltip="Click to toggle expand/collapse all" flow="down" @click="toggleExpandCollapseAll()">Classes</th>
+                <th tooltip="Click to on/off all" flow="down" @click.stop="toggleOnOffAll()">Status</th>
                 <th>Action</th> 
               </tr>
             </thead>
@@ -443,7 +456,14 @@ function toggleExpandCollapseAll(){
                         </template>
                       </ul>
                     </div>
-                  </td>                   
+                  </td>  
+                  <td>
+                    <Switch size="sm" v-model="item.status" @change="async (status) => {
+                    await http.post('/schedules/update-status', {id: item.id, status} );
+                    getSchedules()
+                  
+                    }"></Switch>
+                  </td>                 
             
                   <td class="text-center"> 
                     <div class="d-flex justify-content-start">
@@ -460,8 +480,7 @@ function toggleExpandCollapseAll(){
                   </td> 
               </tr> 
               <tr v-if="item.showClasses">
-                <td :colspan="3"></td>
-                <td :colspan="1" style="max-width: 500px;">
+                <td :colspan="5" style="max-width: 500px;">
                   <div class="p-2 border bg-white shadow radius-10">
                     <div class="d-flex justify-content-center align-content-center gap-2 flex-wrap" :class="[item?.classes?.length <=3 ? 'justify-content-start' : 'justify-content-center']">
                       <template v-for="cls in item.classes">

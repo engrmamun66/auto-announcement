@@ -360,7 +360,6 @@ provide('classes', classes)
 provide('wattingList', wattingList)
 provide('attendenceList', attendenceList)
 provide('liveAttendenceList', liveAttendenceList)
-provide('getSchedules', getSchedules)
 provide('speakText', speakText)
 provide('getSchedules', getSchedules)
 provide('punch_schedules', punch_schedules)
@@ -396,7 +395,7 @@ const callbacks = {
         if(!className) return false;
 
         let ms = helper.miliseconds()
-        let founds = punch_schedules.value.filter(schedule => {
+        let founds = punch_schedules.value.filter(s => s.status == 1).filter(schedule => {
             let { start_ms, end_ms } = schedule 
             return (schedule.class_shorts.includes(class_short) && ms >= start_ms && ms <= end_ms) 
         })   
@@ -405,7 +404,7 @@ const callbacks = {
     running_punch_schedules(class_short=null){        
       
         let ms = helper.miliseconds()
-        let founds = punch_schedules.value.filter(schedule => {
+        let founds = punch_schedules.value.filter(s => s.status == 1).filter(schedule => {
             let { start_ms, end_ms } = schedule
             return (ms >= start_ms && ms <= end_ms)
         })      
@@ -415,7 +414,7 @@ const callbacks = {
     running_call_schedules(class_short=null){        
       
         let ms = helper.miliseconds()
-        let founds = call_schedules.value.filter(schedule => {
+        let founds = call_schedules.value.filter(s => s.status == 1).filter(schedule => {
             let { start_ms, end_ms } = schedule
             return (ms >= start_ms && ms <= end_ms)
            
@@ -426,7 +425,7 @@ const callbacks = {
     incoming_punch_schedules(){        
       
         let ms = helper.miliseconds()
-        let data = helper.clone(punch_schedules.value)
+        let data = helper.clone(punch_schedules.value.filter(s => s.status == 1))
         data.forEach(schedule => {
             let { start_ms, end_ms } = schedule
             schedule['incoming_time'] = (ms < start_ms) ? start_ms - ms : -1
@@ -440,7 +439,7 @@ const callbacks = {
     incoming_call_schedules(class_short=null){        
       
         let ms = helper.miliseconds()
-        let data = helper.clone(call_schedules.value)
+        let data = helper.clone(call_schedules.value.filter(s => s.status == 1))
         data.forEach(schedule => {
             let { start_ms } = schedule
             schedule['incoming_time'] = (ms < start_ms) ? start_ms - ms : -1
@@ -470,7 +469,7 @@ const callbacks = {
     timesup_call_schedules(){       
       
         let ms = helper.miliseconds()
-        let data =  (call_schedules.value.filter(schedule => {
+        let data = (call_schedules.value.filter(s => s.status == 1).filter(schedule => {
             let { end_ms } = schedule
             return ms > end_ms
         }))

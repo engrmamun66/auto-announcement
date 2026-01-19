@@ -117,6 +117,45 @@ class Schedules {
       });
     });
   }
+
+
+  updateScheduleStatus(req, res) {
+    const { id, status } = req.body;
+
+    if (!id || typeof status === 'undefined') {
+      res.status(400).send({ error: "Fields id and status are required." });
+      return;
+    }
+
+    const tableName = this.tableName;
+    const db = this.db;
+
+    const query = `
+      UPDATE ${tableName}
+      SET status = ?
+      WHERE id = ?
+    `;
+
+    const params = [status, id];
+
+    db.run(query, params, function (err) {
+      if (err) {
+        res.status(500).send({ error: err.message });
+        return;
+      }
+
+      if (this.changes === 0) {
+        res.status(404).send({ error: "No record found with the specified ID." });
+        return;
+      }
+
+      res.send({
+        message: "Status updated successfully.",
+        updatedId: id,
+        newStatus: status
+      });
+    });
+  }
   
 
   
