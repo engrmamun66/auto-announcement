@@ -291,7 +291,7 @@ function recallAllPunchedStudents(){
                                                   {{ helper.formatTime(item.start_time) }} - {{ helper.formatTime(item.end_time) }}
                                              </p>
                                              <div class="d-flex flex-wrap mb-3">
-                                                  <span class="m-1 classes-left" >
+                                                  <span class="m-1 classes-left w-100" >
                                                        <span v-for="cls in item.classes">
                                                             {{ helper.ucfirst(cls.display_name) }}
                                                        </span>
@@ -320,14 +320,14 @@ function recallAllPunchedStudents(){
                                    <!-- running call scheduls -->
                                    <template v-for="(item, i) in callbacks.running_call_schedules()">
                                         <li class="mb-2" >                    
-                                             <h3 class="mb-0"> 
+                                             <h3 class="mb-1"> 
                                                   {{ helper.ucfirst(item?.title) }}
                                              </h3>
                                              <p class="time-duration"> 
                                                   {{ helper.formatTime(item.start_time) }} - {{ helper.formatTime(item.end_time) }}
                                              </p>
                                              <div class="d-flex flex-wrap">
-                                                  <span class="m-1 classes-left" >
+                                                  <span class="m-1 classes-left w-100" >
                                                        <span v-for="cls in item.classes">
                                                             {{ helper.ucfirst(cls.display_name) }}
                                                        </span>
@@ -350,7 +350,7 @@ function recallAllPunchedStudents(){
                                                   {{ helper.formatTime(item.start_time) }} - {{ helper.formatTime(item.end_time) }}
                                              </p>
                                              <div class="d-flex flex-wrap mb-3" v-show="!item?.__hideClasses">
-                                                  <span class="m-1 classes-left" >
+                                                  <span class="m-1 classes-left w-100" >
                                                        <span v-for="cls in item.classes">
                                                             {{ helper.ucfirst(cls.display_name) }}
                                                        </span>

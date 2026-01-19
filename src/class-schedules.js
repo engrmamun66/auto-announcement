@@ -156,6 +156,44 @@ class Schedules {
       });
     });
   }
+
+  updateSchedulesOrderIndex(req, res) {
+    const { data } = req.body;
+
+    if (!Array.isArray(data) || data.length === 0) {
+      return res.status(400).send({ error: "Data array is required." });
+    }
+
+    const tableName = this.tableName;
+    const db = this.db;
+
+    db.serialize(() => {
+      db.run("BEGIN TRANSACTION");
+
+      const query = `UPDATE ${tableName} SET order_index = ? WHERE id = ?`;
+
+      for (const item of data) {
+        if (typeof item.id === 'undefined' || typeof item.order_index === 'undefined') {
+          db.run("ROLLBACK");
+          return res.status(400).send({ error: "Each item must have id and order_index." });
+        }
+
+        db.run(query, [item.order_index, item.id]);
+      }
+
+      db.run("COMMIT", (err) => {
+        if (err) {
+          return res.status(500).send({ error: err.message });
+        }
+
+        res.send({
+          message: "Order index updated successfully",
+          updatedCount: data.length
+        });
+      });
+    });
+  }
+
   
 
   
@@ -195,7 +233,7 @@ class Schedules {
   list(req, res){ 
 
     const {db, tableName} = this; // Capture `this.db` reference  
-    const selectQuery = `SELECT * FROM ${tableName} WHERE 1=1`;
+    const selectQuery = `SELECT * FROM ${tableName} WHERE 1=1 ORDER BY order_index ASC`;
 
     db.all(selectQuery, [], (err, data) => {
       if (err) {

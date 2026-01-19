@@ -94,6 +94,9 @@ h6,
 .cp {
   cursor: pointer !important;
 }
+.nc {
+  pointer-events: none !important;
+}
 
 .sidebar-wrapper ul {
   list-style-type: none;

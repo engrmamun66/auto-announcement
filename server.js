@@ -339,6 +339,10 @@ app.get(`/api/_ac`, async (req, res) => {
     Schedules.updateScheduleStatus(req, res);
   });
   
+  app.post(prefix + '/schedules/update-order-indexes', (req, res) => {
+    Schedules.updateSchedulesOrderIndex(req, res);
+  });
+  
   app.get(prefix + '/schedules/list', (req, res) => {
     Schedules.list(req, res);
   });

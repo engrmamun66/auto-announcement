@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, watch, inject, ref, reactive } from 'vue';
+import { onMounted, nextTick, watch, inject, ref, reactive } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import Note from '../components/note.vue'
 import myTable from '../components/myTable.vue'
@@ -277,6 +277,37 @@ function toggleOnOffAll(){
   }
 }
 
+let scheduleTrRef = ref([])
+
+async function reOrderSchedules(schedule_list, i, action='up'){
+  if(action == 'up'){
+    [schedule_list[i], schedule_list[i - 1]] = [schedule_list[i - 1], schedule_list[i]]
+    await nextTick()
+    scheduleTrRef.value[i].classList.add('slideDownTr')
+    scheduleTrRef.value[i - 1].classList.add('slideUpTr')
+  }
+  else if(action == 'down'){
+    [schedule_list[i], schedule_list[i + 1]] = [schedule_list[i + 1], schedule_list[i]]
+    await nextTick()
+    scheduleTrRef.value[i].classList.add('slideUpTr')
+    scheduleTrRef.value[i + 1].classList.add('slideDownTr')
+  }
+  setTimeout(() => {
+    scheduleTrRef.value.forEach(el => {
+      el.classList.remove('slideUpTr')
+      el.classList.remove('slideDownTr')
+    })
+  }, 310);
+
+
+  let data = schedule_list.map((item, i) => ({id: item.id, order_index: i + 1}))
+  await http.post('/schedules/update-order-indexes', {data})
+  await getSchedules()
+
+}
+
+
+
 </script>
 
 <template>
@@ -430,17 +461,18 @@ function toggleOnOffAll(){
                 <th class="text-center" tooltip="Click to toggle expand/collapse all" flow="down" @click="toggleExpandCollapseAll()">Classes</th>
                 <th tooltip="Click to on/off all" flow="down" @click.stop="toggleOnOffAll()">Status</th>
                 <th>Action</th> 
+                <th>Order</th> 
               </tr>
             </thead>
           </template>
           <template #rows>
             <template v-if="tab==1 ? punch_schedules?.length  : call_schedules?.length">
               <template v-for="(item, i) in tab==1 ? punch_schedules  : call_schedules">
-                <tr @auxclick="helper.log(item)">
+                <tr ref="scheduleTrRef" @auxclick="helper.log(item)">
                     
-                  <td> {{ item.title }} </td> 
-                  <td> {{ helper.formatTime(item.start_time) }} </td>                   
-                  <td> {{ helper.formatTime(item.end_time) }}</td>                   
+                  <td :class="{'text-danger': item?.status == 0}"> {{ item.title }} </td> 
+                  <td :class="{'text-danger': item?.status == 0}"> {{ helper.formatTime(item.start_time) }} </td>                   
+                  <td :class="{'text-danger': item?.status == 0}"> {{ helper.formatTime(item.end_time) }}</td>                   
                   <td style="max-width: 500px;">
                     <div class="d-flex justify-content-center">
                       <ul v-if="item.classes">
@@ -479,9 +511,22 @@ function toggleOnOffAll(){
           
                     </div>
                   </td> 
+                  <td class="text-center" style="width: 20px;"> 
+                    <div class="d-flex justify-content-start">
+                    
+  
+                      <span :class="{'opacity-0 pointer-none': i == 0}" class="me-2 badge bg-white p-2 cp" @click.stop="reOrderSchedules(tab==1 ? punch_schedules  : call_schedules, i, 'up')">
+                        <i class='bx bx-chevron-up text-black cm size-1' ></i>
+                      </span>
+                      <span :class="{'opacity-0 pointer-none': (tab==1 ? punch_schedules  : call_schedules)?.length - 1 === i}" class="badge bg-white p-2 cp" @click.stop="reOrderSchedules(tab==1 ? punch_schedules  : call_schedules, i, 'down')">
+                        <i class='bx bx-chevron-down text-black cp size-1' ></i>
+                      </span>
+          
+                    </div>
+                  </td> 
               </tr> 
               <tr v-if="item.showClasses">
-                <td :colspan="5" >
+                <td :colspan="6" >
                   <div class="p-2 border bg-white shadow radius-10">
                     <div class="d-flex justify-content-center align-content-center gap-2 flex-wrap" :class="[item?.classes?.length <=3 ? 'justify-content-start' : 'justify-content-center']">
                       <template v-for="cls in item.classes">

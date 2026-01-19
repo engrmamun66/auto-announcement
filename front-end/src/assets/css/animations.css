@@ -74,6 +74,31 @@ opening animation classes
 }
 
 
+.slideUpTr{
+    animation: slideUp var(--dur, 0.3s) ease-in-out;
+}
+.slideDownTr{
+    animation: slideDown var(--dur, 0.3s) ease-in-out;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(59px);
+    }
+
+    to {
+        transform: translateY(0);
+    }
+}
+@keyframes slideDown {
+    from {
+        transform: translateY(-59px);
+    }
+
+    to {
+        transform: translateY(0);
+    }
+}
 
 
 @keyframes fadeUp {
