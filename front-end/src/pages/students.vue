@@ -336,10 +336,10 @@ async function deleteStudent(id, i){
     if(!confirm('Do you want to delete?')) return;
     // let passcode = prompt('Type passcode to delete')
     let passcode = true
-    if(passcode !== String(new Date().getDate()) && passcode !== 'D') {
-      emitter.emit('toaster-error', {message: 'দয়া করে সঠিক পাসকোড দিন'})
-      return
-    }
+    // if(passcode !== String(new Date().getDate()) && passcode !== 'D') {
+    //   emitter.emit('toaster-error', {message: 'দয়া করে সঠিক পাসকোড দিন'})
+    //   return
+    // }
 
     
     http.delete(`/students/delete/${id}`).then(response => {
