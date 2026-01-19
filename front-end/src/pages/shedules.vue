@@ -270,6 +270,7 @@ function toggleExpandCollapseAll(){
 function toggleOnOffAll(){
   let targetSchedules = tab.value == 1 ? punch_schedules.value : call_schedules.value
   let status = targetSchedules.every(item => item.status == 1)
+  if(!confirm(`Are you sure to turn ${status ? 'off' : 'on'} all?`)) return;
   for(const item of targetSchedules){
     item.status = status ? 0 : 1
     http.post('/schedules/update-status', {id: item.id, status: item.status} )
