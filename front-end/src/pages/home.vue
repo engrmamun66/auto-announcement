@@ -403,7 +403,7 @@ function recallAllPunchedStudents(){
                                                   barcode,
                                              }})
                                         }">
-                                             {{ student.name.split('||')?.[0] }} <i class='bx bx-edit-alt transformY-3px cp'></i>
+                                             {{ student.name.split('||')?.[0] }} <i class='bx bx-filter transformY-3px cp'></i>
                                         </div>
                                         <div class="class-name">
                                              {{ student.class }} <span>[{{ student.dakhela }}]{{ originalDakhela(student) ? `[main:${originalDakhela(student)}]` : '' }} </span>

@@ -385,11 +385,14 @@ onMounted(async()=>{
   await getStudents()
 
   if(route.query.dakhela){
+    clearParams({dakhela: route.query.dakhela, get: true})
     let student = await getStudentByDakhela(route.query.dakhela)
     if(student){
-      prepareToEdit(student)
-      editModeTabIndex.value = route.query.log === 'true' ? 2 : 1
-      getStudentPuchLogs()
+      if(route.query.log === 'true'){
+        prepareToEdit(student)
+        editModeTabIndex.value = 2
+        getStudentPuchLogs()
+      }
     } 
   }
 })
