@@ -436,7 +436,7 @@ watch(fixedWidthSoundCol, (newVal) => {
       </div>
     </div>
 
-    <modal v-model="addMode" :title="!payload?.id ? 'Add Student' : 'Update Student'">
+    <modal v-model="addMode" :title="!payload?.id ? 'Add Student' : (editModeTabIndex == 1 ? 'Update Student' : 'Guardian Punch History')" :width="editModeTabIndex == 2 ? '700px' : '500px'" :close-on-esc="true" :close-on-click-away="true" >
       <div class="w-100 d-flex justify-content-center" >
 
         <div class="cb-form">
@@ -530,7 +530,7 @@ watch(fixedWidthSoundCol, (newVal) => {
 
                 <template v-else-if="editModeTabIndex == 2"> 
                   <div class="col-12 overflow-y-scroll">
-                     <table>
+                     <table class="table table-striped">
                       <thead>
                         <th>Name</th> 
                         <th>Date</th>
