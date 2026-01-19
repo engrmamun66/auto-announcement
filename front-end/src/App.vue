@@ -457,7 +457,7 @@ const callbacks = {
     timesup_punch_schedules(){       
       
         let ms = helper.miliseconds()
-        let data = (punch_schedules.value.filter(schedule => {
+        let data = (punch_schedules.value.filter(s => s.status == 1).filter(schedule => {
             let { end_ms } = schedule
             return ms > end_ms
         }))
