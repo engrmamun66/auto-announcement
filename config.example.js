@@ -59,7 +59,7 @@ const default_config = {
                media: true,
           },
           with_speaker_controls: {
-               status: true,
+               status: true, // -------------------------- on/off
                switch_count: 8,
                switch_board_chunk_size: 8,
                on_inactivity_switches_mode: 'no_action', // no_action | open_all | close_all | [1,2,3] ===> array of switch numbers
