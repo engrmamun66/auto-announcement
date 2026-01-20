@@ -583,3 +583,17 @@ tbody tr:hover td {
 .card-body{
   overflow-x: auto;
 }
+
+.group-header{
+    background: #f0f0f0;
+    padding: 4px 10px;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+.group-header2{
+    background: #f0f0f0;
+    padding: 4px 10px;
+    padding-bottom: 15px;
+    border-radius: 5px;
+    margin-top: 10px;
+}

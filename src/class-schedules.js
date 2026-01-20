@@ -21,7 +21,9 @@ class Schedules {
 
   add(req, res){
     
-    const { type, title, start_time, end_time, classes /** comma separated */ } = req.body;  
+    const { type, title, start_time, end_time, classes /** comma separated */, order_index } = req.body;  
+
+    if(!order_index) order_index = 1
  
   
     if (!type || !start_time || !end_time || !classes) {
@@ -34,8 +36,8 @@ class Schedules {
     const tableName = this.tableName;
   
     const query = `
-      INSERT INTO ${tableName} (type, title, start_time, end_time, classes)
-      VALUES (?, ?, ?, ?, ?)
+      INSERT INTO ${tableName} (type, title, start_time, end_time, classes, order_index)
+      VALUES (?, ?, ?, ?, ?, ?)
     `;
   
     const params = [type, title, start_time, end_time, classes];

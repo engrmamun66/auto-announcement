@@ -65,6 +65,10 @@ let inputStyles = computed(() => {
   return styles.join(";");
 });
 
+watch(()=>props.modelValue, (mode__value) => {
+  emits('change', mode__value)
+})
+
 
 function makeDatesObject(start = '2025-04-15', end = '2025-04-15') {
   const dateArray = {}; // Array to store the dates
