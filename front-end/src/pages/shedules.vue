@@ -97,6 +97,7 @@ function decrementTime2(key){
       payload.end_time = moment(payload.end_time, 'hh:mm A').subtract(INC, 'minutes').format('hh:mm A')
       endTimePicker2.value.setTime(payload.end_time)
    }
+   updateSecondPickers()
 }
 function incrementTime2(key){
   if(key == 'start'){
