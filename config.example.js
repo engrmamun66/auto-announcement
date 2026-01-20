@@ -67,7 +67,7 @@ const default_config = {
                delay_before_starting: 10, // miliseconds
           },
           attendance: {
-               status: true,
+               status: true, // -------------------------- on/off
                only_attendance_feature: false,
                /**
                 * using in getRunningShift() function
