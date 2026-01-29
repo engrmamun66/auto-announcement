@@ -117,7 +117,7 @@ function updateSecondPickers(){
     startTimePicker2.value.setTime(payload.start_time2)
 
     // end_time2
-    payload.end_time2 = payload.end_time
+    payload.end_time2 = moment(payload.end_time, 'hh:mm A').add(0, 'minutes').format('hh:mm A')
     endTimePicker2.value.setTime(payload.end_time2)
   }, 10);
 }
