@@ -1,5 +1,5 @@
 <template>
-  <button v-bind="$attrs" @click.stop="(e)=>$emit('click', e)" class="emb-buttons" :class="{'with-cbinput': cbinput}" type="button"> 
+  <button v-bind="$attrs" @click.stop="(e)=>$emit('click', e)" class="emb-buttons" :class="{'with-cbinput': cbinput, 'opacity-50 nc': disabled}" type="button"> 
     <slot>
       Submit
     </slot>
@@ -13,7 +13,11 @@ let props = defineProps({
   cbinput: {
     type: Boolean,
     default: false
-  }
+  },
+  disabled: {
+    type: Boolean,
+    default: false
+  },
 })
 defineEmits(['click'])
 </script>

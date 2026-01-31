@@ -90,8 +90,9 @@ onMounted(()=>{
       :defaultStartValue="defaultStart"
       :defaultEndValue="defaultEnd"
       :dayOfMonth="1"
+      :inactiveFutureMonth="true"
       ></MonthPicker>
-      <Btn @click.stop="showDetails = false" class="red">Back</Btn>
+      <Btn @click.stop="showDetails = false" class="red px-5" :disabled="!showDetails" >Back</Btn>
     </div>   
      
     <template v-if="!showDetails">
