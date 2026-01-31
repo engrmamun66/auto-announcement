@@ -41,6 +41,20 @@ async function handleDateChange(dates) {
 }
 
 
+function countDays(start_date, end_date) {
+  const start = moment(start_date, 'YYYY-MM-DD');
+  let end = moment(end_date, 'YYYY-MM-DD');
+
+  // if end_date is current month, use today
+  if (end.isSame(moment(), 'month')) {
+    end = moment();
+  }
+
+  return end.diff(start, 'days') + 1;
+}
+
+
+
 let showDetails = ref(false)
 let targetData = ref(null)
 
@@ -57,8 +71,11 @@ async function onChangeMonthRange([start_date, end_date]){
       weekends,
       class_short,
       leaveData: leaves_and_vacations,
-      classwise_students: all_students_non_copied.value.map(s => ({dakhela: s.dakhela, class_short: s.class_short})) 
+      classwise_students: all_students_non_copied.value.map(s => ({dakhela: s.dakhela, class_short: s.class_short})),
+      total_days: countDays(start_date, end_date),
     }
+    console.log({payloadData});
+
     let data = await getAttendeceListFullHistory(payloadData, {start_date, end_date, action: 'classwise_data' })
     classes.value[index]["data"] = data?.attendance
     if(showDetails.value && targetData.value?.class_short === eachClass.class_short){
