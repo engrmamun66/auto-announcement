@@ -319,8 +319,8 @@ class Attendance {
             
           }) 
 
-          // let class_attendance_data = attendanceList.filter(att => att.class_short == class___short)
-           
+          // fs.writeFileSync('./_samples/DATA.json', JSON.stringify(DATA, null, 2));
+
           return { 
             attendance: DATA, 
           }
