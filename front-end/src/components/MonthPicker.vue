@@ -55,6 +55,9 @@
                     </tbody>
                 </table>
             </div>
+            <div class="pickerFooter">
+                <button type="button" class="pickerClose" @click="closePicker">Close</button>
+            </div>
         </div>
     </div>
 </template>
@@ -136,6 +139,10 @@ export default {
             type: Number,
             default: 1,
         },
+        inactiveFutureMonth: {
+            type: Boolean,
+            default: false,
+        },
     },
     data() {
         const currentDate = new Date();
@@ -194,6 +201,11 @@ export default {
         },
     },
     methods: {
+        handleDocumentClick(event) {
+            if (!this.picking) return;
+            if (!this.$el || this.$el.contains(event.target)) return;
+            this.closePicker();
+        },
         openStartPicker() {
             this.yearContext = this.startYear;
             this.selectingStart = true;
@@ -247,10 +259,16 @@ export default {
             if (currentYear === this.endYear && month === this.endMonth) {
                 classes.push(this.selected, this.isEndMonth);
             }
+            if (this.isFutureMonth(currentYear, month)) {
+                classes.push("isDisabled");
+            }
 
             return classes.join(" ");
         },
         onSelectMonth(newMonth, newYear, eventType) {
+            if (this.isFutureMonth(newYear, newMonth)) {
+                return;
+            }
             let {
                 selectingStart,
                 startMonth,
@@ -326,6 +344,13 @@ export default {
             Object.assign(this, nextState);
             this.setDates();
         },
+        isFutureMonth(year, month) {
+            if (!this.inactiveFutureMonth) return false;
+            const now = new Date();
+            const nowYear = now.getFullYear();
+            const nowMonth = now.getMonth();
+            return year > nowYear || (year === nowYear && month > nowMonth);
+        },
         fixDates({
             selectingStart,
             selectingEnd,
@@ -378,6 +403,14 @@ export default {
             }
         },
     },
+    mounted() {
+        document.addEventListener("mousedown", this.handleDocumentClick);
+        document.addEventListener("touchstart", this.handleDocumentClick, { passive: true });
+    },
+    beforeUnmount() {
+        document.removeEventListener("mousedown", this.handleDocumentClick);
+        document.removeEventListener("touchstart", this.handleDocumentClick);
+    },
     watch: {
         startValue(newVal) {
         },
@@ -393,12 +426,12 @@ export default {
 .termInput {
   position: relative;
   display: inline-block;
-  padding: .5em 12px .5em .5em;
-  border: 1px solid #ddd;
+  padding: 0.5em 12px 0.5em 0.5em;
+  border: 1px solid #d1d5db;
   outline: none;
-  transition: box-shadow .2s,border-color .2s;
-  border-radius: 6px;
-  background-color: #c7c7c7;
+  transition: box-shadow 0.2s, border-color 0.2s;
+  border-radius: 8px;
+  background-color: #ffffff;
 }
 .termInput.active {
   border-color: var(--primaryColor);
@@ -410,10 +443,12 @@ export default {
 .termInputControl {
   display: inline-block;
   min-width: 5em;
-  padding: 3px 15px;
+  padding: 6px 12px;
   text-align: center;
-  background-color: #eee;
-  border-radius: 1em;
+  background-color: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 999px;
+  color: #111827;
   cursor: pointer;
 }
 .termInputControl.selecting {
@@ -431,10 +466,11 @@ export default {
   left: 0;
   top: 2.9em;
   min-width: 300px;
-  padding: 10px;
-  background-color: white;
-  border-radius: 3px;
-  box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.2);
+  padding: 12px 12px 48px 12px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
   z-index: 99999;
   box-sizing: border-box;
   -webkit-touch-callout: none;
@@ -457,11 +493,16 @@ export default {
   width: 2.9166666667em;
   height: 2.9166666667em;
   margin: 0 auto;
-  font-size: 0.6666666667em;
-  font-weight: bold;
+  font-size: 0.75em;
+  font-weight: 600;
   line-height: 2.9166666667;
   cursor: pointer;
   transition: background-color 200ms, box-shadow 200ms;
+}
+.pickerControl.isDisabled {
+  pointer-events: none;
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 .pickerControlInner {
   border-radius: 50%;
@@ -485,11 +526,11 @@ export default {
   display: block;
   width: 75%;
   margin: 0 auto;
-  fill: #666;
+  fill: #6b7280;
   cursor: pointer;
 }
 .picker th svg:hover {
-  fill: black;
+  fill: #111827;
 }
 .picker .yearOneContext,
 .picker .yearTwoContext {
@@ -509,7 +550,7 @@ export default {
 .picker .yearTwoContext td,
 .picker .yearTwoContext th {
   text-align: center;
-  color: #666;
+  color: #4b5563;
   font-weight: normal;
 }
 .picker .yearOneContext th,
@@ -529,5 +570,31 @@ export default {
 }
 .picker .yearTwoContext {
   margin-left: 0.5em;
+}
+
+.pickerFooter {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+}
+
+.pickerClose {
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  color: #111827;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.pickerClose:hover {
+  background-color: #f9fafb;
+  border-color: #cbd5f5;
+}
+
+.pickerClose:active {
+  background-color: #f3f4f6;
 }
 </style>
