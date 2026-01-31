@@ -58,9 +58,10 @@ let payload = reactive({
     end_time2: '12:00 AM',
     status: 1,
     classes: [],
+    both: true,
 })
 
-const INC = 15
+const INC = 5
 
 function decrementTime(key){
    if(key == 'start'){
@@ -191,7 +192,8 @@ function clearPayload(){
   payload.title =  null
   payload.start_time = '12:00 AM'
   payload.end_time = '12:00 AM',
-  payload.classes =  []
+  payload.classes = []
+  payload.both = true
   addUpdateMode.value = false;
   is___adding.value = false
   clickOnDocumentBody()
@@ -239,11 +241,6 @@ function addSchedule(){
       return
     }
 
-    let for__both = false
-    if(payload.status == 1){
-      for__both = confirm('Add for both?')
-    }
-    
     is___adding.value = true
 
     http.post('/schedules/add', _payload).then(response => {
@@ -252,9 +249,11 @@ function addSchedule(){
       }
     }).finally(()=>{
 
-      if(for__both){
+      if(payload.type === 1 && payload.both){
         let anotherPayload = _payload
-        anotherPayload.type = anotherPayload.type === 1 ? 2 : 1
+        anotherPayload.type = 2
+        anotherPayload['start_time'] = payload.start_time2
+        anotherPayload['end_time'] = payload.end_time2
         http.post('/schedules/add', anotherPayload).then(response => {
           if(response.status == 200){
             getSchedules()
@@ -536,9 +535,15 @@ async function reOrderSchedules(schedule_list, i, action='up'){
                 <div class="col-12">
                   <div class="row">
                     <div class="col-12">
-                      <label class="group-header">Set Call Times</label>
+                      <div class="d-flex justify-content-between align-items-center">
+                        <label class="group-header">Set Call Times</label>
+                        <label for="">
+                          <input v-model="payload.both" type="checkbox">
+                          Both
+                        </label>
+                      </div>
                     </div>
-                    <div class="col-6">
+                    <div class="col-6" :class="{'opacity-25 nc': !payload.both}">
                       <div class="form-group group-header2">
                         <label for="">Call Start</label>
                         <!-- <input v-model="payload.start_time" type="time" class="form-control cb-input"> -->
@@ -576,7 +581,7 @@ async function reOrderSchedules(schedule_list, i, action='up'){
                       </div>
                     </div>
       
-                    <div class="col-6">
+                    <div class="col-6" :class="{'opacity-25 nc': !payload.both}">
                       <div class="form-group group-header2">
                         <div class="d-flex justify-content-between">
                           <label for="">Call End</label>
