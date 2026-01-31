@@ -72,10 +72,8 @@ async function onChangeMonthRange([start_date, end_date]){
       class_short,
       leaveData: leaves_and_vacations,
       classwise_students: all_students_non_copied.value.map(s => ({dakhela: s.dakhela, class_short: s.class_short})),
-      total_days: countDays(start_date, end_date),
+      total_days: countDays(start_date, end_date), // This will helpe to generate attendence report by percentage
     }
-    console.log({payloadData});
-
     let data = await getAttendeceListFullHistory(payloadData, {start_date, end_date, action: 'classwise_data' })
     classes.value[index]["data"] = data?.attendance
     if(showDetails.value && targetData.value?.class_short === eachClass.class_short){
