@@ -560,14 +560,9 @@ export default {
 }
 .picker .yearOneContext td.cellWithinRange .pickerControl,
 .picker .yearTwoContext td.cellWithinRange .pickerControl {
-  /* background-color: #e8e8e8; */
-  /* background-color: #e8e8e8; */
   color: #aaa;
 }
-.picker .yearOneContext td.cellWithinRange:not(:first-child) .pickerControl,
-.picker .yearTwoContext td.cellWithinRange:not(:first-child) .pickerControl {
-  /* box-shadow: -10px 0 0 0 #e8e8e8; */
-}
+
 .picker .yearTwoContext {
   margin-left: 0.5em;
 }
