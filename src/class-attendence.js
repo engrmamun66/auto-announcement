@@ -219,10 +219,189 @@ class Attendance {
           const totalPages = Math.max(1, Math.ceil(total / limit));
     
           res.send({
-            data: this.modify_data_by_action(rows, action, req),
+            data: rows,
             pagination: { page_no, total, limit, totalPages },
           });
         });
+      });
+    }
+
+
+    getAttendanceReports(req, res) {
+      const {
+        student_ids,
+        class_shorts,
+        start_date,
+        end_date,
+        date,
+        sort_by = "date",
+        sort_direction = "ASC", 
+        action = '',
+      } = req.query;
+
+      const whereParts = [];
+      const params = [];
+    
+      // student_ids (array or comma-separated)
+      if (student_ids) {
+        const ids = Array.isArray(student_ids)
+          ? student_ids.map(Number).filter(Boolean)
+          : String(student_ids).split(",").map(Number).filter(Boolean);
+        if (ids.length) {
+          whereParts.push(`a.student_id IN (${ids.map(() => "?").join(",")})`);
+          params.push(...ids);
+        }
+      } 
+    
+      // date or range
+      if (start_date && end_date) {
+        whereParts.push("a.date BETWEEN ? AND ?");
+        params.push(start_date, end_date);
+      } else if (date) {
+        whereParts.push("a.date = ?");
+        params.push(date);
+      }
+    
+      const whereClause = whereParts.length ? "WHERE " + whereParts.join(" AND ") : "";
+    
+      // safe sorting
+      const allowedSortBy = ["date", "in_time", "out_time", "created"];
+      const allowedSortDir = ["ASC", "DESC"];
+      const orderBy = allowedSortBy.includes(sort_by) ? sort_by : "date";
+      const direction = allowedSortDir.includes(sort_direction.toUpperCase()) ? sort_direction.toUpperCase() : "ASC";
+    
+      
+    
+      // data query
+      let dataQuery = `
+        SELECT a.*, s.class_short, s.name AS student_name
+        FROM ${this.tableName} a 
+        LEFT JOIN students s ON a.student_id = s.dakhela
+        ${whereClause} 
+        ORDER BY a.${orderBy} ${direction}
+      `;
+
+      
+      const dataParams = [...params];
+    
+      this.db.all(dataQuery, dataParams, (err, rows) => {
+        if (err) return res.status(500).send({ error: err.message });
+
+        if (action === 'classwise_data') {
+          return res.send({
+            data: this.modify_data_by_action(rows, action, req),
+          });
+        }
+
+        const payload = req.body || {};
+        const weekends = Array.isArray(payload.weekends) ? payload.weekends : [];
+        const leaveData = Array.isArray(payload.leaveData) ? payload.leaveData : [];
+        const total_days = Number(payload.total_days || 0);
+        let all__students = Array.isArray(payload.all__students) ? payload.all__students : [];
+
+        if (!all__students.length) {
+          const studentMap = {};
+          rows.forEach((row) => {
+            if (!row?.student_id) return;
+            const key = `${row.student_id}-${row.class_short || ''}`;
+            if (!studentMap[key]) {
+              studentMap[key] = { dakhela: row.student_id, class_short: row.class_short || null };
+            }
+          });
+          all__students = Object.values(studentMap);
+        }
+
+        let date_duration = utils.createDateRange(start_date, end_date);
+        if (total_days > 0 && total_days < date_duration.length) {
+          date_duration = date_duration.slice(0, total_days);
+        }
+
+        const weekend_leaves = date_duration.filter(date => weekends.includes(moment(date).format('dddd')));
+        const leaveData_excluded_weekends = leaveData.filter(leave => !weekend_leaves.includes(leave.date));
+        const leaveData_group_by_date = utils.listGroupBy(leaveData_excluded_weekends, 'date');
+
+        const attendanceByStudentDate = {};
+        rows.forEach((att) => {
+          if (!att?.student_id || !att?.date) return;
+          const sid = att.student_id;
+          if (!attendanceByStudentDate[sid]) attendanceByStudentDate[sid] = {};
+          if (!attendanceByStudentDate[sid][att.date]) attendanceByStudentDate[sid][att.date] = [];
+          attendanceByStudentDate[sid][att.date].push(att);
+        });
+
+        const classConfigMap = {};
+        const classFirstShift = {};
+        (global.config?.classes || []).forEach((cls) => {
+          classConfigMap[cls.class_short] = cls;
+          const firstShift = cls?.shifts?.[0];
+          if (firstShift?.start && firstShift?.end) {
+            classFirstShift[cls.class_short] = `${firstShift.start} - ${firstShift.end}`;
+          }
+        });
+
+        const initReport = (class_short, class_name) => ({
+          class_short,
+          class_name: class_name || '',
+          total_students: 0,
+          total_days: date_duration.length,
+          total_present: 0,
+          total_in: 0,
+          total_absent: 0,
+          present_percent: 0,
+        });
+
+        const report = {};
+        (global.config?.classes || []).forEach((cls) => {
+          report[cls.class_short] = initReport(cls.class_short, cls.class_name);
+        });
+
+        all__students.forEach((student) => {
+          const { dakhela, class_short } = student || {};
+          if (!class_short) return;
+
+          if (!report[class_short]) {
+            const cls = classConfigMap[class_short] || {};
+            report[class_short] = initReport(class_short, cls.class_name || '');
+          }
+
+          const reportItem = report[class_short];
+          reportItem.total_students += 1;
+
+          const firstShiftDuration = classFirstShift[class_short] || null;
+
+          date_duration.forEach((date) => {
+            const is_weekend = weekend_leaves.includes(date);
+            const _leaves = leaveData_group_by_date[date] || [];
+            const day_leaves = _leaves.filter(leave => (
+              leave.student_id == dakhela || leave.class_short == '_all_' || leave.class_short == class_short
+            ));
+            const is_leave_day = day_leaves.length > 0;
+            const is_presentable_day = !(is_weekend || is_leave_day);
+
+            let is_present = false;
+            if (!is_presentable_day) {
+              is_present = true;
+            } else {
+              const dayAttendance = attendanceByStudentDate?.[dakhela]?.[date] || [];
+              if (firstShiftDuration) {
+                is_present = dayAttendance.some(att => att.shift_duration === firstShiftDuration);
+              } else {
+                is_present = dayAttendance.length > 0;
+              }
+            }
+
+            if (is_present) reportItem.total_present += 1;
+          });
+        });
+
+        Object.values(report).forEach((item) => {
+          const denom = item.total_students * item.total_days;
+          item.total_in = item.total_present;
+          item.total_absent = Math.max(0, denom - item.total_present);
+          item.present_percent = denom > 0 ? Number(((item.total_present / denom) * 100).toFixed(2)) : 0;
+        });
+
+        res.send({ data: report });
       });
     }
 
@@ -235,7 +414,7 @@ class Attendance {
         if(action === 'classwise_data'){
           let { start_date, end_date } = req.query 
           let date_duration = utils.createDateRange(start_date, end_date)
-          let { leaveData, weekends, classwise_students, class_short: class___short, total_days } = req.body 
+          let { leaveData, weekends, all__students, class_short: class___short, total_days } = req.body 
           let weekend_leaves = date_duration.filter(date => weekends.includes(moment(date).format('dddd')))
           let leaveData_excluded_weekends = leaveData.filter(leave => !weekend_leaves.includes(leave.date))
           let leaveData_group_by_date = utils.listGroupBy(leaveData_excluded_weekends, 'date')
@@ -246,76 +425,74 @@ class Attendance {
           let DATA = []
           
 
-          classwise_students.forEach((student, i) => {
+          all__students.forEach((student, i) => {
             let { dakhela, class_short } = student
 
-            if(class_short == class___short){
-              let student_attendance = attendanceGroup?.[dakhela] || []
-              // let class_vacations = utils.
-  
-              let _targetStd = global.config.classes.find(eachClass => eachClass.class_short == class_short) || {}
-              let class_name = _targetStd?.class_name || ''
-              let student_shifts = _targetStd?.shifts || []
-          
-              // Calucating Every Single Date for a student
-              let date_wise_report = date_duration.map((date, j) => {
-  
-                let date_wide_attendace = student_attendance.filter(att => att.date === date)
-                let attendance = null
-  
-                let shiftInfo = student_shifts.map(shift => {
-                  let duration_text  = `${shift.start} - ${shift.end}`
-                  let find = date_wide_attendace.find(att => att.shift_duration === duration_text)
-                  shift['is_present'] = Boolean(find)
-                  shift['attendance'] = find || null
-                  if(!attendance){
-                    attendance = find || null
-                  }
-                  return shift
-                })
-  
-                let _leaves = leaveData_group_by_date[date] || []
-                let day_leaves = _leaves.filter(leave => (leave.student_id == dakhela || leave.class_short == '_all_' || leave.class_short == class_short))
-                
-                let is_leave_day = day_leaves.length > 0
-                let is_weekend = weekend_leaves.includes(date)
-                let is_leave_or_weekend_day = is_leave_day || is_weekend
-  
-                let is_presentable_day = is_leave_or_weekend_day === false
-                let is_present = (!is_presentable_day || shiftInfo?.[0]?.is_present) ? true : false
-                let is_preset_all_shifts = !is_presentable_day || shiftInfo.every(shift => shift.is_present)
-                let let_in_minute = shiftInfo[0]?.attendance?.late_in_minute || 0
+            let student_attendance = attendanceGroup?.[dakhela] || []
+            // let class_vacations = utils.
 
-                let data = {
-                  date,
-                  month: moment(date).format('MMMM'),
-                  month_year: moment(date).format('MMM YY'),
-                  dakhela,
-                  class_short,
-                  class_name,
-                  shiftInfo, 
-                  is_weekend,
-                  is_leave_day,
-                  is_present,
-                  is_preset_all_shifts,
-                  in_out_count: day_leaves.length,
-                  day_leaves,
-                  let_in_minute, 
-                  is_presentable_day,
-                  student_name: attendance?.student_name || null,
-                  class_short: attendance?.class_short || null,
-                } 
-  
-                data['_leaves'] = _leaves 
-  
-                return data
-  
-              })  
+            let _targetStd = global.config.classes.find(eachClass => eachClass.class_short == class_short) || {}
+            let class_name = _targetStd?.class_name || ''
+            let student_shifts = _targetStd?.shifts || []
+        
+            // Calucating Every Single Date for a student
+            let date_wise_report = date_duration.map((date, j) => {
+
+              let date_wide_attendace = student_attendance.filter(att => att.date === date)
+              let attendance = null
+
+              let shiftInfo = student_shifts.map(shift => {
+                let duration_text  = `${shift.start} - ${shift.end}`
+                let find = date_wide_attendace.find(att => att.shift_duration === duration_text)
+                shift['is_present'] = Boolean(find)
+                shift['attendance'] = find || null
+                if(!attendance){
+                  attendance = find || null
+                }
+                return shift
+              })
+
+              let _leaves = leaveData_group_by_date[date] || []
+              let day_leaves = _leaves.filter(leave => (leave.student_id == dakhela || leave.class_short == '_all_' || leave.class_short == class_short))
               
-             
-              date_wise_report.sort((a, b) => (a.serial) - b.serial); 
-              DATA.push(date_wise_report) 
-            } //===
+              let is_leave_day = day_leaves.length > 0
+              let is_weekend = weekend_leaves.includes(date)
+              let is_leave_or_weekend_day = is_leave_day || is_weekend
+
+              let is_presentable_day = is_leave_or_weekend_day === false
+              let is_present = (!is_presentable_day || shiftInfo?.[0]?.is_present) ? true : false
+              let is_preset_all_shifts = !is_presentable_day || shiftInfo.every(shift => shift.is_present)
+              let let_in_minute = shiftInfo[0]?.attendance?.late_in_minute || 0
+
+              let data = {
+                date,
+                month: moment(date).format('MMMM'),
+                month_year: moment(date).format('MMM YY'),
+                dakhela,
+                class_short,
+                class_name,
+                shiftInfo, 
+                is_weekend,
+                is_leave_day,
+                is_present,
+                is_preset_all_shifts,
+                in_out_count: day_leaves.length,
+                day_leaves,
+                let_in_minute, 
+                is_presentable_day,
+                student_name: attendance?.student_name || null,
+                class_short: attendance?.class_short || null,
+              } 
+
+              data['_leaves'] = _leaves 
+
+              return data
+
+            })  
+            
+           
+            date_wise_report.sort((a, b) => (a.serial) - b.serial); 
+            DATA.push(date_wise_report)  
             
           }) 
 

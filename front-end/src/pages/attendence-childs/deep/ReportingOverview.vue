@@ -21,7 +21,7 @@ const liveAttendenceList = inject("liveAttendenceList");
 const pagination_perpage = inject("pagination_perpage");
 const sort_direction = inject("sort_direction");
 const sortby_column = inject("sortby_column");
-const getAttendeceListFullHistory = inject("getAttendeceListFullHistory");
+const getAttendeceReports = inject("getAttendeceReports");
 const all_students_non_copied = inject("all_students_non_copied");
 
 const emit = defineEmits(['onBtnSubmit', 'onBtnClear']);
@@ -62,24 +62,18 @@ let targetData = ref(null)
 async function onChangeMonthRange([start_date, end_date]){
   let leaves_and_vacations = await callbacks.getLeavesAndVacations({start_date, end_date})  
 
-  for(const eachClass of classes.value){
-    let index = classes.value.indexOf(eachClass); 
-
-    let class_short = eachClass.class_short
-
-    let payloadData = {
-      weekends,
-      class_short,
-      leaveData: leaves_and_vacations,
-      classwise_students: all_students_non_copied.value.map(s => ({dakhela: s.dakhela, class_short: s.class_short})),
-      total_days: countDays(start_date, end_date), // This will helpe to generate attendence report by percentage
-    }
-    let data = await getAttendeceListFullHistory(payloadData, {start_date, end_date, action: 'classwise_data' })
-    classes.value[index]["data"] = data?.attendance
-    if(showDetails.value && targetData.value?.class_short === eachClass.class_short){
-      targetData.value = classes.value[index]
-    }
+  let payloadData = {
+    weekends, 
+    leaveData: leaves_and_vacations,
+    all__students: all_students_non_copied.value.map(s => ({dakhela: s.dakhela, class_short: s.class_short})),
+    total_days: countDays(start_date, end_date), // This will helpe to generate attendence report by percentage
   }
+  let data = await getAttendeceReports(payloadData, {start_date, end_date})
+  console.log('data', data);
+  // classes.value[index]["data"] = data?.attendance
+  // if(showDetails.value && targetData.value?.class_short === eachClass.class_short){
+  //   targetData.value = classes.value[index]
+  // } 
 }  
 
 

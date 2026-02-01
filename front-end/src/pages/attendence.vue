@@ -120,27 +120,25 @@ function getAttendeceList({ page_no = null, reset = false, other_params = {} } =
   } catch (error) {}
 }
 
-provide('getAttendeceListFullHistory', getAttendeceListFullHistory)
+provide('getAttendeceReports', getAttendeceReports)
 
-async function getAttendeceListFullHistory(payload={}, { start_date, end_date, action = null }={}) {
+async function getAttendeceReports(payload={}, { start_date, end_date, action = null }={}) {
   try {
     let queryParams = {
-      "page_no": 1,
-      "totalPages": 1,
-      "total": 0,
-      "limit": -1, // -1 == 'all'
       start_date,
       end_date,
       action,
     }
 
-    let response = await http.post("/attendence-list", payload, { params: queryParams })
+    let response = await http.post("/attendence-reports", payload, { params: queryParams })
       if (response.status == 200) {
         let data = response.data?.data;
         return data
       } 
       
-  } catch (error) {}
+  } catch (getAttendeceReports__error) {
+    console.warn({getAttendeceReports__error});
+  }
 }
 // ============= End For AttendencesAll.vue ============= //
 // ====================================================== // 

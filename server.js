@@ -385,6 +385,9 @@ app.get(`/api/_ac`, async (req, res) => {
   app.post(prefix + '/attendence-list', (req, res) => {
     Attendence.list(req, res)
   }); 
+  app.post(prefix + '/attendence-reports', (req, res) => {
+    Attendence.getAttendanceReports(req, res)
+  }); 
   app.post(prefix + '/attendence-add', (req, res) => {
     Attendence.addNew(req, res)
   }); 

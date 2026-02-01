@@ -57,6 +57,7 @@
             </div>
             <div class="pickerFooter">
                 <button type="button" class="pickerClose" @click="closePicker">Close</button>
+                <button type="button" class="pickerSubmit" @click="fireChange">Submit</button>
             </div>
         </div>
     </div>
@@ -126,10 +127,6 @@ export default {
         defaultStartValue: {
             type: String,
             default: null,
-        },
-        endName: {
-            type: String,
-            default: "end",
         },
         defaultEndValue: {
             type: String,
@@ -312,12 +309,6 @@ export default {
 
             if (eventType === "click") {
                 this.setDates();
-                if (!selectingStart) {
-                    setTimeout(() => {
-                        this.selectingStart = false;
-                        this.selectingEnd = false;
-                    }, 200);
-                }
             }
         },
         onSelectYear(direction) {
@@ -402,6 +393,10 @@ export default {
                 this.endValue = end; 
             }
         },
+        fireChange() {
+            this.onChange([this.startValue, this.endValue]);
+            this.closePicker();
+        },
     },
     mounted() {
         document.addEventListener("mousedown", this.handleDocumentClick);
@@ -415,7 +410,7 @@ export default {
         startValue(newVal) {
         },
         endValue(newVal) {
-            this.onChange([this.startValue, this.endValue]);
+            // this.onChange([this.startValue, this.endValue]);
         },
     },
 };
@@ -590,6 +585,27 @@ export default {
 }
 
 .pickerClose:active {
+  background-color: #f3f4f6;
+}
+
+.pickerSubmit {
+  margin-left: 5px;
+  border: 1px solid #d1d5db;
+  background: var(--grad3);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.pickerSubmit:hover {
+  background-color: #f9fafb;
+  border-color: #cbd5f5;
+}
+
+.pickerSubmit:active {
   background-color: #f3f4f6;
 }
 </style>
