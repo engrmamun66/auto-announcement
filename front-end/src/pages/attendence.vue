@@ -277,7 +277,7 @@ onMounted(()=>{
       </div> 
       <div v-else-if="tab==4">
 
-        <div class="d-flex justify-content-end column-gap-3">
+        <!-- <div class="d-flex justify-content-end column-gap-3">
           <ul class="nav nav-tabs d2 mt-0 mb-3 bottom-borderless">
             <li class="nav-item">
               <a @click.stop="reportingViewTab = 1" class="nav-link cp text-black" :class="{'active': reportingViewTab==1}" >Overview</a>
@@ -286,7 +286,7 @@ onMounted(()=>{
               <a @click.stop="reportingViewTab = 2" class="nav-link cp text-black" :class="{'active': reportingViewTab==2}" >Class Wise</a>
             </li>       
           </ul>
-        </div>
+        </div> -->
 
       </div> 
 

@@ -8,7 +8,6 @@ import BaseSelectMultiple from './../../../components/BaseSelectMultiple.vue'
 import EmDateTimePicker from './../../../components/EmDateTimePicker.vue'
 import Btn from './../../../components/Btn.vue'
 import MonthPicker from './../../../components/MonthPicker.vue'
-import AttendanceDetailsPopup from './../../../components/AttendanceDetailsPopup.vue'
 
 const CONFIG = inject("CONFIG");
 const classes = inject("classes");
@@ -69,6 +68,14 @@ let reports = ref({
   classWise: {},
   classRanking: [],
 })
+let activeReportTab = ref('summary')
+const reportTabs = [
+  { key: 'summary', label: 'Summary' },
+  { key: 'monthly', label: 'Monthly' },
+  { key: 'ranking', label: 'Ranking' },
+  { key: 'cards', label: 'Cards' },
+]
+let selectedSummaryClass = ref(null)
 
 const monthKeys = computed(() => {
   let classWise = reports.value?.classWise || {}
@@ -79,6 +86,15 @@ const monthKeys = computed(() => {
 
 function getClassReport(class_short, monthKey='all'){
   return reports.value?.classWise?.[class_short]?.[monthKey] || {}
+}
+
+function openClassSummary(cls){
+  selectedSummaryClass.value = cls
+  activeReportTab.value = 'summary'
+}
+
+function closeClassSummary(){
+  selectedSummaryClass.value = null
 }
 
 
@@ -121,120 +137,156 @@ onMounted(()=>{
       :dayOfMonth="1"
       :inactiveFutureMonth="true"
       ></MonthPicker>
-      <Btn @click.stop="showDetails = false" class="red px-5" :disabled="!showDetails" >Back</Btn>
+
+      <div class="report-tabs mb-3">
+        <button
+          v-for="tab in reportTabs"
+          :key="tab.key"
+          class="report-tab"
+          :class="{ active: activeReportTab === tab.key }"
+          @click="activeReportTab = tab.key"
+        >
+          {{ tab.label }}
+        </button>
+
+
+      </div>
     </div>   
-     
-    <template v-if="!showDetails">
-      <div v-if="Object.keys(reports?.classWise || {}).length" class="mb-3">
-        <myTable topMarginClass="mt-2">
-          <template #thead>
-            <thead>
-              <tr>
-                <th>Class</th>
-                <th>Students</th>
-                <th>Presentable Days</th>
-                <th>Present</th>
-                <th>Absent</th>
-                <th>Present(%)</th>
-              </tr>
-            </thead>
-          </template>
-          <template #rows>
-            <tr v-for="cls in classes" :key="'sum-' + cls.class_short">
-              <td>{{ cls.class_name }}</td>
-              <td>{{ getClassReport(cls.class_short)?.total_students || 0 }}</td>
-              <td>{{ getClassReport(cls.class_short)?.total_presentable_days || 0 }}</td>
-              <td>{{ getClassReport(cls.class_short)?.total_present || 0 }}</td>
-              <td>{{ getClassReport(cls.class_short)?.total_absent || 0 }}</td>
-              <td>{{ getClassReport(cls.class_short)?.present_percent || 0 }}%</td>
-            </tr>
-          </template>
-        </myTable>
-      </div>
+      
 
-      <div v-if="monthKeys.length" class="mb-3">
-        <myTable topMarginClass="mt-2">
-          <template #thead>
-            <thead>
-              <tr>
-                <th>Class</th>
-                <th v-for="m in monthKeys" :key="'h-' + m">{{ moment(m).format('MMM YYYY') }}</th>
-                <th>All</th>
-              </tr>
-            </thead>
-          </template>
-          <template #rows>
-            <tr v-for="cls in classes" :key="'mon-' + cls.class_short">
-              <td>{{ cls.class_name }}</td>
-              <td v-for="m in monthKeys" :key="'c-' + cls.class_short + '-' + m">
-                {{ getClassReport(cls.class_short, m)?.present_percent || 0 }}%
-              </td>
-              <td>{{ getClassReport(cls.class_short, 'all')?.present_percent || 0 }}%</td>
+    <div v-if="activeReportTab === 'summary' && Object.keys(reports?.classWise || {}).length" class="mb-3">
+      <myTable topMarginClass="mt-2">
+        <template #thead>
+          <thead>
+            <tr>
+              <th>Class</th>
+              <th>Students</th>
+              <th>Presentable Days</th>
+              <th>Present</th>
+              <th>Absent</th>
+              <th>Present(%)</th>
+              <th>Action</th>
             </tr>
-          </template>
-        </myTable>
-      </div>
+          </thead>
+        </template>
+        <template #rows>
+          <tr v-for="cls in classes" :key="'sum-' + cls.class_short">
+            <td>{{ cls.class_name }}</td>
+            <td>{{ getClassReport(cls.class_short)?.total_students || 0 }}</td>
+            <td>{{ getClassReport(cls.class_short)?.total_presentable_days || 0 }}</td>
+            <td>{{ getClassReport(cls.class_short)?.total_present || 0 }}</td>
+            <td>{{ getClassReport(cls.class_short)?.total_absent || 0 }}</td>
+            <td>{{ getClassReport(cls.class_short)?.present_percent || 0 }}%</td>
+            <td>
+              <button class="btn btn-sm btn-light" @click="openClassSummary(cls)">View</button>
+            </td>
+          </tr>
+        </template>
+      </myTable>
+    </div>
 
-      <div v-if="reports?.classRanking?.length" class="mb-3">
-        <myTable topMarginClass="mt-2">
-          <template #thead>
-            <thead>
-              <tr>
-                <th>Ranking</th>
-                <th>Class</th>
-                <th>Present(%)</th>
-              </tr>
-            </thead>
-          </template>
-          <template #rows>
-            <tr v-for="(clsShort, idx) in reports.classRanking" :key="'rank-' + clsShort">
-              <td>{{ idx + 1 }}</td>
-              <td>{{ (classes.find(c => c.class_short === clsShort) || {}).class_name || clsShort }}</td>
-              <td>{{ getClassReport(clsShort, 'all')?.present_percent || 0 }}%</td>
+    <div v-if="activeReportTab === 'summary' && selectedSummaryClass" class="mb-3">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h5 class="mb-0">Single Class Summary</h5>
+        <button class="btn btn-sm btn-outline-secondary" @click="closeClassSummary">Close</button>
+      </div>
+      <myTable topMarginClass="mt-2">
+        <template #thead>
+          <thead>
+            <tr>
+              <th>Class</th>
+              <th>Students</th>
+              <th>Presentable Days</th>
+              <th>Present</th>
+              <th>Absent</th>
+              <th>Present(%)</th>
             </tr>
-          </template>
-        </myTable>
-      </div>
+          </thead>
+        </template>
+        <template #rows>
+          <tr>
+            <td>{{ selectedSummaryClass.class_name }}</td>
+            <td>{{ getClassReport(selectedSummaryClass.class_short)?.total_students || 0 }}</td>
+            <td>{{ getClassReport(selectedSummaryClass.class_short)?.total_presentable_days || 0 }}</td>
+            <td>{{ getClassReport(selectedSummaryClass.class_short)?.total_present || 0 }}</td>
+            <td>{{ getClassReport(selectedSummaryClass.class_short)?.total_absent || 0 }}</td>
+            <td>{{ getClassReport(selectedSummaryClass.class_short)?.present_percent || 0 }}%</td>
+          </tr>
+        </template>
+      </myTable>
+    </div>
 
-      <div class="row mt-3">
-        <template v-for="cls in classes" :key="cls.class_short">
-          <div class="col-md-4 mb-3">
-            <div class="card attendance-card">
-  
-              <div class="overflow-div">
-                <button @click.stop="onClickShowDetails(cls)" class="btn btn-light bg-white">Show Details</button>
-              </div>
-  
-  
-              <div class="card-body text-center">
-                <h4 class="card-title">{{ cls.class_name }}</h4>
-                <div class="w-100 d-flex justify-content-around">
-                  <div class="side-of-card">
-                    <div class="sub-title">Students</div>
-                    <div class="info">{{ getClassReport(cls.class_short)?.total_students || 0 }}</div> 
-                  </div>
-                  <div class="side-of-card">
-                    <div class="sub-title">Present</div>
-                    <div class="info">{{ getClassReport(cls.class_short)?.total_present || 0 }}</div> 
-                  </div>
+    <div v-if="activeReportTab === 'monthly' && monthKeys.length" class="mb-3">
+      <myTable topMarginClass="mt-2">
+        <template #thead>
+          <thead>
+            <tr>
+              <th>Class</th>
+              <th v-for="m in monthKeys" :key="'h-' + m">{{ moment(m).format('MMM YYYY') }}</th>
+              <th>All</th>
+            </tr>
+          </thead>
+        </template>
+        <template #rows>
+          <tr v-for="cls in classes" :key="'mon-' + cls.class_short">
+            <td>{{ cls.class_name }}</td>
+            <td v-for="m in monthKeys" :key="'c-' + cls.class_short + '-' + m">
+              {{ getClassReport(cls.class_short, m)?.present_percent || 0 }}%
+            </td>
+            <td>{{ getClassReport(cls.class_short, 'all')?.present_percent || 0 }}%</td>
+          </tr>
+        </template>
+      </myTable>
+    </div>
+
+    <div v-if="activeReportTab === 'ranking' && reports?.classRanking?.length" class="mb-3">
+      <myTable topMarginClass="mt-2">
+        <template #thead>
+          <thead>
+            <tr>
+              <th>Ranking</th>
+              <th>Class</th>
+              <th>Present(%)</th>
+            </tr>
+          </thead>
+        </template>
+        <template #rows>
+          <tr v-for="(clsShort, idx) in reports.classRanking" :key="'rank-' + clsShort">
+            <td>{{ idx + 1 }}</td>
+            <td>{{ (classes.find(c => c.class_short === clsShort) || {}).class_name || clsShort }}</td>
+            <td>{{ getClassReport(clsShort, 'all')?.present_percent || 0 }}%</td>
+          </tr>
+        </template>
+      </myTable>
+    </div>
+
+    <div v-if="activeReportTab === 'cards'" class="row mt-3">
+      <template v-for="cls in classes" :key="cls.class_short">
+        <div class="col-md-4 mb-3">
+          <div class="card attendance-card">
+
+            <div class="overflow-div">
+              <button @click.stop="onClickShowDetails(cls)" class="btn btn-light bg-white">Show Details</button>
+            </div>
+
+
+            <div class="card-body text-center">
+              <h4 class="card-title">{{ cls.class_name }}</h4>
+              <div class="w-100 d-flex justify-content-around">
+                <div class="side-of-card">
+                  <div class="sub-title">Students</div>
+                  <div class="info">{{ getClassReport(cls.class_short)?.total_students || 0 }}</div> 
+                </div>
+                <div class="side-of-card">
+                  <div class="sub-title">Present</div>
+                  <div class="info">{{ getClassReport(cls.class_short)?.total_present || 0 }}</div> 
                 </div>
               </div>
             </div>
           </div>
-        </template> 
-      </div> 
-
-    </template>  
-     
-    <template v-else> 
-  
-      <AttendanceDetailsPopup v-if="showDetails" 
-      :cls="targetData" 
-      :startDate="defaultStart"
-      :endDate="defaultEnd"
-      ></AttendanceDetailsPopup>
-
-    </template>  
+        </div>
+      </template> 
+    </div>   
      
 
   </div>
@@ -248,6 +300,29 @@ onMounted(()=>{
   background-color: #ffffffbe; 
   position: relative;
   overflow: hidden;
+}
+.report-tabs{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.report-tab{
+  border: 1px solid #d9d9d9;
+  background-color: #ffffff;
+  color: #333333;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.report-tab:hover{
+  background-color: #f1f1f1;
+}
+.report-tab.active{
+  background-color: var(--primaryColor);
+  color: #ffffff;
+  border-color: var(--primaryColor);
 }
 .card .info{
     color: #5b5b5b;

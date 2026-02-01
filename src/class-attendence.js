@@ -456,8 +456,6 @@ class Attendance {
 
           const className = classConfigMap[cls]?.class_name || classWise[cls][Object.keys(classWise[cls])[0]]?.class_name || '';
           const allReport = initReport(cls, className, 0);
-          let monthCount = 0;
-          let percentSum = 0;
           Object.keys(classWise[cls]).forEach((monthKey) => {
             const item = classWise[cls][monthKey];
             allReport.total_days += item.total_days;
@@ -465,10 +463,12 @@ class Attendance {
             allReport.total_present += item.total_present;
             allReport.total_in = allReport.total_present;
             allReport.total_absent += item.total_absent;
-            percentSum += item.present_percent;
-            monthCount += 1;
           });
-          allReport.present_percent = monthCount > 0 ? Number((percentSum / monthCount).toFixed(2)) : 0;
+          const allDenom = allReport.total_presentable_days;
+          allReport.total_absent = Math.max(0, allDenom - allReport.total_present);
+          allReport.present_percent = allDenom > 0
+            ? Number(((allReport.total_present / allDenom) * 100).toFixed(2))
+            : 0;
           classWise[cls]['all'] = allReport;
         });
 
