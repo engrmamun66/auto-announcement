@@ -235,7 +235,7 @@ class Attendance {
         if(action === 'classwise_data'){
           let { start_date, end_date } = req.query 
           let date_duration = utils.createDateRange(start_date, end_date)
-          let { leaveData, weekends, classwise_students, class_short: class___short } = req.body 
+          let { leaveData, weekends, classwise_students, class_short: class___short, total_days } = req.body 
           let weekend_leaves = date_duration.filter(date => weekends.includes(moment(date).format('dddd')))
           let leaveData_excluded_weekends = leaveData.filter(leave => !weekend_leaves.includes(leave.date))
           let leaveData_group_by_date = utils.listGroupBy(leaveData_excluded_weekends, 'date')
@@ -319,10 +319,13 @@ class Attendance {
             
           }) 
 
-          // fs.writeFileSync('./_samples/DATA.json', JSON.stringify(DATA, null, 2));
+          fs.writeFileSync('./_samples/DATA.json', JSON.stringify(DATA, null, 2));
 
           return { 
             attendance: DATA, 
+            report: {
+              
+            }
           }
         }
       }
