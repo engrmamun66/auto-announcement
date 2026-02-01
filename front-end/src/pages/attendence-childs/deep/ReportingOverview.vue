@@ -14,12 +14,6 @@ const classes = inject("classes");
 const all_students = inject("all_students");
 const helper = inject("helper");
 const callbacks = inject("callbacks");
-const attendenceList = inject("attendenceList");
-const attendenceParams = inject("attendenceParams");
-const liveAttendenceList = inject("liveAttendenceList");
-const pagination_perpage = inject("pagination_perpage");
-const sort_direction = inject("sort_direction");
-const sortby_column = inject("sortby_column");
 const getAttendeceReports = inject("getAttendeceReports");
 const all_students_non_copied = inject("all_students_non_copied");
 
