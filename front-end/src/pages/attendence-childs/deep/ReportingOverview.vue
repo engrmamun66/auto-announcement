@@ -65,24 +65,20 @@ function countDays(start_date, end_date) {
 
 let showDetails = ref(false)
 let targetData = ref(null)
-let allClassSummary = ref({
-  /**
-   * class_short: {
-      "class_short": "four",
-      "class_name": "Four/Saffe Rabe",
-      "total_students": 33,
-      "total_days": 1,
-      "total_present": 0,
-      "total_in": 0,
-      "total_absent": 33,
-      "present_percent": 0
-  }
-   */
+let reports = ref({
+  classWise: {},
+  classRanking: [],
 })
 
-function getClassSummary(class_short){
-  if(!allClassSummary.value) return {}
-  return allClassSummary.value[class_short] || {}
+const monthKeys = computed(() => {
+  let classWise = reports.value?.classWise || {}
+  let firstClass = Object.keys(classWise || {})[0]
+  if(!firstClass) return []
+  return Object.keys(classWise[firstClass] || {}).filter(k => k !== 'all').sort()
+})
+
+function getClassReport(class_short, monthKey='all'){
+  return reports.value?.classWise?.[class_short]?.[monthKey] || {}
 }
 
 
@@ -96,8 +92,8 @@ async function onChangeMonthRange([start_date, end_date]){
     all__students: all_students_non_copied.value.map(s => ({dakhela: s.dakhela, class_short: s.class_short})),
     total_days: countDays(start_date, end_date), // This will helpe to generate attendence report by percentage
   }
-  let classSummary = await getAttendeceReports(payloadData, {start_date, end_date})
-  allClassSummary.value = classSummary 
+  let data = await getAttendeceReports(payloadData, {start_date, end_date})
+  reports.value = data || { classWise: {}, classRanking: [] }
 }  
 
 
@@ -129,7 +125,7 @@ onMounted(()=>{
     </div>   
      
     <template v-if="!showDetails">
-      <div v-if="Object.keys(allClassSummary || {}).length" class="mb-3">
+      <div v-if="Object.keys(reports?.classWise || {}).length" class="mb-3">
         <myTable topMarginClass="mt-2">
           <template #thead>
             <thead>
@@ -146,11 +142,55 @@ onMounted(()=>{
           <template #rows>
             <tr v-for="cls in classes" :key="'sum-' + cls.class_short">
               <td>{{ cls.class_name }}</td>
-              <td>{{ getClassSummary(cls.class_short)?.total_students || 0 }}</td>
-              <td>{{ getClassSummary(cls.class_short)?.total_presentable_days || 0 }}</td>
-              <td>{{ getClassSummary(cls.class_short)?.total_present || 0 }}</td>
-              <td>{{ getClassSummary(cls.class_short)?.total_absent || 0 }}</td>
-              <td>{{ getClassSummary(cls.class_short)?.present_percent || 0 }}%</td>
+              <td>{{ getClassReport(cls.class_short)?.total_students || 0 }}</td>
+              <td>{{ getClassReport(cls.class_short)?.total_presentable_days || 0 }}</td>
+              <td>{{ getClassReport(cls.class_short)?.total_present || 0 }}</td>
+              <td>{{ getClassReport(cls.class_short)?.total_absent || 0 }}</td>
+              <td>{{ getClassReport(cls.class_short)?.present_percent || 0 }}%</td>
+            </tr>
+          </template>
+        </myTable>
+      </div>
+
+      <div v-if="monthKeys.length" class="mb-3">
+        <myTable topMarginClass="mt-2">
+          <template #thead>
+            <thead>
+              <tr>
+                <th>Class</th>
+                <th v-for="m in monthKeys" :key="'h-' + m">{{ moment(m).format('MMM YYYY') }}</th>
+                <th>All</th>
+              </tr>
+            </thead>
+          </template>
+          <template #rows>
+            <tr v-for="cls in classes" :key="'mon-' + cls.class_short">
+              <td>{{ cls.class_name }}</td>
+              <td v-for="m in monthKeys" :key="'c-' + cls.class_short + '-' + m">
+                {{ getClassReport(cls.class_short, m)?.present_percent || 0 }}%
+              </td>
+              <td>{{ getClassReport(cls.class_short, 'all')?.present_percent || 0 }}%</td>
+            </tr>
+          </template>
+        </myTable>
+      </div>
+
+      <div v-if="reports?.classRanking?.length" class="mb-3">
+        <myTable topMarginClass="mt-2">
+          <template #thead>
+            <thead>
+              <tr>
+                <th>Ranking</th>
+                <th>Class</th>
+                <th>Present(%)</th>
+              </tr>
+            </thead>
+          </template>
+          <template #rows>
+            <tr v-for="(clsShort, idx) in reports.classRanking" :key="'rank-' + clsShort">
+              <td>{{ idx + 1 }}</td>
+              <td>{{ (classes.find(c => c.class_short === clsShort) || {}).class_name || clsShort }}</td>
+              <td>{{ getClassReport(clsShort, 'all')?.present_percent || 0 }}%</td>
             </tr>
           </template>
         </myTable>
@@ -171,11 +211,11 @@ onMounted(()=>{
                 <div class="w-100 d-flex justify-content-around">
                   <div class="side-of-card">
                     <div class="sub-title">Students</div>
-                    <div class="info">{{ getClassSummary(cls.class_short)?.total_students || 0 }}</div> 
+                    <div class="info">{{ getClassReport(cls.class_short)?.total_students || 0 }}</div> 
                   </div>
                   <div class="side-of-card">
                     <div class="sub-title">Present</div>
-                    <div class="info">{{ getClassSummary(cls.class_short)?.total_present || 0 }}</div> 
+                    <div class="info">{{ getClassReport(cls.class_short)?.total_present || 0 }}</div> 
                   </div>
                 </div>
               </div>

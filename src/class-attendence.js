@@ -327,6 +327,25 @@ class Attendance {
           date_duration = date_duration.slice(0, total_days);
         }
 
+        const dateMeta = date_duration.map((date) => ({
+          date,
+          monthKey: moment(date).startOf('month').format('YYYY-MM-01'),
+        }));
+
+        const monthMeta = {};
+        dateMeta.forEach(({ date, monthKey }) => {
+          if (!monthMeta[monthKey]) {
+            monthMeta[monthKey] = {
+              month: moment(date).format('MMMM'),
+              month_year: moment(date).format('MMM YY'),
+              year: moment(date).format('YYYY'),
+              month_index: Number(moment(date).format('MM')),
+              total_days: 0,
+            };
+          }
+          monthMeta[monthKey].total_days += 1;
+        });
+
         const weekend_leaves = date_duration.filter(date => weekends.includes(moment(date).format('dddd')));
         const leaveData_excluded_weekends = leaveData.filter(leave => !weekend_leaves.includes(leave.date));
         const leaveData_group_by_date = utils.listGroupBy(leaveData_excluded_weekends, 'date');
@@ -350,11 +369,18 @@ class Attendance {
           }
         });
 
-        const initReport = (class_short, class_name) => ({
+        const classStudentCounts = {};
+        all__students.forEach((student) => {
+          const cls = student?.class_short;
+          if (!cls) return;
+          classStudentCounts[cls] = (classStudentCounts[cls] || 0) + 1;
+        });
+
+        const initReport = (class_short, class_name, total_days_for_range) => ({
           class_short,
           class_name: class_name || '',
-          total_students: 0,
-          total_days: date_duration.length,
+          total_students: classStudentCounts[class_short] || 0,
+          total_days: total_days_for_range,
           total_presentable_days: 0,
           total_present: 0,
           total_in: 0,
@@ -362,26 +388,37 @@ class Attendance {
           present_percent: 0,
         });
 
-        const report = {};
+        const classWise = {};
         (global.config?.classes || []).forEach((cls) => {
-          report[cls.class_short] = initReport(cls.class_short, cls.class_name);
+          classWise[cls.class_short] = {};
+          Object.keys(monthMeta).forEach((monthKey) => {
+            classWise[cls.class_short][monthKey] = initReport(
+              cls.class_short,
+              cls.class_name,
+              monthMeta[monthKey].total_days
+            );
+          });
         });
 
         all__students.forEach((student) => {
           const { dakhela, class_short } = student || {};
           if (!class_short) return;
 
-          if (!report[class_short]) {
+          if (!classWise[class_short]) {
             const cls = classConfigMap[class_short] || {};
-            report[class_short] = initReport(class_short, cls.class_name || '');
+            classWise[class_short] = {};
+            Object.keys(monthMeta).forEach((monthKey) => {
+              classWise[class_short][monthKey] = initReport(
+                class_short,
+                cls.class_name || '',
+                monthMeta[monthKey].total_days
+              );
+            });
           }
-
-          const reportItem = report[class_short];
-          reportItem.total_students += 1;
 
           const firstShiftDuration = classFirstShift[class_short] || null;
 
-          date_duration.forEach((date) => {
+          dateMeta.forEach(({ date, monthKey }) => {
             const is_weekend = weekend_leaves.includes(date);
             const _leaves = leaveData_group_by_date[date] || [];
             const day_leaves = _leaves.filter(leave => (
@@ -391,9 +428,7 @@ class Attendance {
             const is_presentable_day = !(is_weekend || is_leave_day);
 
             let is_present = false;
-            if (!is_presentable_day) {
-              is_present = true;
-            } else {
+            if (is_presentable_day) {
               const dayAttendance = attendanceByStudentDate?.[dakhela]?.[date] || [];
               if (firstShiftDuration) {
                 is_present = dayAttendance.some(att => att.shift_duration === firstShiftDuration);
@@ -402,6 +437,7 @@ class Attendance {
               }
             }
 
+            const reportItem = classWise[class_short][monthKey];
             if (is_presentable_day) {
               reportItem.total_presentable_days += 1;
               if (is_present) reportItem.total_present += 1;
@@ -409,14 +445,40 @@ class Attendance {
           });
         });
 
-        Object.values(report).forEach((item) => {
-          const denom = item.total_presentable_days;
-          item.total_in = item.total_present;
-          item.total_absent = Math.max(0, denom - item.total_present);
-          item.present_percent = denom > 0 ? Number(((item.total_present / denom) * 100).toFixed(2)) : 0;
+        Object.keys(classWise).forEach((cls) => {
+          Object.keys(classWise[cls]).forEach((monthKey) => {
+            const item = classWise[cls][monthKey];
+            const denom = item.total_presentable_days;
+            item.total_in = item.total_present;
+            item.total_absent = Math.max(0, denom - item.total_present);
+            item.present_percent = denom > 0 ? Number(((item.total_present / denom) * 100).toFixed(2)) : 0;
+          });
+
+          const className = classConfigMap[cls]?.class_name || classWise[cls][Object.keys(classWise[cls])[0]]?.class_name || '';
+          const allReport = initReport(cls, className, 0);
+          let monthCount = 0;
+          let percentSum = 0;
+          Object.keys(classWise[cls]).forEach((monthKey) => {
+            const item = classWise[cls][monthKey];
+            allReport.total_days += item.total_days;
+            allReport.total_presentable_days += item.total_presentable_days;
+            allReport.total_present += item.total_present;
+            allReport.total_in = allReport.total_present;
+            allReport.total_absent += item.total_absent;
+            percentSum += item.present_percent;
+            monthCount += 1;
+          });
+          allReport.present_percent = monthCount > 0 ? Number((percentSum / monthCount).toFixed(2)) : 0;
+          classWise[cls]['all'] = allReport;
         });
 
-        res.send({ data: report });
+        const classRanking = Object.keys(classWise).sort((a, b) => {
+          const aVal = classWise[a]?.all?.present_percent || 0;
+          const bVal = classWise[b]?.all?.present_percent || 0;
+          return bVal - aVal;
+        });
+
+        res.send({ data: { classWise, classRanking } });
       });
     }
 
