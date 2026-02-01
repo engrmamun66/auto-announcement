@@ -33,10 +33,18 @@ console.log('=====:::ReportingOverview.vue')
 let defaultStart = ref(moment().startOf('month').format('Y-MM-DD'))
 let defaultEnd = ref(moment().add(0, 'month').endOf('month').format('Y-MM-DD'))
 
+function checkEndDate(){
+  let end = moment(defaultEnd.value, 'YYYY-MM-DD');
+  if (end.isSame(moment(), 'month')) {
+    defaultEnd.value = moment().format('YYYY-MM-DD'); 
+  }
+}
+checkEndDate()
  
 async function handleDateChange(dates) {
   defaultStart.value = dates[0]
   defaultEnd.value = dates[1]
+  checkEndDate()
   await onChangeMonthRange(dates) 
 }
 
@@ -57,6 +65,26 @@ function countDays(start_date, end_date) {
 
 let showDetails = ref(false)
 let targetData = ref(null)
+let allClassSummary = ref({
+  /**
+   * class_short: {
+      "class_short": "four",
+      "class_name": "Four/Saffe Rabe",
+      "total_students": 33,
+      "total_days": 1,
+      "total_present": 0,
+      "total_in": 0,
+      "total_absent": 33,
+      "present_percent": 0
+  }
+   */
+})
+
+function getClassSummary(class_short){
+  if(!allClassSummary.value) return {}
+  return allClassSummary.value[class_short] || {}
+}
+
 
 // For multiple select of students
 async function onChangeMonthRange([start_date, end_date]){
@@ -68,12 +96,8 @@ async function onChangeMonthRange([start_date, end_date]){
     all__students: all_students_non_copied.value.map(s => ({dakhela: s.dakhela, class_short: s.class_short})),
     total_days: countDays(start_date, end_date), // This will helpe to generate attendence report by percentage
   }
-  let data = await getAttendeceReports(payloadData, {start_date, end_date})
-  console.log('data', data);
-  // classes.value[index]["data"] = data?.attendance
-  // if(showDetails.value && targetData.value?.class_short === eachClass.class_short){
-  //   targetData.value = classes.value[index]
-  // } 
+  let classSummary = await getAttendeceReports(payloadData, {start_date, end_date})
+  allClassSummary.value = classSummary 
 }  
 
 
@@ -105,6 +129,33 @@ onMounted(()=>{
     </div>   
      
     <template v-if="!showDetails">
+      <div v-if="Object.keys(allClassSummary || {}).length" class="mb-3">
+        <myTable topMarginClass="mt-2">
+          <template #thead>
+            <thead>
+              <tr>
+                <th>Class</th>
+                <th>Students</th>
+                <th>Presentable Days</th>
+                <th>Present</th>
+                <th>Absent</th>
+                <th>Present(%)</th>
+              </tr>
+            </thead>
+          </template>
+          <template #rows>
+            <tr v-for="cls in classes" :key="'sum-' + cls.class_short">
+              <td>{{ cls.class_name }}</td>
+              <td>{{ getClassSummary(cls.class_short)?.total_students || 0 }}</td>
+              <td>{{ getClassSummary(cls.class_short)?.total_presentable_days || 0 }}</td>
+              <td>{{ getClassSummary(cls.class_short)?.total_present || 0 }}</td>
+              <td>{{ getClassSummary(cls.class_short)?.total_absent || 0 }}</td>
+              <td>{{ getClassSummary(cls.class_short)?.present_percent || 0 }}%</td>
+            </tr>
+          </template>
+        </myTable>
+      </div>
+
       <div class="row mt-3">
         <template v-for="cls in classes" :key="cls.class_short">
           <div class="col-md-4 mb-3">
@@ -120,11 +171,11 @@ onMounted(()=>{
                 <div class="w-100 d-flex justify-content-around">
                   <div class="side-of-card">
                     <div class="sub-title">Students</div>
-                    <div class="info">{{ all_students_non_copied.filter(s => s.class_short === cls.class_short).length }}</div> 
+                    <div class="info">{{ getClassSummary(cls.class_short)?.total_students || 0 }}</div> 
                   </div>
                   <div class="side-of-card">
-                    <div class="sub-title">Attendance</div>
-                    <div class="info">{{ cls?.data?.total_in || 0 }}</div> 
+                    <div class="sub-title">Present</div>
+                    <div class="info">{{ getClassSummary(cls.class_short)?.total_present || 0 }}</div> 
                   </div>
                 </div>
               </div>

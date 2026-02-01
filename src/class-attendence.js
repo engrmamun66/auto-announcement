@@ -355,6 +355,7 @@ class Attendance {
           class_name: class_name || '',
           total_students: 0,
           total_days: date_duration.length,
+          total_presentable_days: 0,
           total_present: 0,
           total_in: 0,
           total_absent: 0,
@@ -401,12 +402,15 @@ class Attendance {
               }
             }
 
-            if (is_present) reportItem.total_present += 1;
+            if (is_presentable_day) {
+              reportItem.total_presentable_days += 1;
+              if (is_present) reportItem.total_present += 1;
+            }
           });
         });
 
         Object.values(report).forEach((item) => {
-          const denom = item.total_students * item.total_days;
+          const denom = item.total_presentable_days;
           item.total_in = item.total_present;
           item.total_absent = Math.max(0, denom - item.total_present);
           item.present_percent = denom > 0 ? Number(((item.total_present / denom) * 100).toFixed(2)) : 0;
