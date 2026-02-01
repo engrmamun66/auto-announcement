@@ -314,16 +314,16 @@ export default {
   position: relative;
   display: inline-flex;
   align-items: stretch;
-  gap: 14px;
-  padding: 10px;
-  border: 2px solid var(--primaryColor);
-  border-radius: 6px;
-  background-color: #ffffff;
-  transition: box-shadow 0.2s, border-color 0.2s;
+  gap: 12px;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background-color: transparent;
+  transition: box-shadow 0.2s;
 }
 
 .termInput.active {
-  box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.08);
+  box-shadow: none;
 }
 
 .rangePanels {
@@ -332,8 +332,8 @@ export default {
 }
 
 .rangePanel {
-  background-color: #e5e7eb;
-  padding: 10px 12px 12px;
+  background-color: #f1f5f9;
+  padding: 8px 10px;
   border-radius: 4px;
   min-width: 200px;
   display: flex;
@@ -342,7 +342,7 @@ export default {
 }
 
 .rangePanel.isActive {
-  outline: 2px solid var(--primaryColor);
+  outline: none;
 }
 
 .yearRow {
@@ -353,13 +353,13 @@ export default {
 }
 
 .yearBtn {
-  width: 36px;
-  height: 32px;
+  width: 30px;
+  height: 28px;
   border: none;
   border-radius: 3px;
-  background-color: #bdbdbd;
+  background-color: #cbd5e1;
   color: #111827;
-  font-size: 24px;
+  font-size: 18px;
   font-weight: 600;
   line-height: 1;
   cursor: pointer;
@@ -367,7 +367,7 @@ export default {
 }
 
 .yearBtn:hover {
-  background-color: #a8a8a8;
+  background-color: #b9c3d3;
 }
 
 .yearBtn:active {
@@ -377,7 +377,7 @@ export default {
 .yearValue {
   flex: 1 1 auto;
   text-align: center;
-  font-size: 28px;
+  font-size: 18px;
   font-weight: 600;
   color: #111827;
   letter-spacing: 1px;
@@ -399,8 +399,8 @@ export default {
   border: none;
   background: transparent;
   color: #111827;
-  font-size: 22px;
-  font-weight: 500;
+  font-size: 18px;
+  font-weight: 400;
   text-align: center;
   padding: 4px 32px 4px 8px;
   cursor: pointer;
