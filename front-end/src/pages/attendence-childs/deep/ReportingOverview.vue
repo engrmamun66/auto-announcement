@@ -324,6 +324,7 @@ onMounted(()=>{
           :classes="classes"
           :classWise="reports.classWise"
           :monthKeys="monthKeys"
+          @details="openClassSummary"
         />
       </div>
   
@@ -332,6 +333,7 @@ onMounted(()=>{
           :rankings="reports.classRanking"
           :classes="classes"
           :classWise="reports.classWise"
+          @details="openClassSummary"
         />
       </div>
 

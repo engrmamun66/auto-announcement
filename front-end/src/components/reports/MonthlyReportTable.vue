@@ -6,6 +6,7 @@
           <th MonthlyReportTable>Class</th>
           <th v-for="m in monthKeys" :key="'h-' + m">{{ formatMonth(m) }}</th>
           <th MonthlyReportTable>Total</th>
+          <th class="hide_onprint">Action</th>
         </tr>
       </thead>
     </template>
@@ -16,6 +17,9 @@
           {{ getClassReport(cls.class_short, m)?.present_percent || 0 }}%
         </td>
         <td>{{ getClassReport(cls.class_short, 'total')?.present_percent || 0 }}%</td>
+        <td>
+          <button class="btn btn-sm btn-secondary hide_onprint" @click="$emit('details', cls)">Details</button>
+        </td>
       </tr>
     </template>
   </myTable>
@@ -30,6 +34,7 @@ const props = defineProps({
   classWise: { type: Object, default: () => ({}) },
   monthKeys: { type: Array, default: () => [] },
 })
+defineEmits(['details'])
 
 function getClassReport(class_short, monthKey='total'){
   return props.classWise?.[class_short]?.[monthKey] || {}
