@@ -7,17 +7,18 @@
       <div class="d-flex align-items-center gap-2">
         <button
           class="btn btn-sm btn-outline-primary btn-view-toggle"
-          :class="{ active: viewMode === 'details' }"
-          @click="$emit('changeView', 'details')"
-        >
-          Details
-        </button>
-        <button
-          class="btn btn-sm btn-outline-primary btn-view-toggle"
           :class="{ active: viewMode === 'compact' }"
           @click="$emit('changeView', 'compact')"
         >
           Compact
+        </button>
+
+        <button
+          class="btn btn-sm btn-outline-primary btn-view-toggle"
+          :class="{ active: viewMode === 'details' }"
+          @click="$emit('changeView', 'details')"
+        >
+          Details
         </button>
         <button class="btn btn-sm btn-close-light" @click="$emit('close')">Close</button>
       </div>
@@ -35,7 +36,7 @@
             <th>Status</th>
             <th>Late(min)</th>
             <th>Shift</th>
-            <th>Remarks</th>
+            <!-- <th>Remarks</th> -->
           </tr>
         </thead>
       </template>
@@ -47,7 +48,7 @@
           <td>{{ statusByDate?.[row.date] || row.status || '-' }}</td>
           <td>{{ row.late_in_minute ?? 0 }}</td>
           <td>{{ row.shift_duration || '-' }}</td>
-          <td>{{ row.remarks || '-' }}</td>
+          <!-- <td>{{ row.remarks || '-' }}</td> -->
         </tr>
         <tr v-if="!rows.length">
           <td colspan="7" class="text-center text-muted">No attendance data found.</td>
@@ -93,7 +94,7 @@ defineProps({
   rows: { type: Array, default: () => [] },
   grouped: { type: Array, default: () => [] },
   statusByDate: { type: Object, default: () => ({}) },
-  viewMode: { type: String, default: 'details' },
+  viewMode: { type: String, default: 'compact' },
   loading: { type: Boolean, default: false },
 })
 defineEmits(['changeView', 'close'])

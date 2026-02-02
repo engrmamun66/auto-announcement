@@ -73,7 +73,7 @@ let singleClassReport = ref(null)
 let selectedStudent = ref(null)
 let singleStudentAttendance = ref([])
 let loadingStudentAttendance = ref(false)
-let attendanceViewMode = ref('details')
+let attendanceViewMode = ref('compact') // details | compact
 
 const monthKeys = computed(() => {
   let classWise = reports.value?.classWise || {}
@@ -91,7 +91,7 @@ function openClassSummary(cls){
   activeReportTab.value = 'single-class-summary'
   selectedStudent.value = null
   singleStudentAttendance.value = []
-  attendanceViewMode.value = 'details'
+  attendanceViewMode.value = 'compact'
   loadSingleClassSummaryReport(cls.class_short, [defaultStart.value, defaultEnd.value])
 }
 
@@ -101,7 +101,7 @@ function closeClassSummary(){
   activeReportTab.value = 'summary'
   selectedStudent.value = null
   singleStudentAttendance.value = []
-  attendanceViewMode.value = 'details'
+  attendanceViewMode.value = 'compact'
 }
 
 
@@ -137,7 +137,7 @@ async function loadSingleStudentAttendance(std){
   if(!std?.dakhela) return
   selectedStudent.value = std
   loadingStudentAttendance.value = true
-  attendanceViewMode.value = 'details'
+  attendanceViewMode.value = 'compact'
   try {
     let params = {
       start_date: defaultStart.value,
@@ -161,7 +161,7 @@ async function loadSingleStudentAttendance(std){
 function closeSingleStudentAttendance(){
   selectedStudent.value = null
   singleStudentAttendance.value = []
-  attendanceViewMode.value = 'details'
+  attendanceViewMode.value = 'compact'
 }
 
 const groupedAttendance = computed(() => {
@@ -286,7 +286,7 @@ onMounted(()=>{
       />
     </div>
 
-    <div v-if="activeReportTab === 'single-class-summary' && singleClassReport?.students?.length" class="mb-3">
+    <div v-if="activeReportTab === 'single-class-summary' && singleClassReport?.students?.length && !selectedStudent" class="mb-3">
       <StudentWiseReportTable
         :students="singleClassReport.students"
         @details="loadSingleStudentAttendance"
