@@ -421,7 +421,7 @@ export default {
   background-color: #f1f5f9;
   padding: 8px 10px;
   border-radius: 4px;
-  min-width: 200px;
+  min-width: 100px;
   display: flex;
   flex-direction: column;
   gap: 0px;
@@ -445,7 +445,7 @@ export default {
   border-radius: 3px;
   background-color: #cbd5e1;
   color: #111827;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   line-height: 1;
   cursor: pointer;
@@ -469,7 +469,7 @@ export default {
 .yearValue {
   flex: 1 1 auto;
   text-align: center;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   color: #111827;
   letter-spacing: 1px;
@@ -494,7 +494,7 @@ export default {
   font-size: 18px;
   font-weight: 400;
   text-align: center;
-  padding: 4px 32px 4px 8px;
+  padding: 0px 29px 0px 29px;
   cursor: pointer;
   appearance: none;
   -webkit-appearance: none;
