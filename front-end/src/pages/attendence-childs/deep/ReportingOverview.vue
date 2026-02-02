@@ -22,6 +22,7 @@ const http = inject("http");
 const emit = defineEmits(['onBtnSubmit', 'onBtnClear']);
 let log = console.log
 const weekends = CONFIG.value?.settings?.attendance?.weekends || [] // ['Friday']
+const preset_count_by = CONFIG.value?.settings?.attendance?.preset_count_by ?? 'if_prent_in_first_shift'
 
 console.log('=====:::ReportingOverview.vue')
 
@@ -75,6 +76,7 @@ let singleClassReport = ref(null)
 let selectedStudent = ref(null)
 let singleStudentAttendance = ref([])
 let loadingStudentAttendance = ref(false)
+let attendanceViewMode = ref('details')
 
 const monthKeys = computed(() => {
   let classWise = reports.value?.classWise || {}
@@ -90,6 +92,9 @@ function getClassReport(class_short, monthKey='total'){
 function openClassSummary(cls){
   selectedSummaryClass.value = cls
   activeReportTab.value = 'single-class-summary'
+  selectedStudent.value = null
+  singleStudentAttendance.value = []
+  attendanceViewMode.value = 'details'
   loadSingleClassSummaryReport(cls.class_short, [defaultStart.value, defaultEnd.value])
 }
 
@@ -99,6 +104,7 @@ function closeClassSummary(){
   activeReportTab.value = 'summary'
   selectedStudent.value = null
   singleStudentAttendance.value = []
+  attendanceViewMode.value = 'details'
 }
 
 
@@ -134,6 +140,7 @@ async function loadSingleStudentAttendance(std){
   if(!std?.dakhela) return
   selectedStudent.value = std
   loadingStudentAttendance.value = true
+  attendanceViewMode.value = 'details'
   try {
     let params = {
       start_date: defaultStart.value,
@@ -157,6 +164,69 @@ async function loadSingleStudentAttendance(std){
 function closeSingleStudentAttendance(){
   selectedStudent.value = null
   singleStudentAttendance.value = []
+  attendanceViewMode.value = 'details'
+}
+
+const groupedAttendance = computed(() => {
+  if(!singleStudentAttendance.value?.length) return []
+  const groups = helper.listGroupBy(singleStudentAttendance.value, 'date')
+  return Object.keys(groups).sort().map(date => ({
+    date,
+    rows: groups[date],
+    status: computePresentStatus(groups[date], selectedStudent.value?.class_short),
+  }))
+})
+
+const statusByDate = computed(() => {
+  const map = {}
+  groupedAttendance.value.forEach(g => {
+    map[g.date] = g.status
+  })
+  return map
+})
+
+function getShiftDurations(class_short){
+  if(!class_short) return { first: null, last: null }
+  const cls = classes.value.find(c => c.class_short === class_short)
+  const shifts = cls?.shifts || []
+  if(!shifts.length) return { first: null, last: null }
+  const first = `${shifts[0].start} - ${shifts[0].end}`
+  const last = `${shifts[shifts.length - 1].start} - ${shifts[shifts.length - 1].end}`
+  return { first, last }
+}
+
+function computePresentStatus(rows=[], class_short){
+  if(!rows?.length) return 'Absent'
+  const { first, last } = getShiftDurations(class_short)
+  if(!first || !last){
+    return rows.length ? 'Present' : 'Absent'
+  }
+  const hasFirst = rows.some(r => r.shift_duration === first)
+  const hasLast = rows.some(r => r.shift_duration === last)
+
+  if(preset_count_by === 'if_prent_in_last_shift') return hasLast ? 'Present' : 'Absent'
+  if(preset_count_by === 'if_prent_in_both_shift'){
+    if(first === last) return hasFirst ? 'Present' : 'Absent'
+    return (hasFirst && hasLast) ? 'Present' : 'Absent'
+  }
+  return hasFirst ? 'Present' : 'Absent'
+}
+
+function getFirstIn(rows=[]){
+  const times = rows.map(r => r.in_time).filter(Boolean).sort()
+  return times[0] || '-'
+}
+function getLastOut(rows=[]){
+  const times = rows.map(r => r.out_time).filter(Boolean).sort()
+  return times[times.length - 1] || '-'
+}
+function getStatuses(rows=[]){
+  const statuses = Array.from(new Set(rows.map(r => r.status).filter(Boolean)))
+  return statuses.join(', ') || '-'
+}
+function getMaxLate(rows=[]){
+  const vals = rows.map(r => Number(r.late_in_minute || 0))
+  return vals.length ? Math.max(...vals) : 0
 }
 
 
@@ -274,11 +344,27 @@ onMounted(()=>{
           <h6 class="table-title">
             Attendance Details: {{ selectedStudent.name || '-' }} ({{ selectedStudent.dakhela }})
           </h6>
-          <button class="btn btn-sm btn-outline-secondary" @click="closeSingleStudentAttendance">Close</button>
+          <div class="d-flex align-items-center gap-2">
+            <button
+              class="btn btn-sm btn-outline-primary btn-view-toggle"
+              :class="{ active: attendanceViewMode === 'details' }"
+              @click="attendanceViewMode = 'details'"
+            >
+              Details
+            </button>
+            <button
+              class="btn btn-sm btn-outline-primary btn-view-toggle"
+              :class="{ active: attendanceViewMode === 'compact' }"
+              @click="attendanceViewMode = 'compact'"
+            >
+              Compact
+            </button>
+            <button class="btn btn-sm btn-close-light" @click="closeSingleStudentAttendance">Close</button>
+          </div>
         </div>
         
         <div v-if="loadingStudentAttendance" class="text-muted">Loading...</div>
-        <myTable v-else topMarginClass="mt-2">
+        <myTable v-else-if="attendanceViewMode === 'details'" topMarginClass="mt-2">
           <template #thead>
             <thead>
               <tr>
@@ -297,13 +383,40 @@ onMounted(()=>{
               <td>{{ row.date }}</td>
               <td>{{ row.in_time || '-' }}</td>
               <td>{{ row.out_time || '-' }}</td>
-              <td>{{ row.status || '-' }}</td>
+              <td>{{ statusByDate[row.date] || row.status || '-' }}</td>
               <td>{{ row.late_in_minute ?? 0 }}</td>
               <td>{{ row.shift_duration || '-' }}</td>
               <td>{{ row.remarks || '-' }}</td>
             </tr>
             <tr v-if="!singleStudentAttendance.length">
               <td colspan="7" class="text-center text-muted">No attendance data found.</td>
+            </tr>
+          </template>
+        </myTable>
+        <myTable v-else topMarginClass="mt-2">
+          <template #thead>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>In</th>
+                <th>Out</th>
+                <th>Status</th>
+                <th>Late(max)</th>
+                <th>Entries</th>
+              </tr>
+            </thead>
+          </template>
+          <template #rows>
+            <tr v-for="group in groupedAttendance" :key="'grp-' + group.date">
+              <td>{{ group.date }}</td>
+              <td>{{ getFirstIn(group.rows) }}</td>
+              <td>{{ getLastOut(group.rows) }}</td>
+              <td>{{ group.status }}</td>
+              <td>{{ getMaxLate(group.rows) }}</td>
+              <td>{{ group.rows.length }}</td>
+            </tr>
+            <tr v-if="!groupedAttendance.length">
+              <td colspan="6" class="text-center text-muted">No attendance data found.</td>
             </tr>
           </template>
         </myTable>
@@ -421,6 +534,19 @@ onMounted(()=>{
   background-color: var(--primaryColor);
   color: #ffffff;
   border-color: var(--primaryColor);
+}
+.btn-view-toggle.active{
+  background-color: var(--primaryColor);
+  color: #ffffff;
+  border-color: var(--primaryColor);
+}
+.btn-close-light{
+  color: #b42318;
+  background-color: #fff5f5;
+  border: 1px solid #f2c2c2;
+}
+.btn-close-light:hover{
+  background-color: #ffecec;
 }
 .back-to-previous{
   cursor: pointer;

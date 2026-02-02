@@ -69,6 +69,13 @@ const default_config = {
           attendance: {
                status: true, // -------------------------- on/off
                only_attendance_feature: false,
+
+               /**
+                * 'if_prent_in_first_shift'
+                * 'if_prent_in_last_shift'
+                * 'if_prent_in_both_shift'
+                */
+               preset_count_by: 'if_prent_in_first_shift', 
                /**
                 * using in getRunningShift() function
                 * example: if boundary_time = 30
