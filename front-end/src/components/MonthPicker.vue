@@ -414,17 +414,22 @@ export default {
 
 .rangePanels {
   display: flex;
-  gap: 14px;
+  gap: 1px;
 }
 
 .rangePanel {
   background-color: #f1f5f9;
   padding: 8px 10px;
-  border-radius: 4px;
   min-width: 100px;
   display: flex;
   flex-direction: column;
   gap: 0px;
+}
+.rangePanel:first-child{
+    border-radius: 12px 0px 0px 12px;
+}
+.rangePanel:last-child {
+    border-radius: 0px 12px 12px 0px;
 }
 
 .rangePanel.isActive {
@@ -442,7 +447,7 @@ export default {
   width: 30px;
   height: 28px;
   border: none;
-  border-radius: 3px;
+  border-radius: 12px;
   background-color: #cbd5e1;
   color: #111827;
   font-size: 16px;
