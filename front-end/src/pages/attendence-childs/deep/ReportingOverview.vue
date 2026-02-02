@@ -141,7 +141,7 @@ onMounted(()=>{
 
 <template>
   <div> 
-    <div class="d-flex justify-content-between align-content-start"> 
+    <div class="d-flex justify-content-between align-items-center mb-3"> 
       <MonthPicker 
       :onChange="handleDateChange"
       :defaultStartValue="defaultStart"
@@ -149,6 +149,13 @@ onMounted(()=>{
       :dayOfMonth="1"
       :inactiveFutureMonth="true"
       ></MonthPicker>
+
+      <div v-if="activeReportTab === 'single-class-summary'" class="ms-auto">
+        <span class="back-to-previous" @click="closeClassSummary">
+          <i class="fa fa-arrow-left me-2"></i>
+          Back to previous view
+        </span>
+      </div>
 
       <div v-if="activeReportTab !== 'single-class-summary'" class="report-tabs mb-3">
         <button
@@ -165,10 +172,6 @@ onMounted(()=>{
       </div>
     </div>   
       
-
-    <div v-if="activeReportTab === 'single-class-summary'" class="mb-2">
-      <span class="back-to-previous" @click="closeClassSummary">Back to previous view</span>
-    </div>
 
     <div v-if="activeReportTab === 'summary' && Object.keys(reports?.classWise || {}).length" class="mb-3">
       <myTable topMarginClass="mt-2">
@@ -201,9 +204,9 @@ onMounted(()=>{
       </myTable>
     </div>
 
-    <div v-if="activeReportTab === 'single-class-summary' && selectedSummaryClass" class="mb-3">
-      <div class="d-flex justify-content-between align-items-center mb-2">
-        <h5 class="mb-0">Single Class Summary</h5>
+    <div v-if="activeReportTab === 'single-class-summary' && selectedSummaryClass" class="mb-">
+      <div class="d-flex justify-content-center align-items-center">
+        <h5 class="table-title">Single Class Summary</h5>
       </div>
       <myTable topMarginClass="mt-2">
         <template #thead>
@@ -232,7 +235,9 @@ onMounted(()=>{
       </div>
 
       <div v-if="activeReportTab === 'single-class-summary' && singleClassReport?.students?.length" class="mb-3">
-        <h6 class="mb-2">Student-wise Report</h6>
+        <div class="d-flex justify-content-center align-items-center">
+          <!-- <h5 class="table-title">Student-wise Report</h5> -->
+        </div>
         <myTable topMarginClass="mt-2">
           <template #thead>
             <thead>
@@ -342,9 +347,17 @@ onMounted(()=>{
   cursor: pointer;
   color: var(--primaryColor);
   font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background-color: #f5f7fb;
+  border: 1px solid #e2e8f0;
 }
 .back-to-previous:hover{
-  text-decoration: underline;
+  background-color: #eef2f7;
+  text-decoration: none;
 }
 .card .info{
     color: #5b5b5b;
@@ -403,5 +416,10 @@ onMounted(()=>{
 .card:hover .overflow-div{ 
   top: 0; 
 }
-
+.table-title{
+  margin-bottom: 0px;
+  background: white;
+  padding: 6px 15px;
+  border-radius: 10px;
+}
 </style>
