@@ -99,7 +99,7 @@ async function onChangeMonthRange([start_date, end_date]){
   let payloadData = {
     weekends, 
     leaveData: leaves_and_vacations,
-    all__students: all_students_non_copied.value.map(s => ({dakhela: s.dakhela, class_short: s.class_short})),
+    all__students: all_students_non_copied.value.map(s => ({id: s.id, name: s.name, dakhela: s.dakhela, class_short: s.class_short})),
     total_days: countDays(start_date, end_date), // This will helpe to generate attendence report by percentage
   }
   let data = await getAttendeceReports(payloadData, {start_date, end_date})
@@ -155,7 +155,7 @@ onMounted(()=>{
             <tr>
               <th>Class</th>
               <th>Students</th>
-              <th>Presentable Days</th>
+              <th>Open&nbsp;Days</th>
               <th>Present</th>
               <th>Absent</th>
               <th>Present(%)</th>
