@@ -9,7 +9,7 @@
             <th>Presentable Days</th>
             <th>Present</th>
             <th>Absent</th>
-            <th>Present(%)</th>
+            <th SingleClassSummaryTable>Present(%)</th>
             <th>Action</th>
           </tr>
         </thead>
@@ -23,7 +23,7 @@
           <td>{{ std.total_absent || 0 }}</td>
           <td>{{ std.present_percent || 0 }}%</td>
           <td>
-            <button class="btn btn-sm btn-light" @click="$emit('details', std)">Detail</button>
+            <button class="btn btn-sm btn-secondary" @click="$emit('details', std)">Detail</button>
           </td>
         </tr>
       </template>

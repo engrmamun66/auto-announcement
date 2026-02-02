@@ -5,7 +5,7 @@
         <tr>
           <th>Ranking</th>
           <th>Class</th>
-          <th>Present(%)</th>
+          <th RangkigTable>Present(%)</th>
         </tr>
       </thead>
     </template>

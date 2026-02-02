@@ -8,7 +8,7 @@
           <th>Open&nbsp;Days</th>
           <th>Present</th>
           <th>Absent</th>
-          <th>Present(%)</th>
+          <th SummaryTable>Present(%)</th>
           <th>Action</th>
         </tr>
       </thead>
@@ -22,7 +22,7 @@
         <td>{{ getClassReport(cls.class_short)?.total_absent || 0 }}</td>
         <td>{{ getClassReport(cls.class_short)?.present_percent || 0 }}%</td>
         <td>
-          <button class="btn btn-sm btn-light" @click="$emit('details', cls)">Details</button>
+          <button class="btn btn-sm btn-secondary" @click="$emit('details', cls)">Details</button>
         </td>
       </tr>
     </template>
