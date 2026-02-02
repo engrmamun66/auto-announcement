@@ -347,8 +347,9 @@ class Attendance {
         });
 
         const weekend_leaves = date_duration.filter(date => weekends.includes(moment(date).format('dddd')));
-        const leaveData_excluded_weekends = leaveData.filter(leave => !weekend_leaves.includes(leave.date));
-        const leaveData_group_by_date = utils.listGroupBy(leaveData_excluded_weekends, 'date');
+        const weekendSet = new Set(weekend_leaves);
+        const classLevelLeaves = leaveData.filter(leave => leave?.class_short);
+        const leaveData_group_by_date = utils.listGroupBy(classLevelLeaves, 'date');
 
         const attendanceByStudentDate = {};
         rows.forEach((att) => {
@@ -376,12 +377,12 @@ class Attendance {
           classStudentCounts[cls] = (classStudentCounts[cls] || 0) + 1;
         });
 
-        const initReport = (class_short, class_name, total_days_for_range) => ({
+        const initReport = (class_short, class_name, total_days_for_range, presentable_days_for_range = 0) => ({
           class_short,
           class_name: class_name || '',
           total_students: classStudentCounts[class_short] || 0,
           total_days: total_days_for_range,
-          total_presentable_days: 0,
+          total_presentable_days: presentable_days_for_range,
           total_present: 0,
           total_in: 0,
           total_absent: 0,
@@ -389,13 +390,33 @@ class Attendance {
         });
 
         const classWise = {};
+        const classPresentableDays = {};
+        const isClassHoliday = (date, class_short) => {
+          if (weekendSet.has(date)) return true;
+          const leaves = leaveData_group_by_date[date] || [];
+          return leaves.some(leave => leave.class_short === '_all_' || leave.class_short === class_short);
+        };
+
+        (global.config?.classes || []).forEach((cls) => {
+          classPresentableDays[cls.class_short] = {};
+          Object.keys(monthMeta).forEach((monthKey) => {
+            let count = 0;
+            dateMeta.forEach(({ date, monthKey: mk }) => {
+              if (mk !== monthKey) return;
+              if (!isClassHoliday(date, cls.class_short)) count += 1;
+            });
+            classPresentableDays[cls.class_short][monthKey] = count;
+          });
+        });
+
         (global.config?.classes || []).forEach((cls) => {
           classWise[cls.class_short] = {};
           Object.keys(monthMeta).forEach((monthKey) => {
             classWise[cls.class_short][monthKey] = initReport(
               cls.class_short,
               cls.class_name,
-              monthMeta[monthKey].total_days
+              monthMeta[monthKey].total_days,
+              classPresentableDays?.[cls.class_short]?.[monthKey] || 0
             );
           });
         });
@@ -411,7 +432,8 @@ class Attendance {
               classWise[class_short][monthKey] = initReport(
                 class_short,
                 cls.class_name || '',
-                monthMeta[monthKey].total_days
+                monthMeta[monthKey].total_days,
+                classPresentableDays?.[class_short]?.[monthKey] || 0
               );
             });
           }
@@ -419,13 +441,7 @@ class Attendance {
           const firstShiftDuration = classFirstShift[class_short] || null;
 
           dateMeta.forEach(({ date, monthKey }) => {
-            const is_weekend = weekend_leaves.includes(date);
-            const _leaves = leaveData_group_by_date[date] || [];
-            const day_leaves = _leaves.filter(leave => (
-              leave.student_id == dakhela || leave.class_short == '_all_' || leave.class_short == class_short
-            ));
-            const is_leave_day = day_leaves.length > 0;
-            const is_presentable_day = !(is_weekend || is_leave_day);
+            const is_presentable_day = !isClassHoliday(date, class_short);
 
             let is_present = false;
             if (is_presentable_day) {
@@ -438,33 +454,29 @@ class Attendance {
             }
 
             const reportItem = classWise[class_short][monthKey];
-            if (is_presentable_day) {
-              reportItem.total_presentable_days += 1;
-              if (is_present) reportItem.total_present += 1;
-            }
+            if (is_presentable_day && is_present) reportItem.total_present += 1;
           });
         });
 
         Object.keys(classWise).forEach((cls) => {
           Object.keys(classWise[cls]).forEach((monthKey) => {
             const item = classWise[cls][monthKey];
-            const denom = item.total_presentable_days;
+            const denom = item.total_students * item.total_presentable_days;
             item.total_in = item.total_present;
             item.total_absent = Math.max(0, denom - item.total_present);
             item.present_percent = denom > 0 ? Number(((item.total_present / denom) * 100).toFixed(2)) : 0;
           });
 
           const className = classConfigMap[cls]?.class_name || classWise[cls][Object.keys(classWise[cls])[0]]?.class_name || '';
-          const allReport = initReport(cls, className, 0);
+          const allReport = initReport(cls, className, 0, 0);
           Object.keys(classWise[cls]).forEach((monthKey) => {
             const item = classWise[cls][monthKey];
             allReport.total_days += item.total_days;
             allReport.total_presentable_days += item.total_presentable_days;
             allReport.total_present += item.total_present;
             allReport.total_in = allReport.total_present;
-            allReport.total_absent += item.total_absent;
           });
-          const allDenom = allReport.total_presentable_days;
+          const allDenom = allReport.total_students * allReport.total_presentable_days;
           allReport.total_absent = Math.max(0, allDenom - allReport.total_present);
           allReport.present_percent = allDenom > 0
             ? Number(((allReport.total_present / allDenom) * 100).toFixed(2))
