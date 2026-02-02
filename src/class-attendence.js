@@ -481,12 +481,12 @@ class Attendance {
           allReport.present_percent = allDenom > 0
             ? Number(((allReport.total_present / allDenom) * 100).toFixed(2))
             : 0;
-          classWise[cls]['all'] = allReport;
+          classWise[cls]['total'] = allReport;
         });
 
         const classRanking = Object.keys(classWise).sort((a, b) => {
-          const aVal = classWise[a]?.all?.present_percent || 0;
-          const bVal = classWise[b]?.all?.present_percent || 0;
+          const aVal = classWise[a]?.total?.present_percent || 0;
+          const bVal = classWise[b]?.total?.present_percent || 0;
           return bVal - aVal;
         });
 

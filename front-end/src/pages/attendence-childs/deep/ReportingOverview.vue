@@ -75,10 +75,10 @@ const monthKeys = computed(() => {
   let classWise = reports.value?.classWise || {}
   let firstClass = Object.keys(classWise || {})[0]
   if(!firstClass) return []
-  return Object.keys(classWise[firstClass] || {}).filter(k => k !== 'all').sort()
+  return Object.keys(classWise[firstClass] || {}).filter(k => k !== 'total').sort()
 })
 
-function getClassReport(class_short, monthKey='all'){
+function getClassReport(class_short, monthKey='total'){
   return reports.value?.classWise?.[class_short]?.[monthKey] || {}
 }
 
@@ -216,22 +216,22 @@ onMounted(()=>{
           <thead>
             <tr>
               <th>Class</th>
-              <th v-for="m in monthKeys" :key="'h-' + m">{{ moment(m).format('MMM YYYY') }}</th>
-              <th>All</th>
+                <th v-for="m in monthKeys" :key="'h-' + m">{{ moment(m).format('MMM YYYY') }}</th>
+                <th>Total</th>
             </tr>
           </thead>
         </template>
         <template #rows>
           <tr v-for="cls in classes" :key="'mon-' + cls.class_short">
             <td>{{ cls.class_name }}</td>
-            <td v-for="m in monthKeys" :key="'c-' + cls.class_short + '-' + m">
-              {{ getClassReport(cls.class_short, m)?.present_percent || 0 }}%
-            </td>
-            <td>{{ getClassReport(cls.class_short, 'all')?.present_percent || 0 }}%</td>
-          </tr>
-        </template>
-      </myTable>
-    </div>
+              <td v-for="m in monthKeys" :key="'c-' + cls.class_short + '-' + m">
+                {{ getClassReport(cls.class_short, m)?.present_percent || 0 }}%
+              </td>
+              <td>{{ getClassReport(cls.class_short, 'total')?.present_percent || 0 }}%</td>
+            </tr>
+          </template>
+        </myTable>
+      </div>
 
     <div v-if="activeReportTab === 'ranking' && reports?.classRanking?.length" class="mb-3">
       <myTable topMarginClass="mt-2">
@@ -248,11 +248,11 @@ onMounted(()=>{
           <tr v-for="(clsShort, idx) in reports.classRanking" :key="'rank-' + clsShort">
             <td>{{ idx + 1 }}</td>
             <td>{{ (classes.find(c => c.class_short === clsShort) || {}).class_name || clsShort }}</td>
-            <td>{{ getClassReport(clsShort, 'all')?.present_percent || 0 }}%</td>
-          </tr>
-        </template>
-      </myTable>
-    </div>
+              <td>{{ getClassReport(clsShort, 'total')?.present_percent || 0 }}%</td>
+            </tr>
+          </template>
+        </myTable>
+      </div>
 
     <div v-if="activeReportTab === 'cards'" class="row mt-3">
       <template v-for="cls in classes" :key="cls.class_short">
