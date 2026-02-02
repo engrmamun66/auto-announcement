@@ -10,7 +10,7 @@
             <th>Present</th>
             <th>Absent</th>
             <th SingleClassSummaryTable>Present(%)</th>
-            <th>Action</th>
+            <th class="hide_onprint">Action</th>
           </tr>
         </thead>
       </template>
@@ -23,7 +23,7 @@
           <td>{{ std.total_absent || 0 }}</td>
           <td>{{ std.present_percent || 0 }}%</td>
           <td>
-            <button class="btn btn-sm btn-secondary" @click="$emit('details', std)">Detail</button>
+            <button class="btn btn-sm btn-secondary hide_onprint" @click="$emit('details', std)">Detail</button>
           </td>
         </tr>
       </template>

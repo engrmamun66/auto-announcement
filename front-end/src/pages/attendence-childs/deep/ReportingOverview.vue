@@ -75,6 +75,17 @@ let singleStudentAttendance = ref([])
 let loadingStudentAttendance = ref(false)
 let attendanceViewMode = ref('compact') // details | compact
 
+const reportTitle = computed(() => {
+  if (activeReportTab.value === 'single-class-summary' && selectedSummaryClass.value) {
+    return `${selectedSummaryClass.value.class_name || selectedSummaryClass.value.class_short} Summary`
+  }
+  if (activeReportTab.value === 'monthly') return 'Monthly Report'
+  if (activeReportTab.value === 'ranking') return 'Ranking Report'
+  return 'Attendance Summary'
+})
+
+const printDate = computed(() => moment().format('YYYY-MM-DD'))
+
 const monthKeys = computed(() => {
   let classWise = reports.value?.classWise || {}
   let firstClass = Object.keys(classWise || {})[0]
@@ -258,56 +269,72 @@ onMounted(()=>{
       </div>
     </div>
 
-    <div v-if="activeReportTab === 'summary' && Object.keys(reports?.classWise || {}).length" class="mb-3">
-      <SummaryTable
-        :classes="classes"
-        :classWise="reports.classWise"
-        @details="openClassSummary"
-      />
+    <div class="print-area">
+
+      <div id="REPORT_HEADER" class="only-show-onprint report-header">
+        <div>
+          <div class="report-header__title">{{ reportTitle }}</div>
+          <div class="report-header__meta">
+            <span>{{ defaultStart }} to {{ defaultEnd }}</span>
+            <span class="report-header__dot">•</span>
+            <span>Printed: {{ printDate }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div v-if="activeReportTab === 'summary' && Object.keys(reports?.classWise || {}).length" class="mb-3">
+        <SummaryTable
+          :classes="classes"
+          :classWise="reports.classWise"
+          @details="openClassSummary"
+        />
+      </div>
+  
+      <div v-if="activeReportTab === 'single-class-summary' && selectedSummaryClass" class="mb-3">
+        <SingleClassSummaryTable
+          :classInfo="selectedSummaryClass"
+          :summary="getClassReport(selectedSummaryClass.class_short)"
+        />
+      </div>
+  
+      <div v-if="activeReportTab === 'single-class-summary' && selectedStudent" class="mb-3">
+        <StudentAttendanceDetails
+          :selectedStudent="selectedStudent"
+          :rows="singleStudentAttendance"
+          :grouped="groupedAttendance"
+          :statusByDate="statusByDate"
+          :viewMode="attendanceViewMode"
+          :loading="loadingStudentAttendance"
+          @changeView="attendanceViewMode = $event"
+          @close="closeSingleStudentAttendance"
+        />
+      </div>
+  
+      <div v-if="activeReportTab === 'single-class-summary' && singleClassReport?.students?.length && !selectedStudent" class="mb-3">
+        <StudentWiseReportTable
+          :students="singleClassReport.students"
+          @details="loadSingleStudentAttendance"
+        />
+      </div>
+  
+      <div v-if="activeReportTab === 'monthly' && monthKeys.length" class="mb-3">
+        <MonthlyReportTable
+          :classes="classes"
+          :classWise="reports.classWise"
+          :monthKeys="monthKeys"
+        />
+      </div>
+  
+      <div v-if="activeReportTab === 'ranking' && reports?.classRanking?.length" class="mb-3">
+        <RankingTable
+          :rankings="reports.classRanking"
+          :classes="classes"
+          :classWise="reports.classWise"
+        />
+      </div>
+
     </div>
 
-    <div v-if="activeReportTab === 'single-class-summary' && selectedSummaryClass" class="mb-3">
-      <SingleClassSummaryTable
-        :classInfo="selectedSummaryClass"
-        :summary="getClassReport(selectedSummaryClass.class_short)"
-      />
-    </div>
-
-    <div v-if="activeReportTab === 'single-class-summary' && selectedStudent" class="mb-3">
-      <StudentAttendanceDetails
-        :selectedStudent="selectedStudent"
-        :rows="singleStudentAttendance"
-        :grouped="groupedAttendance"
-        :statusByDate="statusByDate"
-        :viewMode="attendanceViewMode"
-        :loading="loadingStudentAttendance"
-        @changeView="attendanceViewMode = $event"
-        @close="closeSingleStudentAttendance"
-      />
-    </div>
-
-    <div v-if="activeReportTab === 'single-class-summary' && singleClassReport?.students?.length && !selectedStudent" class="mb-3">
-      <StudentWiseReportTable
-        :students="singleClassReport.students"
-        @details="loadSingleStudentAttendance"
-      />
-    </div>
-
-    <div v-if="activeReportTab === 'monthly' && monthKeys.length" class="mb-3">
-      <MonthlyReportTable
-        :classes="classes"
-        :classWise="reports.classWise"
-        :monthKeys="monthKeys"
-      />
-    </div>
-
-    <div v-if="activeReportTab === 'ranking' && reports?.classRanking?.length" class="mb-3">
-      <RankingTable
-        :rankings="reports.classRanking"
-        :classes="classes"
-        :classWise="reports.classWise"
-      />
-    </div>
   </div>
 </template>
 

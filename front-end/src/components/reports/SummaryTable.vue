@@ -9,7 +9,7 @@
           <th>Present</th>
           <th>Absent</th>
           <th SummaryTable>Present(%)</th>
-          <th>Action</th>
+          <th class="hide_onprint">Action</th>
         </tr>
       </thead>
     </template>
@@ -22,7 +22,7 @@
         <td>{{ getClassReport(cls.class_short)?.total_absent || 0 }}</td>
         <td>{{ getClassReport(cls.class_short)?.present_percent || 0 }}%</td>
         <td>
-          <button class="btn btn-sm btn-secondary" @click="$emit('details', cls)">Details</button>
+          <button class="btn btn-sm btn-secondary hide_onprint" @click="$emit('details', cls)">Details</button>
         </td>
       </tr>
     </template>
