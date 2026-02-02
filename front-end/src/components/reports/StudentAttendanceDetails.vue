@@ -2,7 +2,7 @@
   <div v-if="selectedStudent">
     <div class="d-flex justify-content-between align-items-center mb-2">
       <h6 class="table-title">
-        Attendance Details: {{ selectedStudent.name || '-' }} ({{ selectedStudent.dakhela }})
+        Attendance Of: {{ selectedStudent.name || '-' }} ({{ selectedStudent.dakhela }})
       </h6>
       <div class="d-flex align-items-center gap-2">
         <button
