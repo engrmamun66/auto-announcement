@@ -602,6 +602,150 @@ class Attendance {
 
     
 
+    /**
+     * ==================================
+     * ==================================
+     * ==================================
+     * ==================================
+     * ==================================
+     * ==================================
+     * ==================================
+     * ==================================
+     * ==================================
+     */
+
+
+    getAttendanceReportsForSingleClass(req, res){
+      const {
+        start_date,
+        end_date,
+      } = req.query;
+
+      const payload = req.body || {};
+      const weekends = Array.isArray(payload.weekends) ? payload.weekends : [];
+      const leaveData = Array.isArray(payload.leaveData) ? payload.leaveData : [];
+      const total_days = Number(payload.total_days || 0);
+      const class_students = Array.isArray(payload.class_students) ? payload.class_students : [];
+
+      if (!class_students.length) {
+        return res.send({ data: { class_short: null, class_name: '', total_days: 0, total_presentable_days: 0, students: [] } });
+      }
+
+      const class_short = class_students[0]?.class_short || null;
+      const class_name = (global.config?.classes || []).find(c => c.class_short === class_short)?.class_name || '';
+
+      const student_ids = class_students.map(s => Number(s.dakhela)).filter(Boolean);
+
+      let date_duration = utils.createDateRange(start_date, end_date);
+      if (total_days > 0 && total_days < date_duration.length) {
+        date_duration = date_duration.slice(0, total_days);
+      }
+
+      const weekend_leaves = date_duration.filter(date => weekends.includes(moment(date).format('dddd')));
+      const weekendSet = new Set(weekend_leaves);
+      const classLevelLeaves = leaveData.filter(leave => leave?.class_short);
+      const leaveData_group_by_date = utils.listGroupBy(classLevelLeaves, 'date');
+
+      const isClassHoliday = (date) => {
+        if (weekendSet.has(date)) return true;
+        const leaves = leaveData_group_by_date[date] || [];
+        return leaves.some(leave => leave.class_short === '_all_' || leave.class_short === class_short);
+      };
+
+      const total_presentable_days = date_duration.reduce((sum, date) => {
+        return sum + (isClassHoliday(date) ? 0 : 1);
+      }, 0);
+
+      const whereParts = [];
+      const params = [];
+      if (student_ids.length) {
+        whereParts.push(`a.student_id IN (${student_ids.map(() => "?").join(",")})`);
+        params.push(...student_ids);
+      }
+      if (start_date && end_date) {
+        whereParts.push("a.date BETWEEN ? AND ?");
+        params.push(start_date, end_date);
+      }
+
+      const whereClause = whereParts.length ? "WHERE " + whereParts.join(" AND ") : "";
+
+      const dataQuery = `
+        SELECT a.*, s.class_short, s.name AS student_name
+        FROM ${this.tableName} a 
+        LEFT JOIN students s ON a.student_id = s.dakhela
+        ${whereClause} 
+      `;
+
+      this.db.all(dataQuery, params, (err, rows) => {
+        if (err) return res.status(500).send({ error: err.message });
+
+        const attendanceByStudentDate = {};
+        rows.forEach((att) => {
+          if (!att?.student_id || !att?.date) return;
+          const sid = att.student_id;
+          if (!attendanceByStudentDate[sid]) attendanceByStudentDate[sid] = {};
+          if (!attendanceByStudentDate[sid][att.date]) attendanceByStudentDate[sid][att.date] = [];
+          attendanceByStudentDate[sid][att.date].push(att);
+        });
+
+        const classFirstShift = {};
+        (global.config?.classes || []).forEach((cls) => {
+          const firstShift = cls?.shifts?.[0];
+          if (firstShift?.start && firstShift?.end) {
+            classFirstShift[cls.class_short] = `${firstShift.start} - ${firstShift.end}`;
+          }
+        });
+
+        const firstShiftDuration = classFirstShift[class_short] || null;
+
+        const students = class_students.map((student) => {
+          const dakhela = Number(student?.dakhela);
+          let total_present = 0;
+
+          date_duration.forEach((date) => {
+            const is_presentable_day = !isClassHoliday(date);
+            if (!is_presentable_day) return;
+
+            const dayAttendance = attendanceByStudentDate?.[dakhela]?.[date] || [];
+            let is_present = false;
+            if (firstShiftDuration) {
+              is_present = dayAttendance.some(att => att.shift_duration === firstShiftDuration);
+            } else {
+              is_present = dayAttendance.length > 0;
+            }
+
+            if (is_present) total_present += 1;
+          });
+
+          const denom = total_presentable_days;
+          const total_absent = Math.max(0, denom - total_present);
+          const present_percent = denom > 0 ? Number(((total_present / denom) * 100).toFixed(2)) : 0;
+
+          return {
+            id: student?.id || null,
+            name: student?.name || null,
+            dakhela,
+            class_short,
+            total_days: date_duration.length,
+            total_presentable_days,
+            total_present,
+            total_in: total_present,
+            total_absent,
+            present_percent,
+          };
+        });
+
+        res.send({
+          data: {
+            class_short,
+            class_name,
+            total_days: date_duration.length,
+            total_presentable_days,
+            students,
+          }
+        });
+      });
+    }
 
 
 

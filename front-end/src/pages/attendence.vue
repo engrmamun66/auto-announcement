@@ -121,6 +121,7 @@ function getAttendeceList({ page_no = null, reset = false, other_params = {} } =
 }
 
 provide('getAttendeceReports', getAttendeceReports)
+provide('getAttendeceReportsForSingleClass', getAttendeceReportsForSingleClass)
 
 async function getAttendeceReports(payload={}, { start_date, end_date, action = null }={}) {
   try {
@@ -131,6 +132,25 @@ async function getAttendeceReports(payload={}, { start_date, end_date, action = 
     }
 
     let response = await http.post("/attendence-reports", payload, { params: queryParams })
+      if (response.status == 200) {
+        let data = response.data?.data;
+        return data
+      } 
+      
+  } catch (getAttendeceReports__error) {
+    console.warn({getAttendeceReports__error});
+  }
+}
+
+async function getAttendeceReportsForSingleClass(payload={}, { start_date, end_date, action = null }={}) {
+  try {
+    let queryParams = {
+      start_date,
+      end_date,
+      action,
+    }
+
+    let response = await http.post("/attendence-reports-for-single-class", payload, { params: queryParams })
       if (response.status == 200) {
         let data = response.data?.data;
         return data

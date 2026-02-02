@@ -15,6 +15,7 @@ const all_students = inject("all_students");
 const helper = inject("helper");
 const callbacks = inject("callbacks");
 const getAttendeceReports = inject("getAttendeceReports");
+const getAttendeceReportsForSingleClass = inject("getAttendeceReportsForSingleClass");
 const all_students_non_copied = inject("all_students_non_copied");
 
 const emit = defineEmits(['onBtnSubmit', 'onBtnClear']);
@@ -38,7 +39,7 @@ async function handleDateChange(dates) {
   defaultStart.value = dates[0]
   defaultEnd.value = dates[1]
   checkEndDate()
-  await onChangeMonthRange(dates) 
+  await loadAllClassSummaryReport(dates) 
 }
 
 
@@ -67,9 +68,9 @@ const reportTabs = [
   { key: 'summary', label: 'Summary' },
   { key: 'monthly', label: 'Monthly' },
   { key: 'ranking', label: 'Ranking' },
-  { key: 'cards', label: 'Cards' },
 ]
 let selectedSummaryClass = ref(null)
+let singleClassReport = ref(null)
 
 const monthKeys = computed(() => {
   let classWise = reports.value?.classWise || {}
@@ -84,16 +85,19 @@ function getClassReport(class_short, monthKey='total'){
 
 function openClassSummary(cls){
   selectedSummaryClass.value = cls
-  activeReportTab.value = 'summary'
+  activeReportTab.value = 'single-class-summary'
+  loadSingleClassSummaryReport(cls.class_short, [defaultStart.value, defaultEnd.value])
 }
 
 function closeClassSummary(){
   selectedSummaryClass.value = null
+  singleClassReport.value = null
+  activeReportTab.value = 'summary'
 }
 
 
 // For multiple select of students
-async function onChangeMonthRange([start_date, end_date]){
+async function loadAllClassSummaryReport([start_date, end_date]){
   let leaves_and_vacations = await callbacks.getLeavesAndVacations({start_date, end_date})  
 
   let payloadData = {
@@ -107,6 +111,20 @@ async function onChangeMonthRange([start_date, end_date]){
 }  
 
 
+async function loadSingleClassSummaryReport(class_short, [start_date, end_date]){
+  let leaves_and_vacations = await callbacks.getLeavesAndVacations({start_date, end_date})  
+
+  let payloadData = {
+    weekends, 
+    leaveData: leaves_and_vacations,
+    class_students: all_students_non_copied.value.filter(std => std.class_short === class_short).map(s => ({id: s.id, name: s.name, dakhela: s.dakhela, class_short: s.class_short})),
+    total_days: countDays(start_date, end_date), // This will helpe to generate attendence report by percentage
+  }
+  let data = await getAttendeceReportsForSingleClass(payloadData, {start_date, end_date})
+  singleClassReport.value = data || null
+}  
+
+
 
 function onClickShowDetails(cls){
   showDetails.value = true
@@ -115,7 +133,7 @@ function onClickShowDetails(cls){
 
 
 onMounted(()=>{
-  onChangeMonthRange([defaultStart.value, defaultEnd.value])
+  loadAllClassSummaryReport([defaultStart.value, defaultEnd.value])
 })
 
 </script>
@@ -132,7 +150,7 @@ onMounted(()=>{
       :inactiveFutureMonth="true"
       ></MonthPicker>
 
-      <div class="report-tabs mb-3">
+      <div v-if="activeReportTab !== 'single-class-summary'" class="report-tabs mb-3">
         <button
           v-for="tab in reportTabs"
           :key="tab.key"
@@ -147,6 +165,10 @@ onMounted(()=>{
       </div>
     </div>   
       
+
+    <div v-if="activeReportTab === 'single-class-summary'" class="mb-2">
+      <span class="back-to-previous" @click="closeClassSummary">Back to previous view</span>
+    </div>
 
     <div v-if="activeReportTab === 'summary' && Object.keys(reports?.classWise || {}).length" class="mb-3">
       <myTable topMarginClass="mt-2">
@@ -179,10 +201,9 @@ onMounted(()=>{
       </myTable>
     </div>
 
-    <div v-if="activeReportTab === 'summary' && selectedSummaryClass" class="mb-3">
+    <div v-if="activeReportTab === 'single-class-summary' && selectedSummaryClass" class="mb-3">
       <div class="d-flex justify-content-between align-items-center mb-2">
         <h5 class="mb-0">Single Class Summary</h5>
-        <button class="btn btn-sm btn-outline-secondary" @click="closeClassSummary">Close</button>
       </div>
       <myTable topMarginClass="mt-2">
         <template #thead>
@@ -197,18 +218,46 @@ onMounted(()=>{
             </tr>
           </thead>
         </template>
-        <template #rows>
-          <tr>
-            <td>{{ selectedSummaryClass.class_name }}</td>
-            <td>{{ getClassReport(selectedSummaryClass.class_short)?.total_students || 0 }}</td>
-            <td>{{ getClassReport(selectedSummaryClass.class_short)?.total_presentable_days || 0 }}</td>
-            <td>{{ getClassReport(selectedSummaryClass.class_short)?.total_present || 0 }}</td>
-            <td>{{ getClassReport(selectedSummaryClass.class_short)?.total_absent || 0 }}</td>
-            <td>{{ getClassReport(selectedSummaryClass.class_short)?.present_percent || 0 }}%</td>
-          </tr>
-        </template>
-      </myTable>
-    </div>
+          <template #rows>
+            <tr>
+              <td>{{ selectedSummaryClass.class_name }}</td>
+              <td>{{ getClassReport(selectedSummaryClass.class_short)?.total_students || 0 }}</td>
+              <td>{{ getClassReport(selectedSummaryClass.class_short)?.total_presentable_days || 0 }}</td>
+              <td>{{ getClassReport(selectedSummaryClass.class_short)?.total_present || 0 }}</td>
+              <td>{{ getClassReport(selectedSummaryClass.class_short)?.total_absent || 0 }}</td>
+              <td>{{ getClassReport(selectedSummaryClass.class_short)?.present_percent || 0 }}%</td>
+            </tr>
+          </template>
+        </myTable>
+      </div>
+
+      <div v-if="activeReportTab === 'single-class-summary' && singleClassReport?.students?.length" class="mb-3">
+        <h6 class="mb-2">Student-wise Report</h6>
+        <myTable topMarginClass="mt-2">
+          <template #thead>
+            <thead>
+              <tr>
+                <th>Student Name</th>
+                <th>Dakhela</th>
+                <th>Presentable Days</th>
+                <th>Present</th>
+                <th>Absent</th>
+                <th>Present(%)</th>
+              </tr>
+            </thead>
+          </template>
+          <template #rows>
+            <tr v-for="std in singleClassReport.students" :key="'std-' + std.dakhela">
+              <td>{{ std.name || '-' }}</td>
+              <td>{{ std.dakhela }}</td>
+              <td>{{ std.total_presentable_days || 0 }}</td>
+              <td>{{ std.total_present || 0 }}</td>
+              <td>{{ std.total_absent || 0 }}</td>
+              <td>{{ std.present_percent || 0 }}%</td>
+            </tr>
+          </template>
+        </myTable>
+      </div>
 
     <div v-if="activeReportTab === 'monthly' && monthKeys.length" class="mb-3">
       <myTable topMarginClass="mt-2">
@@ -254,35 +303,6 @@ onMounted(()=>{
         </myTable>
       </div>
 
-    <div v-if="activeReportTab === 'cards'" class="row mt-3">
-      <template v-for="cls in classes" :key="cls.class_short">
-        <div class="col-md-4 mb-3">
-          <div class="card attendance-card">
-
-            <div class="overflow-div">
-              <button @click.stop="onClickShowDetails(cls)" class="btn btn-light bg-white">Show Details</button>
-            </div>
-
-
-            <div class="card-body text-center">
-              <h4 class="card-title">{{ cls.class_name }}</h4>
-              <div class="w-100 d-flex justify-content-around">
-                <div class="side-of-card">
-                  <div class="sub-title">Students</div>
-                  <div class="info">{{ getClassReport(cls.class_short)?.total_students || 0 }}</div> 
-                </div>
-                <div class="side-of-card">
-                  <div class="sub-title">Present</div>
-                  <div class="info">{{ getClassReport(cls.class_short)?.total_present || 0 }}</div> 
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </template> 
-    </div>   
-     
-
   </div>
 </template>
 
@@ -317,6 +337,14 @@ onMounted(()=>{
   background-color: var(--primaryColor);
   color: #ffffff;
   border-color: var(--primaryColor);
+}
+.back-to-previous{
+  cursor: pointer;
+  color: var(--primaryColor);
+  font-weight: 600;
+}
+.back-to-previous:hover{
+  text-decoration: underline;
 }
 .card .info{
     color: #5b5b5b;
