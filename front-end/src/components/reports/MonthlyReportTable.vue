@@ -3,9 +3,9 @@
     <template #thead>
       <thead>
         <tr>
-          <th>Class</th>
+          <th MonthlyReportTable>Class</th>
           <th v-for="m in monthKeys" :key="'h-' + m">{{ formatMonth(m) }}</th>
-          <th>Total</th>
+          <th MonthlyReportTable>Total</th>
         </tr>
       </thead>
     </template>

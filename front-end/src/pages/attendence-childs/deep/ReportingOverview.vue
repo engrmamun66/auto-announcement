@@ -84,7 +84,7 @@ const reportTitle = computed(() => {
   return 'Attendance Summary'
 })
 
-const printDate = computed(() => moment().format('YYYY-MM-DD'))
+const printDate = computed(() => moment().format('DD MMMM, Y - hh:mm A'))
 
 const monthKeys = computed(() => {
   let classWise = reports.value?.classWise || {}
@@ -275,9 +275,11 @@ onMounted(()=>{
         <div>
           <div class="report-header__title">{{ reportTitle }}</div>
           <div class="report-header__meta">
-            <span>{{ defaultStart }} to {{ defaultEnd }}</span>
-            <span class="report-header__dot">•</span>
-            <span>Printed: {{ printDate }}</span>
+            <span>
+              <span class="report-header__range">{{ moment(defaultStart).format('MMM Y') }} - {{ moment(defaultEnd).format('MMM Y') }}</span>
+              <!-- <span class="report-header__range">{{ defaultStart }} to {{ defaultEnd }}</span> -->
+            </span>
+            <span class="report-header__printed">Printed: {{ printDate }}</span>
           </div>
         </div>
       </div>

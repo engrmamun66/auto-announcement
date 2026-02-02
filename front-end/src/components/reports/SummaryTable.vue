@@ -3,12 +3,12 @@
     <template #thead>
       <thead>
         <tr>
-          <th>Class</th>
+          <th SummaryTable>Class</th>
           <th>Students</th>
           <th>Open&nbsp;Days</th>
           <th>Present</th>
           <th>Absent</th>
-          <th SummaryTable>Present(%)</th>
+          <th>Present(%)</th>
           <th class="hide_onprint">Action</th>
         </tr>
       </thead>

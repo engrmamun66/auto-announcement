@@ -23,7 +23,7 @@
 
   .print-area .invisible_onprint
    {
-    visibility: visible;
+    visibility: hidden;
   }
 
   .print-area {
@@ -41,6 +41,9 @@
     padding: 6px 0 10px;
     margin-bottom: 12px;
   }
+  .report-header > div{
+    width: 100%;
+  }
   .report-header__title{
     font-size: 18px;
     font-weight: 700;
@@ -50,8 +53,9 @@
   .report-header__meta{
     font-size: 12px;
     color: #555555;
-  }
-  .report-header__dot{
-    margin: 0 6px;
-  }
+    display: flex;
+    align-items: center;
+    width: 100%;
+    justify-content: space-between;
+  } 
 }

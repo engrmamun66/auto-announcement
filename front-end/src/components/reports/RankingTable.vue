@@ -3,7 +3,7 @@
     <template #thead>
       <thead>
         <tr>
-          <th>Ranking</th>
+          <th RankingTable>Ranking</th>
           <th>Class</th>
           <th RangkigTable>Present(%)</th>
         </tr>
