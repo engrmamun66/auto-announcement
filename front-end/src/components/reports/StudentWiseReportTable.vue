@@ -4,7 +4,7 @@
       <template #thead>
         <thead>
           <tr>
-            <th>Student Name</th>
+            <th StudentWiseReportTable>Student Name</th>
             <th>Dakhela</th>
             <th>Presentable Days</th>
             <th>Present</th>

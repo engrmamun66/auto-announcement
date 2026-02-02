@@ -231,11 +231,11 @@ onMounted(()=>{
            <a @click.stop="tab = 2" class="nav-link cp text-black" :class="{'active': tab==2}" ><i class='bx bx-history transformY-2px' ></i> Attendence&nbsp;History</a>
          </li>   
          <li class="nav-item">
-           <a @click.stop="tab = 3" class="nav-link cp text-black" :class="{'active': tab==3}" ><i class='bx bx-run transformY-2px' ></i> Leaves And Vacations</a>
-         </li>   
-         <li class="nav-item">
            <a @click.stop="tab = 4" class="nav-link cp text-black" :class="{'active': tab==4}" ><i class='bx bx-timer transformY-2px'></i> Reporting </a>
-         </li>   
+          </li>   
+          <li class="nav-item">
+            <a @click.stop="tab = 3" class="nav-link cp text-black" :class="{'active': tab==3}" ><i class='bx bx-run transformY-2px' ></i> Leaves And Vacations</a>
+          </li>   
       </ul>
 
       <div v-if="tab==1">
