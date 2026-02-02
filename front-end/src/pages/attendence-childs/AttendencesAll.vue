@@ -58,7 +58,6 @@ function prepareToDelete(item){
 
 }
 function deleteAttedence(item, note_text = null){
-  // if(prompt("Delete this attendance?").toLocaleLowerCase() !== 'd') return
   http.delete(`/attendence-delete/${item.id}`).then(response => {
     if(response.status === 200){
       liveAttendenceList.value = liveAttendenceList.value.filter(_item => _item.id != item.id)

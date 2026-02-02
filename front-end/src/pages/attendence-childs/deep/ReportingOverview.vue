@@ -40,7 +40,13 @@ async function handleDateChange(dates) {
   defaultStart.value = dates[0]
   defaultEnd.value = dates[1]
   checkEndDate()
-  await loadAllClassSummaryReport(dates) 
+  await loadAllClassSummaryReport(dates)
+  if (activeReportTab.value === 'single-class-summary' && selectedSummaryClass.value) {
+    await loadSingleClassSummaryReport(selectedSummaryClass.value.class_short, dates)
+    if (selectedStudent.value) {
+      await loadSingleStudentAttendance(selectedStudent.value)
+    }
+  }
 }
 
 
@@ -85,6 +91,61 @@ const reportTitle = computed(() => {
 })
 
 const printDate = computed(() => moment().format('DD MMMM, Y - hh:mm A'))
+
+const breadcrumbs = computed(() => {
+  const items = []
+
+  if (activeReportTab.value === 'single-class-summary') {
+    items.push({
+      label: 'Summary',
+      onClick: () => {
+        closeSingleStudentAttendance()
+        closeClassSummary()
+      },
+    })
+
+    if (selectedSummaryClass.value) {
+      items.push({
+        label: selectedSummaryClass.value.class_name || selectedSummaryClass.value.class_short || 'Class',
+        onClick: () => {
+          activeReportTab.value = 'single-class-summary'
+          selectedStudent.value = null
+          singleStudentAttendance.value = []
+          attendanceViewMode.value = 'compact'
+          if (!singleClassReport.value) {
+            loadSingleClassSummaryReport(selectedSummaryClass.value.class_short, [defaultStart.value, defaultEnd.value])
+          }
+        },
+      })
+
+      items.push({
+        label: 'Students',
+        onClick: () => {
+          activeReportTab.value = 'single-class-summary'
+          selectedStudent.value = null
+          singleStudentAttendance.value = []
+          attendanceViewMode.value = 'compact'
+          if (!singleClassReport.value) {
+            loadSingleClassSummaryReport(selectedSummaryClass.value.class_short, [defaultStart.value, defaultEnd.value])
+          }
+        },
+      })
+
+      if (selectedStudent.value) {
+        items.push({
+          label: selectedStudent.value.name || selectedStudent.value.dakhela || 'Student',
+          onClick: null,
+        })
+      }
+    }
+
+    return items
+  }
+
+  const tabLabel = reportTabs.find(tab => tab.key === activeReportTab.value)?.label || 'Summary'
+  items.push({ label: tabLabel, onClick: null })
+  return items
+})
 
 const monthKeys = computed(() => {
   let classWise = reports.value?.classWise || {}
@@ -247,6 +308,21 @@ onMounted(()=>{
 
 <template>
   <div>
+    <div v-if="breadcrumbs.length" class="breadcrumb-bar hide_onprint">
+      <span v-for="(crumb, idx) in breadcrumbs" :key="'crumb-' + idx" class="breadcrumb-item">
+        <button
+          v-if="crumb.onClick && idx < breadcrumbs.length - 1"
+          type="button"
+          class="breadcrumb-link"
+          @click="crumb.onClick"
+        >
+          {{ crumb.label }}
+        </button>
+        <span v-else class="breadcrumb-current">{{ crumb.label }}</span>
+        <span v-if="idx < breadcrumbs.length - 1" class="breadcrumb-sep">&gt;</span>
+      </span>
+    </div>
+
     <div class="d-flex justify-content-between align-items-center mb-3">
       <MonthPicker
         :onChange="handleDateChange"
@@ -345,4 +421,46 @@ onMounted(()=>{
 
 
 <style scoped>
+.breadcrumb-bar{
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding: 6px 10px;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 13px;
+  color: #6b7280;
+}
+.breadcrumb-item{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.breadcrumb-link{
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  padding: 3px 10px;
+  border-radius: 999px;
+  color: #1f2937;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color .15s ease, border-color .15s ease, color .15s ease;
+}
+.breadcrumb-link:hover{
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+.breadcrumb-current{
+  background: var(--primaryColor);
+  color: #ffffff;
+  font-weight: 600;
+  padding: 3px 12px;
+  border-radius: 999px;
+}
+.breadcrumb-sep{
+  color: #cbd5e1;
+}
 </style>
