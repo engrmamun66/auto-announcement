@@ -17,6 +17,7 @@ const callbacks = inject("callbacks");
 const getAttendeceReports = inject("getAttendeceReports");
 const getAttendeceReportsForSingleClass = inject("getAttendeceReportsForSingleClass");
 const all_students_non_copied = inject("all_students_non_copied");
+const http = inject("http");
 
 const emit = defineEmits(['onBtnSubmit', 'onBtnClear']);
 let log = console.log
@@ -71,6 +72,9 @@ const reportTabs = [
 ]
 let selectedSummaryClass = ref(null)
 let singleClassReport = ref(null)
+let selectedStudent = ref(null)
+let singleStudentAttendance = ref([])
+let loadingStudentAttendance = ref(false)
 
 const monthKeys = computed(() => {
   let classWise = reports.value?.classWise || {}
@@ -93,6 +97,8 @@ function closeClassSummary(){
   selectedSummaryClass.value = null
   singleClassReport.value = null
   activeReportTab.value = 'summary'
+  selectedStudent.value = null
+  singleStudentAttendance.value = []
 }
 
 
@@ -123,6 +129,35 @@ async function loadSingleClassSummaryReport(class_short, [start_date, end_date])
   let data = await getAttendeceReportsForSingleClass(payloadData, {start_date, end_date})
   singleClassReport.value = data || null
 }  
+
+async function loadSingleStudentAttendance(std){
+  if(!std?.dakhela) return
+  selectedStudent.value = std
+  loadingStudentAttendance.value = true
+  try {
+    let params = {
+      start_date: defaultStart.value,
+      end_date: defaultEnd.value,
+      student_ids: String(std.dakhela),
+      limit: 1000,
+      sort_by: 'date',
+      sort_direction: 'ASC',
+    }
+    let response = await http.post('/attendence-list', {}, { params })
+    if(response.status == 200){
+      singleStudentAttendance.value = response.data?.data || []
+    }
+  } catch (error) {
+    console.warn('loadSingleStudentAttendance__error', error);
+  } finally {
+    loadingStudentAttendance.value = false
+  }
+}
+
+function closeSingleStudentAttendance(){
+  selectedStudent.value = null
+  singleStudentAttendance.value = []
+}
 
 
 
@@ -197,7 +232,7 @@ onMounted(()=>{
             <td>{{ getClassReport(cls.class_short)?.total_absent || 0 }}</td>
             <td>{{ getClassReport(cls.class_short)?.present_percent || 0 }}%</td>
             <td>
-              <button class="btn btn-sm btn-light" @click="openClassSummary(cls)">View</button>
+              <button class="btn btn-sm btn-light" @click="openClassSummary(cls)">Details</button>
             </td>
           </tr>
         </template>
@@ -206,7 +241,7 @@ onMounted(()=>{
 
     <div v-if="activeReportTab === 'single-class-summary' && selectedSummaryClass" class="mb-">
       <div class="d-flex justify-content-center align-items-center">
-        <h5 class="table-title">Single Class Summary</h5>
+        <h5 class="table-title">{{ selectedSummaryClass.class_name }} Summary</h5>
       </div>
       <myTable topMarginClass="mt-2">
         <template #thead>
@@ -234,6 +269,46 @@ onMounted(()=>{
         </myTable>
       </div>
 
+      <div v-if="activeReportTab === 'single-class-summary' && selectedStudent" class="mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h6 class="table-title">
+            Attendance Details: {{ selectedStudent.name || '-' }} ({{ selectedStudent.dakhela }})
+          </h6>
+          <button class="btn btn-sm btn-outline-secondary" @click="closeSingleStudentAttendance">Close</button>
+        </div>
+        
+        <div v-if="loadingStudentAttendance" class="text-muted">Loading...</div>
+        <myTable v-else topMarginClass="mt-2">
+          <template #thead>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>In</th>
+                <th>Out</th>
+                <th>Status</th>
+                <th>Late(min)</th>
+                <th>Shift</th>
+                <th>Remarks</th>
+              </tr>
+            </thead>
+          </template>
+          <template #rows>
+            <tr v-for="(row, idx) in singleStudentAttendance" :key="'att-' + idx">
+              <td>{{ row.date }}</td>
+              <td>{{ row.in_time || '-' }}</td>
+              <td>{{ row.out_time || '-' }}</td>
+              <td>{{ row.status || '-' }}</td>
+              <td>{{ row.late_in_minute ?? 0 }}</td>
+              <td>{{ row.shift_duration || '-' }}</td>
+              <td>{{ row.remarks || '-' }}</td>
+            </tr>
+            <tr v-if="!singleStudentAttendance.length">
+              <td colspan="7" class="text-center text-muted">No attendance data found.</td>
+            </tr>
+          </template>
+        </myTable>
+      </div>
+
       <div v-if="activeReportTab === 'single-class-summary' && singleClassReport?.students?.length" class="mb-3">
         <div class="d-flex justify-content-center align-items-center">
           <!-- <h5 class="table-title">Student-wise Report</h5> -->
@@ -248,6 +323,7 @@ onMounted(()=>{
                 <th>Present</th>
                 <th>Absent</th>
                 <th>Present(%)</th>
+                <th>Action</th>
               </tr>
             </thead>
           </template>
@@ -259,6 +335,9 @@ onMounted(()=>{
               <td>{{ std.total_present || 0 }}</td>
               <td>{{ std.total_absent || 0 }}</td>
               <td>{{ std.present_percent || 0 }}%</td>
+              <td>
+                <button class="btn btn-sm btn-light" @click="loadSingleStudentAttendance(std)">Detail</button>
+              </td>
             </tr>
           </template>
         </myTable>
