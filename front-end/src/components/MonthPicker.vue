@@ -5,7 +5,8 @@
                 <div class="yearRow">
                     <button type="button" class="yearBtn" @click.stop="changeYear('start', -1)">-</button>
                     <span class="yearValue">{{ startYear }}</span>
-                    <button type="button" class="yearBtn" @click.stop="changeYear('start', 1)">+</button>
+                    <button type="button" class="yearBtn" @click.stop="changeYear('start', 1)"
+                        :disabled="isFutureYear(startYear + 1)">+</button>
                 </div>
                 <div class="monthRow">
                     <div class="monthSelectWrap">
@@ -24,7 +25,8 @@
                 <div class="yearRow">
                     <button type="button" class="yearBtn" @click.stop="changeYear('end', -1)">-</button>
                     <span class="yearValue">{{ endYear }}</span>
-                    <button type="button" class="yearBtn" @click.stop="changeYear('end', 1)">+</button>
+                    <button type="button" class="yearBtn" @click.stop="changeYear('end', 1)"
+                        :disabled="isFutureYear(endYear + 1)">+</button>
                 </div>
                 <div class="monthRow">
                     <div class="monthSelectWrap">
@@ -143,6 +145,71 @@ export default {
         },
     },
     methods: {
+        getNowParts() {
+            const now = new Date();
+            return { year: now.getFullYear(), month: now.getMonth() };
+        },
+        isFutureYear(year) {
+            if (!this.inactiveFutureMonth) return false;
+            const nowYear = this.getNowParts().year;
+            return year > nowYear;
+        },
+        clampToCurrentMonthIfFuture(year, month) {
+            if (!this.inactiveFutureMonth) return { year, month };
+            const { year: nowYear, month: nowMonth } = this.getNowParts();
+            let nextYear = year;
+            let nextMonth = month;
+            if (nextYear > nowYear) {
+                nextYear = nowYear;
+            }
+            if (nextYear === nowYear && nextMonth > nowMonth) {
+                nextMonth = nowMonth;
+            }
+            return { year: nextYear, month: nextMonth };
+        },
+        loadFromStorage() {
+            if (typeof window === "undefined" || !window.localStorage) return false;
+            const raw = window.localStorage.getItem("monthPickerRange");
+            if (!raw) return false;
+            try {
+                const saved = JSON.parse(raw);
+                if (
+                    typeof saved?.startYear !== "number" ||
+                    typeof saved?.startMonth !== "number" ||
+                    typeof saved?.endYear !== "number" ||
+                    typeof saved?.endMonth !== "number"
+                ) {
+                    return false;
+                }
+                const start = this.clampToCurrentMonthIfFuture(saved.startYear, saved.startMonth);
+                const end = this.clampToCurrentMonthIfFuture(saved.endYear, saved.endMonth);
+
+                const nextState = this.fixDates({
+                    selectingStart: false,
+                    selectingEnd: false,
+                    yearContext: start.year,
+                    startMonth: start.month,
+                    startYear: start.year,
+                    endMonth: end.month,
+                    endYear: end.year,
+                });
+
+                Object.assign(this, nextState);
+                return true;
+            } catch (err) {
+                return false;
+            }
+        },
+        saveToStorage() {
+            if (typeof window === "undefined" || !window.localStorage) return;
+            const payload = {
+                startYear: this.startYear,
+                startMonth: this.startMonth,
+                endYear: this.endYear,
+                endMonth: this.endMonth,
+            };
+            window.localStorage.setItem("monthPickerRange", JSON.stringify(payload));
+        },
         handleDocumentClick(event) {
             if (!this.picking) return;
             if (!this.$el || this.$el.contains(event.target)) return;
@@ -174,9 +241,23 @@ export default {
             let { startMonth, startYear, endMonth, endYear } = this;
 
             if (which === "start") {
-                startYear += delta;
+                const nextYear = startYear + delta;
+                if (this.isFutureYear(nextYear)) return;
+                startYear = nextYear;
             } else {
-                endYear += delta;
+                const nextYear = endYear + delta;
+                if (this.isFutureYear(nextYear)) return;
+                endYear = nextYear;
+            }
+
+            if (which === "start") {
+                const clamped = this.clampToCurrentMonthIfFuture(startYear, startMonth);
+                startYear = clamped.year;
+                startMonth = clamped.month;
+            } else {
+                const clamped = this.clampToCurrentMonthIfFuture(endYear, endMonth);
+                endYear = clamped.year;
+                endMonth = clamped.month;
             }
 
             const nextState = this.fixDates({
@@ -288,12 +369,17 @@ export default {
         },
         fireChange() {
             this.onChange([this.startValue, this.endValue]);
+            this.saveToStorage();
         },
     },
     mounted() {
         document.addEventListener("mousedown", this.handleDocumentClick);
         document.addEventListener("touchstart", this.handleDocumentClick, { passive: true });
         this.openStartPicker();
+        if (this.loadFromStorage()) {
+            this.setDates();
+            this.fireChange();
+        }
     },
     beforeUnmount() {
         document.removeEventListener("mousedown", this.handleDocumentClick);
@@ -338,7 +424,7 @@ export default {
   min-width: 200px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 0px;
 }
 
 .rangePanel.isActive {
@@ -368,6 +454,12 @@ export default {
 
 .yearBtn:hover {
   background-color: #b9c3d3;
+}
+
+.yearBtn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  background-color: #d6dbe4;
 }
 
 .yearBtn:active {

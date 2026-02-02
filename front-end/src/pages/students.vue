@@ -798,9 +798,9 @@ watch(fixedWidthSoundCol, (newVal) => {
 
                     </div>
                 
-                      <small v-for="shift in helper.getShifts(classes, std.class_short, false)">
+                      <!-- <small v-for="shift in helper.getShifts(classes, std.class_short, false)">
                         {{ Ahelper.printShift(shift) }}<br>
-                      </small> 
+                      </small>  -->
                   </template> 
                 </template> 
                 <template v-else>

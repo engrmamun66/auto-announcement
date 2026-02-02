@@ -305,7 +305,7 @@ onMounted(()=>{
   background-color: #ffffff;
   color: #333333;
   padding: 6px 14px;
-  border-radius: 999px;
+  border-radius: 12px;
   font-size: 14px;
   cursor: pointer;
   transition: all 0.15s ease;

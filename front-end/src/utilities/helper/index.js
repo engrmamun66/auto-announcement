@@ -39,37 +39,60 @@ const helper = {
       }
     },
     localStorage: function (name) {
-        return {
-          get value() {
-            if (typeof process == "undefined") {
-              var process = { client: true };
+      return {
+        get value() {
+          if (typeof process == "undefined") {
+            var process = { client: true };
+          }
+          if (process.client && globalThis.localStorage) {
+            let data = globalThis.localStorage.getItem(name);
+            if(!data) return data
+
+            let parts = data.split('::')
+            let type = 'string'
+            if(parts.length > 1){
+              type = parts[0]
+              data = parts.slice(1).join('')
             }
-            if (process.client && globalThis.localStorage) {
-              let data = globalThis.localStorage.getItem(name);
-              if (
-                (data && data?.startsWith("{") && data?.endsWith("}")) ||
-                (data?.startsWith("[") && data?.endsWith("]"))
-              ) {
-                data = JSON.parse(data);
-              }
-              if(data === 'true') return true
-              if(data === 'false') return false
+
+
+            if (
+              (data && data?.startsWith("{") && data?.endsWith("}")) ||
+              (data?.startsWith("[") && data?.endsWith("]"))
+            ) {
+              data = JSON.parse(data);
+            }
+            if(type == 'boolean'){
+              return data === 'true' ? true : false
+            }
+            else if(type == 'number'){
+              return Number(data)
+            }
+            else  {
               return data;
             }
-          },
-          set value(value) {
-            if (typeof process == "undefined") {
-              var process = { client: true };
-            }
-            if (process.client) {
+          }
+        },
+        set value(value) {
+
+          let type = typeof value
+          if (typeof process == "undefined") {
+            var process = { client: true };
+          }
+          if (process.client && globalThis.localStorage) {
+            if(value === null || value === ''){
+              localStorage.removeItem(name)
+            } else {
               if (value && typeof value === "object") {
                 value = JSON.stringify(value);
               }
-              localStorage.setItem(name, value);
+              let prefix = `${type}::`
+              localStorage.setItem(name, prefix + value);
             }
-          },
-        };
-    },  
+          }
+        },
+      };
+    }, 
     time_in_miliseconds: function(time_24=''){
       let [hours, minutes] = time_24.split(":")      
       
