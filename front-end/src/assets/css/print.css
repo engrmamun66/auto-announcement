@@ -18,7 +18,7 @@
   }
   .print-area .hide_onprint
    {
-    display: none;
+    display: none !important;
   }
 
   .print-area .invisible_onprint

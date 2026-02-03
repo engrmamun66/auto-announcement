@@ -490,7 +490,7 @@ onMounted(()=>{
 
 
 <template>
-  <div>
+  <div class="print-area">
     <div v-if="breadcrumbs.length" class="breadcrumb-bar hide_onprint">
       <span v-for="(crumb, idx) in breadcrumbs" :key="'crumb-' + idx" class="breadcrumb-item">
         <button
@@ -506,7 +506,7 @@ onMounted(()=>{
       </span>
     </div>
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-3 hide_onprint">
       <MonthPicker
         :onChange="handleDateChange"
         :defaultStartValue="defaultStart"
@@ -528,7 +528,7 @@ onMounted(()=>{
       </div>
     </div>
 
-    <div class="print-area">
+    <div class="print-area----">
 
       <div id="REPORT_HEADER" class="only-show-onprint report-header">
         <div>

@@ -1,5 +1,5 @@
 <template>
-    <div :class="['termInput', selectingStart || selectingEnd ? 'active' : '']" tabindex="-1">
+    <div class="hide_onprint" :class="['termInput', selectingStart || selectingEnd ? 'active' : '']" tabindex="-1">
         <div class="rangePanels">
             <div class="rangePanel" :class="selectingStart ? 'isActive' : ''" @click="openStartPicker">
                 <div class="yearRow">
