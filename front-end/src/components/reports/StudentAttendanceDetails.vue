@@ -7,7 +7,7 @@
       <div class="d-flex align-items-center gap-2">
         <div class="btn-group bg-white hide_onprint" role="group" aria-label="Attendance view mode">
           <button
-            class="btn btn-sm btn-outline-primary btn-view-toggle"
+            class="btn btn-sm btn-outline-secondary"
             :class="{ active: viewMode === 'compact' }"
             @click="$emit('changeView', 'compact')"
           >
@@ -15,7 +15,7 @@
           </button>
 
           <button
-            class="btn btn-sm btn-outline-primary btn-view-toggle"
+            class="btn btn-sm btn-outline-secondary"
             :class="{ active: viewMode === 'details' }"
             @click="$emit('changeView', 'details')"
           >
@@ -108,11 +108,6 @@ defineEmits(['changeView', 'close'])
   background: white;
   padding: 6px 15px;
   border-radius: 10px;
-}
-.btn-view-toggle.active{
-  background-color: var(--primaryColor);
-  color: #ffffff;
-  border-color: var(--primaryColor);
 }
 .btn-close-light{
   color: #b42318;
