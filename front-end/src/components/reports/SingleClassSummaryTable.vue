@@ -12,7 +12,7 @@
             <th>Presentable Days</th>
             <th>Present</th>
             <th>Absent</th>
-            <th SingleClassSummary>Present(%)</th>
+            <th>Present(%)</th>
           </tr>
         </thead>
       </template>
