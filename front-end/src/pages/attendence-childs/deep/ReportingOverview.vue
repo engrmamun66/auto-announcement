@@ -85,6 +85,7 @@ let singleStudentAttendance = ref([])
 let loadingStudentAttendance = ref(false)
 let attendanceViewMode = ref('compact') // details | compact
 let reportLeaves = ref([])
+let studentSearchId = ref('')
 
 const reportTitle = computed(() => {
   if (activeReportTab.value === 'single-class-summary' && selectedSummaryClass.value) {
@@ -188,6 +189,36 @@ function getClassReport(class_short, monthKey='total'){
   return reports.value?.classWise?.[class_short]?.[monthKey] || {}
 }
 
+async function openStudentMonthlyById(){
+  const raw = String(studentSearchId.value || '').trim()
+  if(!raw) return
+  const found = all_students_non_copied.value.find(s => String(s.dakhela) === raw)
+  if(!found) return
+
+  try {
+    const leaves = await callbacks.getLeavesAndVacations({
+      start_date: defaultStart.value,
+      end_date: defaultEnd.value
+    })
+    reportLeaves.value = leaves || reportLeaves.value
+  } catch (error) {
+    console.warn('openStudentMonthlyById__leave_error', error)
+  }
+
+  const clsInfo = classes.value.find(c => c.class_short === found.class_short) || {}
+  selectedSummaryClass.value = clsInfo.class_short ? clsInfo : { class_short: found.class_short, class_name: found.class_short }
+  activeReportTab.value = 'single-class-summary'
+  selectedStudentMonth.value = null
+  singleStudentAttendance.value = []
+  attendanceViewMode.value = 'compact'
+  loadSingleStudentAttendance(found)
+}
+
+function clearStudentSearch(){
+  studentSearchId.value = ''
+  closeClassSummary()
+}
+
 function enrichStudentInfo(std){
   if(!std) return null
   const meta = all_students_non_copied.value.find(s => String(s.dakhela) === String(std.dakhela))
@@ -288,6 +319,9 @@ function goBackOneStep(){
     selectedStudent.value = null
     singleStudentAttendance.value = []
     attendanceViewMode.value = 'compact'
+    if (!singleClassReport.value?.students?.length) {
+      closeClassSummary()
+    }
     return
   }
   if (selectedSummaryClass.value) {
@@ -503,13 +537,43 @@ onMounted(()=>{
     </div>
 
     <div class="d-flex justify-content-between align-items-center mb-3 hide_onprint">
-      <MonthPicker
-        :onChange="handleDateChange"
-        :defaultStartValue="defaultStart"
-        :defaultEndValue="defaultEnd"
-        :dayOfMonth="1"
-        :inactiveFutureMonth="true"
-      ></MonthPicker>
+      <div class="d-flex align-items-center gap-2">
+        <MonthPicker
+          :onChange="handleDateChange"
+          :defaultStartValue="defaultStart"
+          :defaultEndValue="defaultEnd"
+          :dayOfMonth="1"
+          :inactiveFutureMonth="true"
+        ></MonthPicker>
+
+        <div class="student-search">
+          <div class="input-group input-group-sm">
+            <input
+              v-model="studentSearchId"
+              type="search"
+              class="form-control"
+              placeholder="Student ID"
+              @keyup.enter="openStudentMonthlyById"
+            />
+            <button
+              class="btn btn-outline-secondary"
+              type="button"
+              :disabled="!studentSearchId"
+              @click="openStudentMonthlyById"
+            >
+              <i class='bx bx-search'></i>
+            </button>
+            <button
+              class="btn btn-outline-secondary"
+              type="button"
+              :disabled="!studentSearchId"
+              @click="clearStudentSearch"
+            >
+              <i class='bx bx-x'></i>
+            </button>
+          </div>
+        </div>
+      </div>
 
       <div v-if="activeReportTab === 'single-class-summary'" class="ms-auto">
         <BackToPrevious @click="goBackOneStep" />
@@ -644,5 +708,28 @@ onMounted(()=>{
 }
 .breadcrumb-sep{
   color: #cbd5e1;
+}
+.student-search{
+  min-width: 180px;
+}
+.student-search .input-group{
+  width: 180px;
+}
+.student-search .form-control{
+  text-align: left;
+}
+.student-search .form-control,
+.student-search .btn{
+  height: 40px;
+}
+.student-search .form-control,
+.student-search .btn{
+  background-color: #ffffff;
+  border-color: #e5e7eb;
+}
+.student-search .form-control:focus,
+.student-search .btn:focus{
+  border-color: #d1d5db;
+  box-shadow: none;
 }
 </style>
