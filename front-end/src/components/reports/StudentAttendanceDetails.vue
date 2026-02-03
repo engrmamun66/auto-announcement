@@ -2,7 +2,10 @@
   <div v-if="selectedStudent">
     <div class="d-flex justify-content-between align-items-center mb-2">
       <h6 class="table-title">
-        Attendance Of: {{ selectedStudent.name || '-' }} ({{ selectedStudent.dakhela }})
+        Attendance Of: {{ selectedStudent.name || '-' }}
+        <span class="table-title-meta">
+          ({{ selectedStudent.class_name || selectedStudent.class_short || '-' }} • {{ selectedStudent.dakhela }})
+        </span>
       </h6>
       <div class="d-flex align-items-center gap-2">
         <div class="btn-group bg-white hide_onprint" role="group" aria-label="Attendance view mode">
@@ -108,6 +111,10 @@ defineEmits(['changeView', 'close'])
   background: white;
   padding: 6px 15px;
   border-radius: 10px;
+}
+.table-title-meta{
+  font-weight: 600;
+  color: #6b7280;
 }
 .btn-close-light{
   color: #b42318;

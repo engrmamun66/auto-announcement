@@ -1,8 +1,12 @@
 <template>
   <div>
     <div v-if="selectedStudent" class="d-flex justify-content-between align-items-center mb-2">
-      <h6 class="table-title">
-        Monthly Attendance: {{ selectedStudent.name || '-' }} ({{ selectedStudent.dakhela }})
+      <h6 class="table-title table-title-highlight">
+        Monthly Attendance:
+        {{ selectedStudent.name || '-' }}
+        <span class="table-title-meta">
+          ({{ selectedStudent.class_name || selectedStudent.class_short || '-' }} • {{ selectedStudent.dakhela }})
+        </span>
       </h6>
       <!-- <button class="btn btn-sm btn-close-light hide_onprint" @click="$emit('close')">Back</button> -->
     </div>
@@ -54,6 +58,14 @@ defineEmits(['details', 'close'])
   background: white;
   padding: 6px 15px;
   border-radius: 10px;
+}
+.table-title-highlight{
+  font-weight: 800; 
+  font-size: 16px;
+}
+.table-title-meta{
+  font-weight: 600;
+  color: #6b7280;
 }
 .btn-close-light{
   color: #b42318;

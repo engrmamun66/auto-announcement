@@ -1,7 +1,7 @@
 <template>
   <span class="back-to-previous" @click="$emit('click')">
     <i class="fa fa-arrow-left me-2"></i>
-    Back to previous view
+    Back to view
   </span>
 </template>
 

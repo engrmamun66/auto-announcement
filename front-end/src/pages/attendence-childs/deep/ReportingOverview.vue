@@ -188,6 +188,14 @@ function getClassReport(class_short, monthKey='total'){
   return reports.value?.classWise?.[class_short]?.[monthKey] || {}
 }
 
+function enrichStudentInfo(std){
+  if(!std) return null
+  const meta = all_students_non_copied.value.find(s => String(s.dakhela) === String(std.dakhela))
+  const class_short = std.class_short || meta?.class_short || null
+  const class_name = classes.value.find(c => c.class_short === class_short)?.class_name || meta?.class_name || ''
+  return { ...std, class_short, class_name }
+}
+
 function openClassSummary(cls){
   selectedSummaryClass.value = cls
   activeReportTab.value = 'single-class-summary'
@@ -241,7 +249,7 @@ async function loadSingleClassSummaryReport(class_short, [start_date, end_date])
 
 async function loadSingleStudentAttendance(std){
   if(!std?.dakhela) return
-  selectedStudent.value = std
+  selectedStudent.value = enrichStudentInfo(std)
   selectedStudentMonth.value = null
   loadingStudentAttendance.value = true
   attendanceViewMode.value = 'compact'
