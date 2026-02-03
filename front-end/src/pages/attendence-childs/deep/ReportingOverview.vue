@@ -572,6 +572,7 @@ onMounted(()=>{
       <div v-if="activeReportTab === 'single-class-summary' && singleClassReport?.students?.length && !selectedStudent" class="mb-3">
         <StudentWiseReportTable
           :students="singleClassReport.students"
+          :monthKeys="monthKeys"
           @details="loadSingleStudentAttendance"
         />
       </div>

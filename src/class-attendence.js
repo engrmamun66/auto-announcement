@@ -664,6 +664,16 @@ class Attendance {
         return sum + (isClassHoliday(date) ? 0 : 1);
       }, 0);
 
+      const monthMeta = {};
+      date_duration.forEach((date) => {
+        const monthKey = moment(date).startOf('month').format('YYYY-MM-01');
+        if (!monthMeta[monthKey]) {
+          monthMeta[monthKey] = { total_days: 0, total_presentable_days: 0 };
+        }
+        monthMeta[monthKey].total_days += 1;
+        if (!isClassHoliday(date)) monthMeta[monthKey].total_presentable_days += 1;
+      });
+
       const whereParts = [];
       const params = [];
       if (student_ids.length) {
@@ -709,6 +719,16 @@ class Attendance {
         const students = class_students.map((student) => {
           const dakhela = Number(student?.dakhela);
           let total_present = 0;
+          const monthly = {};
+          Object.keys(monthMeta).forEach((monthKey) => {
+            monthly[monthKey] = {
+              total_days: monthMeta[monthKey].total_days,
+              total_presentable_days: monthMeta[monthKey].total_presentable_days,
+              total_present: 0,
+              total_absent: 0,
+              present_percent: 0,
+            };
+          });
 
           date_duration.forEach((date) => {
             const is_presentable_day = !isClassHoliday(date);
@@ -723,6 +743,19 @@ class Attendance {
             }
 
             if (is_present) total_present += 1;
+
+            const monthKey = moment(date).startOf('month').format('YYYY-MM-01');
+            const monthItem = monthly[monthKey];
+            if (monthItem && is_present) monthItem.total_present += 1;
+          });
+
+          Object.keys(monthly).forEach((monthKey) => {
+            const item = monthly[monthKey];
+            const denom = item.total_presentable_days;
+            item.total_absent = Math.max(0, denom - item.total_present);
+            item.present_percent = denom > 0
+              ? Number(((item.total_present / denom) * 100).toFixed(2))
+              : 0;
           });
 
           const denom = total_presentable_days;
@@ -740,6 +773,7 @@ class Attendance {
             total_in: total_present,
             total_absent,
             present_percent,
+            monthly,
           };
         });
 
