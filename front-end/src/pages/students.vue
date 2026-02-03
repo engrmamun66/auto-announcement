@@ -787,7 +787,10 @@ watch(fixedWidthSoundCol, (newVal) => {
                           Attendance
                       </button>
                       <!-- For Students Attendence calendar-->
-                      <button class="class-short-btn px-2 for-attendence" @click.stop="() => {
+                      <button class="class-short-btn px-2 for-attendence" 
+                      :tooltip="helper.getShifts(classes, std.class_short, false).map(shift => Ahelper.printShift(shift)).join(' | ')"
+                      style="--tmaxW: 27em"
+                      @click.stop="() => {
                         targetStudent = std; 
                         $refs.dateTimePickerRef.setTime(moment().format('HH:mm'))
                         $refs.dateTimePickerRef.toggle()
