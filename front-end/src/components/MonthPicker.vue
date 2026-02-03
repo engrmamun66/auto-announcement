@@ -422,7 +422,8 @@ export default {
   padding: 8px 10px;
   min-width: 100px;
   display: flex;
-  flex-direction: column;
+  /* flex-direction: column; */
+  flex-direction: row;
   gap: 0px;
 }
 .rangePanel:first-child{
