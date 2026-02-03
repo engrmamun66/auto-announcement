@@ -12,7 +12,7 @@
       </thead>
     </template>
     <template #rows>
-      <tr v-for="std in students" :key="'std-m-' + std.dakhela">
+      <tr v-for="std in sortedStudents" :key="'std-m-' + std.dakhela">
         <td>{{ std.name || '-' }}</td>
         <td>{{ std.dakhela }}</td>
         <td v-for="m in monthKeys" :key="'m-' + std.dakhela + '-' + m">
@@ -31,14 +31,27 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import moment from 'moment/moment'
 import myTable from '../myTable.vue'
 
-defineProps({
+const props = defineProps({
   students: { type: Array, default: () => [] },
   monthKeys: { type: Array, default: () => [] },
+  sortOrder: { type: String, default: 'desc' },
 })
 defineEmits(['details'])
+
+const sortedStudents = computed(() => {
+  const list = [...(props.students || [])]
+  const direction = props.sortOrder === 'asc' ? 1 : -1
+  return list.sort((a, b) => {
+    const av = Number(a.present_percent || 0)
+    const bv = Number(b.present_percent || 0)
+    if (av === bv) return 0
+    return av > bv ? direction : -direction
+  })
+})
 
 function formatMonth(value){
   return moment(value).format('MMM YYYY')

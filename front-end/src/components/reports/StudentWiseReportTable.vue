@@ -11,21 +11,21 @@
         </button>
         <button
           class="btn btn-sm btn-outline-secondary"
-          :class="{ active: activeView === 'ranking' }"
-          @click="activeView = 'ranking'"
+          :class="{ active: activeView === 'summary' }"
+          @click="activeView = 'summary'"
         >
-          Ranking
+          Summary
         </button>
       </div>
 
-      <div v-if="activeView === 'ranking'" class="btn-group bg-white hide_onprint" role="group" aria-label="Sort by present percent">
+      <div class="btn-group bg-white hide_onprint" role="group" aria-label="Sort by present percent">
         <button
           class="btn btn-sm btn-outline-secondary"
           :class="{ active: sortOrder === 'desc' }"
           @click="setSort('desc')"
         >
           <i class='bx bx-sort-down transformY-2px'></i>
-          Rank
+          Sort
         </button>
         <button
           class="btn btn-sm btn-outline-secondary"
@@ -33,7 +33,7 @@
           @click="setSort('asc')"
         >
           <i class='bx bx-sort-up transformY-2px'></i>
-          Rank
+          Sort
         </button>
       </div>
     </div>
@@ -42,6 +42,7 @@
       v-if="activeView === 'monthly'"
       :students="students"
       :monthKeys="monthKeys"
+      :sortOrder="sortOrder"
       @details="$emit('details', $event)"
     />
 
