@@ -4,7 +4,7 @@
       <h6 class="table-title">
         Monthly Attendance: {{ selectedStudent.name || '-' }} ({{ selectedStudent.dakhela }})
       </h6>
-      <button class="btn btn-sm btn-close-light hide_onprint" @click="$emit('close')">Back</button>
+      <!-- <button class="btn btn-sm btn-close-light hide_onprint" @click="$emit('close')">Back</button> -->
     </div>
     <myTable topMarginClass="mt-2">
       <template #thead>

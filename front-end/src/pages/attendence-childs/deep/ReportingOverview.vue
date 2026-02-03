@@ -551,7 +551,7 @@ onMounted(()=>{
         />
       </div>
   
-      <div v-if="activeReportTab === 'single-class-summary' && selectedSummaryClass" class="mb-3">
+      <div v-if="activeReportTab === 'single-class-summary' && selectedSummaryClass && classSummaryStep === 'class' && !selectedStudent" class="mb-3">
         <SingleClassSummaryTable
           :classInfo="selectedSummaryClass"
           :summary="getClassReport(selectedSummaryClass.class_short)"
