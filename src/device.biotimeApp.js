@@ -134,7 +134,7 @@ const TEST_TRANSACTION_DATA = [
     {
       "id": 1,
       "emp_code": "467",
-      "punch_time": "2026-03-04 07:50:00",
+      "punch_time": "2026-02-04 07:50:00",
       "punch_state": "0",
       "verify_type": 1,
       "work_code": null,
@@ -159,7 +159,7 @@ const TEST_TRANSACTION_DATA = [
     {
       "id": 2,
       "emp_code": "430",
-      "punch_time": "2026-03-04 02:50:00",
+      "punch_time": "2026-02-04 02:50:00",
       "punch_state": "0",
       "verify_type": 1,
       "work_code": null,
