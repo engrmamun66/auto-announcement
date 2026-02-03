@@ -31,6 +31,20 @@ watch(tab, (index) => {
   storage('attendance_tab').value = index
 })
 
+const clearingLive = ref(false)
+const hasLiveAttendence = computed(() => (liveAttendenceList.value?.length || 0) > 0)
+
+async function clearAllAndRelaod(){
+  if (!hasLiveAttendence.value || clearingLive.value) return
+  if (!confirm('Clear all live attendance?')) return
+  clearingLive.value = true
+  try {
+    liveAttendenceList.value = []
+  } finally {
+    clearingLive.value = false
+  }
+}
+
 // ====================================================== //
 // ====================================================== //
 // ====================================================== //
@@ -244,6 +258,14 @@ onMounted(()=>{
             <Btn class="white">Out: <span class="badge text-white bg-warning">{{ Ahelper.count.out(liveAttendenceList) }}</span></Btn>
             <Btn class="white">Late: <span class="badge text-white bg-danger">{{ Ahelper.count.late(liveAttendenceList) }}</span></Btn>
             <Btn class="white">Total: <span class="badge text-white bg-success">{{ liveAttendenceList?.length }}</span></Btn>
+            <Btn
+              class="red"
+              :disabled="!hasLiveAttendence || clearingLive"
+              @click="clearAllAndRelaod"
+            >
+              <template v-if="clearingLive">Clearing...</template>
+              <template v-else>Clear All</template>
+            </Btn>
           </div>
         </div>   
       <div v-else-if="tab==2">
