@@ -441,6 +441,12 @@ export default {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
+  zoom: 0.8;
+  opacity: 0.75;
+}
+
+.yearRow:hover { 
+  opacity: 1;
 }
 
 .yearBtn {
