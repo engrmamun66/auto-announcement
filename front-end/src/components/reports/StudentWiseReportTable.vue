@@ -1,20 +1,22 @@
 <template>
   <div>
     <div class="d-flex justify-content-end mb-2">
-      <div class="btn-group" role="group" aria-label="Sort by present percent">
-        <button
-          class="btn btn-sm btn-outline-secondary"
-          :class="{ active: sortOrder === 'asc' }"
-          @click="setSort('asc')"
-        >
-          Sort ASC
-        </button>
+      <div class="btn-group bg-white" role="group" aria-label="Sort by present percent">
         <button
           class="btn btn-sm btn-outline-secondary"
           :class="{ active: sortOrder === 'desc' }"
           @click="setSort('desc')"
         >
-          Sort DESC
+         <i class='bx bx-sort-down'></i>
+          Rank
+        </button>
+        <button
+          class="btn btn-sm btn-outline-secondary"
+          :class="{ active: sortOrder === 'asc' }"
+          @click="setSort('asc')"
+        >
+        <i class='bx bx-sort-up'></i>
+          Rank
         </button>
       </div>
     </div>

@@ -60,7 +60,7 @@
       <template #thead>
         <thead>
           <tr>
-            <th>Date</th>
+            <th StudentAttendanceDetails>Date</th>
             <th>In</th>
             <th>Out</th>
             <th>Status</th>

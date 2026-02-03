@@ -7,6 +7,7 @@ import BackToPrevious from '../../../components/reports/BackToPrevious.vue'
 import SummaryTable from '../../../components/reports/SummaryTable.vue'
 import SingleClassSummaryTable from '../../../components/reports/SingleClassSummaryTable.vue'
 import StudentWiseReportTable from '../../../components/reports/StudentWiseReportTable.vue'
+import StudentMonthlyReportTable from '../../../components/reports/StudentMonthlyReportTable.vue'
 import StudentAttendanceDetails from '../../../components/reports/StudentAttendanceDetails.vue'
 import MonthlyReportTable from '../../../components/reports/MonthlyReportTable.vue'
 import RankingTable from '../../../components/reports/RankingTable.vue'
@@ -47,6 +48,9 @@ async function handleDateChange(dates) {
       await loadSingleStudentAttendance(selectedStudent.value)
     }
   }
+  if (selectedStudentMonth.value && !studentMonthKeys.value.includes(selectedStudentMonth.value)) {
+    selectedStudentMonth.value = null
+  }
 }
 
 
@@ -77,9 +81,12 @@ const reportTabs = [
 let selectedSummaryClass = ref(null)
 let singleClassReport = ref(null)
 let selectedStudent = ref(null)
+let selectedStudentMonth = ref(null)
 let singleStudentAttendance = ref([])
 let loadingStudentAttendance = ref(false)
 let attendanceViewMode = ref('compact') // details | compact
+let reportLeaves = ref([])
+let classSummaryStep = ref('students') // class | students
 
 const reportTitle = computed(() => {
   if (activeReportTab.value === 'single-class-summary' && selectedSummaryClass.value) {
@@ -91,6 +98,20 @@ const reportTitle = computed(() => {
 })
 
 const printDate = computed(() => moment().format('DD MMMM, Y - hh:mm A'))
+
+const studentMonthKeys = computed(() => {
+  if (!selectedStudent.value) return []
+  const start = moment(defaultStart.value, 'YYYY-MM-DD').startOf('month')
+  const end = getEffectiveEndDate().startOf('month')
+  if (end.isBefore(start, 'month')) return []
+  const keys = []
+  let cur = start.clone()
+  while (cur.isSameOrBefore(end, 'month')) {
+    keys.push(cur.format('YYYY-MM-01'))
+    cur.add(1, 'month')
+  }
+  return keys
+})
 
 const breadcrumbs = computed(() => {
   const items = []
@@ -110,32 +131,47 @@ const breadcrumbs = computed(() => {
         onClick: () => {
           activeReportTab.value = 'single-class-summary'
           selectedStudent.value = null
+          selectedStudentMonth.value = null
           singleStudentAttendance.value = []
           attendanceViewMode.value = 'compact'
+          classSummaryStep.value = 'class'
           if (!singleClassReport.value) {
             loadSingleClassSummaryReport(selectedSummaryClass.value.class_short, [defaultStart.value, defaultEnd.value])
           }
         },
       })
 
-      items.push({
-        label: 'Students',
-        onClick: () => {
-          activeReportTab.value = 'single-class-summary'
-          selectedStudent.value = null
-          singleStudentAttendance.value = []
-          attendanceViewMode.value = 'compact'
-          if (!singleClassReport.value) {
-            loadSingleClassSummaryReport(selectedSummaryClass.value.class_short, [defaultStart.value, defaultEnd.value])
-          }
-        },
-      })
+      if (classSummaryStep.value === 'students' || selectedStudent.value || selectedStudentMonth.value) {
+        items.push({
+          label: 'Students',
+          onClick: () => {
+            activeReportTab.value = 'single-class-summary'
+            selectedStudent.value = null
+            selectedStudentMonth.value = null
+            singleStudentAttendance.value = []
+            attendanceViewMode.value = 'compact'
+            classSummaryStep.value = 'students'
+            if (!singleClassReport.value) {
+              loadSingleClassSummaryReport(selectedSummaryClass.value.class_short, [defaultStart.value, defaultEnd.value])
+            }
+          },
+        })
+      }
 
       if (selectedStudent.value) {
         items.push({
           label: selectedStudent.value.name || selectedStudent.value.dakhela || 'Student',
-          onClick: null,
+          onClick: selectedStudentMonth.value ? () => {
+            selectedStudentMonth.value = null
+            attendanceViewMode.value = 'compact'
+          } : null,
         })
+        if (selectedStudentMonth.value) {
+          items.push({
+            label: moment(selectedStudentMonth.value).format('MMMM YYYY'),
+            onClick: null,
+          })
+        }
       }
     }
 
@@ -162,8 +198,10 @@ function openClassSummary(cls){
   selectedSummaryClass.value = cls
   activeReportTab.value = 'single-class-summary'
   selectedStudent.value = null
+  selectedStudentMonth.value = null
   singleStudentAttendance.value = []
   attendanceViewMode.value = 'compact'
+  classSummaryStep.value = 'students'
   loadSingleClassSummaryReport(cls.class_short, [defaultStart.value, defaultEnd.value])
 }
 
@@ -172,8 +210,10 @@ function closeClassSummary(){
   singleClassReport.value = null
   activeReportTab.value = 'summary'
   selectedStudent.value = null
+  selectedStudentMonth.value = null
   singleStudentAttendance.value = []
   attendanceViewMode.value = 'compact'
+  classSummaryStep.value = 'students'
 }
 
 
@@ -189,6 +229,7 @@ async function loadAllClassSummaryReport([start_date, end_date]){
   }
   let data = await getAttendeceReports(payloadData, {start_date, end_date})
   reports.value = data || { classWise: {}, classRanking: [] }
+  reportLeaves.value = leaves_and_vacations || []
 }  
 
 
@@ -203,11 +244,13 @@ async function loadSingleClassSummaryReport(class_short, [start_date, end_date])
   }
   let data = await getAttendeceReportsForSingleClass(payloadData, {start_date, end_date})
   singleClassReport.value = data || null
+  reportLeaves.value = leaves_and_vacations || []
 }  
 
 async function loadSingleStudentAttendance(std){
   if(!std?.dakhela) return
   selectedStudent.value = std
+  selectedStudentMonth.value = null
   loadingStudentAttendance.value = true
   attendanceViewMode.value = 'compact'
   try {
@@ -231,22 +274,58 @@ async function loadSingleStudentAttendance(std){
 }
 
 function closeSingleStudentAttendance(){
-  selectedStudent.value = null
-  singleStudentAttendance.value = []
+  selectedStudentMonth.value = null
   attendanceViewMode.value = 'compact'
 }
 
-const groupedAttendance = computed(() => {
-  if(!singleStudentAttendance.value?.length) return []
-  const groups = helper.listGroupBy(singleStudentAttendance.value, 'date')
+function goBackOneStep(){
+  if (selectedStudentMonth.value) {
+    selectedStudentMonth.value = null
+    attendanceViewMode.value = 'compact'
+    return
+  }
+  if (selectedStudent.value) {
+    selectedStudent.value = null
+    singleStudentAttendance.value = []
+    attendanceViewMode.value = 'compact'
+    return
+  }
+  if (classSummaryStep.value === 'students') {
+    classSummaryStep.value = 'class'
+    return
+  }
+  if (selectedSummaryClass.value) {
+    closeClassSummary()
+  }
+}
+
+const filteredStudentAttendance = computed(() => {
+  if(!selectedStudentMonth.value) return singleStudentAttendance.value || []
+  return (singleStudentAttendance.value || []).filter(row => {
+    const rowKey = moment(row.date, 'YYYY-MM-DD').startOf('month').format('YYYY-MM-01')
+    return rowKey === selectedStudentMonth.value
+  })
+})
+
+function buildGroupedAttendance(rows=[], class_short){
+  if(!rows?.length) return []
+  const groups = helper.listGroupBy(rows, 'date')
   return Object.keys(groups).sort().map(date => ({
     date,
     rows: groups[date],
-    status: computePresentStatus(groups[date], selectedStudent.value?.class_short),
+    status: computePresentStatus(groups[date], class_short),
     first_in: getFirstIn(groups[date]),
     last_out: getLastOut(groups[date]),
     max_late: getMaxLate(groups[date]),
   }))
+}
+
+const groupedAttendanceAll = computed(() => {
+  return buildGroupedAttendance(singleStudentAttendance.value, selectedStudent.value?.class_short)
+})
+
+const groupedAttendance = computed(() => {
+  return buildGroupedAttendance(filteredStudentAttendance.value, selectedStudent.value?.class_short)
 })
 
 const statusByDate = computed(() => {
@@ -297,6 +376,110 @@ function getMaxLate(rows=[]){
   return vals.length ? Math.max(...vals) : 0
 }
 
+const vacationDatesAll = computed(() => {
+  const set = new Set()
+  ;(reportLeaves.value || []).forEach(l => {
+    if(l?.type === 'vacation' && l?.class_short === '_all_' && l?.date){
+      set.add(l.date)
+    }
+  })
+  return set
+})
+
+const vacationDatesByClass = computed(() => {
+  const map = {}
+  ;(reportLeaves.value || []).forEach(l => {
+    if(l?.type !== 'vacation') return
+    if(!l?.class_short || l.class_short === '_all_') return
+    if(!map[l.class_short]) map[l.class_short] = new Set()
+    if(l.date) map[l.class_short].add(l.date)
+  })
+  return map
+})
+
+function isVacationDate(dateStr, class_short){
+  if(vacationDatesAll.value.has(dateStr)) return true
+  const set = vacationDatesByClass.value?.[class_short]
+  return set ? set.has(dateStr) : false
+}
+
+function getEffectiveEndDate(){
+  let end = moment(defaultEnd.value, 'YYYY-MM-DD')
+  if (end.isSame(moment(), 'month')) {
+    end = moment()
+  }
+  return end
+}
+
+function countPresentableDays(startDateStr, endDateStr, class_short){
+  const start = moment(startDateStr, 'YYYY-MM-DD')
+  const end = moment(endDateStr, 'YYYY-MM-DD')
+  if (end.isBefore(start, 'day')) return 0
+  let count = 0
+  for (let d = start.clone(); d.isSameOrBefore(end, 'day'); d.add(1, 'day')) {
+    const dateStr = d.format('YYYY-MM-DD')
+    const dayName = d.format('dddd')
+    if (weekends.includes(dayName)) continue
+    if (isVacationDate(dateStr, class_short)) continue
+    count += 1
+  }
+  return count
+}
+
+const studentMonthlySummary = computed(() => {
+  if(!selectedStudent.value) return []
+  const class_short = selectedStudent.value.class_short
+  const months = studentMonthKeys.value || []
+  if(!months.length) return []
+
+  const statsByMonth = {}
+  groupedAttendanceAll.value.forEach(g => {
+    const key = moment(g.date, 'YYYY-MM-DD').startOf('month').format('YYYY-MM-01')
+    if(!statsByMonth[key]) statsByMonth[key] = { presentDays: 0, lateDays: 0, lateMinutes: 0 }
+    const dayName = moment(g.date, 'YYYY-MM-DD').format('dddd')
+    const isPresentable = !weekends.includes(dayName) && !isVacationDate(g.date, class_short)
+    if(isPresentable){
+      if(g.status === 'Present') statsByMonth[key].presentDays += 1
+      const late = Number(g.max_late || 0)
+      if(late > 0){
+        statsByMonth[key].lateDays += 1
+        statsByMonth[key].lateMinutes += late
+      }
+    }
+  })
+
+  const effectiveEnd = getEffectiveEndDate()
+
+  return months.map(monthKey => {
+    const monthStart = moment(monthKey, 'YYYY-MM-DD').startOf('month')
+    const monthEnd = monthStart.clone().endOf('month')
+    const rangeStart = moment.max(monthStart, moment(defaultStart.value, 'YYYY-MM-DD'))
+    const rangeEnd = moment.min(monthEnd, effectiveEnd)
+    const presentable_days = countPresentableDays(
+      rangeStart.format('YYYY-MM-DD'),
+      rangeEnd.format('YYYY-MM-DD'),
+      class_short
+    )
+    const stats = statsByMonth[monthKey] || { presentDays: 0, lateDays: 0, lateMinutes: 0 }
+    const present_percent = presentable_days ? Math.round((stats.presentDays / presentable_days) * 100) : 0
+    const avg_late = stats.lateDays ? Math.round(stats.lateMinutes / stats.lateDays) : 0
+    return {
+      monthKey,
+      label: moment(monthKey).format('MMMM - YYYY'),
+      present_percent,
+      presentable_days,
+      late_days: stats.lateDays,
+      avg_late,
+    }
+  })
+})
+
+function openStudentMonthDetails(row){
+  if(!row?.monthKey) return
+  selectedStudentMonth.value = row.monthKey
+  attendanceViewMode.value = 'compact'
+}
+
 
 
 onMounted(()=>{
@@ -333,7 +516,7 @@ onMounted(()=>{
       ></MonthPicker>
 
       <div v-if="activeReportTab === 'single-class-summary'" class="ms-auto">
-        <BackToPrevious @click="closeClassSummary" />
+        <BackToPrevious @click="goBackOneStep" />
       </div>
 
       <div v-if="activeReportTab !== 'single-class-summary'" class="mb-3">
@@ -375,10 +558,17 @@ onMounted(()=>{
         />
       </div>
   
-      <div v-if="activeReportTab === 'single-class-summary' && selectedStudent" class="mb-3">
+      <div v-if="activeReportTab === 'single-class-summary' && selectedStudent && !selectedStudentMonth" class="mb-3">
+        <StudentMonthlyReportTable
+          :rows="studentMonthlySummary"
+          @details="openStudentMonthDetails"
+        />
+      </div>
+
+      <div v-if="activeReportTab === 'single-class-summary' && selectedStudent && selectedStudentMonth" class="mb-3">
         <StudentAttendanceDetails
           :selectedStudent="selectedStudent"
-          :rows="singleStudentAttendance"
+          :rows="filteredStudentAttendance"
           :grouped="groupedAttendance"
           :statusByDate="statusByDate"
           :viewMode="attendanceViewMode"
@@ -388,7 +578,7 @@ onMounted(()=>{
         />
       </div>
   
-      <div v-if="activeReportTab === 'single-class-summary' && singleClassReport?.students?.length && !selectedStudent" class="mb-3">
+      <div v-if="activeReportTab === 'single-class-summary' && singleClassReport?.students?.length && !selectedStudent && classSummaryStep === 'students'" class="mb-3">
         <StudentWiseReportTable
           :students="singleClassReport.students"
           @details="loadSingleStudentAttendance"

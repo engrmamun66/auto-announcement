@@ -348,8 +348,10 @@ class Attendance {
 
         const weekend_leaves = date_duration.filter(date => weekends.includes(moment(date).format('dddd')));
         const weekendSet = new Set(weekend_leaves);
-        const classLevelLeaves = leaveData.filter(leave => leave?.class_short);
-        const leaveData_group_by_date = utils.listGroupBy(classLevelLeaves, 'date');
+        const classLevelVacations = leaveData.filter(
+          leave => leave?.type === 'vacation' && leave?.class_short
+        );
+        const leaveData_group_by_date = utils.listGroupBy(classLevelVacations, 'date');
 
         const attendanceByStudentDate = {};
         rows.forEach((att) => {
@@ -542,15 +544,19 @@ class Attendance {
               })
 
               let _leaves = leaveData_group_by_date[date] || []
-              let day_leaves = _leaves.filter(leave => (leave.student_id == dakhela || leave.class_short == '_all_' || leave.class_short == class_short))
-              
-              let is_leave_day = day_leaves.length > 0
-              let is_weekend = weekend_leaves.includes(date)
-              let is_leave_or_weekend_day = is_leave_day || is_weekend
+              let class_vacations = _leaves.filter(
+                leave => leave.type === 'vacation' && (leave.class_short == '_all_' || leave.class_short == class_short)
+              )
+              let student_leaves = _leaves.filter(
+                leave => leave.type === 'leave' && leave.student_id == dakhela
+              )
+              let day_leaves = [...class_vacations, ...student_leaves]
 
-              let is_presentable_day = is_leave_or_weekend_day === false
-              let is_present = (!is_presentable_day || shiftInfo?.[0]?.is_present) ? true : false
-              let is_preset_all_shifts = !is_presentable_day || shiftInfo.every(shift => shift.is_present)
+              let is_leave_day = student_leaves.length > 0
+              let is_weekend = weekend_leaves.includes(date)
+              let is_presentable_day = !(is_weekend || class_vacations.length > 0)
+              let is_present = is_presentable_day ? Boolean(shiftInfo?.[0]?.is_present) : false
+              let is_preset_all_shifts = is_presentable_day ? shiftInfo.every(shift => shift.is_present) : false
               let let_in_minute = shiftInfo[0]?.attendance?.late_in_minute || 0
 
               let data = {
@@ -643,8 +649,10 @@ class Attendance {
 
       const weekend_leaves = date_duration.filter(date => weekends.includes(moment(date).format('dddd')));
       const weekendSet = new Set(weekend_leaves);
-      const classLevelLeaves = leaveData.filter(leave => leave?.class_short);
-      const leaveData_group_by_date = utils.listGroupBy(classLevelLeaves, 'date');
+      const classLevelVacations = leaveData.filter(
+        leave => leave?.type === 'vacation' && leave?.class_short
+      );
+      const leaveData_group_by_date = utils.listGroupBy(classLevelVacations, 'date');
 
       const isClassHoliday = (date) => {
         if (weekendSet.has(date)) return true;
