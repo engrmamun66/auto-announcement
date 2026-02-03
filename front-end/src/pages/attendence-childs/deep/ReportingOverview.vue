@@ -5,7 +5,6 @@ import MonthPicker from './../../../components/MonthPicker.vue'
 import ReportTabs from '../../../components/reports/ReportTabs.vue'
 import BackToPrevious from '../../../components/reports/BackToPrevious.vue'
 import SummaryTable from '../../../components/reports/SummaryTable.vue'
-import SingleClassSummaryTable from '../../../components/reports/SingleClassSummaryTable.vue'
 import StudentWiseReportTable from '../../../components/reports/StudentWiseReportTable.vue'
 import StudentMonthlyReportTable from '../../../components/reports/StudentMonthlyReportTable.vue'
 import StudentAttendanceDetails from '../../../components/reports/StudentAttendanceDetails.vue'
@@ -86,7 +85,6 @@ let singleStudentAttendance = ref([])
 let loadingStudentAttendance = ref(false)
 let attendanceViewMode = ref('compact') // details | compact
 let reportLeaves = ref([])
-let classSummaryStep = ref('students') // class | students
 
 const reportTitle = computed(() => {
   if (activeReportTab.value === 'single-class-summary' && selectedSummaryClass.value) {
@@ -134,29 +132,25 @@ const breadcrumbs = computed(() => {
           selectedStudentMonth.value = null
           singleStudentAttendance.value = []
           attendanceViewMode.value = 'compact'
-          classSummaryStep.value = 'class'
           if (!singleClassReport.value) {
             loadSingleClassSummaryReport(selectedSummaryClass.value.class_short, [defaultStart.value, defaultEnd.value])
           }
         },
       })
 
-      if (classSummaryStep.value === 'students' || selectedStudent.value || selectedStudentMonth.value) {
-        items.push({
-          label: 'Students',
-          onClick: () => {
-            activeReportTab.value = 'single-class-summary'
-            selectedStudent.value = null
-            selectedStudentMonth.value = null
-            singleStudentAttendance.value = []
-            attendanceViewMode.value = 'compact'
-            classSummaryStep.value = 'students'
-            if (!singleClassReport.value) {
-              loadSingleClassSummaryReport(selectedSummaryClass.value.class_short, [defaultStart.value, defaultEnd.value])
-            }
-          },
-        })
-      }
+      items.push({
+        label: 'Students',
+        onClick: () => {
+          activeReportTab.value = 'single-class-summary'
+          selectedStudent.value = null
+          selectedStudentMonth.value = null
+          singleStudentAttendance.value = []
+          attendanceViewMode.value = 'compact'
+          if (!singleClassReport.value) {
+            loadSingleClassSummaryReport(selectedSummaryClass.value.class_short, [defaultStart.value, defaultEnd.value])
+          }
+        },
+      })
 
       if (selectedStudent.value) {
         items.push({
@@ -201,7 +195,6 @@ function openClassSummary(cls){
   selectedStudentMonth.value = null
   singleStudentAttendance.value = []
   attendanceViewMode.value = 'compact'
-  classSummaryStep.value = 'students'
   loadSingleClassSummaryReport(cls.class_short, [defaultStart.value, defaultEnd.value])
 }
 
@@ -213,7 +206,6 @@ function closeClassSummary(){
   selectedStudentMonth.value = null
   singleStudentAttendance.value = []
   attendanceViewMode.value = 'compact'
-  classSummaryStep.value = 'students'
 }
 
 
@@ -288,10 +280,6 @@ function goBackOneStep(){
     selectedStudent.value = null
     singleStudentAttendance.value = []
     attendanceViewMode.value = 'compact'
-    return
-  }
-  if (classSummaryStep.value === 'students') {
-    classSummaryStep.value = 'class'
     return
   }
   if (selectedSummaryClass.value) {
@@ -551,13 +539,6 @@ onMounted(()=>{
         />
       </div>
   
-      <div v-if="activeReportTab === 'single-class-summary' && selectedSummaryClass && classSummaryStep === 'class' && !selectedStudent" class="mb-3">
-        <SingleClassSummaryTable
-          :classInfo="selectedSummaryClass"
-          :summary="getClassReport(selectedSummaryClass.class_short)"
-        />
-      </div>
-  
       <div v-if="activeReportTab === 'single-class-summary' && selectedStudent && !selectedStudentMonth" class="mb-3">
         <StudentMonthlyReportTable
           :rows="studentMonthlySummary"
@@ -580,7 +561,7 @@ onMounted(()=>{
         />
       </div>
   
-      <div v-if="activeReportTab === 'single-class-summary' && singleClassReport?.students?.length && !selectedStudent && classSummaryStep === 'students'" class="mb-3">
+      <div v-if="activeReportTab === 'single-class-summary' && singleClassReport?.students?.length && !selectedStudent" class="mb-3">
         <StudentWiseReportTable
           :students="singleClassReport.students"
           @details="loadSingleStudentAttendance"
