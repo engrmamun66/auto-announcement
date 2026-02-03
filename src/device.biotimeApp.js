@@ -129,6 +129,41 @@ async function getLastPunchData(Students) {
 }
 
 
+async function getBulkPunces(req) {
+    if (!global.DEVICE_TOKEN) return []; 
+    const myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+    myHeaders.append("Authorization", `JWT ${global.DEVICE_TOKEN}`);
+
+    const requestOptions = {
+        method: "GET",
+        headers: myHeaders,
+        redirect: "follow"
+    };
+
+    // const start_time = moment().subtract(BACK_SECONDS, 'second').format('YYYY-MM-DD HH:mm:ss');
+    const start_time = req.query.start_time;
+    const end_time = req.query.end_time; 
+    const limit = 3000; 
+
+    try {
+        const response = await fetch(
+            `${DEVICE_API_BASE_URL}/iclock/api/transactions/?page=1&page_size=${limit}&start_time=${start_time}&end_time=${end_time}`,
+            requestOptions
+        );
+        const text = await response.text();
+        const result = JSON.parse(text);
+        const data = result?.data || []; 
+        return data || []
+
+    } catch (error) {
+        console.error(`data face error`, error);
+        return []
+    }
+
+}
+
+
 function fake_getLastPunchData(Students, dakhela, punch_time, device_index=0){ 
 
     const start_time = moment().subtract(BACK_SECONDS, 'second').format('YYYY-MM-DD HH:mm:ss')
@@ -145,4 +180,5 @@ function fake_getLastPunchData(Students, dakhela, punch_time, device_index=0){
 
 module.exports = {
     getToken,
+    getBulkPunces,
 }

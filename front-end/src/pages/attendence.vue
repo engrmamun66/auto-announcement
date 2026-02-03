@@ -11,6 +11,7 @@ import Btn from './../components/Btn.vue'
 import Ahelper from './attendence-childs/attendacnceHelper';
 import Pagination from '../components/Pagination.vue'
 import BtnLoader from '../components/BtnLoader.vue'
+import FetchBulkAttendanceFromDevice from '../components/FetchBulkAttendanceFromDevice.vue'
  
 const route = inject('route');
 const router = inject('router');
@@ -33,6 +34,7 @@ watch(tab, (index) => {
 
 const clearingLive = ref(false)
 const hasLiveAttendence = computed(() => (liveAttendenceList.value?.length || 0) > 0)
+const show_bulk_device_fetch = ref(false)
 
 async function clearAllAndRelaod(){
   if (!hasLiveAttendence.value || clearingLive.value) return
@@ -258,11 +260,8 @@ onMounted(()=>{
             <Btn class="white">Out: <span class="badge text-white bg-warning">{{ Ahelper.count.out(liveAttendenceList) }}</span></Btn>
             <Btn class="white">Late: <span class="badge text-white bg-danger">{{ Ahelper.count.late(liveAttendenceList) }}</span></Btn>
             <Btn class="white">Total: <span class="badge text-white bg-success">{{ liveAttendenceList?.length }}</span></Btn>
-            <Btn
-              class="red"
-              :disabled="!hasLiveAttendence || clearingLive"
-              @click="clearAllAndRelaod"
-            >
+            <Btn id="transaction_bulk_fetch" class="" @click="show_bulk_device_fetch = true">Get Attendace From History </Btn>
+            <Btn class="red" :disabled="!hasLiveAttendence || clearingLive" @click="clearAllAndRelaod" >
               <template v-if="clearingLive">Clearing...</template>
               <template v-else>Clear All</template>
             </Btn>
@@ -346,6 +345,11 @@ onMounted(()=>{
     <template v-else-if="tab == 4">
         <Reporting ></Reporting>
     </template> 
+
+    <FetchBulkAttendanceFromDevice
+      v-if="show_bulk_device_fetch"
+      @unmount="show_bulk_device_fetch = false"
+    />
   </div>
 
 

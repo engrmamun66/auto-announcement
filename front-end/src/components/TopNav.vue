@@ -14,7 +14,7 @@
         <RouterLink :to="{name: 'import', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active': route.name === 'import'}"><i class='bx bxs-file-import pre-icon' ></i> Import</RouterLink>
         <RouterLink :to="{name: 'ContactUs', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active': route.name === 'ContactUs'}">Contact</RouterLink>
         <a v-if="useRoute().query.dev === 'true'">
-          <Btn class="border" @click.prevent.stop="show_bulk_attedance_component = true"> Bulk Attendance </Btn>
+          <Btn class="border" @click.prevent.stop="show_bulk_attedance_component = true"> <span tooltip="Bulk Attendence" flow="left">Bulk</span> </Btn>
         </a>
         
         

@@ -58,7 +58,6 @@ watch(params, (newVal, oldVal) => {
 }, {deep: true, immediate: true});
 
 let addMode = ref(false)
-let showSearchForm = ref(true)
 let targetStd = ref(null)
 let columnName = ref('sound1')
 let targetStdForBarcode = ref(null)
@@ -444,7 +443,6 @@ watch(fixedWidthSoundCol, (newVal) => {
 
       <div class="d-flex justify-content-end">
         <Btn class="me-2" style="background: #673AB7;">Total: {{ params?.total || '000' }} </Btn>
-        <Btn @click="showSearchForm = !showSearchForm;editModeTabIndex=1" class="me-2"><i class='bx bx-search transformY-2px size-1' ></i> {{ showSearchForm ? "Hide" : 'Show' }} search</Btn>
         <Btn v-if="!addMode" class="me-2" @click="addMode = !addMode;editModeTabIndex=1;clearParams();payload.id = null" ><i class='bx bx-plus'></i> Add Student</Btn>
         <Btn v-else class="me-2 red" @click="addMode = !addMode;editModeTabIndex=1;clearParams();payload.id = null" >Cancel</Btn>
         <!-- <Btn @click="router.push({name: 'import'})"><i class='bx bxs-file-import' ></i> Import</Btn> -->
@@ -596,7 +594,7 @@ watch(fixedWidthSoundCol, (newVal) => {
 
       
     <!-- Search -->
-    <div v-if="showSearchForm" class="form-area mt-3 p-4 border radius-10">
+    <div class="form-area mt-3 p-4 border radius-10">
       <div asform>
         <div class="row">
           <div class="col-md-3 col-12">
@@ -662,7 +660,7 @@ watch(fixedWidthSoundCol, (newVal) => {
             <div class="all-class-buttons-to-filter">
               <template v-for="cls in classes">
                 <button class="class-short-btn" :class="{'active': params.class_name === cls.class_name}" var="cls?.display_name || cls.class_short" 
-                @click="params.page_no = 1;params.class_name = cls.class_name;getStudents()" >{{ helper.ucfirst(cls?.display_name || cls.class_short) }}</button>
+                @click="clearParams();params.page_no = 1;params.class_name = cls.class_name;getStudents()" >{{ helper.ucfirst(cls?.display_name || cls.class_short) }}</button>
               </template>
 
             </div>

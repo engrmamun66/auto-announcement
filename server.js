@@ -18,7 +18,7 @@ const multer = require("multer");
 const upload = multer({ dest: DIR + '/public/temp' });
 const webSocket = require("./socket/socket")
 
-const { getToken } = require('./src/device.biotimeApp')
+const { getToken, getBulkPunces } = require('./src/device.biotimeApp')
 
 let webContents = require("./src/web-contents"); 
 let checkAccess = require("./src/checkaccess"); 
@@ -385,6 +385,10 @@ app.get(`/api/_ac`, async (req, res) => {
   app.post(prefix + '/attendence-list', (req, res) => {
     Attendence.list(req, res)
   }); 
+  app.get(prefix + '/get-bulk-punched', async (req, res) => {
+    let punch_data = await getBulkPunces(req)
+    res.send({ data: punch_data });
+  }); 
   app.post(prefix + '/attendence-reports', (req, res) => {
     Attendence.getAttendanceReports(req, res)
   }); 
@@ -431,4 +435,3 @@ app.listen(PORT, () => {
   getToken(Students)
    
 });
-
