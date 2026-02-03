@@ -6,6 +6,11 @@
     @unmount="showRightbar = false; $emit('unmount')"
     :largestMode="false"
   >
+    <div class="alert alert-info small mb-2">
+      <div><strong>এই টুলটি কী করে?</strong> ডিভাইস (BioTime) থেকে নির্দিষ্ট সময়ের পাঞ্চ লিস্ট এনে এখানে দেখায়।</div>
+      <div><strong>কিভাবে ব্যবহার করবেন:</strong> Start/End সময় দিন → <b>Fetch Logs</b> চাপুন → তালিকা দেখে <b>Submit Attendance</b> দিন।</div>
+      <!-- <div><strong>নোট:</strong> শুধু যেসব Emp Code আমাদের সিস্টেমে আছে সেগুলোই “Matched” হবে, বাকি গুলো “Skipped”.</div> -->
+    </div>
     <div class="row g-3">
       <div class="col-6">
         <label for="">Start Time</label>
@@ -99,8 +104,8 @@ const payload = reactive({
 })
 
 const studentsMap = computed(() => {
-  const map = new Map()
-  ;(all_students_non_copied.value || []).forEach((s) => {
+  const map = new Map();
+  (all_students_non_copied.value || []).forEach((s) => {
     map.set(String(s.dakhela), s)
   })
   return map

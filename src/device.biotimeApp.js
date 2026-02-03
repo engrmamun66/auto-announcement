@@ -129,8 +129,67 @@ async function getLastPunchData(Students) {
 }
 
 
+
+const TEST_TRANSACTION_DATA = [
+    {
+      "id": 1,
+      "emp_code": "1209",
+      "punch_time": "2019-03-04 09:50:00",
+      "punch_state": "0",
+      "verify_type": 1,
+      "work_code": null,
+      "terminal_sn": "",
+      "terminal_alias": null,
+      "area_alias": null,
+      "longitude": null,
+      "latitude": null,
+      "gps_location": "",
+      "mobile": null,
+      "source": 0,
+      "purpose": 1,
+      "crc": null,
+      "is_attendance": 1,
+      "reserved": null,
+      "upload_time": "2019-03-04 09:50:00",
+      "sync_status": 1,
+      "sync_time": null,
+      "emp": null,
+      "terminal": null
+    },
+    {
+      "id": 2,
+      "emp_code": "1228",
+      "punch_time": "2019-03-04 18:10:00",
+      "punch_state": "0",
+      "verify_type": 1,
+      "work_code": null,
+      "terminal_sn": "",
+      "terminal_alias": null,
+      "area_alias": null,
+      "longitude": null,
+      "latitude": null,
+      "gps_location": "",
+      "mobile": null,
+      "source": 0,
+      "purpose": 1,
+      "crc": null,
+      "is_attendance": 1,
+      "reserved": null,
+      "upload_time": "2019-03-04 18:10:00",
+      "sync_status": 1,
+      "sync_time": null,
+      "emp": null,
+      "terminal": null
+    }
+    // … more entries …
+  ];
+
+
 async function getBulkPunces(req) {
-    if (!global.DEVICE_TOKEN) return []; 
+    // if (!global.DEVICE_TOKEN) return []
+    if (!global.DEVICE_TOKEN) return TEST_TRANSACTION_DATA
+
+    
     const myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
     myHeaders.append("Authorization", `JWT ${global.DEVICE_TOKEN}`);
