@@ -7,7 +7,7 @@
       <template v-if="liveAttendenceList?.length">
           <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
               <template v-for="(item, i) in liveAttendenceList" :key="getLiveKey(item, i)">
-                <div class="col position-relative" :style="`order:${-i}`" @auxclick="log(item)">
+                <div class="col position-relative" :style="`order:${-(i + 1)}`" @auxclick="log(item)">
 
                   
                     <div class="popup in-out d-flex">
