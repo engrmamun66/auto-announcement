@@ -24,6 +24,7 @@ const router = inject('router');
 const emitter = inject('emitter');
 const printDiv = inject('printDiv');
 const helper = inject('helper');
+const storage = inject('storage');
 const classes = inject('classes');
 const CONFIG = inject('CONFIG');
 let http = inject('http'); 
@@ -36,7 +37,8 @@ const getAllStudents = inject('getAllStudents', () => {})
 
 let students = ref([])
 let studentLogs = ref([])
-let only_similler_students = ref(false)
+let only_similler_students = ref(storage('only_similler_students', false).value)
+watch(only_similler_students, (bool) => storage('only_similler_students').value = bool )
 
 
 let ___params = {

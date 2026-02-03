@@ -38,7 +38,7 @@ const helper = {
         }
       }
     },
-    localStorage: function (name) {
+    localStorage: function (name, __defaultValue=undefined) {
       return {
         get value() {
           if (typeof process == "undefined") {
@@ -46,7 +46,7 @@ const helper = {
           }
           if (process.client && globalThis.localStorage) {
             let data = globalThis.localStorage.getItem(name);
-            if(!data) return data
+            if(!data) return __defaultValue
 
             let parts = data.split('::')
             let type = 'string'

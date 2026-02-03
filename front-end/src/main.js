@@ -70,6 +70,7 @@ async function mountTheApp(){
         .provide('makeCarcode', makeCarcode)
         .provide('storage', utils.helper.localStorage)
         .mount('#my-app');
+        globalThis.storage = utils.helper.localStorage
     } catch (error) {
         console.log({error});
     }
