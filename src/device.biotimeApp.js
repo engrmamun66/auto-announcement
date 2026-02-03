@@ -133,8 +133,8 @@ async function getLastPunchData(Students) {
 const TEST_TRANSACTION_DATA = [
     {
       "id": 1,
-      "emp_code": "1209",
-      "punch_time": "2019-03-04 09:50:00",
+      "emp_code": "467",
+      "punch_time": "2026-03-04 07:50:00",
       "punch_state": "0",
       "verify_type": 1,
       "work_code": null,
@@ -158,8 +158,8 @@ const TEST_TRANSACTION_DATA = [
     },
     {
       "id": 2,
-      "emp_code": "1228",
-      "punch_time": "2019-03-04 18:10:00",
+      "emp_code": "430",
+      "punch_time": "2026-03-04 02:50:00",
       "punch_state": "0",
       "verify_type": 1,
       "work_code": null,
