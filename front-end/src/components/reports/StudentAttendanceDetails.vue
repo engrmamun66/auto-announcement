@@ -22,7 +22,7 @@
             Details
           </button>
         </div>
-        <button class="btn btn-sm btn-close-light hide_onprint" @click="$emit('close')">Back</button>
+        <!-- <button class="btn btn-sm btn-close-light hide_onprint" @click="$emit('close')">Back</button> -->
       </div>
     </div>
 
