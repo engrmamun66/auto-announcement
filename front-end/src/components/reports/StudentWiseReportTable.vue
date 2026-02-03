@@ -1,13 +1,13 @@
 <template>
   <div>
     <div class="d-flex justify-content-end mb-2">
-      <div class="btn-group bg-white" role="group" aria-label="Sort by present percent">
+      <div class="btn-group bg-white hide_onprint" role="group" aria-label="Sort by present percent">
         <button
           class="btn btn-sm btn-outline-secondary"
           :class="{ active: sortOrder === 'desc' }"
           @click="setSort('desc')"
         >
-         <i class='bx bx-sort-down'></i>
+         <i class='bx bx-sort-down transformY-2px'></i>
           Rank
         </button>
         <button
@@ -15,7 +15,7 @@
           :class="{ active: sortOrder === 'asc' }"
           @click="setSort('asc')"
         >
-        <i class='bx bx-sort-up'></i>
+        <i class='bx bx-sort-up transformY-2px'></i>
           Rank
         </button>
       </div>

@@ -1,5 +1,11 @@
 <template>
   <div>
+    <div v-if="selectedStudent" class="d-flex justify-content-between align-items-center mb-2">
+      <h6 class="table-title">
+        Monthly Attendance: {{ selectedStudent.name || '-' }} ({{ selectedStudent.dakhela }})
+      </h6>
+      <button class="btn btn-sm btn-close-light hide_onprint" @click="$emit('close')">Back</button>
+    </div>
     <myTable topMarginClass="mt-2">
       <template #thead>
         <thead>
@@ -37,6 +43,24 @@ import myTable from '../myTable.vue'
 
 defineProps({
   rows: { type: Array, default: () => [] },
+  selectedStudent: { type: Object, default: null },
 })
-defineEmits(['details'])
+defineEmits(['details', 'close'])
 </script>
+
+<style scoped>
+.table-title{
+  margin-bottom: 0px;
+  background: white;
+  padding: 6px 15px;
+  border-radius: 10px;
+}
+.btn-close-light{
+  color: #b42318;
+  background-color: #fff5f5;
+  border: 1px solid #f2c2c2;
+}
+.btn-close-light:hover{
+  background-color: #ffecec;
+}
+</style>

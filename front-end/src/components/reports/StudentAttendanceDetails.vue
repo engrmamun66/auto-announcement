@@ -5,22 +5,24 @@
         Attendance Of: {{ selectedStudent.name || '-' }} ({{ selectedStudent.dakhela }})
       </h6>
       <div class="d-flex align-items-center gap-2">
-        <button
-          class="btn btn-sm btn-outline-primary btn-view-toggle"
-          :class="{ active: viewMode === 'compact' }"
-          @click="$emit('changeView', 'compact')"
-        >
-          Compact
-        </button>
+        <div class="btn-group bg-white hide_onprint" role="group" aria-label="Attendance view mode">
+          <button
+            class="btn btn-sm btn-outline-primary btn-view-toggle"
+            :class="{ active: viewMode === 'compact' }"
+            @click="$emit('changeView', 'compact')"
+          >
+            Compact
+          </button>
 
-        <button
-          class="btn btn-sm btn-outline-primary btn-view-toggle"
-          :class="{ active: viewMode === 'details' }"
-          @click="$emit('changeView', 'details')"
-        >
-          Details
-        </button>
-        <button class="btn btn-sm btn-close-light" @click="$emit('close')">Close</button>
+          <button
+            class="btn btn-sm btn-outline-primary btn-view-toggle"
+            :class="{ active: viewMode === 'details' }"
+            @click="$emit('changeView', 'details')"
+          >
+            Details
+          </button>
+        </div>
+        <button class="btn btn-sm btn-close-light hide_onprint" @click="$emit('close')">Back</button>
       </div>
     </div>
 

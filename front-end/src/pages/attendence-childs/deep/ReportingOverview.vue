@@ -561,7 +561,9 @@ onMounted(()=>{
       <div v-if="activeReportTab === 'single-class-summary' && selectedStudent && !selectedStudentMonth" class="mb-3">
         <StudentMonthlyReportTable
           :rows="studentMonthlySummary"
+          :selectedStudent="selectedStudent"
           @details="openStudentMonthDetails"
+          @close="goBackOneStep"
         />
       </div>
 
