@@ -7,7 +7,7 @@
       <template #thead>
         <thead>
           <tr>
-            <th>Class</th>
+            <th SingleClassSummaryTable>Class</th>
             <th>Students</th>
             <th>Presentable Days</th>
             <th>Present</th>
