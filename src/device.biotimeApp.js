@@ -186,8 +186,8 @@ const TEST_TRANSACTION_DATA = [
 
 
 async function getBulkPunces(req) {
-    // if (!global.DEVICE_TOKEN) return []
-    if (!global.DEVICE_TOKEN) return TEST_TRANSACTION_DATA
+    if (!global.DEVICE_TOKEN) return []
+    // if (!global.DEVICE_TOKEN) return TEST_TRANSACTION_DATA
 
     
     const myHeaders = new Headers();
