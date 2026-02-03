@@ -507,7 +507,7 @@ onMounted(()=>{
         <BackToPrevious @click="goBackOneStep" />
       </div>
 
-      <div v-if="activeReportTab !== 'single-class-summary'" class="mb-3">
+      <div v-if="activeReportTab !== 'single-class-summary'">
         <ReportTabs
           :tabs="reportTabs"
           :active="activeReportTab"
