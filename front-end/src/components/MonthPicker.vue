@@ -443,7 +443,7 @@ export default {
   justify-content: space-between;
   gap: 10px;
   zoom: 0.8;
-  opacity: 0.75;
+  opacity: 0.55;
 }
 
 .yearRow:hover { 
@@ -495,7 +495,7 @@ export default {
 
 .monthSelectWrap {
   position: relative;
-  width: 100%;
+  width: 75px;
 }
 
 .monthSelect {
@@ -505,12 +505,12 @@ export default {
   color: #111827;
   font-size: 18px;
   font-weight: 400;
-  text-align: center;
-  padding: 0px 29px 0px 29px;
+  text-align: left;
+  padding: 0px 0px 0px 10px;
   cursor: pointer;
-  appearance: none;
+  /* appearance: none;
   -webkit-appearance: none;
-  -moz-appearance: none;
+  -moz-appearance: none; */
 }
 
 .monthSelect:focus {
