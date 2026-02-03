@@ -415,7 +415,13 @@ let pickerModelValue = reactive({
 })
 
 function onChange_dateTimePicker(data){
-  punchToSubmitAttendance(makeCarcode(targetStudent.value), {source: 'manual_button', delay: 0, punch_time: data.startDateTime })
+  let divMode = route.query.dev === 'true'
+  if(!divMode){
+    punchToSubmitAttendance(makeCarcode(targetStudent.value), {source: 'manual_button', delay: 0, punch_time: data.startDateTime })
+  } else {
+    router.push({ name: 'attendence', query: {dev: true}})
+    punchToSubmitAttendance(makeCarcode(targetStudent.value), {source: 'manual_button', delay: 0, punch_time: data.startDateTime })
+  }
 }
 
 function onClickAttendance(std){
