@@ -1,547 +1,255 @@
 <template>
-    <div class="hide_onprint" :class="['termInput', selectingStart || selectingEnd ? 'active' : '']" tabindex="-1">
-        <div class="rangePanels">
-            <div class="rangePanel" :class="selectingStart ? 'isActive' : ''" @click="openStartPicker">
-                <div class="yearRow">
-                    <button type="button" class="yearBtn" @click.stop="changeYear('start', -1)">-</button>
-                    <span class="yearValue">{{ startYear }}</span>
-                    <button type="button" class="yearBtn" @click.stop="changeYear('start', 1)"
-                        :disabled="isFutureYear(startYear + 1)">+</button>
-                </div>
-                <div class="monthRow">
-                    <div class="monthSelectWrap">
-                        <select class="monthSelect" :value="startMonth" @change="onMonthChange('start', $event)">
-                            <option v-for="(monthLabel, monthIndex) in months" :key="monthIndex" :value="monthIndex"
-                                :disabled="isFutureMonth(startYear, monthIndex)">
-                                {{ monthLabel }}
-                            </option>
-                        </select>
-                        <span class="monthCaret"></span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="rangePanel" :class="selectingEnd ? 'isActive' : ''" @click="openEndPicker">
-                <div class="yearRow">
-                    <button type="button" class="yearBtn" @click.stop="changeYear('end', -1)">-</button>
-                    <span class="yearValue">{{ endYear }}</span>
-                    <button type="button" class="yearBtn" @click.stop="changeYear('end', 1)"
-                        :disabled="isFutureYear(endYear + 1)">+</button>
-                </div>
-                <div class="monthRow">
-                    <div class="monthSelectWrap">
-                        <select class="monthSelect" :value="endMonth" @change="onMonthChange('end', $event)">
-                            <option v-for="(monthLabel, monthIndex) in months" :key="monthIndex" :value="monthIndex"
-                                :disabled="isFutureMonth(endYear, monthIndex)">
-                                {{ monthLabel }}
-                            </option>
-                        </select>
-                        <span class="monthCaret"></span>
-                    </div>
-                </div>
-            </div>
-        </div>
+  <div class="hide_onprint month-picker">
+    <div class="month-control">
+      <button class="month-nav" type="button" @click.stop="shiftStart(-1)">
+        <i class='bx bx-minus'></i>
+      </button>
+      <div class="month-label">{{ startLabel }}</div>
+      <button class="month-nav" type="button" @click.stop="shiftStart(1)" :disabled="isFutureStartDisabled">
+        <i class='bx bx-plus'></i>
+      </button>
     </div>
+
+    <div class="month-control">
+      <button class="month-nav" type="button" @click.stop="shiftEnd(-1)">
+        <i class='bx bx-minus'></i>
+      </button>
+      <div class="month-label">{{ endLabel }}</div>
+      <button class="month-nav" type="button" @click.stop="shiftEnd(1)" :disabled="isFutureEndDisabled">
+        <i class='bx bx-plus'></i>
+      </button>
+    </div>
+  </div>
 </template>
 
 <script>
-
 import moment from 'moment/moment'
 
-const months = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-];
-
-function pad(padStr, str, padLeft) {
-    if (typeof str === "undefined") return padStr;
-    if (padLeft) return (padStr + str).slice(-padStr.length);
-    else return (str + padStr).substring(0, padStr.length);
-}
-
-const dateToLocalMidnightDateTime = (date) =>
-    new Date(
-        new Date(date).setTime(
-            new Date(date).getTime() +
-            (new Date(date).getTimezoneOffset() / 60) * 60 * 60 * 1000
-        )
-    );
-
 export default {
-    name: "TermPicker",
-    props: {
-        onChange: {
-            type: Function,
-            default: () => { },
-        },
-        startName: {
-            type: String,
-            default: "start",
-        },
-        defaultStartValue: {
-            type: String,
-            default: null,
-        },
-        defaultEndValue: {
-            type: String,
-            default: null,
-        },
-        dayOfMonth: {
-            type: Number,
-            default: 1,
-        },
-        inactiveFutureMonth: {
-            type: Boolean,
-            default: false,
-        },
+  name: "TermPicker",
+  props: {
+    onChange: {
+      type: Function,
+      default: () => {},
     },
-    data() {
-        const currentDate = new Date();
-        const startDate = this.defaultStartValue
-            ? dateToLocalMidnightDateTime(this.defaultStartValue)
-            : new Date(new Date(currentDate).setMonth(currentDate.getMonth() + 1));
-        const endDate = this.defaultEndValue
-            ? dateToLocalMidnightDateTime(this.defaultEndValue)
-            : new Date(new Date(currentDate).setMonth(currentDate.getMonth() + 12));
-
-        const startValue = `${startDate.getFullYear()}-${pad(
-            "00",
-            startDate.getMonth() + 1,
-            true
-        )}-${pad("00", this.dayOfMonth, true)}`;
-
-        const endValue = `${endDate.getFullYear()}-${pad(
-            "00",
-            endDate.getMonth() + 1,
-            true
-        )}-${pad("00", this.dayOfMonth, true)}`;
-
-        return {
-            months,
-            selectingStart: false,
-            selectingEnd: false,
-            yearContext: startDate.getFullYear(),
-            startMonth: startDate.getMonth(),
-            endMonth: endDate.getMonth(),
-            startYear: startDate.getFullYear(),
-            endYear: endDate.getFullYear(),
-            startValue,
-            endValue,
-        };
+    startName: {
+      type: String,
+      default: "start",
     },
-    computed: {
-        picking() {
-            return this.selectingStart || this.selectingEnd;
-        },
+    defaultStartValue: {
+      type: String,
+      default: null,
     },
-    methods: {
-        getNowParts() {
-            const now = new Date();
-            return { year: now.getFullYear(), month: now.getMonth() };
-        },
-        isFutureYear(year) {
-            if (!this.inactiveFutureMonth) return false;
-            const nowYear = this.getNowParts().year;
-            return year > nowYear;
-        },
-        clampToCurrentMonthIfFuture(year, month) {
-            if (!this.inactiveFutureMonth) return { year, month };
-            const { year: nowYear, month: nowMonth } = this.getNowParts();
-            let nextYear = year;
-            let nextMonth = month;
-            if (nextYear > nowYear) {
-                nextYear = nowYear;
-            }
-            if (nextYear === nowYear && nextMonth > nowMonth) {
-                nextMonth = nowMonth;
-            }
-            return { year: nextYear, month: nextMonth };
-        },
-        loadFromStorage() {
-            if (typeof window === "undefined" || !window.localStorage) return false;
-            const raw = window.localStorage.getItem("monthPickerRange");
-            if (!raw) return false;
-            try {
-                const saved = JSON.parse(raw);
-                if (
-                    typeof saved?.startYear !== "number" ||
-                    typeof saved?.startMonth !== "number" ||
-                    typeof saved?.endYear !== "number" ||
-                    typeof saved?.endMonth !== "number"
-                ) {
-                    return false;
-                }
-                const start = this.clampToCurrentMonthIfFuture(saved.startYear, saved.startMonth);
-                const end = this.clampToCurrentMonthIfFuture(saved.endYear, saved.endMonth);
-
-                const nextState = this.fixDates({
-                    selectingStart: false,
-                    selectingEnd: false,
-                    yearContext: start.year,
-                    startMonth: start.month,
-                    startYear: start.year,
-                    endMonth: end.month,
-                    endYear: end.year,
-                });
-
-                Object.assign(this, nextState);
-                return true;
-            } catch (err) {
-                return false;
-            }
-        },
-        saveToStorage() {
-            if (typeof window === "undefined" || !window.localStorage) return;
-            const payload = {
-                startYear: this.startYear,
-                startMonth: this.startMonth,
-                endYear: this.endYear,
-                endMonth: this.endMonth,
-            };
-            window.localStorage.setItem("monthPickerRange", JSON.stringify(payload));
-        },
-        handleDocumentClick(event) {
-            if (!this.picking) return;
-            if (!this.$el || this.$el.contains(event.target)) return;
-            this.closePicker();
-        },
-        openStartPicker() {
-            this.yearContext = this.startYear;
-            this.selectingStart = true;
-            this.selectingEnd = false;
-        },
-        openEndPicker() {
-            this.yearContext = this.endYear;
-            this.selectingStart = false;
-            this.selectingEnd = true;
-        },
-        closePicker() {
-            this.selectingStart = false;
-            this.selectingEnd = false;
-        },
-        setActive(which) {
-            if (which === "start") {
-                this.openStartPicker();
-            } else {
-                this.openEndPicker();
-            }
-        },
-        changeYear(which, delta) {
-            this.setActive(which);
-            let { startMonth, startYear, endMonth, endYear } = this;
-
-            if (which === "start") {
-                const nextYear = startYear + delta;
-                if (this.isFutureYear(nextYear)) return;
-                startYear = nextYear;
-            } else {
-                const nextYear = endYear + delta;
-                if (this.isFutureYear(nextYear)) return;
-                endYear = nextYear;
-            }
-
-            if (which === "start") {
-                const clamped = this.clampToCurrentMonthIfFuture(startYear, startMonth);
-                startYear = clamped.year;
-                startMonth = clamped.month;
-            } else {
-                const clamped = this.clampToCurrentMonthIfFuture(endYear, endMonth);
-                endYear = clamped.year;
-                endMonth = clamped.month;
-            }
-
-            const nextState = this.fixDates({
-                selectingStart: which === "start",
-                selectingEnd: which === "end",
-                yearContext: which === "start" ? startYear : endYear,
-                startMonth,
-                startYear,
-                endMonth,
-                endYear,
-            });
-
-            Object.assign(this, nextState);
-            this.setDates();
-            this.fireChange();
-        },
-        onMonthChange(which, event) {
-            const newMonth = Number(event?.target?.value);
-            if (Number.isNaN(newMonth)) return;
-
-            this.setActive(which);
-            let { startMonth, startYear, endMonth, endYear } = this;
-
-            if (which === "start") {
-                startMonth = newMonth;
-            } else {
-                endMonth = newMonth;
-            }
-
-            const targetYear = which === "start" ? startYear : endYear;
-            if (this.isFutureMonth(targetYear, newMonth)) {
-                return;
-            }
-
-            const nextState = this.fixDates({
-                selectingStart: which === "start",
-                selectingEnd: which === "end",
-                yearContext: which === "start" ? startYear : endYear,
-                startMonth,
-                startYear,
-                endMonth,
-                endYear,
-            });
-
-            Object.assign(this, nextState);
-            this.setDates();
-            this.fireChange();
-        },
-        isFutureMonth(year, month) {
-            if (!this.inactiveFutureMonth) return false;
-            const today = moment().startOf('day');
-            const safeDay = Math.min(
-                this.dayOfMonth || 1,
-                moment({ year, month }).daysInMonth()
-            );
-            const target = moment({ year, month, day: safeDay }).startOf('day');
-            return target.isAfter(today);
-        },
-        fixDates({
-            selectingStart,
-            selectingEnd,
-            yearContext,
-            startMonth,
-            startYear,
-            endMonth,
-            endYear,
-            }) {
-            if (selectingStart) {
-                // Don't let start year exceed end year
-                if (startYear > endYear) endYear = startYear;
-
-                // Allow same month/year — only adjust if start > end
-                if (startYear === endYear && startMonth > endMonth) {
-                endMonth = startMonth;
-                }
-            } else {
-                // Don't let end year go before start year
-                if (endYear < startYear) endYear = startYear;
-
-                // Allow same month/year — only adjust if end < start
-                if (startYear === endYear && endMonth < startMonth) {
-                startMonth = endMonth;
-                }
-            }
-
-            return {
-                selectingStart,
-                selectingEnd,
-                yearContext,
-                startMonth,
-                startYear,
-                endMonth,
-                endYear,
-            };
-            },
-        setDates(field = "all") {
-            const { startYear, startMonth, endYear, endMonth, dayOfMonth } = this;
-
-            if (field === "start" || field === "all") {
-                const start = moment({ year: startYear, month: startMonth, day: dayOfMonth }).format('YYYY-MM-DD');
-                this.startValue = start; 
-            }
-
-            if (field === "end" || field === "all") {
-                // Always last day of month
-                const end = moment({ year: endYear, month: endMonth }).endOf('month').format('YYYY-MM-DD');
-                this.endValue = end; 
-            }
-        },
-        fireChange() {
-            this.onChange([this.startValue, this.endValue]);
-            this.saveToStorage();
-        },
+    defaultEndValue: {
+      type: String,
+      default: null,
     },
-    mounted() {
-        document.addEventListener("mousedown", this.handleDocumentClick);
-        document.addEventListener("touchstart", this.handleDocumentClick, { passive: true });
-        this.openStartPicker();
-        if (this.loadFromStorage()) {
-            this.setDates();
-            this.fireChange();
+    dayOfMonth: {
+      type: Number,
+      default: 1,
+    },
+    inactiveFutureMonth: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  data() {
+    let start = this.defaultStartValue ? moment(this.defaultStartValue, 'YYYY-MM-DD') : moment().startOf('month')
+    let end = this.defaultEndValue ? moment(this.defaultEndValue, 'YYYY-MM-DD') : moment().endOf('month')
+
+    if (!start.isValid()) start = moment().startOf('month')
+    if (!end.isValid()) end = moment().endOf('month')
+
+    start = start.startOf('month')
+    end = end.startOf('month')
+
+    const currentMonth = moment().startOf('month')
+    if (this.inactiveFutureMonth && end.isAfter(currentMonth)) {
+      end = currentMonth.clone()
+    }
+    if (start.isAfter(end)) {
+      start = end.clone()
+    }
+
+    return {
+      startMonth: start,
+      endMonth: end,
+      startValue: '',
+      endValue: '',
+    }
+  },
+  computed: {
+    startLabel() {
+      return this.startMonth.format('MMM YYYY')
+    },
+    endLabel() {
+      return this.endMonth.format('MMM YYYY')
+    },
+    isFutureStartDisabled() {
+      if (!this.inactiveFutureMonth) return false
+      const nextStart = this.startMonth.clone().add(1, 'month')
+      const currentMonth = moment().startOf('month')
+      return nextStart.isAfter(currentMonth)
+    },
+    isFutureEndDisabled() {
+      if (!this.inactiveFutureMonth) return false
+      const nextEnd = this.endMonth.clone().add(1, 'month')
+      const currentMonth = moment().startOf('month')
+      return nextEnd.isAfter(currentMonth)
+    },
+  },
+  methods: {
+    loadFromStorage() {
+      if (typeof window === "undefined" || !window.localStorage) return false
+      const raw = window.localStorage.getItem("monthPickerRange")
+      if (!raw) return false
+      try {
+        const saved = JSON.parse(raw)
+        if (
+          typeof saved?.startYear !== "number" ||
+          typeof saved?.startMonth !== "number" ||
+          typeof saved?.endYear !== "number" ||
+          typeof saved?.endMonth !== "number"
+        ) {
+          return false
         }
+        let start = moment({ year: saved.startYear, month: saved.startMonth }).startOf('month')
+        let end = moment({ year: saved.endYear, month: saved.endMonth }).startOf('month')
+        const currentMonth = moment().startOf('month')
+        if (this.inactiveFutureMonth && end.isAfter(currentMonth)) {
+          end = currentMonth.clone()
+        }
+        if (start.isAfter(end)) {
+          start = end.clone()
+        }
+        this.startMonth = start
+        this.endMonth = end
+        return true
+      } catch (err) {
+        return false
+      }
     },
-    beforeUnmount() {
-        document.removeEventListener("mousedown", this.handleDocumentClick);
-        document.removeEventListener("touchstart", this.handleDocumentClick);
+    saveToStorage() {
+      if (typeof window === "undefined" || !window.localStorage) return
+      const payload = {
+        startYear: this.startMonth.year(),
+        startMonth: this.startMonth.month(),
+        endYear: this.endMonth.year(),
+        endMonth: this.endMonth.month(),
+      }
+      window.localStorage.setItem("monthPickerRange", JSON.stringify(payload))
     },
-    watch: {
-        startValue(newVal) {
-        },
-        endValue(newVal) {
-            // this.onChange([this.startValue, this.endValue]);
-        },
+    shiftStart(delta) {
+      let nextStart = this.startMonth.clone().add(delta, 'month')
+      const currentMonth = moment().startOf('month')
+      if (this.inactiveFutureMonth && nextStart.isAfter(currentMonth)) {
+        return
+      }
+      if (nextStart.isAfter(this.endMonth)) {
+        this.endMonth = nextStart.clone()
+      }
+      this.startMonth = nextStart
+      this.setDatesAndEmit()
     },
-};
+    shiftEnd(delta) {
+      let nextEnd = this.endMonth.clone().add(delta, 'month')
+      const currentMonth = moment().startOf('month')
+      if (this.inactiveFutureMonth && nextEnd.isAfter(currentMonth)) {
+        return
+      }
+      if (nextEnd.isBefore(this.startMonth)) {
+        this.startMonth = nextEnd.clone()
+      }
+      this.endMonth = nextEnd
+      this.setDatesAndEmit()
+    },
+    setDatesAndEmit() {
+      const safeStartDay = Math.min(
+        this.dayOfMonth || 1,
+        this.startMonth.daysInMonth()
+      )
+      this.startValue = moment({
+        year: this.startMonth.year(),
+        month: this.startMonth.month(),
+        day: safeStartDay,
+      }).format('YYYY-MM-DD')
+
+      this.endValue = this.endMonth.clone().endOf('month').format('YYYY-MM-DD')
+      this.onChange([this.startValue, this.endValue])
+      this.saveToStorage()
+    },
+  },
+  mounted() {
+    this.loadFromStorage()
+    this.setDatesAndEmit()
+  },
+}
 </script>
 
 <style scoped>
-.termInput {
-  position: relative;
+.month-picker{
   display: inline-flex;
-  align-items: stretch;
-  gap: 12px;
-  padding: 0;
-  border: none;
-  border-radius: 0;
-  background-color: transparent;
-  transition: box-shadow 0.2s;
-}
-
-.termInput.active {
-  box-shadow: none;
-}
-
-.rangePanels {
-  display: flex;
-  gap: 1px;
-}
-
-.rangePanel {
-  background-color: #f1f5f9;
-  padding: 8px 10px;
-  min-width: 100px;
-  display: flex;
-  /* flex-direction: column; */
-  flex-direction: row;
-  gap: 0px;
-}
-.rangePanel:first-child{
-    border-radius: 12px 0px 0px 12px;
-}
-.rangePanel:last-child {
-    border-radius: 0px 12px 12px 0px;
-}
-
-.rangePanel.isActive {
-  outline: none;
-}
-
-.yearRow {
-  display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  zoom: 0.8;
-  opacity: 0.55;
-}
-
-.yearRow:hover { 
-  opacity: 1;
-}
-
-.yearBtn {
-  width: 30px;
-  height: 28px;
-  border: none;
+  gap: 12px;
+  padding: 6px 10px;
+  background: #f1f5f9;
   border-radius: 12px;
-  background-color: #cbd5e1;
-  color: #111827;
-  font-size: 16px;
+  border: 1px solid #e2e8f0;
+}
+
+.month-control{
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 2px 6px;
+  border-radius: 10px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+}
+
+.month-label{
   font-weight: 600;
-  line-height: 1;
+  color: #1f2937;
+  min-width: 120px;
+  text-align: center;
+}
+
+.month-nav{
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 999px;
+  background: #e2e8f0;
+  color: #1f2937;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
   cursor: pointer;
   transition: background-color 0.15s ease, transform 0.1s ease;
 }
 
-.yearBtn:hover {
-  background-color: #b9c3d3;
+.month-nav:hover{
+  background: #cbd5e1;
 }
 
-.yearBtn:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-  background-color: #d6dbe4;
-}
-
-.yearBtn:active {
+.month-nav:active{
   transform: translateY(1px);
 }
 
-.yearValue {
-  flex: 1 1 auto;
-  text-align: center;
-  font-size: 16px;
-  font-weight: 600;
-  color: #111827;
-  letter-spacing: 1px;
+.month-nav:disabled{
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: #e5e7eb;
 }
 
-.monthRow {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.monthSelectWrap {
-  position: relative;
-  width: 75px;
-}
-
-.monthSelect {
-  width: 100%;
-  border: none;
-  background: transparent;
-  color: #111827;
-  font-size: 18px;
-  font-weight: 400;
-  text-align: left;
-  padding: 0px 0px 0px 10px;
-  cursor: pointer;
-  /* appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none; */
-}
-
-.monthSelect:focus {
-  outline: none;
-}
-
-.monthCaret {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 0;
-  height: 0;
-  border-left: 7px solid transparent;
-  border-right: 7px solid transparent;
-  border-top: 7px solid #111827;
-  pointer-events: none;
-}
-
-@media (max-width: 640px) {
-  .termInput {
-    width: 100%;
-  }
-
-  .rangePanels {
+@media (max-width: 720px) {
+  .month-picker{
     flex-direction: column;
-    gap: 10px;
+    align-items: flex-start;
   }
-
-  .rangePanel {
-    min-width: 0;
+  .month-label{
+    min-width: 140px;
   }
 }
 </style>
