@@ -16,6 +16,13 @@
         >
           Summary
         </button>
+        <button
+          class="btn btn-sm btn-outline-secondary"
+          :class="{ active: activeView === 'chart' }"
+          @click="activeView = 'chart'"
+        >
+          Chart
+        </button>
       </div>
 
       <div class="btn-group bg-white hide_onprint" role="group" aria-label="Sort by present percent">
@@ -47,6 +54,13 @@
     />
 
     <StudentWiseRankingTable
+      v-else-if="activeView === 'summary'"
+      :students="students"
+      :sortOrder="sortOrder"
+      @details="$emit('details', $event)"
+    />
+
+    <StudentsChart
       v-else
       :students="students"
       :sortOrder="sortOrder"
@@ -59,6 +73,7 @@
 import { ref } from 'vue'
 import StudentWiseMonthlyTable from './StudentWiseMonthlyTable.vue'
 import StudentWiseRankingTable from './StudentWiseRankingTable.vue'
+import StudentsChart from './StudentsChart.vue'
 
 defineProps({
   students: { type: Array, default: () => [] },

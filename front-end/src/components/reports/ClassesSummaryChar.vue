@@ -31,12 +31,13 @@ function getPercent(class_short){
 const chartOptions = computed(() => {
   const categories = classList.value.map(cls => cls.class_name || cls.class_short)
   const data = classList.value.map(cls => getPercent(cls.class_short))
+  const chartHeight = Math.min(600, 120 + categories.length * 26)
 
   return {
-    chart: { type: 'column', height: 420 },
+    chart: { type: 'bar', height: chartHeight },
     title: { text: '' },
     credits: { enabled: false },
-    xAxis: { categories, crosshair: true },
+    xAxis: { categories, title: { text: null } },
     yAxis: {
       min: 0,
       max: 100,
