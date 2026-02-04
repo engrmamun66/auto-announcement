@@ -17,6 +17,7 @@ import RecoringAnimation from '../components/RecoringAnimation.vue'
 import Tabset from '../components/Tabset.vue'
 import EmDateTimePicker from '../components/EmDateTimePicker.vue'
 import Ahelper from './../pages/attendence-childs/attendacnceHelper'
+import CloneStudents from '../components/cloneStudents.vue'
 
 
 const route = inject('route');
@@ -66,6 +67,7 @@ let targetStdForBarcode = ref(null)
 let editModeTabIndex = ref(1)
 provide('editModeTabIndex', editModeTabIndex)
 let only_attendance_feature = CONFIG.value?.settings?.attendance?.only_attendance_feature === true
+let showCloneStudents = ref(false)
 
 function hide_modals(event){
   if (event.key === 'Escape') { 
@@ -445,9 +447,8 @@ watch(fixedWidthSoundCol, (newVal) => {
 
       <div class="d-flex justify-content-end">
         <Btn class="me-2" style="background: #673AB7;">Total: {{ params?.total || '000' }} </Btn>
+        <Btn id="CLONE_ALL" class="me-2" @click.stop="showCloneStudents = true">Clone All</Btn>
         <Btn v-if="!addMode" class="me-2" @click="addMode = !addMode;editModeTabIndex=1;clearParams();payload.id = null" ><i class='bx bx-plus'></i> Add Student</Btn>
-        <Btn v-else class="me-2 red" @click="addMode = !addMode;editModeTabIndex=1;clearParams();payload.id = null" >Cancel</Btn>
-        <!-- <Btn @click="router.push({name: 'import'})"><i class='bx bxs-file-import' ></i> Import</Btn> -->
       </div>
     </div>
 
@@ -714,7 +715,7 @@ watch(fixedWidthSoundCol, (newVal) => {
                 <div class="align-items-center d-flex">
                   <span class="p-1" @dblclick="params.dakhela = std.dakhela">{{ std.dakhela }}</span>
                   <!-- No need multiple card Access If using only for attendance -->
-                  <span v-if="only_attendance_feature === false" tooltip="Cone Student">
+                  <span id="CLONE___STUDENT" v-if="only_attendance_feature === false" tooltip="Cone Student">
                     <i v-if="std.name && String(std.name)?.indexOf('||dakhela') > -1 === false" @click.stop="()=>{
                       std.cloneMode = !(!!(std.cloneMode));
                     }" class="bx bxs-copy-alt cp px-1">
@@ -870,7 +871,13 @@ watch(fixedWidthSoundCol, (newVal) => {
         </AudioRecorAndUpload>
       </div>
     </modal>
+
     </template>
+    <CloneStudents
+      v-if="showCloneStudents"
+      @unmount="showCloneStudents = false"
+      @refresh="getStudents()"
+    />
 
   
 
@@ -1008,4 +1015,3 @@ watch(fixedWidthSoundCol, (newVal) => {
   border-color: var(--primaryColor);
 }
 </style>
-
