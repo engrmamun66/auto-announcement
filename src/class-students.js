@@ -9,6 +9,14 @@ const utils = require('./utls')
 let checkAccess = require("./checkaccess"); 
 let Backup = require("./backup"); 
  
+function normalizeProfileImage(req, profile_image) {
+  if (!profile_image) return null
+  if (/^https?:\/\//i.test(profile_image) || /^data:/i.test(profile_image)) {
+    return profile_image
+  }
+  const path = String(profile_image).startsWith('/') ? profile_image : `/${profile_image}`
+  return utils.audioFullUrl(req, path)
+}
 
 class Students { 
 
@@ -107,6 +115,7 @@ class Students {
         res.send({
           data: rows.map(row => {
             row.sound1 = row.sound1 ? utils.audioFullUrl(req, row.sound1) : null
+            row.profile_image = normalizeProfileImage(req, row.profile_image)
             return row
           }),
           pagination: {
@@ -139,7 +148,8 @@ class Students {
       }
 
       const row = rows[rows.length - 1];   
-      row.sound1 = utils.audioFullUrl(req, row.sound1)
+      row.sound1 = row.sound1 ? utils.audioFullUrl(req, row.sound1) : null
+      row.profile_image = normalizeProfileImage(req, row.profile_image)
 
       row['soundColName'] = soundColName
 
@@ -225,6 +235,10 @@ class Students {
         res.status(500).send({ error: err.message });
         return;
       }  
+      if (student) {
+        student.sound1 = student.sound1 ? utils.audioFullUrl(req, student.sound1) : null
+        student.profile_image = normalizeProfileImage(req, student.profile_image)
+      }
       res.send(student);
     });
   }
@@ -238,8 +252,13 @@ class Students {
         res.status(500).send({ error: err.message });
         return;
       }
-       
-      res.send(students);
+      
+      const data = (students || []).map((student) => {
+        student.sound1 = student.sound1 ? utils.audioFullUrl(req, student.sound1) : null
+        student.profile_image = normalizeProfileImage(req, student.profile_image)
+        return student
+      })
+      res.send(data);
     });
   }
   
@@ -312,47 +331,86 @@ class Students {
     try {
       const workbook = xlsx.readFile(filePath);
       const sheetName = workbook.SheetNames[0]; // Assuming data is in the first sheet
+      const scheduleSheetName = workbook.SheetNames.find((name) => String(name).toLowerCase() === 'schedules') || workbook.SheetNames[1];
       const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName], {
         header: 1,
       });
+      const scheduleData = scheduleSheetName ? xlsx.utils.sheet_to_json(workbook.Sheets[scheduleSheetName], { header: 1 }) : [];
       const insertQuery = `
-        INSERT INTO students (name, dakhela, class, class_short, card_no, year, status, sound1, device_index, card_owner, options, note)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO students (name, dakhela, class, class_short, card_no, year, status, sound1, device_index, card_owner, options, note, profile_image)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
   
       const updateQuery = `
         UPDATE students
-        SET name = ?, dakhela = ?, class = ?, class_short = ?, card_no = ?, year = ?, status = ?, sound1 = ?, device_index = ?, card_owner = ?, options = ?, note = ?
+        SET name = ?, dakhela = ?, class = ?, class_short = ?, card_no = ?, year = ?, status = ?, sound1 = ?, device_index = ?, card_owner = ?, options = ?, note = ?, profile_image = ?
         WHERE id = ?
       `;
   
       const findQuery = `
         SELECT id FROM students WHERE dakhela = ? AND class = ? AND year = ?
       `;
-  
+
+      const insertScheduleQuery = `
+        INSERT INTO schedules (type, title, start_time, end_time, order_index, status, classes)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `;
+
+      const updateScheduleQuery = `
+        UPDATE schedules
+        SET type = ?, title = ?, start_time = ?, end_time = ?, order_index = ?, status = ?, classes = ?
+        WHERE id = ?
+      `;
+
       let errorOccurred = false;
+
+      const headerRow = data[0] || []
+      const headerMap = {}
+      if (headerRow && headerRow.length && headerRow.some((h) => String(h).toLowerCase() === 'id' || String(h).toLowerCase() === 'name')) {
+        headerRow.forEach((h, idx) => {
+          headerMap[String(h).trim().toLowerCase()] = idx
+        })
+      }
+      const hasHeader = Object.keys(headerMap).length > 0
+      const getValue = (row, key, fallbackIndex) => {
+        if (headerMap[key] !== undefined) return row[headerMap[key]]
+        if (fallbackIndex !== undefined) return row[fallbackIndex]
+        return undefined
+      }
   
       this.db.serialize(() => {
         data.forEach((row, i) => {
-          if (i === 0) {
+          if (i === 0 && hasHeader) {
             // Skip the header row
-            console.log("Skipping header row:", row, row.length, data[1].length, data[1]);
+            console.log("Skipping header row:", row, row.length, data[1]?.length, data[1]);
             return;
           }
   
-          if (row.length === 0 || !row[1]) {
+          const name = getValue(row, 'name', 1)
+          if (row.length === 0 || !name) {
             // Skip empty rows or rows without a name
             console.log("Skipping empty row or invalid data:", row);
             return;
           }
   
-          const [id, name, dakhela, className, /* class_short */, card_no, year, status, sound1, card_owner,	options,	device_index, note, /* created */,] = row;
+          const id = getValue(row, 'id', 0)
+          const dakhela = getValue(row, 'dakhela', 2)
+          const className = getValue(row, 'class', 3) || getValue(row, 'class_name', 3)
+          const card_no = getValue(row, 'card_no', 5)
+          const year = getValue(row, 'year', 6)
+          const status = getValue(row, 'status', 7)
+          const sound1 = getValue(row, 'sound1', 8)
+          const card_owner = getValue(row, 'card_owner', 9)
+          const options = getValue(row, 'options', 10)
+          const device_index = getValue(row, 'device_index', 11)
+          const note = getValue(row, 'note', 12)
+          const profile_image = headerMap.profile_image !== undefined ? getValue(row, 'profile_image') : (row.length >= 15 ? row[14] : null)
 
           if (id) {
             // If `id` is provided, update the row
             this.db.run(
               updateQuery,
-              [name, dakhela, className, utils.getClassShort(className), card_no, year, status || 1, sound1 || '', device_index || null, card_owner || null, options || null, note || null, id],
+              [name, dakhela, className, utils.getClassShort(className), card_no, year, status || 1, sound1 || '', device_index || null, card_owner || null, options || null, note || null, profile_image || null, id],
               (err) => {
                 if (err) {
                   console.error(`Error updating data with ID ${id}:`, err);
@@ -373,7 +431,7 @@ class Students {
                 // Update the existing row
                 this.db.run(
                   updateQuery,
-                  [name, dakhela, className, utils.getClassShort(className), card_no, year, status || 1, sound1 || null, device_index || null, card_owner || null, options || null, note || null, existingRow.id],
+                  [name, dakhela, className, utils.getClassShort(className), card_no, year, status || 1, sound1 || null, device_index || null, card_owner || null, options || null, note || null, profile_image || null, existingRow.id],
                   (err) => {
                     if (err) {
                       console.error(`Error updating data for dakhela: ${dakhela}, class: ${className}, year: ${year}:`, err);
@@ -385,7 +443,7 @@ class Students {
                 // Insert a new row device_index
                 this.db.run(
                   insertQuery,
-                  [name, dakhela, className, utils.getClassShort(className), card_no, year, status || 1, sound1 || null, device_index || null, card_owner || null, options || null, note || null],
+                  [name, dakhela, className, utils.getClassShort(className), card_no, year, status || 1, sound1 || null, device_index || null, card_owner || null, options || null, note || null, profile_image || null],
                   (err) => {
                     if (err) {
                       console.error("Error inserting data:", err);
@@ -398,6 +456,76 @@ class Students {
           }
         });
       });
+
+      if (scheduleData && scheduleData.length) {
+        const scheduleHeaderRow = scheduleData[0] || []
+        const scheduleHeaderMap = {}
+        if (scheduleHeaderRow && scheduleHeaderRow.length && scheduleHeaderRow.some((h) => ['id', 'type', 'start_time'].includes(String(h).toLowerCase()))) {
+          scheduleHeaderRow.forEach((h, idx) => {
+            scheduleHeaderMap[String(h).trim().toLowerCase()] = idx
+          })
+        }
+        const scheduleHasHeader = Object.keys(scheduleHeaderMap).length > 0
+        const getScheduleValue = (row, key, fallbackIndex) => {
+          if (scheduleHeaderMap[key] !== undefined) return row[scheduleHeaderMap[key]]
+          if (fallbackIndex !== undefined) return row[fallbackIndex]
+          return undefined
+        }
+
+        this.db.serialize(() => {
+          scheduleData.forEach((row, i) => {
+            if (i === 0 && scheduleHasHeader) {
+              console.log("Skipping schedule header row:", row, row.length, scheduleData[1]?.length, scheduleData[1]);
+              return;
+            }
+
+            if (row.length === 0) return;
+
+            const id = getScheduleValue(row, 'id', 0)
+            const type = getScheduleValue(row, 'type', 1)
+            const title = getScheduleValue(row, 'title', 2)
+            const start_time = getScheduleValue(row, 'start_time', 3)
+            const end_time = getScheduleValue(row, 'end_time', 4)
+            const order_index = getScheduleValue(row, 'order_index', 5)
+            const status = getScheduleValue(row, 'status', 6)
+            const classes = getScheduleValue(row, 'classes', 7)
+
+            if (!type || !start_time || !end_time || !classes) {
+              console.log("Skipping invalid schedule row:", row);
+              return;
+            }
+
+            const resolvedTitle = title || `${start_time} - ${end_time}`
+            const resolvedOrder = Number.isFinite(Number(order_index)) ? Number(order_index) : 1
+            const statusNum = Number(status)
+            const resolvedStatus = (statusNum === 0 || statusNum === 1) ? statusNum : 1
+
+            if (id) {
+              this.db.run(
+                updateScheduleQuery,
+                [Number(type) || type, resolvedTitle, start_time, end_time, resolvedOrder, resolvedStatus, classes, id],
+                (err) => {
+                  if (err) {
+                    console.error(`Error updating schedule with ID ${id}:`, err);
+                    errorOccurred = true;
+                  }
+                }
+              );
+            } else {
+              this.db.run(
+                insertScheduleQuery,
+                [Number(type) || type, resolvedTitle, start_time, end_time, resolvedOrder, resolvedStatus, classes],
+                (err) => {
+                  if (err) {
+                    console.error("Error inserting schedule data:", err);
+                    errorOccurred = true;
+                  }
+                }
+              );
+            }
+          })
+        })
+      }
   
       fs.unlink(filePath, () => {});
       if (!errorOccurred) {
@@ -428,36 +556,47 @@ class Students {
         return;
       }
 
-      try {
-        // Create a worksheet from the rows
-        const worksheet = xlsx.utils.json_to_sheet(rows);
+      const schedulesQuery = `SELECT * FROM schedules ORDER BY id ASC`;
 
-        // Create a new workbook and append the worksheet
-        const workbook = xlsx.utils.book_new();
-        xlsx.utils.book_append_sheet(workbook, worksheet, "Students");
-        const fileName = `students_export_${moment().format('YYYY_MMM_DD')}_${Date.now()}.xlsx`
-        const filePath = path.join( DIR, "/public/exports", fileName );    
-        xlsx.writeFile(workbook, filePath);
+      this.db.all(schedulesQuery, [], (scheduleErr, schedules) => {
+        if (scheduleErr) {
+          res.status(500).send({ error: scheduleErr.message });
+          return;
+        }
 
-        res.download(filePath, "students_export.xlsx", (err) => {
-          if (err) {
-            console.error("Error downloading file:", err.message);
-            res.status(500).send({ error: "Error downloading file." });
-          }
+        try {
+          // Create worksheets
+          const worksheet = xlsx.utils.json_to_sheet(rows);
+          const schedulesSheet = xlsx.utils.json_to_sheet(schedules || []);
 
-          // Delete the file after download
-          if(!global.config.settings?.backup?.exports){
-            fs.unlink(filePath, (unlinkErr) => {
-              if (unlinkErr) {
-                console.error("Error deleting file:", unlinkErr.message);
-              }
-            });
-          }
-        });
-      } catch (exportError) {
-        console.error("Error exporting data:", exportError.message);
-        res.status(500).send({ error: exportError.message });
-      }
+          // Create a new workbook and append worksheets
+          const workbook = xlsx.utils.book_new();
+          xlsx.utils.book_append_sheet(workbook, worksheet, "Students");
+          xlsx.utils.book_append_sheet(workbook, schedulesSheet, "Schedules");
+          const fileName = `students_export_${moment().format('YYYY_MMM_DD')}_${Date.now()}.xlsx`
+          const filePath = path.join( DIR, "/public/exports", fileName );    
+          xlsx.writeFile(workbook, filePath);
+
+          res.download(filePath, "students_export.xlsx", (err) => {
+            if (err) {
+              console.error("Error downloading file:", err.message);
+              res.status(500).send({ error: "Error downloading file." });
+            }
+
+            // Delete the file after download
+            if(!global.config.settings?.backup?.exports){
+              fs.unlink(filePath, (unlinkErr) => {
+                if (unlinkErr) {
+                  console.error("Error deleting file:", unlinkErr.message);
+                }
+              });
+            }
+          });
+        } catch (exportError) {
+          console.error("Error exporting data:", exportError.message);
+          res.status(500).send({ error: exportError.message });
+        }
+      })
     });
   }
 
@@ -576,7 +715,8 @@ class Students {
   }
 
   addStudent(req, res) {
-    const { class: className, name, dakhela, year, card_no, card_owner, note } = req.body;
+    const { class: className, name, dakhela, year, card_no, card_owner, note, profile_image: profile_image_input } = req.body;
+    const profile_image = req.file ? `/media/${req.file.filename}` : profile_image_input;
   
     const class_short = utils.getClassShort(className);
   
@@ -588,11 +728,11 @@ class Students {
     const tableName = this.tableName;
   
     const query = `
-      INSERT INTO ${tableName} (class, name, class_short, dakhela, year, card_no, card_owner, note)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO ${tableName} (class, name, class_short, dakhela, year, card_no, card_owner, note, profile_image)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
   
-    const params = [className, name, class_short, dakhela, year || null, card_no, card_owner, note];
+    const params = [className, name, class_short, dakhela, year || null, card_no, card_owner, note, profile_image || null];
   
     const db = this.db; // Capture `this.db` reference
   
@@ -645,7 +785,7 @@ class Students {
           if(existing_student_by_dakhela){
             return res.status(500).send({ message: `এই দাখেলাটি ইতিমধ্যে ব্যবহার করা হয়েছে (${dakhela_new})`, existing_student_by_dakhela });
           } else {
-            let {name, class: className, card_no, year, status, sound1} = studentRow
+            let {name, class: className, card_no, year, status, sound1, profile_image} = studentRow
              
               const class_short = utils.getClassShort(className);
             
@@ -657,12 +797,12 @@ class Students {
               const tableName = this.tableName;
             
               const query = `
-                INSERT INTO ${tableName} (class, name, class_short, dakhela, year, card_no, sound1)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO ${tableName} (class, name, class_short, dakhela, year, card_no, sound1, profile_image)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
               `;
             
               name = `${name} (Copied)||dakhela::${dakhela}`
-              let params = [className, name, class_short, dakhela_new, year || null, card_no, sound1];
+              let params = [className, name, class_short, dakhela_new, year || null, card_no, sound1, profile_image || null];
             
               const db = this.db; // Capture `this.db` reference
 
@@ -714,7 +854,7 @@ class Students {
 
   updateStudent(req, res) {
 
-    const { id, class: className, name, dakhela, year, card_no, card_owner, note } = req.body;
+    const { id, class: className, name, dakhela, year, card_no, card_owner, note, profile_image } = req.body;
   
     if (!id) {
       res.status(400).send({ error: "Student ID is required for updating." });
@@ -732,11 +872,11 @@ class Students {
   
     const query = `
       UPDATE ${tableName}
-      SET class = ?, name = ?, class_short = ?, dakhela = ?, year = ?, card_no = ?, card_owner = ?, note = ?
+      SET class = ?, name = ?, class_short = ?, dakhela = ?, year = ?, card_no = ?, card_owner = ?, note = ?, profile_image = ?
       WHERE id = ?
     `;
 
-    const params = [className, name, class_short, dakhela, year || null, card_no, card_owner, note, id];
+    const params = [className, name, class_short, dakhela, year || null, card_no, card_owner, note, profile_image || null, id];
     const db = this.db; // Capture `this.db` reference
   
     db.run(query, params, function (err) {

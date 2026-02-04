@@ -30,6 +30,9 @@
                         'live_data': item?.live_data,
                     }"
                     >
+                    <div class="d-flex justify-content-center mb-2">
+                        <img class="profile-thumb" :src="getProfileImage(getStudent(item))" alt="profile" />
+                    </div>
                     <div class="d-flex justify-content-between align-items-center mb-2" >
                         <h4 class="student-name"> {{ getStudent(item)?.name || "Unknown" }} </h4>
                     </div>
@@ -106,6 +109,10 @@ const LIVE_ANIM_MS = 900
 const getStudent = ({ student_id }) =>
   all_students_non_copied.value.find((std) => std.dakhela == student_id);
 
+const getProfileImage = (student) => {
+  return student?.profile_image || '/default-profile-image.png'
+}
+
 const getLiveKey = (item, i) =>
   item?.id || item?.identity_string || `${item?.student_id || 'std'}-${item?.in_time || item?.out_time || i}`;
 
@@ -178,6 +185,14 @@ function deleteAttedence(item){
   border-radius: 5px;
   width: 100%;
   text-align: center;
+}
+.profile-thumb{
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid #cfcfcf;
+  background: #fff;
 }
 
 .status-present {

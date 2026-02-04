@@ -77,6 +77,7 @@ class myDB {
                 options TEXT DEFAULT NULL,
                 device_index INTEGER DEFAULT 1, -- zkteco punching device index
                 note TEXT DEFAULT NULL,
+                profile_image TEXT DEFAULT NULL,
                 created TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );`,
                 (err) => {

@@ -48,7 +48,6 @@
             <Btn class="white">No Sound: <span class="badge text-white bg-warning">{{ summary.no_sound }}</span></Btn>
             <Btn class="white">Exists: <span class="badge text-white bg-danger">{{ summary.exists }}</span></Btn>
             <Btn class="white">Duplicate: <span class="badge text-white bg-danger">{{ summary.duplicate }}</span></Btn>
-            <Btn class="white">Invalid: <span class="badge text-white bg-danger">{{ summary.invalid }}</span></Btn>
           </div>
           <div v-if="setupError" class="text-danger small mt-2">
             {{ setupError }}
@@ -61,7 +60,7 @@
               <thead>
                 <tr>
                   <th>#</th>
-                  <th>Original</th>
+                <th>Original</th>
                   <th>Old Dakhela</th>
                   <th>New Dakhela</th>
                   <th>Status</th>
@@ -70,10 +69,15 @@
               <tbody>
                 <tr v-for="(item, idx) in previewItems" :key="'clone-prev-' + idx">
                   <td>{{ idx + 1 }}</td>
-                  <td>
-                    <div class="fw-semibold">{{ item.student?.name?.split('||')[0] }}</div>
-                  <div class="text-muted">{{ item.student?.dakhela }} ({{ getClassName(item.student?.class_short) }})</div>
-                  </td>
+                <td>
+                  <div class="d-flex align-items-center gap-2">
+                    <img class="profile-thumb" :src="getProfileImage(item.student)" alt="profile" />
+                    <div>
+                      <div class="fw-semibold">{{ item.student?.name?.split('||')[0] }}</div>
+                      <div class="text-muted">{{ item.student?.dakhela }} ({{ getClassName(item.student?.class_short) }})</div>
+                    </div>
+                  </div>
+                </td>
                   <td>{{ item.student?.dakhela ?? '-' }}</td>
                   <td>{{ item.newDakhela ?? '-' }}</td>
                   <td>
@@ -136,7 +140,12 @@
               <tbody>
                 <tr v-for="(std, idx) in clonedPreview" :key="'clone-del-' + std.id">
                   <td>{{ idx + 1 }}</td>
-                  <td>{{ std?.name?.split('||')[0] }}</td>
+                  <td>
+                    <div class="d-flex align-items-center gap-2">
+                      <img class="profile-thumb" :src="getProfileImage(std)" alt="profile" />
+                      <span>{{ std?.name?.split('||')[0] }}</span>
+                    </div>
+                  </td>
                   <td>{{ std?.dakhela }}</td>
                   <td>{{ getClassName(std?.class_short) }}</td>
                 </tr>
@@ -240,6 +249,10 @@ function getClassName(class_short) {
   if (!class_short) return ''
   const cls = getClassesList().find((c) => c.class_short === class_short)
   return cls?.class_name || class_short
+}
+
+function getProfileImage(student) {
+  return student?.profile_image || '/default-profile-image.png'
 }
 
 function setDefaultStudents() {
@@ -473,3 +486,13 @@ async function deleteAllCloned() {
   }
 }
 </script>
+
+<style scoped>
+.profile-thumb{
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid #cfcfcf;
+}
+</style>

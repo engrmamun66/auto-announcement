@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, inject, ref, reactive, watch, provide } from 'vue';
+import { onMounted, inject, ref, reactive, watch, provide, onBeforeUnmount } from 'vue';
 import moment from 'moment/moment'
 import { useRouter, useRoute } from 'vue-router';
 import Note from '../components/note.vue'
@@ -180,9 +180,12 @@ let payload = reactive({
   card_no: null,
   card_owner: null,
   note: null,
+  profile_image: null,
 })
 
 let is___adding = ref(false)
+let profileImageFile = ref(null)
+let profileImagePreview = ref('')
 
 function clearPayload(){
   payload.id = null
@@ -194,6 +197,8 @@ function clearPayload(){
   payload.card_no = null
   payload.card_owner = null
   payload.note = null
+  payload.profile_image = null
+  clearProfileImageFile()
 
   addMode.value = false 
   is___adding.value = false 
@@ -204,9 +209,31 @@ function prepareToEdit(std){
   Object.keys(payload).forEach(key => {
     payload[key] = std[key]
   });
+  clearProfileImageFile()
   addMode.value = true
   editModeTabIndex.value = 1
 }
+
+function clearProfileImageFile(){
+  if (profileImagePreview.value) {
+    URL.revokeObjectURL(profileImagePreview.value)
+  }
+  profileImageFile.value = null
+  profileImagePreview.value = ''
+}
+
+function onProfileImageChange(event){
+  const file = event.target?.files?.[0] || null
+  clearProfileImageFile()
+  if (file) {
+    profileImageFile.value = file
+    profileImagePreview.value = URL.createObjectURL(file)
+  }
+}
+
+onBeforeUnmount(() => {
+  clearProfileImageFile()
+})
  
 
 
@@ -295,7 +322,18 @@ async function addStudent(){
     is___adding.value = true
     
 
-    http.post('/students/add', payload).then(response => {
+    const formData = new FormData()
+    Object.keys(payload).forEach((key) => {
+      const value = payload[key]
+      if (value !== null && value !== undefined) {
+        formData.append(key, value)
+      }
+    })
+    if (profileImageFile.value) {
+      formData.append('profile_image_file', profileImageFile.value)
+    }
+
+    http.post('/students/add', formData, {formData: true}).then(response => {
       if(response.status == 200){
         let { id } = response.data.data; 
         if(id){          
@@ -456,7 +494,7 @@ watch(fixedWidthSoundCol, (newVal) => {
       <div class="w-100 d-flex justify-content-center" >
 
         <div class="cb-form">
-          <div @click.stop.prevent="false">
+          <div @click.stop="false">
             <div class="row" :class="[payload?.id ? 'mt-2' : 'mt-4']">
 
               <div class="col-12 d-flex justify-content-between align-items-center">
@@ -467,7 +505,7 @@ watch(fixedWidthSoundCol, (newVal) => {
                 }"></Tabset> 
 
                 <label class="using-card-title-in-form" v-if="CONFIG?.settings?.attendance?.status && payload?.id && payload?.name">
-                  {{ String(payload?.name).indexOf('Copied') > -1 ? 'This card for guardian' : 'this card for student' }}
+                  {{ String(payload?.name).indexOf('Copied') > -1 ? 'This card for guardian' : 'This card for student' }}
                 </label>
 
 
@@ -512,6 +550,20 @@ watch(fixedWidthSoundCol, (newVal) => {
                         <option :value="new Date().getFullYear() - 2">{{ new Date().getFullYear() - 2 }}</option>
                         <option :value="new Date().getFullYear() - 3">{{ new Date().getFullYear() - 3 }}</option>
                       </select>
+                    </div>
+                  </div>
+
+                  <div class="col-12">
+                    <div class="form-group">
+                      <label for="profile_image_input">Profile Image</label>
+                      <div class="d-flex align-items-center gap-2">
+                        <img class="profile-thumb" :src="profileImagePreview || payload.profile_image || '/default-profile-image.png'" alt="profile" />
+                        <input v-model="payload.profile_image" type="text" class="form-control cb-input" placeholder="Image URL or path">
+                        <label for="profile_image_input" class="cb-input">
+                          <span class="transformY-3px">Choose Image</span>
+                          <input id="profile_image_input" v-if="!payload.id" type="file" accept="image/*" class="form-control opacity-0" @change="onProfileImageChange">
+                        </label>
+                      </div>
                     </div>
                   </div>
 
@@ -683,6 +735,7 @@ watch(fixedWidthSoundCol, (newVal) => {
           <tr>
             <th>{{ CONFIG?.studentTableColumns?.class || 'Class' }}</th>
             <th>{{ CONFIG?.studentTableColumns?.name || 'Name' }}</th>
+            <th>{{ CONFIG?.studentTableColumns?.profile_image || 'Image' }}</th>
             <th>{{ CONFIG?.studentTableColumns?.card_owner || 'Card Owner' }}</th>
             <!-- <th>Card</th> -->
             <th>{{ CONFIG?.studentTableColumns?.dakhela || 'Dakhela' }}</th>
@@ -707,6 +760,9 @@ watch(fixedWidthSoundCol, (newVal) => {
             <tr @auxclick="log(std)">
               <td class="text-left"> {{ std.class }} </td> 
               <td class="text-left cp" @click.stop="prepareToEdit(std)" :student-id="std.id" >{{ std.name.split('||')?.[0] }}</td>
+              <td>
+                <img class="profile-thumb" :src="std.profile_image || '/default-profile-image.png'" alt="profile" />
+              </td>
               <td> 
                 <p class="mb-1">{{ callbacks.getCardOwnerName(std?.card_owner) }}</p>
                 <div class="student-note" tooltip="Note" v-if="std?.note">{{ std?.note }}</div>
@@ -821,7 +877,10 @@ watch(fixedWidthSoundCol, (newVal) => {
               </td>
               <td> 
                 <div class="d-flex justify-content-center action-icons">
-                  <ul>
+                  <ul class="d-flex">
+                    <li tooltip="Edit student" class="fs-5 transformY-3px">
+                      <i @click="prepareToEdit(std)" class='bx bx-edit cp' ></i>
+                    </li>
                     <li tooltip="Delete student" class="fs-5 transformY-3px">
                       <i @click="deleteStudent(std.id, i)" class='bx bx-trash text-danger cp' ></i>
                     </li>
@@ -966,6 +1025,14 @@ watch(fixedWidthSoundCol, (newVal) => {
   border: 1px solid #b8b8b8;
   border-radius: 6px;
   margin-left: 5px;
+}
+.profile-thumb{
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid #cfcfcf;
+  background: #fff;
 }
 .action-icons > *:not(:last-child){
   margin-right: 8px;

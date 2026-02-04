@@ -89,6 +89,25 @@ const audioUpload = multer({
   },
 });
 
+const imageUpload = multer({
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, __dirname + "/public/media"); // Save files to public/media folder
+    },
+    filename: (req, file, cb) => {
+      const uniqueName = `${config?.env?.CODE_NUMBER || 'code_number'}-${Date.now()}-${file.originalname}`;
+      cb(null, uniqueName);
+    },
+  }),
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith("image/")) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only image files are allowed"), false);
+    }
+  },
+});
+
 
 global.is_active_the_instutute = true
 
@@ -307,7 +326,7 @@ app.get(`/api/_ac`, async (req, res) => {
     Students.getStudent(req, res);
   });
 
-  app.post(prefix + '/students/add', (req, res) => {
+  app.post(prefix + '/students/add', imageUpload.single("profile_image_file"), (req, res) => {
     Students.addStudent(req, res);
   });
 
