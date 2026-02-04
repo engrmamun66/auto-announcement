@@ -10,7 +10,6 @@ import StudentMonthlyReportTable from '../../../components/reports/StudentMonthl
 import StudentAttendanceDetails from '../../../components/reports/StudentAttendanceDetails.vue'
 import MonthlyReportTable from '../../../components/reports/MonthlyReportTable.vue'
 import RankingTable from '../../../components/reports/RankingTable.vue'
-import ClassesSummaryPercent from '../../../components/reports/ClassesSummaryPercent.vue'
 import ClassesSummaryChar from '../../../components/reports/ClassesSummaryChar.vue'
 
 const CONFIG = inject("CONFIG");
@@ -74,13 +73,12 @@ let reports = ref({
   classRanking: [],
 })
 let activeReportTab = ref('summary')
-const mainReportTabs = ['summary', 'monthly', 'ranking', 'chart', 'chart2']
+const mainReportTabs = ['summary', 'monthly', 'ranking', 'chart2']
 let lastMainTab = ref('summary')
 const reportTabs = [
   { key: 'summary', label: 'Summary' },
   { key: 'monthly', label: 'Monthly' },
   { key: 'ranking', label: 'Ranking' },
-  { key: 'chart', label: 'Precent' },
   { key: 'chart2', label: 'Chart' },
 ]
 let selectedSummaryClass = ref(null)
@@ -99,7 +97,6 @@ const reportTitle = computed(() => {
   }
   if (activeReportTab.value === 'monthly') return 'Monthly Report'
   if (activeReportTab.value === 'ranking') return 'Ranking Report'
-  if (activeReportTab.value === 'chart') return 'Class Summary Chart'
   if (activeReportTab.value === 'chart2') return 'Class Summary Chart'
   return 'Attendance Summary'
 })
@@ -674,14 +671,6 @@ onMounted(()=>{
       <div v-if="activeReportTab === 'ranking' && reports?.classRanking?.length" class="mb-3">
         <RankingTable
           :rankings="reports.classRanking"
-          :classes="classes"
-          :classWise="reports.classWise"
-          @details="openClassSummary"
-        />
-      </div>
-
-      <div v-if="activeReportTab === 'chart' && Object.keys(reports?.classWise || {}).length" class="mb-3">
-        <ClassesSummaryPercent
           :classes="classes"
           :classWise="reports.classWise"
           @details="openClassSummary"
