@@ -1,5 +1,5 @@
 <template>
-  <div class="summary-chart">
+  <div class="summary-chart mt-4">
     <highcharts v-if="hasData" :options="chartOptions" />
     <div v-else class="text-muted">No data found.</div>
   </div>
