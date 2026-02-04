@@ -103,7 +103,8 @@ function getPercent(class_short){
 .chart-bar{
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, #198754, #2ecc71);
+  /* background: linear-gradient(90deg, #198754, #2ecc71); */
+  background: var(--primaryColor);
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -144,7 +145,7 @@ function getPercent(class_short){
     background: #e0e0e0 !important;
   }
   .chart-bar{
-    background: #198754 !important;
+    background: #666;
     color: #ffffff !important;
   }
   .chart-track{
