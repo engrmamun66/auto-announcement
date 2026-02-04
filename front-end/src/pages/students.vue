@@ -447,7 +447,7 @@ watch(fixedWidthSoundCol, (newVal) => {
 
       <div class="d-flex justify-content-end">
         <Btn class="me-2" style="background: #673AB7;">Total: {{ params?.total || '000' }} </Btn>
-        <Btn id="CLONE_ALL" class="me-2" @click.stop="showCloneStudents = true">Clone All</Btn>
+        <Btn v-if="route.query.dev === 'true'" id="CLONE_ALL" class="me-2" @click.stop="showCloneStudents = true">Clone All</Btn>
         <Btn v-if="!addMode" class="me-2" @click="addMode = !addMode;editModeTabIndex=1;clearParams();payload.id = null" ><i class='bx bx-plus'></i> Add Student</Btn>
       </div>
     </div>
