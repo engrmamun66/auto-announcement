@@ -191,7 +191,7 @@ export default {
   display: inline-flex;
   align-items: center;
   gap: 12px;
-  padding: 6px 10px;
+  padding: 2px;
   background: #f1f5f9;
   border-radius: 12px;
   border: 1px solid #e2e8f0;
@@ -210,7 +210,7 @@ export default {
 .month-label{
   font-weight: 600;
   color: #1f2937;
-  min-width: 120px;
+  min-width: 80px;
   text-align: center;
 }
 
