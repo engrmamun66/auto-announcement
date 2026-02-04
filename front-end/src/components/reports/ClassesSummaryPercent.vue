@@ -132,4 +132,23 @@ function getPercent(class_short){
     justify-content: flex-start;
   }
 }
+
+@media print {
+  .chart-bar-wrap,
+  .chart-bar,
+  .chart-track{
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .chart-bar-wrap{
+    background: #e0e0e0 !important;
+  }
+  .chart-bar{
+    background: #198754 !important;
+    color: #ffffff !important;
+  }
+  .chart-track{
+    background: transparent !important;
+  }
+}
 </style>
