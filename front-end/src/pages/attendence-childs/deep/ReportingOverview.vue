@@ -10,6 +10,8 @@ import StudentMonthlyReportTable from '../../../components/reports/StudentMonthl
 import StudentAttendanceDetails from '../../../components/reports/StudentAttendanceDetails.vue'
 import MonthlyReportTable from '../../../components/reports/MonthlyReportTable.vue'
 import RankingTable from '../../../components/reports/RankingTable.vue'
+import ClassesSummaryPercent from '../../../components/reports/ClassesSummaryPercent.vue'
+import ClassesSummaryChar from '../../../components/reports/ClassesSummaryChar.vue'
 
 const CONFIG = inject("CONFIG");
 const classes = inject("classes");
@@ -72,10 +74,14 @@ let reports = ref({
   classRanking: [],
 })
 let activeReportTab = ref('summary')
+const mainReportTabs = ['summary', 'monthly', 'ranking', 'chart', 'chart2']
+let lastMainTab = ref('summary')
 const reportTabs = [
   { key: 'summary', label: 'Summary' },
   { key: 'monthly', label: 'Monthly' },
   { key: 'ranking', label: 'Ranking' },
+  { key: 'chart', label: 'Precent' },
+  { key: 'chart2', label: 'Chart' },
 ]
 let selectedSummaryClass = ref(null)
 let singleClassReport = ref(null)
@@ -93,6 +99,8 @@ const reportTitle = computed(() => {
   }
   if (activeReportTab.value === 'monthly') return 'Monthly Report'
   if (activeReportTab.value === 'ranking') return 'Ranking Report'
+  if (activeReportTab.value === 'chart') return 'Class Summary Chart'
+  if (activeReportTab.value === 'chart2') return 'Class Summary Chart'
   return 'Attendance Summary'
 })
 
@@ -207,6 +215,9 @@ async function openStudentMonthlyById(){
 
   const clsInfo = classes.value.find(c => c.class_short === found.class_short) || {}
   selectedSummaryClass.value = clsInfo.class_short ? clsInfo : { class_short: found.class_short, class_name: found.class_short }
+  if (mainReportTabs.includes(activeReportTab.value)) {
+    lastMainTab.value = activeReportTab.value
+  }
   activeReportTab.value = 'single-class-summary'
   selectedStudentMonth.value = null
   singleStudentAttendance.value = []
@@ -228,6 +239,9 @@ function enrichStudentInfo(std){
 }
 
 function openClassSummary(cls){
+  if (mainReportTabs.includes(activeReportTab.value)) {
+    lastMainTab.value = activeReportTab.value
+  }
   selectedSummaryClass.value = cls
   activeReportTab.value = 'single-class-summary'
   selectedStudent.value = null
@@ -240,7 +254,7 @@ function openClassSummary(cls){
 function closeClassSummary(){
   selectedSummaryClass.value = null
   singleClassReport.value = null
-  activeReportTab.value = 'summary'
+  activeReportTab.value = lastMainTab.value || 'summary'
   selectedStudent.value = null
   selectedStudentMonth.value = null
   singleStudentAttendance.value = []
@@ -327,6 +341,13 @@ function goBackOneStep(){
   if (selectedSummaryClass.value) {
     closeClassSummary()
   }
+}
+
+function setActiveMainTab(tab){
+  if (mainReportTabs.includes(tab)) {
+    lastMainTab.value = tab
+  }
+  activeReportTab.value = tab
 }
 
 const filteredStudentAttendance = computed(() => {
@@ -583,7 +604,7 @@ onMounted(()=>{
         <ReportTabs
           :tabs="reportTabs"
           :active="activeReportTab"
-          @change="activeReportTab = $event"
+          @change="setActiveMainTab($event)"
         />
       </div>
     </div>
@@ -653,6 +674,22 @@ onMounted(()=>{
       <div v-if="activeReportTab === 'ranking' && reports?.classRanking?.length" class="mb-3">
         <RankingTable
           :rankings="reports.classRanking"
+          :classes="classes"
+          :classWise="reports.classWise"
+          @details="openClassSummary"
+        />
+      </div>
+
+      <div v-if="activeReportTab === 'chart' && Object.keys(reports?.classWise || {}).length" class="mb-3">
+        <ClassesSummaryPercent
+          :classes="classes"
+          :classWise="reports.classWise"
+          @details="openClassSummary"
+        />
+      </div>
+
+      <div v-if="activeReportTab === 'chart2' && Object.keys(reports?.classWise || {}).length" class="mb-3">
+        <ClassesSummaryChar
           :classes="classes"
           :classWise="reports.classWise"
           @details="openClassSummary"
