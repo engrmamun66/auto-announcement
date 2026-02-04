@@ -334,7 +334,7 @@ app.get(`/api/_ac`, async (req, res) => {
     Students.cloneStudent(req, res);
   });
 
-  app.post(prefix + '/students/update', (req, res) => {
+  app.post(prefix + '/students/update', imageUpload.single("profile_image_file"), (req, res) => {
     Students.updateStudent(req, res);
   });
 

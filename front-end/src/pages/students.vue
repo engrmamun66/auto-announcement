@@ -354,7 +354,18 @@ async function updateStudent(){
     if(!payload.class) return emitter.emit('toaster-warning', {message: 'ক্লাস নির্বাচন করুন'})
     if(!payload.dakhela) return emitter.emit('toaster-warning', {message: 'দাখেল নাম্বার লিখুন'})
     is___adding.value = true
-    http.post(`/students/update`, payload).then(response => {
+    const formData = new FormData()
+    Object.keys(payload).forEach((key) => {
+      const value = payload[key]
+      if (value !== null && value !== undefined) {
+        formData.append(key, value)
+      }
+    })
+    if (profileImageFile.value) {
+      formData.append('profile_image_file', profileImageFile.value)
+    }
+
+    http.post(`/students/update`, formData, {formData: true}).then(response => {
       if(response.status == 200){
         let { id } = response.data.data; 
         if(id){          
@@ -559,9 +570,9 @@ watch(fixedWidthSoundCol, (newVal) => {
                       <div class="d-flex align-items-center gap-2">
                         <img class="profile-thumb" :src="profileImagePreview || payload.profile_image || '/default-profile-image.png'" alt="profile" />
                         <input v-model="payload.profile_image" type="text" class="form-control cb-input" placeholder="Image URL or path">
-                        <label for="profile_image_input" class="cb-input">
+                        <label for="profile_image_input" class="form-control cb-input">
                           <span class="transformY-3px">Choose Image</span>
-                          <input id="profile_image_input" v-if="!payload.id" type="file" accept="image/*" class="form-control opacity-0" @change="onProfileImageChange">
+                          <input id="profile_image_input" type="file" accept="image/*" class="form-control opacity-0" @change="onProfileImageChange">
                         </label>
                       </div>
                     </div>
@@ -877,7 +888,7 @@ watch(fixedWidthSoundCol, (newVal) => {
               </td>
               <td> 
                 <div class="d-flex justify-content-center action-icons">
-                  <ul class="d-flex">
+                  <ul class="d-flex gap-1">
                     <li tooltip="Edit student" class="fs-5 transformY-3px">
                       <i @click="prepareToEdit(std)" class='bx bx-edit cp' ></i>
                     </li>

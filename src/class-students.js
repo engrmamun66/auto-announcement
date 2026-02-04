@@ -18,6 +18,23 @@ function normalizeProfileImage(req, profile_image) {
   return utils.audioFullUrl(req, path)
 }
 
+function deleteProfileImageFile(profile_image) {
+  try {
+    if (!profile_image) return
+    if (/^https?:\/\//i.test(profile_image) || /^data:/i.test(profile_image)) return
+    if (profile_image === '/default-profile-image.png' || profile_image === 'default-profile-image.png') return
+    const relativePath = String(profile_image).startsWith('/') ? profile_image.slice(1) : profile_image
+    const mediaDir = path.join(global.DIR, 'public', 'media')
+    const fullPath = path.resolve(global.DIR, relativePath)
+    if (!fullPath.startsWith(mediaDir)) return
+    if (fs.existsSync(fullPath)) {
+      fs.unlinkSync(fullPath)
+    }
+  } catch (error) {
+    console.warn('deleteProfileImageFile_error', error?.message || error)
+  }
+}
+
 class Students { 
 
   constructor(db) {
@@ -854,7 +871,8 @@ class Students {
 
   updateStudent(req, res) {
 
-    const { id, class: className, name, dakhela, year, card_no, card_owner, note, profile_image } = req.body;
+    const { id, class: className, name, dakhela, year, card_no, card_owner, note, profile_image: profile_image_input } = req.body;
+    const profile_image = req.file ? `/media/${req.file.filename}` : profile_image_input;
   
     if (!id) {
       res.status(400).send({ error: "Student ID is required for updating." });
@@ -921,27 +939,36 @@ class Students {
       res.status(400).send({ error: "Student ID is required." });
       return;
     }
-  
-    const query = `DELETE FROM ${this.tableName} WHERE id = ?`;
-  
-    this.db.run(query, [id], function (err) {
-      if (err) {
-        res.status(500).send({ error: "Error deleting the student." });
-        return;
-      }
-  
-      if (this.changes === 0) {
-        res.status(404).send({ error: "No student found with the provided ID." });
+ 
+    const selectQuery = `SELECT profile_image FROM ${this.tableName} WHERE id = ?`;
+    const deleteQuery = `DELETE FROM ${this.tableName} WHERE id = ?`;
+
+    this.db.get(selectQuery, [id], (selectErr, row) => {
+      if (selectErr) {
+        res.status(500).send({ error: "Error fetching student." });
         return;
       }
 
-      checkAccess.CheckAppAccess({save_info: true})
-  
-      res.send({
-        message: "Student deleted successfully.",
-        studentId: id,
+      this.db.run(deleteQuery, [id], function (err) {
+        if (err) {
+          res.status(500).send({ error: "Error deleting the student." });
+          return;
+        }
+    
+        if (this.changes === 0) {
+          res.status(404).send({ error: "No student found with the provided ID." });
+          return;
+        }
+
+        deleteProfileImageFile(row?.profile_image)
+        checkAccess.CheckAppAccess({save_info: true})
+    
+        res.send({
+          message: "Student deleted successfully.",
+          studentId: id,
+        });
       });
-    });
+    })
   }
   
   
