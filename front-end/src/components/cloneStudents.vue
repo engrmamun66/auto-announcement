@@ -72,7 +72,7 @@
                   <td>{{ idx + 1 }}</td>
                   <td>
                     <div class="fw-semibold">{{ item.student?.name?.split('||')[0] }}</div>
-                    <div class="text-muted">{{ item.student?.dakhela }} ({{ item.student?.class_short }})</div>
+                  <div class="text-muted">{{ item.student?.dakhela }} ({{ getClassName(item.student?.class_short) }})</div>
                   </td>
                   <td>{{ item.student?.dakhela ?? '-' }}</td>
                   <td>{{ item.newDakhela ?? '-' }}</td>
@@ -138,7 +138,7 @@
                   <td>{{ idx + 1 }}</td>
                   <td>{{ std?.name?.split('||')[0] }}</td>
                   <td>{{ std?.dakhela }}</td>
-                  <td>{{ std?.class_short }}</td>
+                  <td>{{ getClassName(std?.class_short) }}</td>
                 </tr>
               </tbody>
             </table>
@@ -234,6 +234,12 @@ function getClassesList() {
   if (Array.isArray(classes)) return classes
   if (classes && Array.isArray(classes.value)) return classes.value
   return []
+}
+
+function getClassName(class_short) {
+  if (!class_short) return ''
+  const cls = getClassesList().find((c) => c.class_short === class_short)
+  return cls?.class_name || class_short
 }
 
 function setDefaultStudents() {
