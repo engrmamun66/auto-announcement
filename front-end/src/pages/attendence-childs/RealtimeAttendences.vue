@@ -110,7 +110,12 @@ const getStudent = ({ student_id }) =>
   all_students_non_copied.value.find((std) => std.dakhela == student_id);
 
 const getProfileImage = (student) => {
-  return student?.profile_image || '/default-profile-image.png'
+  const img = student?.profile_image
+  if (!img) return '/default-profile-image.png'
+  if (/^https?:\/\//i.test(img) || /^data:/i.test(img)) return img
+  const base = globalThis.GLOBAL_DATA?.env?.API_BASE_URL || ''
+  if (!base) return img.startsWith('/') ? img : `/${img}`
+  return img.startsWith('/') ? `${base}${img}` : `${base}/${img}`
 }
 
 const getLiveKey = (item, i) =>

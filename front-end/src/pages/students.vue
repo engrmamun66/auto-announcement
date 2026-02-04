@@ -339,6 +339,7 @@ async function addStudent(){
         if(id){          
           clearParams({id}) 
         }
+        getAllStudents()
       }
     }).catch(() => {}).finally(()=>{
       clearPayload()
@@ -371,6 +372,7 @@ async function updateStudent(){
         if(id){          
           clearParams({id, get: false}) 
         }
+        getAllStudents()
       }
     }).catch(() => {}).finally(()=>{
       clearPayload()
