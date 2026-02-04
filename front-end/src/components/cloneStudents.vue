@@ -6,11 +6,6 @@
     @unmount="showRightbar = false; $emit('unmount')"
     :largestMode="false"
   >
-    <div class="alert alert-warning small mb-2">
-      <div><strong>What this does:</strong> clones every non-copied student into a new student record.</div>
-      <div><strong>How it works:</strong> choose a numbering mode and generate new dakhela numbers.</div>
-    </div>
-
     <div class="row g-3">
       <div class="col-12 col-md-4">
         <label for="">Mode</label>
