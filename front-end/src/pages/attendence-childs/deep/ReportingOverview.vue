@@ -167,8 +167,15 @@ const breadcrumbs = computed(() => {
           } : null,
         })
         if (selectedStudentMonth.value) {
+          const startMoment = moment(defaultStart.value, 'YYYY-MM-DD')
+          const endMoment = getEffectiveEndDate()
+          const monthLabel = startMoment.isValid() && endMoment.isValid()
+            ? (startMoment.isSame(endMoment, 'month')
+              ? startMoment.format('MMMM YYYY')
+              : `${startMoment.format('MMM YYYY')} - ${endMoment.format('MMM YYYY')}`)
+            : moment(selectedStudentMonth.value, 'YYYY-MM-DD').format('MMMM YYYY')
           items.push({
-            label: moment(selectedStudentMonth.value).format('MMMM YYYY'),
+            label: monthLabel,
             onClick: null,
           })
         }

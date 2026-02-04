@@ -1,7 +1,7 @@
 <template>
   <div v-if="selectedStudent">
     <div class="d-flex justify-content-between align-items-center mb-2">
-      <h6 class="table-title">
+      <h6 class="table-title table-title-highlight">
         Attendance Of: {{ selectedStudent.name || '-' }}
         <span class="table-title-meta">
           ({{ selectedStudent.class_name || selectedStudent.class_short || '-' }} • {{ selectedStudent.dakhela }})
@@ -111,6 +111,10 @@ defineEmits(['changeView', 'close'])
   background: white;
   padding: 6px 15px;
   border-radius: 10px;
+}
+.table-title-highlight{
+  font-weight: 800; 
+  font-size: 16px;
 }
 .table-title-meta{
   font-weight: 600;
