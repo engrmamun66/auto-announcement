@@ -8,6 +8,11 @@
     visibility: hidden;
   }
 
+  #myTopnav,
+  #REPORTING_TAB_AREA {
+    display: none !important;
+  }
+
   .only-show-onprint{
     display: block;
    }
@@ -27,10 +32,10 @@
   }
 
   .print-area {
-    position: fixed;
-    inset: 0;
+    position: static;
+    inset: auto;
     background: white;
-    overflow: hidden;
+    overflow: visible;
   }
 
   .report-header{

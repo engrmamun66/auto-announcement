@@ -238,23 +238,23 @@ onMounted(()=>{
 <template>
 
   <div class="page-contents">
-    <div class="d-flex justify-content-between align-items-start">
+    <div id="REPORTING_TAB_AREA" class="d-flex justify-content-between align-items-start">
       <ul class="nav nav-tabs mt-0 mb-3 bottom-borderless">
          <li class="nav-item">
-           <a @click.stop="tab = 1" @auxclick.stop="clearAllAndRelaod()" class="nav-link cp text-black" :class="{'active': tab==1}" ><i class='bx bx-time-five transformY-2px' ></i> Realtime&nbsp;Attendence</a>
+           <a @click.stop="tab = 1" @auxclick.stop="clearAllAndRelaod()" class="nav-link cp text-black" :class="{'active': tab == 1}" ><i class='bx bx-time-five transformY-2px' ></i> Realtime&nbsp;Attendence</a>
          </li>
          <li class="nav-item">
-           <a @click.stop="tab = 2" class="nav-link cp text-black" :class="{'active': tab==2}" ><i class='bx bx-history transformY-2px' ></i> Attendence&nbsp;History</a>
+           <a @click.stop="tab = 2" class="nav-link cp text-black" :class="{'active': tab == 2}" ><i class='bx bx-history transformY-2px' ></i> Attendence&nbsp;History</a>
          </li>   
          <li class="nav-item">
-           <a @click.stop="tab = 4" class="nav-link cp text-black" :class="{'active': tab==4}" ><i class='bx bx-timer transformY-2px'></i> Reporting </a>
+           <a @click.stop="tab = 4" class="nav-link cp text-black" :class="{'active': tab == 4}" ><i class='bx bx-timer transformY-2px'></i> Reporting </a>
           </li>   
           <li class="nav-item">
-            <a @click.stop="tab = 3" class="nav-link cp text-black" :class="{'active': tab==3}" ><i class='bx bx-run transformY-2px' ></i> Leaves And Vacations</a>
+            <a @click.stop="tab = 3" class="nav-link cp text-black" :class="{'active': tab == 3}" ><i class='bx bx-run transformY-2px' ></i> Leaves And Vacations</a>
           </li>   
       </ul>
 
-      <div v-if="tab==1">
+      <div v-if="tab == 1">
         <div class="d-flex justify-content-center align-items-center gap-2">
             <Btn class="white">In: <span class="badge text-white bg-secondary">{{ Ahelper.count.in(liveAttendenceList) }}</span></Btn>
             <Btn class="white">Out: <span class="badge text-white bg-warning">{{ Ahelper.count.out(liveAttendenceList) }}</span></Btn>
@@ -267,7 +267,7 @@ onMounted(()=>{
             </Btn>
           </div>
         </div>   
-      <div v-else-if="tab==2">
+      <div v-else-if="tab == 2">
           <div class="d-flex justify-content-center align-items-center gap-2">
             
           <Btn class="white">Total: <span class="badge text-white bg-success">{{ attendenceList?.length }}</span></Btn>
@@ -302,7 +302,7 @@ onMounted(()=>{
           </div>
         </div>
       </div>   
-      <div v-else-if="tab==3">
+      <div v-else-if="tab == 3">
 
         <div class="d-flex justify-content-end column-gap-3">
           <ul class="nav nav-tabs d2 mt-0 mb-3 bottom-borderless">
@@ -316,7 +316,7 @@ onMounted(()=>{
         </div>
         
       </div> 
-      <div v-else-if="tab==4">
+      <div v-else-if="tab == 4">
 
         <!-- <div class="d-flex justify-content-end column-gap-3">
           <ul class="nav nav-tabs d2 mt-0 mb-3 bottom-borderless">

@@ -150,5 +150,13 @@ function getPercent(class_short){
   .chart-track{
     background: transparent !important;
   }
+
+  .chart-list{
+    break-inside: auto;
+  }
+  .chart-row{
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
 }
 </style>
