@@ -7,6 +7,7 @@ import { emitter, utils } from './import-hub';
 import moment from 'moment/moment';
 import { router } from './routes/index';
 import { socketInit } from './socket';
+import HighchartsVue from 'highcharts-vue'
 
 
  
@@ -55,6 +56,7 @@ async function mountTheApp(){
         const app = createApp(App)
         app.use(router)
         app.use(createPinia())
+        app.use(HighchartsVue);
         let app_div = document.createElement('div');
         app_div.id = 'my-app';
         app_div.style.display = 'none';
