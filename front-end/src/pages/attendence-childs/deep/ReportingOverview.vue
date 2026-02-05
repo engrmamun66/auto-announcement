@@ -7,6 +7,7 @@ import BackToPrevious from '../../../components/reports/BackToPrevious.vue'
 import SummaryTable from '../../../components/reports/SummaryTable.vue'
 import StudentWiseReportTable from '../../../components/reports/StudentWiseReportTable.vue'
 import StudentMonthlyReportTable from '../../../components/reports/StudentMonthlyReportTable.vue'
+import StudentMonthlyVacations from '../../../components/reports/StudentMonthlyVacations.vue'
 import StudentAttendanceDetails from '../../../components/reports/StudentAttendanceDetails.vue'
 import MonthlyReportTable from '../../../components/reports/MonthlyReportTable.vue'
 import RankingTable from '../../../components/reports/RankingTable.vue'
@@ -16,6 +17,7 @@ const CONFIG = inject("CONFIG");
 const classes = inject("classes");
 const helper = inject("helper");
 const callbacks = inject("callbacks");
+const route = inject("route");
 const getAttendeceReports = inject("getAttendeceReports");
 const getAttendeceReportsForSingleClass = inject("getAttendeceReportsForSingleClass");
 const all_students_non_copied = inject("all_students_non_copied");
@@ -26,6 +28,7 @@ const preset_count_by = CONFIG.value?.settings?.attendance?.preset_count_by ?? '
 
 console.log('=====:::ReportingOverview.vue')
 
+const log = console.log
 let defaultStart = ref(moment().startOf('month').format('Y-MM-DD'))
 let defaultEnd = ref(moment().add(0, 'month').endOf('month').format('Y-MM-DD'))
 
@@ -88,6 +91,7 @@ let selectedStudentMonth = ref(null)
 let singleStudentAttendance = ref([])
 let loadingStudentAttendance = ref(false)
 let attendanceViewMode = ref('compact') // details | compact
+let studentMonthView = ref('attendance') // attendance | vacations
 let reportLeaves = ref([])
 let studentSearchId = ref('')
 
@@ -325,12 +329,14 @@ async function loadSingleStudentAttendance(std){
 function closeSingleStudentAttendance(){
   selectedStudentMonth.value = null
   attendanceViewMode.value = 'compact'
+  studentMonthView.value = 'attendance'
 }
 
 function goBackOneStep(){
   if (selectedStudentMonth.value) {
     selectedStudentMonth.value = null
     attendanceViewMode.value = 'compact'
+    studentMonthView.value = 'attendance'
     return
   }
   if (selectedStudent.value) {
@@ -488,6 +494,9 @@ const studentMonthlySummary = computed(() => {
   if(!months.length) return []
 
   const statsByMonth = {}
+  const leavesByMonth = {}
+  const rangeStartBound = moment(defaultStart.value, 'YYYY-MM-DD').startOf('day')
+  const rangeEndBound = getEffectiveEndDate().endOf('day')
   groupedAttendanceAll.value.forEach(g => {
     const key = moment(g.date, 'YYYY-MM-DD').startOf('month').format('YYYY-MM-01')
     if(!statsByMonth[key]) statsByMonth[key] = { presentDays: 0, lateDays: 0, lateMinutes: 0 }
@@ -499,6 +508,24 @@ const studentMonthlySummary = computed(() => {
       if(late > 0){
         statsByMonth[key].lateDays += 1
         statsByMonth[key].lateMinutes += late
+      }
+    }
+  })
+
+  ;(reportLeaves.value || []).forEach(l => {
+    if(!l?.date) return
+    const dateObj = moment(l.date, 'YYYY-MM-DD')
+    if(!dateObj.isValid()) return
+    if(dateObj.isBefore(rangeStartBound) || dateObj.isAfter(rangeEndBound)) return
+    const key = dateObj.startOf('month').format('YYYY-MM-01')
+    if(!leavesByMonth[key]) leavesByMonth[key] = { common: 0, personal: 0 }
+    if(l.type === 'vacation'){
+      if(!l.class_short || l.class_short === '_all_' || l.class_short === class_short){
+        leavesByMonth[key].common += 1
+      }
+    } else if(l.type === 'leave'){
+      if(String(l.student_id) === String(selectedStudent.value.dakhela)){
+        leavesByMonth[key].personal += 1
       }
     }
   })
@@ -516,6 +543,7 @@ const studentMonthlySummary = computed(() => {
       class_short
     )
     const stats = statsByMonth[monthKey] || { presentDays: 0, lateDays: 0, lateMinutes: 0 }
+    const leaveStats = leavesByMonth[monthKey] || { common: 0, personal: 0 }
     const present_percent = presentable_days ? Math.round((stats.presentDays / presentable_days) * 100) : 0
     const avg_late = stats.lateDays ? Math.round(stats.lateMinutes / stats.lateDays) : 0
     return {
@@ -523,21 +551,85 @@ const studentMonthlySummary = computed(() => {
       label: moment(monthKey).format('MMMM - YYYY'),
       present_percent,
       presentable_days,
+      common_leaves: leaveStats.common,
+      personal_leaves: leaveStats.personal,
+      total_leaves: leaveStats.common + leaveStats.personal,
       late_days: stats.lateDays,
       avg_late,
     }
   })
 })
 
+const selectedStudentMonthLabel = computed(() => {
+  if(!selectedStudentMonth.value) return ''
+  const monthStart = moment(selectedStudentMonth.value, 'YYYY-MM-DD').startOf('month')
+  const monthEnd = monthStart.clone().endOf('month')
+  const rangeStart = moment.max(monthStart, moment(defaultStart.value, 'YYYY-MM-DD'))
+  const rangeEnd = moment.min(monthEnd, getEffectiveEndDate())
+  return rangeStart.isSame(rangeEnd, 'month')
+    ? rangeStart.format('MMMM YYYY')
+    : `${rangeStart.format('MMM YYYY')} - ${rangeEnd.format('MMM YYYY')}`
+})
+
+const selectedStudentMonthVacations = computed(() => {
+  if(!selectedStudent.value || !selectedStudentMonth.value) return []
+  const class_short = selectedStudent.value.class_short
+  const studentId = String(selectedStudent.value.dakhela)
+  const monthStart = moment(selectedStudentMonth.value, 'YYYY-MM-DD').startOf('month')
+  const monthEnd = monthStart.clone().endOf('month')
+  const rangeStart = moment.max(monthStart, moment(defaultStart.value, 'YYYY-MM-DD'))
+  const rangeEnd = moment.min(monthEnd, getEffectiveEndDate())
+
+  const classLabel = (short) => {
+    if(!short || short === '_all_') return 'All Classes'
+    const cls = (classes.value || []).find(c => c.class_short === short)
+    return cls?.class_name || short
+  }
+
+  return (reportLeaves.value || [])
+    .filter(l => {
+      if(!l?.date) return false
+      const dateObj = moment(l.date, 'YYYY-MM-DD')
+      if(!dateObj.isValid()) return false
+      if(dateObj.isBefore(rangeStart, 'day') || dateObj.isAfter(rangeEnd, 'day')) return false
+      if(l.type === 'vacation'){
+        return !l.class_short || l.class_short === '_all_' || l.class_short === class_short
+      }
+      if(l.type === 'leave'){
+        return String(l.student_id) === studentId
+      }
+      return false
+    })
+    .map(l => ({
+      ...l,
+      scope: l.type === 'vacation' ? classLabel(l.class_short) : 'Student',
+    }))
+    .sort((a, b) => String(a.date).localeCompare(String(b.date)))
+})
+
 function openStudentMonthDetails(row){
   if(!row?.monthKey) return
   selectedStudentMonth.value = row.monthKey
   attendanceViewMode.value = 'compact'
+  studentMonthView.value = 'attendance'
+}
+
+function openStudentMonthVacations(row){
+  if(!row?.monthKey) return
+  selectedStudentMonth.value = row.monthKey
+  studentMonthView.value = 'vacations'
 }
 
 
 
 onMounted(()=>{
+  if(route.query.id && /^\d+$/.test(String(route.query.id))){
+    studentSearchId.value = Number(route.query.id)
+    setTimeout(() => {
+      openStudentMonthlyById()
+    }, 500);
+  }
+
   loadAllClassSummaryReport([defaultStart.value, defaultEnd.value])
 })
 
@@ -579,6 +671,16 @@ onMounted(()=>{
               class="form-control"
               placeholder="Student ID"
               @keyup.enter="openStudentMonthlyById"
+              @keyup="(e) => {
+                if(e.key == 'Escape'){
+                  clearStudentSearch()
+                }
+              }"
+              @change="(e) => { 
+                if(!e.target.value){
+                  clearStudentSearch()
+                }
+              }"
             />
             <button
               class="btn btn-outline-secondary"
@@ -641,12 +743,14 @@ onMounted(()=>{
           :rows="studentMonthlySummary"
           :selectedStudent="selectedStudent"
           @details="openStudentMonthDetails"
+          @vacations="openStudentMonthVacations"
           @close="goBackOneStep"
         />
       </div>
 
       <div v-if="activeReportTab === 'single-class-summary' && selectedStudent && selectedStudentMonth" class="mb-3">
         <StudentAttendanceDetails
+          v-if="studentMonthView === 'attendance'"
           :selectedStudent="selectedStudent"
           :rows="filteredStudentAttendance"
           :grouped="groupedAttendance"
@@ -655,6 +759,12 @@ onMounted(()=>{
           :loading="loadingStudentAttendance"
           @changeView="attendanceViewMode = $event"
           @close="closeSingleStudentAttendance"
+        />
+        <StudentMonthlyVacations
+          v-else
+          :selectedStudent="selectedStudent"
+          :rows="selectedStudentMonthVacations"
+          :monthLabel="selectedStudentMonthLabel"
         />
       </div>
   

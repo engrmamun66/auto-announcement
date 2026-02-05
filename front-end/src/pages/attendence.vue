@@ -28,8 +28,8 @@ const liveAttendenceList = inject('liveAttendenceList');
 
 
 let tab = ref(Number(storage('attendance_tab').value || '1'))  
-watch(tab, (index) => {
-  storage('attendance_tab').value = index
+watch(tab, (tab_name) => { 
+  storage('attendance_tab').value = tab_name
 })
 
 const clearingLive = ref(false)
@@ -229,8 +229,9 @@ provide('reportingViewTab', reportingViewTab)
 
 
 onMounted(()=>{
- 
- 
+  if(route.query.tab){
+    tab.value = Number(route.query.tab) || 1 
+  }
 })
  
 </script>
@@ -247,11 +248,11 @@ onMounted(()=>{
            <a @click.stop="tab = 2" class="nav-link cp text-black" :class="{'active': tab == 2}" ><i class='bx bx-history transformY-2px' ></i> Attendence&nbsp;History</a>
          </li>   
          <li class="nav-item">
-           <a @click.stop="tab = 4" class="nav-link cp text-black" :class="{'active': tab == 4}" ><i class='bx bx-timer transformY-2px'></i> Reporting </a>
+           <a @click.stop="tab = 3" class="nav-link cp text-black" :class="{'active': tab == 3}" ><i class='bx bx-run transformY-2px' ></i> Leaves And Vacations</a>
           </li>   
           <li class="nav-item">
-            <a @click.stop="tab = 3" class="nav-link cp text-black" :class="{'active': tab == 3}" ><i class='bx bx-run transformY-2px' ></i> Leaves And Vacations</a>
-          </li>   
+            <a @click.stop="tab = 4" class="nav-link cp text-black" :class="{'active': tab == 4}" ><i class='bx bx-timer transformY-2px'></i> Reporting </a>
+           </li>   
       </ul>
 
       <div v-if="tab == 1">
