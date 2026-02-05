@@ -151,6 +151,11 @@ watch(
     <div v-if="totalPage > 1" class="d-flex justify-content-center" v-bind="$attrs">
         <nav aria-label="Page navigation">
             <ul class="pagination">
+                <li id="GoFirstPage" class="page-item cp" :class="{'disabled': current_page <= 1}" @click="current_page <= 1 ? false : goToPage(1)" :disabled="current_page <= 1">
+                    <a class="page-link cp" aria-label="First">
+                        <i class='bx bx-arrow-to-left transformY-2px'></i>
+                    </a>
+                </li>
                 <li class="page-item cp" :class="{'disabled': current_page <= 1}" @click="current_page <= 1 ? false : goToPage(current_page - 1)" :disabled="current_page <= 1">
                     <a class="page-link cp" aria-label="Previous">
                         <span>&laquo;</span>
@@ -169,6 +174,11 @@ watch(
                 <li class="page-item cp" :class="{'disabled': current_page >= totalPage}" @click="current_page < totalPage ? goToPage(current_page + 1) : false">
                     <a class="page-link cp" aria-label="Next">
                         <span>&raquo;</span>
+                    </a>
+                </li>
+                <li id="GoLastPage" class="page-item cp" :class="{'disabled': current_page >= totalPage}" @click="current_page < totalPage ? goToPage(totalPage) : false">
+                    <a class="page-link cp" aria-label="Last">
+                        <i class='bx bx-arrow-to-right transformY-2px'></i>
                     </a>
                 </li>
             </ul>
