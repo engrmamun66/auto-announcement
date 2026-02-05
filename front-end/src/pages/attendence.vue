@@ -5,6 +5,7 @@ import AttendencesAll from './attendence-childs/AttendencesAll.vue'
 import RealtimeAttendences from './attendence-childs/RealtimeAttendences.vue'
 import WeekendAndHolidays from './attendence-childs/WeekendAndHolidays.vue'
 import Reporting from './attendence-childs/Reporting.vue'
+import HaziraKhata from './attendence-childs/HaziraKhata.vue'
 import BaseSelectMultiple from './../components/BaseSelectMultiple.vue'
 import EmDateTimePicker from './../components/EmDateTimePicker.vue'
 import Btn from './../components/Btn.vue'
@@ -252,7 +253,10 @@ onMounted(()=>{
           </li>   
           <li class="nav-item">
             <a @click.stop="tab = 4" class="nav-link cp text-black" :class="{'active': tab == 4}" ><i class='bx bx-timer transformY-2px'></i>Reporting</a>
-           </li>   
+          </li>   
+          <li class="nav-item">
+            <a @click.stop="tab = 5" class="nav-link cp text-black" :class="{'active': tab == 5}" ><i class='bx bx-timer transformY-2px'></i>Daily&nbsp;Log</a>
+          </li>   
       </ul>
 
       <div v-if="tab == 1">
@@ -343,6 +347,9 @@ onMounted(()=>{
     </template> 
     <template v-else-if="tab == 4">
         <Reporting ></Reporting>
+    </template> 
+    <template v-else-if="tab == 5">
+        <HaziraKhata ></HaziraKhata>
     </template> 
 
     <FetchBulkAttendanceFromDevice

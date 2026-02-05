@@ -212,6 +212,10 @@ async function CheckAccess({loader=false}={}){
         if(response.status == 200){
             let accessdata = response.data
 
+            if(accessdata?.reason == 'in_flight' && accessdata?.skipped == true){
+                emitter.emit('toaster-success', { message: 'Skiiped', duration: 3000})
+                return
+            }
 
             let defaultData = {
                 prefix: 'developer',

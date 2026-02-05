@@ -597,3 +597,6 @@ tbody tr:hover td {
     border-radius: 5px;
     margin-top: 10px;
 }
+.usn{
+  user-select: none;
+}
