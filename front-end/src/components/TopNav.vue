@@ -14,26 +14,36 @@
         <RouterLink :to="{name: 'import', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active': route.name === 'import'}"><i class='bx bxs-file-import pre-icon' ></i> Import</RouterLink>
         <RouterLink :to="{name: 'ContactUs', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active': route.name === 'ContactUs'}">Contact</RouterLink>
         <a v-if="useRoute().query.dev === 'true'">
-          <Btn class="border" @click.prevent.stop="show_bulk_attedance_component = true"> <span tooltip="Bulk Attendence" flow="left">Bulk</span> </Btn>
+          <Btn class="border me-1" @click.prevent.stop="show_bulk_attedance_component = true"> <span tooltip="Bulk Attendence" flow="left">Bulk</span> </Btn>
+          <Btn class="border me-0" @click.prevent.stop="openCloneStudents"> <span tooltip="Clone Students" flow="left">Clone</span> </Btn>
         </a>
-        
         
     </div>
 </template>
 
 <script setup>
 import { ref, inject, onMounted } from 'vue';
-import { RouterLink, useRoute } from 'vue-router';
+import { RouterLink, useRoute, useRouter } from 'vue-router';
 import Btn from './Btn.vue'
 
 
 let logoEl = ref(null)
 let logo_wrapper = ref(null)
 let route = useRoute()
+let router = useRouter()
 
 const emitter = inject('emitter'); 
 const CONFIG = inject('CONFIG'); 
 const show_bulk_attedance_component = inject('show_bulk_attedance_component'); 
+
+function openCloneStudents(){
+  let query = route?.name === 'students'
+    ? { ...(route.query || {}) }
+    : { dev: 'true' }
+  query.dev = query.dev ?? 'true'
+  query.clone = 'true'
+  router.push({ name: 'students', query })
+}
 
 onMounted(()=>{
   if(typeof GLOBAL_DATA !== 'undefined'){

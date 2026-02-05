@@ -17,7 +17,6 @@ import RecoringAnimation from '../components/RecoringAnimation.vue'
 import Tabset from '../components/Tabset.vue'
 import EmDateTimePicker from '../components/EmDateTimePicker.vue'
 import Ahelper from './../pages/attendence-childs/attendacnceHelper'
-import CloneStudents from '../components/cloneStudents.vue'
 
 
 const route = inject('route');
@@ -67,8 +66,6 @@ let targetStdForBarcode = ref(null)
 let editModeTabIndex = ref(1)
 provide('editModeTabIndex', editModeTabIndex)
 let only_attendance_feature = CONFIG.value?.settings?.attendance?.only_attendance_feature === true
-let showCloneStudents = ref(false)
-
 function hide_modals(event){
   if (event.key === 'Escape') { 
     targetStd.value = null
@@ -498,7 +495,6 @@ watch(fixedWidthSoundCol, (newVal) => {
 
       <div class="d-flex justify-content-end">
         <Btn class="me-2" style="background: #673AB7;">Total: {{ params?.total || '000' }} </Btn>
-        <Btn v-if="route.query.dev === 'true'" id="CLONE_ALL" class="me-2" @click.stop="showCloneStudents = true">Clone All</Btn>
         <Btn v-if="!addMode" class="me-2" @click="addMode = !addMode;editModeTabIndex=1;clearParams();payload.id = null" ><i class='bx bx-plus'></i> Add Student</Btn>
       </div>
     </div>
@@ -945,12 +941,6 @@ watch(fixedWidthSoundCol, (newVal) => {
     </modal>
 
     </template>
-    <CloneStudents
-      v-if="showCloneStudents"
-      @unmount="showCloneStudents = false"
-      @refresh="getStudents()"
-    />
-
   
 
     <EmDateTimePicker ref="dateTimePickerRef"
