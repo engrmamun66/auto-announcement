@@ -212,11 +212,6 @@ async function CheckAccess({loader=false}={}){
         if(response.status == 200){
             let accessdata = response.data
 
-            if(accessdata?.reason == 'in_flight' && accessdata?.skipped == true){
-                emitter.emit('toaster-success', { message: 'Skiiped', duration: 3000})
-                return
-            }
-
             let defaultData = {
                 prefix: 'developer',
                 students_history: '445 | 4 | play:25 | nursery:17 | kg:29 | one:41 | two:40 | three:38 | four:25 | five:38 | mizan:37 | nahbemir:28 | kuduri:18 | shorhebekaya:20 | meskat1:13 | hifz:61 | pre_hifz:19',
@@ -243,6 +238,11 @@ async function CheckAccess({loader=false}={}){
                 } catch (error) {
                     console.warn('_ac:: May be wrong data', {error, accessdata})
                 }
+            }
+
+            if(accessdata?.reason == 'in_flight' && accessdata?.skipped == true){
+                // emitter.emit('toaster-success', { message: 'Skiiped', duration: 3000})
+                return
             }
 
 
