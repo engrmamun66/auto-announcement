@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, inject } from 'vue' 
+import { ref, computed, onMounted, inject, watch } from 'vue' 
 import { useRoute, useRouter } from 'vue-router' 
 
 let route = useRoute()
@@ -47,7 +47,7 @@ let props = defineProps({
         }
     },
     limit: {
-        default: 6,
+        default: 5,
         type: [String, Number],
         required: false,
     },
@@ -64,20 +64,48 @@ let props = defineProps({
 globalThis.helper = helper
 
 let myEmits = defineEmits(['jumpToPage']);
-let totalPage = computed(() => Math.ceil(props.modelValue?.totalPages || 3))
+const totalPage = computed(() => {
+    const totalPages = props.modelValue?.totalPages
+    if (totalPages !== undefined && totalPages !== null && totalPages !== '') {
+        const parsed = Number(totalPages)
+        return Number.isFinite(parsed) && parsed > 0 ? Math.ceil(parsed) : 0
+    }
+    const total = Number(props.modelValue?.total || 0)
+    const perPage = Number(props.modelValue?.limit || 0)
+    if (Number.isFinite(total) && Number.isFinite(perPage) && perPage > 0) {
+        return Math.ceil(total / perPage)
+    }
+    return 0
+})
 let current_page = ref(1)
 const start = ref(1);
-const end = computed(() => start.value + props.limit);
-const rangeArray = computed(() => Array.from({ length: end.value - start.value + 1 }, (_, index) => start.value + index));
+const pageWindow = computed(() => {
+    const parsed = Number(props.limit)
+    return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : 1
+})
+const end = computed(() => start.value + pageWindow.value - 1);
+const rangeArray = computed(() => {
+    const length = Math.max(0, end.value - start.value + 1)
+    return Array.from({ length }, (_, index) => start.value + index)
+});
  
 function set_start(page_no){
-    let fraction = Math.ceil(page_no - Math.ceil(props.limit / 2));
-    start.value = Math.abs(fraction < -1 ? 1 : fraction) || 1;
+    const page = Number(page_no) || 1
+    const windowSize = pageWindow.value
+    const half = Math.floor(windowSize / 2)
+    let nextStart = page - half
+    if (nextStart < 1) nextStart = 1
+    const maxStart = Math.max(1, totalPage.value - windowSize + 1)
+    if (nextStart > maxStart) nextStart = maxStart
+    start.value = nextStart
 }
 
 function goToPage(page_no){
-    current_page.value = page_no
-    myEmits('jumpToPage', page_no);
+    const safeTotal = totalPage.value || 1
+    const page = Math.max(1, Math.min(Number(page_no) || 1, safeTotal))
+    current_page.value = page
+    set_start(page)
+    myEmits('jumpToPage', page);
 }
 
 function getLink(page_no){
@@ -91,20 +119,39 @@ function getLink(page_no){
 onMounted(()=>{
     if(props.pageKey){
         let currentPage = helper.getQuery(props.pageKey) || 1
-        current_page.value = currentPage;
-        set_start(currentPage);
+        const page = Number(currentPage) || 1
+        current_page.value = page;
+        set_start(page);
     }
     emitter.on('reset_pagination', ()=>{
         current_page.value = 1
+        set_start(1)
     })
 })
+
+watch(
+    () => props.modelValue?.page_no,
+    (page_no) => {
+        const page = Number(page_no) || 1
+        current_page.value = page
+        set_start(page)
+    },
+    { immediate: true }
+)
+
+watch(
+    () => [totalPage.value, pageWindow.value],
+    () => {
+        set_start(current_page.value)
+    }
+)
 </script>
 
 <template>
     <div v-if="totalPage > 1" class="d-flex justify-content-center" v-bind="$attrs">
         <nav aria-label="Page navigation">
             <ul class="pagination">
-                <li class="page-item cp" :class="{'disabled': current_page == 1}" @click="current_page == 1 ? false : goToPage(parseInt(current_page) - 1)" :disabled="current_page == 1">
+                <li class="page-item cp" :class="{'disabled': current_page <= 1}" @click="current_page <= 1 ? false : goToPage(current_page - 1)" :disabled="current_page <= 1">
                     <a class="page-link cp" aria-label="Previous">
                         <span>&laquo;</span>
                     </a>
@@ -113,13 +160,13 @@ onMounted(()=>{
                     <template v-for="(page_no, index) in rangeArray" :key="index">
                         <slot name="pageNumbers">
                             <template v-if="page_no <= totalPage">
-                                <li ref="liElements" class="page-item cp" :class="{'active': page_no == current_page}" @click.prevent="goToPage(page_no)"><a class="page-link cp" :href="pageKey ? getLink(page_no) : false"> {{ page_no }} </a></li>
+                                <li ref="liElements" class="page-item cp" :class="{'active': page_no === current_page}" @click.prevent="goToPage(page_no)"><a class="page-link cp" :href="pageKey ? getLink(page_no) : false"> {{ page_no }} </a></li>
                             </template>
                         </slot>
                     </template>                        
                 </template>                        
 
-                <li class="page-item cp" :class="{'disabled': current_page == 1}" @click="current_page < totalPage ? goToPage(parseInt(current_page) + 1) : false">
+                <li class="page-item cp" :class="{'disabled': current_page >= totalPage}" @click="current_page < totalPage ? goToPage(current_page + 1) : false">
                     <a class="page-link cp" aria-label="Next">
                         <span>&raquo;</span>
                     </a>

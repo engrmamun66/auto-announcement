@@ -271,8 +271,6 @@ onMounted(()=>{
       <div v-else-if="tab == 2">
           <div class="d-flex justify-content-center align-items-center gap-2">
             
-          <Btn class="white">Total: <span class="badge text-white bg-success">{{ attendenceList?.length }}</span></Btn>
-
           <div class="d-flex"  >
             <Pagination v-if="attendenceParams?.totalPages > 1" v-model="attendenceParams" @jumpToPage="(page_no) => {
               getAttendeceList({page_no})
