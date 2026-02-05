@@ -96,7 +96,7 @@ function clearSearch() {
 
 function submitSearch(eventData={}) { 
   try {
-    if(eventData){
+    if(eventData?.startDate){
       pickerModelValue.value = eventData || pickerModelValue.value
     }
     let data = { 
