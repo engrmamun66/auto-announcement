@@ -242,16 +242,16 @@ onMounted(()=>{
     <div id="REPORTING_TAB_AREA" class="d-flex justify-content-between align-items-start">
       <ul class="nav nav-tabs mt-0 mb-3 bottom-borderless">
          <li class="nav-item">
-           <a @click.stop="tab = 1" @auxclick.stop="clearAllAndRelaod()" class="nav-link cp text-black" :class="{'active': tab == 1}" ><i class='bx bx-time-five transformY-2px' ></i> Realtime&nbsp;Attendence</a>
+           <a @click.stop="tab = 1" @auxclick.stop="clearAllAndRelaod()" class="nav-link cp text-black" :class="{'active': tab == 1}" ><i class='bx bx-time-five transformY-2px' ></i>Realtime</a>
          </li>
          <li class="nav-item">
-           <a @click.stop="tab = 2" class="nav-link cp text-black" :class="{'active': tab == 2}" ><i class='bx bx-history transformY-2px' ></i> Attendence&nbsp;History</a>
+           <a @click.stop="tab = 2" class="nav-link cp text-black" :class="{'active': tab == 2}" ><i class='bx bx-history transformY-2px' ></i>History</a>
          </li>   
          <li class="nav-item">
-           <a @click.stop="tab = 3" class="nav-link cp text-black" :class="{'active': tab == 3}" ><i class='bx bx-run transformY-2px' ></i> Leaves And Vacations</a>
+           <a @click.stop="tab = 3" class="nav-link cp text-black" :class="{'active': tab == 3}" ><i class='bx bx-run transformY-2px' ></i>Leaves</a>
           </li>   
           <li class="nav-item">
-            <a @click.stop="tab = 4" class="nav-link cp text-black" :class="{'active': tab == 4}" ><i class='bx bx-timer transformY-2px'></i> Reporting </a>
+            <a @click.stop="tab = 4" class="nav-link cp text-black" :class="{'active': tab == 4}" ><i class='bx bx-timer transformY-2px'></i>Reporting</a>
            </li>   
       </ul>
 
