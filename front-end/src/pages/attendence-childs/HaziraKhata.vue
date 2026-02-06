@@ -180,7 +180,7 @@ async function loadDailyLogs(classShortOverride = null) {
   } catch (error) {
     if (currentId !== requestId) return
     console.warn('HaziraKhata__error', error)
-    errorMessage.value = 'Failed to load daily logs.'
+    errorMessage.value = null// 'Failed to load daily logs.'
     dailyLogs.value = []
   } finally {
     if (currentId === requestId) loading.value = false
@@ -245,7 +245,7 @@ watch(
 
     <hr class="only-show-onprint">
 
-    <div class="class-button-list hide_onprint">
+    <div class="bg-dark-subtle border class-button-list hide_onprint p-3 radius-10">
         <button
             v-for="(cls, index) in classes"
             :key="index"
@@ -259,14 +259,13 @@ watch(
     </div> 
 
     <div class="legend-bar">
-      <div class="legend-row bg-white p-2 radius-10">
+      <div class="legend-row bg-dark-subtle p-2 radius-10">
         <div v-for="item in legendItems" :key="item.code" class="legend-item">
           <span class="legend-badge" :class="item.class">{{ item.code }}</span>
           <span>{{ item.label }}</span>
         </div>
       </div>
       <div class="legend-actions">
-        <MonthPickerSingle :onChange="handleMonthChange" />
         <div v-if="showScrollControls" class="legend-scroll-controls hide_onprint">
           <button type="button" class="legend-scroll-btn" @click="scrollGrid(-1)" aria-label="Scroll left">
             <i class='bx bx-chevron-left'></i>
@@ -275,6 +274,7 @@ watch(
             <i class='bx bx-chevron-right'></i>
           </button>
         </div>
+        <MonthPickerSingle :onChange="handleMonthChange" />
       </div>
     </div>
 
@@ -619,7 +619,7 @@ watch(
   .status-leave{ background: #f59e0b !important; }
   .status-weekend{ background: #64748b !important; }
   .status-vacation{ background: #7c3aed !important; }
-  .status-future{ background: #e5e7eb00 !important; }
+  .status-future{ background: #e5e7ebb5 !important; }
   .status-holiday{ background: #94a3b8 !important; }
   .status-empty{ background: #cbd5f5 !important; }
 }
