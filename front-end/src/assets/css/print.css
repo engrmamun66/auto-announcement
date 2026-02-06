@@ -1,6 +1,6 @@
 
 .only-show-onprint{
-    display: none;
+    display: none !important;
 }
 
 @media print {
@@ -14,7 +14,7 @@
   }
 
   .only-show-onprint{
-    display: block;
+    display: block !important;
    }
  
   .print-area,

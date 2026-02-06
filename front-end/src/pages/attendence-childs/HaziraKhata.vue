@@ -206,6 +206,7 @@ const selectFistClass = () => {
 onMounted(() => {
   helper.delay(selectFistClass, 500)
   window.addEventListener('resize', updateScrollControls)
+  setTimeout(updateScrollControls, 1000)
 })
 
 onBeforeUnmount(() => {
@@ -232,15 +233,15 @@ watch(
 
 <template>
   <div class="daily-log-wrapper print-area">
-    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 only-show-onprint">
       <div class="daily-log-heading">
-        <div class="daily-log-title">Hazira Khata:: {{ classLabel }}</div>
+        <div class="daily-log-title">Hazira Khata :: {{ classLabel }}</div>
         <div class="daily-log-subtitle">{{ monthLabel }}</div>
       </div>
       <div class="daily-log-controls"></div>
     </div>
 
-    <hr>
+    <hr class="only-show-onprint">
 
     <div class="class-button-list hide_onprint">
         <button
@@ -256,7 +257,7 @@ watch(
     </div> 
 
     <div class="legend-bar">
-      <div class="legend-row">
+      <div class="legend-row bg-white p-2 radius-10">
         <div v-for="item in legendItems" :key="item.code" class="legend-item">
           <span class="legend-badge" :class="item.class">{{ item.code }}</span>
           <span>{{ item.label }}</span>
