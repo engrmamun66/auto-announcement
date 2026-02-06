@@ -255,7 +255,7 @@ onMounted(()=>{
             <a @click.stop="tab = 4" class="nav-link cp text-black" :class="{'active': tab == 4}" ><i class='bx bx-timer transformY-2px'></i>Reporting</a>
           </li>   
           <li class="nav-item">
-            <a @click.stop="tab = 5" class="nav-link cp text-black" :class="{'active': tab == 5}" ><i class='bx bx-timer transformY-2px'></i>Daily&nbsp;Log</a>
+            <a @click.stop="tab = 5" class="nav-link cp text-black" :class="{'active': tab == 5}" ><i class='bx bx-timer transformY-2px'></i>Hazira</a>
           </li>   
       </ul>
 

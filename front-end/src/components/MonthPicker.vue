@@ -2,21 +2,21 @@
   <div class="hide_onprint month-picker">
     <div class="month-control">
       <button class="month-nav" type="button" @click.stop="shiftStart(-1)">
-        <i class='bx bx-minus'></i>
+        <i class='bx bx-chevron-left'></i>
       </button>
       <div class="month-label">{{ startLabel }}</div>
       <button class="month-nav" type="button" @click.stop="shiftStart(1)" :disabled="isFutureStartDisabled">
-        <i class='bx bx-plus'></i>
+        <i class='bx bx-chevron-right'></i>
       </button>
     </div>
 
     <div class="month-control">
       <button class="month-nav" type="button" @click.stop="shiftEnd(-1)">
-        <i class='bx bx-minus'></i>
+        <i class='bx bx-chevron-left'></i>
       </button>
       <div class="month-label">{{ endLabel }}</div>
       <button class="month-nav" type="button" @click.stop="shiftEnd(1)" :disabled="isFutureEndDisabled">
-        <i class='bx bx-plus'></i>
+        <i class='bx bx-chevron-right'></i>
       </button>
     </div>
   </div>

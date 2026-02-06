@@ -1,7 +1,7 @@
 
 <script setup>
 import moment from 'moment/moment'
-import { inject, ref, computed, watch } from "vue";
+import { inject, ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from "vue";
 import MonthPickerSingle from '../../components/MonthPickerSingle.vue'
 
 const CONFIG = inject("CONFIG");
@@ -21,6 +21,8 @@ const errorMessage = ref('')
 const dailyLogs = ref([])
 const todayStr = ref(moment().format('YYYY-MM-DD'))
 const hasLoaded = ref(false)
+const gridScrollRef = ref(null)
+const showScrollControls = ref(false)
 
 const weekends = computed(() => CONFIG.value?.settings?.attendance?.weekends || [])
 
@@ -55,7 +57,7 @@ const dayColumns = computed(() => {
     const dateObj = monthStart.clone().add(index, 'day')
     return {
       date: dateObj.format('YYYY-MM-DD'),
-      label: dateObj.format('DD'),
+      label: dateObj.format('DD ddd'),
       dayName: dateObj.format('ddd'),
     }
   })
@@ -80,6 +82,22 @@ function handleClassSelect(classShort) {
   selectedClassShort.value = classShort
   hasLoaded.value = true
   loadDailyLogs(classShort)
+}
+
+function scrollGrid(direction) {
+  const el = gridScrollRef.value
+  if (!el) return
+  const step = Math.max(240, Math.floor(el.clientWidth * 0.6))
+  el.scrollBy({ left: direction * step, behavior: 'smooth' })
+}
+
+function updateScrollControls() {
+  const el = gridScrollRef.value
+  if (!el) {
+    showScrollControls.value = false
+    return
+  }
+  showScrollControls.value = el.scrollWidth > el.clientWidth + 2
 }
 
 function resolveStatus(item, dateStr) {
@@ -157,6 +175,8 @@ async function loadDailyLogs(classShortOverride = null) {
       name: student.name || student.full_name || student.student_name || '-',
       byDate: dataMap.get(Number(student.dakhela)) || {},
     }))
+    await nextTick()
+    updateScrollControls()
   } catch (error) {
     if (currentId !== requestId) return
     console.warn('HaziraKhata__error', error)
@@ -173,6 +193,26 @@ watch(classes, (list) => {
   }
 }, { immediate: true })
 
+const selectFistClass = () => {
+    if (!selectedClassShort.value && classes.value?.length) {
+    selectedClassShort.value = classes.value[0]?.class_short || null
+  }
+  if (selectedClassShort.value) {
+    hasLoaded.value = true
+    loadDailyLogs(selectedClassShort.value)
+  }
+}
+
+onMounted(() => {
+  helper.delay(selectFistClass, 0)
+  helper.delay(selectFistClass, 1000)
+  window.addEventListener('resize', updateScrollControls)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', updateScrollControls)
+})
+
 watch(
   () => [selectedRange.value?.[0], selectedRange.value?.[1]],
   () => {
@@ -181,21 +221,29 @@ watch(
     }
   }
 )
+
+watch(
+  () => [dayColumns.value.length, dailyLogs.value.length],
+  async () => {
+    await nextTick()
+    updateScrollControls()
+  }
+)
 </script>
 
 <template>
   <div class="daily-log-wrapper print-area">
     <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
       <div class="daily-log-heading">
-        <div class="daily-log-title">Hazira Khata</div>
-        <div class="daily-log-subtitle">Daily Attendance Register</div>
+        <div class="daily-log-title">Hazira Khata:: {{ classLabel }}</div>
+        <div class="daily-log-subtitle">{{ monthLabel }}</div>
       </div>
-        <div class="daily-log-controls">
-            <MonthPickerSingle :onChange="handleMonthChange" />
-        </div>
+      <div class="daily-log-controls"></div>
     </div>
 
-    <div class="class-button-list">
+    <hr>
+
+    <div class="class-button-list hide_onprint">
         <button
             v-for="(cls, index) in classes"
             :key="index"
@@ -206,32 +254,35 @@ watch(
         >
             {{ cls.class_name }}
         </button>
-    </div>
+    </div> 
 
-    <div class="daily-report-title mt-3">
-      <div class="daily-report-title__main">
-        Daily Attendance Register
+    <div class="legend-bar">
+      <div class="legend-row">
+        <div v-for="item in legendItems" :key="item.code" class="legend-item">
+          <span class="legend-badge" :class="item.class">{{ item.code }}</span>
+          <span>{{ item.label }}</span>
+        </div>
       </div>
-      <div class="daily-report-title__meta">
-        <span class="meta-pill">Class: {{ classLabel }}</span>
-        <span class="meta-pill">Month: {{ monthLabel }}</span>
-      </div>
-    </div>
-
-    <div class="legend-row">
-      <div v-for="item in legendItems" :key="item.code" class="legend-item">
-        <span class="legend-badge" :class="item.class">{{ item.code }}</span>
-        <span>{{ item.label }}</span>
+      <div class="legend-actions">
+        <MonthPickerSingle :onChange="handleMonthChange" />
+        <div v-if="showScrollControls" class="legend-scroll-controls hide_onprint">
+          <button type="button" class="legend-scroll-btn" @click="scrollGrid(-1)" aria-label="Scroll left">
+            <i class='bx bx-chevron-left'></i>
+          </button>
+          <button type="button" class="legend-scroll-btn" @click="scrollGrid(1)" aria-label="Scroll right">
+            <i class='bx bx-chevron-right'></i>
+          </button>
+        </div>
       </div>
     </div>
 
     <div v-if="loading" class="text-muted mt-2">Loading daily logs...</div>
     <div v-else-if="errorMessage" class="text-danger mt-2">{{ errorMessage }}</div>
 
-    <div v-else class="daily-grid-wrapper">
+    <div v-else class="daily-grid-wrapper" ref="gridScrollRef">
       <div class="daily-grid" :style="{ '--day-count': dayColumns.length }">
         <div class="daily-grid-row daily-grid-header">
-          <div class="daily-grid-cell sticky-col sticky-head">Name</div>
+          <div class="daily-grid-cell sticky-col sticky-head">Students Name</div>
           <div v-for="day in dayColumns" :key="day.date" class="daily-grid-cell day-header" :title="day.dayName">
             {{ day.label }}
           </div>
@@ -239,8 +290,7 @@ watch(
 
         <div v-for="student in dailyLogs" :key="student.dakhela" class="daily-grid-row">
           <div class="daily-grid-cell sticky-col student-cell">
-            <div class="student-name">{{ student.name || '-' }}</div>
-            <div class="student-meta">{{ student.dakhela }}</div>
+            <div class="student-name">{{ student.name || '-' }} ({{ student.dakhela  }})</div>
           </div>
           <div v-for="day in dayColumns" :key="day.date" class="daily-grid-cell day-cell">
             <span
@@ -353,11 +403,56 @@ watch(
   font-weight: 600;
 }
 
+.legend-bar{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
 .legend-row{
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
   align-items: center;
+}
+
+.legend-actions{
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.legend-scroll-controls{
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-scroll-btn{
+  width: 34px;
+  height: 34px;
+  border: 1px solid #e5e7eb;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #111827;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.1s ease, border-color 0.15s ease;
+}
+
+.legend-scroll-btn:hover{
+  background: #f3f4f6;
+}
+
+.legend-scroll-btn:active{
+  transform: translateY(1px);
 }
 
 .legend-item{
@@ -391,6 +486,7 @@ watch(
   min-width: 900px;
   display: grid;
   gap: 0;
+  min-width: 100vh;
 }
 
 .daily-grid-row{
@@ -451,26 +547,21 @@ watch(
   font-size: 12px;
   color: #111827;
 }
-
-.student-meta{
-  font-size: 11px;
-  color: #6b7280;
-}
-
+ 
 .day-cell{
-  padding: 4px;
+  padding: 0px;
 }
 
 .status-pill{
-  width: 22px;
-  height: 22px;
-  border-radius: 6px;
+  width: 100%;
+  height: 100%;
+  border-radius: 0px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
   font-size: 11px;
-  color: #ffffff;
+  color: #fff;
 }
 
 .status-present{
@@ -505,6 +596,30 @@ watch(
 
 .status-empty{
   background: #cbd5f5;
+}
+
+@media print {
+  .status-pill,
+  .status-present,
+  .status-absent,
+  .status-leave,
+  .status-weekend,
+  .status-vacation,
+  .status-future,
+  .status-holiday,
+  .status-empty{
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    color: #ffffff !important;
+  }
+  .status-present{ background: #16a34a !important; }
+  .status-absent{ background: #dc2626 !important; }
+  .status-leave{ background: #f59e0b !important; }
+  .status-weekend{ background: #64748b !important; }
+  .status-vacation{ background: #7c3aed !important; }
+  .status-future{ background: #e5e7eb00 !important; }
+  .status-holiday{ background: #94a3b8 !important; }
+  .status-empty{ background: #cbd5f5 !important; }
 }
 
 @media (max-width: 768px) {

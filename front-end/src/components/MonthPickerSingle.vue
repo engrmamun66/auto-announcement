@@ -2,11 +2,11 @@
   <div class="hide_onprint month-picker month-picker-single">
     <div class="month-control usn cp" @click.stop="resetToCurrent">
       <button class="month-nav" type="button" @click.stop="shiftMonth(-1)">
-        <i class='bx bx-minus'></i>
+        <i class='bx bx-chevron-left'></i>
       </button>
       <div class="month-label">{{ monthLabel }}</div>
       <button class="month-nav" type="button" @click.stop="shiftMonth(1)" :disabled="isFutureDisabled">
-        <i class='bx bx-plus'></i>
+        <i class='bx bx-chevron-right'></i>
       </button>
     </div>
   </div>
@@ -114,9 +114,9 @@ export default {
 }
 
 .month-label{
-  font-weight: 600;
+  font-weight: 400;
   color: #1f2937;
-  min-width: 80px;
+  min-width: 60px;
   text-align: center;
 }
 
