@@ -24,6 +24,13 @@
           >
             Details
           </button>
+          <button
+            class="btn btn-sm btn-outline-secondary"
+            :class="{ active: viewMode === 'chart' }"
+            @click="$emit('changeView', 'chart')"
+          >
+            Chart
+          </button>
         </div>
         <!-- <button class="btn btn-sm btn-close-light hide_onprint" @click="$emit('close')">Back</button> -->
       </div>
@@ -31,11 +38,18 @@
 
     <div v-if="loading" class="text-muted">Loading...</div>
 
+    <StudentsAttendacePerformance
+      v-else-if="viewMode === 'chart'"
+      :selectedStudent="selectedStudent"
+      :grouped="grouped"
+      :statusByDate="statusByDate"
+    />
+
     <myTable v-else-if="viewMode === 'details'" topMarginClass="mt-2">
       <template #thead>
         <thead>
           <tr>
-            <th>Date</th>
+            <th StudentAttendanceDetails>Date</th>
             <th>In</th>
             <th>Out</th>
             <th>Status</th>
@@ -93,6 +107,7 @@
 
 <script setup>
 import myTable from '../myTable.vue'
+import StudentsAttendacePerformance from './StudentsAttendacePerformance.vue'
 
 defineProps({
   selectedStudent: { type: Object, default: null },
