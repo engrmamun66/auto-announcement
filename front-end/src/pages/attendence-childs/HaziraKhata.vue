@@ -206,7 +206,9 @@ const selectFistClass = () => {
 onMounted(() => {
   helper.delay(selectFistClass, 500)
   window.addEventListener('resize', updateScrollControls)
+  setTimeout(updateScrollControls, 0)
   setTimeout(updateScrollControls, 1000)
+  setTimeout(updateScrollControls, 1500)
 })
 
 onBeforeUnmount(() => {
