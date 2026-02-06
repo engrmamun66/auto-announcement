@@ -488,7 +488,6 @@ watch(
   min-width: 900px;
   display: grid;
   gap: 0;
-  min-width: 100vh;
 }
 
 .daily-grid-row{
