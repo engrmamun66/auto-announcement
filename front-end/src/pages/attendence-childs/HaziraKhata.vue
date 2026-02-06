@@ -234,7 +234,7 @@ watch(
 </script>
 
 <template>
-  <div class="daily-log-wrapper print-area">
+  <div class="daily-log-wrapper print-area" style="min-height: 100vh;">
     <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 only-show-onprint">
       <div class="daily-log-heading">
         <div class="daily-log-title">Hazira Khata :: {{ classLabel }}</div>
