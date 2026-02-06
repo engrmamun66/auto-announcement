@@ -75,12 +75,12 @@ let reports = ref({
   classWise: {},
   classRanking: [],
 })
-let activeReportTab = ref('summary')
+let activeReportTab = ref('monthly')
 const mainReportTabs = ['summary', 'monthly', 'ranking', 'chart2']
-let lastMainTab = ref('summary')
+let lastMainTab = ref('monthly')
 const reportTabs = [
-  { key: 'summary', label: 'Summary' },
   { key: 'monthly', label: 'Monthly' },
+  { key: 'summary', label: 'Summary' },
   { key: 'ranking', label: 'Ranking' },
   { key: 'chart2', label: 'Chart' },
 ]
