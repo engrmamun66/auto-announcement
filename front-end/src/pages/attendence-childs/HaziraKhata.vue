@@ -204,8 +204,7 @@ const selectFistClass = () => {
 }
 
 onMounted(() => {
-  helper.delay(selectFistClass, 0)
-  helper.delay(selectFistClass, 1000)
+  helper.delay(selectFistClass, 500)
   window.addEventListener('resize', updateScrollControls)
 })
 
