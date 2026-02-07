@@ -45,6 +45,7 @@ const LeavAndVacationsClass = require('./src/class-leave-and-vacations');
 const Backup = require('./src/backup');
 const Updater = require('./src/updater');
 const utils = require('./src/utls');
+const vm = require('vm');
 const DB = new classDB() 
 const Students = new students(DB.db) 
 const Schedules = new schedules(DB.db)
@@ -202,6 +203,63 @@ app.get(`/api/_ac`, async (req, res) => {
 
 
 ['/api'].forEach(prefix => { 
+
+  app.get(prefix + "/env-config", (req, res) => {
+    try {
+      const filePath = path.join(__dirname, 'config.example.js')
+      const raw = fs.readFileSync(filePath, 'utf-8')
+      let data = null
+      try {
+        delete require.cache[require.resolve(filePath)]
+        data = require(filePath)
+      } catch (e) {
+        data = null
+      }
+      res.send({ raw, data })
+    } catch (error) {
+      res.status(500).send({ error: error.message })
+    }
+  })
+
+  app.post(prefix + "/env-config/validate", (req, res) => {
+    try {
+      const raw = req.body?.raw
+      if (!raw || typeof raw !== 'string') {
+        return res.status(400).send({ error: 'Raw config string required.' })
+      }
+      const sandbox = { module: { exports: {} }, exports: {}, require, __dirname }
+      const script = new vm.Script(raw)
+      script.runInNewContext(sandbox)
+      res.send({ data: sandbox.module.exports || null })
+    } catch (error) {
+      res.status(400).send({ error: error.message })
+    }
+  })
+
+  app.post(prefix + "/env-config", (req, res) => {
+    try {
+      const filePath = path.join(__dirname, 'config.example.js')
+      const raw = req.body?.raw
+      const data = req.body?.data
+
+      if (raw && typeof raw === 'string') {
+        const sandbox = { module: { exports: {} }, exports: {}, require, __dirname }
+        const script = new vm.Script(raw)
+        script.runInNewContext(sandbox)
+        fs.writeFileSync(filePath, raw, 'utf-8')
+        return res.send({ success: true, data: sandbox.module.exports || null })
+      }
+
+      if (!data || typeof data !== 'object') {
+        return res.status(400).send({ error: 'Invalid JSON payload.' })
+      }
+      const content = `module.exports = ${JSON.stringify(data, null, 2)}\n`
+      fs.writeFileSync(filePath, content, 'utf-8')
+      res.send({ success: true, data })
+    } catch (error) {
+      res.status(500).send({ error: error.message })
+    }
+  })
 
   app.get(prefix + `/transactions`, async (req, res) => {   
     const myHeaders = new Headers();
