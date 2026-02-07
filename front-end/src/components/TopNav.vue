@@ -34,7 +34,7 @@
 
       <div v-if="useRoute().query.dev === 'true'" class="topnav__dev">
         <span class="border cp me-1 text-white px-1" @click.prevent.stop="navigateTo({name: 'env'})">
-          <span tooltip="Bulk Attendence" flow="left">Config</span>
+          <span tooltip="Show Config.js" flow="left">Config</span>
         </span>
         <span class="border cp me-1 text-white px-1" @click.prevent.stop="show_bulk_attedance_component = true">
           <span tooltip="Bulk Attendence" flow="left">Bulk</span>

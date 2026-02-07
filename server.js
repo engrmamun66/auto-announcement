@@ -204,9 +204,22 @@ app.get(`/api/_ac`, async (req, res) => {
 
 ['/api'].forEach(prefix => { 
 
+  const ENV_FILES = {
+    'config.example.js': path.join(__dirname, 'config.example.js'),
+    'config.js': path.join(__dirname, 'config.js'),
+  }
+
+  function resolveEnvFile(name){
+    return ENV_FILES[name] || null
+  }
+
   app.get(prefix + "/env-config", (req, res) => {
     try {
-      const filePath = path.join(__dirname, 'config.example.js')
+      const fileKey = String(req.query.file || 'config.example.js')
+      const filePath = resolveEnvFile(fileKey)
+      if (!filePath) {
+        return res.status(400).send({ error: 'Invalid file selection.' })
+      }
       const raw = fs.readFileSync(filePath, 'utf-8')
       let data = null
       try {
@@ -215,7 +228,7 @@ app.get(`/api/_ac`, async (req, res) => {
       } catch (e) {
         data = null
       }
-      res.send({ raw, data })
+      res.send({ raw, data, file: fileKey })
     } catch (error) {
       res.status(500).send({ error: error.message })
     }
@@ -224,10 +237,15 @@ app.get(`/api/_ac`, async (req, res) => {
   app.post(prefix + "/env-config/validate", (req, res) => {
     try {
       const raw = req.body?.raw
+      const fileKey = String(req.body?.file || 'config.example.js')
+      const filePath = resolveEnvFile(fileKey)
+      if (!filePath) {
+        return res.status(400).send({ error: 'Invalid file selection.' })
+      }
       if (!raw || typeof raw !== 'string') {
         return res.status(400).send({ error: 'Raw config string required.' })
       }
-      const sandbox = { module: { exports: {} }, exports: {}, require, __dirname }
+      const sandbox = { module: { exports: {} }, exports: {}, require, __dirname: path.dirname(filePath) }
       const script = new vm.Script(raw)
       script.runInNewContext(sandbox)
       res.send({ data: sandbox.module.exports || null })
@@ -238,16 +256,20 @@ app.get(`/api/_ac`, async (req, res) => {
 
   app.post(prefix + "/env-config", (req, res) => {
     try {
-      const filePath = path.join(__dirname, 'config.example.js')
+      const fileKey = String(req.body?.file || 'config.example.js')
+      const filePath = resolveEnvFile(fileKey)
+      if (!filePath) {
+        return res.status(400).send({ error: 'Invalid file selection.' })
+      }
       const raw = req.body?.raw
       const data = req.body?.data
 
       if (raw && typeof raw === 'string') {
-        const sandbox = { module: { exports: {} }, exports: {}, require, __dirname }
+        const sandbox = { module: { exports: {} }, exports: {}, require, __dirname: path.dirname(filePath) }
         const script = new vm.Script(raw)
         script.runInNewContext(sandbox)
         fs.writeFileSync(filePath, raw, 'utf-8')
-        return res.send({ success: true, data: sandbox.module.exports || null })
+        return res.send({ success: true, data: sandbox.module.exports || null, file: fileKey })
       }
 
       if (!data || typeof data !== 'object') {

@@ -6,6 +6,10 @@
         <div class="env-subtitle">Editing `config.example.js` (Raw + JSON preview)</div>
       </div>
       <div class="env-actions">
+        <select v-model="selectedFile" class="form-select form-select-sm env-select" @change="loadConfig">
+          <option value="config.example.js">config.example.js</option>
+          <option value="config.js">config.js</option>
+        </select>
         <button class="btn btn-sm btn-outline-secondary" @click="loadConfig" :disabled="loading">
           Reload
         </button>
@@ -55,13 +59,14 @@ const errorMessage = ref('')
 const successMessage = ref('')
 let previewTimer = null
 const activeTab = ref('raw')
+const selectedFile = ref('config.example.js')
 
 async function loadConfig(){
   loading.value = true
   errorMessage.value = ''
   successMessage.value = ''
   try {
-    const res = await http.get('/env-config')
+    const res = await http.get('/env-config', { params: { file: selectedFile.value } })
     if (res.status === 200) {
       rawText.value = res.data?.raw || ''
       const dataToUse = res.data?.data ?? null
@@ -80,7 +85,7 @@ async function refreshPreview(){
     return
   }
   try {
-    const res = await http.post('/env-config/validate', { raw: rawText.value })
+    const res = await http.post('/env-config/validate', { raw: rawText.value, file: selectedFile.value })
     if (res.status === 200) {
       jsonPreview.value = JSON.stringify(res.data?.data ?? null, null, 2)
       errorMessage.value = ''
@@ -95,7 +100,7 @@ async function saveConfig(){
   errorMessage.value = ''
   successMessage.value = ''
   try {
-    const res = await http.post('/env-config', { raw: rawText.value })
+    const res = await http.post('/env-config', { raw: rawText.value, file: selectedFile.value })
     if (res.status === 200) {
       jsonPreview.value = JSON.stringify(res.data?.data ?? null, null, 2)
       successMessage.value = 'Saved successfully.'
@@ -140,6 +145,10 @@ onMounted(loadConfig)
 .env-actions{
   display: inline-flex;
   gap: 8px;
+  align-items: center;
+}
+.env-select{
+  min-width: 170px;
 }
 .env-tabs{
   display: inline-flex;
