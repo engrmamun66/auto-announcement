@@ -3,7 +3,7 @@
     <div class="env-header">
       <div>
         <h4 class="env-title">Environment Config</h4>
-        <div class="env-subtitle">Editing `config.example.js` (Raw + JSON preview)</div>
+        <div class="env-subtitle">Editing `{{ selectedFile }}` (Raw + JSON preview)</div>
       </div>
       <div class="env-actions">
         <select v-model="selectedFile" class="form-select form-select-sm env-select" @change="loadConfig">
