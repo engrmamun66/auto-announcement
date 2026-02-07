@@ -1,24 +1,47 @@
 <template>
-    <div class="topnav bg3" id="myTopnav">
-        <a ref="logo_wrapper" class="madrasha-title logo-area" :href="CONFIG?.settings?.attendance?.only_attendance_feature === true ? '#/attendence' : '#'">
-            <img alt="site-logo" ref="logoEl" id="LOGO" src="" style="width: 200px;">
-          </a>
-        <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
-          <RouterLink :to="{name: 'home', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active': route.name === 'home'}"><i class='bx bxs-home pre-icon'></i> Dashboard</RouterLink>
-        </template>
-        <template v-if="CONFIG?.settings?.attendance?.status">
-          <RouterLink :to="{name: 'attendence', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active attendence-tab': route.name === 'attendence'}"><i class='bx bx-user-pin pre-icon'></i> Attendence</RouterLink>
-        </template>
-        <RouterLink :to="{name: 'students', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active students-tab': route.name === 'students'}"><i class='bx bxs-user pre-icon'></i> Students</RouterLink>
-        <RouterLink :to="{name: 'shedules', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active': route.name === 'shedules'}"><i class='bx bxs-calendar pre-icon' ></i> Shedules</RouterLink>
-        <RouterLink :to="{name: 'import', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active': route.name === 'import'}"><i class='bx bxs-file-import pre-icon' ></i> Import</RouterLink>
-        <RouterLink :to="{name: 'ContactUs', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active': route.name === 'ContactUs'}">Contact</RouterLink>
-        <a v-if="useRoute().query.dev === 'true'">
-          <Btn class="border me-1" @click.prevent.stop="show_bulk_attedance_component = true"> <span tooltip="Bulk Attendence" flow="left">Bulk</span> </Btn>
-          <Btn class="border me-0" @click.prevent.stop="openCloneStudents"> <span tooltip="Clone Students" flow="left">Clone</span> </Btn>
-        </a>
-        
-    </div>
+  <header class="topnav bg3" id="myTopnav">
+    <a ref="logo_wrapper" class="madrasha-title logo-area" :href="CONFIG?.settings?.attendance?.only_attendance_feature === true ? '#/attendence' : '#'">
+      <img alt="site-logo" ref="logoEl" id="LOGO" src="" class="topnav__logo">
+    </a>
+
+    <button class="topnav__toggle" type="button" @click="isOpen = !isOpen" aria-label="Toggle navigation">
+      <i class='bx bx-menu'></i>
+    </button>
+
+    <nav class="topnav__links" :class="{ 'is-open': isOpen }">
+      <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
+        <RouterLink :to="{name: 'home', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active': route.name === 'home'}">
+          <i class='bx bxs-home pre-icon'></i> Dashboard
+        </RouterLink>
+      </template>
+      <template v-if="CONFIG?.settings?.attendance?.status">
+        <RouterLink :to="{name: 'attendence', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active attendence-tab': route.name === 'attendence'}">
+          <i class='bx bx-user-pin pre-icon'></i> Attendence
+        </RouterLink>
+      </template>
+      <RouterLink :to="{name: 'students', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active students-tab': route.name === 'students'}">
+        <i class='bx bxs-user pre-icon'></i> Students
+      </RouterLink>
+      <RouterLink :to="{name: 'shedules', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active': route.name === 'shedules'}">
+        <i class='bx bxs-calendar pre-icon' ></i> Shedules
+      </RouterLink>
+      <RouterLink :to="{name: 'import', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active': route.name === 'import'}">
+        <i class='bx bxs-file-import pre-icon' ></i> Import
+      </RouterLink>
+      <RouterLink :to="{name: 'ContactUs', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active': route.name === 'ContactUs'}">
+        Contact
+      </RouterLink>
+
+      <div v-if="useRoute().query.dev === 'true'" class="topnav__dev">
+        <Btn class="border me-1" @click.prevent.stop="show_bulk_attedance_component = true">
+          <span tooltip="Bulk Attendence" flow="left">Bulk</span>
+        </Btn>
+        <Btn class="border me-0" @click.prevent.stop="openCloneStudents">
+          <span tooltip="Clone Students" flow="left">Clone</span>
+        </Btn>
+      </div>
+    </nav>
+  </header>
 </template>
 
 <script setup>
@@ -31,6 +54,7 @@ let logoEl = ref(null)
 let logo_wrapper = ref(null)
 let route = useRoute()
 let router = useRouter()
+let isOpen = ref(false)
 
 const emitter = inject('emitter'); 
 const CONFIG = inject('CONFIG'); 
@@ -64,15 +88,18 @@ onMounted(()=>{
   color: #ff0;
   font-size: 17px;
   text-shadow: 1px 2px 2px rgb(0,0,0);
-  margin-right: 10px;
+  margin-right: 12px;
   border-top-left-radius: 0px;
   border-top-right-radius: 0px;
 }
 
 .topnav {
-  padding-left: 20px;
-  overflow: hidden;
-  background-color: #333; /* Add background color */
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: #333;
+  flex-wrap: wrap;
 }
 
 .topnav .pre-icon{
@@ -80,78 +107,100 @@ onMounted(()=>{
   font-size: 18px;
 }
 
-.topnav a {
-  float: left;
-  display: block;
-  color: white;
-  text-align: center;
-  padding: 14px 33px;
-  text-decoration: none;
-  font-size: 17px;
-  font-weight: bold;
-  position: relative;
+.topnav__logo{
+  width: 200px;
 }
 
-.topnav a:not(.madrasha-title):active {
+.topnav__toggle{
+  border: 1px solid #3f3f46;
+  background: #1f2937;
+  color: #ffffff;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+
+.topnav__links{
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+}
+
+.topnav__links a {
+  color: white;
+  text-align: center;
+  padding: 10px 16px;
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 700;
+  position: relative;
+  border-radius: 8px;
+}
+
+.topnav__dev{
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.topnav__links a:not(.madrasha-title):active {
   background-color: #ffffffa7 !important;
   color: rgb(240, 237, 84);
 }
 
-.topnav a:not(.madrasha-title):hover {
+.topnav__links a:not(.madrasha-title):hover {
   background-color: #ffffff21;
   color: rgb(240, 237, 84);
 }
 
-.topnav a.active:not(.madrasha-title)::after,
-.topnav a:not(.madrasha-title):hover::after {
+.topnav__links a.active:not(.madrasha-title)::after,
+.topnav__links a:not(.madrasha-title):hover::after {
   position: absolute;
   content: '';
-  bottom: 0px;
+  bottom: 4px;
   left: 0px;
   height: 2px;
   width: 100%;
   background-color: rgb(255, 255, 255);
 }
 
-.topnav .icon {
-  display: none;
-}
-
-.topnav.responsive {
-  position: relative;
-}
-
-.topnav.responsive .icon {
-  display: block;
-  float: right;
-  position: absolute;
-  top: 0;
-  right: 0;
-}
-
-.topnav.responsive a {
-  float: none;
-  display: block;
-  text-align: left;
-}
-
-.right-lnk {
-  float: right;
-}
-
-@media screen and (max-width: 600px) {  
-
-  .topnav.responsive a {
-    display: block;
+@media screen and (max-width: 960px) {
+  .topnav{
+    padding: 10px 12px;
+  }
+  .topnav__logo{
+    width: 160px;
+  }
+  .topnav__toggle{
+    display: inline-flex;
+    margin-left: auto;
+  }
+  .topnav__links{
+    width: 100%;
+    display: none;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 6px 0 0 0;
+  }
+  .topnav__links.is-open{
+    display: flex;
+  }
+  .topnav__links a{
+    width: 100%;
     text-align: left;
   }
-
-  .topnav.responsive .icon {
-    display: block;
-  }
-
-  .topnav.responsive a.active {
-    display: block;
+  .topnav__dev{
+    width: 100%;
+    justify-content: flex-start;
+    margin-left: 0;
+    padding-left: 4px;
   }
 }
 </style>
