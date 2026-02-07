@@ -142,6 +142,8 @@ async function fetchLogs({ silent = false } = {}){
     const params = {
       start_time: formatForApi(payload.start_time),
       end_time: formatForApi(payload.end_time),
+      page_size: 1000,
+      max_pages: 20,
     }
     const response = await http.get('/get-bulk-punched', { params })
     if (response.status === 200) {

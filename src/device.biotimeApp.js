@@ -203,17 +203,26 @@ async function getBulkPunces(req) {
     // const start_time = moment().subtract(BACK_SECONDS, 'second').format('YYYY-MM-DD HH:mm:ss');
     const start_time = req.query.start_time;
     const end_time = req.query.end_time; 
-    const limit = 3000; 
+    const limit = Math.min(Number(req.query.page_size || 3000) || 3000, 3000);
+    const max_pages = Math.max(1, Number(req.query.max_pages || 200) || 200);
 
     try {
-        const response = await fetch(
-            `${DEVICE_API_BASE_URL}/iclock/api/transactions/?page=1&page_size=${limit}&start_time=${start_time}&end_time=${end_time}`,
-            requestOptions
-        );
-        const text = await response.text();
-        const result = JSON.parse(text);
-        const data = result?.data || []; 
-        return data || []
+        let allData = [];
+        let page = 1;
+        while (page <= max_pages) {
+            const response = await fetch(
+                `${DEVICE_API_BASE_URL}/iclock/api/transactions/?page=${page}&page_size=${limit}&start_time=${start_time}&end_time=${end_time}`,
+                requestOptions
+            );
+            const text = await response.text();
+            const result = JSON.parse(text);
+            const data = result?.data || []; 
+            if (!data.length) break;
+            allData = allData.concat(data);
+            if (data.length < limit) break;
+            page += 1;
+        }
+        return allData
 
     } catch (error) {
         console.error(`data face error`, error);
