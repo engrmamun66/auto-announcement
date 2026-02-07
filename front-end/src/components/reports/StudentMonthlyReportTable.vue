@@ -38,7 +38,7 @@
           <td>{{ row.avg_late || 0 }} Minutes</td>
           <td>
             <div class="d-flex gap-1">
-              <button class="btn btn-sm btn-secondary hide_onprint" @click="$emit('details', row)">Details</button>
+              <button :disabled="!row.present_percent" class="btn btn-sm btn-secondary hide_onprint" @click="$emit('details', row)">Details</button>
               <button :disabled="!row.total_leaves" class="btn btn-sm btn-secondary hide_onprint" @click="$emit('vacations', row)">Vacations</button>
             </div>
           </td>

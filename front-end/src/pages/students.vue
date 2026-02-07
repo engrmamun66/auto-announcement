@@ -446,7 +446,7 @@ onMounted(async()=>{
         prepareToEdit(student)
         editModeTabIndex.value = 2
         getStudentPuchLogs()
-      }
+      } 
       else {
         clearParams({dakhela: route.query.dakhela, get: true})
       }

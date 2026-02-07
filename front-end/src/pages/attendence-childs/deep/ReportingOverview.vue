@@ -12,6 +12,7 @@ import StudentAttendanceDetails from '../../../components/reports/StudentAttenda
 import MonthlyReportTable from '../../../components/reports/MonthlyReportTable.vue'
 import RankingTable from '../../../components/reports/RankingTable.vue'
 import ClassesSummaryChar from '../../../components/reports/ClassesSummaryChar.vue'
+import { emitter } from '../../../import-hub';
 
 const CONFIG = inject("CONFIG");
 const classes = inject("classes");
@@ -623,6 +624,12 @@ function openStudentMonthVacations(row){
 
 
 onMounted(()=>{
+
+  emitter.on('student_id_for_report', (dakhela_number) => {
+    studentSearchId.value = dakhela_number
+    openStudentMonthlyById()
+  })
+
   if(route.query.id && /^\d+$/.test(String(route.query.id))){
     studentSearchId.value = Number(route.query.id)
     setTimeout(() => {

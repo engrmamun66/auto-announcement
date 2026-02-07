@@ -29,6 +29,7 @@ const liveAttendenceList = inject('liveAttendenceList');
 
 
 let tab = ref(Number(storage('attendance_tab').value || '1'))  
+
 watch(tab, (tab_name) => { 
   storage('attendance_tab').value = tab_name
 })
@@ -104,6 +105,7 @@ let attendenceParams = ref({
     "limit": pagination_perpage.value, 
 })
 
+provide('parent_tab', tab)
 provide('attendenceParams', attendenceParams)
 provide('sortby_column', sortby_column)
 provide('sort_direction', sort_direction)

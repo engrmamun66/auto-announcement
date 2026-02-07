@@ -169,22 +169,22 @@ const helper = {
     // with Time
     // with Time
     // with Time
-  miliseconds: function (time_24 = '') {
-    let momentObject = moment();
+    miliseconds: function (time_24 = '') {
+      let momentObject = moment();
 
-    if (time_24) {
-      const [hours, minutes] = time_24.split(":").map(Number);
+      if (time_24) {
+        const [hours, minutes] = time_24.split(":").map(Number);
 
-      if (!isNaN(hours) && !isNaN(minutes)) {
-        momentObject.hour(hours);
-        momentObject.minute(minutes);
-        momentObject.second(0);
-        momentObject.millisecond(0);
+        if (!isNaN(hours) && !isNaN(minutes)) {
+          momentObject.hour(hours);
+          momentObject.minute(minutes);
+          momentObject.second(0);
+          momentObject.millisecond(0);
+        }
       }
-    }
 
-    return momentObject.valueOf(); // returns timestamp in milliseconds
-  }
+      return momentObject.valueOf(); // returns timestamp in milliseconds
+    }
     ,
     formatTime: function(time_24){
       if(/^\d{2}:\d{2}$/.test(time_24)){

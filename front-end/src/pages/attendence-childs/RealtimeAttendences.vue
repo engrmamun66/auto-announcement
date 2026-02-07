@@ -48,15 +48,15 @@
                       <i class="bx bx-menu"></i>
                     </button>
                     <div v-if="isCardMenuOpen(item, i)" class="card-menu">
-                      <button class="btn smallerbtn btn-outline-secondary card-menu-btn">
-                        File: Export
+                      <button @click="$goto({name: 'students', query: { dakhela: getStudent(item)?.dakhela } })" class="btn smallerbtn btn-outline-secondary card-menu-btn" >
+                        Find
                       </button>
-                      <button class="btn smallerbtn btn-outline-secondary card-menu-btn">
-                        Live: Refresh
-                      </button>
-                      <button class="btn smallerbtn btn-outline-secondary card-menu-btn">
-                        View: Filter
-                      </button>
+                      <button class="btn smallerbtn btn-outline-secondary card-menu-btn" @click="() => {
+                        parent_tab = 4;
+                        helper.delay(()=> emitter.emit('student_id_for_report', getStudent(item)?.dakhela), 100)
+                      }">
+                        Report
+                      </button> 
                     </div>
                     <div class="d-flex justify-content-center mb-2 profile-wrap mt-4">
                         <img class="profile-thumb" :src="getProfileImage(getStudent(item))" alt="profile" />
@@ -123,7 +123,9 @@ import Ahelper from "./attendacnceHelper";
 const http = inject('http');
 const CONFIG = inject("CONFIG");
 const emitter = inject('emitter');
+const helper = inject("helper");
 const classes = inject("classes");
+const parent_tab = inject("parent_tab");
 const attendenceList = inject("attendenceList");
 const all_students_non_copied = inject("all_students_non_copied");
 const liveAttendenceList = inject("liveAttendenceList");
