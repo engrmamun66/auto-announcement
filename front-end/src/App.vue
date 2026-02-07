@@ -12,6 +12,7 @@ import accessCheckAnimation from './components/accessCheckAnimation.vue'
 import Lockscreen from './components/Lockscreen.vue'
 import DevicesPreloader from './components/DevicesPreloader.vue'
 import AddBulkAttendaceForDev from './components/AddBulkAttendaceForDev.vue'
+import FetchBulkAttendanceFromDevice from './components/FetchBulkAttendanceFromDevice.vue'
 
 const socketInit = inject('socketInit');
 
@@ -645,6 +646,7 @@ async function getAllStudents(){
 
 let Socket = ref(null)
 let socketServerIsRunning = ref(false)
+let allow_auto_fetch = ref(false)
 
 emitter.on('is_connected_socket_server', (bool) => {
     socketServerIsRunning.value = bool
@@ -740,6 +742,13 @@ onMounted(async ()=>{
 
         }, 1000);
     }, 100);
+
+
+    setTimeout(() => {
+        const today = moment().format('Y-MM-DD')
+        const is_allowed_attendance = CONFIG.value?.settings?.attendance?.status === true
+        allow_auto_fetch.value = is_allowed_attendance && storage('last__allow_auto_fetch_date').value !== today
+    }, 1000);
 
     isMounted.value = true;
  
@@ -975,12 +984,13 @@ async function punchToSubmitAttendance(barcode='play-417-2024', {
     remarks='',
     delay=0,
     punch_time=moment(),
+    silent_mode=false,
 }={} ){
     if(!delay){
-        await __punchToSubmitAttendance(barcode, { message, source, device_index, remarks, punch_time });
+        await __punchToSubmitAttendance(barcode, { message, source, device_index, remarks, punch_time, silent_mode });
     } else {
         setTimeout(async () => {
-            await __punchToSubmitAttendance(barcode, { message, source, device_index, remarks, punch_time });
+            await __punchToSubmitAttendance(barcode, { message, source, device_index, remarks, punch_time, silent_mode });
         }, delay);
     }
 }
@@ -991,6 +1001,7 @@ async function __punchToSubmitAttendance(barcode='play-417-2024', {
     device_index=0,
     remarks='',
     punch_time=moment(), // actually punch dateTime
+    silent_mode=false,
 }={} ){
      try {
 
@@ -1251,23 +1262,46 @@ async function __punchToSubmitAttendance(barcode='play-417-2024', {
                     let response = await http.post('/attendence-add', payload)
                     if(response.status === 200){
                         let attendenceData = response.data.data
-                        liveAttendenceList.value.push({...attendenceData, live_data: true})
-                        callbacks.fixOverflowOfLiveAttendence()
-                        setTimeout(() => {
-                            delete liveAttendenceList.value.at(-1).live_data
-                        }, 700);
+                        if(!silent_mode){
+                            liveAttendenceList.value.push({...attendenceData, live_data: true})
+                            callbacks.fixOverflowOfLiveAttendence()
+                            setTimeout(() => {
+                                delete liveAttendenceList.value.at(-1).live_data
+                            }, 700);
+                        } else {
+                            const maxLive = CONFIG.value?.settings?.attendance?.maximum_live_attedence || 50
+                            let current = storage('liveAttendenceList').value
+                            if(!Array.isArray(current)) current = []
+                            current.push({...attendenceData, live_data: true})
+                            if(current.length > maxLive){
+                                current = current.slice(-maxLive)
+                            }
+                            storage('liveAttendenceList').value = current
+                        }
                     } 
                 }
 
                 async function updateAttendance(payload){
                     let response = await http.post('/attendence-update', payload)
                     if(response.status === 200){
-                        let targetIndex = liveAttendenceList.value.findIndex(item => item.id == payload.id)
-                        if(targetIndex > -1){
-                            liveAttendenceList.value[targetIndex] = {...liveAttendenceList.value[targetIndex], ...payload, updated_now: true}
+                        if(!silent_mode){
+                            let targetIndex = liveAttendenceList.value.findIndex(item => item.id == payload.id)
+                            if(targetIndex > -1){
+                                liveAttendenceList.value[targetIndex] = {...liveAttendenceList.value[targetIndex], ...payload, updated_now: true}
+                            } else {
+                                liveAttendenceList.value.push(payload)
+                            } 
                         } else {
-                            liveAttendenceList.value.push(payload)
-                        } 
+                            let current = storage('liveAttendenceList').value
+                            if(!Array.isArray(current)) current = []
+                            let targetIndex = current.findIndex(item => item.id == payload.id)
+                            if(targetIndex > -1){
+                                current[targetIndex] = {...current[targetIndex], ...payload, updated_now: true}
+                            } else {
+                                current.push(payload)
+                            }
+                            storage('liveAttendenceList').value = current
+                        }
                     } 
                 }
 
@@ -1308,6 +1342,7 @@ async function __punchToSubmitAttendance(barcode='play-417-2024', {
             <SwitchBoard v-if="showSwithBoardModal" @close="showSwithBoardModal = false"></SwitchBoard>
             <Playlist ref="palylistComponent"></Playlist> 
             <AddBulkAttendaceForDev v-if="show_bulk_attedance_component" @unmount="show_bulk_attedance_component = false"></AddBulkAttendaceForDev>
+            <FetchBulkAttendanceFromDevice v-if="allow_auto_fetch" :isAutomatic="true" />
 
         </div>
     

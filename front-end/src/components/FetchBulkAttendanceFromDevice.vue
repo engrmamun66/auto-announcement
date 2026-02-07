@@ -1,11 +1,12 @@
 <template>
-  <Rightbar
-    ref="RightbarRef"
-    v-if="showRightbar"
-    title="Fetch Bulk Attendance"
-    @unmount="showRightbar = false; $emit('unmount')"
-    :largestMode="false"
-  >
+  <div :class="{ 'automatic-hidden': isAutomatic }">
+    <Rightbar
+      ref="RightbarRef"
+      v-if="showRightbar"
+      title="Fetch Bulk Attendance"
+      @unmount="showRightbar = false; $emit('unmount')"
+      :largestMode="false"
+    >
     <div class="alert alert-info small mb-2">
       <div><strong>এই টুলটি কী করে?</strong> ডিভাইস (BioTime) থেকে নির্দিষ্ট সময়ের পাঞ্চ লিস্ট এনে এখানে দেখায়।</div>
       <div><strong>কিভাবে ব্যবহার করবেন:</strong> Start/End সময় দিন → <b>Fetch Logs</b> চাপুন → তালিকা দেখে <b>Submit Attendance</b> দিন।</div>
@@ -75,7 +76,8 @@
         </div>
       </div>
     </template>
-  </Rightbar>
+    </Rightbar>
+  </div>
 </template>
 
 <script setup>
@@ -83,6 +85,10 @@ import moment from 'moment/moment'
 import { ref, reactive, inject, computed, onMounted } from 'vue'
 import Rightbar from './Rightbar.vue'
 import Btn from './Btn.vue'
+
+const props = defineProps({
+  isAutomatic: { type: Boolean, default: false },
+})
 
 const http = inject('http')
 const emitter = inject('emitter')
@@ -124,9 +130,12 @@ function formatForApi(dt){
   return moment(dt).format('YYYY-MM-DD HH:mm:ss')
 }
 
-async function fetchLogs(){
+async function fetchLogs({ silent = false } = {}){
   if (!payload.start_time || !payload.end_time) {
-    return emitter?.emit?.('toaster-error', { message: 'Start and end time required.' })
+    if (!silent) {
+      emitter?.emit?.('toaster-error', { message: 'Start and end time required.' })
+    }
+    return 0
   }
   fetching.value = true
   try {
@@ -141,10 +150,13 @@ async function fetchLogs(){
     }
   } catch (error) {
     console.warn('fetchLogs_error', error)
-    emitter?.emit?.('toaster-error', { message: 'Failed to fetch logs.' })
+    if (!silent) {
+      emitter?.emit?.('toaster-error', { message: 'Failed to fetch logs.' })
+    }
   } finally {
     fetching.value = false
   }
+  return logs.value.length
 }
 
 function clearLogs(){
@@ -154,9 +166,9 @@ function clearLogs(){
   progress.skipped = 0
 }
 
-async function submitLogs(){
+async function submitLogs({ skipConfirm = false } = {}){
   if (!logs.value.length) return
-  if (!confirm(`Are you sure to submit ${logs.value.length} logs?`)) return
+  if (!skipConfirm && !confirm(`Are you sure to submit ${logs.value.length} logs?`)) return
 
   inserting.value = true
   progress.total = logs.value.length
@@ -176,16 +188,37 @@ async function submitLogs(){
       punch_time: item.punch_time,
       remarks: 'bulk_device_fetch',
       device_index: 0,
+      silent_mode: props.isAutomatic,
     })
     progress.done += 1
   }
 
   inserting.value = false
-  emitter?.emit?.('toaster-success', { message: 'Bulk attendance submitted.' })
+  storage('last__allow_auto_fetch_date').value = moment().format('Y-MM-DD')
+  if (!skipConfirm) {
+    emitter?.emit?.('toaster-success', { message: 'Bulk attendance submitted.' })
+  }
 }
 
 onMounted(() => {
   payload.start_time = moment().startOf('day').format('YYYY-MM-DDTHH:mm')
   payload.end_time = moment().format('YYYY-MM-DDTHH:mm')
+
+  if (props.isAutomatic) {
+    showRightbar.value = true
+    fetchLogs({ silent: true }).then((count) => {
+      if (count > 0) {
+        submitLogs({ skipConfirm: true })
+      } else {
+        storage('last__allow_auto_fetch_date').value = moment().format('Y-MM-DD')
+      }
+    })
+  }
 })
 </script>
+
+<style scoped>
+.automatic-hidden{
+  display: none;
+}
+</style>
