@@ -33,12 +33,15 @@
       </RouterLink>
 
       <div v-if="useRoute().query.dev === 'true'" class="topnav__dev">
-        <Btn class="border me-1" @click.prevent.stop="show_bulk_attedance_component = true">
+        <span class="border cp me-1 text-white px-1" @click.prevent.stop="navigateTo({name: 'env'})">
+          <span tooltip="Bulk Attendence" flow="left">Config</span>
+        </span>
+        <span class="border cp me-1 text-white px-1" @click.prevent.stop="show_bulk_attedance_component = true">
           <span tooltip="Bulk Attendence" flow="left">Bulk</span>
-        </Btn>
-        <Btn class="border me-0" @click.prevent.stop="show_cloner_component = true">
+        </span>
+        <span class="border cp me-0 text-white px-1" @click.prevent.stop="show_cloner_component = true">
           <span tooltip="Clone Students" flow="left">Clone</span>
-        </Btn>
+        </span>
       </div>
     </nav>
   </header>
