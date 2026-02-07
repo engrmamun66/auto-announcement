@@ -170,6 +170,7 @@ onMounted(() => {
   inputElement.value
     .emDateTimePicker({
       ...useAttrs(),
+      showTimeInPickTimeButton: true,
     })
     .onEvent("initialized", (data) => {
       emits('initialized', data)

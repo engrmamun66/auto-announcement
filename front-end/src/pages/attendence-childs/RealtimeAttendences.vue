@@ -2,6 +2,9 @@
   <!-- Attendance Cards -->
    
   <div class="mt-3 live-attendace-area">
+    <div class="live-attendace-header">
+      <div class="live-attendace-title">Realtime Attendance</div>
+    </div>
     <div class="max-heigt-for-live-attendace">
 
       <template v-if="liveAttendenceList?.length">
@@ -30,7 +33,21 @@
                         'live_data': item?.live_data,
                     }"
                     >
-                    <div class="d-flex justify-content-center mb-2">
+                    <button class="card-menu-toggle" type="button" @click.stop="toggleCardMenu(item, i)" aria-label="Card menu">
+                      <i class="bx bx-menu"></i>
+                    </button>
+                    <div v-if="isCardMenuOpen(item, i)" class="card-menu">
+                      <button class="btn smallerbtn btn-outline-secondary card-menu-btn">
+                        File: Export
+                      </button>
+                      <button class="btn smallerbtn btn-outline-secondary card-menu-btn">
+                        Live: Refresh
+                      </button>
+                      <button class="btn smallerbtn btn-outline-secondary card-menu-btn">
+                        View: Filter
+                      </button>
+                    </div>
+                    <div class="d-flex justify-content-center mb-2 profile-wrap mt-4">
                         <img class="profile-thumb" :src="getProfileImage(getStudent(item))" alt="profile" />
                     </div>
                     <div class="d-flex justify-content-between align-items-center mb-2" >
@@ -89,7 +106,7 @@
 </template>
 
 <script setup>
-import { inject, ref, onMounted, watch, nextTick } from "vue";
+import { inject, ref, onMounted, watch, nextTick, onBeforeUnmount } from "vue";
 import Ahelper from "./attendacnceHelper";
 
 const http = inject('http');
@@ -105,6 +122,7 @@ let log = console.log
 const late_consideration_minute = CONFIG.value?.settings?.attendance?.late_consideration_minute || 0
 let isMounted = ref(false)
 const LIVE_ANIM_MS = 900
+const openMenuId = ref(null)
 
 const getStudent = ({ student_id }) =>
   all_students_non_copied.value.find((std) => std.dakhela == student_id);
@@ -121,10 +139,35 @@ const getProfileImage = (student) => {
 const getLiveKey = (item, i) =>
   item?.id || item?.identity_string || `${item?.student_id || 'std'}-${item?.in_time || item?.out_time || i}`;
 
+const getMenuKey = (item, i) => getLiveKey(item, i)
+
+function toggleCardMenu(item, i){
+  const key = getMenuKey(item, i)
+  openMenuId.value = openMenuId.value === key ? null : key
+}
+
+function isCardMenuOpen(item, i){
+  return openMenuId.value === getMenuKey(item, i)
+}
+
 onMounted(()=>{
   setTimeout(() => {
     isMounted.value = true
   }, 500);
+
+  const closeMenus = () => {
+    openMenuId.value = null
+  }
+  document.addEventListener('click', closeMenus)
+  // store ref for cleanup
+  __closeMenusHandler.value = closeMenus
+})
+
+const __closeMenusHandler = ref(null)
+onBeforeUnmount(() => {
+  if (__closeMenusHandler.value) {
+    document.removeEventListener('click', __closeMenusHandler.value)
+  }
 })
 
 async function triggerLiveAnimation(item){
@@ -161,116 +204,226 @@ function deleteAttedence(item){
 </script>
 
 <style scoped>
-.attendance-card {
-  background: #fff;
-  border-radius: 10px;
-  padding: 1rem 1.2rem;
-  border: 1px solid #e2e2e2;
-  transition: all 0.25s ease;
-  color: #333;
-  padding-top: 40px;
-}
-.attendance-card.live_data { 
-  animation: livePulse 1.0s ease;
-  box-shadow: 0 8px 18px rgba(25, 135, 84, 0.25);
+.live-attendace-header{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
 }
 
-.attendance-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+.live-attendace-title{
+  font-weight: 700;
+  font-size: 16px;
+  color: #111827;
+}
+
+.card-menu-toggle{
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+}
+
+.card-menu-toggle:hover{
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.card-menu{
+  position: absolute;
+  top: 50px;
+  right: 10px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 8px;
+  display: grid;
+  gap: 6px;
+  z-index: 2;
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.15);
+}
+
+.card-menu-btn{
+  font-size: 11px;
+  padding: 2px 6px;
+  line-height: 1.1;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.card-menu-label{
+  font-weight: 700;
+  color: #6b7280;
+}
+
+.live-attendace-area{
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  padding: 16px;
+  border-radius: 12px;
+}
+
+.max-heigt-for-live-attendace{
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+}
+
+.attendance-card{
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 16px 16px 12px;
+  border: 1px solid #e5e7eb;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  color: #111827;
+  position: relative;
+  min-height: 100%;
+}
+
+.attendance-card:hover{
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.12);
+  transform: translateY(-2px);
+}
+
+.attendance-card.live_data{
+  animation: livePulse 0.9s ease;
+  box-shadow: 0 10px 22px rgba(25, 135, 84, 0.2);
+  border-color: rgba(25, 135, 84, 0.35);
+}
+
+.profile-thumb{
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+}
+.profile-wrap{
+  margin-top: 10px;
 }
 
 .student-name{
-  margin-bottom: 10px;
+  margin: 0;
   font-weight: 700;
-  border: 1px solid;
-  border-bottom: 2px double;
-  border-color:rgba(255, 255, 255, 0.442);
-  cursor: pointer;
-  padding: 5px;
-  border-radius: 5px;
+  font-size: 15px;
+  color: #0f172a;
   width: 100%;
   text-align: center;
 }
-.profile-thumb{
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 1px solid #cfcfcf;
-  background: #fff;
+
+.attendance-card ul{
+  margin: 0;
+  padding: 0;
 }
 
-.status-present {
-  background-color: #198754; /* Bootstrap success green */
+.attendance-card li{
+  margin-bottom: 6px;
+  font-size: 13px;
+  color: #1f2937;
+}
+
+.status-present{
+  background-color: #2ab361;
   color: #fff !important;
 }
 
-.status-absent {
-  background-color: chocolate; /* Bootstrap danger red */
+.status-absent{
+  background-color: #f0893a;
   color: #fff !important;
 }
 
-.status-outtime {
-  background-color: #0c7086; /* Bootstrap danger red */
+.status-outtime{
+  background-color: #0e94b1;
   color: #fff !important;
 }
 
 .status-present .badge,
-.status-absent .badge {
+.status-absent .badge{
   background: rgba(255, 255, 255, 0.2) !important;
   color: #fff !important;
 }
 
-.remarks {
+.remarks{
   border-top: 1px dashed rgba(255, 255, 255, 0.4);
   padding-top: 6px;
   font-style: italic;
+  font-size: 12px;
 }
 
-.no-data-card {
-  min-height: 250px;
-  background-color: #f8f9fa;
-  border: 1px dashed #ccc;
+.no-data-card{
+  min-height: 220px;
+  background-color: #ffffff;
+  border: 1px dashed #cbd5e1;
+  border-radius: 12px;
 }
+
 span[status]{
-  background-color: rgba(255, 255, 255, 0.161);
-    padding: 1px 8px 3px 6px;
-    border-radius: 6px;
-    color: #ffffff;
-    transform: translateY(-2px);
-    border: 1px solid #ffffff54;
-}
-.popup{
-    position: absolute;
-    padding: 5px 15px;
-    text-align: center;
-    background-color: rgb(255, 255, 255);
-    border-radius: 0px 0px 5px 5px;
-    top: 1px;
-    box-shadow: 0px 1px 0px rgba(0, 0, 0, 0.489), inset 1px 1px 0px rgba(0, 0, 0, 0.175);
-    z-index: 1;
-  } 
-.popup.in-out{  
-    left: 50%;
-    top: 1px;
-    transform: translateX(-50%);
-    border-radius: 0px 0px 5px 5px;
-} 
-li{
-  margin-bottom: 6px;
-}
-.live-attendace-area{
-    box-shadow: inset 5px 22px 44px #00000045;
-    padding: 15px;
-    border-radius: 6px;
-}
-.max-heigt-for-live-attendace{
-    max-height: calc(100vh - 200px);
-    overflow-y: auto;  
+  background-color: rgba(255, 255, 255, 0.18);
+  padding: 2px 8px;
+  border-radius: 6px;
+  color: #ffffff;
+  transform: translateY(-1px);
+  border: 1px solid #ffffff54;
+  display: inline-block;
 }
 
-@keyframes livePulse {
-  0% { transform: scale(0.2); }
+.popup{
+  position: absolute;
+  padding: 4px 10px;
+  text-align: center;
+  background: #3e4453f2;
+  color: #ffffff;
+  border-radius: 999px;
+  top: 8px;
+  box-shadow: 0px 6px 18px rgba(15, 23, 42, 0.25);
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  letter-spacing: 0.2px;
+}
+
+.popup .badge{
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+  font-weight: 600;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.popup.in-out{
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+@keyframes livePulse{
+  0% { transform: scale(0.92); }
   100% { transform: scale(1); }
+}
+
+@media (max-width: 768px) {
+  .live-attendace-area{
+    padding: 12px;
+  }
+  .attendance-card{
+    padding: 14px 14px 10px;
+  }
+}
+
+.smallerbtn{
+  padding: 2px 5px;
+  font-size: 12px;
 }
 </style>

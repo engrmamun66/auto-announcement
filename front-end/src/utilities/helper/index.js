@@ -1,7 +1,15 @@
 import moment from 'moment/moment';
+import { useRoute, useRouter } from "vue-router";
 
 const helper = { 
     log: console.log,
+    naviateTo: function(name, queyrParams={}){
+      const route = useRoute()
+      const router = useRouter() 
+      let dev = route.query.dev === 'true'
+      if(dev) queyrParams.dev = true 
+      router.push({ name, query: queyrParams })
+    },
     listGroupBy: function (array, property) {
       if (!array?.length || !property) return {};
       return array.reduce((result, obj) => {
