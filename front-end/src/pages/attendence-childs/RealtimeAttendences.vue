@@ -4,6 +4,17 @@
   <div class="mt-3 live-attendace-area">
     <div class="live-attendace-header">
       <div class="live-attendace-title">Realtime Attendance</div>
+      <div class="live-attendace-legend">
+        <span class="legend-item">
+          <span class="legend-dot legend-present"></span> Present
+        </span>
+        <span class="legend-item">
+          <span class="legend-dot legend-late"></span> Late
+        </span>
+        <span class="legend-item">
+          <span class="legend-dot legend-out"></span> Just-Out
+        </span>
+      </div>
     </div>
     <div class="max-heigt-for-live-attendace">
 
@@ -216,6 +227,41 @@ function deleteAttedence(item){
   font-weight: 700;
   font-size: 16px;
   color: #111827;
+}
+
+.live-attendace-legend{
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.legend-item{
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #374151;
+  font-weight: 600;
+}
+
+.legend-dot{
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.legend-present{
+  background-color: #2ab361;
+}
+
+.legend-late{
+  background-color: #f0893a;
+}
+
+.legend-out{
+  background-color: #0e94b1;
 }
 
 .card-menu-toggle{
