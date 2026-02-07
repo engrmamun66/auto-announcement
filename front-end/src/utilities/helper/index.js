@@ -3,7 +3,7 @@ import { useRoute, useRouter } from "vue-router";
 
 const helper = { 
     log: console.log,
-    navigateTo: function(payload){
+    goto: function(payload){
       let route = null
       let router = null
       try {

@@ -104,6 +104,9 @@ class Students {
       }
     }
   
+    // Default sort
+    query += ` ORDER BY class_short ASC, name ASC`;
+
     // Add pagination
     query += ` LIMIT ? OFFSET ?`;
     queryParams.push(limit, offset);
@@ -262,7 +265,7 @@ class Students {
 
   allStudents(req, res) {   
   
-    const query = `SELECT * FROM ${this.tableName} WHERE 1`;
+    const query = `SELECT * FROM ${this.tableName} WHERE 1 ORDER BY class_short ASC, name ASC`;
   
     this.db.all(query, [], (err, students) => {
       if (err) {

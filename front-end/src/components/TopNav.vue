@@ -33,7 +33,7 @@
       </RouterLink>
 
       <div v-if="useRoute().query.dev === 'true'" class="topnav__dev">
-        <span class="border cp me-1 text-white px-1 size-08" @click.prevent.stop="navigateTo({name: 'env'})">
+        <span class="border cp me-1 text-white px-1 size-08" @click.prevent.stop="goto({name: 'env'})">
           <span tooltip="Show Config.js" flow="left">Config</span>
         </span>
         <span class="border cp me-1 text-white px-1 size-08" @click.prevent.stop="show_bulk_attedance_component = true">

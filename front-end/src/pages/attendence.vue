@@ -245,9 +245,6 @@ onMounted(()=>{
          <li class="nav-item">
            <a @click.stop="tab = 1" @auxclick.stop="clearAllAndRelaod()" class="nav-link cp text-black" :class="{'active': tab == 1}" ><i class='bx bx-time-five transformY-2px' ></i>Realtime</a>
          </li>
-         <!-- <li class="nav-item">
-           <a @click.stop="tab = 2" class="nav-link cp text-black" :class="{'active': tab == 2}" ><i class='bx bx-history transformY-2px' ></i>History</a>
-         </li>    -->
          <li class="nav-item">
            <a @click.stop="tab = 5" class="nav-link cp text-black" :class="{'active': tab == 5}" ><i class='bx bx-timer transformY-2px'></i>Hazira</a>
          </li>   
@@ -257,6 +254,9 @@ onMounted(()=>{
           <li class="nav-item">
             <a @click.stop="tab = 4" class="nav-link cp text-black" :class="{'active': tab == 4}" ><i class='bx bx-timer transformY-2px'></i>Reporting</a>
           </li>   
+          <li class="nav-item">
+           <a @click.stop="tab = 2" class="nav-link cp text-black" :class="{'active': tab == 2}" ><i class='bx bx-history transformY-2px' ></i>Logs</a>
+         </li>   
       </ul>
 
       <div v-if="tab == 1">

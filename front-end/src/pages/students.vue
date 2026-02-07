@@ -466,17 +466,13 @@ let pickerModelValue = reactive({
 })
 
 function onChange_dateTimePicker(data){
-  let divMode = route.query.dev === 'true'
-  if(!divMode){
-    punchToSubmitAttendance(makeCarcode(targetStudent.value), {source: 'manual_button', delay: 0, punch_time: data.startDateTime })
-  } else {
-    router.push({ name: 'attendence', query: {dev: true}})
-    punchToSubmitAttendance(makeCarcode(targetStudent.value), {source: 'manual_button', delay: 0, punch_time: data.startDateTime })
-  }
+  if(route.query.dev === 'true') helper.goto({name: 'attendence'}) 
+  punchToSubmitAttendance(makeCarcode(targetStudent.value), {source: 'manual_button', delay: 0, punch_time: data.startDateTime })
 }
 
 function onClickAttendance(std){
   if(!confirm('Are you sure to submit attendance?')) return;
+  if(route.query.dev === 'true') helper.goto({name: 'attendence'}) 
   punchToSubmitAttendance(makeCarcode(std), {source: 'manual_button', delay: 0})
 }
 
@@ -852,7 +848,6 @@ watch(fixedWidthSoundCol, (newVal) => {
 
                     <div class="d-flex justify-content-start gap-1">
                       <button class="class-short-btn px-2 for-attendence" style="--tmaxW: 27em" :tooltip="helper.getShifts(classes, std.class_short, false).map(shift => Ahelper.printShift(shift)).join(' | ')"
-                      @auxclick.stop="onClickAttendance(std)"
                       @click.stop="onClickAttendance(std)"
                       >
                           <!-- For Students Attendence -->
