@@ -3,6 +3,10 @@ const port_number = 2323
 
 // shifts must be 24 hours format
 const SHIFTS = {
+     teacher: {
+          start: '04:00',
+          end: '23:59', 
+     },
      first: {
           start: '08:30',
           end: '10:00', 
@@ -160,6 +164,14 @@ const default_config = {
      `,
     
      classes: [
+          {
+               class_name: 'Teacher',
+               class_short: 'teachers',
+               display_name: 'Teacher',
+               isActive: true,
+               speaker_ports: [],
+               shifts: [ SHIFTS.teacher ],
+          },
           {
                class_name: 'Play',
                class_short: 'play',
