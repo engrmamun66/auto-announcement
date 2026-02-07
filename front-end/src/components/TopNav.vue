@@ -36,18 +36,20 @@
         <Btn class="border me-1" @click.prevent.stop="show_bulk_attedance_component = true">
           <span tooltip="Bulk Attendence" flow="left">Bulk</span>
         </Btn>
-        <Btn class="border me-0" @click.prevent.stop="openCloneStudents">
+        <Btn class="border me-0" @click.prevent.stop="show_cloner_component = true">
           <span tooltip="Clone Students" flow="left">Clone</span>
         </Btn>
       </div>
     </nav>
   </header>
+  <cloneStudents v-if="show_cloner_component" @unmount="show_cloner_component = false"></cloneStudents>
 </template>
 
 <script setup>
 import { ref, inject, onMounted } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 import Btn from './Btn.vue'
+import cloneStudents from './cloneStudents.vue'
 
 
 let logoEl = ref(null)
@@ -59,15 +61,9 @@ let isOpen = ref(false)
 const emitter = inject('emitter'); 
 const CONFIG = inject('CONFIG'); 
 const show_bulk_attedance_component = inject('show_bulk_attedance_component'); 
+let show_cloner_component = ref(false)
 
-function openCloneStudents(){
-  let query = route?.name === 'students'
-    ? { ...(route.query || {}) }
-    : { dev: 'true' }
-  query.dev = query.dev ?? 'true'
-  query.clone = 'true'
-  router.push({ name: 'students', query })
-}
+ 
 
 onMounted(()=>{
   if(typeof GLOBAL_DATA !== 'undefined'){

@@ -3,12 +3,23 @@ import { useRoute, useRouter } from "vue-router";
 
 const helper = { 
     log: console.log,
-    navigateTo: function(name, queyrParams={}){
-      const route = useRoute()
-      const router = useRouter() 
-      let dev = route.query.dev === 'true'
-      if(dev) queyrParams.dev = true 
-      router.push({ name, query: queyrParams })
+    navigateTo: function(payload){
+      let route = null
+      let router = null
+      try {
+        route = useRoute()
+        router = useRouter()
+      } catch (e) {}
+
+      if (!router && globalThis.__app_router) {
+        router = globalThis.__app_router
+        route = router?.currentRoute?.value || null
+      }
+
+      if (!router) return
+      let dev = route?.query?.dev === 'true'
+      if(dev) payload.query = { ...(payload.query || {}), dev: true} 
+      router.push(payload)
     },
     listGroupBy: function (array, property) {
       if (!array?.length || !property) return {};
