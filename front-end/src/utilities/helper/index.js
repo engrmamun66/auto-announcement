@@ -3,7 +3,7 @@ import { useRoute, useRouter } from "vue-router";
 
 const helper = { 
     log: console.log,
-    naviateTo: function(name, queyrParams={}){
+    navigateTo: function(name, queyrParams={}){
       const route = useRoute()
       const router = useRouter() 
       let dev = route.query.dev === 'true'

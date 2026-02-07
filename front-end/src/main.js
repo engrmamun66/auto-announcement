@@ -71,7 +71,11 @@ async function mountTheApp(){
         .provide('printDiv', printDiv)
         .provide('makeCarcode', makeCarcode)
         .provide('storage', utils.helper.localStorage)
+        .provide('navigateTo', utils.helper.navigateTo)
         .mount('#my-app');
+        app.config.globalProperties.log = console.log
+        app.config.globalProperties.$helper = utils.helper
+        app.config.globalProperties.helper = utils.helper
         globalThis.storage = utils.helper.localStorage
     } catch (error) {
         console.log({error});
