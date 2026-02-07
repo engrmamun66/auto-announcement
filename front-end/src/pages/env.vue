@@ -13,9 +13,9 @@
         <button class="btn btn-sm btn-outline-secondary" @click="loadConfig" :disabled="loading">
           Reload
         </button>
-        <button class="btn btn-sm btn-outline-secondary" @click="refreshPreview" :disabled="loading">
+        <!-- <button class="btn btn-sm btn-outline-secondary" @click="refreshPreview" :disabled="loading">
           Preview
-        </button>
+        </button> -->
         <button class="btn btn-sm btn-primary" @click="saveConfig" :disabled="loading">
           Save
         </button>
