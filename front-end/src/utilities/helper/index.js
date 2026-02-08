@@ -173,6 +173,7 @@ const helper = {
       let momentObject = moment();
 
       if (time_24) {
+        time_24 = moment(time_24, ['HH:mm', 'hh:mm A'], true).format('HH:mm')
         const [hours, minutes] = time_24.split(":").map(Number);
 
         if (!isNaN(hours) && !isNaN(minutes)) {

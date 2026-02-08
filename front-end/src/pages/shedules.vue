@@ -92,7 +92,7 @@ function incrementTime(key){
 function decrementTime2(key){
    if(key == 'start'){
       payload.start_time2 = moment(payload.start_time2, 'hh:mm A').subtract(INC, 'minutes').format('hh:mm A')
-      startTimePicker2.value.setTime(payload.start_time2)
+      if(startTimePicker2.value) startTimePicker2.value.setTime(payload.start_time2)
    }
    else if(key == 'end'){
       payload.end_time = moment(payload.end_time, 'hh:mm A').subtract(INC, 'minutes').format('hh:mm A')
@@ -103,7 +103,7 @@ function decrementTime2(key){
 function incrementTime2(key){
   if(key == 'start'){
       payload.start_time2 = moment(payload.start_time2, 'hh:mm A').add(INC, 'minutes').format('hh:mm A')
-      startTimePicker2.value.setTime(payload.start_time2)
+      if(startTimePicker2.value) startTimePicker2.value.setTime(payload.start_time2)
    }
    else if(key == 'end'){
       payload.end_time2 = moment(payload.end_time2, 'hh:mm A').add(INC, 'minutes').format('hh:mm A')
@@ -115,7 +115,7 @@ function updateSecondPickers(){
 
     // start_time2
     payload.start_time2 = moment(payload.start_time, 'hh:mm A').add(30, 'minutes').format('hh:mm A')
-    startTimePicker2.value.setTime(payload.start_time2)
+    if(startTimePicker2.value) startTimePicker2.value.setTime(payload.start_time2)
 
     // end_time2
     payload.end_time2 = moment(payload.end_time, 'hh:mm A').add(0, 'minutes').format('hh:mm A')
