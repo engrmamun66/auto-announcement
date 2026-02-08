@@ -1,6 +1,6 @@
 <script setup>
 import { useRoute, useRouter } from "vue-router";
-import { provide, inject, ref, computed, watch, onMounted } from 'vue';
+import { provide, inject, ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
 import SideBar from './components/sidebar.vue'
 import TopNav from './components/TopNav.vue'
 import Toaster from './components/Toaster.vue'
@@ -76,6 +76,11 @@ let disabilityAlretRef = ref(null)
 let manually_paused_the_playlist = ref(false)
 let showSwithBoardModal = ref(false)
 let show_bulk_attedance_component = ref(false)
+
+const handleBeforeUnload = (event) => {
+    event.preventDefault()
+    event.returnValue = ''
+}
 let switches_PreviewInHomePage = ref(localStorage.getItem('switches_PreviewInHomePage') === 'true' ? true : false)
 let borad_image_url = globalThis.GLOBAL_DATA?.env.BASE_URL + '/electric-board.png'
 let isUsingSpeakerAutoControl = computed(()=>CONFIG.value?.settings?.with_speaker_controls?.status)
@@ -653,6 +658,8 @@ emitter.on('is_connected_socket_server', (bool) => {
 })
 
 onMounted(async ()=>{ 
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
     
     setTimeout(() => {
         Socket.value = socketInit({emitter, toaster: true})
@@ -1318,6 +1325,10 @@ async function __punchToSubmitAttendance(barcode='play-417-2024', {
           console.warn('punchToSubmitAttendance_error::', error);
      }
 }
+
+onBeforeUnmount(() => {
+    window.removeEventListener('beforeunload', handleBeforeUnload)
+})
 
 </script>
 
