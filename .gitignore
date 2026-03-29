@@ -145,7 +145,7 @@ exe/build/
 public/logo.png
 public/logo.jpg
 exe/main.spec
-config.js
+/config.js
 open.bat
 backup.zip
 backup

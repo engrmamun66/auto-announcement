@@ -1,0 +1,94 @@
+const express = require('express');
+const fs = require('fs');
+const path = require('path');
+const vm = require('vm');
+
+const ENV_FILES = {
+  'config.example.js': path.join(__dirname, '..', 'config.example.js'),
+  'config.js': path.join(__dirname, '..', 'config.js'),
+};
+
+function resolveEnvFile(name) {
+  return ENV_FILES[name] || null;
+}
+
+module.exports = function (config, utils, Backup) {
+  const router = express.Router();
+
+  router.get('/config', (req, res) => {
+    const track = require('../tracker.json');
+
+    if (req.query.switch_mode) {
+      const switch_mode = req.query.switch_mode;
+      if (['auto', 'manual'].includes(switch_mode)) {
+        track.switch_mode = switch_mode;
+        utils.withTrackFile(track, { overwrite: true });
+      }
+    }
+
+    config.settings.with_speaker_controls.switch_mode = track?.switch_mode || 'auto';
+    res.send({ ...config });
+  });
+
+  router.get('/env-config', (req, res) => {
+    try {
+      const fileKey = String(req.query.file || 'config.example.js');
+      const filePath = resolveEnvFile(fileKey);
+      if (!filePath) return res.status(400).send({ error: 'Invalid file selection.' });
+      const raw = fs.readFileSync(filePath, 'utf-8');
+      let data = null;
+      try {
+        delete require.cache[require.resolve(filePath)];
+        data = require(filePath);
+      } catch (e) {
+        data = null;
+      }
+      res.send({ raw, data, file: fileKey });
+    } catch (error) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  router.post('/env-config/validate', (req, res) => {
+    try {
+      const raw = req.body?.raw;
+      const fileKey = String(req.body?.file || 'config.example.js');
+      const filePath = resolveEnvFile(fileKey);
+      if (!filePath) return res.status(400).send({ error: 'Invalid file selection.' });
+      if (!raw || typeof raw !== 'string') return res.status(400).send({ error: 'Raw config string required.' });
+      const sandbox = { module: { exports: {} }, exports: {}, require, __dirname: path.dirname(filePath) };
+      new vm.Script(raw).runInNewContext(sandbox);
+      res.send({ data: sandbox.module.exports || null });
+    } catch (error) {
+      res.status(400).send({ error: error.message });
+    }
+  });
+
+  router.post('/env-config', (req, res) => {
+    try {
+      const fileKey = String(req.body?.file || 'config.example.js');
+      const filePath = resolveEnvFile(fileKey);
+      if (!filePath) return res.status(400).send({ error: 'Invalid file selection.' });
+      const raw = req.body?.raw;
+      const data = req.body?.data;
+
+      if (raw && typeof raw === 'string') {
+        const sandbox = { module: { exports: {} }, exports: {}, require, __dirname: path.dirname(filePath) };
+        new vm.Script(raw).runInNewContext(sandbox);
+        fs.writeFileSync(filePath, raw, 'utf-8');
+        res.send({ success: true, data: sandbox.module.exports || null, file: fileKey });
+        utils.restartServer();
+        return;
+      }
+
+      if (!data || typeof data !== 'object') return res.status(400).send({ error: 'Invalid JSON payload.' });
+      fs.writeFileSync(filePath, `module.exports = ${JSON.stringify(data, null, 2)}\n`, 'utf-8');
+      res.send({ success: true, data });
+      utils.restartServer();
+    } catch (error) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  return router;
+};
