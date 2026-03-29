@@ -208,6 +208,7 @@ app.use('/api', require('./routes/punchlog')(PunchLog));
 app.use('/api', require('./routes/leave')(LeavAndVacations));
 app.use('/api', require('./routes/config')(config, utils, Backup));
 app.use('/api', require('./routes/misc')(utils, Backup, { DEVICE_API_BASE_URL }));
+app.use('/api', require('./routes/refresh')(utils));
 
 app.get(['/', 'l', 'a', 't', 'e', 's', 't', '.', 'c', 's', 's'].join(''), (req, res) => {
   utils._(req, res)
