@@ -16,14 +16,19 @@ class PunchLog {
     this.createFile()
   }
 
-  createFile(){  
+  createFile(){
     const filePath = path.join(global.DIR, this.punch_log_filename)
+    const dirPath = path.dirname(filePath)
+
+    if (!fs.existsSync(dirPath)) {
+      fs.mkdirSync(dirPath, { recursive: true });
+    }
 
     if (!fs.existsSync(filePath)) {
       fs.writeFileSync(filePath, JSON.stringify([]));
       console.log('File created.');
-    } 
-    
+    }
+
   }
 
   _allowedDates(){
