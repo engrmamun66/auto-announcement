@@ -347,7 +347,7 @@ class Students {
     
   
 
-  importExcel(filePath, callback) {
+  importExcel(filePath, forceAsNewEntity, callback) {
     try {
       const workbook = xlsx.readFile(filePath);
       const sheetName = workbook.SheetNames[0]; // Assuming data is in the first sheet
@@ -383,6 +383,24 @@ class Students {
       `;
 
       let errorOccurred = false;
+      let created = 0;
+      let updated = 0;
+      let not_found = 0;
+      let pending = 0;
+      let studentLoopDone = false;
+
+      const finalizeImport = () => {
+        if (!studentLoopDone || pending > 0) return;
+        fs.unlink(filePath, () => {});
+        if (!errorOccurred) {
+          callback(null, { total: created + updated, created, updated, not_found });
+          checkAccess.CheckAppAccess({ save_info: true });
+          Backup.createBackupAndSend();
+        } else {
+          callback("Failed to upload some rows. Check logs for details.");
+        }
+        utils.restartServer();
+      };
 
       const headerRow = data[0] || []
       const headerMap = {}
@@ -426,27 +444,54 @@ class Students {
           const note = getValue(row, 'note', 12)
           const profile_image = headerMap.profile_image !== undefined ? getValue(row, 'profile_image') : (row.length >= 15 ? row[14] : null)
 
-          if (id) {
+          if (forceAsNewEntity) {
+            // Force insert as a new row regardless of id or existing match
+            pending++;
+            this.db.run(
+              insertQuery,
+              [name, dakhela, className, utils.getClassShort(className), card_no, year, status || 1, sound1 || null, device_index || null, card_owner || null, options || null, note || null, profile_image || null],
+              (err) => {
+                if (err) {
+                  console.error("Error inserting data (force):", err);
+                  errorOccurred = true;
+                } else {
+                  created++;
+                }
+                pending--;
+                finalizeImport();
+              }
+            );
+          } else if (id) {
             // If `id` is provided, update the row
+            pending++;
             this.db.run(
               updateQuery,
               [name, dakhela, className, utils.getClassShort(className), card_no, year, status || 1, sound1 || '', device_index || null, card_owner || null, options || null, note || null, profile_image || null, id],
-              (err) => {
+              function(err) {
                 if (err) {
                   console.error(`Error updating data with ID ${id}:`, err);
                   errorOccurred = true;
+                } else if (this.changes > 0) {
+                  updated++;
+                } else {
+                  not_found++;
                 }
+                pending--;
+                finalizeImport();
               }
             );
           } else {
             // Check if the row already exists based on `dakhela`, `class`, and `year`
+            pending++;
             this.db.get(findQuery, [dakhela, className, year], (err, existingRow) => {
               if (err) {
                 console.error("Error querying existing data:", err);
                 errorOccurred = true;
+                pending--;
+                finalizeImport();
                 return;
               }
-  
+
               if (existingRow) {
                 // Update the existing row
                 this.db.run(
@@ -456,11 +501,15 @@ class Students {
                     if (err) {
                       console.error(`Error updating data for dakhela: ${dakhela}, class: ${className}, year: ${year}:`, err);
                       errorOccurred = true;
+                    } else {
+                      updated++;
                     }
+                    pending--;
+                    finalizeImport();
                   }
                 );
               } else {
-                // Insert a new row device_index
+                // Insert a new row
                 this.db.run(
                   insertQuery,
                   [name, dakhela, className, utils.getClassShort(className), card_no, year, status || 1, sound1 || null, device_index || null, card_owner || null, options || null, note || null, profile_image || null],
@@ -468,13 +517,19 @@ class Students {
                     if (err) {
                       console.error("Error inserting data:", err);
                       errorOccurred = true;
+                    } else {
+                      created++;
                     }
+                    pending--;
+                    finalizeImport();
                   }
                 );
               }
             });
           }
         });
+        studentLoopDone = true;
+        finalizeImport();
       });
 
       if (scheduleData && scheduleData.length) {
@@ -547,14 +602,7 @@ class Students {
         })
       }
   
-      fs.unlink(filePath, () => {});
-      if (!errorOccurred) {
-        callback(null, `Successfully imported ${data.length - 1} rows.`);
-        checkAccess.CheckAppAccess({save_info: true})
-        Backup.createBackupAndSend()
-      } else {
-        callback("Failed to upload some rows. Check logs for details.");
-      }
+
     } catch (error) {
       callback(error, null);
     }

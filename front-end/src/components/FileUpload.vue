@@ -5,10 +5,13 @@
         <header>
             <h4>{{file ? file?.name : 'Select File here'}}</h4>
         </header>
-        <p>Files Supported: excel</p>
+        <p>Files Supported: Excel Only</p>
         <input v-if="fileInputField" ref="uploader" @change="onChangeFile" type="file" hidden accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"   id="fileID" style="display:none;">
         <Btn v-if="!file?.name"  @click="open" >Choose File</Btn>
         <Btn v-if="file?.name" @click.stop="uploadNow()" >Upload Now <BtnLoader v-if="loading"></BtnLoader></Btn>
+        <label v-if="useRoute().query.dev == 'true'" class="mt-2 d-flex align-items-center gap-2" style="cursor:pointer;font-size:13px;">
+          <input type="checkbox" v-model="forceAsNewEntity" /> Force data as new entry
+        </label>
         <a :href="`${BASE_URL}/sample.xlsx`" class="mt-2">Download Sample File</a>
         
         </div>  
@@ -18,9 +21,9 @@
 <script setup>
 import Btn from './Btn.vue'
 import { ref, inject } from "vue";
-import { useRouter } from "vue-router";
-let http = inject('http'); 
-let emitter = inject('emitter'); 
+import { useRoute } from "vue-router";
+let http = inject('http');
+let emitter = inject('emitter');
 import BtnLoader from './BtnLoader.vue'
 
 
@@ -29,6 +32,7 @@ let uploader = ref(null)
 let file = ref(null)
 let loading = ref(false)
 let fileInputField = ref(true)
+let forceAsNewEntity = ref(false)
 
 let { BASE_URL } = globalThis.GLOBAL_DATA?.env
 
@@ -46,7 +50,8 @@ function onChangeFile(event){
 async function uploadNow(){
   if(file.value){    
     loading.value = true
-    http.post('/students/import', {file: file.value}, {formData: true}).then(response => {
+    const url = forceAsNewEntity.value ? '/students/import?force_as_newentity=true' : '/students/import'
+    http.post(url, {file: file.value}, {formData: true}).then(response => {
       emitter.emit('toaster-success', {message: 'import সম্পন্ন হয়েছে'})
       file.value = null;
     }).finally(()=>{

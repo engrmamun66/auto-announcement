@@ -32,6 +32,12 @@ module.exports = {
     
         return momentObject.valueOf(); // returns timestamp in milliseconds
     },
+    restartServer: function () {
+        const { exec } = require('child_process');
+        exec('pm2 restart all', (err) => {
+        // if (err) console.error('pm2 restart failed:', err);
+        });
+    },
     createRequiredFolders(){
 
         let folders = [

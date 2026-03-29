@@ -95,6 +95,7 @@ const emitter = inject('emitter')
 const all_students_non_copied = inject('all_students_non_copied')
 const makeCarcode = inject('makeCarcode')
 const punchToSubmitAttendance = inject('punchToSubmitAttendance')
+const storage = inject('storage')
 
 defineEmits(['unmount'])
 

@@ -373,7 +373,7 @@ app.get(`/api/_ac`, async (req, res) => {
       return res.status(400).send("No file uploaded.");
     }
   
-    Students.importExcel(req.file.path, (error, message) => {
+    Students.importExcel(req.file.path, req.query.force_as_newentity === 'true', (error, message) => {
       if (error) {
         return res.status(500).send(`Failed to import data: ${error.message}`);
       }

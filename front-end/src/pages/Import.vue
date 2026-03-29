@@ -43,7 +43,7 @@ async function getBackup(){
 
 async function eraseAll() {
      try {
-          let confi = confirm('Delete all students from DB. Are you sure?')
+          let confi = confirm('আপনি কি সকল ছাত্রদের তথ্য মুছে ফেলতে চান?')
           if(!confi) return
           let passKey = prompt('Type passcode to confirm')
           if(!['DD', 'dd', 'delete'].includes(passKey)) {
@@ -94,7 +94,7 @@ function getBackupDetails() {
 }
 
 onMounted(() => {
-     getBackupDetails()
+     // getBackupDetails()
 })
  
 
@@ -105,7 +105,7 @@ onMounted(() => {
           <h1>Import Students</h1>  
           <div class="right-align" >
                <!-- <Btn v-if="useRoute().query.dev == 'true'" @click="eraseAll" class="red me-1" ><i class='bx bxs-eraser' ></i> Delete All Students <BtnLoader v-if="loading"></BtnLoader> </Btn> -->
-               <Btn @click="eraseAll" v-if="useRoute().query.dev == 'true'" class="red me-1" ><i class='bx bxs-eraser' ></i> Delete All Students <BtnLoader v-if="loading"></BtnLoader> </Btn>
+               <Btn @click="eraseAll" v-if="true" class="red me-1" ><i class='bx bxs-eraser' ></i> Delete All Students <BtnLoader v-if="loading"></BtnLoader> </Btn>
                <Btn @click="getBackup" ><i class='bx bxs-file-export' ></i> Export All <BtnLoader v-if="loading"></BtnLoader> </Btn>
 
           </div>
