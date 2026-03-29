@@ -116,7 +116,7 @@ async function getStudents({id=null}={}){
     }
     let response = await http.get('/students', { params: {...parameters, id} }) 
     if(response.status == 200){
-      students.value = response.data.data;
+      students.value = response.data?.data || [];
       params.value = {...params.value, ...response.data.pagination};
     } 
     
