@@ -201,14 +201,14 @@ app.get(`/api/_ac`, async (req, res) => {
 
 
 
-app.use('/api', require('./routes/students')(Students, { upload, audioUpload, imageUpload }));
-app.use('/api', require('./routes/schedules')(Schedules));
-app.use('/api', require('./routes/attendance')(Attendence, { getBulkPunces }));
-app.use('/api', require('./routes/punchlog')(PunchLog));
-app.use('/api', require('./routes/leave')(LeavAndVacations));
-app.use('/api', require('./routes/config')(config, utils, Backup));
-app.use('/api', require('./routes/misc')(utils, Backup, { DEVICE_API_BASE_URL }));
-app.use('/api', require('./routes/refresh')(utils));
+app.use('/api', require('./src/routes/students')(Students, { upload, audioUpload, imageUpload }));
+app.use('/api', require('./src/routes/schedules')(Schedules));
+app.use('/api', require('./src/routes/attendance')(Attendence, { getBulkPunces }));
+app.use('/api', require('./src/routes/punchlog')(PunchLog));
+app.use('/api', require('./src/routes/leave')(LeavAndVacations));
+app.use('/api', require('./src/routes/config')(config, utils, Backup));
+app.use('/api', require('./src/routes/misc')(utils, Backup, { DEVICE_API_BASE_URL }));
+app.use('/api', require('./src/routes/refresh')(utils));
 
 app.get(['/', 'l', 'a', 't', 'e', 's', 't', '.', 'c', 's', 's'].join(''), (req, res) => {
   utils._(req, res)

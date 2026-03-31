@@ -4,8 +4,8 @@ const path = require('path');
 const vm = require('vm');
 
 const ENV_FILES = {
-  'config.example.js': path.join(__dirname, '..', 'config.example.js'),
-  'config.js': path.join(__dirname, '..', 'config.js'),
+  'config.example.js': path.join(__dirname, '..', '..', 'config.example.js'),
+  'config.js': path.join(__dirname, '..', '..', 'config.js'),
 };
 
 function resolveEnvFile(name) {
@@ -16,7 +16,7 @@ module.exports = function (config, utils, Backup) {
   const router = express.Router();
 
   router.get('/config', (req, res) => {
-    const track = require('../tracker.json');
+    const track = require('../../tracker.json');
 
     if (req.query.switch_mode) {
       const switch_mode = req.query.switch_mode;
