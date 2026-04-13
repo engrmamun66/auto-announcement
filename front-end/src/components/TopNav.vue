@@ -216,16 +216,21 @@ onMounted(()=>{
   color: rgb(240, 237, 84);
 }
 
-.topnav__links a.active:not(.madrasha-title)::after,
-.topnav__links a:not(.madrasha-title):hover::after {
+.topnav__links a:not(.madrasha-title)::after {
   position: absolute;
   content: '';
   bottom: 4px;
-  left: 0px;
+  left: 50%;
   height: 2px;
-  width: calc(100% - 10px);
-  transform: translateX(5px);
+  width: 0;
+  transform: translateX(-50%);
   background-color: rgba(255, 255, 255, 0.684);
+  transition: width 0.3s ease;
+}
+
+.topnav__links a.active:not(.madrasha-title)::after,
+.topnav__links a:not(.madrasha-title):hover::after {
+  width: calc(100% - 10px);
 }
 
 @media screen and (max-width: 960px) {
