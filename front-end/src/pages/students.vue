@@ -46,7 +46,7 @@ let recorderMounted = ref(false)
 
 function copyRecorderUrl({target}) {
   target.setAttribute('tooltip', 'Copied')
-  navigator.clipboard.writeText(appAccessData.value?.recorder_web_url).then(() => {
+  navigator.clipboard.writeText(appAccessData.value?.recorder_web_url + `?code=${CONFIG.value?.env?.CODE_NUMBER}`).then(() => {
     setTimeout(() => {
       target.setAttribute('tooltip', 'Copy link')
     }, 1500)
