@@ -27,7 +27,8 @@ const helper = inject('helper');
 const storage = inject('storage');
 const classes = inject('classes');
 const CONFIG = inject('CONFIG');
-let http = inject('http'); 
+const appAccessData = inject('appAccessData');
+let http = inject('http');
 const punchToCallStudent = inject('punchToCallStudent');
 const punchToSubmitAttendance = inject('punchToSubmitAttendance');
 const makeCarcode = inject('makeCarcode');
@@ -37,6 +38,61 @@ const getAllStudents = inject('getAllStudents', () => {})
 
 let students = ref([])
 let studentLogs = ref([])
+let linkPopup = ref(null) // { std, column }
+let linkPopupUrl = ref('')
+let linkPopupLoading = ref(false)
+let showRecorder = ref(false)
+
+function copyRecorderUrl({target}) {
+  target.setAttribute('tooltip', 'Copied')
+  navigator.clipboard.writeText(appAccessData.value?.recorder_web_url).then(() => {
+    setTimeout(() => {
+      target.setAttribute('tooltip', 'Copy link')
+    }, 1500)
+  })
+}
+const isIPAccess = window.location.hostname !== 'localhost'
+let recorderLoaded = ref(false)
+let showPhoneModal = ref(false)
+let qrDataUrl = ref('')
+
+function buildPhoneUrl() {
+  const ip = globalThis.GLOBAL_DATA?.env?.LOCAL_IP || 'localhost'
+  const port = globalThis.GLOBAL_DATA?.env?.PORT || 2323
+  return `http://${ip}:${port}/app/#/students`
+}
+
+async function openPhoneModal() {
+  showPhoneModal.value = true
+  if (qrDataUrl.value) return
+  try {
+    const QRCode = (await import('qrcode')).default
+    qrDataUrl.value = await QRCode.toDataURL(buildPhoneUrl(), { width: 260, margin: 2 })
+  } catch (e) {
+    console.error('QR error', e)
+  }
+}
+
+async function saveAudioFromUrl() {
+  if (!linkPopupUrl.value || !linkPopup.value) return
+  const { std, column } = linkPopup.value
+  linkPopupLoading.value = true
+  try {
+    const response = await http.post('/students/upload-audio-from-url', {
+      id: std.id,
+      column,
+      url: linkPopupUrl.value,
+    })
+    std[column] = response.data.audio_url
+    emitter.emit('toaster-success', { message: 'আডিও আপলোড সম্পন্ন হয়েছে' })
+    linkPopup.value = null
+    linkPopupUrl.value = ''
+  } catch (e) {
+    emitter.emit('toaster-error', { message: 'আপলোড ব্যর্থ হয়েছে' })
+  } finally {
+    linkPopupLoading.value = false
+  }
+}
 let only_similler_students = ref(storage('only_similler_students', false).value)
 watch(only_similler_students, (bool) => storage('only_similler_students').value = bool )
 
@@ -489,14 +545,28 @@ watch(fixedWidthSoundCol, (newVal) => {
     <div class="d-flex justify-content-between align-items-center flex-wrap">
       <h1>{{ !addMode ? 'Students' : 'Add Student'}}  </h1> 
 
-      <div class="d-flex justify-content-end">
+      <div class="d-flex justify-content-end align-items-center flex-wrap gap-2">
+        <Btn v-if="!isIPAccess" class="me-2" style="background: #1565C0;" @click="openPhoneModal"><i class='bx bx-qr'></i> Open With Phone</Btn>
+        <div v-if="appAccessData?.recorder_web_url" class="btn-group me-2" style="display:inline-flex;align-items:stretch;">
+          <a v-if="isIPAccess" :href="appAccessData.recorder_web_url" target="_blank" class="btn" style="background:#00796B;color:#fff;">
+            <i class='bx bx-microphone'></i> Recorder
+          </a>
+          <Btn v-else style="background:#00796B;border-top-right-radius:0;border-bottom-right-radius:0;" @click="showRecorder = true; recorderLoaded = false">
+            <i class='bx bx-microphone'></i> Recorder
+          </Btn>
+          <button class="btn" style="background:#005a4a;color:#fff;border-left:1px solid rgba(255,255,255,0.2);padding:0 12px;display:inline-flex;align-items:center;justify-content:center;"
+            tooltip="Copy link"
+            @click="copyRecorderUrl">
+            <i class="bx bx-link"></i>
+          </button>
+        </div>
         <Btn class="me-2" style="background: #673AB7;">Total: {{ params?.total || '000' }} </Btn>
         <Btn v-if="!addMode" class="me-2" @click="addMode = !addMode;editModeTabIndex=1;clearParams();payload.id = null" ><i class='bx bx-plus'></i> Add New</Btn>
       </div>
     </div>
 
     <modal v-model="addMode" :title="!payload?.id ? 'Add Student' : (editModeTabIndex == 1 ? 'Update Student' : 'Guardian Punch History')" :width="editModeTabIndex == 2 ? '700px' : '500px'" :close-on-esc="true" :close-on-click-away="true" >
-      <div class="w-100 d-flex justify-content-center" >
+      <div class="w-100" >
 
         <div class="cb-form">
           <div @click.stop="false">
@@ -582,7 +652,7 @@ watch(fixedWidthSoundCol, (newVal) => {
                   <div class="col-12" v-if="CONFIG?.card_owners?.length">
                     <div class="form-group d-flex align-items-center gap-3">
                       <label>Card Owner</label>
-                      <div class="d-flex gap-2"> 
+                      <div class="d-flex flex-wrap gap-2"> 
                         <template v-for="owner in CONFIG?.card_owners">
                           <div @click.stop="payload.card_owner = owner.id" class="d-flex justify-content-start each-owner-name">
                               <span :class="{'checked': payload.card_owner == owner.id}" customized-radio ></span>
@@ -825,6 +895,10 @@ watch(fixedWidthSoundCol, (newVal) => {
                       <span tooltip="Rcord Sound" @click="targetStd=std;columnName=column">
                         <i class='bx bxs-microphone p-1 ms-1 cp' ></i>
                       </span>
+                      <!-- Here -->
+                      <span v-if="appAccessData?.recorder_web_url" tooltip="Paste recorded URL" @click.stop="linkPopup={std,column};linkPopupUrl=''">
+                        <i class='bx bx-link p-1 ms-1 cp'></i>
+                      </span>
                     </div>
 
                   </template>  
@@ -917,7 +991,40 @@ watch(fixedWidthSoundCol, (newVal) => {
     </div>  
 
   
+    <!-- Recorder iframe overlay -->
+    <Teleport to="body">
+      <div v-if="showRecorder" class="recorder-overlay">
+        <button class="recorder-overlay__close" @click="showRecorder = false; recorderLoaded = false">✕</button>
+        <div v-if="!recorderLoaded" class="recorder-overlay__loader">
+          <div class="recorder-spinner"></div>
+        </div>
+        <iframe :src="appAccessData.recorder_web_url" class="recorder-overlay__frame" allow="microphone" @load="recorderLoaded = true" :style="{ visibility: recorderLoaded ? 'visible' : 'hidden' }"></iframe>
+      </div>
+    </Teleport>
+
+    <!-- Open With Phone Modal -->
+    <modal v-if="showPhoneModal" title="Open With Phone" @close="showPhoneModal = false">
+      <div class="text-center p-3">
+        <p class="mb-1" style="font-size:13px;opacity:.7;">Scan this QR code with your phone</p>
+        <p class="mb-3" style="font-size:12px;font-family:monospace;">{{ buildPhoneUrl() }}</p>
+        <img v-if="qrDataUrl" :src="qrDataUrl" style="width:220px;height:220px;" />
+        <div v-else style="width:220px;height:220px;display:inline-flex;align-items:center;justify-content:center;">
+          <div class="recorder-spinner"></div>
+        </div>
+      </div>
+    </modal>
+
     <!-- Audio Recorder Modal -->
+    <modal v-if="linkPopup" title="Paste Recorded Audio URL" @close="linkPopup=null;linkPopupUrl=''">
+      <div class="p-2">
+        <input v-model="linkPopupUrl" type="text" class="form-control cb-input mb-2" placeholder="Paste recorded audio URL here..." autofocus />
+        <Btn class="w-100" @click="saveAudioFromUrl" :disabled="linkPopupLoading || !linkPopupUrl">
+          <BtnLoader v-if="linkPopupLoading"></BtnLoader>
+          <span v-else>Save</span>
+        </Btn>
+      </div>
+    </modal>
+
     <template v-if="targetStd && columnName">
     <modal @close="targetStd=null" :title="false">
       <div style="height:100px" class="d-flex justify-content-center align-items-center">
@@ -960,6 +1067,55 @@ watch(fixedWidthSoundCol, (newVal) => {
 </template>
 
 <style>
+.recorder-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: stretch;
+}
+.recorder-overlay__frame {
+  flex: 1;
+  border: none;
+  width: 100%;
+  height: 100%;
+}
+.recorder-overlay__loader {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #111;
+  z-index: 10001;
+}
+.recorder-spinner {
+  width: 52px;
+  height: 52px;
+  border: 5px solid rgba(255,255,255,0.2);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: recorder-spin 0.8s linear infinite;
+}
+@keyframes recorder-spin {
+  to { transform: rotate(360deg); }
+}
+.recorder-overlay__close {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  z-index: 10000;
+  background: #e53935;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  font-size: 18px;
+  cursor: pointer;
+  line-height: 1;
+}
 .print-buton{
   padding: 5px 5px;
   border-radius: 5px;

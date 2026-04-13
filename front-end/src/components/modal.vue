@@ -65,9 +65,29 @@ function close(){
   border-radius: 4px;
   position: relative;
   width: 600px;
-  max-width: 90%;
+  max-width: 95%;
   background: #fff;
   padding: 1em 2em;
+  max-height: 90vh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+@media screen and (max-width: 600px) {
+  .modal__content {
+    padding: 1em 0.75em;
+    max-width: 98%;
+  }
+  /* Neutralise Bootstrap .row negative margins inside modal on mobile */
+  .modal__content .row {
+    margin-left: 0;
+    margin-right: 0;
+  }
+  .modal__content .row > [class*="col"] {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
 }
  
 .modal__close {

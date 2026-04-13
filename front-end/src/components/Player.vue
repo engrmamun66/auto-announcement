@@ -1,6 +1,7 @@
 <template>
   <div class="audio-player-area" >
     <audio ref="audioElement" controls @ended="fireEndEvent ? emits('ended') : null">
+      <source :src="src" />
       <source v-if="srcOgg" :src="srcOgg" type="audio/ogg" />
       <source v-if="srcMp3" :src="srcMp3" type="audio/mpeg" />
       Your browser does not support the audio element.

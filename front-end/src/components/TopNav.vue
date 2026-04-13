@@ -49,7 +49,7 @@
 </template>
 
 <script setup>
-import { ref, inject, onMounted } from 'vue';
+import { ref, inject, onMounted, watch, onBeforeUnmount } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 import Btn from './Btn.vue'
 import cloneStudents from './cloneStudents.vue'
@@ -60,6 +60,19 @@ let logo_wrapper = ref(null)
 let route = useRoute()
 let router = useRouter()
 let isOpen = ref(false)
+
+// Close menu on route change (after clicking a nav link on mobile)
+watch(() => route.path, () => { isOpen.value = false })
+
+// Close menu on outside click
+function onOutsideClick(e) {
+  const header = document.getElementById('myTopnav')
+  if (isOpen.value && header && !header.contains(e.target)) {
+    isOpen.value = false
+  }
+}
+onMounted(() => document.addEventListener('click', onOutsideClick))
+onBeforeUnmount(() => document.removeEventListener('click', onOutsideClick))
 
 const emitter = inject('emitter'); 
 const CONFIG = inject('CONFIG'); 
@@ -99,6 +112,9 @@ onMounted(()=>{
   gap: 10px;
   background-color: #333;
   flex-wrap: wrap;
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
 .topnav .pre-icon{

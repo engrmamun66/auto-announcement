@@ -220,9 +220,9 @@ function recallAllPunchedStudents(){
 
 
      <div class="d-flex align-items-center bttt">
-          <div class="togglerbtn">
+          <!-- <div class="togglerbtn">
                <btn @click="toggleSettings = !toggleSettings" class="px-3 shadow me-2"><i class='bx bx-list-ul'></i></btn>
-          </div>
+          </div> -->
           
           <div class="relative w-100 me-2">
                <EmergencyMode v-if="emergency_mode"></EmergencyMode>

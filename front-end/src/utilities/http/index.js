@@ -9,9 +9,15 @@ if(globalThis.GLOBAL_DATA?.env && typeof globalThis.GLOBAL_DATA?.env === 'string
 }
  
 
+let _apiBaseUrl = globalThis.GLOBAL_DATA?.env.API_BASE_URL || '/api'
+if (typeof window !== 'undefined') {
+    _apiBaseUrl = _apiBaseUrl
+        .replace('localhost', window.location.hostname)
+        .replace('127.0.0.1', window.location.hostname)
+}
+
 const http = Axios.create({
-    // baseURL: import.meta.env.API_BASE_URL,
-    baseURL: globalThis.GLOBAL_DATA?.env.API_BASE_URL,
+    baseURL: _apiBaseUrl,
     headers: {
         'content-type': 'application/json'
     }

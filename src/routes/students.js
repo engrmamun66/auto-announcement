@@ -21,6 +21,7 @@ module.exports = function (Students, { upload, audioUpload, imageUpload }) {
   router.post('/students/update-status', (req, res) => Students.updateStatus(req, res));
   router.post('/students/clone/:id', (req, res) => Students.cloneStudent(req, res));
   router.post('/students/upload-audio', audioUpload.single('file'), (req, res) => Students.uploadAudio(req, res));
+  router.post('/students/upload-audio-from-url', (req, res) => Students.uploadAudioFromUrl(req, res));
 
   router.delete('/students/delete/:id', (req, res) => Students.deleteStudent(req, res));
   router.delete('/students/delete-audio/:id/:column', (req, res) => Students.deleteAudio(req, res));

@@ -3,6 +3,20 @@ global.DIR = __dirname;
 const fs = require('fs');
 const path = require('path');
 const moment = require('moment')
+const os = require('os')
+
+function getLocalIP() {
+  const interfaces = os.networkInterfaces()
+  for (const name of Object.keys(interfaces)) {
+    for (const iface of interfaces[name]) {
+      if (iface.family === 'IPv4' && !iface.internal) {
+        return iface.address
+      }
+    }
+  }
+  return 'localhost'
+}
+const LOCAL_IP = getLocalIP()
 
 let config = require('./config.example');
 const configPath = path.join(__dirname, 'config.js');
@@ -154,7 +168,7 @@ app.get(`/app`, (req, res) => {
   webContents = webContents.replace('DYNAMIC_LOGO_AREA_PADDING', logo_padding)
 
 
-  webContents = webContents.replace('ENV_VARIABLES_IN_JSON_FROMAT', JSON.stringify(config.env || {}))
+  webContents = webContents.replace('ENV_VARIABLES_IN_JSON_FROMAT', JSON.stringify({...(config.env || {}), LOCAL_IP}))
 
   // With CSS variables
   if(config.css_vars){

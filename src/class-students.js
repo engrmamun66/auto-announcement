@@ -117,12 +117,15 @@ class Students {
         return;
       }
   
-      // Count total records for pagination metadata
-      const countQuery = `SELECT COUNT(*) as total FROM ${this.tableName} WHERE 1=1`;
-  
-      let countQueryParams = [...queryParams.slice(0, queryParams.length - 2)]; // Exclude limit and offset for count query
-  
-      this.db.get(countQuery, [], (err, result) => {
+      // Count total records for pagination metadata (same filters, no LIMIT/OFFSET)
+      const countQuery = query
+        .replace(/SELECT \* FROM/, 'SELECT COUNT(*) as total FROM')
+        .replace(/ ORDER BY .+$/, '')
+        .replace(/ LIMIT \? OFFSET \?$/, '');
+
+      const countQueryParams = queryParams.slice(0, queryParams.length - 2); // strip limit & offset
+
+      this.db.get(countQuery, countQueryParams, (err, result) => {
         if (err) {
           res.status(500).send({ error__2: err.message, query, queryParams });
           return;
@@ -746,6 +749,45 @@ class Students {
         audio_url: utils.audioFullUrl(req, audioPath),
       });
     });
+  }
+
+  async uploadAudioFromUrl(req, res) {
+    const { id, column, url } = req.body;
+    if (!url) return res.status(400).send({ error: 'No URL provided' });
+    if (!id || !column) return res.status(400).send({ error: 'Missing id or column' });
+
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`Failed to fetch audio: ${response.status}`);
+
+      const contentType = response.headers.get('content-type') || '';
+      let ext = 'mp3';
+      if (contentType.includes('wav')) ext = 'wav';
+      else if (contentType.includes('ogg')) ext = 'ogg';
+      else if (contentType.includes('webm')) ext = 'webm';
+
+      const codeNumber = global.config?.env?.CODE_NUMBER || 'code_number';
+      const filename = `${codeNumber}-${Date.now()}-recorded.${ext}`;
+      const mediaDir = path.join(DIR, 'public', 'media');
+      if (!fs.existsSync(mediaDir)) fs.mkdirSync(mediaDir, { recursive: true });
+      const filePath = path.join(mediaDir, filename);
+
+      const buffer = await response.arrayBuffer();
+      fs.writeFileSync(filePath, Buffer.from(buffer));
+
+      const audioPath = `/media/${filename}`;
+      const query = `UPDATE students SET ${column} = ? WHERE id = ?`;
+      this.db.run(query, [audioPath, id], (err) => {
+        if (err) return res.status(500).send({ error: 'Error updating database' });
+        res.send({
+          message: 'Audio uploaded successfully',
+          audio_path: audioPath,
+          audio_url: utils.audioFullUrl(req, audioPath),
+        });
+      });
+    } catch (err) {
+      res.status(500).send({ error: err.message });
+    }
   }
 
   deleteAudio(req, res){
