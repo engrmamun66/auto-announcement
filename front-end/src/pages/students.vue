@@ -1029,7 +1029,7 @@ watch(fixedWidthSoundCol, (newVal) => {
         <input v-model="linkPopupUrl" type="text" class="form-control cb-input mb-2" placeholder="Paste recorded audio URL here..." autofocus />
         <Btn class="w-100" @click="saveAudioFromUrl" :disabled="linkPopupLoading || !linkPopupUrl">
           <BtnLoader v-if="linkPopupLoading"></BtnLoader>
-          <span v-else>Save</span>
+          <span v-else>Upload</span>
         </Btn>
       </div>
     </modal>
@@ -1134,6 +1134,7 @@ watch(fixedWidthSoundCol, (newVal) => {
   font-size: 18px;
   cursor: pointer;
   line-height: 1;
+  box-shadow: 0px 2px 15px #0000006e;
 }
 .print-buton{
   padding: 5px 5px;
