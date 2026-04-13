@@ -684,10 +684,17 @@ function sendRemoteAction(
         let __data = { type: 'remote_action', action, selector, data }
 
         if(from == 'any' || (from == 'ip' && isIPAccess) || (from == 'localhost' && !isIPAccess)){
+
+            if(from === 'ip'){
+                if(!is_connected_with_main_app.value) {
+                    sendRemoteAction() // try to connect with main app
+                    return
+                }
+            }
             SOCKET.send(JSON.stringify(__data))
         }
     } catch (sendRemoteAction_error) {
-        console.error({sendRemoteAction_error})
+        console.error({sendRemoteAction_error}) 
     }
 }
 
