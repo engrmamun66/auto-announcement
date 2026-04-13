@@ -8,6 +8,8 @@ const http = inject('http');
 
 let CONFIG = inject('CONFIG');
 
+const ip = globalThis.GLOBAL_DATA?.env?.LOCAL_IP || 'localhost'
+
 let restarting = ref(false)
 async function restartServer() {
   restarting.value = true
@@ -42,6 +44,7 @@ function CopyCode() {
   <!-- Contact Wrap -->
   <div class="container">
     <div class="header">
+      <p class="ip-badge">Server IP: <strong>{{ ip }}</strong></p>
       <h1>Contact Information</h1>
       <p class="mt-3">
         Find all our contact details, office location, visit hours, and payment
@@ -258,6 +261,16 @@ body {
   border-bottom: 1px solid #eaeaea;
 }
 
+.ip-badge {
+  display: inline-block;
+  background: #f0f4ff;
+  border: 1px solid #c7d4f0;
+  border-radius: 6px;
+  padding: 4px 14px;
+  font-size: 0.85rem;
+  color: #4a6fa5;
+  margin-bottom: 12px;
+}
 .header h1 {
   color: var(--primary-color);
   font-weight: 600;
