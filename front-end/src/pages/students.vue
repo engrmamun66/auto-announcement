@@ -555,7 +555,7 @@ watch(fixedWidthSoundCol, (newVal) => {
       <div class="d-flex justify-content-end align-items-center flex-wrap gap-2">
         <Btn v-if="!isIPAccess" class="me-2" style="background: #1565C0;" @click="openPhoneModal"><i class='bx bx-qr'></i> Open With Phone</Btn>
         <div v-if="appAccessData?.recorder_web_url" class="btn-group me-2" style="display:inline-flex;align-items:stretch;">
-          <a v-if="isIPAccess" :href="appAccessData.recorder_web_url" target="_blank" class="btn" style="background:#00796B;color:#fff;">
+          <a v-if="isIPAccess" :href="appAccessData.recorder_web_url + `?code=${CONFIG?.env?.CODE_NUMBER}`" target="_blank" class="btn" style="background:#00796B;color:#fff;">
             <i class='bx bx-microphone'></i> Recorder
           </a>
           <Btn v-else style="background:#00796B;border-top-right-radius:0;border-bottom-right-radius:0;" @click="recorderMounted = true; showRecorder = true">
@@ -1006,7 +1006,7 @@ watch(fixedWidthSoundCol, (newVal) => {
           <div v-if="!recorderLoaded" class="recorder-overlay__loader">
             <div class="recorder-spinner"></div>
           </div>
-          <iframe :src="appAccessData.recorder_web_url + `?onCopyNewRecord=true`" class="recorder-overlay__frame" allow="microphone" @load="recorderLoaded = true" :style="{ visibility: recorderLoaded ? 'visible' : 'hidden' }"></iframe>
+          <iframe :src="appAccessData.recorder_web_url + `?onCopyNewRecord=true&code=${CONFIG?.env?.CODE_NUMBER}`" class="recorder-overlay__frame" allow="microphone" @load="recorderLoaded = true" :style="{ visibility: recorderLoaded ? 'visible' : 'hidden' }"></iframe>
         </div>
       </div>
     </Teleport>
