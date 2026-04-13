@@ -9,7 +9,7 @@
       <i :class="is_connected_with_main_app ? 'bx bx-wifi' : 'bx bx-wifi-off'"></i>
     </span>
     <span v-if="isIPAccess && is_connected_with_main_app" class="topnav__wifi" :class="!main_app_user_is_active ? 'topnav__wifi--on' : 'topnav__wifi--off'"
-      :tooltip="main_app_user_is_active ? 'User is active' : 'User is inactive'" flow="down">
+      :tooltip="main_app_user_is_active ? 'Main app is busy' : 'You can control remotely'" flow="down">
       <i class="bx bx-mouse"></i>
     </span>
  
