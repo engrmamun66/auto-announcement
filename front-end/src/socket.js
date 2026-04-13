@@ -1,6 +1,7 @@
 export function socketInit({emitter}){
 
-    const socket = new WebSocket(`ws://localhost:${globalThis.GLOBAL_DATA?.env.SOCKET_PORT}`); 
+    const host = (typeof window !== 'undefined' && window.location.hostname) || 'localhost'
+    const socket = new WebSocket(`ws://${host}:${globalThis.GLOBAL_DATA?.env.SOCKET_PORT}`); 
 
     socket.onopen = () => {
         console.log('Connecte to socket server');
