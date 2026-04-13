@@ -19,6 +19,7 @@ const socketInit = inject('socketInit');
 
 
 const log = console.log
+const isIPAccess = window.location.hostname !== 'localhost'
 
 let helper = inject('helper')
 let http = inject('http')
@@ -364,6 +365,7 @@ let isMountedAppDotVue = ref(false)
 provide('route', route)
 provide('router', router)
 provide('CONFIG', CONFIG)
+provide('isIPAccess', isIPAccess)
 provide('is_started_schedule', is_started_schedule)
 provide('schedule_timeout', schedule_timeout)
 provide('classes', classes)

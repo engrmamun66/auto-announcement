@@ -28,6 +28,7 @@ const storage = inject('storage');
 const classes = inject('classes');
 const CONFIG = inject('CONFIG');
 const appAccessData = inject('appAccessData');
+const Socket = inject('Socket');
 let http = inject('http');
 const punchToCallStudent = inject('punchToCallStudent');
 const punchToSubmitAttendance = inject('punchToSubmitAttendance');
@@ -52,7 +53,7 @@ function copyRecorderUrl({target}) {
     }, 1500)
   })
 }
-const isIPAccess = window.location.hostname !== 'localhost'
+const isIPAccess = inject('isIPAccess')
 let recorderLoaded = ref(false)
 let showPhoneModal = ref(false)
 let qrDataUrl = ref('')
@@ -563,9 +564,13 @@ watch(fixedWidthSoundCol, (newVal) => {
           </Btn>
           <button class="btn" style="background:#005a4a;color:#fff;border-left:1px solid rgba(255,255,255,0.2);padding:0 12px;display:inline-flex;align-items:center;justify-content:center;"
             tooltip="Copy link"
-            @click="copyRecorderUrl">
+            @click.prevent="copyRecorderUrl">
             <i class="bx bx-link"></i>
           </button>
+          <!-- <button  class="btn" style="background:#005a4a;color:#fff;border-left:1px solid rgba(255,255,255,0.2);padding:0 12px;display:inline-flex;align-items:center;justify-content:center;"
+            @click="Socket?.send(JSON.stringify({ type: 'experiment_ping', from: 'IP client', time: Date.now() }))">
+            TEST
+          </button> -->
         </div>
         <Btn class="me-2" style="background: #673AB7;">Total: {{ params?.total || '000' }} </Btn>
         <Btn v-if="!addMode" class="me-2" @click="addMode = !addMode;editModeTabIndex=1;clearParams();payload.id = null" ><i class='bx bx-plus'></i> Add New</Btn>
