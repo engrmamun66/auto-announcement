@@ -42,6 +42,7 @@ let linkPopup = ref(null) // { std, column }
 let linkPopupUrl = ref('')
 let linkPopupLoading = ref(false)
 let showRecorder = ref(false)
+let recorderMounted = ref(false)
 
 function copyRecorderUrl({target}) {
   target.setAttribute('tooltip', 'Copied')
@@ -493,6 +494,12 @@ onMounted(async()=>{
     editModeTabIndex.value = 1
   })
 
+  emitter.on('recorder_url_received', ({ url }) => {
+    showRecorder.value = false
+    linkPopup.value = null
+    linkPopupUrl.value = url || ''
+  })
+
   await getStudents()
 
   if(route.query.dakhela){
@@ -551,7 +558,7 @@ watch(fixedWidthSoundCol, (newVal) => {
           <a v-if="isIPAccess" :href="appAccessData.recorder_web_url" target="_blank" class="btn" style="background:#00796B;color:#fff;">
             <i class='bx bx-microphone'></i> Recorder
           </a>
-          <Btn v-else style="background:#00796B;border-top-right-radius:0;border-bottom-right-radius:0;" @click="showRecorder = true; recorderLoaded = false">
+          <Btn v-else style="background:#00796B;border-top-right-radius:0;border-bottom-right-radius:0;" @click="recorderMounted = true; showRecorder = true">
             <i class='bx bx-microphone'></i> Recorder
           </Btn>
           <button class="btn" style="background:#005a4a;color:#fff;border-left:1px solid rgba(255,255,255,0.2);padding:0 12px;display:inline-flex;align-items:center;justify-content:center;"
@@ -993,12 +1000,14 @@ watch(fixedWidthSoundCol, (newVal) => {
   
     <!-- Recorder iframe overlay -->
     <Teleport to="body">
-      <div v-if="showRecorder" class="recorder-overlay">
-        <button class="recorder-overlay__close" @click="showRecorder = false; recorderLoaded = false">✕</button>
-        <div v-if="!recorderLoaded" class="recorder-overlay__loader">
-          <div class="recorder-spinner"></div>
+      <div v-if="recorderMounted" v-show="showRecorder" class="recorder-overlay" @click.self="showRecorder = false">
+        <div class="recorder-overlay__box">
+          <button class="recorder-overlay__close" @click="showRecorder = false">✕</button>
+          <div v-if="!recorderLoaded" class="recorder-overlay__loader">
+            <div class="recorder-spinner"></div>
+          </div>
+          <iframe :src="appAccessData.recorder_web_url + `?onCopyNewRecord=true`" class="recorder-overlay__frame" allow="microphone" @load="recorderLoaded = true" :style="{ visibility: recorderLoaded ? 'visible' : 'hidden' }"></iframe>
         </div>
-        <iframe :src="appAccessData.recorder_web_url" class="recorder-overlay__frame" allow="microphone" @load="recorderLoaded = true" :style="{ visibility: recorderLoaded ? 'visible' : 'hidden' }"></iframe>
       </div>
     </Teleport>
 
@@ -1073,10 +1082,20 @@ watch(fixedWidthSoundCol, (newVal) => {
   z-index: 9999;
   background: rgba(0,0,0,0.6);
   display: flex;
-  align-items: stretch;
+  align-items: center;
+  justify-content: center;
+}
+.recorder-overlay__box {
+  position: relative;
+  width: 500px;
+  height: 500px;
+  max-width: 96vw;
+  max-height: 96vh;
+  background: #111;
+  border-radius: 8px;
+  overflow: hidden;
 }
 .recorder-overlay__frame {
-  flex: 1;
   border: none;
   width: 100%;
   height: 100%;

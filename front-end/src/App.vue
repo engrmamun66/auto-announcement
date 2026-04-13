@@ -660,6 +660,7 @@ emitter.on('is_connected_socket_server', (bool) => {
 onMounted(async ()=>{ 
 
     window.addEventListener('beforeunload', handleBeforeUnload)
+    window.addEventListener('message', onIframeMessage)
     
     setTimeout(() => {
         Socket.value = socketInit({emitter, toaster: true})
@@ -1326,8 +1327,16 @@ async function __punchToSubmitAttendance(barcode='play-417-2024', {
      }
 }
 
+function onIframeMessage(e) {
+    if (e.data && e.data.event === 'recorded_url_copied') {
+        emitter.emit('recorder_url_received', { url: e.data.url })
+        emitter.emit('toaster-success', { message: 'Recorded URL copied' })
+    }
+}
+
 onBeforeUnmount(() => {
     window.removeEventListener('beforeunload', handleBeforeUnload)
+    window.removeEventListener('message', onIframeMessage)
 })
 
 </script>
