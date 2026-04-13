@@ -15,7 +15,11 @@ module.exports = function () {
         });
         socket.on("message", (message) => {
             const decodedMessage = JSON.parse(message.toString());
-            socket.send(JSON.stringify(decodedMessage));
+            server.clients.forEach((client) => {
+                if (client.readyState === client.OPEN) {
+                    client.send(JSON.stringify(decodedMessage));
+                }
+            });
         });
     });
 
