@@ -1014,8 +1014,9 @@ watch(fixedWidthSoundCol, (newVal) => {
     <!-- Open With Phone Modal -->
     <modal v-if="showPhoneModal" title="Open With Phone" @close="showPhoneModal = false">
       <div class="text-center p-3">
-        <p class="mb-1" style="font-size:13px;opacity:.7;">Scan this QR code with your phone</p>
-        <p class="mb-3" style="font-size:12px;font-family:monospace;">{{ buildPhoneUrl() }}</p>
+        <p class="mb-1" style="font-size:13px;opacity:.7;">Scan this QR code with your phone <span><a :href="buildPhoneUrl()" target="_blank">Open URL</a></span></p>
+        <!-- <p class="mb-3" style="font-size:12px;font-family:monospace;">{{ buildPhoneUrl() }}</p> -->
+         
         <img v-if="qrDataUrl" :src="qrDataUrl" style="width:220px;height:220px;" />
         <div v-else style="width:220px;height:220px;display:inline-flex;align-items:center;justify-content:center;">
           <div class="recorder-spinner"></div>
