@@ -28,13 +28,16 @@ const storage = inject('storage');
 const classes = inject('classes');
 const CONFIG = inject('CONFIG');
 const appAccessData = inject('appAccessData');
+const sendRemoteAction = inject('sendRemoteAction');
 const Socket = inject('Socket');
+const is_connected_with_main_app = inject('is_connected_with_main_app');
 let http = inject('http');
 const punchToCallStudent = inject('punchToCallStudent');
 const punchToSubmitAttendance = inject('punchToSubmitAttendance');
 const makeCarcode = inject('makeCarcode');
 const callbacks = inject('callbacks');
 const all_students = inject('all_students', [])
+const all_students_non_copied = inject('all_students_non_copied', [])
 const getAllStudents = inject('getAllStudents', () => {})
 
 let students = ref([])
@@ -567,12 +570,8 @@ watch(fixedWidthSoundCol, (newVal) => {
             @click.prevent="copyRecorderUrl">
             <i class="bx bx-link"></i>
           </button>
-          <!-- <button  class="btn" style="background:#005a4a;color:#fff;border-left:1px solid rgba(255,255,255,0.2);padding:0 12px;display:inline-flex;align-items:center;justify-content:center;"
-            @click="Socket?.send(JSON.stringify({ type: 'experiment_ping', from: 'IP client', time: Date.now() }))">
-            TEST
-          </button> -->
         </div>
-        <Btn class="me-2" style="background: #673AB7;">Total: {{ params?.total || '000' }} </Btn>
+        <Btn class="me-2" style="background: #673AB7;">Total: <span class="bg-success p-3">{{ all_students_non_copied?.length }}</span> / <span>{{ params?.total || '0' }}</span></Btn>
         <Btn v-if="!addMode" class="me-2" @click="addMode = !addMode;editModeTabIndex=1;clearParams();payload.id = null" ><i class='bx bx-plus'></i> Add New</Btn>
       </div>
     </div>

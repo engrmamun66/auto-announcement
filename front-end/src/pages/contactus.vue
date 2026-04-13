@@ -5,6 +5,8 @@ import helper from '../utilities/helper'
 
 const emitter = inject('emitter');
 const http = inject('http');
+const all_students_non_copied = inject('all_students_non_copied');
+const appAccessData = inject('appAccessData');
 
 let CONFIG = inject('CONFIG');
 
@@ -55,6 +57,30 @@ function CopyCode() {
 
 
 
+
+    <div class="row mt-4 mb-3">
+      <div class="col-12">
+        <div class="students-stat-card">
+          <div class="students-stat-card__glow"></div>
+          <div class="students-stat-card__body">
+            <div class="students-stat-card__icon">
+              ৳
+            </div>
+            <div class="students-stat-card__info">
+              <span class="students-stat-card__label">Payable amout</span>
+              <span class="students-stat-card__count">{{ all_students_non_copied?.length ?? 0 }} <span class="students-stat-card__count_sub">x&nbsp;&nbsp;{{appAccessData?.cost_perhead || 15}} tk</span> = {{ all_students_non_copied?.length * (appAccessData?.cost_perhead || 15) }} tk</span>
+            </div>
+            <div class="students-stat-card__badge">
+              <i class='bx bx-transfer-alt'></i> About payment
+            </div>
+          </div>
+          <p class="students-stat-card__notice">
+            <i class='bx bx-info-circle'></i>
+            উপরের হিসাবটি শুধুমাত্র প্রকৃত (ডুপ্লিকেট বাদে) শিক্ষার্থীদের উপর ভিত্তি করে তৈরি করা হয়েছে। অনুগ্রহ করে নির্ধারিত পরিমাণ পরিশোধ করুন — অতিরিক্ত কার্ড বাবহারকারিদের গণনায় অন্তর্ভুক্ত করা হয়নি, তাই এই সংখ্যাটিই আপনার প্রদেয় বিলের ভিত্তি।
+          </p>
+        </div>
+      </div>
+    </div>
 
     <div class="row mt-4">
         <div class="col-12">
@@ -389,6 +415,118 @@ body {
 
 
 
+
+/* Students Non-Copied Stat Card */
+.students-stat-card {
+  position: relative;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  border-radius: 16px;
+  padding: 24px 32px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(15, 52, 96, 0.35);
+  border: 1px solid rgba(255,255,255,0.07);
+}
+
+.students-stat-card__glow {
+  position: absolute;
+  top: -60px;
+  right: -60px;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(99, 179, 237, 0.25) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.students-stat-card__body {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  position: relative;
+  z-index: 1;
+}
+
+.students-stat-card__icon {
+  width: 68px;
+  height: 68px;
+  border-radius: 16px;
+  background: rgba(99, 179, 237, 0.15);
+  border: 1px solid rgba(99, 179, 237, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  font-weight: 800;
+  font-family: 'SolaimanLipi', 'Kalpurush', sans-serif;
+  color: #63b3ed;
+  flex-shrink: 0;
+}
+
+.students-stat-card__info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.students-stat-card__label {
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.55);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.students-stat-card__count {
+  font-size: 3rem;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1;
+  letter-spacing: -1px;
+}
+.students-stat-card__count_sub {
+  font-size: 1.5rem;
+}
+
+.students-stat-card__notice {
+  margin-top: 16px;
+  margin-bottom: 0;
+  padding: 10px 14px;
+  background: rgba(99, 179, 237, 0.08);
+  border-left: 3px solid rgba(99, 179, 237, 0.5);
+  border-radius: 0 8px 8px 0;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.88rem;
+  line-height: 1.7;
+  position: relative;
+  z-index: 1;
+}
+.students-stat-card__notice .bx {
+  color: #63b3ed;
+  margin-right: 6px;
+  font-size: 1rem;
+  vertical-align: middle;
+}
+
+.students-stat-card__badge {
+  flex-shrink: 0;
+  background: rgba(99, 179, 237, 0.12);
+  border: 1px solid rgba(99, 179, 237, 0.3);
+  color: #63b3ed;
+  border-radius: 999px;
+  padding: 6px 16px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+@media (max-width: 576px) {
+  .students-stat-card { padding: 20px; }
+  .students-stat-card__body { flex-wrap: wrap; gap: 16px; }
+  .students-stat-card__count { font-size: 2.4rem; }
+  .students-stat-card__badge { margin-left: 0; }
+}
 
 /* WhatsApp Card Styles */
 .whatsapp-card {

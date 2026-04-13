@@ -1,6 +1,6 @@
 <script setup>
 import { useRoute, useRouter } from "vue-router";
-import { provide, inject, ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
+import { provide, inject, ref, computed, watch, onMounted, onBeforeUnmount, triggerRef } from 'vue';
 import SideBar from './components/sidebar.vue'
 import TopNav from './components/TopNav.vue'
 import Toaster from './components/Toaster.vue'
@@ -77,6 +77,14 @@ let disabilityAlretRef = ref(null)
 let manually_paused_the_playlist = ref(false)
 let showSwithBoardModal = ref(false)
 let show_bulk_attedance_component = ref(false)
+let last_mouse_keyboard_activity = ref(new Date().getTime())
+// true if mouse/keyboard was used within the last 5 seconds
+const isUserActive = ref(false)
+const main_app_user_is_active = ref(false)
+
+watch(isUserActive, (bool) => {
+    sendRemoteAction({from: 'localhost', action: 'is_active_main_user', data: isUserActive.value})
+})
 
 const handleBeforeUnload = (event) => {
     event.preventDefault()
@@ -94,6 +102,7 @@ watch(switches_PreviewInHomePage, (bool) => {
 
 watch(wattingList, (newWaittinglist) => {
     storage('wattingList').value = newWaittinglist
+    sendRemoteAction({from: 'localhost', action: 'update_waiting_list', data: wattingList.value })
 }, {deep: true})
 
 watch(attendenceList, (newAttendenceList) => {
@@ -392,6 +401,8 @@ provide('getConfig', getConfig)
 provide('controlSounds', controlSounds)
 provide('showSwithBoardModal', showSwithBoardModal)
 provide('show_bulk_attedance_component', show_bulk_attedance_component)
+provide('isUserActive', isUserActive)
+provide('main_app_user_is_active', main_app_user_is_active)
 provide('borad_image_url', borad_image_url)
 provide('switches_PreviewInHomePage', switches_PreviewInHomePage)
 provide('isUsingSpeakerAutoControl', isUsingSpeakerAutoControl)
@@ -632,7 +643,6 @@ async function getAllStudents(){
 
        all_students.value = data
 
-
        if(attendanceAllowed){
         if(allowOnlyAttendance){
             all_students_non_copied.value = data // allow attendance for all students
@@ -652,8 +662,34 @@ async function getAllStudents(){
 }
 
 let Socket = ref(null)
+provide('Socket', Socket)
 let socketServerIsRunning = ref(false)
 let allow_auto_fetch = ref(false)
+let is_connected_with_main_app = ref(false)
+provide('sendRemoteAction', sendRemoteAction)
+provide('is_connected_with_main_app', is_connected_with_main_app)
+
+function sendRemoteAction(
+    {
+        from='any', // ip | localhost
+        action='say_hi',
+        selector = null,
+        data = null, 
+    } = {}
+){
+    try {
+        if(!Socket.value) return 
+        let SOCKET = Socket.value
+
+        let __data = { type: 'remote_action', action, selector, data }
+
+        if(from == 'any' || (from == 'ip' && isIPAccess) || (from == 'localhost' && !isIPAccess)){
+            SOCKET.send(JSON.stringify(__data))
+        }
+    } catch (sendRemoteAction_error) {
+        console.error({sendRemoteAction_error})
+    }
+}
 
 emitter.on('is_connected_socket_server', (bool) => {
     socketServerIsRunning.value = bool
@@ -709,15 +745,20 @@ onMounted(async ()=>{
         document.body.classList.add('user-interacted')
     }
 
-    document.addEventListener('click', () => {
-        user_interacted.value = true;  
+    document.addEventListener('click', (event) => {
+        user_interacted.value = true;
         last_mouse_activity_time.value = moment().format('Y-MM-DD HH:mm:ss')
+        if(event.isTrusted) last_mouse_keyboard_activity.value = new Date().getTime()
         document.body.classList.add('user-interacted')
         emitter.emit('document_click')
     })
-    document.addEventListener('mousemove', () => { 
-        last_mouse_activity_time.value = moment().format('Y-MM-DD HH:mm:ss') 
+    document.addEventListener('mousemove', (event) => {
+        last_mouse_activity_time.value = moment().format('Y-MM-DD HH:mm:ss')
+        if(event.isTrusted) last_mouse_keyboard_activity.value = new Date().getTime()
         emitter.emit('document_mousemove')
+    })
+    document.addEventListener('keydown', (event) => {
+        if(event.isTrusted) last_mouse_keyboard_activity.value = new Date().getTime()
     })
     document.addEventListener('resize', () => { 
         emitter.emit('document_resize')
@@ -743,11 +784,8 @@ onMounted(async ()=>{
             if(end_of_hour){
                 CheckAccess()
             }
-
-
-
-
             emitter.emit('intervalling', true)
+            isUserActive.value = (new Date().getTime() - last_mouse_keyboard_activity.value) < 5000
             focusCurrenPlayingSoundCard_if_userIsInavtiveForFewSeconds()
 
         }, 1000);
@@ -762,9 +800,8 @@ onMounted(async ()=>{
 
     isMounted.value = true;
  
-
-
     emitter.on('on_socket_message', (socket_data) => {
+        
         if(socket_data.type == 'attendence'){
             let { punch_time, barcode, for_attendence, device_index } = socket_data 
             let time_and_barcode = `${punch_time}-${barcode}`
@@ -781,9 +818,38 @@ onMounted(async ()=>{
                 
             }
         }
+
+        if(socket_data.type == 'remote_action') {
+            let { action, selector, data } = socket_data
+
+            // localhost receives say_hi → reply with ack
+            if(!isIPAccess && action === 'say_hi'){
+                sendRemoteAction({action: 'say_hi_reply'})
+            }
+            // IP client receives ack → mark connected
+            if(isIPAccess && action === 'say_hi_reply'){
+                is_connected_with_main_app.value = true
+            }
+            // localhost receives onClick from IP client → click the element (only if user is not active)
+            // !isUserActive.value
+            if(!isIPAccess && action === 'onClick' && selector && !isUserActive.value){
+                const el = document.querySelector(selector)
+                if(el) el.click()
+            }
+            if(!isIPAccess && action === 'update_waiting_list'){
+                wattingList.value = data || []
+            }
+            if(isIPAccess && action === 'is_active_main_user'){
+                main_app_user_is_active.value = data // boolean
+            }
+        }
      })
 
      await CheckAccess({loader: true}) 
+ 
+    setTimeout(() => {
+        sendRemoteAction({from: 'ip'})
+    }, 2000);
 })
 
 

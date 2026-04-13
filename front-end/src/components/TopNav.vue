@@ -4,31 +4,46 @@
       <img alt="site-logo" ref="logoEl" id="LOGO" src="" class="topnav__logo">
     </a>
 
+    <span v-if="isIPAccess" @click="sendRemoteAction()" class="topnav__wifi" :class="is_connected_with_main_app ? 'topnav__wifi--on' : 'topnav__wifi--off'"
+      :tooltip="is_connected_with_main_app ? 'Connected to main app' : 'Not connected to main app'" flow="down">
+      <i :class="is_connected_with_main_app ? 'bx bx-wifi' : 'bx bx-wifi-off'"></i>
+    </span>
+    <span v-if="isIPAccess && is_connected_with_main_app" class="topnav__wifi" :class="!main_app_user_is_active ? 'topnav__wifi--on' : 'topnav__wifi--off'"
+      :tooltip="main_app_user_is_active ? 'User is active' : 'User is inactive'" flow="down">
+      <i class="bx bx-mouse"></i>
+    </span>
+ 
+
+    <span v-if="!isIPAccess && !isUserActive" class="topnav__wifi topnav__wifi--on"
+      tooltip="User is not active" flow="down">
+      <i class='bx bx-loader-circle topnav__hypnotize'></i>
+    </span>
+
     <button class="topnav__toggle" type="button" @click="isOpen = !isOpen" aria-label="Toggle navigation">
       <i class='bx bx-menu'></i>
     </button>
 
     <nav class="topnav__links" :class="{ 'is-open': isOpen }">
       <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
-        <RouterLink :to="{name: 'home', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active': route.name === 'home'}">
+        <RouterLink id="nav-link-home" :to="{name: 'home', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active': route.name === 'home'}" @click="sendRemoteAction({from: 'ip', action: 'onClick', selector: '#nav-link-home'})">
           <i class='bx bxs-home pre-icon'></i> Dashboard
         </RouterLink>
       </template>
       <template v-if="CONFIG?.settings?.attendance?.status">
-        <RouterLink :to="{name: 'attendence', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active attendence-tab': route.name === 'attendence'}">
+        <RouterLink id="nav-link-attendence" :to="{name: 'attendence', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active attendence-tab': route.name === 'attendence'}" @click="sendRemoteAction({from: 'ip', action: 'onClick', selector: '#nav-link-attendence'})">
           <i class='bx bx-user-pin pre-icon'></i> Attendence
         </RouterLink>
       </template>
-      <RouterLink :to="{name: 'students', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active students-tab': route.name === 'students'}">
+      <RouterLink id="nav-link-students" :to="{name: 'students', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active students-tab': route.name === 'students'}" @click="sendRemoteAction({from: 'ip', action: 'onClick', selector: '#nav-link-students'})">
         <i class='bx bxs-user pre-icon'></i> Students
       </RouterLink>
-      <RouterLink :to="{name: 'shedules', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active': route.name === 'shedules'}">
+      <RouterLink id="nav-link-shedules" :to="{name: 'shedules', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active': route.name === 'shedules'}" @click="sendRemoteAction({from: 'ip', action: 'onClick', selector: '#nav-link-shedules'})">
         <i class='bx bxs-calendar pre-icon' ></i> Shedules
       </RouterLink>
-      <RouterLink :to="{name: 'import', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active': route.name === 'import'}">
+      <RouterLink id="nav-link-import" :to="{name: 'import', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active': route.name === 'import'}" @click="sendRemoteAction({from: 'ip', action: 'onClick', selector: '#nav-link-import'})">
         <i class='bx bxs-file-import pre-icon' ></i> Import
       </RouterLink>
-      <RouterLink :to="{name: 'ContactUs', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active': route.name === 'ContactUs'}">
+      <RouterLink id="nav-link-contact" :to="{name: 'ContactUs', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active': route.name === 'ContactUs'}" @click="sendRemoteAction({from: 'ip', action: 'onClick', selector: '#nav-link-contact'})">
         Contact
       </RouterLink>
 
@@ -76,6 +91,11 @@ onBeforeUnmount(() => document.removeEventListener('click', onOutsideClick))
 
 const emitter = inject('emitter'); 
 const CONFIG = inject('CONFIG'); 
+const isIPAccess = inject('isIPAccess'); 
+const isUserActive = inject('isUserActive'); 
+const main_app_user_is_active = inject('main_app_user_is_active'); 
+const sendRemoteAction = inject('sendRemoteAction'); 
+const is_connected_with_main_app = inject('is_connected_with_main_app'); 
 const show_bulk_attedance_component = inject('show_bulk_attedance_component'); 
 let show_cloner_component = ref(false)
 
@@ -103,6 +123,27 @@ onMounted(()=>{
   margin-right: 12px;
   border-top-left-radius: 0px;
   border-top-right-radius: 0px;
+}
+
+.topnav__wifi {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.topnav__wifi--on  { color: #4caf50; background: rgba(76,175,80,0.15); }
+.topnav__wifi--off { color: #f44336; background: rgba(244,67,54,0.15); }
+
+.topnav__hypnotize {
+  animation: hypno-spin 1.2s linear infinite;
+}
+@keyframes hypno-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
 }
 
 .topnav {
@@ -182,8 +223,9 @@ onMounted(()=>{
   bottom: 4px;
   left: 0px;
   height: 2px;
-  width: 100%;
-  background-color: rgb(255, 255, 255);
+  width: calc(100% - 10px);
+  transform: translateX(5px);
+  background-color: rgba(255, 255, 255, 0.684);
 }
 
 @media screen and (max-width: 960px) {
