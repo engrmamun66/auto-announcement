@@ -1,44 +1,62 @@
-export function socketInit({emitter}){
+const RECONNECT_DELAY = 5000 // ms between reconnect attempts
 
-    const host = (typeof window !== 'undefined' && window.location.hostname) || 'localhost'
-    const socket = new WebSocket(`ws://${host}:${globalThis.GLOBAL_DATA?.env.SOCKET_PORT}`); 
+export function socketInit({ emitter }) {
+    let socket = null
+    let reconnectTimer = null
+    let destroyed = false
 
-    socket.onopen = () => {
-        console.log('Connecte to socket server');
-        // socket.send('Hello, Server!');
-        // emitter.emit('toaster-success', { message: 'Connecte to socket server' })
-        emitter.emit('is_connected_socket_server', true)
+    function connect() {
+        const host = (typeof window !== 'undefined' && window.location.hostname) || 'localhost'
+        socket = new WebSocket(`ws://${host}:${globalThis.GLOBAL_DATA?.env.SOCKET_PORT}`)
 
-    };
-
-    socket.onmessage = (event) => {
-        try {
-            let data = JSON.parse(event.data || '{}')
-            if(data?.type == 'hi'){
-                emitter.emit('is_connected_socket_server', true)
-            } else {
-                emitter.emit('on_socket_message', data);
-            }
-        } catch (error) {
-            console.error('socket.onmessage__error::', {
-                error,
-                data: event.data,
-                typeof: typeof event.data,
-            });
+        socket.onopen = () => {
+            console.log('Connected to socket server')
+            clearTimeout(reconnectTimer)
+            emitter.emit('is_connected_socket_server', true)
         }
-    };
 
-    socket.onclose = () => {
-        console.log('Disconnected socket from server');
-        // emitter.emit('toaster-error', { message: 'Disconnected socket from server' })
-        console.warn('Disconnected socket from server')
-        emitter.emit('is_connected_socket_server', false)
-    };
+        socket.onmessage = (event) => {
+            try {
+                let data = JSON.parse(event.data || '{}')
+                if (data?.type == 'hi') {
+                    emitter.emit('is_connected_socket_server', true)
+                } else {
+                    emitter.emit('on_socket_message', data)
+                }
+            } catch (error) {
+                console.error('socket.onmessage__error::', {
+                    error,
+                    data: event.data,
+                    typeof: typeof event.data,
+                })
+            }
+        }
 
-    socket.onerror = (error) => {
-        console.error('WebSocket error:', error);
-    };
+        socket.onclose = () => {
+            console.warn('Disconnected from socket server')
+            emitter.emit('is_connected_socket_server', false)
+            if (!destroyed) {
+                console.log(`Reconnecting in ${RECONNECT_DELAY / 1000}s...`)
+                reconnectTimer = setTimeout(connect, RECONNECT_DELAY)
+            }
+        }
 
-    return socket
+        socket.onerror = (error) => {
+            console.error('WebSocket error:', error)
+            // onclose fires automatically after onerror — reconnect handled there
+        }
+    }
+
+    connect()
+
+    // Return a proxy so callers can still call .send() and .close()
+    return {
+        send: (data) => socket?.readyState === WebSocket.OPEN && socket.send(data),
+        close: () => {
+            destroyed = true
+            clearTimeout(reconnectTimer)
+            socket?.close()
+        },
+        get readyState() { return socket?.readyState },
+    }
 }
-
