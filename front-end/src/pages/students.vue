@@ -927,11 +927,7 @@ watch(fixedWidthSoundCol, (newVal) => {
                     @click.stop="() => {
                       let barcode = makeCarcode(std);
                       let data = {message: 'কার্ডটি সফলভাবে পাঞ্চ হয়েছে।', source: 'manual_button', for_attendence: false};
-                      if(isIPAccess){
-                        sendRemoteAction({from: 'ip', action: 'call_punch__from_ip', data: {...data, barcode}})
-                      } else {
-                        punchToCallStudent(barcode, data)
-                      }
+                      punchToCallStudent(barcode, data)
                     } 
                     ">
                       <!-- For Guardian-->

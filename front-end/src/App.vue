@@ -87,8 +87,12 @@ watch(isUserActive, (bool) => {
 })
 
 const handleBeforeUnload = (event) => {
-    event.preventDefault()
-    event.returnValue = ''
+    if(!isIPAccess && !isUserActive.value){
+
+    } else {
+        event.preventDefault()
+        event.returnValue = ''
+    }
 }
 let switches_PreviewInHomePage = ref(localStorage.getItem('switches_PreviewInHomePage') === 'true' ? true : false)
 let borad_image_url = globalThis.GLOBAL_DATA?.env.BASE_URL + '/electric-board.png'
@@ -100,9 +104,10 @@ watch(switches_PreviewInHomePage, (bool) => {
     localStorage.setItem('switches_PreviewInHomePage', bool)
 })
 
+let _skipWattingListWatch = false
 watch(wattingList, (newWaittinglist) => {
     storage('wattingList').value = newWaittinglist
-    sendRemoteAction({from: 'localhost', action: 'update_waiting_list', newWaittinglist})
+    sendRemoteAction({from: 'localhost', action: 'update_waiting_list', data: newWaittinglist})
 }, {deep: true})
 
 watch(attendenceList, (newAttendenceList) => {
@@ -669,6 +674,10 @@ let is_connected_with_main_app = ref(false)
 provide('sendRemoteAction', sendRemoteAction)
 provide('is_connected_with_main_app', is_connected_with_main_app)
 
+function onToaster({ type, message, duration }) {
+    sendRemoteAction({ from: 'localhost', action: 'onToaster', data: { type, message, duration } })
+}
+
 function sendRemoteAction(
     {
         from='any', // ip | localhost
@@ -736,8 +745,8 @@ onMounted(async ()=>{
     
     await getAllStudents()
     await getSchedules() 
-
     await getConfig()
+
     if(CONFIG.value?.settings?.click_me_to_allow_sound?.status === false){
         document.body.classList.add('user-interacted')
     }
@@ -843,17 +852,20 @@ onMounted(async ()=>{
                 const el = document.querySelector(selector)
                 if(el) el.click()
             }
-            if(!isIPAccess && action === 'update_waiting_list'){
+            if(isIPAccess && action === 'update_waiting_list'){
                 wattingList.value = data || []
             }
             if(isIPAccess && action === 'is_active_main_user'){
                 main_app_user_is_active.value = data // boolean
             }
-            if(isIPAccess && action === 'update_watting_list'){
-                wattingList.value = data
-            }
             if(!isIPAccess && action === 'call_punch__from_ip'){
                 punchToCallStudent(data.barcode, {...data})
+            }
+            if(!isIPAccess && action === 'remote_toaster'){
+                punchToCallStudent(data.barcode, {...data})
+            }
+            if(!isIPAccess && action === 'reload'){
+                window.location.reload()
             }
         }
      })
@@ -889,6 +901,13 @@ function focusCurrenPlayingSoundCard_if_userIsInavtiveForFewSeconds(){
 
 function punchToCallStudent(barcode='play-417-2024', { message='', source='device', device_index=0 }={}){
     try {
+        
+        if(isIPAccess){
+            sendRemoteAction({from: 'ip', action: 'call_punch__from_ip', data: {barcode, message, source, device_index}})
+            return
+        }
+
+
         if(!is_started_schedule.value){
             emitter.emit('toaster-error', { message: 'switched is off'})
             return
@@ -1425,7 +1444,7 @@ onBeforeUnmount(() => {
     <!-- <SideBar>
         <routerView />
     </SideBar> -->
-    <Toaster></Toaster>
+    <Toaster @onToaster="onToaster"></Toaster>
     <template v-if="appUseForbiddened && appAccessData?.internet === true">
         <Lockscreen ref="LockscreenRef" @tryToUnlock="CheckAccess({loader: true})"></Lockscreen>
         <template v-if="true">
