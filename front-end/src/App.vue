@@ -102,7 +102,7 @@ watch(switches_PreviewInHomePage, (bool) => {
 
 watch(wattingList, (newWaittinglist) => {
     storage('wattingList').value = newWaittinglist
-    sendRemoteAction({from: 'localhost', action: 'update_waiting_list', data: wattingList.value })
+    sendRemoteAction({from: 'localhost', action: 'update_watting_list', newWaittinglist})
 }, {deep: true})
 
 watch(attendenceList, (newAttendenceList) => {
@@ -849,6 +849,12 @@ onMounted(async ()=>{
             if(isIPAccess && action === 'is_active_main_user'){
                 main_app_user_is_active.value = data // boolean
             }
+            if(isIPAccess && action === 'update_watting_list'){
+                wattingList.value = data
+            }
+            if(!isIPAccess && action === 'call_punch__from_ip'){
+                punchToCallStudent(data.barcode, {...data})
+            }
         }
      })
 
@@ -882,7 +888,6 @@ function focusCurrenPlayingSoundCard_if_userIsInavtiveForFewSeconds(){
 
 
 function punchToCallStudent(barcode='play-417-2024', { message='', source='device', device_index=0 }={}){
-    
     try {
         if(!is_started_schedule.value){
             emitter.emit('toaster-error', { message: 'switched is off'})

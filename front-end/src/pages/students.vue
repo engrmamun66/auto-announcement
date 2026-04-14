@@ -924,8 +924,18 @@ watch(fixedWidthSoundCol, (newVal) => {
                 <template v-if="CONFIG?.settings?.attendance?.status">
                   <template v-if="std.name.indexOf('Copied') > -1">
                     <button class="class-short-btn px-2 for-call" 
-                    @click.stop="punchToCallStudent(makeCarcode(std), {message: 'কার্ডটি সফলভাবে পাঞ্চ হয়েছে।', source: 'manual_button', for_attendence: false})">
-                      <!-- For Guardian -->
+                    @click.stop="() => {
+                      let barcode = makeCarcode(std);
+                      let data = {message: 'কার্ডটি সফলভাবে পাঞ্চ হয়েছে।', source: 'manual_button', for_attendence: false};
+                      if(isIPAccess){
+                        sendRemoteAction({from: 'ip', action: 'call_punch__from_ip', data: {...data, barcode}})
+                      } else {
+                        punchToCallStudent(barcode, data)
+                      }
+                    } 
+                    ">
+                      <!-- For Guardian-->
+                      <!-- Call Punch -->
                       Call&nbsp;Punch
                     </button>
                   </template> 

@@ -32,14 +32,17 @@ function close(){
     <Teleport to="body" >
         <!-- <div class="an-modal" v-if="modelValue" @click.stop="close()"> -->
         <div class="an-modal" v-if="modelValue" @click.stop="false">
-            <div class="modal__content fadeUp" @click.stop="false">
-                <slot name="title">
-                    <h3 v-if="title">{{title}}</h3> 
-                </slot>
-                <slot>
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Sapiente nihil assumenda voluptates voluptatem repellat cumque esse numquam quam soluta natus, deserunt facere maiores quos nobis similique, quis, nisi vel minus!
-                </slot> 
-                <a @click.stop.prevent="close()" class="modal__close" :class="{'closeIconInOutside': closeIconInOutside}" >×</a>
+            <div class="modal__wrapper">
+                <a v-if="closeIconInOutside" @click.stop.prevent="close()" class="modal__close modal__close--outside">×</a>
+                <div class="modal__content fadeUp" @click.stop="false">
+                    <slot name="title">
+                        <h3 v-if="title">{{title}}</h3>
+                    </slot>
+                    <slot>
+                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Sapiente nihil assumenda voluptates voluptatem repellat cumque esse numquam quam soluta natus, deserunt facere maiores quos nobis similique, quis, nisi vel minus!
+                    </slot>
+                    <a v-if="!closeIconInOutside" @click.stop.prevent="close()" class="modal__close">×</a>
+                </div>
             </div>
         </div>
     </Teleport>   
@@ -64,8 +67,7 @@ function close(){
 .modal__content {
   border-radius: 4px;
   position: relative;
-  width: 600px;
-  max-width: 95%;
+  width: 100%;
   background: #fff;
   padding: 1em 2em;
   max-height: 90vh;
@@ -90,6 +92,12 @@ function close(){
   }
 }
  
+.modal__wrapper {
+    position: relative;
+    width: 600px;
+    max-width: 95%;
+}
+
 .modal__close {
     position: absolute;
     top: 0px;
@@ -99,10 +107,16 @@ function close(){
     font-size: 24px;
     cursor: pointer;
 }
-.modal__close.closeIconInOutside {
+
+.modal__close--outside {
+    position: absolute;
     top: -32px;
-    color: white;
     right: 0px;
+    color: white;
+    text-decoration: none;
+    font-size: 28px;
+    cursor: pointer;
+    line-height: 1;
 }
 
 </style>
