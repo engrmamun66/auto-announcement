@@ -102,7 +102,7 @@ watch(switches_PreviewInHomePage, (bool) => {
 
 watch(wattingList, (newWaittinglist) => {
     storage('wattingList').value = newWaittinglist
-    sendRemoteAction({from: 'localhost', action: 'update_watting_list', newWaittinglist})
+    sendRemoteAction({from: 'localhost', action: 'update_waiting_list', newWaittinglist})
 }, {deep: true})
 
 watch(attendenceList, (newAttendenceList) => {
