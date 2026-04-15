@@ -60,6 +60,18 @@ const isIPAccess = inject('isIPAccess')
 let recorderLoaded = ref(false)
 let showPhoneModal = ref(false)
 let qrDataUrl = ref('')
+let copiedPhoneUrl = ref(false)
+
+function copyPhoneUrl({target}) {
+  target.setAttribute('tooltip', 'Copied')
+  navigator.clipboard.writeText(buildPhoneUrl()).then(() => {
+    copiedPhoneUrl.value = true
+    setTimeout(() => copiedPhoneUrl.value = false, 2000)
+    setTimeout(() => {
+      target.setAttribute('tooltip', 'Copy link')
+    }, 1500)
+  })
+}
 
 function buildPhoneUrl() {
   const ip = globalThis.GLOBAL_DATA?.env?.LOCAL_IP || 'localhost'
@@ -557,7 +569,15 @@ watch(fixedWidthSoundCol, (newVal) => {
       <h1>{{ !addMode ? 'Students' : 'Add Student'}}  </h1> 
 
       <div class="d-flex justify-content-end align-items-center flex-wrap gap-2">
-        <Btn v-if="!isIPAccess" class="me-2" style="background: #1565C0;" @click="openPhoneModal"><i class='bx bx-qr'></i> Open With Phone</Btn>
+        <div v-if="!isIPAccess" class="btn-group me-2" style="display:inline-flex;align-items:stretch;">
+
+          <Btn style="background: #1565C0;border-top-right-radius: 0px; border-bottom-right-radius: 0px;" @click="openPhoneModal"><i class='bx bx-qr'></i> Open With Phone</Btn>
+          <button class="btn" style="background:#005a4a;color:#fff;border-left:1px solid rgba(255,255,255,0.2);padding:0 12px;display:inline-flex;align-items:center;justify-content:center;"
+            tooltip="Copy link"
+            @click.prevent="copyPhoneUrl">
+            <i class="bx bx-link" style="pointer-events: none;"></i>
+          </button>
+        </div>
         <div v-if="appAccessData?.recorder_web_url" class="btn-group me-2" style="display:inline-flex;align-items:stretch;">
           <a v-if="isIPAccess" :href="appAccessData.recorder_web_url + `?code=${CONFIG?.env?.CODE_NUMBER}`" target="_blank" class="btn" style="background:#00796B;color:#fff;">
             <i class='bx bx-microphone'></i> Recorder
@@ -567,8 +587,8 @@ watch(fixedWidthSoundCol, (newVal) => {
           </Btn>
           <button class="btn" style="background:#005a4a;color:#fff;border-left:1px solid rgba(255,255,255,0.2);padding:0 12px;display:inline-flex;align-items:center;justify-content:center;"
             tooltip="Copy link"
-            @click.prevent="copyRecorderUrl">
-            <i class="bx bx-link"></i>
+            @click.prevent.stop="copyRecorderUrl">
+            <i class="bx bx-link" style="pointer-events: none;"></i>
           </button>
         </div>
         <Btn class="me-2" style="background: #673AB7;">Total: <span class="bg-success p-3">{{ all_students_non_copied?.length }}</span> / <span>{{ params?.total || '0' }}</span></Btn>
@@ -1023,13 +1043,18 @@ watch(fixedWidthSoundCol, (newVal) => {
 
     <!-- Open With Phone Modal -->
     <modal v-if="showPhoneModal" title="Open With Phone" @close="showPhoneModal = false">
-      <div class="text-center p-3">
-        <p class="mb-1" style="font-size:13px;opacity:.7;">Scan this QR code with your phone <span><a :href="buildPhoneUrl()" target="_blank">Open URL</a></span></p>
-        <!-- <p class="mb-3" style="font-size:12px;font-family:monospace;">{{ buildPhoneUrl() }}</p> -->
-         
-        <img v-if="qrDataUrl" :src="qrDataUrl" style="width:220px;height:220px;" />
-        <div v-else style="width:220px;height:220px;display:inline-flex;align-items:center;justify-content:center;">
-          <div class="recorder-spinner"></div>
+      <div class="phone-modal">
+        <div class="phone-modal__qr">
+          <img v-if="qrDataUrl" :src="qrDataUrl" />
+          <div v-else class="phone-modal__qr-spinner"><div class="recorder-spinner"></div></div>
+        </div>
+        <p class="phone-modal__hint"><i class='bx bx-scan'></i> Point your phone camera at the QR code to open the app</p>
+        <div class="phone-modal__url-row">
+          <a :href="buildPhoneUrl()" target="_blank" class="phone-modal__url">{{ buildPhoneUrl() }}</a>
+          <button @click="copyPhoneUrl" class="phone-modal__copy-btn" :class="{ 'phone-modal__copy-btn--copied': copiedPhoneUrl }">
+            <i :class="copiedPhoneUrl ? 'bx bx-check' : 'bx bx-copy'"></i>
+            {{ copiedPhoneUrl ? 'Copied!' : 'Copy' }}
+          </button>
         </div>
       </div>
     </modal>
@@ -1131,6 +1156,90 @@ watch(fixedWidthSoundCol, (newVal) => {
 @keyframes recorder-spin {
   to { transform: rotate(360deg); }
 }
+
+/* Phone Modal */
+.phone-modal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 0 4px;
+}
+.phone-modal__qr {
+  width: 220px;
+  height: 220px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f9fafb;
+}
+.phone-modal__qr img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.phone-modal__qr-spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.phone-modal__qr-spinner .recorder-spinner {
+  border-color: rgba(0,0,0,0.1);
+  border-top-color: #4a6fa5;
+}
+.phone-modal__hint {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.phone-modal__hint .bx {
+  font-size: 16px;
+  color: #4a6fa5;
+}
+.phone-modal__url-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.phone-modal__url {
+  flex: 1;
+  font-size: 12px;
+  font-family: monospace;
+  color: #374151;
+  padding: 8px 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-decoration: none;
+}
+.phone-modal__url:hover { text-decoration: underline; }
+.phone-modal__copy-btn {
+  flex-shrink: 0;
+  border: none;
+  border-left: 1px solid #e5e7eb;
+  background: #fff;
+  color: #374151;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: background 0.15s;
+}
+.phone-modal__copy-btn:hover { background: #f9fafb; }
+.phone-modal__copy-btn--copied { color: #16a34a; }
 .recorder-overlay__close {
   position: absolute;
   top: 10px;

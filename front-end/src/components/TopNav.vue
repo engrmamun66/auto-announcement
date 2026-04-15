@@ -30,11 +30,15 @@
         </RouterLink>
       </template>
       <template v-if="CONFIG?.settings?.attendance?.status">
-        <RouterLink id="nav-link-attendence" :to="{name: 'attendence', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active attendence-tab': route.name === 'attendence'}" @click="sendRemoteAction({from: 'ip', action: 'onClick', selector: '#nav-link-attendence'})">
+        <RouterLink id="nav-link-attendence" :to="{name: 'attendence', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active attendence-tab': route.name === 'attendence'}" 
+        @click="sendRemoteAction({from: 'ip', action: 'onClick', selector: '#nav-link-attendence'})"
+        @dblclick.prevent="show_bulk_attedance_component = true" >
           <i class='bx bx-user-pin pre-icon'></i> Attendence
         </RouterLink>
       </template>
-      <RouterLink id="nav-link-students" :to="{name: 'students', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active students-tab': route.name === 'students'}" @click="sendRemoteAction({from: 'ip', action: 'onClick', selector: '#nav-link-students'})">
+      <RouterLink id="nav-link-students" :to="{name: 'students', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active students-tab': route.name === 'students'}" 
+        @click="sendRemoteAction({from: 'ip', action: 'onClick', selector: '#nav-link-students'})"
+        @dblclick.prevent="show_cloner_component = true" >
         <i class='bx bxs-user pre-icon'></i> Students
       </RouterLink>
       <RouterLink id="nav-link-shedules" :to="{name: 'shedules', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active': route.name === 'shedules'}" @click="sendRemoteAction({from: 'ip', action: 'onClick', selector: '#nav-link-shedules'})">
@@ -43,7 +47,9 @@
       <RouterLink id="nav-link-import" :to="{name: 'import', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active': route.name === 'import'}" @click="sendRemoteAction({from: 'ip', action: 'onClick', selector: '#nav-link-import'})">
         <i class='bx bxs-file-import pre-icon' ></i> Import
       </RouterLink>
-      <RouterLink id="nav-link-contact" :to="{name: 'ContactUs', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active': route.name === 'ContactUs'}" @click="sendRemoteAction({from: 'ip', action: 'onClick', selector: '#nav-link-contact'})">
+      <RouterLink id="nav-link-contact" :to="{name: 'ContactUs', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active': route.name === 'ContactUs'}" 
+        @click="sendRemoteAction({from: 'ip', action: 'onClick', selector: '#nav-link-contact'})"
+         >
         Contact
       </RouterLink>
 
@@ -155,7 +161,7 @@ onMounted(()=>{
   flex-wrap: wrap;
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 10;
 }
 
 .topnav .pre-icon{
