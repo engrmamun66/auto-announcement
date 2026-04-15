@@ -107,7 +107,7 @@ watch(switches_PreviewInHomePage, (bool) => {
 let _skipWattingListWatch = false
 watch(wattingList, (newWaittinglist) => {
     storage('wattingList').value = newWaittinglist
-    sendRemoteAction({from: 'localhost', action: 'update_waiting_list', data: newWaittinglist, localhostHost: window.location.host})
+    sendRemoteAction({from: 'localhost', action: 'update_waiting_list', data: newWaittinglist, host_name: window.location.host})
 }, {deep: true})
 
 watch(attendenceList, (newAttendenceList) => {
@@ -684,13 +684,14 @@ function sendRemoteAction(
         action='say_hi',
         selector = null,
         data = null, 
+        host_name = null, 
     } = {}
 ){
     try {
         if(!Socket.value) return 
         let SOCKET = Socket.value
 
-        let __data = { type: 'remote_action', action, selector, data }
+        let __data = { type: 'remote_action', action, selector, data, host_name }
 
         if(from == 'any' || (from == 'ip' && isIPAccess) || (from == 'localhost' && !isIPAccess)){
 
@@ -853,13 +854,14 @@ onMounted(async ()=>{
                 if(el) el.click()
             }
             if(isIPAccess && action === 'update_waiting_list'){
-                let { localhostHost } = socket_data
+                let { host_name } = socket_data
                 let _data = (data || []).map(item => {
                     if(item.sound1){
-                        item.sound1 = String(item.sound1).replace(localhostHost, window.location.host)
+                        item.sound1 = String(item.sound1).replace(host_name, window.location.host)
                     }
                     return item
                 })
+                console.log({_data});
                 wattingList.value = _data
             }
             if(isIPAccess && action === 'is_active_main_user'){
