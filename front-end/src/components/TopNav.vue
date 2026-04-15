@@ -240,6 +240,9 @@ onMounted(()=>{
 }
 
 @media screen and (max-width: 960px) {
+  .topnav__logo{
+    width: 140px !important;
+  }
   .topnav{
     padding: 10px 12px;
   }

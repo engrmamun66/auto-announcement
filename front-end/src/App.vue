@@ -854,12 +854,13 @@ onMounted(async ()=>{
             }
             if(isIPAccess && action === 'update_waiting_list'){
                 let { localhostHost } = socket_data
-                wattingList.value = (data || []).map(item => {
+                let _data = (data || []).map(item => {
                     if(item.sound1){
                         item.sound1 = String(item.sound1).replace(localhostHost, window.location.host)
                     }
                     return item
                 })
+                wattingList.value = _data
             }
             if(isIPAccess && action === 'is_active_main_user'){
                 main_app_user_is_active.value = data // boolean
