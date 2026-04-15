@@ -107,7 +107,7 @@ watch(switches_PreviewInHomePage, (bool) => {
 let _skipWattingListWatch = false
 watch(wattingList, (newWaittinglist) => {
     storage('wattingList').value = newWaittinglist
-    sendRemoteAction({from: 'localhost', action: 'update_waiting_list', data: newWaittinglist})
+    sendRemoteAction({from: 'localhost', action: 'update_waiting_list', data: newWaittinglist, localhostHost: window.location.host})
 }, {deep: true})
 
 watch(attendenceList, (newAttendenceList) => {
@@ -853,7 +853,13 @@ onMounted(async ()=>{
                 if(el) el.click()
             }
             if(isIPAccess && action === 'update_waiting_list'){
-                wattingList.value = data || []
+                let { localhostHost } = socket_data
+                wattingList.value = (data || []).map(item => {
+                    if(item.sound1){
+                        item.sound1 = String(item.sound1).replace(localhostHost, window.location.host)
+                    }
+                    return item
+                })
             }
             if(isIPAccess && action === 'is_active_main_user'){
                 main_app_user_is_active.value = data // boolean
