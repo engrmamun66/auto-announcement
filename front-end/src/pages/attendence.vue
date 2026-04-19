@@ -338,7 +338,7 @@ onMounted(()=>{
 
     </div>
 
-    <!-- <h1>Tab: {{ tab }}</h1> -->
+    <!-- <h1>debug::Tab: {{ tab }}</h1> -->
   
     <template v-if="tab == 1">
         <RealtimeAttendences ></RealtimeAttendences>
