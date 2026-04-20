@@ -22,17 +22,29 @@ let helper = {
             }
     },        
     getQuery: function(param='', url = globalThis.location.href){        
-        const currentUrl = new URL(url);            
-        if(param){
-            return currentUrl.searchParams.get(param);
+        const currentUrl = new URL(url);
+
+        // Extract query from hash if exists
+        let search = currentUrl.search;
+
+        if (!search && currentUrl.hash.includes('?')) {
+            search = currentUrl.hash.split('?')[1];
         } else {
-            const urlParams = new URLSearchParams(globalThis.location.search);
-            const paramObj = {};
-            for(var value of urlParams.keys()) {
-                paramObj[value] = urlParams.get(value);
-            }
-            return paramObj;
+            search = search.replace(/^\?/, '');
         }
+
+        const urlParams = new URLSearchParams(search);
+
+        if (param) {
+            return urlParams.get(param);
+        }
+
+        const paramObj = {};
+        for (const key of urlParams.keys()) {
+            paramObj[key] = urlParams.get(key);
+        }
+
+        return paramObj;
     },
 }
 
