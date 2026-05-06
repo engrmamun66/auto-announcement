@@ -591,7 +591,8 @@ watch(fixedWidthSoundCol, (newVal) => {
             <i class="bx bx-link" style="pointer-events: none;"></i>
           </button>
         </div>
-        <Btn class="me-2" style="background: #673AB7;">Total: 
+        <Btn class="me-2" style="background: #673AB7;" :tooltip="`params.total = ${params?.total}`" >
+          Total: 
           <span class="bg-success- p-1">{{ all_students_non_copied?.length }}</span>
            <!-- <span>{{ params?.total || '0' }}</span> -->
         </Btn>
