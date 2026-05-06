@@ -95,16 +95,27 @@ async function create_zip_with_latest_code({zip_for_setup_in_new_pc=false}={}) {
   try {
     const directories = [];
     const files = [];
+
+
+    // files.push({
+    //     src: path.join(__dirname, "front-end/dist/assets/my-announcement.min.css"),
+    //     dest: "front-end/dist/assets/my-announcement.min.css"
+    // });
+    // files.push({
+    //     src: path.join(__dirname, "front-end/dist/assets/my-announcement.min.js"),
+    //     dest: "front-end/dist/assets/my-announcement.min.js"
+    // });
  
 
-    files.push({
-        src: path.join(__dirname, "front-end/dist/assets/my-announcement.min.css"),
-        dest: "front-end/dist/assets/my-announcement.min.css"
-    });
-    files.push({
-        src: path.join(__dirname, "front-end/dist/assets/my-announcement.min.js"),
-        dest: "front-end/dist/assets/my-announcement.min.js"
-    });
+    const assetsDir = path.join(__dirname, "front-end/dist/assets");
+    if (fs.existsSync(assetsDir)) {
+      fs.readdirSync(assetsDir).forEach(file => {
+        files.push({
+          src: path.join(assetsDir, file),
+          dest: `front-end/dist/assets/${file}`
+        });
+      });
+    }
 
     if(zip_for_setup_in_new_pc){
       directories.push(path.join(__dirname, "database"));
