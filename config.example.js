@@ -17,7 +17,7 @@ const SHIFTS = {
      },
 }
 
-const default_config = {
+module.exports = {
      env: {
           PORT: port_number,
           SOCKET_PORT: 2424,
@@ -40,7 +40,7 @@ const default_config = {
           // #Front End variables
           BASE_URL: `http://localhost:${port_number}`,
           API_BASE_URL: `http://localhost:${port_number}/api`,
-          DEVICE_API_BASE_URL: 'http://127.0.0.1:8081/',
+          DEVICE_API_BASE_URL: 'http://127.0.0.1:2323/',
 
      },
      settings: {
@@ -341,14 +341,5 @@ const default_config = {
      ]
 
 }
-
-
-module.exports = {
-     ...default_config,
-     /**
-      * ==== connect [client config, included database] ======
-      */ 
-     // ...require('./../clients-configs/DHM101.config')
-}
-
+ 
 
