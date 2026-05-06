@@ -811,17 +811,18 @@ watch(fixedWidthSoundCol, (newVal) => {
               </select>
             </div>
           </div>
-          <div class="col-md-12 mt-2">
+          <div class="col-md-12 mt-4 mt-md-2">
             <div class="form-group mt-md-3"> 
                 <div class="d-flex">
                   <Btn @click.stop="getStudents()" class="me-1"></Btn> 
                   <Btn @click.stop="clearParams();getStudents();editModeTabIndex=1" class="me-1 red">Clear</Btn> 
+                  <!-- add bulk punch button -->
                 </div>
               </div>
             </div>
           </div>
 
-          <div class="col-12 mt-4 w-100 all-class-buttons-to-filter-area">
+          <div class="col-12 mt-4 w-100 all-class-buttons-to-filter-area d-none d-md-block">
             <div class="all-class-buttons-to-filter">
               <template v-for="cls in classes">
                 <button class="class-short-btn" :class="{'active': params.class_name === cls.class_name}" var="cls?.display_name || cls.class_short" 
