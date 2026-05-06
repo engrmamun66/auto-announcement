@@ -625,6 +625,7 @@ watch(fixedWidthSoundCol, (newVal) => {
            <!-- <span>{{ params?.total || '0' }}</span> -->
         </Btn>
         <Btn v-if="!addMode" class="me-2" @click="addMode = !addMode;editModeTabIndex=1;clearParams();payload.id = null" ><i class='bx bx-plus'></i> Add New</Btn>
+        <Btn @click.stop="bulkPunch()" style="background: #673AB7;" :disabled="!PunchButtonsRef?.length">Bulk Punch ({{ PunchButtonsRef?.length || 0 }})</Btn>
       </div>
     </div>
 
@@ -846,7 +847,7 @@ watch(fixedWidthSoundCol, (newVal) => {
                     <Btn @click.stop="getStudents()" class="me-1"></Btn>
                     <Btn @click.stop="clearParams();getStudents();editModeTabIndex=1" class="me-1 red">Clear</Btn>
                   </div>
-                  <Btn @click.stop="bulkPunch()" style="background: #673AB7;" :disabled="!PunchButtonsRef?.length">Bulk Punch ({{ PunchButtonsRef?.length || 0 }})</Btn>
+                  
                 </div>
               </div>
             </div>
@@ -1096,7 +1097,7 @@ watch(fixedWidthSoundCol, (newVal) => {
 
     <!-- Bulk Punch Modal -->
     <modal v-if="showBulkPunchModal" title="Bulk Punch" @close="!bulkPunchRunning && (showBulkPunchModal = false)" :close-on-esc="!bulkPunchRunning" :close-on-click-away="false">
-      <div class="p-3">
+      <div>
         <p class="mb-3">Punch <strong>{{ PunchButtonsRef?.length }}</strong> displayed students?</p>
 
         <template v-if="bulkPunchRunning || bulkPunchDone">
