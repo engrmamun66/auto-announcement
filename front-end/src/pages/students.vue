@@ -555,6 +555,34 @@ function onClickAttendance(std){
   punchToSubmitAttendance(makeCarcode(std), {source: 'manual_button', delay: 0})
 }
 
+let PunchButtonsRef = ref([])
+let showBulkPunchModal = ref(false)
+let bulkPunchProgress = ref(0)
+let bulkPunchRunning = ref(false)
+let bulkPunchDone = ref(false)
+
+function bulkPunch() {
+  if (!PunchButtonsRef.value?.length) return;
+  bulkPunchProgress.value = 0;
+  bulkPunchRunning.value = false;
+  bulkPunchDone.value = false;
+  showBulkPunchModal.value = true;
+}
+
+async function startBulkPunch() {
+  if (bulkPunchRunning.value) return;
+  bulkPunchRunning.value = true;
+  bulkPunchDone.value = false;
+  const buttons = [...PunchButtonsRef.value];
+  for (let i = 0; i < buttons.length; i++) {
+    buttons[i].click();
+    bulkPunchProgress.value = Math.round(((i + 1) / buttons.length) * 100);
+    await new Promise(r => setTimeout(r, 300));
+  }
+  bulkPunchRunning.value = false;
+  bulkPunchDone.value = true;
+}
+
 let fixedWidthSoundCol = ref(Boolean(sessionStorage.getItem('fixedWidthSoundCol_students') === 'true'))
 watch(fixedWidthSoundCol, (newVal) => {
   sessionStorage.setItem('fixedWidthSoundCol_students', String(newVal))
@@ -813,10 +841,12 @@ watch(fixedWidthSoundCol, (newVal) => {
           </div>
           <div class="col-md-12 mt-4 mt-md-2">
             <div class="form-group mt-md-3"> 
-                <div class="d-flex">
-                  <Btn @click.stop="getStudents()" class="me-1"></Btn> 
-                  <Btn @click.stop="clearParams();getStudents();editModeTabIndex=1" class="me-1 red">Clear</Btn> 
-                  <!-- add bulk punch button -->
+                <div class="d-flex justify-content-between w-100">
+                  <div>
+                    <Btn @click.stop="getStudents()" class="me-1"></Btn>
+                    <Btn @click.stop="clearParams();getStudents();editModeTabIndex=1" class="me-1 red">Clear</Btn>
+                  </div>
+                  <Btn @click.stop="bulkPunch()" style="background: #673AB7;" :disabled="!PunchButtonsRef?.length">Bulk Punch ({{ PunchButtonsRef?.length || 0 }})</Btn>
                 </div>
               </div>
             </div>
@@ -948,7 +978,7 @@ watch(fixedWidthSoundCol, (newVal) => {
               <td>
                 <template v-if="CONFIG?.settings?.attendance?.status">
                   <template v-if="std.name.indexOf('Copied') > -1">
-                    <button class="class-short-btn px-2 for-call" 
+                    <button ref="PunchButtonsRef" class="class-short-btn px-2 for-call" 
                     @click.stop="() => {
                       let barcode = makeCarcode(std);
                       let data = {message: 'কার্ডটি সফলভাবে পাঞ্চ হয়েছে।', source: 'manual_button', for_attendence: false};
@@ -990,7 +1020,7 @@ watch(fixedWidthSoundCol, (newVal) => {
                   </template> 
                 </template> 
                 <template v-else>
-                  <button class="class-short-btn px-2" @click.stop="punchToCallStudent(makeCarcode(std), {message: 'কার্ডটি সফলভাবে পাঞ্চ হয়েছে।', source: 'manual_button'})">
+                  <button ref="PunchButtonsRef" class="class-short-btn px-2" @click.stop="punchToCallStudent(makeCarcode(std), {message: 'কার্ডটি সফলভাবে পাঞ্চ হয়েছে।', source: 'manual_button'})">
                     Punch
                   </button>
                 </template> 
@@ -1061,6 +1091,33 @@ watch(fixedWidthSoundCol, (newVal) => {
             {{ copiedPhoneUrl ? 'Copied!' : 'Copy' }}
           </button>
         </div>
+      </div>
+    </modal>
+
+    <!-- Bulk Punch Modal -->
+    <modal v-if="showBulkPunchModal" title="Bulk Punch" @close="!bulkPunchRunning && (showBulkPunchModal = false)" :close-on-esc="!bulkPunchRunning" :close-on-click-away="false">
+      <div class="p-3">
+        <p class="mb-3">Punch <strong>{{ PunchButtonsRef?.length }}</strong> displayed students?</p>
+
+        <template v-if="bulkPunchRunning || bulkPunchDone">
+          <div class="mb-2 d-flex justify-content-between">
+            <small>{{ bulkPunchDone ? 'Done!' : 'Punching...' }}</small>
+            <small>{{ bulkPunchProgress }}%</small>
+          </div>
+          <div class="progress mb-3" style="height:10px">
+            <div class="progress-bar" :class="bulkPunchDone ? 'bg-success' : 'bg-primary'" role="progressbar"
+              :style="{width: bulkPunchProgress + '%'}" :aria-valuenow="bulkPunchProgress" aria-valuemin="0" aria-valuemax="100">
+            </div>
+          </div>
+          <Btn v-if="bulkPunchDone" class="w-100" @click="showBulkPunchModal = false">Close</Btn>
+        </template>
+
+        <template v-else>
+          <div class="d-flex gap-2">
+            <Btn class="red flex-fill" @click="showBulkPunchModal = false">Cancel</Btn>
+            <Btn class="green flex-fill" @click="startBulkPunch()">Start Punch</Btn>
+          </div>
+        </template>
       </div>
     </modal>
 
