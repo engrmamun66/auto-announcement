@@ -649,11 +649,13 @@ async function getAllStudents(){
        all_students.value = data
 
        if(attendanceAllowed){
-        if(allowOnlyAttendance){
-            all_students_non_copied.value = data // allow attendance for all students
+            if(allowOnlyAttendance){
+                all_students_non_copied.value = data // allow attendance for all students
+            } else {
+                all_students_non_copied.value = no_copied_students // else, only permit the non-copied/real students
+            }
         } else {
-            all_students_non_copied.value = no_copied_students // else, only permit the non-copied/real students
-        }
+            all_students_non_copied.value = no_copied_students
        }
      }
    }).finally(()=>{

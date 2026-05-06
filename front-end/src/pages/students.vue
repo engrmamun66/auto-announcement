@@ -591,7 +591,10 @@ watch(fixedWidthSoundCol, (newVal) => {
             <i class="bx bx-link" style="pointer-events: none;"></i>
           </button>
         </div>
-        <Btn class="me-2" style="background: #673AB7;">Total: <span class="bg-success p-3">{{ all_students_non_copied?.length }}</span> / <span>{{ params?.total || '0' }}</span></Btn>
+        <Btn class="me-2" style="background: #673AB7;">Total: 
+          <span class="bg-success- p-1">{{ all_students_non_copied?.length }}</span>
+           <!-- <span>{{ params?.total || '0' }}</span> -->
+        </Btn>
         <Btn v-if="!addMode" class="me-2" @click="addMode = !addMode;editModeTabIndex=1;clearParams();payload.id = null" ><i class='bx bx-plus'></i> Add New</Btn>
       </div>
     </div>
