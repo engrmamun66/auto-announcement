@@ -7,6 +7,9 @@
  *   4. Open the URL printed in terminal → Allow → copy the code
  *   5. Paste code when prompted → refresh_token will be printed
  *   6. Copy refresh_token → paste into src/zipper/drive-config.js
+ *   GO: https://console.cloud.google.com/auth/clients/1007948709664-2en05iifj11s2vmmqvk8ar0g4g8v0n6a.apps.googleusercontent.com?project=announcment-466023
+ *   To add user
+ *   GO: https://console.cloud.google.com/auth/audience?project=announcment-466023
  */
 
 const { google } = require('googleapis');
