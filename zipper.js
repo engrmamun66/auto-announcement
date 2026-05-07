@@ -34,7 +34,7 @@ const has_drive_config = fs.existsSync(path.join(__dirname, 'src/zipper/drive-co
     console.log('║  [c]  Create Latest ZIP              ║');
     console.log('║  [t]  Create Temporaty Zip           ║');
     console.log('║  [n]  Create ZIP - For New Customer  ║');
-    console.log('║  [dd]  Donwnload - Lates Zip.        ║');
+    console.log('║  [dd]  Donwnload - Latest Zip.       ║');
     console.log('║  [dt]  Donwnload - Temp Zip.         ║');
     if(has_drive_config){
     console.log('║  [g]  Upload to Google Drive         ║');
