@@ -43,7 +43,6 @@ function ask(question) {
     console.log('║  [c]  Create ZIP                     ║');
     console.log('║  [g]  Upload to Google Drive         ║');
     console.log('║  [d]  Download from Google Drive     ║');
-    console.log('║  [u]  Upload to Server               ║');
     console.log('╚══════════════════════════════════════╝');
     const create = await ask('\n  → Choose option: ');
     if(create.toLowerCase() === "c"){
@@ -54,32 +53,7 @@ function ask(question) {
     } else if(create.toLowerCase() === "d"){
         downloadFromGoogleDrive()
     } else {
-      console.log('===== Uploading Latest Code to Server =====');
-        // const username = await ask("Enter username: ");
-        // const password = await ask("Enter password: ");
-        // if(!username) {
-        //     console.log("❌ Username is required")
-        //     return
-        // }
-        // if(!password) {
-        //     console.log("❌ Password is required")
-        //     return
-        // }
-        // let server_api_url = PRIMARY_SERVER
-        // console.log('PRIMARY_SERVER:: ', PRIMARY_SERVER);
-        // const server = await ask("Which Server(l/p)? ");
-        // if(!server || server.toLowerCase() === "l"){
-        //     server_api_url = PRIMARY_SERVER_LOCAL
-        // } else {
-        //     server_api_url = PRIMARY_SERVER
-        // }
-
-
-        let username = 'mamun'
-        let password = 'xasdf'
-        server_api_url = PRIMARY_SERVER_LOCAL
-
-        uploadLatestZopToServer({server_api_url, username, password}) 
+        console.log('❌ Invalid option.');
     }
   })();
 
