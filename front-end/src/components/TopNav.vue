@@ -77,7 +77,7 @@
           <span tooltip="Clone Students" flow="left">Clone</span>
         </span>
         <span class="border cp me-0 text-white px-1 size-08" @click.prevent.stop="getTemporaryZip">
-          <span tooltip="calling-bird-latest-debug-temp.zip" flow="left">Get</span>
+          <span tooltip="Temporary update" flow="left">Temp</span>
         </span>
       </div>
     </nav>
@@ -105,7 +105,6 @@ import { ref, inject, computed, onMounted, watch, onBeforeUnmount } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 import Btn from './Btn.vue'
 import cloneStudents from './cloneStudents.vue'
-
 
 let logoEl = ref(null)
 let logo_wrapper = ref(null)
@@ -174,7 +173,7 @@ async function triggerUpdate() {
 async function getTemporaryZip() {
     updateDone.value = false;
     try {
-        await http.get('/update-app');
+        await http.get('/update-app', { params: { debug_mode: true}});
         updateDone.value = true;
         allow_to_reaload.value = true;
         emitter.emit('toaster-success', { message: 'Update successful. Restarting...', duration: 0 });
