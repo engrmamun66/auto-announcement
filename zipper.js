@@ -96,8 +96,10 @@ const { ZIP_LATEST, ZIP_TEMP, ZIP_NEW_SETUP, encodeAndWrite, decodeAndWrite } = 
         delelteFile(ZIP_NEW_SETUP)
 
         if(has_drive_config){
-            // Read file content if contain 'DELETE_REQUIRED', then run  delelteFile('src/zipper/drive-config.js')
-            
+            const driveConfigContent = fs.readFileSync(path.join(__dirname, 'src/zipper/drive-config.js'), 'utf8');
+            if(driveConfigContent.includes('DELETE_REQUIRED')){
+                delelteFile('src/zipper/drive-config.js');
+            }
         }
     }
     else {
