@@ -37,10 +37,12 @@ function ask(question) {
   }
   
   (async () => {
-    const create = await ask("Create or Upload zip (c/u)? ");
+    const create = await ask("Create(c) / Upload to server(u) / Upload to Google Drive(g)? ");
     if(create.toLowerCase() === "c"){
         const zip_for_setup_in_new_pc = await ask("Zip for setup in new PC (y/n): ");
         create_zip_with_latest_code({zip_for_setup_in_new_pc: zip_for_setup_in_new_pc === 'y'})
+    } else if(create.toLowerCase() === "g"){
+        uploadToGoogleDrive()
     } else {
       console.log('===== Uploading Latest Code to Server =====');
         // const username = await ask("Enter username: ");
@@ -119,7 +121,15 @@ async function create_zip_with_latest_code({zip_for_setup_in_new_pc=false}={}) {
 
     if(zip_for_setup_in_new_pc){
       directories.push(path.join(__dirname, "database"));
-      directories.push(path.join(__dirname, "public"));
+      const publicDir = path.join(__dirname, "public");
+      if (fs.existsSync(publicDir)) {
+        fs.readdirSync(publicDir).forEach(file => {
+          const fullPath = path.join(publicDir, file);
+          if (fs.statSync(fullPath).isFile()) {
+            files.push({ src: fullPath, dest: `public/${file}` });
+          }
+        });
+      }
 
     } else {
       files.push({
@@ -233,6 +243,52 @@ async function uploadLatestZopToServer({server_api_url=PRIMARY_SERVER, username,
         } 
     } catch (err) {
       console.error("❌ uploadLatestZopToServer error3:", err);
+    }
+}
+
+// ===== Google Drive credentials (fill in per machine) =====
+const GDRIVE_CLIENT_ID     = '1007948709664-qhdf7mhmd8g4mhr6gqumu98d0pldsl1v.apps.googleusercontent.com';
+const GDRIVE_CLIENT_SECRET = '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';
+const GDRIVE_REFRESH_TOKEN = '1//0gHLsoFNhMoX-CgYIARAAGBASNwF-L9IroRBfAZeD74kifG49059lm3m7hdGvp0CdaTN9mfw4VMCLB7HG2Nlm-h4wt691AhUkvdQ';
+const GDRIVE_FOLDER_ID     = '1_RO1kcAVIQPAQan_46mX8detzJnznZ5p';
+// ==========================================================
+
+async function uploadToGoogleDrive() {
+    try {
+        const { google } = require('googleapis');
+        if (GDRIVE_REFRESH_TOKEN === 'YOUR_REFRESH_TOKEN') {
+            console.error('❌ Fill in GDRIVE credentials in zipper.js');
+            return;
+        }
+
+        const auth = new google.auth.OAuth2(GDRIVE_CLIENT_ID, GDRIVE_CLIENT_SECRET);
+        auth.setCredentials({ refresh_token: GDRIVE_REFRESH_TOKEN });
+
+        const drive = google.drive({ version: 'v3', auth });
+        const zipPath = path.resolve('calling-bird-latest.zip');
+
+        if (!fs.existsSync(zipPath)) {
+            console.error('❌ calling-bird-latest.zip not found. Create it first (c).');
+            return;
+        }
+
+        console.log('📤 Uploading to Google Drive...');
+        const response = await drive.files.create({
+            requestBody: {
+                name: 'calling-bird-latest.zip',
+                parents: [GDRIVE_FOLDER_ID],
+            },
+            media: {
+                mimeType: 'application/zip',
+                body: fs.createReadStream(zipPath),
+            },
+            fields: 'id, name, webViewLink',
+        });
+
+        console.log('✅ Uploaded:', response.data.name);
+        console.log('🔗 Link:', response.data.webViewLink);
+    } catch (err) {
+        console.error('❌ uploadToGoogleDrive error:', err.message);
     }
 }
 
