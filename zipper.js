@@ -24,6 +24,8 @@ function ask(question) {
     return new Promise(resolve => rl.question(question, ans => { rl.close(); resolve(ans); }));
 }
 
+const has_drive_config = fs.existsSync(path.join(__dirname, 'src/zipper/drive-config.js'))
+
 (async () => {
     console.log('\n╔══════════════════════════════════════╗');
     console.log('║       🐦 Calling Bird Zipper         ║');
@@ -31,9 +33,11 @@ function ask(question) {
     console.log('║  [c]  Create Latest ZIP              ║');
     console.log('║  [t]  Create Temporaty Zip           ║');
     console.log('║  [n]  Create ZIP - For New Customer  ║');
+    if(has_drive_config){
     console.log('║  [g]  Upload to Google Drive         ║');
     console.log('║  [d]  Download from Google Drive     ║');
     console.log('╚══════════════════════════════════════╝');
+    }
 
     const choice = await ask('\n  → Choose option: ');
     let char = choice.toLowerCase()
