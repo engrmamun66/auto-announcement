@@ -2,11 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const unzipper = require('unzipper');
 
-/**
- * Unzip a zip file and overwrite files into the destination directory.
- * @param {string} zipPath   - Path to zip file (default: calling-bird-latest.zip)
- * @param {string} destDir   - Destination directory (default: project root)
- */
+ 
 async function unzipAndOverwrite(
     zipPath = path.resolve('calling-bird-latest.zip'),
     destDir = path.resolve('.')
