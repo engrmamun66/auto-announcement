@@ -24,7 +24,7 @@ function ask(question) {
     return new Promise(resolve => rl.question(question, ans => { rl.close(); resolve(ans); }));
 }
 
-const has_drive_config = fs.existsSync(path.join(__dirname, 'src/zipper/drive-config.js'))
+const has_drive_config = fs.existsSync(path.join(__dirname, 'src/zipper/drive-config.js'));
 
 (async () => {
     console.log('\n╔══════════════════════════════════════╗');
@@ -36,6 +36,8 @@ const has_drive_config = fs.existsSync(path.join(__dirname, 'src/zipper/drive-co
     if(has_drive_config){
     console.log('║  [g]  Upload to Google Drive         ║');
     console.log('║  [d]  Download from Google Drive     ║');
+    console.log('╚══════════════════════════════════════╝');
+    } else {
     console.log('╚══════════════════════════════════════╝');
     }
 
