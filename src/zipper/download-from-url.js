@@ -2,19 +2,16 @@ const fs = require('fs');
 const path = require('path');
 const https = require('https');
 const http = require('http');
+const { ZIP_LATEST, ZIP_TEMP } = require('./zip-names');
 
-/**
- * Download a file from a URL (supports Google Drive direct download links).
- * @param {string} url - Direct download URL
- * @param {string} destPath - Local path to save the file (default: calling-bird-latest.zip)
- */
-async function downloadFromUrl(debug_file=false) {
+ 
+async function downloadFromUrl(debug_file=false, zipFilename=ZIP_LATEST) {
 
-    const url = debug_file 
-                    ? "https://drive.google.com/uc?id=1ISeHzAjp-k65KURIEUDifPP8_ImZrbnr&export=download" // calling-bird-latest-debug-temp.zip
-                    : "https://drive.google.com/uc?id=1LmBlo7XrQDlbwMvAJDtuoJy8U1QkGc_8&export=download" // calling-bird-latest.zip
+    const url = debug_file
+                    ? "https://drive.google.com/uc?id=1ISeHzAjp-k65KURIEUDifPP8_ImZrbnr&export=download" // ZIP_TEMP
+                    : "https://drive.google.com/uc?id=1LmBlo7XrQDlbwMvAJDtuoJy8U1QkGc_8&export=download" // ZIP_LATEST
 
-    const destPath = path.resolve(debug_file ? 'calling-bird-latest-debug-temp.zip' : 'calling-bird-latest.zip')
+    const destPath = path.resolve(zipFilename)
 
     return new Promise((resolve, reject) => {
         function doRequest(requestUrl) {

@@ -1,11 +1,11 @@
 const fs = require('fs');
 const path = require('path');
 const archiver = require('archiver');
-const { uploadToGoogleDrive } = require('./drive-upload');
+const { ZIP_LATEST, ZIP_TEMP } = require('./zip-names');
 
 async function create_zip_with_latest_code({ zip_for_setup_in_new_pc = false, debug_mode=false } = {}) {
     try {
-        const FILE_NAME = !debug_mode ? "calling-bird-latest.zip" : "calling-bird-latest-debug-temp.zip"
+        const FILE_NAME = debug_mode ? ZIP_TEMP : ZIP_LATEST;
         const directories = [];
         const files = [];
 

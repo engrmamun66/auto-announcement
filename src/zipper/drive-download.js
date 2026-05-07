@@ -1,12 +1,13 @@
 const fs = require('fs');
 const path = require('path');
+const { ZIP_LATEST, ZIP_TEMP } = require('./zip-names');
 let { GDRIVE_CLIENT_ID, GDRIVE_CLIENT_SECRET, GDRIVE_REFRESH_TOKEN, GDRIVE_FOLDER_ID } = require('./drive-config.example');
 const driveConfigPath = path.join(__dirname, 'drive-config.js');
 if (fs.existsSync(driveConfigPath)) {
     ({ GDRIVE_CLIENT_ID, GDRIVE_CLIENT_SECRET, GDRIVE_REFRESH_TOKEN, GDRIVE_FOLDER_ID } = require('./drive-config'));
 }
 
-async function downloadFromGoogleDrive() {
+async function downloadFromGoogleDrive(debug_mode=false) {
     try {
         const { google } = require('googleapis');
         if (GDRIVE_REFRESH_TOKEN === 'YOUR_REFRESH_TOKEN') {
@@ -18,8 +19,10 @@ async function downloadFromGoogleDrive() {
         auth.setCredentials({ refresh_token: GDRIVE_REFRESH_TOKEN });
         const drive = google.drive({ version: 'v3', auth });
 
+        const file_name = debug_mode ? ZIP_TEMP : ZIP_LATEST;
+
         const list = await drive.files.list({
-            q: `'${GDRIVE_FOLDER_ID}' in parents and name='calling-bird-latest.zip' and trashed=false`,
+            q: `'${GDRIVE_FOLDER_ID}' in parents and name='${file_name}' and trashed=false`,
             orderBy: 'modifiedTime desc',
             pageSize: 1,
             fields: 'files(id, name, modifiedTime)',
@@ -27,12 +30,12 @@ async function downloadFromGoogleDrive() {
 
         const file = list.data.files?.[0];
         if (!file) {
-            console.error('❌ No calling-bird-latest.zip found in Drive folder.');
+            console.error(`❌ No ${file_name} found in Drive folder.`);
             return;
         }
 
         console.log(`📥 Downloading: ${file.name} (modified: ${file.modifiedTime})`);
-        const destPath = path.resolve('calling-bird-latest.zip');
+        const destPath = path.resolve(file_name);
         const dest = fs.createWriteStream(destPath);
 
         const res = await drive.files.get(

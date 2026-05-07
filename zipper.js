@@ -28,6 +28,8 @@ function ask(question) {
 
 const has_drive_config = fs.existsSync(path.join(__dirname, 'src/zipper/drive-config.js'));
 
+const { ZIP_LATEST, ZIP_TEMP } = require('./src/zipper/zip-names');
+
 (async () => {
     console.log('\n╔══════════════════════════════════════╗');
     console.log('║       🐦 Calling Bird Zipper         ║');
@@ -65,22 +67,20 @@ const has_drive_config = fs.existsSync(path.join(__dirname, 'src/zipper/drive-co
         downloadFromGoogleDrive();
     } 
     else if (char === 'dd') {
-        await downloadFromUrl();
+        await downloadFromUrl(false, ZIP_LATEST);
     }
     else if (char === 'tt') {
-        await downloadFromUrl(true);
+        await downloadFromUrl(true, ZIP_TEMP);
     }
     else if (char === 'u') {
-        await unzipAndOverwrite();
+        await unzipAndOverwrite(ZIP_LATEST);
     }
     else {
         console.log('❌ Invalid option.');
     }
 
     if(has_drive_config){
-        let filename = char !== 't' 
-            ? 'calling-bird-latest.zip' 
-            : 'calling-bird-latest-debug-temp.zip'
+        const filename = char === 't' ? ZIP_TEMP : ZIP_LATEST;
         if(['c', 't', 'n'].includes(char)){
             let upload = await ask('\n  → Upload to google-drive (y/n)? ');
             if(upload.toLowerCase() == 'y'){

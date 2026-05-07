@@ -1,12 +1,15 @@
 const fs = require('fs');
 const path = require('path');
 const unzipper = require('unzipper');
+const { ZIP_LATEST } = require('./zip-names');
 
  
 async function unzipAndOverwrite(
-    zipPath = path.resolve('calling-bird-latest.zip'),
+    zipFilename = ZIP_LATEST,
     destDir = path.resolve('.')
 ) {
+    const zipPath = path.resolve(zipFilename)
+
     if (!fs.existsSync(zipPath)) {
         console.error(`❌ Zip file not found: ${zipPath}`);
         return;
