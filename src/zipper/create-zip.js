@@ -2,8 +2,9 @@ const fs = require('fs');
 const path = require('path');
 const archiver = require('archiver');
 
-async function create_zip_with_latest_code({ zip_for_setup_in_new_pc = false } = {}) {
+async function create_zip_with_latest_code({ zip_for_setup_in_new_pc = false, debug_mode=false } = {}) {
     try {
+        const FILE_NAME = debug_mode ? "calling-bird-latest.zip" : "calling-bird-latest-debug.zip"
         const directories = [];
         const files = [];
 
@@ -16,6 +17,11 @@ async function create_zip_with_latest_code({ zip_for_setup_in_new_pc = false } =
 
         if (zip_for_setup_in_new_pc) {
             directories.push(path.join(global.DIR, 'database'));
+            directories.push(path.join(global.DIR, "public"));
+
+            
+        } else {
+            // all root file of public folder
             const publicDir = path.join(global.DIR, 'public');
             if (fs.existsSync(publicDir)) {
                 fs.readdirSync(publicDir).forEach(file => {
@@ -25,12 +31,6 @@ async function create_zip_with_latest_code({ zip_for_setup_in_new_pc = false } =
                     }
                 });
             }
-        } else {
-            files.push({ src: path.join(global.DIR, 'public/favicon.png'),        dest: 'public/favicon.png' });
-            files.push({ src: path.join(global.DIR, 'public/logo.example.png'),   dest: 'public/logo.example.jpeg' });
-            files.push({ src: path.join(global.DIR, 'public/logo.example.jpeg'),  dest: 'public/logo.example.jpeg' });
-            files.push({ src: path.join(global.DIR, 'public/logo.example.jpg'),   dest: 'public/logo.example.jpg' });
-            files.push({ src: path.join(global.DIR, 'public/sample.xlsx'),        dest: 'public/sample.xlsx' });
         }
 
         directories.push(path.join(global.DIR, 'socket'));
@@ -40,11 +40,12 @@ async function create_zip_with_latest_code({ zip_for_setup_in_new_pc = false } =
         files.push(path.join(global.DIR, 'ecosystem.config.js'));
         files.push(path.join(global.DIR, 'open.example.bat'));
         files.push(path.join(global.DIR, 'package.json'));
-        files.push(path.join(global.DIR, 'README.md'));
         files.push(path.join(global.DIR, 'server.js'));
+        files.push(path.join(global.DIR, 'README.md'));
         files.push(path.join(global.DIR, 'zipper.js'));
+        files.push(path.join(global.DIR, 'relay.multiboard.md'));
 
-        const outputPath = path.resolve('calling-bird-latest.zip');
+        const outputPath = path.resolve(FILE_NAME);
 
         await new Promise((resolve, reject) => {
             const output = fs.createWriteStream(outputPath);
@@ -63,7 +64,7 @@ async function create_zip_with_latest_code({ zip_for_setup_in_new_pc = false } =
             archive.finalize();
         });
 
-        console.log(`✅ calling-bird-latest.zip created at`, outputPath);
+        console.log(`✅ ${FILE_NAME} created at`, outputPath);
     } catch (err) {
         console.error('❌ create_zip error:', err);
     }

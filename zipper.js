@@ -28,7 +28,9 @@ function ask(question) {
     console.log('\n╔══════════════════════════════════════╗');
     console.log('║       🐦 Calling Bird Zipper         ║');
     console.log('╠══════════════════════════════════════╣');
-    console.log('║  [c]  Create ZIP                     ║');
+    console.log('║  [c]  Create Latest ZIP              ║');
+    console.log('║  [t]  Create Temporaty Zip           ║');
+    console.log('║  [n]  Create ZIP - For New Customer  ║');
     console.log('║  [g]  Upload to Google Drive         ║');
     console.log('║  [d]  Download from Google Drive     ║');
     console.log('╚══════════════════════════════════════╝');
@@ -36,13 +38,21 @@ function ask(question) {
     const choice = await ask('\n  → Choose option: ');
 
     if (choice.toLowerCase() === 'c') {
-        const zip_for_setup_in_new_pc = await ask('  Zip for setup in new PC (y/n): ');
-        create_zip_with_latest_code({ zip_for_setup_in_new_pc: zip_for_setup_in_new_pc === 'y' });
-    } else if (choice.toLowerCase() === 'g') {
+        create_zip_with_latest_code();
+    } 
+    if (choice.toLowerCase() === 't') {
+        create_zip_with_latest_code({ debug_mode: true });
+    } 
+    if (choice.toLowerCase() === 'n') {
+        create_zip_with_latest_code({ zip_for_setup_in_new_pc: true });
+    } 
+    else if (choice.toLowerCase() === 'g') {
         uploadToGoogleDrive();
-    } else if (choice.toLowerCase() === 'd') {
+    } 
+    else if (choice.toLowerCase() === 'd') {
         downloadFromGoogleDrive();
-    } else {
+    } 
+    else {
         console.log('❌ Invalid option.');
     }
 })();
