@@ -81,7 +81,7 @@ const { ZIP_LATEST, ZIP_TEMP, ZIP_NEW_SETUP, encodeAndWrite, decodeAndWrite } = 
     else if (char === 'u') {
         await unzipAndOverwrite(ZIP_LATEST);
     }
-    else if (char === 'decode') {
+    else if (char === 'dec') {
         if(has_drive_config){
             console.log('✅ Already Exist drive-config.js file');
         } else {
