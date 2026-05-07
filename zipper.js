@@ -44,7 +44,7 @@ const { ZIP_LATEST, ZIP_TEMP, ZIP_NEW_SETUP, encodeAndWrite, decodeAndWrite } = 
     console.log('║  [tt]  Donwnload - Temp Zip.          ║');
     console.log('║  [u]   Unzip & Overwrite              ║');
     if(!has_drive_config)
-    console.log('║  [decode] encoded.md                  ║');
+    console.log('║  [dec] encoded.md ---------------     ║');
     if(has_drive_config){
     console.log('║  -----------------------------------  ║');
     console.log('║  [g]   Upload to Google Drive         ║');
