@@ -228,14 +228,8 @@ app.get('/api/update-app', async (req, res) => {
     try {
       await downloadFromUrl(debug_mode, zipFile, false);
       await unzipAndOverwrite(zipFile, path.resolve('.'));
-      try {
-        require('child_process').exec('pm2 restart all')
-      } catch (error) {
-        
-      }
-      setTimeout(() => {
-        res.json({ success: true, message: `Update successful. Restarting...` });
-      }, 1000);
+      res.json({ success: true, message: `Update successful. Restarting...` });
+      setTimeout(() => require('child_process').exec('pm2 restart all'), 100);
       
     } catch (err) {
         console.error('❌ update-app error:', err.message);

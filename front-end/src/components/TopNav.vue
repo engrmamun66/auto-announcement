@@ -81,14 +81,14 @@
   <Teleport to="body">
     <div v-if="showUpdateModal" class="update-modal-overlay">
       <div class="update-modal">
-        <div v-if="!updateDone">
+        <template v-if="!updateDone">
           <div class="update-modal__spinner"></div>
           <p class="update-modal__text">Updating app...</p>
-        </div>
-        <div v-else>
+        </template>
+        <template v-else>
           <div class="update-modal__check">✓</div>
           <p class="update-modal__text">Update successful! Reloading...</p>
-        </div>
+        </template>
       </div>
     </div>
   </Teleport>
