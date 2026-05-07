@@ -25,18 +25,40 @@ async function uploadToGoogleDrive(file_name='calling-bird-latest.zip') {
             return;
         }
 
-        console.log('📤 Uploading to Google Drive...');
-        const response = await drive.files.create({
-            requestBody: {
-                name: file_name,
-                parents: [GDRIVE_FOLDER_ID],
-            },
-            media: {
-                mimeType: 'application/zip',
-                body: fs.createReadStream(zipPath),
-            },
-            fields: 'id, name, webViewLink',
+        // Check if file already exists in folder
+        const existing = await drive.files.list({
+            q: `'${GDRIVE_FOLDER_ID}' in parents and name='${file_name}' and trashed=false`,
+            fields: 'files(id, name)',
+            pageSize: 1,
         });
+        const existingFile = existing.data.files?.[0];
+
+        let response;
+        if (existingFile) {
+            console.log(`📤 Replacing existing file on Google Drive...`);
+            response = await drive.files.update({
+                fileId: existingFile.id,
+                requestBody: { name: file_name },
+                media: {
+                    mimeType: 'application/zip',
+                    body: fs.createReadStream(zipPath),
+                },
+                fields: 'id, name, webViewLink',
+            });
+        } else {
+            console.log('📤 Uploading to Google Drive...');
+            response = await drive.files.create({
+                requestBody: {
+                    name: file_name,
+                    parents: [GDRIVE_FOLDER_ID],
+                },
+                media: {
+                    mimeType: 'application/zip',
+                    body: fs.createReadStream(zipPath),
+                },
+                fields: 'id, name, webViewLink',
+            });
+        }
 
         console.log('✅ Uploaded:', response.data.name);
         console.log('🔗 Link:', response.data.webViewLink);
