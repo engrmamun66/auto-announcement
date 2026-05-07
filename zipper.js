@@ -35,7 +35,7 @@ const has_drive_config = fs.existsSync(path.join(__dirname, 'src/zipper/drive-co
     console.log('║  [t]  Create Temporaty Zip           ║');
     console.log('║  [n]  Create ZIP - For New Customer  ║');
     console.log('║  [dd]  Donwnload - Latest Zip.       ║');
-    console.log('║  [dt]  Donwnload - Temp Zip.         ║');
+    console.log('║  [tt]  Donwnload - Temp Zip.         ║');
     if(has_drive_config){
     console.log('║  [g]  Upload to Google Drive         ║');
     console.log('║  [d]  Download from Google Drive     ║');
@@ -65,7 +65,7 @@ const has_drive_config = fs.existsSync(path.join(__dirname, 'src/zipper/drive-co
     else if (char === 'dd') {
         await downloadFromUrl();
     }
-    else if (char === 'dt') {
+    else if (char === 'tt') {
         await downloadFromUrl(true);
     } 
     else {
