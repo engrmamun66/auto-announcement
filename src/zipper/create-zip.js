@@ -1,11 +1,11 @@
 const fs = require('fs');
 const path = require('path');
 const archiver = require('archiver');
-const { ZIP_LATEST, ZIP_TEMP } = require('./zip-names');
+const { ZIP_LATEST, ZIP_TEMP, ZIP_NEW_SETUP } = require('./zip-names');
 
-async function create_zip_with_latest_code({ zip_for_setup_in_new_pc = false, debug_mode=false } = {}) {
+async function create_zip_with_latest_code({ file_name, for_new_setup = false } = {}) {
     try {
-        const FILE_NAME = debug_mode ? ZIP_TEMP : ZIP_LATEST;
+        const FILE_NAME = file_name;
         const directories = [];
         const files = [];
 
@@ -16,11 +16,11 @@ async function create_zip_with_latest_code({ zip_for_setup_in_new_pc = false, de
             });
         }
 
-        if (zip_for_setup_in_new_pc) {
+        if (for_new_setup) {
+            const { config } = global
             directories.push(path.join(global.DIR, 'database'));
             directories.push(path.join(global.DIR, "public"));
 
-            
         } else {
             // all root file of public folder
             const publicDir = path.join(global.DIR, 'public');

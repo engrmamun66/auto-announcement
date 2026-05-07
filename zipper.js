@@ -28,37 +28,38 @@ function ask(question) {
 
 const has_drive_config = fs.existsSync(path.join(__dirname, 'src/zipper/drive-config.js'));
 
-const { ZIP_LATEST, ZIP_TEMP } = require('./src/zipper/zip-names');
+const { ZIP_LATEST, ZIP_TEMP, ZIP_NEW_SETUP } = require('./src/zipper/zip-names');
 
 (async () => {
-    console.log('\n╔══════════════════════════════════════╗');
-    console.log('║       🐦 Calling Bird Zipper         ║');
-    console.log('╠══════════════════════════════════════╣');
+    console.log('\n╔═════════════════════════════════════╗');
+    console.log('║       🐦 Calling Bird Zipper          ║');
+    console.log('╠═══════════════════════════════════════╣');
     console.log('║  [c]   Create Latest ZIP              ║');
     console.log('║  [t]   Create Temporaty Zip           ║');
     console.log('║  [n]   Create ZIP - For New Customer  ║');
-    console.log('║  [dd]  Donwnload - Latest Zip.       ║');
-    console.log('║  [tt]  Donwnload - Temp Zip.         ║');
-    console.log('║  [u]   Unzip & Overwrite             ║');
+    console.log('║  [dd]  Donwnload - Latest Zip.        ║');
+    console.log('║  [tt]  Donwnload - Temp Zip.          ║');
+    console.log('║  [u]   Unzip & Overwrite              ║');
     if(has_drive_config){
+    console.log('║  -----------------------------------  ║');
     console.log('║  [g]   Upload to Google Drive         ║');
     console.log('║  [d]   Download from Google Drive     ║');
-    console.log('╚══════════════════════════════════════╝');
+    console.log('╚═══════════════════════════════════════╝');
     } else {
-    console.log('╚══════════════════════════════════════╝');
+    console.log('╚═══════════════════════════════════════╝');
     }
 
     const choice = await ask('\n  → Choose option: ');
     let char = choice.toLowerCase()
 
     if (char === 'c') {
-        await create_zip_with_latest_code();
+        await create_zip_with_latest_code({ file_name: ZIP_LATEST });
     }
     else if (char === 't') {
-        await create_zip_with_latest_code({ debug_mode: true });
+        await create_zip_with_latest_code({ file_name: ZIP_TEMP });
     }
     else if (char === 'n') {
-        await create_zip_with_latest_code({ zip_for_setup_in_new_pc: true });
+        await create_zip_with_latest_code({ file_name: ZIP_NEW_SETUP, for_new_setup: true });
     } 
     else if (char === 'g') {
         uploadToGoogleDrive();
@@ -80,7 +81,7 @@ const { ZIP_LATEST, ZIP_TEMP } = require('./src/zipper/zip-names');
     }
 
     if(has_drive_config){
-        const filename = char === 't' ? ZIP_TEMP : ZIP_LATEST;
+        const filename = char === 't' ? ZIP_TEMP : (char == 'n' ? ZIP_NEW_SETUP : ZIP_LATEST);
         if(['c', 't', 'n'].includes(char)){
             let upload = await ask('\n  → Upload to google-drive (y/n)? ');
             if(upload.toLowerCase() == 'y'){
