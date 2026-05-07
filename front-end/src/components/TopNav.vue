@@ -147,7 +147,7 @@ async function triggerUpdate() {
         setTimeout(() => { window.location.reload(); }, 2000);
     } catch (err) {
         showUpdateModal.value = false;
-        emitter.emit('toaster-error', { message: 'Update failed.' });
+        emitter.emit('toaster-error', { message: 'Update failed.' }); 
     }
 }
 
