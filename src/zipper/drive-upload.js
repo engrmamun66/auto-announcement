@@ -66,6 +66,8 @@ async function uploadToGoogleDrive(file_name='calling-bird-latest.zip') {
 
         console.log('✅ Uploaded:', response.data.name);
         console.log('🔗 Link:', response.data.webViewLink);
+        fs.unlinkSync(zipPath);
+        console.log(`🗑️  Deleted local: ${file_name}`);
     } catch (err) {
         console.error('❌ uploadToGoogleDrive error:', err.message);
     }
