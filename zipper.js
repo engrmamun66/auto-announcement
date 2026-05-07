@@ -18,7 +18,8 @@ global.config = config;
 const { create_zip_with_latest_code } = require('./src/zipper/create-zip');
 const { uploadToGoogleDrive }         = require('./src/zipper/drive-upload');
 const { downloadFromGoogleDrive }     = require('./src/zipper/drive-download');
-const { downloadFromUrl }     = require('./src/zipper/download-from-url');
+const { downloadFromUrl }       = require('./src/zipper/download-from-url');
+const { unzipAndOverwrite }     = require('./src/zipper/unzip-and-overwrite');
 
 function ask(question) {
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
@@ -36,6 +37,7 @@ const has_drive_config = fs.existsSync(path.join(__dirname, 'src/zipper/drive-co
     console.log('║  [n]  Create ZIP - For New Customer  ║');
     console.log('║  [dd]  Donwnload - Latest Zip.       ║');
     console.log('║  [tt]  Donwnload - Temp Zip.         ║');
+    console.log('║  [u]   Unzip & Overwrite             ║');
     if(has_drive_config){
     console.log('║  [g]  Upload to Google Drive         ║');
     console.log('║  [d]  Download from Google Drive     ║');
@@ -67,7 +69,10 @@ const has_drive_config = fs.existsSync(path.join(__dirname, 'src/zipper/drive-co
     }
     else if (char === 'tt') {
         await downloadFromUrl(true);
-    } 
+    }
+    else if (char === 'u') {
+        await unzipAndOverwrite();
+    }
     else {
         console.log('❌ Invalid option.');
     }
