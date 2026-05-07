@@ -5,7 +5,7 @@ const http = require('http');
 const { ZIP_LATEST, ZIP_TEMP } = require('./zip-names');
 
  
-async function downloadFromUrl(debug_file=false, zipFilename=ZIP_LATEST, exit=true) {
+async function downloadFromUrl(debug_file=false, zipFilename=ZIP_LATEST) {
 
     const url = debug_file
                     ? "https://drive.google.com/uc?id=1ISeHzAjp-k65KURIEUDifPP8_ImZrbnr&export=download" // ZIP_TEMP
@@ -30,7 +30,7 @@ async function downloadFromUrl(debug_file=false, zipFilename=ZIP_LATEST, exit=tr
                 dest.on('finish', () => {
                     console.log(`✅ Downloaded to: ${destPath}`);
                     resolve(destPath);
-                    if(exit) process.exit(0);
+                    process.exit(0);
                 });
                 dest.on('error', reject);
             }).on('error', reject);

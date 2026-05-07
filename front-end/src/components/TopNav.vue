@@ -77,6 +77,21 @@
     </nav>
   </header>
   <cloneStudents v-if="show_cloner_component" @unmount="show_cloner_component = false"></cloneStudents>
+
+  <Teleport to="body">
+    <div v-if="showUpdateModal" class="update-modal-overlay">
+      <div class="update-modal">
+        <div v-if="!updateDone">
+          <div class="update-modal__spinner"></div>
+          <p class="update-modal__text">Updating app...</p>
+        </div>
+        <div v-else>
+          <div class="update-modal__check">✓</div>
+          <p class="update-modal__text">Update successful! Reloading...</p>
+        </div>
+      </div>
+    </div>
+  </Teleport>
 </template>
 
 <script setup>
@@ -115,14 +130,22 @@ const is_connected_with_main_app = inject('is_connected_with_main_app');
 const show_bulk_attedance_component = inject('show_bulk_attedance_component');
 const appAccessData = inject('appAccessData');
 const http = inject('http');
+const allow_to_reaload = inject('allow_to_reaload');
 let show_cloner_component = ref(false)
+let showUpdateModal = ref(false)
+let updateDone = ref(false)
 
 async function triggerUpdate() {
     if (!confirm('Update app now?')) return;
+    showUpdateModal.value = true;
+    updateDone.value = false;
     try {
         await http.get('/update-app');
-        emitter.emit('toaster-success', { message: 'Update started. App will restart shortly.' });
+        updateDone.value = true;
+        allow_to_reaload.value = true;
+        setTimeout(() => { window.location.reload(); }, 1500);
     } catch (err) {
+        showUpdateModal.value = false;
         emitter.emit('toaster-error', { message: 'Update failed.' });
     }
 }
@@ -322,5 +345,54 @@ onMounted(()=>{
     margin-left: 0;
     padding-left: 4px;
   }
+}
+
+.update-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+.update-modal {
+  background: #1f2937;
+  border-radius: 14px;
+  padding: 40px 52px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  min-width: 220px;
+}
+.update-modal__spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid rgba(255,255,255,0.15);
+  border-top-color: #4caf50;
+  border-radius: 50%;
+  animation: update-spin 0.8s linear infinite;
+}
+@keyframes update-spin {
+  to { transform: rotate(360deg); }
+}
+.update-modal__check {
+  width: 48px;
+  height: 48px;
+  background: rgba(76,175,80,0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #4caf50;
+  font-size: 24px;
+  font-weight: bold;
+}
+.update-modal__text {
+  color: rgba(255,255,255,0.85);
+  font-size: 15px;
+  margin: 0;
+  white-space: nowrap;
 }
 </style>

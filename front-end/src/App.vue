@@ -81,13 +81,14 @@ let last_mouse_keyboard_activity = ref(new Date().getTime())
 // true if mouse/keyboard was used within the last 5 seconds
 const isUserActive = ref(false)
 const main_app_user_is_active = ref(false)
+const allow_to_reaload = ref(false)
 
 watch(isUserActive, (bool) => {
     sendRemoteAction({from: 'localhost', action: 'is_active_main_user', data: isUserActive.value})
 })
 
 const handleBeforeUnload = (event) => {
-    if(!isIPAccess && !isUserActive.value){
+    if(allow_to_reaload.value || (!isIPAccess && !isUserActive.value)){
 
     } else {
         event.preventDefault()
@@ -409,6 +410,7 @@ provide('showSwithBoardModal', showSwithBoardModal)
 provide('show_bulk_attedance_component', show_bulk_attedance_component)
 provide('isUserActive', isUserActive)
 provide('main_app_user_is_active', main_app_user_is_active)
+provide('allow_to_reaload', allow_to_reaload)
 provide('borad_image_url', borad_image_url)
 provide('switches_PreviewInHomePage', switches_PreviewInHomePage)
 provide('isUsingSpeakerAutoControl', isUsingSpeakerAutoControl)
