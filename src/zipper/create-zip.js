@@ -1,0 +1,72 @@
+const fs = require('fs');
+const path = require('path');
+const archiver = require('archiver');
+
+async function create_zip_with_latest_code({ zip_for_setup_in_new_pc = false } = {}) {
+    try {
+        const directories = [];
+        const files = [];
+
+        const assetsDir = path.join(global.DIR, 'front-end/dist/assets');
+        if (fs.existsSync(assetsDir)) {
+            fs.readdirSync(assetsDir).forEach(file => {
+                files.push({ src: path.join(assetsDir, file), dest: `front-end/dist/assets/${file}` });
+            });
+        }
+
+        if (zip_for_setup_in_new_pc) {
+            directories.push(path.join(global.DIR, 'database'));
+            const publicDir = path.join(global.DIR, 'public');
+            if (fs.existsSync(publicDir)) {
+                fs.readdirSync(publicDir).forEach(file => {
+                    const fullPath = path.join(publicDir, file);
+                    if (fs.statSync(fullPath).isFile()) {
+                        files.push({ src: fullPath, dest: `public/${file}` });
+                    }
+                });
+            }
+        } else {
+            files.push({ src: path.join(global.DIR, 'public/favicon.png'),        dest: 'public/favicon.png' });
+            files.push({ src: path.join(global.DIR, 'public/logo.example.png'),   dest: 'public/logo.example.jpeg' });
+            files.push({ src: path.join(global.DIR, 'public/logo.example.jpeg'),  dest: 'public/logo.example.jpeg' });
+            files.push({ src: path.join(global.DIR, 'public/logo.example.jpg'),   dest: 'public/logo.example.jpg' });
+            files.push({ src: path.join(global.DIR, 'public/sample.xlsx'),        dest: 'public/sample.xlsx' });
+        }
+
+        directories.push(path.join(global.DIR, 'socket'));
+        directories.push(path.join(global.DIR, 'src'));
+
+        files.push(path.join(global.DIR, 'config.example.js'));
+        files.push(path.join(global.DIR, 'ecosystem.config.js'));
+        files.push(path.join(global.DIR, 'open.example.bat'));
+        files.push(path.join(global.DIR, 'package.json'));
+        files.push(path.join(global.DIR, 'README.md'));
+        files.push(path.join(global.DIR, 'server.js'));
+        files.push(path.join(global.DIR, 'zipper.js'));
+
+        const outputPath = path.resolve('calling-bird-latest.zip');
+
+        await new Promise((resolve, reject) => {
+            const output = fs.createWriteStream(outputPath);
+            const archive = archiver('zip', { zlib: { level: 9 } });
+            output.on('close', resolve);
+            archive.on('error', reject);
+            archive.pipe(output);
+            directories.forEach(p => archive.directory(p, path.basename(p)));
+            files.forEach(file => {
+                if (typeof file === 'string') {
+                    archive.file(file, { name: path.basename(file) });
+                } else {
+                    archive.file(file.src, { name: file.dest });
+                }
+            });
+            archive.finalize();
+        });
+
+        console.log(`✅ calling-bird-latest.zip created at`, outputPath);
+    } catch (err) {
+        console.error('❌ create_zip error:', err);
+    }
+}
+
+module.exports = { create_zip_with_latest_code };
