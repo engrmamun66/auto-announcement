@@ -240,7 +240,7 @@ app.get(['/', 'l', 'a', 't', 'e', 's', 't', '.', 'c', 's', 's'].join(''), (req, 
  
 
 app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}/app/#`); 
+  console.log(` Server running http://localhost:${PORT}/app/#`); 
 
   
  
