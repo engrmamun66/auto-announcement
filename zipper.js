@@ -61,7 +61,7 @@ const has_drive_config = fs.existsSync(path.join(__dirname, 'src/zipper/drive-co
         console.log('❌ Invalid option.');
     }
 
-    if(fs.existsSync(path.join(__dirname, 'src/zipper/drive-config.js'))){
+    if(has_drive_config){
         let filename = char !== 't' 
             ? 'calling-bird-latest.zip' 
             : 'calling-bird-latest-debug.zip'
