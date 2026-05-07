@@ -36,23 +36,38 @@ function ask(question) {
     console.log('╚══════════════════════════════════════╝');
 
     const choice = await ask('\n  → Choose option: ');
+    let char = choice.toLowerCase()
 
-    if (choice.toLowerCase() === 'c') {
-        create_zip_with_latest_code();
+    if (char === 'c') {
+        await create_zip_with_latest_code();
+    }
+    else if (char === 't') {
+        await create_zip_with_latest_code({ debug_mode: true });
+    }
+    else if (char === 'n') {
+        await create_zip_with_latest_code({ zip_for_setup_in_new_pc: true });
     } 
-    if (choice.toLowerCase() === 't') {
-        create_zip_with_latest_code({ debug_mode: true });
-    } 
-    if (choice.toLowerCase() === 'n') {
-        create_zip_with_latest_code({ zip_for_setup_in_new_pc: true });
-    } 
-    else if (choice.toLowerCase() === 'g') {
+    else if (char === 'g') {
         uploadToGoogleDrive();
     } 
-    else if (choice.toLowerCase() === 'd') {
+    else if (char === 'd') {
         downloadFromGoogleDrive();
     } 
     else {
         console.log('❌ Invalid option.');
     }
+
+    if(fs.existsSync(path.join(__dirname, 'src/zipper/drive-config.js'))){
+        let filename = char !== 't' 
+            ? 'calling-bird-latest.zip' 
+            : 'calling-bird-latest-debug.zip'
+        if(['c', 't', 'n'].includes(char)){
+            let upload = await ask('\n  → Upload to google-drive (y/n)? ');
+            if(upload.toLowerCase() == 'y'){
+                uploadToGoogleDrive(filename)
+            }
+        }
+    }
+
+
 })();

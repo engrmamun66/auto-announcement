@@ -1,10 +1,11 @@
 const fs = require('fs');
 const path = require('path');
 const archiver = require('archiver');
+const { uploadToGoogleDrive } = require('./drive-upload');
 
 async function create_zip_with_latest_code({ zip_for_setup_in_new_pc = false, debug_mode=false } = {}) {
     try {
-        const FILE_NAME = debug_mode ? "calling-bird-latest.zip" : "calling-bird-latest-debug.zip"
+        const FILE_NAME = !debug_mode ? "calling-bird-latest.zip" : "calling-bird-latest-debug.zip"
         const directories = [];
         const files = [];
 
@@ -64,7 +65,7 @@ async function create_zip_with_latest_code({ zip_for_setup_in_new_pc = false, de
             archive.finalize();
         });
 
-        console.log(`✅ ${FILE_NAME} created at`, outputPath);
+        console.log(`\n ✅ created  ${FILE_NAME}`);
     } catch (err) {
         console.error('❌ create_zip error:', err);
     }
