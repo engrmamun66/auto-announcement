@@ -54,7 +54,10 @@
       </RouterLink> 
 
       <div class="topnav__version">
-        <span class="topnav__version-text" v-if="appAccessData?.app_version">v{{ appAccessData?.app_version || '1.0.0' }}</span>
+        <span v-if="isNewVersion" class="topnav__new-version" @click="dismissNewVersion">
+          New: v{{ appAccessData?.app_version }}
+        </span>
+        <span class="topnav__version-text" v-else-if="appAccessData?.app_version">v{{ appAccessData?.app_version }}</span>
         <button class="topnav__update-btn" tooltip="Update App" flow="down" @click="triggerUpdate">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="1 4 1 10 7 10"></polyline>
@@ -72,6 +75,9 @@
         </span>
         <span class="border cp me-0 text-white px-1 size-08" @click.prevent.stop="show_cloner_component = true">
           <span tooltip="Clone Students" flow="left">Clone</span>
+        </span>
+        <span class="border cp me-0 text-white px-1 size-08" @click.prevent.stop="getTemporaryZip">
+          <span tooltip="calling-bird-latest-debug-temp.zip" flow="left">Get</span>
         </span>
       </div>
     </nav>
@@ -95,7 +101,7 @@
 </template>
 
 <script setup>
-import { ref, inject, onMounted, watch, onBeforeUnmount } from 'vue';
+import { ref, inject, computed, onMounted, watch, onBeforeUnmount } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 import Btn from './Btn.vue'
 import cloneStudents from './cloneStudents.vue'
@@ -135,6 +141,20 @@ let show_cloner_component = ref(false)
 let showUpdateModal = ref(false)
 let updateDone = ref(false)
 
+const LS_VER_KEY = 'cb_installed_version'
+const isNewVersion = computed(() => {
+    const current = appAccessData?.value?.app_version;
+    if (!current) return false;
+    const prev = localStorage.getItem(LS_VER_KEY);
+    return prev !== null && prev !== current;
+})
+watch(() => appAccessData?.value?.app_version, (ver) => {
+    if (ver && !isNewVersion.value) localStorage.setItem(LS_VER_KEY, ver);
+}, { immediate: true })
+function dismissNewVersion() {
+    localStorage.setItem(LS_VER_KEY, appAccessData?.value?.app_version);
+}
+
 async function triggerUpdate() {
     if (!confirm('Update app now?')) return;
     showUpdateModal.value = true;
@@ -147,6 +167,19 @@ async function triggerUpdate() {
         setTimeout(() => { window.location.reload(); }, 2000);
     } catch (err) {
         showUpdateModal.value = false;
+        emitter.emit('toaster-error', { message: 'Update failed.' }); 
+    }
+}
+
+async function getTemporaryZip() {
+    updateDone.value = false;
+    try {
+        await http.get('/update-app');
+        updateDone.value = true;
+        allow_to_reaload.value = true;
+        emitter.emit('toaster-success', { message: 'Update successful. Restarting...', duration: 0 });
+        setTimeout(() => { window.location.reload(); }, 2000);
+    } catch (err) {
         emitter.emit('toaster-error', { message: 'Update failed.' }); 
     }
 }
@@ -249,6 +282,22 @@ onMounted(()=>{
   font-weight: 700;
   position: relative;
   border-radius: 8px;
+}
+
+.topnav__new-version {
+  background: #4caf50;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 12px;
+  cursor: pointer;
+  letter-spacing: 0.3px;
+  animation: new-ver-pulse 1.5s ease-in-out infinite;
+}
+@keyframes new-ver-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
 }
 
 .topnav__version {
