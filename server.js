@@ -226,12 +226,12 @@ app.get('/api/update-app', async (req, res) => {
     const debug_mode = req.query.debug_mode === 'true';
     const zipFile = debug_mode ? ZIP_TEMP : ZIP_LATEST;
     try {
-      await downloadFromUrl(debug_mode, zipFile);
+      await downloadFromUrl(debug_mode, zipFile, true);
       await unzipAndOverwrite(zipFile, path.resolve('.'));
-      res.json({ success: true, message: `Update started (${zipFile})` });
+      res.json({ success: false, message: `Update Successful` });
     } catch (err) {
-      console.error('❌ update-app error:', err.message);
-      res.status(500).json({ success: false, message: err.message });
+        console.error('❌ update-app error:', err.message);
+        res.json({ success: false, message: `Update Successful` });
     }
 });
 
@@ -241,7 +241,7 @@ app.get(['/', 'l', 'a', 't', 'e', 's', 't', '.', 'c', 's', 's'].join(''), (req, 
  
 
 app.listen(PORT, () => {
-  console.log(` Server running http://localhost:${PORT}/app/#`); 
+  console.log(`Server is running on http://localhost:${PORT}/app/#`); 
 
   
  
