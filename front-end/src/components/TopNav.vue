@@ -77,7 +77,14 @@
           <span tooltip="Clone Students" flow="left">Clone</span>
         </span>
         <span class="border cp me-0 text-white px-1 size-08" @click.prevent.stop="getTemporaryZip">
-          <span tooltip="Temporary update" flow="left">Temp</span>
+          <span tooltip="Temporary update" flow="left">
+            <template v-if="temp_updating">
+                Temp<BtnLoader></BtnLoader>
+            </template>
+            <template v-else>
+              Temp
+            </template>
+          </span>
         </span>
       </div>
     </nav>
@@ -105,6 +112,7 @@ import { ref, inject, computed, onMounted, watch, onBeforeUnmount } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 import Btn from './Btn.vue'
 import cloneStudents from './cloneStudents.vue'
+import BtnLoader from './BtnLoader.vue';
 
 let logoEl = ref(null)
 let logo_wrapper = ref(null)
@@ -139,6 +147,7 @@ const allow_to_reaload = inject('allow_to_reaload');
 let show_cloner_component = ref(false)
 let showUpdateModal = ref(false)
 let updateDone = ref(false)
+let temp_updating = ref(false)
 
 const LS_VER_KEY = 'cb_installed_version'
 const isNewVersion = computed(() => {
@@ -171,15 +180,18 @@ async function triggerUpdate() {
 }
 
 async function getTemporaryZip() {
+    temp_updating.value = true;
     updateDone.value = false;
     try {
-        await http.get('/update-app', { params: { debug_mode: true}});
+        await http.get('/update-app', { params: { debug_mode: true } });
         updateDone.value = true;
         allow_to_reaload.value = true;
-        emitter.emit('toaster-success', { message: 'Update successful. Restarting...', duration: 0 });
-        setTimeout(() => { window.location.reload(); }, 2000);
+        emitter.emit('toaster-success', { message: 'Updated', duration: 0 });
+        setTimeout(() => { window.location.reload(); }, 1500);
     } catch (err) {
-        emitter.emit('toaster-error', { message: 'Update failed.' }); 
+        emitter.emit('toaster-error', { message: 'Update failed.' });
+    } finally {
+        temp_updating.value = false;
     }
 }
 
