@@ -2,7 +2,7 @@ const { CODE_NUMBER } = global.config.env;
 
 const ZIP_LATEST = 'calling-bird-latest.zip';
 const ZIP_TEMP   = 'calling-bird-latest-debug-temp.zip';
-const ZIP_NEW_SETUP   = `${CODE_NUMBER}__calling-bird-fullcode.zip`;
+const ZIP_NEW_SETUP   = `${CODE_NUMBER}---calling_bird_fullcode.zip`;
 
 
 module.exports = { ZIP_LATEST, ZIP_TEMP, ZIP_NEW_SETUP };
