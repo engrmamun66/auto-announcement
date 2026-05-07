@@ -37,7 +37,15 @@ function ask(question) {
   }
   
   (async () => {
-    const create = await ask("Create(c) / Upload to server(u) / Upload to Google Drive(g) / Download from Drive(d)? ");
+    console.log('\n╔══════════════════════════════════════╗');
+    console.log('║       🐦 Calling Bird Zipper         ║');
+    console.log('╠══════════════════════════════════════╣');
+    console.log('║  [c]  Create ZIP                     ║');
+    console.log('║  [g]  Upload to Google Drive         ║');
+    console.log('║  [d]  Download from Google Drive     ║');
+    console.log('║  [u]  Upload to Server               ║');
+    console.log('╚══════════════════════════════════════╝');
+    const create = await ask('\n  → Choose option: ');
     if(create.toLowerCase() === "c"){
         const zip_for_setup_in_new_pc = await ask("Zip for setup in new PC (y/n): ");
         create_zip_with_latest_code({zip_for_setup_in_new_pc: zip_for_setup_in_new_pc === 'y'})
