@@ -1,12 +1,13 @@
 const fs = require('fs');
 const path = require('path');
+const { ZIP_LATEST } = require('./zip-names');
 let { GDRIVE_CLIENT_ID, GDRIVE_CLIENT_SECRET, GDRIVE_REFRESH_TOKEN, GDRIVE_FOLDER_ID } = require('./drive-config.example');
 const driveConfigPath = path.join(__dirname, 'drive-config.js');
 if (fs.existsSync(driveConfigPath)) {
     ({ GDRIVE_CLIENT_ID, GDRIVE_CLIENT_SECRET, GDRIVE_REFRESH_TOKEN, GDRIVE_FOLDER_ID } = require('./drive-config'));
 }
 
-async function uploadToGoogleDrive(file_name='calling-bird-latest.zip') {
+async function uploadToGoogleDrive(file_name=ZIP_LATEST) {
     try {
         if(!file_name){
             return

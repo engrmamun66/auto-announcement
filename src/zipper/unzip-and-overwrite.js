@@ -32,6 +32,8 @@ async function unzipAndOverwrite(
         .promise();
 
     console.log(`✅ Extracted to: ${destDir}`);
+    fs.unlinkSync(zipPath);
+    console.log(`🗑️  Deleted: ${zipFilename}`);
 }
 
 module.exports = { unzipAndOverwrite };
