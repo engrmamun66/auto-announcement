@@ -63,10 +63,10 @@ const has_drive_config = fs.existsSync(path.join(__dirname, 'src/zipper/drive-co
         downloadFromGoogleDrive();
     } 
     else if (char === 'dd') {
-        downloadFromUrl();
-    } 
+        await downloadFromUrl();
+    }
     else if (char === 'dt') {
-        downloadFromUrl(true);
+        await downloadFromUrl(true);
     } 
     else {
         console.log('❌ Invalid option.');
