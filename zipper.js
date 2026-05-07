@@ -31,7 +31,7 @@ const has_drive_config = fs.existsSync(path.join(__dirname, 'src/zipper/drive-co
 const { ZIP_LATEST, ZIP_TEMP, ZIP_NEW_SETUP } = require('./src/zipper/zip-names');
 
 (async () => {
-    console.log('\n╔═════════════════════════════════════╗');
+    console.log('\n╔═══════════════════════════════════════╗');
     console.log('║       🐦 Calling Bird Zipper          ║');
     console.log('╠═══════════════════════════════════════╣');
     console.log('║  [c]   Create Latest ZIP              ║');
