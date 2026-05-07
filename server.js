@@ -179,24 +179,33 @@ app.get(`/app`, (req, res) => {
 });
 
 
-// app.get(`/api/check-access`, async (req, res) => { 
-app.get(`/api/_ac`, async (req, res) => { 
+function getAppVersion() {
+  try {
+    const vp = path.join(__dirname, '_appVers/version.json');
+    if (fs.existsSync(vp)) return JSON.parse(fs.readFileSync(vp, 'utf8')).version;
+  } catch(e) {}
+  return '1.0.0';
+}
+
+// app.get(`/api/check-access`, async (req, res) => {
+app.get(`/api/_ac`, async (req, res) => {
   try {
 
     let is_connecte_to_internet = await utils.checkNetwork()
     if(!is_connecte_to_internet) console.log("❌ Not-Connected to the Internet");
 
     if(is_connecte_to_internet){
-      let accessData = await checkAccess.CheckAppAccess() 
+      let accessData = await checkAccess.CheckAppAccess()
+      accessData.app_version = getAppVersion();
       if(req.query.dev){
         res.send(accessData)
       } else {
         res.send(utils.encodeString('sbrenc%34#' + JSON.stringify(accessData)))
       }
     } else {
-      // let  
       let accessData = {
-        internet: false
+        internet: false,
+        app_version: getAppVersion(),
       }
       res.send(utils.encodeString('sbrenc%34#' + JSON.stringify(accessData)))
     }
