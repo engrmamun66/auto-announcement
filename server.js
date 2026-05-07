@@ -226,7 +226,7 @@ app.get('/api/update-app', async (req, res) => {
     const debug_mode = req.query.debug_mode === 'true';
     const zipFile = debug_mode ? ZIP_TEMP : ZIP_LATEST;
     try {
-      await downloadFromUrl(debug_mode, zipFile, true);
+      await downloadFromUrl(debug_mode, zipFile, false);
       await unzipAndOverwrite(zipFile, path.resolve('.'));
       res.json({ success: false, message: `Update Successful` });
     } catch (err) {
