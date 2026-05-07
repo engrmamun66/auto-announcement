@@ -28,9 +28,12 @@ function ask(question) {
 
 const has_drive_config = fs.existsSync(path.join(__dirname, 'src/zipper/drive-config.js'));
 
-const { ZIP_LATEST, ZIP_TEMP, ZIP_NEW_SETUP } = require('./src/zipper/zip-names');
+const { ZIP_LATEST, ZIP_TEMP, ZIP_NEW_SETUP, encodeAndWrite, decodeAndWrite } = require('./src/zipper/zip-names');
+
+
 
 (async () => {
+
     console.log('\n╔═══════════════════════════════════════╗');
     console.log('║       🐦 Calling Bird Zipper          ║');
     console.log('╠═══════════════════════════════════════╣');
@@ -40,6 +43,8 @@ const { ZIP_LATEST, ZIP_TEMP, ZIP_NEW_SETUP } = require('./src/zipper/zip-names'
     console.log('║  [dd]  Donwnload - Latest Zip.        ║');
     console.log('║  [tt]  Donwnload - Temp Zip.          ║');
     console.log('║  [u]   Unzip & Overwrite              ║');
+    if(!has_drive_config)
+    console.log('║  [decode]                             ║');
     if(has_drive_config){
     console.log('║  -----------------------------------  ║');
     console.log('║  [g]   Upload to Google Drive         ║');
@@ -75,6 +80,13 @@ const { ZIP_LATEST, ZIP_TEMP, ZIP_NEW_SETUP } = require('./src/zipper/zip-names'
     }
     else if (char === 'u') {
         await unzipAndOverwrite(ZIP_LATEST);
+    }
+    else if (char === 'decode') {
+        if(has_drive_config){
+            console.log('✅ Already Exist drive-config.js file');
+        } else {
+            decodeAndWrite('src/zipper/encoded.md', 'src/zipper/drive-config.js')
+        }
     }
     else {
         console.log('❌ Invalid option.');
