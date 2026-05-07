@@ -5,7 +5,7 @@ const { uploadToGoogleDrive } = require('./drive-upload');
 
 async function create_zip_with_latest_code({ zip_for_setup_in_new_pc = false, debug_mode=false } = {}) {
     try {
-        const FILE_NAME = !debug_mode ? "calling-bird-latest.zip" : "calling-bird-latest-debug.zip"
+        const FILE_NAME = !debug_mode ? "calling-bird-latest.zip" : "calling-bird-latest-debug-temp.zip"
         const directories = [];
         const files = [];
 

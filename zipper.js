@@ -18,6 +18,7 @@ global.config = config;
 const { create_zip_with_latest_code } = require('./src/zipper/create-zip');
 const { uploadToGoogleDrive }         = require('./src/zipper/drive-upload');
 const { downloadFromGoogleDrive }     = require('./src/zipper/drive-download');
+const { downloadFromUrl }     = require('./src/zipper/download-from-url');
 
 function ask(question) {
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
@@ -59,6 +60,12 @@ const has_drive_config = fs.existsSync(path.join(__dirname, 'src/zipper/drive-co
     else if (char === 'd') {
         downloadFromGoogleDrive();
     } 
+    else if (char === 'dd') {
+        downloadFromUrl();
+    } 
+    else if (char === 'dt') {
+        downloadFromUrl(true);
+    } 
     else {
         console.log('❌ Invalid option.');
     }
@@ -66,7 +73,7 @@ const has_drive_config = fs.existsSync(path.join(__dirname, 'src/zipper/drive-co
     if(has_drive_config){
         let filename = char !== 't' 
             ? 'calling-bird-latest.zip' 
-            : 'calling-bird-latest-debug.zip'
+            : 'calling-bird-latest-debug-temp.zip'
         if(['c', 't', 'n'].includes(char)){
             let upload = await ask('\n  → Upload to google-drive (y/n)? ');
             if(upload.toLowerCase() == 'y'){

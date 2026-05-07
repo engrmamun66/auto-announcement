@@ -8,11 +8,11 @@ const http = require('http');
  * @param {string} url - Direct download URL
  * @param {string} destPath - Local path to save the file (default: calling-bird-latest.zip)
  */
-async function downloadFromUrl(url, debug_file=false) {
+async function downloadFromUrl(debug_file=false) {
 
-    const calling_bird_lates__zip = debug_file 
-                    ? "https://drive.google.com/uc?id=1i9HWFHwcw7oeVedz0CfR4J9-oZ5_fH22&export=download"
-                    : "https://drive.google.com/uc?id=1i9HWFHwcw7oeVedz0CfR4J9-oZ5_fH22&export=download"
+    const url = debug_file 
+                    ? "https://drive.google.com/uc?id=1ISeHzAjp-k65KURIEUDifPP8_ImZrbnr&export=download" // calling-bird-latest-debug-temp.zip
+                    : "https://drive.google.com/uc?id=1LmBlo7XrQDlbwMvAJDtuoJy8U1QkGc_8&export=download" // calling-bird-latest.zip
 
     const destPath = path.resolve('calling-bird-latest.zip')
 
