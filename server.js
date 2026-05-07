@@ -230,7 +230,8 @@ app.get('/api/update-app', async (req, res) => {
       await unzipAndOverwrite(zipFile, path.resolve('.'));
       res.json({ success: true, message: `Update started (${zipFile})` });
     } catch (err) {
-        console.error('❌ update-app error:', err.message);
+      console.error('❌ update-app error:', err.message);
+      res.status(500).json({ success: false, message: err.message });
     }
 });
 

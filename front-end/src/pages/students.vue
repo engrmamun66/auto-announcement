@@ -739,10 +739,12 @@ watch(fixedWidthSoundCol, (newVal) => {
                   <div class="col-12 overflow-y-scroll">
                      <table class="table table-striped">
                       <thead>
-                        <th>Name</th> 
-                        <th>Date</th>
-                        <th>Time</th>
-                        <th>Before</th>
+                        <tr>
+                          <th>Name</th>
+                          <th>Date</th>
+                          <th>Time</th>
+                          <th>Before</th>
+                        </tr>
                       </thead>
 
                       <tbody>
