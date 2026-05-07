@@ -15,6 +15,7 @@ const configPath = path.join(__dirname, 'config.js');
 if (fs.existsSync(configPath)) config = require(configPath);
 global.config = config;
 
+const { delelteFile } = require('./src/zipper/delete-file');
 const { create_zip_with_latest_code } = require('./src/zipper/create-zip');
 const { uploadToGoogleDrive }         = require('./src/zipper/drive-upload');
 const { downloadFromGoogleDrive }     = require('./src/zipper/drive-download');
@@ -45,6 +46,7 @@ const { ZIP_LATEST, ZIP_TEMP, ZIP_NEW_SETUP, encodeAndWrite, decodeAndWrite } = 
     console.log('║  [u]   Unzip & Overwrite              ║');
     if(!has_drive_config)
     console.log('║  [dec] encoded.md ---------------     ║');
+    console.log('║  [clear] Unneccessary Files ------    ║');
     if(has_drive_config){
     console.log('║  -----------------------------------  ║');
     console.log('║  [g]   Upload to Google Drive         ║');
@@ -86,6 +88,16 @@ const { ZIP_LATEST, ZIP_TEMP, ZIP_NEW_SETUP, encodeAndWrite, decodeAndWrite } = 
             console.log('✅ Already Exist drive-config.js file');
         } else {
             decodeAndWrite('src/zipper/encoded.md', 'src/zipper/drive-config.js')
+        }
+    }
+    else if (char === 'clear') {
+        delelteFile(ZIP_LATEST)
+        delelteFile(ZIP_TEMP)
+        delelteFile(ZIP_NEW_SETUP)
+
+        if(has_drive_config){
+            // Read file content
+            delelteFile(ZIP_NEW_SETUP)
         }
     }
     else {
