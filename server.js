@@ -58,7 +58,6 @@ const PunchLoogClass = require('./src/class-punchlog');
 const AttendenceClass = require('./src/class-attendence');
 const LeavAndVacationsClass = require('./src/class-leave-and-vacations');
 const Backup = require('./src/backup');
-const Updater = require('./src/updater');
 const utils = require('./src/utls');
 const DB = new classDB()
 const Students = new students(DB.db) 
@@ -66,11 +65,6 @@ const Schedules = new schedules(DB.db)
 const PunchLog = new PunchLoogClass() 
 const Attendence = new AttendenceClass(DB.db) 
 const LeavAndVacations = new LeavAndVacationsClass(DB.db) 
-
-
-// Updater.getUpdateVersion()
-
-// Updater.downloadFile('http://wordpress-test.test/wp-content/uploads/2025/09/cd_backup_%EF%A3%BFYOUR_SECRET_KEY%EF%A3%BF-2.zip', 'latest.zip')
 
 
 utils.createRequiredFolders()
