@@ -5,7 +5,7 @@ module.exports = {
       name: 'callingbird',       // ✅ updated name
       script: './server.js',
       instances: 1,
-      autorestart: true,
+      autorestart: false,
       watch: false,                     // ✅ enable watch
       max_restarts: 10,                // ✅ max restarts
       restart_delay: 2000,             // ✅ delay between restarts (ms)
