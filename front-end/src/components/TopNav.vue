@@ -51,7 +51,7 @@
         @click="sendRemoteAction({from: 'ip', action: 'onClick', selector: '#nav-link-contact'})"
          >
         Contact
-      </RouterLink>
+      </RouterLink> 
 
       <div class="topnav__version">
         <span class="topnav__version-text" v-if="appAccessData?.app_version">v{{ appAccessData?.app_version || '1.0.0' }}</span>
