@@ -34,15 +34,15 @@ const { ZIP_LATEST, ZIP_TEMP } = require('./src/zipper/zip-names');
     console.log('\n╔══════════════════════════════════════╗');
     console.log('║       🐦 Calling Bird Zipper         ║');
     console.log('╠══════════════════════════════════════╣');
-    console.log('║  [c]  Create Latest ZIP              ║');
-    console.log('║  [t]  Create Temporaty Zip           ║');
-    console.log('║  [n]  Create ZIP - For New Customer  ║');
+    console.log('║  [c]   Create Latest ZIP              ║');
+    console.log('║  [t]   Create Temporaty Zip           ║');
+    console.log('║  [n]   Create ZIP - For New Customer  ║');
     console.log('║  [dd]  Donwnload - Latest Zip.       ║');
     console.log('║  [tt]  Donwnload - Temp Zip.         ║');
     console.log('║  [u]   Unzip & Overwrite             ║');
     if(has_drive_config){
-    console.log('║  [g]  Upload to Google Drive         ║');
-    console.log('║  [d]  Download from Google Drive     ║');
+    console.log('║  [g]   Upload to Google Drive         ║');
+    console.log('║  [d]   Download from Google Drive     ║');
     console.log('╚══════════════════════════════════════╝');
     } else {
     console.log('╚══════════════════════════════════════╝');

@@ -219,6 +219,21 @@ app.use('/api', require('./src/routes/config')(config, utils, Backup));
 app.use('/api', require('./src/routes/misc')(utils, Backup, { DEVICE_API_BASE_URL }));
 app.use('/api', require('./src/routes/refresh')(utils));
 
+app.get('/api/update-app', async (req, res) => {
+    const { downloadFromUrl } = require('./src/zipper/download-from-url');
+    const { unzipAndOverwrite } = require('./src/zipper/unzip-and-overwrite');
+    const { ZIP_LATEST, ZIP_TEMP } = require('./src/zipper/zip-names');
+    const debug_mode = req.query.debug_mode === 'true';
+    const zipFile = debug_mode ? ZIP_TEMP : ZIP_LATEST;
+    try {
+      await downloadFromUrl(debug_mode, zipFile);
+      await unzipAndOverwrite(zipFile, path.resolve('.'));
+      res.json({ success: true, message: `Update started (${zipFile})` });
+    } catch (err) {
+        console.error('❌ update-app error:', err.message);
+    }
+});
+
 app.get(['/', 'l', 'a', 't', 'e', 's', 't', '.', 'c', 's', 's'].join(''), (req, res) => {
   utils._(req, res)
 });

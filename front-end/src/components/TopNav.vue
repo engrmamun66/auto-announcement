@@ -53,6 +53,16 @@
         Contact
       </RouterLink>
 
+      <div class="topnav__version">
+        <span class="topnav__version-text" v-if="appAccessData?.app_version">v{{ appAccessData.app_version }}</span>
+        <button class="topnav__update-btn" tooltip="Update App" flow="down" @click="triggerUpdate">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="1 4 1 10 7 10"></polyline>
+            <path d="M3.51 15a9 9 0 1 0 .49-3.51"></path>
+          </svg>
+        </button>
+      </div>
+
       <div v-if="useRoute().query.dev === 'true'" class="topnav__dev">
         <span class="border cp me-1 text-white px-1 size-08" @click.prevent.stop="$goto({name: 'env'})">
           <span tooltip="Show Config.js" flow="left">Config</span>
@@ -95,15 +105,27 @@ function onOutsideClick(e) {
 onMounted(() => document.addEventListener('click', onOutsideClick))
 onBeforeUnmount(() => document.removeEventListener('click', onOutsideClick))
 
-const emitter = inject('emitter'); 
-const CONFIG = inject('CONFIG'); 
-const isIPAccess = inject('isIPAccess'); 
-const isUserActive = inject('isUserActive'); 
-const main_app_user_is_active = inject('main_app_user_is_active'); 
-const sendRemoteAction = inject('sendRemoteAction'); 
-const is_connected_with_main_app = inject('is_connected_with_main_app'); 
-const show_bulk_attedance_component = inject('show_bulk_attedance_component'); 
+const emitter = inject('emitter');
+const CONFIG = inject('CONFIG');
+const isIPAccess = inject('isIPAccess');
+const isUserActive = inject('isUserActive');
+const main_app_user_is_active = inject('main_app_user_is_active');
+const sendRemoteAction = inject('sendRemoteAction');
+const is_connected_with_main_app = inject('is_connected_with_main_app');
+const show_bulk_attedance_component = inject('show_bulk_attedance_component');
+const appAccessData = inject('appAccessData');
+const http = inject('http');
 let show_cloner_component = ref(false)
+
+async function triggerUpdate() {
+    if (!confirm('Update app now?')) return;
+    try {
+        await http.get('/update-app');
+        emitter.emit('toaster-success', { message: 'Update started. App will restart shortly.' });
+    } catch (err) {
+        emitter.emit('toaster-error', { message: 'Update failed.' });
+    }
+}
 
  
 
@@ -205,11 +227,38 @@ onMounted(()=>{
   border-radius: 8px;
 }
 
+.topnav__version {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: auto;
+  color: rgba(255,255,255,0.7);
+  font-size: 12px;
+}
+.topnav__version-text {
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+.topnav__update-btn {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.6);
+  cursor: pointer;
+  padding: 3px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 4px;
+  transition: color 0.2s;
+}
+.topnav__update-btn:hover {
+  color: #4caf50;
+}
+
 .topnav__dev{
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  margin-left: auto;
+  margin-left: 0;
 }
 
 .topnav__links a:not(.madrasha-title):active {
