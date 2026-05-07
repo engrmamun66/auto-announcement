@@ -231,7 +231,7 @@ app.get('/api/update-app', async (req, res) => {
       res.json({ success: true, message: `Update successful. Restarting...` });
       setTimeout(() => require('child_process').exec('pm2 restart all'), 100);
       
-    } catch (err) {
+    } catch (err) { 
         console.error('❌ update-app error:', err.message);
         res.json({ success: false, message: `Update Successful` });
     }
