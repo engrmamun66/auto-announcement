@@ -146,6 +146,8 @@ public/logo.png
 public/logo.jpg
 exe/main.spec
 /config.js
+src/zipper/drive-config.js
+get-google-token.js
 open.bat
 backup.zip
 backup
