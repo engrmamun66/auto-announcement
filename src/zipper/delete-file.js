@@ -3,8 +3,8 @@ const path = require('path');
 
 function delelteFile(file_path){
     let filePath = path.resolve(file_path)
-    if(fs.existsSync(zipPath)){
-        fs.unlinkSync(zipPath);
+    if(fs.existsSync(filePath)){
+        fs.unlinkSync(filePath);
         console.log(`✅ Deleted (${file_path})`)
     }
 }
