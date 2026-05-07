@@ -3,6 +3,18 @@ const path = require('path');
 const archiver = require('archiver');
 const { ZIP_LATEST, ZIP_TEMP, ZIP_NEW_SETUP } = require('./zip-names');
 
+function addDirFiles(files, dirPath, archiveDest) {
+    if (!fs.existsSync(dirPath)) return;
+    fs.readdirSync(dirPath).forEach(item => {
+        const full = path.join(dirPath, item);
+        if (fs.statSync(full).isDirectory()) {
+            addDirFiles(files, full, `${archiveDest}/${item}`);
+        } else {
+            files.push({ src: full, dest: `${archiveDest}/${item}` });
+        }
+    });
+}
+
 async function create_zip_with_latest_code({ file_name, for_new_setup = false, ask = async ()=>{} } = {}) {
     try {
         const FILE_NAME = file_name;
@@ -17,27 +29,38 @@ async function create_zip_with_latest_code({ file_name, for_new_setup = false, a
         }
 
         if (for_new_setup) {
-            const { config } = global
-            const { DATABASE_PATH } = config.env // './database/latest-db-DHM101.db'
-            directories.push(path.join(global.DIR, 'database'));
-            /**
-             * Add database folder only 'latest-db-DHM101.db' file
-             */
+            const { DATABASE_PATH, CODE_NUMBER } = global.config.env;
 
+            // Only the specific DB file, not whole database dir
+            const dbFile = path.resolve(DATABASE_PATH || './database/database.db');
+            if (fs.existsSync(dbFile)) {
+                files.push({ src: dbFile, dest: `database/${path.basename(dbFile)}` });
+            }
 
-            directories.push(path.join(global.DIR, "public"));
-            const { CODE_NUMBER } = config.env
-            console.log(`\nCode-Number:: ${CODE_NUMBER}`)
-            const choice = await ask(`\n  → Only matched media(y/n): `);
+            console.log(`\nCode-Number:: ${CODE_NUMBER}`);
+            const choice = (await ask(`\n  → Only matched media(y/n): `)).trim().toLowerCase();
 
-            /**
-             * From public folder
-             * ==============================
-             * Exclude folder: exports, temp,
-             * if(choice == 'y'){
-             *   pushed media folder, and take only those media that matched starts with CODE_NUMBER
-             * }
-             */
+            const publicDir = path.join(global.DIR, 'public');
+            const EXCLUDE = new Set(['exports', 'temp']);
+            if (fs.existsSync(publicDir)) {
+                fs.readdirSync(publicDir).forEach(item => {
+                    const fullPath = path.join(publicDir, item);
+                    const stat = fs.statSync(fullPath);
+                    if (stat.isFile()) {
+                        files.push({ src: fullPath, dest: `public/${item}` });
+                    } else if (stat.isDirectory() && !EXCLUDE.has(item)) {
+                        if (item === 'media' && choice === 'y') {
+                            fs.readdirSync(fullPath).forEach(mediaFile => {
+                                if (mediaFile.startsWith(CODE_NUMBER)) {
+                                    files.push({ src: path.join(fullPath, mediaFile), dest: `public/media/${mediaFile}` });
+                                }
+                            });
+                        } else {
+                            addDirFiles(files, fullPath, `public/${item}`);
+                        }
+                    }
+                });
+            }
 
         } else {
             // all root file of public folder
