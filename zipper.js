@@ -59,7 +59,7 @@ const { ZIP_LATEST, ZIP_TEMP, ZIP_NEW_SETUP } = require('./src/zipper/zip-names'
         await create_zip_with_latest_code({ file_name: ZIP_TEMP });
     }
     else if (char === 'n') {
-        await create_zip_with_latest_code({ file_name: ZIP_NEW_SETUP, for_new_setup: true });
+        await create_zip_with_latest_code({ file_name: ZIP_NEW_SETUP, for_new_setup: true, ask });
     } 
     else if (char === 'g') {
         uploadToGoogleDrive();

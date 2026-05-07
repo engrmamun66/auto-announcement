@@ -3,7 +3,7 @@ const path = require('path');
 const archiver = require('archiver');
 const { ZIP_LATEST, ZIP_TEMP, ZIP_NEW_SETUP } = require('./zip-names');
 
-async function create_zip_with_latest_code({ file_name, for_new_setup = false } = {}) {
+async function create_zip_with_latest_code({ file_name, for_new_setup = false, ask = async ()=>{} } = {}) {
     try {
         const FILE_NAME = file_name;
         const directories = [];
@@ -18,8 +18,26 @@ async function create_zip_with_latest_code({ file_name, for_new_setup = false } 
 
         if (for_new_setup) {
             const { config } = global
+            const { DATABASE_PATH } = config.env // './database/latest-db-DHM101.db'
             directories.push(path.join(global.DIR, 'database'));
+            /**
+             * Add database folder only 'latest-db-DHM101.db' file
+             */
+
+
             directories.push(path.join(global.DIR, "public"));
+            const { CODE_NUMBER } = config.env
+            console.log(`\nCode-Number:: ${CODE_NUMBER}`)
+            const choice = await ask(`\n  → Only matched media(y/n): `);
+
+            /**
+             * From public folder
+             * ==============================
+             * Exclude folder: exports, temp,
+             * if(choice == 'y'){
+             *   pushed media folder, and take only those media that matched starts with CODE_NUMBER
+             * }
+             */
 
         } else {
             // all root file of public folder
