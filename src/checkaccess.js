@@ -113,6 +113,7 @@ module.exports = {
               },
               body: JSON.stringify({
                   secret_key: global.config.env.SECRET_KEY, 
+                  time: new Date().getTime()
               })
             }); 
         
