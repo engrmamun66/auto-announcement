@@ -44,6 +44,7 @@ const { ZIP_LATEST, ZIP_TEMP, ZIP_NEW_SETUP, encodeAndWrite, decodeAndWrite } = 
     console.log('║  [dd]  Donwnload - Latest Zip.        ║');
     console.log('║  [tt]  Donwnload - Temp Zip.          ║');
     console.log('║  [u]   Unzip & Overwrite              ║');
+    console.log('║  -----------------------------------  ║');
     if(!has_drive_config)
     console.log('║  [dec] encoded.md ---------------     ║');
     console.log('║  [clear] Unneccessary Files ------    ║');
