@@ -37,12 +37,14 @@ function ask(question) {
   }
   
   (async () => {
-    const create = await ask("Create(c) / Upload to server(u) / Upload to Google Drive(g)? ");
+    const create = await ask("Create(c) / Upload to server(u) / Upload to Google Drive(g) / Download from Drive(d)? ");
     if(create.toLowerCase() === "c"){
         const zip_for_setup_in_new_pc = await ask("Zip for setup in new PC (y/n): ");
         create_zip_with_latest_code({zip_for_setup_in_new_pc: zip_for_setup_in_new_pc === 'y'})
     } else if(create.toLowerCase() === "g"){
         uploadToGoogleDrive()
+    } else if(create.toLowerCase() === "d"){
+        downloadFromGoogleDrive()
     } else {
       console.log('===== Uploading Latest Code to Server =====');
         // const username = await ask("Enter username: ");
@@ -289,6 +291,53 @@ async function uploadToGoogleDrive() {
         console.log('🔗 Link:', response.data.webViewLink);
     } catch (err) {
         console.error('❌ uploadToGoogleDrive error:', err.message);
+    }
+}
+
+async function downloadFromGoogleDrive() {
+    try {
+        const { google } = require('googleapis');
+        if (GDRIVE_REFRESH_TOKEN === 'YOUR_REFRESH_TOKEN') {
+            console.error('❌ Fill in GDRIVE credentials in zipper.js');
+            return;
+        }
+
+        const auth = new google.auth.OAuth2(GDRIVE_CLIENT_ID, GDRIVE_CLIENT_SECRET);
+        auth.setCredentials({ refresh_token: GDRIVE_REFRESH_TOKEN });
+        const drive = google.drive({ version: 'v3', auth });
+
+        // Find latest calling-bird-latest.zip in folder (most recently modified)
+        const list = await drive.files.list({
+            q: `'${GDRIVE_FOLDER_ID}' in parents and name='calling-bird-latest.zip' and trashed=false`,
+            orderBy: 'modifiedTime desc',
+            pageSize: 1,
+            fields: 'files(id, name, modifiedTime)',
+        });
+
+        const file = list.data.files?.[0];
+        if (!file) {
+            console.error('❌ No calling-bird-latest.zip found in Drive folder.');
+            return;
+        }
+
+        console.log(`📥 Downloading: ${file.name} (modified: ${file.modifiedTime})`);
+        const destPath = path.resolve('calling-bird-latest.zip');
+        const dest = fs.createWriteStream(destPath);
+
+        const res = await drive.files.get(
+            { fileId: file.id, alt: 'media' },
+            { responseType: 'stream' }
+        );
+
+        await new Promise((resolve, reject) => {
+            res.data.pipe(dest);
+            res.data.on('error', reject);
+            dest.on('finish', resolve);
+        });
+
+        console.log(`✅ Downloaded to: ${destPath}`);
+    } catch (err) {
+        console.error('❌ downloadFromGoogleDrive error:', err.message);
     }
 }
 
