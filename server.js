@@ -21,7 +21,8 @@ const LOCAL_IP = getLocalIP()
 let config = require('./config.example');
 const configPath = path.join(__dirname, 'config.js');
 if (fs.existsSync(configPath)) {
-  config = require(configPath);
+  let { fulfillMisingConfigKeys } = require('./src/fulfill-the-config')
+  config = fulfillMisingConfigKeys(require(configPath), config);
 }
 global.config = config
 
