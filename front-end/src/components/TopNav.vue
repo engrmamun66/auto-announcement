@@ -143,7 +143,8 @@ async function triggerUpdate() {
         await http.get('/update-app');
         updateDone.value = true;
         allow_to_reaload.value = true;
-        setTimeout(() => { window.location.reload(); }, 1500);
+        emitter.emit('toaster-success', { message: 'Update successful. Restarting...', duration: 0 });
+        setTimeout(() => { window.location.reload(); }, 2000);
     } catch (err) {
         showUpdateModal.value = false;
         emitter.emit('toaster-error', { message: 'Update failed.' });
