@@ -195,7 +195,7 @@ async function confirmAndUpdate() {
     showUpdateModal.value = true;
     updateDone.value = false;
     try {
-        await http.get('/update-app');
+        await http.get('/update-app', { params: { new_version: appAccessData?.value?.incoming_version } });
         updateDone.value = true;
         allow_to_reaload.value = true;
         setTimeout(() => { window.location.reload(); }, 2000);
