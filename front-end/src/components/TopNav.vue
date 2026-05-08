@@ -182,7 +182,6 @@ const isNewVersion = computed(() => {
 function dismissNewVersion() {}
 
 watch(isNewVersion, (hasNew) => {
-  console.log({hasNew, autoUpdateEnabled: autoUpdateEnabled.value});
     if (hasNew && autoUpdateEnabled.value === true) {
         confirmAndUpdate();
     }
