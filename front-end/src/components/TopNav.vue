@@ -182,7 +182,7 @@ const checking_accessibility = inject('checking_accessibility')
 watch(checking_accessibility, (bool) => {
   console.log('===Checking', bool);
   if(bool === false){
-    confirmAndUpdate()
+    maybeAutoUpdate()
   }
 })
 
@@ -190,9 +190,7 @@ watch(checking_accessibility, (bool) => {
 
 function maybeAutoUpdate() {
     if (isNewVersion.value && autoUpdateEnabled.value) { 
-        if(!checking_accessibility.value){
-          // confirmAndUpdate(); 
-        }
+      confirmAndUpdate(); 
     }
 }
 watch(isNewVersion, maybeAutoUpdate, { immediate: true })
