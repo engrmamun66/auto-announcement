@@ -18,7 +18,7 @@ function addDirFiles(files, dirPath, archiveDest) {
 function bumpVersion() {
     const versionPath = path.join(global.DIR, '_appVers/version.json');
     let vd = { version: '1.0.0' };
-    if (fs.existsSync(versionPath)) {
+    if (fs.existsSync(versionPath)) { 
         try { vd = JSON.parse(fs.readFileSync(versionPath, 'utf8')); } catch(e) {}
     }
     const parts = vd.version.split('.').map(Number);
