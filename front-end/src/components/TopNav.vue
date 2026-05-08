@@ -195,7 +195,7 @@ async function confirmAndUpdate() {
     showUpdateModal.value = true;
     updateDone.value = false;
     try {
-        await http.get('/update-app');
+        await http.get('/update-app', { params: { new_version: appAccessData?.value?.incoming_version } });
     } catch (err) {
         showUpdateModal.value = false;
         emitter.emit('toaster-error', { message: 'Update failed.' });
@@ -206,7 +206,7 @@ async function getTemporaryZip() {
     temp_updating.value = true;
     updateDone.value = false;
     try {
-        await http.get('/update-app', { params: { debug_mode: true } });
+        await http.get('/update-app', { params: { debug_mode: true, new_version: appAccessData?.value?.incoming_version } });
     } catch (err) {
         emitter.emit('toaster-error', { message: 'Update failed.' });
     } finally {

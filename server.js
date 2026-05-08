@@ -233,10 +233,16 @@ app.get('/api/update-app', async (req, res) => {
     const { unzipAndOverwrite } = require('./src/zipper/unzip-and-overwrite');
     const { ZIP_LATEST, ZIP_TEMP } = require('./src/zipper/zip-names');
     const debug_mode = req.query.debug_mode === 'true';
+    const new_version = req.query.new_version;
     const zipFile = debug_mode ? ZIP_TEMP : ZIP_LATEST;
     try {
       await downloadFromUrl(debug_mode, zipFile, false);
       await unzipAndOverwrite(zipFile, path.resolve('.'));
+      if (new_version) {
+        const vp = path.join(__dirname, '_appVers/version.json');
+        fs.mkdirSync(path.dirname(vp), { recursive: true });
+        fs.writeFileSync(vp, JSON.stringify({ version: new_version, updated_at: new Date().toISOString() }, null, 2));
+      }
       res.json({ success: true, message: `Update successful. Restarting...` });
       setTimeout(() => {
         const { exec } = require('child_process');
