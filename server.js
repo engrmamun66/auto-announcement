@@ -245,7 +245,7 @@ app.get('/api/update-app', async (req, res) => {
             if (client.readyState === client.OPEN) {
               client.send(JSON.stringify({ type: 'app-updated' }));
             }
-          });
+          }); // ====
           setTimeout(() => exec('pm2 restart all'), 500);
         });
       }, 100);
