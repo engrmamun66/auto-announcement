@@ -167,7 +167,7 @@ let showConfirmModal = ref(false)
 let showUpdateModal = ref(false)
 let updateDone = ref(false)
 let temp_updating = ref(false)
-let autoUpdateEnabled = ref(storage('cb_auto_update', false))
+let autoUpdateEnabled = ref(storage('cb_auto_update').value) 
 watch(autoUpdateEnabled, (bool) => {
   storage('cb_auto_update').value = bool
 })
@@ -182,10 +182,11 @@ const isNewVersion = computed(() => {
 function dismissNewVersion() {}
 
 watch(isNewVersion, (hasNew) => {
+  console.log({hasNew, autoUpdateEnabled: autoUpdateEnabled.value});
     if (hasNew && autoUpdateEnabled.value === true) {
         confirmAndUpdate();
     }
-}, {immediate: true})
+})
 
 function showVersionUpdateModal() {
     showConfirmModal.value = true;
