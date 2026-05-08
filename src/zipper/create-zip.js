@@ -38,7 +38,7 @@ async function create_zip_with_latest_code({ file_name, for_new_setup = false, a
             }
 
             console.log(`\nCode-Number:: ${CODE_NUMBER}`);
-            const choice = (await ask(`\n  → Only matched media(y/n): `)).trim().toLowerCase();
+            const choice = (await ask(`\n  → Only matched media(y/all): `)).trim().toLowerCase();
 
             const publicDir = path.join(global.DIR, 'public');
             const EXCLUDE = new Set(['exports', 'temp']);

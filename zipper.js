@@ -110,7 +110,7 @@ const { ZIP_LATEST, ZIP_TEMP, ZIP_NEW_SETUP, encodeAndWrite, decodeAndWrite } = 
     if(has_drive_config){
         const filename = char === 't' ? ZIP_TEMP : (char == 'n' ? ZIP_NEW_SETUP : ZIP_LATEST);
         if(['c', 't', 'n'].includes(char)){
-            let upload = await ask('\n  → Upload to google-drive (y/all)? ');
+            let upload = await ask('\n  → Upload to google-drive (y/n)? ');
             if(upload.toLowerCase() == 'y'){
                 uploadToGoogleDrive(filename)
             }
