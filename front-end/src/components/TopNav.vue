@@ -167,7 +167,8 @@ let showConfirmModal = ref(false)
 let showUpdateModal = ref(false)
 let updateDone = ref(false)
 let temp_updating = ref(false)
-const autoUpdateEnabled = storage('cb_auto_update', false)
+const autoUpdateEnabled = ref(storage('cb_auto_update', false).value)
+watch(autoUpdateEnabled, (val) => { storage('cb_auto_update').value = val })
 
 const isNewVersion = computed(() => {
     const installed = appAccessData?.value?.app_version;
@@ -178,7 +179,7 @@ const isNewVersion = computed(() => {
 })
 
 function maybeAutoUpdate() {
-    if (isNewVersion.value && !!autoUpdateEnabled.value) {
+    if (isNewVersion.value && autoUpdateEnabled.value) {
         confirmAndUpdate();
     }
 }
