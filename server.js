@@ -59,6 +59,7 @@ const AttendenceClass = require('./src/class-attendence');
 const LeavAndVacationsClass = require('./src/class-leave-and-vacations');
 const Backup = require('./src/backup');
 const utils = require('./src/utls');
+const socket = require('./socket/socket');
 const DB = new classDB()
 const Students = new students(DB.db) 
 const Schedules = new schedules(DB.db)
@@ -247,9 +248,14 @@ app.get('/api/update-app', async (req, res) => {
       }
 
 
+      res.json({ success: true, message: `Update successful. Restarting...` });
       exec('npm install --legacy-peer-deps', (npmInstall_error) => {
-          res.json({ success: true, message: `Update successful. Restarting...` });
           setTimeout(() => {
+            global.socketServer.clients.forEach((client) => {
+              if (client.readyState === client.OPEN) {
+                client.send(JSON.stringify({ type: 'app-updated' }));
+              }
+            });
             exec('pm2 restart all', (pm2RestartError) => {
               // After complete the command send message to socket, then, TopNav.vue will receive the event and realod
               
