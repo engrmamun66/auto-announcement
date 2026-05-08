@@ -196,9 +196,6 @@ async function confirmAndUpdate() {
     updateDone.value = false;
     try {
         await http.get('/update-app');
-        updateDone.value = true;
-        allow_to_reaload.value = true;
-        setTimeout(() => { window.location.reload(); }, 2000);
     } catch (err) {
         showUpdateModal.value = false;
         emitter.emit('toaster-error', { message: 'Update failed.' });
@@ -210,10 +207,6 @@ async function getTemporaryZip() {
     updateDone.value = false;
     try {
         await http.get('/update-app', { params: { debug_mode: true } });
-        updateDone.value = true;
-        allow_to_reaload.value = true;
-        emitter.emit('toaster-success', { message: 'Updated', duration: 0 });
-        setTimeout(() => { window.location.reload(); }, 1500);
     } catch (err) {
         emitter.emit('toaster-error', { message: 'Update failed.' });
     } finally {
@@ -221,7 +214,14 @@ async function getTemporaryZip() {
     }
 }
 
- 
+emitter.on('on_socket_message', (data) => {
+    if (data?.type === 'app-updated') {
+        updateDone.value = true;
+        allow_to_reaload.value = true;
+        temp_updating.value = false;
+        setTimeout(() => { window.location.reload(); }, 1500);
+    }
+})
 
 onMounted(()=>{
   if(typeof GLOBAL_DATA !== 'undefined'){

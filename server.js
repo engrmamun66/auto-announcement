@@ -238,7 +238,17 @@ app.get('/api/update-app', async (req, res) => {
       await downloadFromUrl(debug_mode, zipFile, false);
       await unzipAndOverwrite(zipFile, path.resolve('.'));
       res.json({ success: true, message: `Update successful. Restarting...` });
-      setTimeout(() => require('child_process').exec('pm2 restart all'), 100);
+      setTimeout(() => {
+        const { exec } = require('child_process');
+        exec('npm install --legacy-peer-deps', () => {
+          global.socketServer.clients.forEach((client) => {
+            if (client.readyState === client.OPEN) {
+              client.send(JSON.stringify({ type: 'app-updated' }));
+            }
+          });
+          setTimeout(() => exec('pm2 restart all'), 500);
+        });
+      }, 100);
       
     } catch (err) { 
         console.error('❌ update-app error:', err.message);
