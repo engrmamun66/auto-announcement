@@ -236,16 +236,23 @@ app.get('/api/update-app', async (req, res) => {
     const debug_mode = req.query.debug_mode === 'true';
     const zipFile = debug_mode ? ZIP_TEMP : ZIP_LATEST;
     try {
-      // await downloadFromUrl(debug_mode, zipFile, false);
-      // await unzipAndOverwrite(zipFile, path.resolve('.'));
-      const { exec } = require('child_process');
+      let update_success = false;
+      try {
+        await downloadFromUrl(debug_mode, zipFile, false);
+        await unzipAndOverwrite(zipFile, path.resolve('.'));
+        update_success = true;
+      } catch(update_err) {
+        console.error('❌ download/unzip failed:', update_err.message);
+      }
 
       const new_version = req.query.new_version;
-      if (new_version) {
+      if (update_success && new_version) {
         const vp = path.join(__dirname, '_appVers/version.json');
         fs.mkdirSync(path.dirname(vp), { recursive: true });
         fs.writeFileSync(vp, JSON.stringify({ version: new_version, updated_at: new Date().toISOString() }, null, 2));
       }
+
+      const { exec } = require('child_process');
 
 
       res.json({ success: true, message: `Update successful. Restarting...` });
