@@ -238,6 +238,15 @@ app.get('/api/update-app', async (req, res) => {
       // await downloadFromUrl(debug_mode, zipFile, false);
       // await unzipAndOverwrite(zipFile, path.resolve('.'));
       const { exec } = require('child_process');
+
+      const new_version = req.query.new_version;
+      if (new_version) {
+        const vp = path.join(__dirname, '_appVers/version.json');
+        fs.mkdirSync(path.dirname(vp), { recursive: true });
+        fs.writeFileSync(vp, JSON.stringify({ version: new_version, updated_at: new Date().toISOString() }, null, 2));
+      }
+
+
       exec('npm install --legacy-peer-deps', (npmInstall_error) => {
           res.json({ success: true, message: `Update successful. Restarting...` });
           setTimeout(() => {
@@ -245,7 +254,7 @@ app.get('/api/update-app', async (req, res) => {
               // After complete the command send message to socket, then, TopNav.vue will receive the event and realod
               
             });
-        }, 100);
+          }, 100);
       });
       
     } catch (err) { 
