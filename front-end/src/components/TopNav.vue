@@ -193,8 +193,6 @@ function maybeAutoUpdate() {
       confirmAndUpdate(); 
     }
 }
-watch(isNewVersion, maybeAutoUpdate, { immediate: true })
-watch(autoUpdateEnabled, maybeAutoUpdate)
 
 function showVersionUpdateModal() {
     showConfirmModal.value = true;
