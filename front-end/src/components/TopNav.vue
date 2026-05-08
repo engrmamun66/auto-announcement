@@ -185,7 +185,7 @@ watch(isNewVersion, (hasNew) => {
     if (hasNew && autoUpdateEnabled.value === true) {
         confirmAndUpdate();
     }
-})
+}, {immediate: true})
 
 function showVersionUpdateModal() {
     showConfirmModal.value = true;
