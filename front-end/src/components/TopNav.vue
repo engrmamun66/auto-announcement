@@ -54,11 +54,11 @@
       </RouterLink> 
 
       <div class="topnav__version">
-        <span v-if="isNewVersion" class="topnav__new-version" @click="triggerUpdate">
+        <span v-if="isNewVersion" class="topnav__new-version" @click="showVersionUpdateModal">
           New: v{{ appAccessData?.incoming_version }}
         </span>
         <span class="topnav__version-text" v-else-if="appAccessData?.app_version">v{{ appAccessData?.app_version }}</span>
-        <button class="topnav__update-btn" tooltip="Update App" flow="down" @click="triggerUpdate">
+        <button class="topnav__update-btn" tooltip="Update App" flow="down" @click="showVersionUpdateModal">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="1 4 1 10 7 10"></polyline>
             <path d="M3.51 15a9 9 0 1 0 .49-3.51"></path>
@@ -178,7 +178,7 @@ function dismissNewVersion() {
     // no-op: badge disappears once app_version matches incoming_version after update
 }
 
-function triggerUpdate() {
+function showVersionUpdateModal() {
     showConfirmModal.value = true;
 }
 
