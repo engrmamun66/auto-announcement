@@ -254,21 +254,12 @@ app.get('/api/update-app', async (req, res) => {
 
       const { exec } = require('child_process');
 
-
       res.json({ success: true, message: `Update successful. Restarting...` });
-      exec('npm install --legacy-peer-deps', (npmInstall_error) => {
-          setTimeout(() => {
-            global.socketServer.clients.forEach((client) => {
-              if (client.readyState === client.OPEN) {
-                client.send(JSON.stringify({ type: 'app-updated' }));
-              }
-            });
-            exec('pm2 restart all', (pm2RestartError) => {
-              // After complete the command send message to socket, then, TopNav.vue will receive the event and realod
-              
-            });
-          }, 100);
-      });
+      setTimeout(() => {
+          exec('npm install --legacy-peer-deps', (npmInstall_error) => {
+            exec('pm2 restart all');
+          });
+      }, 100);
       
     } catch (err) { 
         console.error('❌ update-app error:', err.message);
