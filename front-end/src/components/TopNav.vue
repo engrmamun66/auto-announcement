@@ -180,7 +180,9 @@ const isNewVersion = computed(() => {
 
 function maybeAutoUpdate() {
     if (isNewVersion.value && autoUpdateEnabled.value) {
-        confirmAndUpdate();
+        setTimeout(() => {
+          confirmAndUpdate();
+        }, 2000);
     }
 }
 watch(isNewVersion, maybeAutoUpdate, { immediate: true })
@@ -190,7 +192,7 @@ function showVersionUpdateModal() {
     showConfirmModal.value = true;
 }
 
-const realod_after = 2000
+const realod_after = 3000
 
 async function confirmAndUpdate() {
     showConfirmModal.value = false;
