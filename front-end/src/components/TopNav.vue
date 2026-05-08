@@ -190,6 +190,8 @@ function showVersionUpdateModal() {
     showConfirmModal.value = true;
 }
 
+const realod_after = 2000
+
 async function confirmAndUpdate() {
     showConfirmModal.value = false;
     showUpdateModal.value = true;
@@ -198,7 +200,7 @@ async function confirmAndUpdate() {
         await http.get('/update-app', { params: { new_version: appAccessData?.value?.incoming_version } });
         updateDone.value = true;
         allow_to_reaload.value = true;
-        setTimeout(() => { window.location.reload(); }, 2000);
+        setTimeout(() => { window.location.reload(); }, realod_after);
     } catch (err) {
         showUpdateModal.value = false;
         emitter.emit('toaster-error', { message: 'Update failed.' });
@@ -213,7 +215,7 @@ async function getTemporaryZip() {
         updateDone.value = true;
         allow_to_reaload.value = true;
         emitter.emit('toaster-success', { message: 'Updated', duration: 0 });
-        setTimeout(() => { window.location.reload(); }, 1500);
+        setTimeout(() => { window.location.reload(); }, realod_after);
     } catch (err) {
         emitter.emit('toaster-error', { message: 'Update failed.' });
     } finally {
