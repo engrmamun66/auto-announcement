@@ -128,6 +128,8 @@ let all_students_non_copied = ref([])
 
 
 let checking_accessibility = ref(false)
+provide('checking_accessibility', checking_accessibility)
+
 let appAccessData = ref({...storage('appAccessData').value || {internet: navigator.onLine}}) 
 
 

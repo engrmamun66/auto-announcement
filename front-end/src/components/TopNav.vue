@@ -177,12 +177,22 @@ const isNewVersion = computed(() => {
     if (!installed || !incoming) return false;
     return incoming !== installed;
 })
+const realod_after = 2000
+const checking_accessibility = inject('checking_accessibility')
+watch(checking_accessibility, (bool) => {
+  console.log('===Checking', bool);
+  if(bool === false){
+    confirmAndUpdate()
+  }
+})
+
+
 
 function maybeAutoUpdate() {
-    if (isNewVersion.value && autoUpdateEnabled.value) {
-        setTimeout(() => {
-          confirmAndUpdate();
-        }, 2000);
+    if (isNewVersion.value && autoUpdateEnabled.value) { 
+        if(!checking_accessibility.value){
+          // confirmAndUpdate(); 
+        }
     }
 }
 watch(isNewVersion, maybeAutoUpdate, { immediate: true })
@@ -192,7 +202,7 @@ function showVersionUpdateModal() {
     showConfirmModal.value = true;
 }
 
-const realod_after = 3000
+
 
 async function confirmAndUpdate() {
     showConfirmModal.value = false;
