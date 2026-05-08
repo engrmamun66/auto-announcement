@@ -205,6 +205,7 @@ function showVersionUpdateModal() {
 
 
 async function confirmAndUpdate() {
+    if (showUpdateModal.value) return;
     showConfirmModal.value = false;
     showUpdateModal.value = true;
     updateDone.value = false;
