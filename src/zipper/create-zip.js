@@ -15,9 +15,25 @@ function addDirFiles(files, dirPath, archiveDest) {
     });
 }
 
+function bumpVersion() {
+    const versionPath = path.join(global.DIR, '_appVers/version.json');
+    let vd = { version: '1.0.0' };
+    if (fs.existsSync(versionPath)) {
+        try { vd = JSON.parse(fs.readFileSync(versionPath, 'utf8')); } catch(e) {}
+    }
+    const parts = vd.version.split('.').map(Number);
+    parts[2] = (parts[2] || 0) + 1;
+    vd.version = parts.join('.');
+    vd.built_at = new Date().toISOString();
+    fs.mkdirSync(path.dirname(versionPath), { recursive: true });
+    fs.writeFileSync(versionPath, JSON.stringify(vd, null, 2));
+    console.log(`📦 Version bumped → ${vd.version}`);
+}
+
 async function create_zip_with_latest_code({ file_name, for_new_setup = false, ask = async ()=>{} } = {}) {
     try {
         const FILE_NAME = file_name;
+        bumpVersion();
         const directories = [];
         const files = [];
 
@@ -75,6 +91,7 @@ async function create_zip_with_latest_code({ file_name, for_new_setup = false, a
             }
         }
 
+        directories.push(path.join(global.DIR, '_appVers'));
         directories.push(path.join(global.DIR, 'socket'));
         directories.push(path.join(global.DIR, 'src'));
 

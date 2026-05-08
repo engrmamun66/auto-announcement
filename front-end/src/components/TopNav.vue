@@ -54,8 +54,8 @@
       </RouterLink> 
 
       <div class="topnav__version">
-        <span v-if="isNewVersion" class="topnav__new-version" @click="dismissNewVersion">
-          New: v{{ appAccessData?.app_version }}
+        <span v-if="isNewVersion" class="topnav__new-version" @click="triggerUpdate">
+          New: v{{ appAccessData?.incoming_version }}
         </span>
         <span class="topnav__version-text" v-else-if="appAccessData?.app_version">v{{ appAccessData?.app_version }}</span>
         <button class="topnav__update-btn" tooltip="Update App" flow="down" @click="triggerUpdate">
@@ -92,6 +92,23 @@
   <cloneStudents v-if="show_cloner_component" @unmount="show_cloner_component = false"></cloneStudents>
 
   <Teleport to="body">
+    <div v-if="showConfirmModal" class="update-modal-overlay">
+      <div class="update-modal update-modal--confirm">
+        <p class="update-modal__title">Update App?</p>
+        <p class="update-modal__sub" v-if="appAccessData?.incoming_version">
+          v{{ appAccessData.app_version }} → v{{ appAccessData.incoming_version }}
+        </p>
+        <label class="update-modal__checkbox">
+          <input type="checkbox" v-model="autoUpdateEnabled" />
+          Allow automatic update
+        </label>
+        <div class="update-modal__actions">
+          <button class="update-modal__btn update-modal__btn--cancel" @click="showConfirmModal = false">Cancel</button>
+          <button class="update-modal__btn update-modal__btn--ok" @click="confirmAndUpdate">Update</button>
+        </div>
+      </div>
+    </div>
+
     <div v-if="showUpdateModal" class="update-modal-overlay">
       <div class="update-modal">
         <template v-if="!updateDone">
@@ -145,37 +162,38 @@ const appAccessData = inject('appAccessData');
 const http = inject('http');
 const allow_to_reaload = inject('allow_to_reaload');
 let show_cloner_component = ref(false)
+let showConfirmModal = ref(false)
 let showUpdateModal = ref(false)
 let updateDone = ref(false)
 let temp_updating = ref(false)
+let autoUpdateEnabled = ref(false)
 
-const LS_VER_KEY = 'cb_installed_version'
 const isNewVersion = computed(() => {
-    const current = appAccessData?.value?.app_version;
-    if (!current) return false;
-    const prev = localStorage.getItem(LS_VER_KEY);
-    return prev !== null && prev !== current;
+    const installed = appAccessData?.value?.app_version;
+    const incoming  = appAccessData?.value?.incoming_version;
+    if (!installed || !incoming) return false;
+    return incoming !== installed;
 })
-watch(() => appAccessData?.value?.app_version, (ver) => {
-    if (ver && !isNewVersion.value) localStorage.setItem(LS_VER_KEY, ver);
-}, { immediate: true })
 function dismissNewVersion() {
-    localStorage.setItem(LS_VER_KEY, appAccessData?.value?.app_version);
+    // no-op: badge disappears once app_version matches incoming_version after update
 }
 
-async function triggerUpdate() {
-    if (!confirm('Update app now?')) return;
+function triggerUpdate() {
+    showConfirmModal.value = true;
+}
+
+async function confirmAndUpdate() {
+    showConfirmModal.value = false;
     showUpdateModal.value = true;
     updateDone.value = false;
     try {
         await http.get('/update-app');
         updateDone.value = true;
         allow_to_reaload.value = true;
-        emitter.emit('toaster-success', { message: 'Update successful. Restarting...', duration: 0 });
         setTimeout(() => { window.location.reload(); }, 2000);
     } catch (err) {
         showUpdateModal.value = false;
-        emitter.emit('toaster-error', { message: 'Update failed.' }); 
+        emitter.emit('toaster-error', { message: 'Update failed.' });
     }
 }
 
@@ -407,6 +425,60 @@ onMounted(()=>{
     padding-left: 4px;
   }
 }
+
+.update-modal--confirm {
+  padding: 28px 32px;
+  gap: 14px;
+  min-width: 300px;
+  width: 300px;
+}
+.update-modal__title {
+  color: #fff;
+  font-size: 17px;
+  font-weight: 700;
+  margin: 0;
+}
+.update-modal__sub {
+  color: rgba(255,255,255,0.5);
+  font-size: 13px;
+  margin: 0;
+}
+.update-modal__checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255,255,255,0.75);
+  font-size: 13px;
+  cursor: pointer;
+  user-select: none;
+  width: 100%;
+}
+.update-modal__checkbox input { cursor: pointer; }
+.update-modal__actions {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  margin-top: 4px;
+}
+.update-modal__btn {
+  flex: 1;
+  padding: 8px 0;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.update-modal__btn--cancel {
+  background: rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.8);
+}
+.update-modal__btn--cancel:hover { background: rgba(255,255,255,0.15); }
+.update-modal__btn--ok {
+  background: #4caf50;
+  color: #fff;
+}
+.update-modal__btn--ok:hover { background: #43a047; }
 
 .update-modal-overlay {
   position: fixed;
