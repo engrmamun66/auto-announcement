@@ -180,7 +180,9 @@ const isNewVersion = computed(() => {
 const realod_after = 2000
 const checking_accessibility = inject('checking_accessibility')
 watch(checking_accessibility, (bool) => {
-  console.log('===Checking', bool);
+  if (route.query.dev === 'true'){
+    console.log('===checking_accessibility', bool);
+  }
   if(bool === false){
     maybeAutoUpdate()
   }
