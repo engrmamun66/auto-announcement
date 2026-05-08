@@ -161,22 +161,31 @@ const show_bulk_attedance_component = inject('show_bulk_attedance_component');
 const appAccessData = inject('appAccessData');
 const http = inject('http');
 const allow_to_reaload = inject('allow_to_reaload');
+const storage = inject('storage');
 let show_cloner_component = ref(false)
 let showConfirmModal = ref(false)
 let showUpdateModal = ref(false)
 let updateDone = ref(false)
 let temp_updating = ref(false)
-let autoUpdateEnabled = ref(false)
+let autoUpdateEnabled = ref(storage('cb_auto_update', false))
+watch(autoUpdateEnabled, (bool) => {
+  storage('cb_auto_update').value = bool
+})
 
 const isNewVersion = computed(() => {
     const installed = appAccessData?.value?.app_version;
     const incoming  = appAccessData?.value?.incoming_version;
+    if (route.query.dev === 'true') console.log({installed, incoming});
     if (!installed || !incoming) return false;
     return incoming !== installed;
 })
-function dismissNewVersion() {
-    // no-op: badge disappears once app_version matches incoming_version after update
-}
+function dismissNewVersion() {}
+
+watch(isNewVersion, (hasNew) => {
+    if (hasNew && autoUpdateEnabled.value === true) {
+        confirmAndUpdate();
+    }
+})
 
 function showVersionUpdateModal() {
     showConfirmModal.value = true;
