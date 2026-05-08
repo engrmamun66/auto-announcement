@@ -99,7 +99,7 @@
           v{{ appAccessData.app_version }} → v{{ appAccessData.incoming_version }}
         </p>
         <label class="update-modal__checkbox">
-          <input type="checkbox" v-model="autoUpdateEnabled" />
+          <input type="checkbox" v-model="autoUpdateEnabled" @change="maybeAutoUpdate" />
           Allow automatic update
         </label>
         <div class="update-modal__actions">
@@ -167,10 +167,7 @@ let showConfirmModal = ref(false)
 let showUpdateModal = ref(false)
 let updateDone = ref(false)
 let temp_updating = ref(false)
-let autoUpdateEnabled = ref(storage('cb_auto_update').value) 
-watch(autoUpdateEnabled, (bool) => {
-  storage('cb_auto_update').value = bool
-})
+const autoUpdateEnabled = storage('cb_auto_update', false)
 
 const isNewVersion = computed(() => {
     const installed = appAccessData?.value?.app_version;
@@ -179,13 +176,14 @@ const isNewVersion = computed(() => {
     if (!installed || !incoming) return false;
     return incoming !== installed;
 })
-function dismissNewVersion() {}
 
-watch(isNewVersion, (hasNew) => {
-    if (hasNew && !!autoUpdateEnabled.value) {
+function maybeAutoUpdate() {
+    if (isNewVersion.value && !!autoUpdateEnabled.value) {
         confirmAndUpdate();
     }
-}, { immediate: true })
+}
+watch(isNewVersion, maybeAutoUpdate, { immediate: true })
+watch(autoUpdateEnabled, maybeAutoUpdate)
 
 function showVersionUpdateModal() {
     showConfirmModal.value = true;
