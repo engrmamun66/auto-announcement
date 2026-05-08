@@ -182,10 +182,10 @@ const isNewVersion = computed(() => {
 function dismissNewVersion() {}
 
 watch(isNewVersion, (hasNew) => {
-    if (hasNew && autoUpdateEnabled.value === true) {
+    if (hasNew && !!autoUpdateEnabled.value) {
         confirmAndUpdate();
     }
-})
+}, { immediate: true })
 
 function showVersionUpdateModal() {
     showConfirmModal.value = true;
