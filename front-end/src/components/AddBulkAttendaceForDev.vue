@@ -46,13 +46,6 @@
                            <EmDateTimePicker 
                            ref="pickerModelValueRef"
                            v-model="payload.dates"
-                           @change="({startDate, endDate}) => {
-                               helper.delay(() => {
-                                   payload.dates = {}
-                                   payload.dates.startDate = startDate
-                                   payload.dates.endDate = endDate
-                               }, 0)
-                           }"
                            @close="false"
                            :displayFormat="'DD-MMM-Y'"
                            :rangePicker="true" 
@@ -119,9 +112,10 @@
                                    <label for="" >Wait For Each</label>
                                    <select v-model="payload.wait_for_each" class="form-control cb-input" @change="submitSearch">
                                         <option :value="0"> Not Wait </option>                
+                                        <option :value="500"> 1/2 Second </option>                
                                         <option :value="1000"> 1 Second </option>                
-                                        <option :value="2000"> 2 Second </option>                
-                                        <option :value="3000"> 3 Second </option>                
+                                        <option :value="1500"> 1.5 Second </option>                
+                                        <option :value="2000"> 2 Second </option>                 
                                     </select> 
                                </div>
                            </div>
