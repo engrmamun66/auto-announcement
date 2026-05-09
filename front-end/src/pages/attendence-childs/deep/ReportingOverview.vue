@@ -76,6 +76,26 @@ let reports = ref({
   classWise: {},
   classRanking: [],
 })
+
+const activeClasses = computed(() => {
+  return (classes.value || []).filter(cls => cls?.isActive !== false)
+})
+
+const activeClassShorts = computed(() => {
+  return new Set(activeClasses.value.map(cls => cls.class_short))
+})
+
+const visibleClassWise = computed(() => {
+  return Object.fromEntries(
+    Object.entries(reports.value?.classWise || {}).filter(([class_short]) => activeClassShorts.value.has(class_short))
+  )
+})
+
+const visibleClassRanking = computed(() => {
+  return (reports.value?.classRanking || []).filter(class_short => activeClassShorts.value.has(class_short))
+})
+
+const hasVisibleClassWise = computed(() => Object.keys(visibleClassWise.value || {}).length > 0)
 let activeReportTab = ref('monthly')
 watch(activeReportTab, (_activeReportTab) => {
   if (route.query.dev === 'true'){
@@ -201,14 +221,14 @@ const breadcrumbs = computed(() => {
 })
 
 const monthKeys = computed(() => {
-  let classWise = reports.value?.classWise || {}
+  let classWise = visibleClassWise.value || {}
   let firstClass = Object.keys(classWise || {})[0]
   if(!firstClass) return []
   return Object.keys(classWise[firstClass] || {}).filter(k => k !== 'total').sort()
 })
 
 function getClassReport(class_short, monthKey='total'){
-  return reports.value?.classWise?.[class_short]?.[monthKey] || {}
+  return visibleClassWise.value?.[class_short]?.[monthKey] || {}
 }
 
 async function openStudentMonthlyById(){
@@ -742,10 +762,10 @@ onMounted(()=>{
         </div>
       </div>
 
-      <div v-if="activeReportTab === 'summary' && Object.keys(reports?.classWise || {}).length" class="mb-3">
+      <div v-if="activeReportTab === 'summary' && hasVisibleClassWise" class="mb-3">
         <SummaryTable
-          :classes="classes"
-          :classWise="reports.classWise"
+          :classes="activeClasses"
+          :classWise="visibleClassWise"
           @details="openClassSummary"
         />
       </div>
@@ -790,26 +810,26 @@ onMounted(()=>{
   
       <div v-if="activeReportTab === 'monthly' && monthKeys.length" class="mb-3">
         <MonthlyReportTable
-          :classes="classes"
-          :classWise="reports.classWise"
+          :classes="activeClasses"
+          :classWise="visibleClassWise"
           :monthKeys="monthKeys"
           @details="openClassSummary"
         />
       </div>
   
-      <div v-if="activeReportTab === 'ranking' && reports?.classRanking?.length" class="mb-3">
+      <div v-if="activeReportTab === 'ranking' && visibleClassRanking.length" class="mb-3">
         <RankingTable
-          :rankings="reports.classRanking"
-          :classes="classes"
-          :classWise="reports.classWise"
+          :rankings="visibleClassRanking"
+          :classes="activeClasses"
+          :classWise="visibleClassWise"
           @details="openClassSummary"
         />
       </div>
 
-      <div v-if="activeReportTab === 'chart2' && Object.keys(reports?.classWise || {}).length" class="mb-3">
+      <div v-if="activeReportTab === 'chart2' && hasVisibleClassWise" class="mb-3">
         <ClassesSummaryChar
-          :classes="classes"
-          :classWise="reports.classWise"
+          :classes="activeClasses"
+          :classWise="visibleClassWise"
           @details="openClassSummary"
         />
       </div>
