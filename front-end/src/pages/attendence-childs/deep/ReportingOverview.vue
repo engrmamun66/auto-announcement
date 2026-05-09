@@ -1,6 +1,6 @@
 <script setup>
 import moment from 'moment/moment'
-import { inject, ref, onMounted, computed } from "vue";
+import { inject, ref, onMounted, computed, watch } from "vue";
 import MonthPicker from './../../../components/MonthPicker.vue'
 import ReportTabs from '../../../components/reports/ReportTabs.vue'
 import BackToPrevious from '../../../components/reports/BackToPrevious.vue'
@@ -77,6 +77,11 @@ let reports = ref({
   classRanking: [],
 })
 let activeReportTab = ref('monthly')
+watch(activeReportTab, (_activeReportTab) => {
+  if (route.query.dev === 'true'){
+    console.log({_activeReportTab})
+  }
+})
 const mainReportTabs = ['summary', 'monthly', 'ranking', 'chart2']
 let lastMainTab = ref('monthly')
 const reportTabs = [
