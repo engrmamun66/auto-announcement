@@ -35,6 +35,44 @@ function deleteProfileImageFile(profile_image) {
   }
 }
 
+function getActiveClassConfig() {
+  const configuredClasses = Array.isArray(global.config?.classes) ? global.config.classes : [];
+  const activeClasses = configuredClasses.filter(cls => cls?.isActive !== false);
+
+  return {
+    classShorts: [...new Set(activeClasses.map(cls => String(cls?.class_short || '').trim()).filter(Boolean))],
+    classNames: [...new Set(activeClasses.map(cls => String(cls?.class_name || '').trim()).filter(Boolean))],
+  };
+}
+
+function appendActiveClassFilter(query = '', queryParams = [], { classShortColumn = 'class_short', classNameColumn = 'class' } = {}) {
+  const { classShorts, classNames } = getActiveClassConfig();
+  const nextParams = [...queryParams];
+  const clauses = [];
+
+  if (classShorts.length) {
+    clauses.push(`${classShortColumn} IN (${classShorts.map(() => '?').join(',')})`);
+    nextParams.push(...classShorts);
+  }
+
+  if (classNames.length) {
+    clauses.push(`${classNameColumn} IN (${classNames.map(() => '?').join(',')})`);
+    nextParams.push(...classNames);
+  }
+
+  if (!clauses.length) {
+    return {
+      query: `${query} AND 1 = 0`,
+      queryParams: nextParams,
+    };
+  }
+
+  return {
+    query: `${query} AND (${clauses.join(' OR ')})`,
+    queryParams: nextParams,
+  };
+}
+
 class Students { 
 
   constructor(db) {
@@ -104,6 +142,8 @@ class Students {
       }
     }
   
+    ({ query, queryParams } = appendActiveClassFilter(query, queryParams));
+
     // Default sort
     query += ` ORDER BY class_short ASC, name ASC`;
 
@@ -267,10 +307,14 @@ class Students {
   }
 
   allStudents(req, res) {   
-  
-    const query = `SELECT * FROM ${this.tableName} WHERE 1 ORDER BY class_short ASC, name ASC`;
-  
-    this.db.all(query, [], (err, students) => {
+
+    let query = `SELECT * FROM ${this.tableName} WHERE 1`;
+    let queryParams = [];
+
+    ({ query, queryParams } = appendActiveClassFilter(query, queryParams));
+    query += ` ORDER BY class_short ASC, name ASC`;
+
+    this.db.all(query, queryParams, (err, students) => {
       if (err) {
         res.status(500).send({ error: err.message });
         return;
