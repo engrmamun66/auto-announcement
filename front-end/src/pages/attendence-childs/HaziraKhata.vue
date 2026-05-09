@@ -9,6 +9,7 @@ const classes = inject("classes");
 const all_students_non_copied = inject("all_students_non_copied");
 const callbacks = inject("callbacks");
 const http = inject("http");
+const helper = inject("helper");
 
 const selectedClassShort = ref(null)
 const selectedRange = ref([
