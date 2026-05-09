@@ -864,6 +864,10 @@ onMounted(async ()=>{
             if(!isIPAccess && action === 'toogle_emergency_mode'){
                 emergency_mode.value = data // boolean
             }
+            // set playback speed
+            if(!isIPAccess && action === 'set_playback_speed'){
+                playback_speed.value = data
+            }
             // localhost receives onClick from IP client → click the element (only if user is not active)
             // !isUserActive.value
             if(!isIPAccess && action === 'onClick' && selector && !isUserActive.value){

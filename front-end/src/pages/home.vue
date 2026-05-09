@@ -75,6 +75,18 @@ function handlePayPause(){
      
 }
 
+
+function onClickSpeed(item){
+     playback_speed.value = item.value
+     if(isIPAccess){
+          sendRemoteAction({
+               from: 'ip',
+               action: 'set_playback_speed',
+               data: item.value
+          })
+     }
+}
+
 let ttoout
 function inputBarcode(event){
      clearTimeout(ttoout)
@@ -249,7 +261,7 @@ function recallAllPunchedStudents(){
           <!-- Add here a button group (Normal & Faster) with icon prefix -->
           <div class="btn-group me-2" role="group">
                <template v-for="item in speedList">
-                    <button :tooltip="`Playback Speed(${item.value})`" type="button" class="btn btn-outline-primary playbackButton" :class="{'active': playback_speed === item.value }" @click="playback_speed = item.value">{{ item.label }}</button>
+                    <button :tooltip="`Playback Speed(${item.value})`" type="button" class="btn btn-outline-primary playbackButton" :class="{'active': playback_speed === item.value }" @click="onClickSpeed(item)">{{ item.label }}</button>
                </template>
           </div>
 
