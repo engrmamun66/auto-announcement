@@ -285,6 +285,7 @@ h1 {
   right: 0;
   padding: 0px 1.1rem;
   z-index: 1000000000;
+  pointer-events: none;
 }
 .toasts-container:empty {
   display: none;
@@ -295,6 +296,7 @@ h1 {
 }
 
 .toasts-container .toast {
+  pointer-events: all;
   position: relative;
   display: flex;
   justify-content: space-between;
