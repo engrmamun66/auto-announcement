@@ -99,6 +99,9 @@
         <p class="update-modal__sub" v-if="appAccessData?.incoming_version">
           v{{ appAccessData.app_version }} → v{{ appAccessData.incoming_version }}
         </p>
+        <p class="update-modal__sub" v-if="appAccessData?.change_log">
+          {{ appAccessData?.change_log }}
+        </p>
         <label class="update-modal__checkbox">
           <input type="checkbox" v-model="autoUpdateEnabled" @change="maybeAutoUpdate" />
           Allow automatic update
@@ -209,7 +212,7 @@ async function confirmAndUpdate() {
     showUpdateModal.value = true;
     updateDone.value = false;
     try {
-        await http.get('/update-app', { params: { new_version: appAccessData?.value?.incoming_version } });
+        await http.get('/update-app', { params: { new_version: appAccessData?.value?.incoming_version, change_log: appAccessData?.value?.change_log } });
         updateDone.value = true;
         allow_to_reaload.value = true;
         setTimeout(() => { window.location.reload(); }, realod_after);

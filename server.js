@@ -246,10 +246,11 @@ app.get('/api/update-app', async (req, res) => {
       }
 
       const new_version = req.query.new_version;
+      const change_log = req.query.change_log;
       if (update_success && new_version) {
         const vp = path.join(__dirname, '_appVers/version.json');
         fs.mkdirSync(path.dirname(vp), { recursive: true });
-        fs.writeFileSync(vp, JSON.stringify({ version: new_version, updated_at: new Date().toISOString() }, null, 2));
+        fs.writeFileSync(vp, JSON.stringify({ version: new_version, change_log: change_log || '', updated_at: new Date().toISOString() }, null, 2));
       }
 
       const { exec } = require('child_process');
