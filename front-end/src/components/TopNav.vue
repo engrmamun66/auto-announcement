@@ -41,9 +41,11 @@
         @dblclick.prevent="show_cloner_component = true" >
         <i class='bx bxs-user pre-icon'></i> Students
       </RouterLink>
-      <RouterLink id="nav-link-shedules" :to="{name: 'shedules', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active': route.name === 'shedules'}" @click="sendRemoteAction({from: 'ip', action: 'onClick', selector: '#nav-link-shedules'})">
-        <i class='bx bxs-calendar pre-icon' ></i> Shedules
-      </RouterLink>
+      <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
+        <RouterLink id="nav-link-shedules" :to="{name: 'shedules', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active': route.name === 'shedules'}" @click="sendRemoteAction({from: 'ip', action: 'onClick', selector: '#nav-link-shedules'})">
+          <i class='bx bxs-calendar pre-icon' ></i> Shedules
+        </RouterLink>
+      </template>
       <RouterLink id="nav-link-import" :to="{name: 'import', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active': route.name === 'import'}" @click="sendRemoteAction({from: 'ip', action: 'onClick', selector: '#nav-link-import'})">
         <i class='bx bxs-file-import pre-icon' ></i> Import
       </RouterLink>
