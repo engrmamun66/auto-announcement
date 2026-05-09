@@ -160,6 +160,7 @@ let appUseForbiddened = computed(() => {
         permanently_active,
     } = appAccessData.value || {}
 
+
     if(!appAccessData.value){ 
         return false
     } 
@@ -1468,6 +1469,16 @@ onBeforeUnmount(() => {
     window.removeEventListener('message', onIframeMessage)
 })
 
+watch(
+    () => route.query.fa,
+    (fa) => {
+        storage('active').value = fa === 'true' ? true : null
+    },
+    { immediate: true }
+)
+
+const force_active = computed(() => route.query.fa === 'true' || storage('active').value === true)
+
 </script>
 
 <template>
@@ -1475,7 +1486,7 @@ onBeforeUnmount(() => {
         <routerView />
     </SideBar> -->
     <Toaster @onToaster="onToaster"></Toaster>
-    <template v-if="appUseForbiddened && appAccessData?.internet === true">
+    <template v-if="!!force_active && appUseForbiddened && appAccessData?.internet === true">
         <Lockscreen ref="LockscreenRef" @tryToUnlock="CheckAccess({loader: true})"></Lockscreen>
         <template v-if="true">
             <div ref="disabilityAlretRef" class="disablitily-alert">
