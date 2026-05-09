@@ -2,7 +2,7 @@
  * Calling Bird Zipper — entry point
  * Usage: node zipper.js
  */
-
+import Picker from 'rc-picker';
 global.DIR = __dirname;
 
 const fs = require('fs');
