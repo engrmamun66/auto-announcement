@@ -88,7 +88,6 @@ module.exports = {
             let responseData = result?.data || result
             lastSaveInfoAt = Date.now()
             lastSaveInfoResult = responseData
-            console.log({responseData});
             return responseData
           } catch (error) {
             console.error("Fetch error:", error);

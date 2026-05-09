@@ -38,7 +38,7 @@ async function create_zip_with_latest_code({ file_name, for_new_setup = false, a
             }
 
             console.log(`\nCode-Number:: ${CODE_NUMBER}`);
-            const choice = (await ask(`\n  → Only matched media(y/all): `)).trim().toLowerCase();
+            const choice = (await ask(`\n  → Only matched media([y/enter]/all): `)).trim().toLowerCase();
 
             const publicDir = path.join(global.DIR, 'public');
             const EXCLUDE = new Set(['exports', 'temp']);
@@ -49,7 +49,7 @@ async function create_zip_with_latest_code({ file_name, for_new_setup = false, a
                     if (stat.isFile()) {
                         files.push({ src: fullPath, dest: `public/${item}` });
                     } else if (stat.isDirectory() && !EXCLUDE.has(item)) {
-                        if (item === 'media' && choice === 'y') {
+                        if (item === 'media' && (!choice || choice === 'y')) {
                             fs.readdirSync(fullPath).forEach(mediaFile => {
                                 if (mediaFile.startsWith(CODE_NUMBER)) {
                                     files.push({ src: path.join(fullPath, mediaFile), dest: `public/media/${mediaFile}` });
