@@ -604,6 +604,32 @@ provide('stop_clear_and_reload', stop_clear_and_reload)
 
  
 
+function getActiveConfigClasses() {
+    const configuredClasses = classes.value?.length ? classes.value : (CONFIG.value?.classes || [])
+    return (configuredClasses || []).filter(cls => cls?.isActive !== false)
+}
+
+function normalizeScheduleList(scheduleList = []) {
+    const activeClassShorts = new Set(
+        getActiveConfigClasses().map(cls => cls?.class_short).filter(Boolean)
+    )
+
+    return (scheduleList || []).map((item) => {
+        const filteredClasses = (Array.isArray(item?.classes) ? item.classes : []).filter(cls => {
+            return activeClassShorts.has(cls?.class_short)
+        })
+
+        return {
+            ...item,
+            classes: filteredClasses,
+            class_names: filteredClasses.map(cls => cls.class_name),
+            class_shorts: filteredClasses.map(cls => cls.class_short),
+            start_ms: helper.miliseconds(item.start_time),
+            end_ms: helper.miliseconds(item.end_time),
+        }
+    })
+}
+
 
 async function getSchedules(){
  
@@ -611,11 +637,7 @@ async function getSchedules(){
 
    http.get('/schedules/list').then(response => {
      if(response.status == 200){
-       let data = response.data.data
-       data.forEach(item => {
-         item.start_ms = helper.miliseconds(item.start_time)
-         item.end_ms = helper.miliseconds(item.end_time) 
-       })
+       let data = normalizeScheduleList(response.data.data || [])
        punch_schedules.value = data.filter(item => item.type == 1);              
        call_schedules.value = data.filter(item => item.type == 2);        
      }
@@ -628,6 +650,11 @@ async function getSchedules(){
  }
 
 }
+
+watch(classes, () => {
+    punch_schedules.value = normalizeScheduleList(punch_schedules.value)
+    call_schedules.value = normalizeScheduleList(call_schedules.value)
+})
  
  
 async function getAllStudents(){
