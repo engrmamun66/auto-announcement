@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const LOG_FILE = path.join(global.DIR || __dirname, '../database/debug.txt');
+const LOG_FILE = path.join(global.DIR || path.join(__dirname, '..'), 'database/debug.txt');
 
 function debugLog(msg) {
     const line = `[${new Date().toISOString()}] ${msg}\n`;
