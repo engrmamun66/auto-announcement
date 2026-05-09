@@ -256,11 +256,13 @@ app.get('/api/update-app', async (req, res) => {
 
       res.json({ success: true, message: `Update successful. Restarting...` });
       setTimeout(() => {
-          console.log('🔧 Running npm install...');
+          const { debugLog } = require('./src/debugger');
+          debugLog('🔧 Running npm install...');
           exec('npm install --legacy-peer-deps', (err, stdout, stderr) => {
-            if (err) console.error('❌ npm install error:', err.message);
-            else console.log('✅ npm install done');
-            if (stdout) console.log(stdout);
+            if (err) debugLog('❌ npm install error: ' + err.message);
+            else debugLog('✅ npm install done');
+            if (stdout) debugLog(stdout);
+            if (stderr) debugLog(stderr);
             exec('pm2 restart all');
           });
       }, 100);
