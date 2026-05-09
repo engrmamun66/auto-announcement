@@ -1,6 +1,6 @@
 <script setup>
 import moment from 'moment/moment'
-import { onMounted, inject, ref, watch, computed, onBeforeUnmount } from 'vue';
+import { onMounted, inject, ref, watch, computed, onBeforeUnmount, nextTick } from 'vue';
 import Note from '../components/note.vue'
 import myTable from '../components/myTable.vue'
 import Modal from '../components/modal.vue'
@@ -52,6 +52,8 @@ const wattingList = inject('wattingList');
 
 let toggleSettings = inject('toggleSettings') 
 let refreshDOM = inject('refreshDOM') 
+let isIPAccess = inject('isIPAccess') 
+let sendRemoteAction = inject('sendRemoteAction') 
 
 let emergency_mode = inject('emergency_mode')
 let palylistComponent = inject('palylistComponent')
@@ -106,8 +108,9 @@ function inputBarcode(event){
 }
  
 
+
  
-function checkSchedule(){   
+async function checkSchedule(){   
      if(!is_started_schedule.value){          
           if(confirm('You want to stop?')){
                stop_clear_and_reload()
@@ -116,6 +119,16 @@ function checkSchedule(){
           } 
                  
      } 
+
+     await nextTick()
+
+     if(isIPAccess){
+          sendRemoteAction({
+               from: 'ip',
+               action: 'toogle_is_started_schedule',
+               data: Boolean(is_started_schedule.value),
+          })
+     }
 }
 
 let tab = ref(1)

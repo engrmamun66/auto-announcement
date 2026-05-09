@@ -843,6 +843,8 @@ onMounted(async ()=>{
             }
         }
 
+        
+
         if(socket_data.type == 'remote_action') {
             let { action, selector, data } = socket_data
 
@@ -853,6 +855,14 @@ onMounted(async ()=>{
             // IP client receives ack → mark connected
             if(isIPAccess && action === 'say_hi_reply'){
                 is_connected_with_main_app.value = true
+            }
+            // on/off
+            if(!isIPAccess && action === 'toogle_is_started_schedule'){
+                is_started_schedule.value = data // boolean
+            }
+            // Toggle emergency mode
+            if(!isIPAccess && action === 'toogle_emergency_mode'){
+                emergency_mode.value = data // boolean
             }
             // localhost receives onClick from IP client → click the element (only if user is not active)
             // !isUserActive.value

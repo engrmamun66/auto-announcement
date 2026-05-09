@@ -9,10 +9,25 @@ defineProps({
 })
 
 let emergency_mode = inject('emergency_mode')
+let isIPAccess = inject('isIPAccess')
+let sendRemoteAction = inject('sendRemoteAction')
+
+function toggle(){
+  emergency_mode.value = !emergency_mode.value
+
+  if(isIPAccess){
+    sendRemoteAction({
+      from: 'ip',
+      action: 'toogle_emergency_mode',
+      data: emergency_mode.value,
+    })
+  }
+}
+
 </script>
 
 <template>
-  <div @dblclick="emergency_mode = !emergency_mode" v-bind="$attrs" class="preloader-scan cp">
+  <div @dblclick="toggle" v-bind="$attrs" class="preloader-scan cp">
     <ul>
       <li></li>
       <li></li>
