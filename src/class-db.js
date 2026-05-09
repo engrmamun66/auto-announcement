@@ -198,7 +198,9 @@ class myDB {
             );
 
             this.db.run(
-              `CREATE TABLE IF NOT EXISTS settings (
+              // DROP TABLE IF EXISTS settings;
+              `
+              CREATE TABLE IF NOT EXISTS settings (
                 key TEXT PRIMARY KEY,
                 value TEXT NOT NULL,
                 updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
