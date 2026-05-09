@@ -606,19 +606,21 @@ watch(fixedWidthSoundCol, (newVal) => {
             <i class="bx bx-link" style="pointer-events: none;"></i>
           </button>
         </div>
-        <div v-if="appAccessData?.recorder_web_url" class="btn-group me-2" style="display:inline-flex;align-items:stretch;">
-          <a v-if="isIPAccess" :href="appAccessData.recorder_web_url + `?code=${CONFIG?.env?.CODE_NUMBER}`" target="_blank" class="btn" style="background:#00796B;color:#fff;">
-            <i class='bx bx-microphone'></i> Recorder
-          </a>
-          <Btn v-else style="background:#00796B;border-top-right-radius:0;border-bottom-right-radius:0;" @click="recorderMounted = true; showRecorder = true">
-            <i class='bx bx-microphone'></i> Recorder
-          </Btn>
-          <button class="btn" style="background:#005a4a;color:#fff;border-left:1px solid rgba(255,255,255,0.2);padding:0 12px;display:inline-flex;align-items:center;justify-content:center;"
-            tooltip="Copy link"
-            @click.prevent.stop="copyRecorderUrl">
-            <i class="bx bx-link" style="pointer-events: none;"></i>
-          </button>
-        </div>
+        <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
+          <div v-if="appAccessData?.recorder_web_url" class="btn-group me-2" style="display:inline-flex;align-items:stretch;">
+            <a v-if="isIPAccess" :href="appAccessData.recorder_web_url + `?code=${CONFIG?.env?.CODE_NUMBER}`" target="_blank" class="btn" style="background:#00796B;color:#fff;">
+              <i class='bx bx-microphone'></i> Recorder
+            </a>
+            <Btn v-else style="background:#00796B;border-top-right-radius:0;border-bottom-right-radius:0;" @click="recorderMounted = true; showRecorder = true">
+              <i class='bx bx-microphone'></i> Recorder
+            </Btn>
+            <button class="btn" style="background:#005a4a;color:#fff;border-left:1px solid rgba(255,255,255,0.2);padding:0 12px;display:inline-flex;align-items:center;justify-content:center;"
+              tooltip="Copy link"
+              @click.prevent.stop="copyRecorderUrl">
+              <i class="bx bx-link" style="pointer-events: none;"></i>
+            </button>
+          </div>
+        </template>
         <Btn class="me-2" style="background: #673AB7;" :tooltip="`params.total = ${params?.total}`" >
           Total: 
           <span class="bg-success- p-1">{{ all_students_non_copied?.length }}</span>
