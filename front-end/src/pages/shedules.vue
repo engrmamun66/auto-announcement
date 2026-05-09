@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, nextTick, watch, inject, ref, reactive } from 'vue';
+import { onMounted, nextTick, watch, inject, ref, reactive, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import Note from '../components/note.vue'
 import myTable from '../components/myTable.vue'
@@ -39,6 +39,35 @@ let http = inject('http');
 let addUpdateMode = ref(false)
 let is___adding = ref(false)
 let tab = ref(1)
+let selectedFilterClasses = ref([])
+let filterMatchMode = ref('and')
+
+const activeClasses = computed(() => {
+  return (classes.value || []).filter(cls => cls?.isActive !== false)
+})
+
+const filteredSchedules = computed(() => {
+  const baseList = tab.value == 1 ? punch_schedules.value : call_schedules.value
+  if(!selectedFilterClasses.value?.length){
+    return baseList || []
+  }
+
+  const selectedClassShorts = new Set(
+    selectedFilterClasses.value.map(cls => cls?.class_short).filter(Boolean)
+  )
+
+  return (baseList || []).filter(item => {
+    const itemClassShorts = Array.isArray(item?.class_shorts)
+      ? item.class_shorts
+      : (item?.classes || []).map(cls => cls?.class_short).filter(Boolean)
+
+    if(filterMatchMode.value === 'or'){
+      return Array.from(selectedClassShorts).some(class_short => itemClassShorts.includes(class_short))
+    }
+
+    return Array.from(selectedClassShorts).every(class_short => itemClassShorts.includes(class_short))
+  })
+})
 
 
 let startTimePicker = ref(null)
@@ -324,10 +353,11 @@ function deleteSchedule(id, i, type=1){
 
     http.delete(`/schedules/delete/${id}`).then(response => {
       if(response.status == 200){
+        const targetIndex = getScheduleIndexById(id, type)
         if(type === 1){
-          punch_schedules.value.splice(i, 1)
+          if(targetIndex > -1) punch_schedules.value.splice(targetIndex, 1)
         } else {
-          call_schedules.value.splice(i, 1)
+          if(targetIndex > -1) call_schedules.value.splice(targetIndex, 1)
         }
       }
     }) 
@@ -336,6 +366,14 @@ function deleteSchedule(id, i, type=1){
     console.warn('addSchedule__error::', error);
   }
 
+}
+
+function getTargetScheduleList(type = 1){
+  return type === 1 ? punch_schedules.value : call_schedules.value
+}
+
+function getScheduleIndexById(id, type = 1){
+  return getTargetScheduleList(type).findIndex(item => item.id === id)
 }
 
 
@@ -386,6 +424,25 @@ async function reOrderSchedules(schedule_list, i, action='up'){
 
 }
 
+async function reOrderVisibleSchedule(item, action='up'){
+  const targetSchedules = getTargetScheduleList(item.type)
+  const index = getScheduleIndexById(item.id, item.type)
+  if(index < 0) return
+  await reOrderSchedules(targetSchedules, index, action)
+}
+
+function canReOrderSchedule(item, action='up'){
+  if(selectedFilterClasses.value?.length) return false
+
+  const targetSchedules = getTargetScheduleList(item.type)
+  const index = getScheduleIndexById(item.id, item.type)
+  if(index < 0) return false
+
+  if(action === 'up') return index > 0
+  if(action === 'down') return index < (targetSchedules.length - 1)
+  return false
+}
+
 
 
 
@@ -398,6 +455,7 @@ async function reOrderSchedules(schedule_list, i, action='up'){
            <h1>{{ !addUpdateMode ? `${tab == 1 ? 'Punch Schedules' : 'Call Schedules'}` : (payload.id ? 'Update Schedule' : 'Add Schedule')}}</h1> 
        
            <div class="d-flex justify-content-end">
+              <!--  -->
                <Btn v-if="!addUpdateMode" class="me-2" @click="addUpdateMode = true" ><i class='bx bx-plus'></i> Add Schedule</Btn>
                <Btn v-else class="me-2 red" @click="clearPayload()" >Cancel</Btn>
                <!-- <Btn @click="router.push({name: 'import'})"><i class='bx bxs-file-import' ></i> Import</Btn> -->
@@ -650,18 +708,44 @@ async function reOrderSchedules(schedule_list, i, action='up'){
  
     <template v-if="true">
 
-      <ul class="nav nav-tabs mt-4 bottom-borderless">
-        <li class="nav-item">
-          <a @click.stop="tab = 1" class="nav-link cp text-black" :class="{'active': tab==1}" >Puch Times</a>
-        </li>
-        <li class="nav-item">
-          <a @click.stop="tab = 2" class="nav-link cp text-black" :class="{'active': tab==2}" >Call Times</a>
-        </li>
-        <!-- <li v-if="CONFIG?.settings?.with_speaker_controls?.status" class="nav-item">
-          <a @click.stop="tab = 3" class="nav-link cp text-black" :class="{'active': tab==3}" >Speaker Ports</a>
-        </li> -->
-         
-      </ul>
+      <div class="d-flex justify-content-between align-items-end flex-wrap gap-3 mt-4 mb-3">
+        <ul class="nav nav-tabs bottom-borderless mb-0">
+          <li class="nav-item">
+            <a @click.stop="tab = 1" class="nav-link cp text-black" :class="{'active': tab==1}" >Puch Times</a>
+          </li>
+          <li class="nav-item">
+            <a @click.stop="tab = 2" class="nav-link cp text-black" :class="{'active': tab==2}" >Call Times</a>
+          </li>
+          <!-- <li v-if="CONFIG?.settings?.with_speaker_controls?.status" class="nav-item">
+            <a @click.stop="tab = 3" class="nav-link cp text-black" :class="{'active': tab==3}" >Speaker Ports</a>
+          </li> -->
+        </ul>
+
+        <div v-if="[1,2].includes(tab)" class="d-flex align-items-end gap-2 ms-auto flex-wrap justify-content-end" style="width: min(100%, 520px);">
+          <div class="schedule-filter-mode">
+            <span class="text-muted small text-nowrap">Mode:</span>
+            <div class="schedule-filter-mode__buttons">
+              <button type="button" class="schedule-filter-mode__btn" :class="{ active: filterMatchMode === 'and' }" @click="filterMatchMode = 'and'">AND</button>
+              <button type="button" class="schedule-filter-mode__btn" :class="{ active: filterMatchMode === 'or' }" @click="filterMatchMode = 'or'">OR</button>
+            </div>
+          </div>
+          <div class="schedule-filter-box">
+            <span class="text-muted small text-nowrap">Filter:</span>
+            <BaseSelectMultiple
+              v-model="selectedFilterClasses"
+              :data="activeClasses"
+              :label="false"
+              placeholder="Classes"
+              displayKey="class_name"
+              valueKey="class_short"
+              :search="true"
+              :searchDelayTime="100"
+              maxHeight="220px"
+              style="width: 100%;"
+            />
+          </div>
+        </div>
+      </div>
 
       <template v-if="[1,2].includes(tab)">
         <myTable >
@@ -679,8 +763,8 @@ async function reOrderSchedules(schedule_list, i, action='up'){
             </thead>
           </template>
           <template #rows>
-            <template v-if="tab==1 ? punch_schedules?.length  : call_schedules?.length">
-              <template v-for="(item, i) in tab==1 ? punch_schedules  : call_schedules">
+            <template v-if="filteredSchedules?.length">
+              <template v-for="(item, i) in filteredSchedules">
                 <tr ref="scheduleTrRef" @auxclick="helper.log(item)">
                     
                   <td :class="{'text-danger': item?.status == 0}"> {{ item.title }} </td> 
@@ -728,10 +812,10 @@ async function reOrderSchedules(schedule_list, i, action='up'){
                     <div class="d-flex justify-content-start">
                     
   
-                      <span :class="{'opacity-0 pointer-none': i == 0}" class="me-2 badge bg-white p-2 cp" @click.stop="reOrderSchedules(tab==1 ? punch_schedules  : call_schedules, i, 'up')">
+                      <span :class="{'opacity-0 pointer-none': !canReOrderSchedule(item, 'up')}" class="me-2 badge bg-white p-2 cp" @click.stop="reOrderVisibleSchedule(item, 'up')">
                         <i class='bx bx-chevron-up text-black cm size-1' ></i>
                       </span>
-                      <span :class="{'opacity-0 pointer-none': (tab==1 ? punch_schedules  : call_schedules)?.length - 1 === i}" class="badge bg-white p-2 cp" @click.stop="reOrderSchedules(tab==1 ? punch_schedules  : call_schedules, i, 'down')">
+                      <span :class="{'opacity-0 pointer-none': !canReOrderSchedule(item, 'down')}" class="badge bg-white p-2 cp" @click.stop="reOrderVisibleSchedule(item, 'down')">
                         <i class='bx bx-chevron-down text-black cp size-1' ></i>
                       </span>
           
@@ -807,3 +891,40 @@ async function reOrderSchedules(schedule_list, i, action='up'){
 
 
 </template>
+
+<style scoped>
+.schedule-filter-box,
+.schedule-filter-mode{
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.schedule-filter-box{
+  width: min(100%, 360px);
+}
+
+.schedule-filter-mode__buttons{
+  display: flex;
+  gap: 6px;
+}
+
+.schedule-filter-mode__btn{
+  min-width: 58px;
+  height: 43px;
+  border: 1px solid #cfd6df;
+  background: #ffffff;
+  color: #526074;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 12px;
+  transition: all 0.18s ease;
+}
+
+.schedule-filter-mode__btn.active{
+  background: #3f4d63;
+  border-color: #3f4d63;
+  color: #ffffff;
+  box-shadow: 0 8px 20px rgba(63, 77, 99, 0.18);
+}
+</style>
