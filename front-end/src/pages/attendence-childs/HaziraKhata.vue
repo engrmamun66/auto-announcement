@@ -10,6 +10,7 @@ const all_students_non_copied = inject("all_students_non_copied");
 const callbacks = inject("callbacks");
 const http = inject("http");
 const helper = inject("helper");
+const log = console.log
 
 const selectedClassShort = ref(null)
 const selectedRange = ref([
@@ -298,10 +299,19 @@ watch(
           <div v-for="day in dayColumns" :key="day.date" class="daily-grid-cell day-cell">
             <span
               class="status-pill"
+              @auxclick="log({
+                student, 
+                byDate: student?.byDate[day.date], 
+                date: day.date,
+                text: resolveStatus(student.byDate?.[day.date], day.date).text
+                })"
               :class="resolveStatus(student.byDate?.[day.date], day.date).class"
-              :title="resolveStatus(student.byDate?.[day.date], day.date).text"
+              :tooltip="resolveStatus(student.byDate?.[day.date], day.date).text"
+              style="--tfsize:11px"
             >
-              {{ resolveStatus(student.byDate?.[day.date], day.date).code }}
+              <span tooltip="right-click" flow="left">
+                {{ resolveStatus(student.byDate?.[day.date], day.date).code }}
+              </span>
             </span>
           </div>
         </div>
