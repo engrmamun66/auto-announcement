@@ -12,6 +12,18 @@ class Attendance {
       this.tableName = "attendance";
       this.db = db;
     }
+
+    writeClasswiseSample(data = []) {
+      const sampleDir = path.join(global.DIR || path.join(__dirname, '..'), '_samples');
+
+      if (!fs.existsSync(sampleDir)) return;
+
+      try {
+        fs.writeFileSync(path.join(sampleDir, 'DATA.json'), JSON.stringify(data, null, 2));
+      } catch (error) {
+        console.error('Unable to write classwise sample data:', error.message);
+      }
+    }
  
   
     addNew(req, res) {
@@ -591,7 +603,7 @@ class Attendance {
             
           }) 
 
-          fs.writeFileSync('./_samples/DATA.json', JSON.stringify(DATA, null, 2));
+          this.writeClasswiseSample(DATA);
 
           return { 
             attendance: DATA, 
