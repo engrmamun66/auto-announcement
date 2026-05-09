@@ -59,7 +59,7 @@ const errorMessage = ref('')
 const successMessage = ref('')
 let previewTimer = null
 const activeTab = ref('raw')
-const selectedFile = ref('config.example.js')
+const selectedFile = ref('config.js')
 
 async function loadConfig(){
   loading.value = true
