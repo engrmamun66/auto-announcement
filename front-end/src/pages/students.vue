@@ -627,7 +627,9 @@ watch(fixedWidthSoundCol, (newVal) => {
            <!-- <span>{{ params?.total || '0' }}</span> -->
         </Btn>
         <Btn v-if="!addMode" class="me-2" @click="addMode = !addMode;editModeTabIndex=1;clearParams();payload.id = null" ><i class='bx bx-plus'></i> Add New</Btn>
-        <Btn @click.stop="bulkPunch()" style="background: #673AB7;" :disabled="!PunchButtonsRef?.length">Bulk Punch ({{ PunchButtonsRef?.length || 0 }})</Btn>
+        <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
+          <Btn @click.stop="bulkPunch()" style="background: #673AB7;" :disabled="!PunchButtonsRef?.length">Bulk Punch ({{ PunchButtonsRef?.length || 0 }})</Btn>
+        </template>
       </div>
     </div>
 
