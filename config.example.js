@@ -17,7 +17,16 @@ const SHIFTS = {
      },
 }
 
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  NOT saved to DB  →  env{}                                   ║
+// ║  Saved to DB      →  settings, classes, logo, css_vars,      ║
+// ║                       date_range_list, studentTableColumns,  ║
+// ║                       card_owners, card_not_set_message      ║
+// ║  DB keys are editable from Settings panel in the UI.         ║
+// ╚══════════════════════════════════════════════════════════════╝
+
 module.exports = {
+     // ── NOT saved to DB ── loaded from config.js at startup only ──
      env: {
           PORT: port_number,
           SOCKET_PORT: 2424,
@@ -43,6 +52,8 @@ module.exports = {
           DEVICE_API_BASE_URL: 'http://127.0.0.1:2323/',
 
      },
+
+     // ── Saved to DB (settings table) ── editable from UI Settings panel ──
      settings: {
           lang_bn: true,
           log_backup_days: 7,
@@ -54,14 +65,6 @@ module.exports = {
           auto_focus_student_card: {
                status: false,
                delay_in_seconds: 3
-          },
-          backup: {
-               logo: true,
-               database: true,
-               openbat: true,
-               config: true,
-               exports: true,
-               media: true,
           },
           with_speaker_controls: {
                status: true, // -------------------------- on/off
@@ -156,7 +159,7 @@ module.exports = {
                display_name: 'Teacher',
                isActive: true,
                speaker_ports: [],
-               shifts: [ SHIFTS.teacher ],
+               shifts: [ SHIFTS?.teacher ],
           },
           {
                class_name: 'Play',
@@ -164,7 +167,7 @@ module.exports = {
                display_name: 'play',
                isActive: true,
                speaker_ports: [1, 2],
-               shifts: [ SHIFTS.first, SHIFTS.second ],
+               shifts: [ SHIFTS?.first, SHIFTS?.second ],
           },
           {
                class_name: 'Nursery',
@@ -172,7 +175,7 @@ module.exports = {
                display_name: 'nursery',
                isActive: true,
                speaker_ports: [1, 2],
-               shifts: [ SHIFTS.first, SHIFTS.second ],
+               shifts: [ SHIFTS?.first, SHIFTS?.second ],
           },
           {
                class_name: 'KG',
@@ -180,7 +183,7 @@ module.exports = {
                display_name: 'kg',
                isActive: true,
                speaker_ports: [1, 2],
-               shifts: [ SHIFTS.first, SHIFTS.second ],
+               shifts: [ SHIFTS?.first, SHIFTS?.second ],
           },
           {
                class_name: 'One/Saffe Awal',
@@ -188,7 +191,7 @@ module.exports = {
                display_name: 'one',
                isActive: true,
                speaker_ports: [1, 2],
-               shifts: [ SHIFTS.first, SHIFTS.second ],
+               shifts: [ SHIFTS?.first, SHIFTS?.second ],
           },
           {
                class_name: 'Two/Saffe Sani',
@@ -196,7 +199,7 @@ module.exports = {
                display_name: 'two',
                isActive: true,
                speaker_ports: [1, 2],
-               shifts: [ SHIFTS.first, SHIFTS.second ],
+               shifts: [ SHIFTS?.first, SHIFTS?.second ],
           },
           {
                class_name: 'Three/Saffe Sales',
@@ -204,7 +207,7 @@ module.exports = {
                display_name: 'three',
                isActive: true,
                speaker_ports: [1, 6],
-               shifts: [ SHIFTS.first, SHIFTS.second ],
+               shifts: [ SHIFTS?.first, SHIFTS?.second ],
           },
           {
                class_name: 'Four/Saffe Rabe',
@@ -212,7 +215,7 @@ module.exports = {
                display_name: 'four',
                isActive: true,
                speaker_ports: [1, 6],
-               shifts: [ SHIFTS.first, SHIFTS.second ],
+               shifts: [ SHIFTS?.first, SHIFTS?.second ],
           },
           {
                class_name: 'Ibtedaiyah',
@@ -220,7 +223,7 @@ module.exports = {
                display_name: 'five',
                isActive: true,
                speaker_ports: [1, 6],
-               shifts: [ SHIFTS.first, SHIFTS.second ],
+               shifts: [ SHIFTS?.first, SHIFTS?.second ],
           },
           {
                class_name: 'Mutawassitah Awal / Mizan',
@@ -228,7 +231,7 @@ module.exports = {
                display_name: 'mizan',
                isActive: true,
                speaker_ports: [1, 6],
-               shifts: [ SHIFTS.first, SHIFTS.second ],
+               shifts: [ SHIFTS?.first, SHIFTS?.second ],
           },
           {
                class_name: 'Mutawassitah Sani / Nahbemir',
@@ -236,7 +239,7 @@ module.exports = {
                display_name: 'nahbemir',
                isActive: true,
                speaker_ports: [1, 6],
-               shifts: [ SHIFTS.first, SHIFTS.second ],
+               shifts: [ SHIFTS?.first, SHIFTS?.second ],
           },
           {
                class_name: 'Mutawassitah Sales',
@@ -244,7 +247,7 @@ module.exports = {
                display_name: 'kuduri',
                isActive: true,
                speaker_ports: [1, 6],
-               shifts: [ SHIFTS.first, SHIFTS.second ],
+               shifts: [ SHIFTS?.first, SHIFTS?.second ],
           },
           {
                class_name: 'Sanabiya Awal/Shorhebekaya',
@@ -252,7 +255,7 @@ module.exports = {
                display_name: 'shorhebekaya',
                isActive: true,
                speaker_ports: [1, 6],
-               shifts: [ SHIFTS.first, SHIFTS.second ],
+               shifts: [ SHIFTS?.first, SHIFTS?.second ],
           },
           {
                class_name: 'Sanabiya Sani',
@@ -260,7 +263,7 @@ module.exports = {
                display_name: 'Hedaya',
                isActive: true,
                speaker_ports: [1, 6],
-               shifts: [ SHIFTS.first, SHIFTS.second ],
+               shifts: [ SHIFTS?.first, SHIFTS?.second ],
           },
           {
                class_name: 'Class 11',
@@ -268,7 +271,7 @@ module.exports = {
                display_name: 'Meshkat',
                isActive: true,
                speaker_ports: [1, 6],
-               shifts: [ SHIFTS.first, SHIFTS.second ],
+               shifts: [ SHIFTS?.first, SHIFTS?.second ],
           },
           {
                class_name: 'Takmil',
@@ -276,7 +279,7 @@ module.exports = {
                display_name: 'Daora',
                isActive: true,
                speaker_ports: [1, 6],
-               shifts: [ SHIFTS.first, SHIFTS.second ],
+               shifts: [ SHIFTS?.first, SHIFTS?.second ],
           },
           {
                class_name: 'Hifz',
@@ -284,7 +287,7 @@ module.exports = {
                display_name: 'hifz',
                isActive: true,
                speaker_ports: [1, 5],
-               shifts: [ SHIFTS.first, SHIFTS.second ],
+               shifts: [ SHIFTS?.first, SHIFTS?.second ],
           },
           {
                class_name: 'Pre Hifz',
@@ -292,7 +295,7 @@ module.exports = {
                display_name: 'Pre Hifz',
                isActive: true,
                speaker_ports: [1, 5],
-               shifts: [ SHIFTS.first, SHIFTS.second ],
+               shifts: [ SHIFTS?.first, SHIFTS?.second ],
           },
      ],
      studentTableColumns: {

@@ -60,6 +60,12 @@
           New: v{{ appAccessData?.incoming_version }}
         </span>
         <span class="topnav__version-text" v-else-if="appAccessData?.app_version">v{{ appAccessData?.app_version }}</span>
+        <button class="topnav__update-btn" tooltip="Settings" flow="down" @click="showSettingsPanel = true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </button>
         <button class="topnav__update-btn" tooltip="Update App" flow="down" @click="showVersionUpdateModal">
           <svg v-if="!isNewVersion" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="23 4 23 10 17 10"/>
@@ -93,6 +99,7 @@
     </nav>
   </header>
   <cloneStudents v-if="show_cloner_component" @unmount="show_cloner_component = false"></cloneStudents>
+  <ConfigSettings v-if="showSettingsPanel" @unmount="showSettingsPanel = false" />
 
   <Teleport to="body">
     <div v-if="showConfirmModal" class="update-modal-overlay">
@@ -136,6 +143,7 @@ import { RouterLink, useRoute, useRouter } from 'vue-router';
 import Btn from './Btn.vue'
 import cloneStudents from './cloneStudents.vue'
 import BtnLoader from './BtnLoader.vue';
+import ConfigSettings from './settings/ConfigSettings.vue'
 
 let logoEl = ref(null)
 let logo_wrapper = ref(null)
@@ -170,6 +178,7 @@ const allow_to_reaload = inject('allow_to_reaload');
 const storage = inject('storage');
 const helper = inject('helper');
 let show_cloner_component = ref(false)
+let showSettingsPanel = ref(false)
 let showConfirmModal = ref(false)
 let showUpdateModal = ref(false)
 let updateDone = ref(false)

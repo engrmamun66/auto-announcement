@@ -14,7 +14,8 @@ class myDB {
     }={}){
         let { env } = global.config
         this.DATABASE_PATH = path.join(global.DIR, env.DATABASE_PATH);
-        this.db = this._createDatabase(); 
+        fs.mkdirSync(path.dirname(this.DATABASE_PATH), { recursive: true });
+        this.db = this._createDatabase();
         this._createTables(this.db);
         // ========== Delete column ==============
         this._removeColumn('students', 'sound2')
@@ -27,8 +28,45 @@ class myDB {
         this._addColumn('students', 'options', 'VARCHAR', 'NULL')
         this._addColumn('students', 'note', 'VARCHAR', 'NULL') 
         this._addColumn('students', 'profile_image', 'VARCHAR', 'NULL')
-        this._addColumn('schedules', 'status', 'INTEGER', '1') 
-        this._addColumn('schedules', 'order_index', 'INTEGER', '1') 
+        this._addColumn('schedules', 'status', 'INTEGER', '1')
+        this._addColumn('schedules', 'order_index', 'INTEGER', '1')
+        this._initSettings()
+    }
+
+    _initSettings(){
+        let cfg = require('./../config.example');
+        const configPath = path.join(global.DIR, 'config.js');
+        if (fs.existsSync(configPath)) {
+          cfg = Object.assign({}, cfg, require(configPath));
+        }
+        const keys = [
+            ['settings',           cfg.settings],
+            ['classes',            cfg.classes],
+            ['logo',               cfg.logo],
+            ['css_vars',           cfg.css_vars],
+            ['date_range_list',    cfg.date_range_list],
+            ['studentTableColumns',cfg.studentTableColumns],
+            ['card_owners',        cfg.card_owners],
+            ['card_not_set_message', cfg.card_not_set_message],
+        ];
+        this.db.serialize(() => {
+            // Seed default values from config.example.js — skips if key already exists in DB
+            keys.forEach(([key, value]) => {
+                this.db.run(
+                    `INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)`,
+                    [key, JSON.stringify(value)],
+                    (err) => { if (err) console.error('_initSettings error:', err.message); }
+                );
+            });
+            // Remove any settings key that no longer exists in config.example.js
+            const knownKeys = keys.map(([k]) => k);
+            const placeholders = knownKeys.map(() => '?').join(', ');
+            this.db.run(
+                `DELETE FROM settings WHERE key NOT IN (${placeholders})`,
+                knownKeys,
+                (err) => { if (err) console.error('_initSettings cleanup error:', err.message); }
+            );
+        });
     }
 
     _createDatabase(){
@@ -158,9 +196,22 @@ class myDB {
                 }
               }
             );
-            
-            
-            
+
+            this.db.run(
+              `CREATE TABLE IF NOT EXISTS settings (
+                key TEXT PRIMARY KEY,
+                value TEXT NOT NULL,
+                updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+              )`,
+              (err) => {
+                if (err) {
+                  console.error("Error creating settings table:", err.message);
+                }
+              }
+            );
+
+
+
         } catch (error) {
             console.log('ddfdf', error);
         }

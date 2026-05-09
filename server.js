@@ -22,8 +22,7 @@ const LOCAL_IP = getLocalIP()
 let config = require('./config.example');
 const configPath = path.join(__dirname, 'config.js');
 if (fs.existsSync(configPath)) {
-  let { fulfillMisingConfigKeys } = require('./src/fulfill-the-config')
-  config = fulfillMisingConfigKeys(require(configPath), config);
+  config = require(configPath)
 }
 global.config = config
 moment.locale('en')
@@ -63,6 +62,11 @@ const Backup = require('./src/backup');
 const utils = require('./src/utls');
 const socket = require('./socket/socket');
 const DB = new classDB()
+const { getSettings } = require('./src/settings');
+const DB_CONFIG_KEYS = ['settings','classes','logo','css_vars','date_range_list','studentTableColumns','card_owners','card_not_set_message'];
+getSettings(DB.db).then(dbSettings => {
+    DB_CONFIG_KEYS.forEach(k => { if (dbSettings[k] !== undefined) global.config[k] = dbSettings[k]; });
+}).catch(() => {});
 const Students = new students(DB.db) 
 const Schedules = new schedules(DB.db)
 const PunchLog = new PunchLoogClass() 
@@ -230,6 +234,7 @@ app.use('/api', require('./src/routes/leave')(LeavAndVacations));
 app.use('/api', require('./src/routes/config')(config, utils, Backup));
 app.use('/api', require('./src/routes/misc')(utils, Backup, { DEVICE_API_BASE_URL }));
 app.use('/api', require('./src/routes/refresh')(utils));
+app.use('/api', require('./src/routes/settings')(DB.db));
 
 app.get('/api/update-app', async (req, res) => {
     const { downloadFromUrl } = require('./src/zipper/download-from-url');
