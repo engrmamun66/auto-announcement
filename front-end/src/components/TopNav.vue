@@ -99,7 +99,7 @@
         <p class="update-modal__sub" v-if="appAccessData?.incoming_version">
           v{{ appAccessData.app_version }} → v{{ appAccessData.incoming_version }}
         </p>
-        <p class="update-modal__sub" v-if="appAccessData?.change_log">
+        <p class="update-modal__changelog" v-if="appAccessData?.change_log">
           {{ appAccessData?.change_log }}
         </p>
         <label class="update-modal__checkbox">
@@ -467,6 +467,18 @@ onMounted(()=>{
   color: rgba(255,255,255,0.5);
   font-size: 13px;
   margin: 0;
+}
+.update-modal__changelog {
+  color: rgba(255,255,255,0.75);
+  font-size: 12px;
+  margin: 0;
+  padding: 8px 12px;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px;
+  background: rgba(255,255,255,0.05);
+  width: 100%;
+  box-sizing: border-box;
+  line-height: 1.5;
 }
 .update-modal__checkbox {
   display: flex;
