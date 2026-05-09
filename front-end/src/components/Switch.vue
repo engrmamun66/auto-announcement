@@ -281,12 +281,12 @@ let sw = computed(() => {
 .switch-label.bothVisible:before {
   opacity: 1 !important;
   color: #f7f7f7;
-  z-index: 99999;
+  z-index: 1;
 }
 .switch-label.bothVisible:after {
   opacity: 1 !important;
   color: #f7f7f7;
-  z-index: 99998;
+  z-index: 1;
 }
 
 .switch-handle {

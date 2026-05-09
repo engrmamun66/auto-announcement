@@ -65,7 +65,7 @@
                            :timePickerButtons="true"
                            :use24FormatTimeForEvents="true"
                            :invisible="true"
-                           displayIn="inline_left" 
+                           displayIn="inline" 
                            :buttons="{applyBtn: false, todayBtn: false}"
    
                            ></EmDateTimePicker>
@@ -112,6 +112,17 @@
                                <div class="form-group float-end">
                                    <label for="" >Shift Miss Probability</label>
                                    <input style="max-width:180px" v-model="payload.shift_miss_probility" type="number" class="form-control cb-input" :disabled="!payload.with_random_time"> 
+                               </div>
+                           </div>
+                           <div class="col-12 mt-3">
+                               <div class="form-group float-end">
+                                   <label for="" >Wait For Each</label>
+                                   <select v-model="payload.wait_for_each" class="form-control cb-input" @change="submitSearch">
+                                        <option :value="0"> Not Wait </option>                
+                                        <option :value="1000"> 1 Second </option>                
+                                        <option :value="2000"> 2 Second </option>                
+                                        <option :value="3000"> 3 Second </option>                
+                                    </select> 
                                </div>
                            </div>
                        </template> 
@@ -169,6 +180,7 @@ let pickerModelValueRef = ref(null)
 let studentnameorid = ref('')
 
 let payload = reactive({
+    wait_for_each: 0, 
     class_short: null,
     shifts: [],
     selected_students: [],
@@ -182,8 +194,8 @@ let payload = reactive({
     day_miss_probility: 5, // Math.random() * 100 <= day_miss_probility, no entry will added for date
     shift_miss_probility: 5, // Math.random() * 100 <= shift_miss_probility, no entry will added for curret shift
     times: {
-        before: 15,
-        after: 10,
+        before: 20,
+        after: 6,
     },
 })
 
@@ -322,6 +334,9 @@ async function AddBulkAttendanceNow() {
     inserting.value = true
     for (const item of all_records){
         await punchToSubmitAttendance(item[0], item[1])
+        if(payload.wait_for_each){
+            await helper.wait(payload.wait_for_each)
+        }
     }
     inserting.value = false 
 }

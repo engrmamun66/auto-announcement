@@ -3,7 +3,6 @@
     ref="inputElement"
     type="text"
     class="form-control cb-input w-100"
-    :style="inputStyles"
     :disabled="isDisabled"
     v-bind="$attrs"
     @click="$emit('click', $event)"
@@ -22,10 +21,6 @@ let props = defineProps({
   modelValueType: {
     default: "object",
     requird: true,
-  },
-  invisible: {
-    default: false,
-    requird: false,
   },
   isDisabled: {
     default: false,
@@ -53,17 +48,7 @@ let emits = defineEmits(["update:modelValue", "change", "nextPrev", "opening", "
 
 let inputElement = ref(null);
 
-let inputStyles = computed(() => {
-  let styles = [];
-  if (props.invisible) {
-    styles.push("height:0px");
-    styles.push("opacity:0");
-    styles.push("padding:0");
-    styles.push("border:none");
-  }
-
-  return styles.join(";");
-});
+ 
 
 watch(()=>props.modelValue, (mode__value) => {
   emits('change', mode__value)
