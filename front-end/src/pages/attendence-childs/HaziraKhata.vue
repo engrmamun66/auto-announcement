@@ -3,6 +3,7 @@
 import moment from 'moment/moment'
 import { inject, ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from "vue";
 import MonthPickerSingle from '../../components/MonthPickerSingle.vue'
+import HaziraShowLogRightbar from '../../components/hazira/HaziraShowLogRightbar.vue'
 
 const CONFIG = inject("CONFIG");
 const classes = inject("classes");
@@ -10,7 +11,6 @@ const all_students_non_copied = inject("all_students_non_copied");
 const callbacks = inject("callbacks");
 const http = inject("http");
 const helper = inject("helper");
-const log = console.log
 
 const selectedClassShort = ref(null)
 const selectedRange = ref([
@@ -25,6 +25,8 @@ const todayStr = ref(moment().format('YYYY-MM-DD'))
 const hasLoaded = ref(false)
 const gridScrollRef = ref(null)
 const showScrollControls = ref(false)
+const showLogRightbar = ref(false)
+const selectedLogEntry = ref(null)
 
 const weekends = computed(() => CONFIG.value?.settings?.attendance?.weekends || [])
 
@@ -46,6 +48,8 @@ function getClassStudents(classShort) {
       name: s.name || s.full_name || s.student_name || '',
       dakhela: s.dakhela,
       class_short: s.class_short,
+      class_name: s.class_name || s.class || '',
+      profile_image: s.profile_image || null,
     }))
 }
 
@@ -100,6 +104,34 @@ function updateScrollControls() {
     return
   }
   showScrollControls.value = el.scrollWidth > el.clientWidth + 2
+}
+
+function getCellStatus(student, dateStr) {
+  return resolveStatus(student?.byDate?.[dateStr], dateStr)
+}
+
+function buildLogPayload(student, day) {
+  const date = day?.date || null
+  const byDate = student?.byDate?.[date] || null
+  const status = getCellStatus(student, date)
+
+  return {
+    student,
+    byDate,
+    date,
+    text: status.text,
+    status,
+  }
+}
+
+function openShowLog(entry) {
+  selectedLogEntry.value = entry
+  showLogRightbar.value = true
+}
+
+function closeShowLog() {
+  showLogRightbar.value = false
+  selectedLogEntry.value = null
 }
 
 function resolveStatus(item, dateStr) {
@@ -297,22 +329,27 @@ watch(
             <div class="student-name">{{ student.name || '-' }} ({{ student.dakhela  }})</div>
           </div>
           <div v-for="day in dayColumns" :key="day.date" class="daily-grid-cell day-cell">
-            <span
-              class="status-pill"
-              @auxclick="log({
-                student, 
-                byDate: student?.byDate[day.date], 
-                date: day.date,
-                text: resolveStatus(student.byDate?.[day.date], day.date).text
-                })"
-              :class="resolveStatus(student.byDate?.[day.date], day.date).class"
-              :tooltip="resolveStatus(student.byDate?.[day.date], day.date).text"
-              style="--tfsize:11px"
-            >
-              <span tooltip="right-click" flow="left">
-                {{ resolveStatus(student.byDate?.[day.date], day.date).code }}
+            <div class="status-cell">
+              <span
+                class="status-pill"
+                :class="getCellStatus(student, day.date).class"
+                :tooltip="getCellStatus(student, day.date).text"
+                style="--tfsize:11px"
+              >
+                {{ getCellStatus(student, day.date).code }}
               </span>
-            </span>
+
+              <button
+                type="button"
+                class="status-menu-toggle"
+                tooltip="Show log"
+                flow="left"
+                :aria-label="`Show log for ${student.name || 'student'} on ${day.date}`"
+                @click.stop="openShowLog(buildLogPayload(student, day))"
+              >
+                <i class='bx bx-info-circle'></i>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -321,6 +358,12 @@ watch(
         </div>
       </div>
     </div>
+
+    <HaziraShowLogRightbar
+      v-if="showLogRightbar && selectedLogEntry"
+      :entry="selectedLogEntry"
+      @unmount="closeShowLog"
+    />
   </div>
 </template>
 
@@ -562,6 +605,15 @@ watch(
  
 .day-cell{
   padding: 0px;
+  position: relative;
+  overflow: visible;
+}
+
+.status-cell{
+  width: 100%;
+  height: 100%;
+  min-height: 38px;
+  position: relative;
 }
 
 .status-pill{
@@ -574,6 +626,44 @@ watch(
   font-weight: 700;
   font-size: 11px;
   color: #fff;
+  transition: filter 0.15s ease;
+}
+
+.status-cell:hover .status-pill{
+  filter: brightness(0.98);
+}
+
+.status-menu-toggle{
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.82);
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+  transform: scale(0.82);
+  transition: opacity 0.15s ease, transform 0.15s ease, background-color 0.15s ease;
+  z-index: 4;
+}
+
+.status-cell:hover .status-menu-toggle,
+.status-cell:focus-within .status-menu-toggle{
+  opacity: 1;
+  transform: scale(1);
+}
+
+.status-menu-toggle:hover{
+  background: rgba(15, 23, 42, 0.94);
 }
 
 .status-present{
@@ -632,6 +722,17 @@ watch(
   .status-future{ background: #e5e7ebb5 !important; }
   .status-holiday{ background: #94a3b8 !important; }
   .status-empty{ background: #cbd5f5 !important; }
+  .status-menu-toggle,
+  .status-menu{
+    display: none !important;
+  }
+}
+
+@media (hover: none) {
+  .status-menu-toggle{
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 @media (max-width: 768px) {
