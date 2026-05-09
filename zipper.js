@@ -59,7 +59,7 @@ const { ZIP_LATEST, ZIP_TEMP, ZIP_NEW_SETUP, encodeAndWrite, decodeAndWrite } = 
     const choice = await ask('\n  → Choose option: ');
     let char = choice.toLowerCase()
 
-    if (char === 'c') {
+    if (char === 'c' || char === 'cy') {
         await create_zip_with_latest_code({ file_name: ZIP_LATEST });
     }
     else if (char === 't') {
@@ -108,11 +108,17 @@ const { ZIP_LATEST, ZIP_TEMP, ZIP_NEW_SETUP, encodeAndWrite, decodeAndWrite } = 
 
     if(has_drive_config){
         const filename = char === 't' ? ZIP_TEMP : (char == 'n' ? ZIP_NEW_SETUP : ZIP_LATEST);
-        if(['c', 't', 'n'].includes(char)){
-            let upload = await ask('\n  → Upload to google-drive (y/n)? ');
-            if(upload.toLowerCase() == 'y'){
+        if(['c', 'cy', 't', 'n'].includes(char)){
+
+            if(char == 'cy'){
                 uploadToGoogleDrive(filename)
+            } else {
+                let upload = await ask('\n  → Upload to google-drive (y/n)? ');
+                if(upload.toLowerCase() == 'y'){
+                    uploadToGoogleDrive(filename)
+                }
             }
+
         }
     }
 
