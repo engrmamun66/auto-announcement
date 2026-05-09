@@ -36,9 +36,7 @@
     "ignore": [
       "**/latest/**",
       "**/database/**",
-      "**/public/**",
-      "package.json",
-      "package-lock.json"
+      "**/public/**"
     ],
     "delay": 50
   }
