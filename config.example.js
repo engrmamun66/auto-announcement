@@ -74,12 +74,14 @@ module.exports = {
                status: true, // -------------------------- on/off
                only_attendance_feature: false,
 
-               /**
-                * 'if_prent_in_first_shift'
-                * 'if_prent_in_last_shift'
-                * 'if_prent_in_both_shift'
+                /**
+                * 'if_present_in_first_shift'
+                * 'if_present_in_last_shift'
+                * 'if_present_in_all_shifts'
+                * 'if_present_minimum_{2}_shift'. // 2 is dynamic
+                * 'if_present_in_[1, 2]'         // 1 means fist shift, 2 means 2nd shift
                 */
-               preset_count_by: 'if_prent_in_first_shift', 
+               preset_count_by: 'if_present_in_first_shift', 
                /**
                 * using in getRunningShift() function
                 * example: if boundary_time = 30

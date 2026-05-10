@@ -24,8 +24,10 @@ const getAttendeceReportsForSingleClass = inject("getAttendeceReportsForSingleCl
 const all_students_non_copied = inject("all_students_non_copied");
 const http = inject("http");
 
-const weekends = CONFIG.value?.settings?.attendance?.weekends || [] // ['Friday']
-const preset_count_by = CONFIG.value?.settings?.attendance?.preset_count_by ?? 'if_prent_in_first_shift'
+const weekends = computed(() => CONFIG.value?.settings?.attendance?.weekends || []) // ['Friday']
+const attendancePresetCountBy = computed(() => {
+  return CONFIG.value?.settings?.attendance?.preset_count_by ?? 'if_present_in_first_shift'
+})
 
 console.log('=====:::ReportingOverview.vue')
 
@@ -301,7 +303,7 @@ async function loadAllClassSummaryReport([start_date, end_date]){
   let leaves_and_vacations = await callbacks.getLeavesAndVacations({start_date, end_date})  
 
   let payloadData = {
-    weekends, 
+    weekends: weekends.value, 
     leaveData: leaves_and_vacations,
     all__students: all_students_non_copied.value.map(s => ({id: s.id, name: s.name, dakhela: s.dakhela, class_short: s.class_short})),
     total_days: countDays(start_date, end_date), // This will helpe to generate attendence report by percentage
@@ -316,7 +318,7 @@ async function loadSingleClassSummaryReport(class_short, [start_date, end_date])
   let leaves_and_vacations = await callbacks.getLeavesAndVacations({start_date, end_date})  
 
   let payloadData = {
-    weekends, 
+    weekends: weekends.value, 
     leaveData: leaves_and_vacations,
     class_students: all_students_non_copied.value.filter(std => std.class_short === class_short).map(s => ({id: s.id, name: s.name, dakhela: s.dakhela, class_short: s.class_short})),
     total_days: countDays(start_date, end_date), // This will helpe to generate attendence report by percentage
@@ -424,30 +426,85 @@ const statusByDate = computed(() => {
 })
 
 function getShiftDurations(class_short){
-  if(!class_short) return { first: null, last: null }
+  if(!class_short) return []
   const cls = classes.value.find(c => c.class_short === class_short)
   const shifts = cls?.shifts || []
-  if(!shifts.length) return { first: null, last: null }
-  const first = `${shifts[0].start} - ${shifts[0].end}`
-  const last = `${shifts[shifts.length - 1].start} - ${shifts[shifts.length - 1].end}`
-  return { first, last }
+  return shifts
+    .map(shift => {
+      if(!shift?.start || !shift?.end) return null
+      return `${shift.start} - ${shift.end}`
+    })
+    .filter(Boolean)
+}
+
+function getPresentShiftNumbers(rows = [], class_short){
+  const shiftDurations = getShiftDurations(class_short)
+  const presentShiftNumbers = new Set()
+
+  ;(rows || []).forEach(row => {
+    if(!row) return
+
+    const durationText = typeof row.shift_duration === 'string' ? row.shift_duration.trim() : ''
+    let shiftIndex = durationText ? shiftDurations.findIndex(duration => duration === durationText) : -1
+
+    if(shiftIndex === -1){
+      const shiftNumber = Number(row.shift_number)
+      if(Number.isInteger(shiftNumber) && shiftNumber > 0){
+        shiftIndex = shiftNumber - 1
+      }
+    }
+
+    if(shiftIndex >= 0){
+      presentShiftNumbers.add(shiftIndex + 1)
+    }
+  })
+
+  return Array.from(presentShiftNumbers).sort((a, b) => a - b)
 }
 
 function computePresentStatus(rows=[], class_short){
   if(!rows?.length) return 'Absent'
-  const { first, last } = getShiftDurations(class_short)
-  if(!first || !last){
+  const shiftDurations = getShiftDurations(class_short)
+  if(!shiftDurations.length){
     return rows.length ? 'Present' : 'Absent'
   }
-  const hasFirst = rows.some(r => r.shift_duration === first)
-  const hasLast = rows.some(r => r.shift_duration === last)
+  const presentShiftNumbers = getPresentShiftNumbers(rows, class_short)
+  const presentShiftSet = new Set(presentShiftNumbers)
+  const totalShifts = shiftDurations.length
+  const preset = String(attendancePresetCountBy.value || 'if_present_in_first_shift').trim()
 
-  if(preset_count_by === 'if_prent_in_last_shift') return hasLast ? 'Present' : 'Absent'
-  if(preset_count_by === 'if_prent_in_both_shift'){
-    if(first === last) return hasFirst ? 'Present' : 'Absent'
-    return (hasFirst && hasLast) ? 'Present' : 'Absent'
+  let isPresent = false
+
+  if(preset === 'if_present_in_last_shift' || preset === 'if_prent_in_last_shift'){
+    isPresent = presentShiftSet.has(totalShifts)
+  } else if(preset === 'if_present_in_all_shifts'){
+    isPresent = totalShifts > 0 && presentShiftNumbers.length >= totalShifts
+  } else if(preset === 'if_prent_in_both_shift'){
+    isPresent = totalShifts === 1
+      ? presentShiftSet.has(1)
+      : (presentShiftSet.has(1) && presentShiftSet.has(totalShifts))
+  } else {
+    const minimumMatch = preset.match(/^if_present_minimum_(?:\{)?(\d+)(?:\})?_shift$/)
+    const specificShiftMatch = preset.match(/^if_present_in_\[(.+)\]$/)
+
+    if(minimumMatch){
+      const minimumRequired = Math.max(1, Math.min(totalShifts, Number(minimumMatch[1]) || 1))
+      isPresent = presentShiftNumbers.length >= minimumRequired
+    } else if(specificShiftMatch){
+      const requiredShiftNumbers = specificShiftMatch[1]
+        .split(',')
+        .map(item => Number(String(item).trim()))
+        .filter(number => Number.isInteger(number) && number > 0 && number <= totalShifts)
+
+      isPresent = requiredShiftNumbers.length
+        ? requiredShiftNumbers.every(number => presentShiftSet.has(number))
+        : presentShiftSet.has(1)
+    } else {
+      isPresent = presentShiftSet.has(1)
+    }
   }
-  return hasFirst ? 'Present' : 'Absent'
+
+  return isPresent ? 'Present' : 'Absent'
 }
 
 function getFirstIn(rows=[]){
@@ -506,7 +563,7 @@ function countPresentableDays(startDateStr, endDateStr, class_short){
   for (let d = start.clone(); d.isSameOrBefore(end, 'day'); d.add(1, 'day')) {
     const dateStr = d.format('YYYY-MM-DD')
     const dayName = d.format('dddd')
-    if (weekends.includes(dayName)) continue
+    if (weekends.value.includes(dayName)) continue
     if (isVacationDate(dateStr, class_short)) continue
     count += 1
   }
@@ -527,7 +584,7 @@ const studentMonthlySummary = computed(() => {
     const key = moment(g.date, 'YYYY-MM-DD').startOf('month').format('YYYY-MM-01')
     if(!statsByMonth[key]) statsByMonth[key] = { presentDays: 0, lateDays: 0, lateMinutes: 0 }
     const dayName = moment(g.date, 'YYYY-MM-DD').format('dddd')
-    const isPresentable = !weekends.includes(dayName) && !isVacationDate(g.date, class_short)
+    const isPresentable = !weekends.value.includes(dayName) && !isVacationDate(g.date, class_short)
     if(isPresentable){
       if(g.status === 'Present') statsByMonth[key].presentDays += 1
       const late = Number(g.max_late || 0)

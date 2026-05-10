@@ -1,6 +1,6 @@
 <script setup>
 import moment from 'moment/moment'
-import { computed } from 'vue'
+import { computed, inject } from 'vue'
 import Rightbar from '../Rightbar.vue'
 
 const props = defineProps({
@@ -11,6 +11,7 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['unmount'])
+const CONFIG = inject('CONFIG', { value: {} })
 const defaultStatus = { code: '-', text: 'N/A', class: 'status-empty' }
 
 const activeEntry = computed(() => props.entry || {})
@@ -36,6 +37,35 @@ const classLabel = computed(() => {
 })
 
 const studentImage = computed(() => resolveImageUrl(student.value.profile_image))
+const attendancePresetRule = computed(() => {
+  return CONFIG.value?.settings?.attendance?.preset_count_by || 'if_present_in_first_shift'
+})
+const attendancePresetRuleLabel = computed(() => {
+  const preset = String(attendancePresetRule.value || '').trim()
+
+  if (preset === 'if_present_in_first_shift') return 'First shift required'
+  if (preset === 'if_present_in_last_shift' || preset === 'if_prent_in_last_shift') return 'Last shift required'
+  if (preset === 'if_present_in_all_shifts') return 'All shifts required'
+  if (preset === 'if_prent_in_both_shift') return 'First and last shift required'
+
+  const minimumMatch = preset.match(/^if_present_minimum_(?:\{)?(\d+)(?:\})?_shift$/)
+  if (minimumMatch) {
+    return `Minimum ${minimumMatch[1]} shifts required`
+  }
+
+  const specificShiftMatch = preset.match(/^if_present_in_\[(.+)\]$/)
+  if (specificShiftMatch) {
+    const shifts = specificShiftMatch[1]
+      .split(',')
+      .map(item => String(item).trim())
+      .filter(Boolean)
+      .join(', ')
+
+    return shifts ? `Required shifts: ${shifts}` : preset
+  }
+
+  return preset
+})
 
 const summaryItems = computed(() => {
   const currentDay = dayData.value
@@ -121,6 +151,11 @@ function leaveType(leave) {
         <div class="log-status" :class="status.class">
           <span class="log-status__code">{{ status.code }}</span>
           <span>{{ status.text }}</span>
+        </div>
+
+        <div class="log-rule">
+          <span class="log-rule__label">Present Rule</span>
+          <span class="log-rule__value">{{ attendancePresetRuleLabel }}</span>
         </div>
       </div>
 
@@ -267,6 +302,35 @@ function leaveType(leave) {
   font-size: 12px;
   font-weight: 700;
   color: #ffffff;
+}
+
+.log-rule{
+  grid-column: 1 / -1;
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 6px;
+}
+
+.log-rule__label{
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.log-rule__value{
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .log-status__code{

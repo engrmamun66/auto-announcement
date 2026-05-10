@@ -24,8 +24,111 @@ class Attendance {
         console.error('Unable to write classwise sample data:', error.message);
       }
     }
+
+    getAttendancePresetCountBy() {
+      const preset = global.config?.settings?.attendance?.preset_count_by;
+      return typeof preset === "string" && preset.trim()
+        ? preset.trim()
+        : "if_present_in_first_shift";
+    }
+
+    getClassConfig(class_short = '') {
+      return (global.config?.classes || []).find(eachClass => eachClass?.class_short == class_short) || {};
+    }
+
+    getClassShiftDurations(class_short = '') {
+      const classConfig = this.getClassConfig(class_short);
+      const shifts = Array.isArray(classConfig?.shifts) ? classConfig.shifts : [];
+
+      return shifts
+        .map((shift) => {
+          if (!shift?.start || !shift?.end) return null;
+          return `${shift.start} - ${shift.end}`;
+        })
+        .filter(Boolean);
+    }
+
+    getPresentShiftNumbers(dayAttendance = [], class_short = '') {
+      const rows = Array.isArray(dayAttendance) ? dayAttendance : [];
+      const shiftDurations = this.getClassShiftDurations(class_short);
+      const presentShiftNumbers = new Set();
+
+      rows.forEach((att) => {
+        if (!att) return;
+
+        const durationText = typeof att.shift_duration === "string" ? att.shift_duration.trim() : "";
+        let shiftIndex = durationText ? shiftDurations.findIndex(duration => duration === durationText) : -1;
+
+        if (shiftIndex === -1) {
+          const shiftNumber = Number(att.shift_number);
+          if (Number.isInteger(shiftNumber) && shiftNumber > 0) {
+            shiftIndex = shiftNumber - 1;
+          }
+        }
+
+        if (shiftIndex >= 0) {
+          presentShiftNumbers.add(shiftIndex + 1);
+        }
+      });
+
+      return Array.from(presentShiftNumbers).sort((a, b) => a - b);
+    }
+
+    isPresentByPreset(dayAttendance = [], class_short = '', presetOverride = null) {
+      const rows = Array.isArray(dayAttendance) ? dayAttendance : [];
+      if (!rows.length) return false;
+
+      const shiftDurations = this.getClassShiftDurations(class_short);
+      if (!shiftDurations.length) {
+        return rows.length > 0;
+      }
+
+      const presentShiftNumbers = this.getPresentShiftNumbers(rows, class_short);
+      const totalShifts = shiftDurations.length;
+      const presentShiftSet = new Set(presentShiftNumbers);
+      const preset = String(presetOverride || this.getAttendancePresetCountBy()).trim();
+
+      if (preset === 'if_present_in_last_shift' || preset === 'if_prent_in_last_shift') {
+        return presentShiftSet.has(totalShifts);
+      }
+
+      if (preset === 'if_present_in_all_shifts') {
+        return totalShifts > 0 && presentShiftNumbers.length >= totalShifts;
+      }
+
+      if (preset === 'if_prent_in_both_shift') {
+        if (totalShifts === 1) return presentShiftSet.has(1);
+        return presentShiftSet.has(1) && presentShiftSet.has(totalShifts);
+      }
+
+      const minimumMatch = preset.match(/^if_present_minimum_(?:\{)?(\d+)(?:\})?_shift$/);
+      if (minimumMatch) {
+        const minimumRequired = Math.max(1, Math.min(totalShifts, Number(minimumMatch[1]) || 1));
+        return presentShiftNumbers.length >= minimumRequired;
+      }
+
+      const specificShiftMatch = preset.match(/^if_present_in_\[(.+)\]$/);
+      if (specificShiftMatch) {
+        const requiredShiftNumbers = specificShiftMatch[1]
+          .split(',')
+          .map(item => Number(String(item).trim()))
+          .filter(number => Number.isInteger(number) && number > 0 && number <= totalShifts);
+
+        if (!requiredShiftNumbers.length) {
+          return presentShiftSet.has(1);
+        }
+
+        return requiredShiftNumbers.every(number => presentShiftSet.has(number));
+      }
+
+      return presentShiftSet.has(1);
+    }
+
+    isPresentInAllConfiguredShifts(dayAttendance = [], class_short = '') {
+      return this.isPresentByPreset(dayAttendance, class_short, 'if_present_in_all_shifts');
+    }
+
  
-  
     addNew(req, res) {
       const { student_id, date, in_time, out_time, status = 'present', remarks, late_in_minute = 0, device_index = 1, shift_duration = '', shift_count = 1, shift_number = 1 } = req.body;
     
@@ -375,13 +478,8 @@ class Attendance {
         });
 
         const classConfigMap = {};
-        const classFirstShift = {};
         (global.config?.classes || []).forEach((cls) => {
           classConfigMap[cls.class_short] = cls;
-          const firstShift = cls?.shifts?.[0];
-          if (firstShift?.start && firstShift?.end) {
-            classFirstShift[cls.class_short] = `${firstShift.start} - ${firstShift.end}`;
-          }
         });
 
         const classStudentCounts = {};
@@ -452,19 +550,13 @@ class Attendance {
             });
           }
 
-          const firstShiftDuration = classFirstShift[class_short] || null;
-
           dateMeta.forEach(({ date, monthKey }) => {
             const is_presentable_day = !isClassHoliday(date, class_short);
 
             let is_present = false;
             if (is_presentable_day) {
               const dayAttendance = attendanceByStudentDate?.[dakhela]?.[date] || [];
-              if (firstShiftDuration) {
-                is_present = dayAttendance.some(att => att.shift_duration === firstShiftDuration);
-              } else {
-                is_present = dayAttendance.length > 0;
-              }
+              is_present = this.isPresentByPreset(dayAttendance, class_short);
             }
 
             const reportItem = classWise[class_short][monthKey];
@@ -534,7 +626,7 @@ class Attendance {
             let student_attendance = attendanceGroup?.[dakhela] || []
             // let class_vacations = utils.
 
-            let _targetStd = global.config.classes.find(eachClass => eachClass.class_short == class_short) || {}
+            let _targetStd = this.getClassConfig(class_short)
             let class_name = _targetStd?.class_name || ''
             let student_shifts = Array.isArray(_targetStd?.shifts) ? _targetStd.shifts : []
         
@@ -570,8 +662,8 @@ class Attendance {
               let is_leave_day = student_leaves.length > 0
               let is_weekend = weekend_leaves.includes(date)
               let is_presentable_day = !(is_weekend || class_vacations.length > 0)
-              let is_present = is_presentable_day ? Boolean(shiftInfo?.[0]?.is_present) : false
-              let is_preset_all_shifts = is_presentable_day ? shiftInfo.every(shift => shift.is_present) : false
+              let is_present = is_presentable_day ? this.isPresentByPreset(date_wide_attendace, class_short) : false
+              let is_preset_all_shifts = is_presentable_day ? this.isPresentInAllConfiguredShifts(date_wide_attendace, class_short) : false
               let let_in_minute = shiftInfo[0]?.attendance?.late_in_minute || 0
               let in_out_count = date_wide_attendace.reduce((total, att) => {
                 return total + (att?.in_time ? 1 : 0) + (att?.out_time ? 1 : 0)
@@ -723,16 +815,6 @@ class Attendance {
           attendanceByStudentDate[sid][att.date].push(att);
         });
 
-        const classFirstShift = {};
-        (global.config?.classes || []).forEach((cls) => {
-          const firstShift = cls?.shifts?.[0];
-          if (firstShift?.start && firstShift?.end) {
-            classFirstShift[cls.class_short] = `${firstShift.start} - ${firstShift.end}`;
-          }
-        });
-
-        const firstShiftDuration = classFirstShift[class_short] || null;
-
         const students = class_students.map((student) => {
           const dakhela = Number(student?.dakhela);
           let total_present = 0;
@@ -752,12 +834,7 @@ class Attendance {
             if (!is_presentable_day) return;
 
             const dayAttendance = attendanceByStudentDate?.[dakhela]?.[date] || [];
-            let is_present = false;
-            if (firstShiftDuration) {
-              is_present = dayAttendance.some(att => att.shift_duration === firstShiftDuration);
-            } else {
-              is_present = dayAttendance.length > 0;
-            }
+            const is_present = this.isPresentByPreset(dayAttendance, class_short);
 
             if (is_present) total_present += 1;
 
