@@ -536,7 +536,7 @@ class Attendance {
 
             let _targetStd = global.config.classes.find(eachClass => eachClass.class_short == class_short) || {}
             let class_name = _targetStd?.class_name || ''
-            let student_shifts = _targetStd?.shifts || []
+            let student_shifts = Array.isArray(_targetStd?.shifts) ? _targetStd.shifts : []
         
             // Calucating Every Single Date for a student
             let date_wise_report = date_duration.map((date, j) => {
@@ -547,12 +547,15 @@ class Attendance {
               let shiftInfo = student_shifts.map(shift => {
                 let duration_text  = `${shift.start} - ${shift.end}`
                 let find = date_wide_attendace.find(att => att.shift_duration === duration_text)
-                shift['is_present'] = Boolean(find)
-                shift['attendance'] = find || null
+                let shiftItem = {
+                  ...shift,
+                  is_present: Boolean(find),
+                  attendance: find ? { ...find } : null,
+                }
                 if(!attendance){
                   attendance = find || null
                 }
-                return shift
+                return shiftItem
               })
 
               let _leaves = leaveData_group_by_date[date] || []
@@ -570,6 +573,9 @@ class Attendance {
               let is_present = is_presentable_day ? Boolean(shiftInfo?.[0]?.is_present) : false
               let is_preset_all_shifts = is_presentable_day ? shiftInfo.every(shift => shift.is_present) : false
               let let_in_minute = shiftInfo[0]?.attendance?.late_in_minute || 0
+              let in_out_count = date_wide_attendace.reduce((total, att) => {
+                return total + (att?.in_time ? 1 : 0) + (att?.out_time ? 1 : 0)
+              }, 0)
 
               let data = {
                 date,
@@ -583,12 +589,11 @@ class Attendance {
                 is_leave_day,
                 is_present,
                 is_preset_all_shifts,
-                in_out_count: day_leaves.length,
+                in_out_count,
                 day_leaves,
                 let_in_minute, 
                 is_presentable_day,
-                student_name: attendance?.student_name || null,
-                class_short: attendance?.class_short || null,
+                student_name: attendance?.student_name || student?.name || null,
               } 
 
               data['_leaves'] = _leaves 

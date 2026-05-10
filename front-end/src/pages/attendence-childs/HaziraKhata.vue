@@ -18,6 +18,7 @@ const selectedRange = ref([
   moment().endOf('month').format('YYYY-MM-DD'),
 ])
 
+const log = console.log
 const loading = ref(false)
 const errorMessage = ref('')
 const dailyLogs = ref([])
@@ -324,11 +325,11 @@ watch(
           </div>
         </div>
 
-        <div v-for="student in dailyLogs" :key="student.dakhela" class="daily-grid-row">
+        <div v-for="(student, studentIndex) in dailyLogs" :key="student.dakhela" class="daily-grid-row">
           <div class="daily-grid-cell sticky-col student-cell">
             <div class="student-name">{{ student.name || '-' }} ({{ student.dakhela  }})</div>
           </div>
-          <div v-for="day in dayColumns" :key="day.date" class="daily-grid-cell day-cell">
+          <div v-for="(day) in dayColumns" :key="day.date" class="daily-grid-cell day-cell">
             <div
               class="status-cell"
               :class="{ 'is-interactive': getCellStatus(student, day.date).code !== '-' }"
@@ -337,6 +338,7 @@ watch(
                 class="status-pill"
                 :class="getCellStatus(student, day.date).class"
                 :tooltip="getCellStatus(student, day.date).code !== '-' ? getCellStatus(student, day.date).text : ''"
+                :flow="studentIndex === 0 ? 'left' : 'up'"
                 style="--tfsize:11px"
               >
                 {{ getCellStatus(student, day.date).code }}
@@ -346,8 +348,14 @@ watch(
                 type="button"
                 class="status-menu-toggle"
                 :tooltip="getCellStatus(student, day.date).code !== '-' ? getCellStatus(student, day.date).text : ''"
+                :flow="studentIndex === 0 ? 'left' : 'up'"
                 :aria-label="`Show log for ${student.name || 'student'} on ${day.date}`"
                 @click.stop="openShowLog(buildLogPayload(student, day))"
+                @auxclick="log({
+                  student,
+                  date: day.date,
+                  text: getCellStatus(student, day.date).code,
+                })"
               >
                 <i class='bx bx-info-circle'></i>
               </button>
