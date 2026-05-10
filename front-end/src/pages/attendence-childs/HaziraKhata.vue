@@ -329,7 +329,10 @@ watch(
             <div class="student-name">{{ student.name || '-' }} ({{ student.dakhela  }})</div>
           </div>
           <div v-for="day in dayColumns" :key="day.date" class="daily-grid-cell day-cell">
-            <div class="status-cell">
+            <div
+              class="status-cell"
+              :class="{ 'is-interactive': getCellStatus(student, day.date).code !== '-' }"
+            >
               <span
                 class="status-pill"
                 :class="getCellStatus(student, day.date).class"
@@ -342,7 +345,6 @@ watch(
               <button v-if="getCellStatus(student, day.date).code !== '-'"
                 type="button"
                 class="status-menu-toggle"
-                title="Show log"
                 :tooltip="getCellStatus(student, day.date).code !== '-' ? getCellStatus(student, day.date).text : ''"
                 :aria-label="`Show log for ${student.name || 'student'} on ${day.date}`"
                 @click.stop="openShowLog(buildLogPayload(student, day))"
@@ -652,14 +654,14 @@ watch(
   transition: transform 0.2s ease, filter 0.2s ease, opacity 0.2s ease;
 }
 
-.status-cell:hover::before,
-.status-cell:focus-within::before{
+.status-cell.is-interactive:hover::before,
+.status-cell.is-interactive:focus-within::before{
   opacity: 1;
   transform: translateY(0) scale(1);
 }
 
-.status-cell:hover .status-pill,
-.status-cell:focus-within .status-pill{
+.status-cell.is-interactive:hover .status-pill,
+.status-cell.is-interactive:focus-within .status-pill{
   filter: brightness(0.84) saturate(0.86);
   opacity: 0.9;
 }
@@ -701,8 +703,8 @@ watch(
   z-index: 4;
 }
 
-.status-cell:hover .status-menu-toggle,
-.status-cell:focus-within .status-menu-toggle{
+.status-cell.is-interactive:hover .status-menu-toggle,
+.status-cell.is-interactive:focus-within .status-menu-toggle{
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
