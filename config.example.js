@@ -119,7 +119,6 @@ module.exports = {
                     pagiation_positon: 'bottom_center', // bottom_left | bottom_center | bottom_right
                },
                weekends: ['Friday'], // Saturday, 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'
-               // vacation_types and stuents_leave_types are loaded from src/lang/en.js or src/lang/bn.js
                
           },
      },
