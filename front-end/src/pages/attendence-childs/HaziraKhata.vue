@@ -333,17 +333,17 @@ watch(
               <span
                 class="status-pill"
                 :class="getCellStatus(student, day.date).class"
-                :tooltip="getCellStatus(student, day.date).text"
+                :tooltip="getCellStatus(student, day.date).code !== '-' ? getCellStatus(student, day.date).text : ''"
                 style="--tfsize:11px"
               >
                 {{ getCellStatus(student, day.date).code }}
               </span>
 
-              <button
+              <button v-if="getCellStatus(student, day.date).code !== '-'"
                 type="button"
                 class="status-menu-toggle"
-                tooltip="Show log"
-                flow="left"
+                title="Show log"
+                :tooltip="getCellStatus(student, day.date).code !== '-' ? getCellStatus(student, day.date).text : ''"
                 :aria-label="`Show log for ${student.name || 'student'} on ${day.date}`"
                 @click.stop="openShowLog(buildLogPayload(student, day))"
               >
@@ -612,8 +612,29 @@ watch(
 .status-cell{
   width: 100%;
   height: 100%;
-  min-height: 38px;
+  min-height: 34px;
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  isolation: isolate;
+}
+
+.status-cell::before{
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border-radius: 10px;
+  background:
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.04) 65%),
+    rgba(15, 23, 42, 0.12);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  transform: translateY(7px) scale(0.9);
+  transition: opacity 0.18s ease, transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+  z-index: 1;
 }
 
 .status-pill{
@@ -626,44 +647,80 @@ watch(
   font-weight: 700;
   font-size: 11px;
   color: #fff;
-  transition: filter 0.15s ease;
+  position: relative;
+  z-index: 0;
+  transition: transform 0.2s ease, filter 0.2s ease, opacity 0.2s ease;
 }
 
-.status-cell:hover .status-pill{
-  filter: brightness(0.98);
+.status-cell:hover::before,
+.status-cell:focus-within::before{
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.status-cell:hover .status-pill,
+.status-cell:focus-within .status-pill{
+  filter: brightness(0.84) saturate(0.86);
+  opacity: 0.9;
 }
 
 .status-menu-toggle{
   position: absolute;
-  top: 2px;
-  right: 2px;
-  width: 16px;
-  height: 16px;
+  top: 50%;
+  left: 50%;
+  width: 30px;
+  height: 30px;
   padding: 0;
-  border: 0;
+  border: 1px solid rgba(255, 255, 255, 0.42);
   border-radius: 999px;
-  background: rgba(15, 23, 42, 0.82);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.04)),
+    rgba(15, 23, 42, 0.34);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
   color: #ffffff;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: 15px;
   line-height: 1;
   cursor: pointer;
   opacity: 0;
-  transform: scale(0.82);
-  transition: opacity 0.15s ease, transform 0.15s ease, background-color 0.15s ease;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translate(-50%, calc(-50% + 12px)) scale(0.84);
+  box-shadow:
+    0 10px 24px rgba(15, 23, 42, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  transition:
+    opacity 0.18s ease,
+    transform 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 0.18s ease,
+    background-color 0.15s ease,
+    box-shadow 0.15s ease;
   z-index: 4;
 }
 
 .status-cell:hover .status-menu-toggle,
 .status-cell:focus-within .status-menu-toggle{
   opacity: 1;
-  transform: scale(1);
+  visibility: visible;
+  pointer-events: auto;
+  transform: translate(-50%, -50%) scale(1);
 }
 
 .status-menu-toggle:hover{
-  background: rgba(15, 23, 42, 0.94);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.26), rgba(255, 255, 255, 0.06)),
+    rgba(15, 23, 42, 0.44);
+  transform: translate(-50%, -50%) scale(1.06);
+  box-shadow:
+    0 14px 30px rgba(15, 23, 42, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.status-menu-toggle i{
+  transform: translateY(0.5px);
 }
 
 .status-present{
