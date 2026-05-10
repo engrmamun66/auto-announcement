@@ -56,7 +56,8 @@ watch(tab3_class_short, (classShort) => {
   onInitAndNextPrev(dateRange.value)
 })
 
-let vacation_types = CONFIG.value?.settings?.attendance?.vacation_types || []
+const vacation_types = computed(() => CONFIG.value?.settings?.attendance?.vacation_types || [])
+const defaultVacationReason = computed(() => helper.optionTitleKey(vacation_types.value?.[0] || {}) || 'Exam')
 
 function remvoeSpaces(str){
   return str ? str.replace(/\s+/g, '') : str
@@ -68,14 +69,14 @@ let payload = reactive({
   class_short: null,
   student_id: null,
   date: null,
-  reason: 'Exam',
+  reason: defaultVacationReason.value,
 })
 
 
 function onCancel(){
   payload.reason = ''
   payload.student_id = null
-  payload.reason = 'Exam'
+  payload.reason = defaultVacationReason.value
   isSelectedAllClasses.value = 1
   selectedClasses.value = [...classes.value]
   emit('onBtnClear')
@@ -192,11 +193,17 @@ async function createAndDisplayEventList(){
 
       let first_item = vacations[0]
       let last_item = vacations[vacations.length - 1]
-      let backgroundColor = vacation_types.find(vt => {
-        return vt.title == reason
+      let backgroundColor = vacation_types.value.find(vt => {
+        return helper.optionTitleKey(vt) == reason
       })?.bgcolor || 'tomato'
 
-      let vaction_slot = helper.createVacationEvent(first_item.date, last_item.date, vacations, first_item.reason, { backgroundColor, class__short })
+      let vaction_slot = helper.createVacationEvent(
+        first_item.date,
+        last_item.date,
+        vacations,
+        helper.localizeReason(first_item.reason, vacation_types.value),
+        { backgroundColor, class__short }
+      )
       vacation_events.push(vaction_slot)
     })
   }) 
@@ -290,7 +297,7 @@ async function deleteVacations(){
           <tbody>
             <template v-for="item in targetedVacationToDelete?.vacations">
               <tr>
-                <td class="size-09"><span class="badge bg-secondary">{{ item?.reason }}</span></td>
+                <td class="size-09"><span class="badge bg-secondary">{{ helper.localizeReason(item?.reason, vacation_types) }}</span></td>
                 <td class="size-09">{{ item?.date }}</td>
                 <td class="size-09">{{ item?.class_short == '_all_' ? 'All' : item?.class_short }}</td>
               </tr>
@@ -307,7 +314,7 @@ async function deleteVacations(){
           <tbody>
             <template v-for="item in targetedVacationToDelete?.vacations">
               <tr>
-                <td class="size-09"><span class="badge bg-secondary">{{ item?.reason }}</span></td>
+                <td class="size-09"><span class="badge bg-secondary">{{ helper.localizeReason(item?.reason, vacation_types) }}</span></td>
                 <td class="size-09">{{ item?.date }}</td>
                 <td class="size-09">{{ item?.class_short == '_all_' ? 'All Class' : item?.class_short }}</td>
                 <td class="size-09 text-end"><span class="badge bg-secondary">{{ item?.type }}</span></td>
@@ -378,10 +385,10 @@ async function deleteVacations(){
             <div class="row">
               <template v-for="vacationType in vacation_types" :key="value">
                 <div class="col-md-6">
-                  <div class="form-check cp" :class="{checked: payload.reason == vacationType.title}" @click="showTextArea = false;payload.reason = vacationType.title">
-                    <input v-model="payload.reason" class="form-check-input" :id="remvoeSpaces(vacationType.title)" type="radio" name="vacation_type" :value="vacationType.title" @click="showTextArea = false">
-                    <label class="form-check-label" :for="remvoeSpaces(vacationType.title)">
-                      {{ vacationType.title }}
+                  <div class="form-check cp" :class="{checked: payload.reason == helper.optionTitleKey(vacationType)}" @click="showTextArea = false;payload.reason = helper.optionTitleKey(vacationType)">
+                    <input v-model="payload.reason" class="form-check-input" :id="remvoeSpaces(helper.optionTitleKey(vacationType))" type="radio" name="vacation_type" :value="helper.optionTitleKey(vacationType)" @click="showTextArea = false">
+                    <label class="form-check-label" :for="remvoeSpaces(helper.optionTitleKey(vacationType))">
+                      {{ helper.optionTitleLabel(vacationType) }}
                     </label>
                   </div>
                 </div>
@@ -390,7 +397,7 @@ async function deleteVacations(){
 
               <div class="col-md-6">
                 <div class="form-check" @click="showTextArea = true;payload.reason = ''">
-                  <input @click="showTextArea = true; payload.reason = ''" class="form-check-input" type="radio" name="vacation_type" :value="''" :checked="!vacation_types.map(vt=>vt.title).includes(payload.reason)" >
+                  <input @click="showTextArea = true; payload.reason = ''" class="form-check-input" type="radio" name="vacation_type" :value="''" :checked="!vacation_types.map(vt=>helper.optionTitleKey(vt)).includes(payload.reason)" >
                   <label class="form-check-label" for="other">
                     Other Vacation
                   </label>

@@ -67,7 +67,7 @@ export default {
         events: this.$props.events, 
         customButtons: {
           myCustomButton: {
-            text: 'Add New Vacation', 
+            text: helper.t('Add New Vacation'), 
             click: ()=>{
               this.$emit('advacation', 'this.$props')
             }
@@ -127,7 +127,7 @@ export default {
       if(!weekends.includes(day_fullname)){
         html_array.push(`
           <div>
-            <span class="badge add-vacation-badge cp" tooltip="Add New" plusicon="true" >+</span>
+            <span class="badge add-vacation-badge cp" tooltip="${helper.t('Add New')}" plusicon="true" >+</span>
           </div>
         `)
       }
@@ -141,7 +141,10 @@ export default {
       let title = arg.event.title
 
       let is_loader = title.includes('--bs-spinner-width:')
-      let is_institute_vacation = vacation_types.map(v => v.title).some(_title => title.includes(_title))
+      let canonicalTitle = helper.canonicalText(title)
+      let is_institute_vacation = vacation_types
+        .map(v => helper.optionTitleKey(v))
+        .some(_title => canonicalTitle.includes(_title))
 
       let htmlArray = []
       htmlArray.push(`<div class="cal-day-event-item" >`)

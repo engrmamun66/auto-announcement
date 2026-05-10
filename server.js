@@ -3,6 +3,7 @@ global.DIR = __dirname;
 const fs = require('fs');
 const path = require('path');
 const moment = require('moment')
+require('moment/locale/bn')
 const os = require('os')
 
 function getLocalIP() {
@@ -25,6 +26,7 @@ if (fs.existsSync(configPath)) {
   config = fulfillMisingConfigKeys(require(configPath), config);
 }
 global.config = config
+moment.locale(global.config?.settings?.lang_bn === false ? 'en' : 'bn')
 
 const cors = require('cors'); 
 const express = require('express')

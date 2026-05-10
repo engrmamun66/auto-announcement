@@ -1,12 +1,13 @@
 <script setup>
 import { useRoute, useRouter } from "vue-router";
-import { provide, inject, ref, computed, watch, onMounted, onBeforeUnmount, triggerRef } from 'vue';
+import { provide, inject, ref, computed, watch, onMounted, onBeforeUnmount, triggerRef, nextTick } from 'vue';
 import SideBar from './components/sidebar.vue'
 import TopNav from './components/TopNav.vue'
 import Toaster from './components/Toaster.vue'
 import SwitchBoard from './components/SwitchBoard.vue'
 const emitter = inject('emitter');
 import moment from 'moment/moment'
+import 'moment/locale/bn'
 import Playlist from './components/Playlist.vue'
 import accessCheckAnimation from './components/accessCheckAnimation.vue'
 import Lockscreen from './components/Lockscreen.vue'
@@ -28,6 +29,9 @@ let route = useRoute();
 let router = useRouter();  
 let makeCarcode = inject('makeCarcode')
 let CONFIG = ref(storage('CONFIG').value || {});  
+const langCode = computed(() => CONFIG.value?.lang_code || (CONFIG.value?.settings?.lang_bn === false ? 'en' : 'bn'))
+const isBanglaUi = computed(() => langCode.value === 'bn')
+const t = (text = '', params = {}) => helper.t(text, params)
 let playback_speed = ref(Number(storage('playback_speed').value) || 1)
 provide('playback_speed', playback_speed)
 
@@ -43,6 +47,7 @@ watch(
                 storage('attendance_tab').value = 1
             } 
         }
+        scheduleUiLocalization()
     }
 )
 
@@ -380,10 +385,47 @@ async function controlSounds({student=null, ports=[], openAll=false}={}){
 
 }
 let isMountedAppDotVue = ref(false)
+let uiLocalizationTimer = null
+let uiLocalizationObserver = null
+
+function applyLanguageSettings() {
+    helper.setLanguage({
+        code: langCode.value,
+        packs: CONFIG.value?.lang_packs || {},
+        strings: CONFIG.value?.lang_pack || {},
+    })
+    moment.locale(langCode.value === 'bn' ? 'bn' : 'en')
+}
+
+function localizeAppDom() {
+    const root = document.getElementById('my-app')
+    if (!root) return
+    helper.localizeDom(root)
+}
+
+function scheduleUiLocalization(delay = 0) {
+    clearTimeout(uiLocalizationTimer)
+    uiLocalizationTimer = setTimeout(async () => {
+        await nextTick()
+        localizeAppDom()
+    }, delay)
+}
+
+watch(
+    () => [langCode.value, CONFIG.value?.lang_pack, CONFIG.value?.lang_packs],
+    () => {
+        applyLanguageSettings()
+        scheduleUiLocalization()
+    },
+    { deep: true, immediate: true }
+)
 
 provide('route', route)
 provide('router', router)
 provide('CONFIG', CONFIG)
+provide('langCode', langCode)
+provide('isBanglaUi', isBanglaUi)
+provide('t', t)
 provide('isIPAccess', isIPAccess)
 provide('is_started_schedule', is_started_schedule)
 provide('schedule_timeout', schedule_timeout)
@@ -748,6 +790,7 @@ emitter.on('is_connected_socket_server', (bool) => {
 })
 
 onMounted(async ()=>{ 
+    applyLanguageSettings()
 
     window.addEventListener('beforeunload', handleBeforeUnload)
     window.addEventListener('message', onIframeMessage)
@@ -782,6 +825,20 @@ onMounted(async ()=>{
     await getAllStudents()
     await getSchedules() 
     await getConfig()
+    applyLanguageSettings()
+    scheduleUiLocalization(80)
+
+    const appRoot = document.getElementById('my-app')
+    if (appRoot) {
+        uiLocalizationObserver = new MutationObserver(() => {
+            scheduleUiLocalization()
+        })
+        uiLocalizationObserver.observe(appRoot, {
+            childList: true,
+            subtree: true,
+            characterData: true,
+        })
+    }
 
     if(CONFIG.value?.settings?.click_me_to_allow_sound?.status === false){
         document.body.classList.add('user-interacted')
@@ -1492,6 +1549,11 @@ function onIframeMessage(e) {
 }
 
 onBeforeUnmount(() => {
+    clearTimeout(uiLocalizationTimer)
+    if (uiLocalizationObserver) {
+        uiLocalizationObserver.disconnect()
+        uiLocalizationObserver = null
+    }
     window.removeEventListener('beforeunload', handleBeforeUnload)
     window.removeEventListener('message', onIframeMessage)
 })

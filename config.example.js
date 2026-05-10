@@ -44,6 +44,7 @@ module.exports = {
 
      },
      settings: {
+          lang_bn: true,
           log_backup_days: 7,
           punch_log_indent: 0, // for developer,
           click_me_to_allow_sound: {
@@ -116,22 +117,22 @@ module.exports = {
                },
                weekends: ['Friday'], // Saturday, 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'
                vacation_types: [
-                    { title: 'Exam', bgcolor: '#ebac0b' },                    
-                    { title: 'After Exam', bgcolor: '#e74a3b' },   
-                    { title: 'Summer', bgcolor: '#e74a3b' },   
-                    { title: 'Miladunnabi', bgcolor: '#e74a3b' },                    
-                    { title: 'Public Holiday', bgcolor: '#4e73df' },  
-                    { title: 'Ramadan', bgcolor: '#e74a3b' },                    
-                    { title: 'Eidul-Fitr', bgcolor: '#e74a3b' },                    
-                    { title: 'Eidul-Adha', bgcolor: '#e74a3b' },                    
-                    { title: 'Special Holiday', bgcolor: '#a944e8' },  
-                    { title: 'Teacher Training', bgcolor: '#4e73df' },  
+                    { title: { en: 'Exam', bn: 'পরীক্ষা' }, bgcolor: '#ebac0b' },                    
+                    { title: { en: 'After Exam', bn: 'পরীক্ষার পরে' }, bgcolor: '#e74a3b' },   
+                    { title: { en: 'Summer', bn: 'গ্রীষ্মকালীন ছুটি' }, bgcolor: '#e74a3b' },   
+                    { title: { en: 'Miladunnabi', bn: 'মিলাদুন্নবী' }, bgcolor: '#e74a3b' },                    
+                    { title: { en: 'Public Holiday', bn: 'সরকারি ছুটি' }, bgcolor: '#4e73df' },  
+                    { title: { en: 'Ramadan', bn: 'রমজান' }, bgcolor: '#e74a3b' },                    
+                    { title: { en: 'Eidul-Fitr', bn: 'ঈদুল ফিতর' }, bgcolor: '#e74a3b' },                    
+                    { title: { en: 'Eidul-Adha', bn: 'ঈদুল আজহা' }, bgcolor: '#e74a3b' },                    
+                    { title: { en: 'Special Holiday', bn: 'বিশেষ ছুটি' }, bgcolor: '#a944e8' },  
+                    { title: { en: 'Teacher Training', bn: 'শিক্ষক প্রশিক্ষণ' }, bgcolor: '#4e73df' },  
                ],
                stuents_leave_types: [
-                    { title: 'Sick Leave', bgcolor: '#e74a3b' },                    
-                    { title: 'Casual Leave', bgcolor: '#4e73df' },   
-                    { title: 'Annual Leave', bgcolor: '#0b8e1a' },   
-                    { title: 'Bereavement Leave', bgcolor: '#6c757d' },              
+                    { title: { en: 'Sick Leave', bn: 'অসুস্থতার ছুটি' }, bgcolor: '#e74a3b' },                    
+                    { title: { en: 'Casual Leave', bn: 'সাধারণ ছুটি' }, bgcolor: '#4e73df' },   
+                    { title: { en: 'Annual Leave', bn: 'বার্ষিক ছুটি' }, bgcolor: '#0b8e1a' },   
+                    { title: { en: 'Bereavement Leave', bn: 'শোকের ছুটি' }, bgcolor: '#6c757d' },              
                ],
                
           },
@@ -344,4 +345,3 @@ module.exports = {
 
 }
  
-

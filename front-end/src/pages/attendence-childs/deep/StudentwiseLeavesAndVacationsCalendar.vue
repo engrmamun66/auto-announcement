@@ -60,7 +60,8 @@ watch(leave_filter_type, (lft) => {
 }) 
 
  
-let stuents_leave_types = CONFIG.value?.settings?.attendance?.stuents_leave_types || []
+const stuents_leave_types = computed(() => CONFIG.value?.settings?.attendance?.stuents_leave_types || [])
+const defaultLeaveReason = computed(() => helper.optionTitleKey(stuents_leave_types.value?.[0] || {}) || '')
 
 function remvoeSpaces(str){
   return str ? str.replace(/\s+/g, '') : str
@@ -73,14 +74,14 @@ let payload = reactive({
   class_short: null,
   student_id: null,
   date: null,
-  reason: stuents_leave_types[0]?.title || ''
+  reason: defaultLeaveReason.value
 })
 
 
 function onCancel(){
   payload.reason = ''
   payload.student_id = null
-  payload.reason = stuents_leave_types[0]?.title || ''
+  payload.reason = defaultLeaveReason.value
   emit('onBtnClear')
   RightbarRef.value.unmount()
 }
@@ -172,8 +173,8 @@ async function onInitAndNextPrev({start_date, end_date}){
 let calculatedVacations = ref([])
 
 let totalEventsCount = computed(() => {
-  let weekends = calculatedVacations.value.filter(v => v.title === 'Weekend').map(v => v.start)
-  let not_weekends = calculatedVacations.value.filter(v => v.title !== 'Weekend') 
+  let weekends = calculatedVacations.value.filter(v => v.__isWeekend === true).map(v => v.start)
+  let not_weekends = calculatedVacations.value.filter(v => v.__isWeekend !== true) 
   let vacations = not_weekends.map(item => item.vacations || []).flat().map(v => v.date)
   let weekends_and_vacations = helper.uniqueArray([...weekends, ...vacations]) 
   return weekends_and_vacations
@@ -212,11 +213,17 @@ async function createAndDisplayEventList(){
 
       let first_item = vacations[0]
       let last_item = vacations[vacations.length - 1]
-      let backgroundColor = stuents_leave_types.find(vt => {
-        return vt.title == reason
+      let backgroundColor = stuents_leave_types.value.find(vt => {
+        return helper.optionTitleKey(vt) == reason
       })?.bgcolor || 'tomato'
 
-      let vaction_slot = helper.createVacationEvent(first_item.date, last_item.date, vacations, first_item.reason, { backgroundColor, class__short, student: getStudent.value })
+      let vaction_slot = helper.createVacationEvent(
+        first_item.date,
+        last_item.date,
+        vacations,
+        helper.localizeReason(first_item.reason, stuents_leave_types.value),
+        { backgroundColor, class__short, student: getStudent.value }
+      )
       vacation_events.push(vaction_slot)
     })
   }) 
@@ -386,7 +393,7 @@ let filteredAllStudents = computed(() => {
           <tbody>
             <template v-for="item in targetedVacationToDelete?.vacations">
               <tr>
-                <td class="size-09"><span class="badge bg-secondary">{{ item?.reason }}</span></td>
+                <td class="size-09"><span class="badge bg-secondary">{{ helper.localizeReason(item?.reason, stuents_leave_types) }}</span></td>
                 <td class="size-09">{{ item?.date }}</td>
                 <td class="size-09">{{ item?.class_short == '_all_' ? 'All' : item?.class_short }}</td>
               </tr>
@@ -403,7 +410,7 @@ let filteredAllStudents = computed(() => {
           <tbody>
             <template v-for="item in targetedVacationToDelete?.vacations">
               <tr>
-                <td class="size-09"><span class="badge bg-secondary">{{ item?.reason }}</span></td>
+                <td class="size-09"><span class="badge bg-secondary">{{ helper.localizeReason(item?.reason, stuents_leave_types) }}</span></td>
                 <td class="size-09">{{ item?.date }}</td>
                 <td class="size-09">{{ item?.class_short == '_all_' ? 'All Class' : item?.class_short }}</td>
                 <td class="size-09 text-end"><span class="badge bg-secondary">{{ item?.type }}</span></td>
@@ -421,7 +428,7 @@ let filteredAllStudents = computed(() => {
     </Modal>
     
     <Rightbar ref="RightbarRef" v-if="showRightbar" 
-      :title="`Add Vacation For, ${getStudent?.name} [${getStudent?.dakhela}]`" @unmount="()=>{
+      :title="helper.t('Add Vacation For, {name} [{id}]', { name: getStudent?.name || '-', id: getStudent?.dakhela || '-' })" @unmount="()=>{
         showRightbar = false;
         initiallyClear=true;
       }" :largestMode="false"> 
@@ -466,10 +473,10 @@ let filteredAllStudents = computed(() => {
             <div class="row">
               <template v-for="vacationType in stuents_leave_types" :key="value">
                 <div class="col-md-6">
-                  <div class="form-check cp" :class="{checked: payload.reason == vacationType.title}" @click="showTextArea = false;payload.reason = vacationType.title">
-                    <input v-model="payload.reason" class="form-check-input" :id="remvoeSpaces(vacationType.title)" type="radio" name="vacation_type" :value="vacationType.title" @click="showTextArea = false">
-                    <label class="form-check-label" :for="remvoeSpaces(vacationType.title)">
-                      {{ vacationType.title }}
+                  <div class="form-check cp" :class="{checked: payload.reason == helper.optionTitleKey(vacationType)}" @click="showTextArea = false;payload.reason = helper.optionTitleKey(vacationType)">
+                    <input v-model="payload.reason" class="form-check-input" :id="remvoeSpaces(helper.optionTitleKey(vacationType))" type="radio" name="vacation_type" :value="helper.optionTitleKey(vacationType)" @click="showTextArea = false">
+                    <label class="form-check-label" :for="remvoeSpaces(helper.optionTitleKey(vacationType))">
+                      {{ helper.optionTitleLabel(vacationType) }}
                     </label>
                   </div>
                 </div>
@@ -478,7 +485,7 @@ let filteredAllStudents = computed(() => {
 
               <div class="col-md-6">
                 <div class="form-check" @click="showTextArea = true;payload.reason = ''">
-                  <input @click="showTextArea = true; payload.reason = ''" class="form-check-input" type="radio" name="vacation_type" :value="''" :checked="!stuents_leave_types.map(vt=>vt.title).includes(payload.reason)" >
+                  <input @click="showTextArea = true; payload.reason = ''" class="form-check-input" type="radio" name="vacation_type" :value="''" :checked="!stuents_leave_types.map(vt=>helper.optionTitleKey(vt)).includes(payload.reason)" >
                   <label class="form-check-label" for="other">
                     Other Vacation
                   </label>

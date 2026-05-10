@@ -5,6 +5,7 @@ import App from './App.vue';
 import { send_css_in_header, minified_css } from './minified-css';
 import { emitter, utils } from './import-hub';
 import moment from 'moment/moment';
+import 'moment/locale/bn';
 import { router } from './routes/index';
 import { socketInit } from './socket';
 import HighchartsVue from 'highcharts-vue'

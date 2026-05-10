@@ -2,6 +2,8 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
+const enLang = require('../lang/en');
+const bnLang = require('../lang/bn');
 
 const ENV_FILES = {
   'config.example.js': path.join(__dirname, '..', '..', 'config.example.js'),
@@ -10,6 +12,37 @@ const ENV_FILES = {
 
 function resolveEnvFile(name) {
   return ENV_FILES[name] || null;
+}
+
+function cloneData(data) {
+  return JSON.parse(JSON.stringify(data || {}));
+}
+
+function getLanguageCode(config = {}) {
+  return config?.settings?.lang_bn === false ? 'en' : 'bn';
+}
+
+function getCanonicalTitle(title) {
+  if (title && typeof title === 'object' && !Array.isArray(title)) {
+    return title.en || title.bn || '';
+  }
+  return title || '';
+}
+
+function getLocalizedTitle(title, langCode = 'en') {
+  if (title && typeof title === 'object' && !Array.isArray(title)) {
+    if (langCode === 'bn') return title.bn || title.en || '';
+    return title.en || title.bn || '';
+  }
+  return title || '';
+}
+
+function enrichLocalizedTypes(items = [], langCode = 'en') {
+  return (Array.isArray(items) ? items : []).map((item) => ({
+    ...item,
+    title_key: getCanonicalTitle(item?.title),
+    title_label: getLocalizedTitle(item?.title, langCode),
+  }));
 }
 
 module.exports = function (config, utils, Backup) {
@@ -27,7 +60,26 @@ module.exports = function (config, utils, Backup) {
     }
 
     config.settings.with_speaker_controls.switch_mode = track?.switch_mode || 'auto';
-    res.send({ ...config });
+    const runtimeConfig = cloneData(config);
+    const lang_code = getLanguageCode(runtimeConfig);
+
+    runtimeConfig.settings.attendance.vacation_types = enrichLocalizedTypes(
+      runtimeConfig?.settings?.attendance?.vacation_types,
+      lang_code
+    );
+    runtimeConfig.settings.attendance.stuents_leave_types = enrichLocalizedTypes(
+      runtimeConfig?.settings?.attendance?.stuents_leave_types,
+      lang_code
+    );
+
+    runtimeConfig.lang_code = lang_code;
+    runtimeConfig.lang_pack = lang_code === 'bn' ? bnLang.strings : enLang.strings;
+    runtimeConfig.lang_packs = {
+      en: enLang.strings,
+      bn: bnLang.strings,
+    };
+
+    res.send(runtimeConfig);
   });
 
   router.get('/env-config', (req, res) => {

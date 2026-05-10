@@ -12,6 +12,7 @@ const props = defineProps({
 
 const emit = defineEmits(['unmount'])
 const CONFIG = inject('CONFIG', { value: {} })
+const helper = inject('helper')
 const defaultStatus = { code: '-', text: 'N/A', class: 'status-empty' }
 
 const activeEntry = computed(() => props.entry || {})
@@ -43,14 +44,14 @@ const attendancePresetRule = computed(() => {
 const attendancePresetRuleLabel = computed(() => {
   const preset = String(attendancePresetRule.value || '').trim()
 
-  if (preset === 'if_present_in_first_shift') return 'First shift required'
-  if (preset === 'if_present_in_last_shift' || preset === 'if_prent_in_last_shift') return 'Last shift required'
-  if (preset === 'if_present_in_all_shifts') return 'All shifts required'
-  if (preset === 'if_prent_in_both_shift') return 'First and last shift required'
+  if (preset === 'if_present_in_first_shift') return helper.t('First shift required')
+  if (preset === 'if_present_in_last_shift' || preset === 'if_prent_in_last_shift') return helper.t('Last shift required')
+  if (preset === 'if_present_in_all_shifts') return helper.t('All shifts required')
+  if (preset === 'if_prent_in_both_shift') return helper.t('First and last shift required')
 
   const minimumMatch = preset.match(/^if_present_minimum_(?:\{)?(\d+)(?:\})?_shift$/)
   if (minimumMatch) {
-    return `Minimum ${minimumMatch[1]} shifts required`
+    return helper.t('Minimum {count} shifts required', { count: minimumMatch[1] })
   }
 
   const specificShiftMatch = preset.match(/^if_present_in_\[(.+)\]$/)
@@ -61,7 +62,7 @@ const attendancePresetRuleLabel = computed(() => {
       .filter(Boolean)
       .join(', ')
 
-    return shifts ? `Required shifts: ${shifts}` : preset
+    return shifts ? helper.t('Required shifts: {shifts}', { shifts }) : preset
   }
 
   return preset

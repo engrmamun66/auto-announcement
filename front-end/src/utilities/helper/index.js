@@ -1,8 +1,187 @@
 import moment from 'moment/moment';
 import { useRoute, useRouter } from "vue-router";
 
+const __i18nState = {
+  code: 'en',
+  packs: {
+    en: {},
+    bn: {},
+  },
+  textNodeOriginals: new WeakMap(),
+  attrOriginals: new WeakMap(),
+}
+
+function sortDictionaryEntries(dictionary = {}) {
+  return Object.entries(dictionary || {})
+    .filter(([from, to]) => from && typeof to === 'string')
+    .sort((a, b) => String(b[0]).length - String(a[0]).length)
+}
+
+function applyDictionary(text = '', dictionary = {}) {
+  let result = String(text ?? '')
+  sortDictionaryEntries(dictionary).forEach(([from, to]) => {
+    if (from && from !== to && result.includes(from)) {
+      result = result.split(from).join(to)
+    }
+  })
+  return result
+}
+
+function canonicalizeText(text = '') {
+  let result = String(text ?? '')
+
+  Object.entries(__i18nState.packs || {}).forEach(([code, pack]) => {
+    if (code === 'en') return
+
+    const reversePack = Object.fromEntries(
+      Object.entries(pack || {})
+        .filter(([enText, localizedText]) => localizedText && localizedText !== enText)
+        .map(([enText, localizedText]) => [localizedText, enText])
+    )
+
+    result = applyDictionary(result, reversePack)
+  })
+
+  return result
+}
+
+function replaceTemplateParams(template = '', params = {}) {
+  return String(template).replace(/\{(\w+)\}/g, (_, key) => {
+    return params?.[key] ?? `{${key}}`
+  })
+}
+
 const helper = { 
     log: console.log,
+    setLanguage({ code = 'en', packs = {}, strings = {} } = {}) {
+      const nextCode = code === 'bn' ? 'bn' : 'en'
+      const nextPacks = { ...(__i18nState.packs || {}), ...(packs || {}) }
+
+      if (strings && Object.keys(strings).length) {
+        nextPacks[nextCode] = strings
+      }
+
+      if (!nextPacks.en) nextPacks.en = {}
+      if (!nextPacks.bn) nextPacks.bn = {}
+
+      __i18nState.code = nextCode
+      __i18nState.packs = nextPacks
+    },
+    getLanguageCode() {
+      return __i18nState.code
+    },
+    t(text = '', params = {}) {
+      if (text === null || text === undefined) return ''
+
+      if (typeof text === 'object' && !Array.isArray(text)) {
+        return helper.localizedText(text, params)
+      }
+
+      const canonical = canonicalizeText(String(text))
+      const translated = __i18nState.code === 'en'
+        ? applyDictionary(canonical, __i18nState.packs.en || {})
+        : applyDictionary(canonical, __i18nState.packs[__i18nState.code] || {})
+
+      return replaceTemplateParams(translated, params)
+    },
+    localizedText(value = '', params = {}) {
+      if (value && typeof value === 'object' && !Array.isArray(value)) {
+        const selected = __i18nState.code === 'bn'
+          ? (value.bn || value.en || '')
+          : (value.en || value.bn || '')
+        return replaceTemplateParams(selected, params)
+      }
+
+      return helper.t(String(value ?? ''), params)
+    },
+    canonicalText(value = '') {
+      if (value && typeof value === 'object' && !Array.isArray(value)) {
+        return value.en || value.bn || ''
+      }
+
+      return canonicalizeText(String(value ?? ''))
+    },
+    optionTitleKey(option = {}) {
+      return option?.title_key || helper.canonicalText(option?.title || '')
+    },
+    optionTitleLabel(option = {}) {
+      return option?.title_label || helper.localizedText(option?.title || option?.title_key || '')
+    },
+    localizeReason(reason = '', options = []) {
+      const canonicalReason = helper.canonicalText(reason)
+      const matched = (options || []).find((option) => {
+        return helper.optionTitleKey(option) === canonicalReason
+      })
+
+      if (matched) {
+        return helper.optionTitleLabel(matched)
+      }
+
+      return helper.t(canonicalReason)
+    },
+    localizeDom(root = document.body) {
+      if (typeof window === 'undefined' || !root) return
+
+      const treeWalker = document.createTreeWalker(
+        root,
+        NodeFilter.SHOW_TEXT,
+        {
+          acceptNode(node) {
+            const parent = node?.parentElement
+            if (!parent) return NodeFilter.FILTER_REJECT
+            if (!String(node?.nodeValue || '').trim()) return NodeFilter.FILTER_REJECT
+            if (['SCRIPT', 'STYLE', 'NOSCRIPT', 'TEXTAREA'].includes(parent.tagName)) {
+              return NodeFilter.FILTER_REJECT
+            }
+            if (parent.closest?.('[data-no-auto-i18n="true"]')) {
+              return NodeFilter.FILTER_REJECT
+            }
+            return NodeFilter.FILTER_ACCEPT
+          },
+        }
+      )
+
+      let currentNode = null
+      while ((currentNode = treeWalker.nextNode())) {
+        const original = __i18nState.textNodeOriginals.get(currentNode) ?? currentNode.nodeValue
+        if (!__i18nState.textNodeOriginals.has(currentNode)) {
+          __i18nState.textNodeOriginals.set(currentNode, original)
+        }
+
+        const translated = helper.t(original)
+        if (translated !== currentNode.nodeValue) {
+          currentNode.nodeValue = translated
+        }
+      }
+
+      const translatableElements = []
+      if (root instanceof Element) {
+        translatableElements.push(root)
+        translatableElements.push(...root.querySelectorAll('[placeholder],[title],[tooltip],[aria-label]'))
+      }
+
+      translatableElements.forEach((element) => {
+        if (!(element instanceof Element)) return
+
+        let cache = __i18nState.attrOriginals.get(element)
+        if (!cache) {
+          cache = {}
+          __i18nState.attrOriginals.set(element, cache)
+        }
+
+        ;['placeholder', 'title', 'tooltip', 'aria-label'].forEach((attr) => {
+          if (!element.hasAttribute(attr)) return
+          if (!(attr in cache)) {
+            cache[attr] = element.getAttribute(attr) || ''
+          }
+
+          const translated = helper.t(cache[attr])
+          if (translated !== element.getAttribute(attr)) {
+            element.setAttribute(attr, translated)
+          }
+        })
+      })
+    },
     goto: function(payload){
       let route = null
       let router = null
@@ -303,7 +482,7 @@ const helper = {
     },
     createWeekdayEvent(date=moment().format('YYYY-MM-DD')) { 
       return ({
-        title: 'Weekend',
+        title: helper.t('Weekend'),
         start: date,
         allDay: true,
         display: 'background', // "auto" | "block" | "background" | "inverse-background" | "none"
@@ -318,27 +497,28 @@ const helper = {
     createVacationEvent(start_date, end_date, vacations, reason, {backgroundColor='#e74a3b', class__short=null, student=null}={}){
       let class_shorts = vacations.map(v => v.class_short) 
       let unique_class_shorts = helper.uniqueArray(class_shorts)
+      const localizedReason = helper.localizedText(reason)
       let event = {
-        title: reason,
+        title: localizedReason,
         start: start_date,
         end: moment(end_date).add(1, 'day').format('YYYY-MM-DD'), // 1 din na barale calndar e shesh din ta dekhabe na
         allDay: true,
         display: 'block',
         editable: false,
         overlap: true,
-        constraint: reason, // this is group ID as my widh=
+        constraint: localizedReason, // this is group ID as my widh=
         backgroundColor,
         // Extra data
-        tooltip: reason + ` For (${unique_class_shorts?.length} class${unique_class_shorts.length > 1 ? 'es' : ''})`,
+        tooltip: `${localizedReason} (${unique_class_shorts?.length} ${helper.t(unique_class_shorts.length > 1 ? 'Classes' : 'Class')})`,
         vacations: vacations || [],
       }
       if(class__short){
-        event.title = reason + ` - ${class__short}`
-        event.tooltip = reason + ` For (${class__short})`
+        event.title = `${localizedReason} - ${class__short}`
+        event.tooltip = `${localizedReason} (${class__short})`
       }
       if(student?.name){
-        event.title = reason
-        event.tooltip = reason + ` For (${student?.name})`
+        event.title = localizedReason
+        event.tooltip = `${localizedReason} (${student?.name})`
       }
       return event
        
