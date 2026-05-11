@@ -168,6 +168,7 @@ const appAccessData = inject('appAccessData');
 const http = inject('http');
 const allow_to_reaload = inject('allow_to_reaload');
 const storage = inject('storage');
+const helper = inject('helper');
 let show_cloner_component = ref(false)
 let showConfirmModal = ref(false)
 let showUpdateModal = ref(false)
@@ -220,7 +221,7 @@ async function confirmAndUpdate() {
         setTimeout(() => { window.location.reload(); }, realod_after);
     } catch (err) {
         showUpdateModal.value = false;
-        emitter.emit('toaster-error', { message: 'Update failed.' });
+        emitter.emit('toaster-error', { message: helper.t('Update failed.') });
     }
 }
 
@@ -231,10 +232,10 @@ async function getTemporaryZip() {
         await http.get('/update-app', { params: { debug_mode: true } });
         updateDone.value = true;
         allow_to_reaload.value = true;
-        emitter.emit('toaster-success', { message: 'Updated', duration: 0 });
+        emitter.emit('toaster-success', { message: helper.t('Updated'), duration: 0 });
         setTimeout(() => { window.location.reload(); }, realod_after);
     } catch (err) {
-        emitter.emit('toaster-error', { message: 'Update failed.' });
+        emitter.emit('toaster-error', { message: helper.t('Update failed.') });
     } finally {
         temp_updating.value = false;
     }

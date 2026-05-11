@@ -101,11 +101,11 @@ async function saveAudioFromUrl() {
       url: linkPopupUrl.value,
     })
     std[column] = response.data.audio_url
-    emitter.emit('toaster-success', { message: 'আডিও আপলোড সম্পন্ন হয়েছে' })
+    emitter.emit('toaster-success', { message: helper.t('Audio upload completed') })
     linkPopup.value = null
     linkPopupUrl.value = ''
   } catch (e) {
-    emitter.emit('toaster-error', { message: 'আপলোড ব্যর্থ হয়েছে' })
+    emitter.emit('toaster-error', { message: helper.t('Upload failed') })
   } finally {
     linkPopupLoading.value = false
   }
@@ -230,13 +230,13 @@ async function clearParams({dakhela=null, id=null, get=true}={}){
 }
  
 async function deleteAudio(std, colName){
-  let is_confired = confirm('Do you want to delete this audio?')
+  let is_confired = confirm(helper.t('Do you want to delete this audio?'))
   if(is_confired){
     http.delete(`/students/delete-audio/${std.id}/${colName}`).then(()=>{
       std[colName] = null
     })
   } else if(text) {
-    emitter.emit('toaster-error', { message: 'দয়া করে সঠিক পাসকোড দিন' })
+    emitter.emit('toaster-error', { message: helper.t('Please enter the correct passcode') })
   }
 }
 
@@ -319,13 +319,13 @@ async function onClickClone(std){
     std._cloning = true
 
     if(!std.sound1){
-      emitter.emit('toaster-warning', { message: 'কপি করার আগে সাউন্ড রেকর্ড করুন' })
+      emitter.emit('toaster-warning', { message: helper.t('Please record sound before copying') })
       return
     }
 
 
     if(!std.dakhela_new){
-      emitter.emit('toaster-warning', {message: 'নতুন দাখেল নাম্বার লিখুন'})
+      emitter.emit('toaster-warning', {message: helper.t('Please enter the new dakhela number')})
       return
     }
     
@@ -377,15 +377,15 @@ async function addStudent(){
     if(payload.dakhela){
       let isAdded = await getStudentByDakhela(payload.dakhela)
       if(isAdded){
-        emitter.emit('toaster-error', {message: `দাখেলা নাম্বার ${payload.dakhela} ইতিমধ্যে যুক্ত আছে`})
+        emitter.emit('toaster-error', {message: helper.t('Dakhela number {value} already exists', { value: payload.dakhela })})
         is___adding.value = false
         return
       }
     }
 
-    if(!payload.name) return emitter.emit('toaster-warning', {message: 'নাম লিখুন'})
-    if(!payload.class) return emitter.emit('toaster-warning', {message: 'ক্লাস নির্বাচন করুন'})
-    if(!payload.dakhela) return emitter.emit('toaster-warning', {message: 'দাখেল নাম্বার লিখুন'})
+    if(!payload.name) return emitter.emit('toaster-warning', {message: helper.t('Please enter name')})
+    if(!payload.class) return emitter.emit('toaster-warning', {message: helper.t('Please select class')})
+    if(!payload.dakhela) return emitter.emit('toaster-warning', {message: helper.t('Please enter dakhela number')})
 
 
 
@@ -421,9 +421,9 @@ async function addStudent(){
 async function updateStudent(){
   try {
 
-    if(!payload.name) return emitter.emit('toaster-warning', {message: 'নাম লিখুন'})
-    if(!payload.class) return emitter.emit('toaster-warning', {message: 'ক্লাস নির্বাচন করুন'})
-    if(!payload.dakhela) return emitter.emit('toaster-warning', {message: 'দাখেল নাম্বার লিখুন'})
+    if(!payload.name) return emitter.emit('toaster-warning', {message: helper.t('Please enter name')})
+    if(!payload.class) return emitter.emit('toaster-warning', {message: helper.t('Please select class')})
+    if(!payload.dakhela) return emitter.emit('toaster-warning', {message: helper.t('Please enter dakhela number')})
     is___adding.value = true
     const formData = new FormData()
     Object.keys(payload).forEach((key) => {
@@ -457,7 +457,7 @@ async function updateStudent(){
 async function deleteStudent(id, i){
   try {
 
-    if(!confirm('Do you want to delete?')) return;
+    if(!confirm(helper.t('Do you want to delete?'))) return;
     // let passcode = prompt('Type passcode to delete')
     let passcode = true
     // if(passcode !== String(new Date().getDate()) && passcode !== 'D') {
@@ -550,7 +550,7 @@ function onChange_dateTimePicker(data){
 }
 
 function onClickAttendance(std){
-  if(!confirm('Are you sure to submit attendance?')) return;
+  if(!confirm(helper.t('Are you sure to submit attendance?'))) return;
   if(route.query.dev === 'true') helper.goto({name: 'attendence'}) 
   punchToSubmitAttendance(makeCarcode(std), {source: 'manual_button', delay: 0})
 }
@@ -862,7 +862,7 @@ watch(fixedWidthSoundCol, (newVal) => {
           <div class="col-12 mt-4 w-100 all-class-buttons-to-filter-area d-none d-md-block">
             <div class="all-class-buttons-to-filter">
               <template v-for="cls in classes">
-                <button class="class-short-btn" :class="{'active': params.class_name === cls.class_name}" var="cls?.display_name || cls.class_short" 
+                <button data-no-auto-i18n="true" class="class-short-btn" :class="{'active': params.class_name === cls.class_name}" var="cls?.display_name || cls.class_short" 
                 @click="clearParams();params.page_no = 1;params.class_name = cls.class_name;getStudents()" >{{ helper.ucfirst(cls?.display_name || cls.class_short) }}</button>
               </template>
 
@@ -906,7 +906,7 @@ watch(fixedWidthSoundCol, (newVal) => {
         <template v-if="students?.length">
           <template v-for="(std, i) in students.toReversed()">
             <tr @auxclick="log(std)">
-              <td class="text-left"> {{ std.class }} </td> 
+              <td class="text-left" data-no-auto-i18n="true" @click.stop="log(std)"> {{ std.class }} </td> 
               <td class="text-left cp" @click.stop="prepareToEdit(std)" :student-id="std.id" >{{ std.name.split('||')?.[0] }}</td>
               <td>
                 <img class="profile-thumb" :src="std.profile_image || '/default-profile-image.png'" alt="profile" />

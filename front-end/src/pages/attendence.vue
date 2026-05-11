@@ -19,6 +19,7 @@ const router = inject('router');
 const emitter = inject('emitter');
 const storage = inject('storage');
 const http = inject('http'); 
+const helper = inject('helper');
 
 const log = console.log
 
@@ -40,7 +41,7 @@ const show_bulk_device_fetch = ref(false)
 
 async function clearAllAndRelaod(){
   if (!hasLiveAttendence.value || clearingLive.value) return
-  if (!confirm('Clear all live attendance?')) return
+  if (!confirm(helper.t('Clear all live attendance?'))) return
   clearingLive.value = true
   try {
     liveAttendenceList.value = []

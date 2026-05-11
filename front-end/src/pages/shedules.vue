@@ -255,7 +255,7 @@ function addSchedule(){
   try {
 
     if(!payload.title || !payload.type || !payload.start_time || !payload.end_time || !payload.classes?.length){
-      emitter.emit('toaster-warning', { message: 'সকল ফিল্ড পূরণ করা গুরুত্বপূর্ণ' })
+      emitter.emit('toaster-warning', { message: helper.t('All fields are required') })
       return  
     }
 
@@ -266,7 +266,7 @@ function addSchedule(){
     _payload.end_time = makeDate(payload.end_time, 'HH:mm') // makeDate is comming from em-DateTimePicker.js
 
     if(!isValidTimesInPayload()){
-      emitter.emit('toaster-error', { message: 'টাইম সঠিকভাবে সিলেক্ট করুন' })
+      emitter.emit('toaster-error', { message: helper.t('Please select valid times') })
       return
     }
 
@@ -313,18 +313,18 @@ function updateSchedule(){
   try {
 
     if(!payload.id){
-      emitter.emit('toaster-warning', { message: 'আইডি পাওয়া যায়নি' })
+      emitter.emit('toaster-warning', { message: helper.t('ID not found') })
       return  
     }
     if(!payload.title || !payload.type || !payload.start_time || !payload.end_time || !payload.classes?.length){
-      emitter.emit('toaster-warning', { message: 'সকল ফিল্ড পূরণ করা গুরুত্বপূর্ণ' })
+      emitter.emit('toaster-warning', { message: helper.t('All fields are required') })
       return  
     }
     let _payload = helper.clone(payload)
     _payload.classes = JSON.stringify(_payload.classes)
 
     if(!isValidTimesInPayload()){
-      emitter.emit('toaster-error', { message: 'টাইম সঠিকভাবে সিলেক্ট করুন' })
+      emitter.emit('toaster-error', { message: helper.t('Please select valid times') })
       return
     }
 
@@ -349,7 +349,7 @@ function deleteSchedule(id, i, type=1){
 
   try {
 
-    if(!confirm('Are you sure?')) return;
+    if(!confirm(helper.t('Are you sure?'))) return;
 
     http.delete(`/schedules/delete/${id}`).then(response => {
       if(response.status == 200){
@@ -388,7 +388,7 @@ function toggleExpandCollapseAll(){
 function toggleOnOffAll(){
   let targetSchedules = tab.value == 1 ? punch_schedules.value : call_schedules.value
   let status = targetSchedules.every(item => item.status == 1)
-  if(!confirm(`Are you sure to turn ${status ? 'off' : 'on'} all?`)) return;
+  if(!confirm(helper.t('Are you sure to turn {status} all?', { status: status ? helper.t('off') : helper.t('on') }))) return;
   for(const item of targetSchedules){
     item.status = status ? 0 : 1
     http.post('/schedules/update-status', {id: item.id, status: item.status} )

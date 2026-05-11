@@ -15,3 +15,11 @@ copy and pate the shortcut of open.bat
 - **Schedules** ডাটা নেয়—যদি কোনো শিটের নাম **Schedules** (case‑insensitive) থাকে, তাহলে সেখান থেকে; **না থাকলে দ্বিতীয় শিট** থেকে নেয়।
 
 সুতরাং নাম একই রাখা রেকমেন্ডেড, না রাখলেও চলবে—শর্ত: Students প্রথম শিটে, Schedules দ্বিতীয় শিটে।
+
+
+To skip DOM lang change add
+[data-no-auto-i18n="true"]
+
+localizeDom() 
+localizeAppDom() 
+is main DOM change able funciton

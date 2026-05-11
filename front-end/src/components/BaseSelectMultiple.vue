@@ -2,7 +2,7 @@
     <div v-bind="$attrs" @mouseleave="showOptions = false">
         <div class="position-relative" :class="{'form-group': useFormGroup}">
             <div class="btn-options-toggler  px-0" :style="(width ? ('width:' + width) : '')">
-                <label v-if="label"> {{ label }} </label>
+                <label v-if="label"> {{ H.t(label) }} </label>
                 <template v-if="showEffect" >
                     <!-- <ShimmerEffect 
                     :bg="effectAttrs?.bg || 'dark'" :width="effectAttrs?.width || '100%'" 
@@ -14,14 +14,14 @@
                     </template>
                 <template v-else >
                     <template v-if="limit !== 1">
-                        <span v-if="modelValue?.length" tooltip="Remove All Items" flow="left" style="--tbg:#e25e16;--tcolor:white" @click.stop="removeAllItems()" class="clearAllItem" :class="{'haslable': label}">
+                        <span v-if="modelValue?.length" :tooltip="H.t('Remove All Items')" flow="left" style="--tbg:#e25e16;--tcolor:white" @click.stop="removeAllItems()" class="clearAllItem" :class="{'haslable': label}">
                             <i class="bx bx-x" ></i>
                         </span>
-                        <span v-else tooltip="Select All" flow="left" style="--tbg:#e25e16;--tcolor:white" @click.stop="selectAll()" class="clearAllItem" :class="{'haslable': label}">
+                        <span v-else :tooltip="H.t('Select All')" flow="left" style="--tbg:#e25e16;--tcolor:white" @click.stop="selectAll()" class="clearAllItem" :class="{'haslable': label}">
                             <i class='bx bx-check' ></i>
                         </span>
                     </template>
-                    <button :tooltip="(modelValue?.length ? tooltip : '') || (disabled ? 'Disabled' : '')" ref="ref_button" :disabled="disabled" @click="()=>{
+                    <button :tooltip="(modelValue?.length ? H.t(tooltip) : '') || (disabled ? H.t('Disabled') : '')" ref="ref_button" :disabled="disabled" @click="()=>{
                         if(!disabled) showOptions = !showOptions;
                         H.delay(() => { 
                             if($refs.searchInput) $refs.searchInput.focus()
@@ -44,7 +44,7 @@
                                 </a>
                             </template>
                         </div>
-                        <p v-else class="fw-500 m-0 text-black-50" > {{ placeholder }} </p>
+                        <p v-else class="fw-500 m-0 text-black-50" > {{ H.t(placeholder) }} </p>
                         <i class="bx bxs-chevron-down" style="position:absolute;right:8px;top:15px;font-size: 12px" />
                     </button>
                 </template>
@@ -55,7 +55,7 @@
                 <!-- <ul v-if="true" class="option-box py-2"  -->
                 <ul v-if="!disabled && (data?.length || search) && showOptions" class="option-box py-2" 
                 :class="{'--animate-show': (showOptions || search), '--animate-hide': (!showOptions && !search)}">
-                    <input v-if="search" :placeholder="placeholder2 + ' (use Enter & Arrow to select)'" ref="searchInput" type="search" class="form-control mb-2" v-model="searchText" @keyup="handleSearching" @keydown="handleSearchingForKeyDown" @search="handleSearching" style="border-radius: 20px;height: 30px;"  />
+                    <input v-if="search" :placeholder="H.t('{text} (use Enter & Arrow to select)', { text: H.t(placeholder2) })" ref="searchInput" type="search" class="form-control mb-2" v-model="searchText" @keyup="handleSearching" @keydown="handleSearchingForKeyDown" @search="handleSearching" style="border-radius: 20px;height: 30px;"  />
                     <template v-if="data?.length" >
                         <template v-for="(item, index) in (data || [])" :key="index" >                            
                             <li class="ps-2"
@@ -73,7 +73,7 @@
                         </template>
                     </template>
                     <template v-else-if="showCreateNew && inputValue">
-                        <a class="add-new-item" @click.stop="onClickShowCreateNew" >Add New "{{ inputValue }}"</a>
+                        <a class="add-new-item" @click.stop="onClickShowCreateNew" >{{ H.t('Add New "{name}"', { name: inputValue }) }}</a>
                     </template>
                 </ul>
             </div>
@@ -392,7 +392,7 @@ function handleSearchingForKeyDown(event){
 
 function onClickShowCreateNew(){
     // showCreateNewConfirmation.value = true;
-    if(confirm(`Are you confirm to create "${inputValue.value}" ?`)){
+    if(confirm(H.t('Are you sure to create "{name}"?', { name: inputValue.value }))){
         $emit('onClickCreateNew', inputValue)
     }
 }

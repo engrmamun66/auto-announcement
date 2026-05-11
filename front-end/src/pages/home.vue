@@ -107,7 +107,7 @@ function inputBarcode(event){
                     event.target.value = ''
                     punchToCallStudent(makeCarcode(student))
                } else {
-                    emitter.emit('toaster-error', { message: 'এই দাখেলা দিয়ে কোনও তথ্য খুঁজে পাওয়া যায়নি' })
+                    emitter.emit('toaster-error', { message: helper.t('No information found for this dakhela') })
                } 
           } else {
                const barcode = input_value
@@ -124,7 +124,7 @@ function inputBarcode(event){
  
 async function checkSchedule(){   
      if(!is_started_schedule.value){          
-          if(confirm('You want to stop?')){
+          if(confirm(helper.t('Do you want to stop?'))){
                stop_clear_and_reload()
           } else {               
                is_started_schedule.value = true

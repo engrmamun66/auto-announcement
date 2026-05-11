@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, watch, inject, ref, reactive } from "vue";
+import { inject, ref } from "vue";
 import Btn from '../components/Btn.vue'
 import helper from '../utilities/helper'
 
@@ -17,14 +17,14 @@ async function restartServer() {
   restarting.value = true
   try {
     await http.get('/refresh')
-    emitter.emit('toaster-success', { message: 'Server restarting...' })
+    emitter.emit('toaster-success', { message: helper.t('Server restarting...') })
   } catch (_) {
-    emitter.emit('toaster-success', { message: 'Server restarting...' })
+    emitter.emit('toaster-success', { message: helper.t('Server restarting...') })
   } finally {
     restarting.value = false
     
     setTimeout(() => {
-      emitter.emit('toaster-success', { message: 'Reloading...' })
+      emitter.emit('toaster-success', { message: helper.t('Reloading...') })
       window.location.reload()
     }, 3000)
   }
@@ -33,9 +33,9 @@ async function restartServer() {
 function CopyCode() {
   if(CONFIG.value?.env?.CODE_NUMBER){
     helper.copyToClipboard(CONFIG.value?.env?.CODE_NUMBER);
-    emitter.emit('toaster-success', {message: 'Code number copied to clipboard!'});
+    emitter.emit('toaster-success', {message: helper.t('Code number copied to clipboard!')});
   } else {
-    emitter.emit('toaster-error', {message: 'Code number not found, please contact support.'});
+    emitter.emit('toaster-error', {message: helper.t('Code number not found, please contact support.')});
   }
 }
 

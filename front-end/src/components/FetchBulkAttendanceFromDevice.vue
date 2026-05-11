@@ -92,6 +92,7 @@ const props = defineProps({
 
 const http = inject('http')
 const emitter = inject('emitter')
+const helper = inject('helper')
 const all_students_non_copied = inject('all_students_non_copied')
 const makeCarcode = inject('makeCarcode')
 const punchToSubmitAttendance = inject('punchToSubmitAttendance')
@@ -134,7 +135,7 @@ function formatForApi(dt){
 async function fetchLogs({ silent = false } = {}){
   if (!payload.start_time || !payload.end_time) {
     if (!silent) {
-      emitter?.emit?.('toaster-error', { message: 'Start and end time required.' })
+      emitter?.emit?.('toaster-error', { message: helper.t('Start and end time required.') })
     }
     return 0
   }
@@ -154,7 +155,7 @@ async function fetchLogs({ silent = false } = {}){
   } catch (error) {
     console.warn('fetchLogs_error', error)
     if (!silent) {
-      emitter?.emit?.('toaster-error', { message: 'Failed to fetch logs.' })
+      emitter?.emit?.('toaster-error', { message: helper.t('Failed to fetch logs.') })
     }
   } finally {
     fetching.value = false
@@ -171,7 +172,7 @@ function clearLogs(){
 
 async function submitLogs({ skipConfirm = false } = {}){
   if (!logs.value.length) return
-  if (!skipConfirm && !confirm(`Are you sure to submit ${logs.value.length} logs?`)) return
+  if (!skipConfirm && !confirm(helper.t('Are you sure to submit {count} logs?', { count: logs.value.length }))) return
 
   inserting.value = true
   progress.total = logs.value.length
@@ -199,7 +200,7 @@ async function submitLogs({ skipConfirm = false } = {}){
   inserting.value = false
   storage('last__allow_auto_fetch_date').value = moment().format('Y-MM-DD')
   if (!skipConfirm) {
-    emitter?.emit?.('toaster-success', { message: 'Bulk attendance submitted.' })
+    emitter?.emit?.('toaster-success', { message: helper.t('Bulk attendance submitted.') })
   }
 }
 

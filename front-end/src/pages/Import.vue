@@ -13,6 +13,7 @@ import BtnLoader from '../components/BtnLoader.vue'
 const emitter = inject('emitter');
 let http = inject('http'); 
 let moment = inject('moment'); 
+const helper = inject('helper');
 let loading = ref(false);
 
 async function getBackup(){
@@ -43,16 +44,16 @@ async function getBackup(){
 
 async function eraseAll() {
      try {
-          let confi = confirm('আপনি কি সকল ছাত্রদের তথ্য মুছে ফেলতে চান?')
+          let confi = confirm(helper.t('Do you want to delete all students?'))
           if(!confi) return
-          let passKey = prompt('Type passcode to confirm')
+          let passKey = prompt(helper.t('Type passcode to confirm'))
           if(!['DD', 'dd', 'delete'].includes(passKey)) {
-               alert('Wrong passcode!')
+               alert(helper.t('Wrong passcode!'))
                return
           }
           http.get('/students/erase-all').then(response => {
                if(response.status == 200){
-                    emitter.emit('toaster-success', {message: 'সব ছাত্র মুছে ফেলা হয়েছে'})
+                    emitter.emit('toaster-success', {message: helper.t('All students have been deleted')})
                }
           })
      } catch (error) {
@@ -140,4 +141,3 @@ ul.backups li{
      margin-bottom: 5px;
 }
 </style>
-

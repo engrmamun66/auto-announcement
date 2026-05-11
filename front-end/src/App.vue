@@ -1024,7 +1024,7 @@ function punchToCallStudent(barcode='play-417-2024', { message='', source='devic
 
 
         if(!is_started_schedule.value){
-            emitter.emit('toaster-error', { message: 'switched is off'})
+            emitter.emit('toaster-error', { message: helper.t('Switch is off')})
             return
         }
         
@@ -1035,7 +1035,7 @@ function punchToCallStudent(barcode='play-417-2024', { message='', source='devic
 
         if(!emergency_mode.value){
             if(!(/^[a-z_0-9]+-\d{1,}-sound(1|2|3)/gi.test(barcode))){
-                    emitter.emit('toaster-error', { message: `বারকোড সঠিক নয় (${barcode})`, duration: 5000})
+                    emitter.emit('toaster-error', { message: helper.t('Barcode is invalid ({barcode})', { barcode }), duration: 5000})
                     return
             }
         }
@@ -1049,7 +1049,7 @@ function punchToCallStudent(barcode='play-417-2024', { message='', source='devic
         if(source === 'device'){
             // Without internet device punch not allowed
             if(appAccessData.value?.internet === false){
-                emitter.emit('toaster-error', { message: 'ইন্টারনেট সংযোগ ছাড়া, ডিভাইস পাঞ্চ করার অনুমতি নেই'})
+                emitter.emit('toaster-error', { message: helper.t('Device punch is not allowed without internet connection')})
                 return
             }
         }
@@ -1059,13 +1059,12 @@ function punchToCallStudent(barcode='play-417-2024', { message='', source='devic
             let isAllowed = callbacks.isMatchedAnySchedule(class_short)
             
             if(!isAllowed){
-                    let prefix = class_name ? (class_name + ' এর ') : ' '
-                    emitter.emit('toaster-error', { message: `${prefix}পাঞ্চ এর সময় শুরু হয়নি`})
+                    emitter.emit('toaster-error', { message: helper.t('Punch time has not started for {name}', { name: class_name || helper.t('this class') })})
                     return
             }
             let targetClass = classes.value.filter(cls => cls.class_short == class_short)?.[0];
             if(!targetClass?.isActive){
-                    emitter.emit('toaster-error', { message: 'এই ক্লাসটি আপাতত বন্ধ আছে'})
+                    emitter.emit('toaster-error', { message: helper.t('This class is currently closed')})
                     return
             }
         }
@@ -1078,7 +1077,7 @@ function punchToCallStudent(barcode='play-417-2024', { message='', source='devic
                     let student = response.data.data;
                     
                     if(student.status !== 1){
-                        return emitter.emit('toaster-error', { message: 'এই স্টুডেন্টটি আপাতত নিষ্ক্রিয় আছে'})
+                        return emitter.emit('toaster-error', { message: helper.t('This student is currently inactive')})
                     }
                     
                     student['barcode'] = barcode;
@@ -1091,7 +1090,7 @@ function punchToCallStudent(barcode='play-417-2024', { message='', source='devic
 
                 
                     if(!student[student['soundColName']]){ 
-                        emitter.emit('toaster-error', { message: `অডিও যুক্ত করা হয়নি`, duration: 10000})
+                        emitter.emit('toaster-error', { message: helper.t('Audio is not attached'), duration: 10000})
                         //  speakText('voice is not added')
                     
                         router.push({name: 'students', query: {
@@ -1138,7 +1137,7 @@ function punchToCallStudent(barcode='play-417-2024', { message='', source='devic
                             student['call_slot'] = `${__startTime} - ${__endTime}`
                         } else {
                             if(!is.length){
-                                emitter.emit('toaster-error', { message: 'ক্লাসের জন্য কোন কল শিডিউল সক্রিয় নেই!'})
+                                emitter.emit('toaster-error', { message: helper.t('No active call schedule found for this class!')})
                                 return
                             }
                         }
@@ -1180,14 +1179,14 @@ function punchToCallStudent(barcode='play-417-2024', { message='', source='devic
                                     studentCard.classList.remove('bx-fade-down')
                                 }, 2000);
                             }
-                            emitter.emit('toaster-error', { message: 'ইতিমধ্যে কার্ডটি পাঞ্চ করা হয়েছে'})
+                            emitter.emit('toaster-error', { message: helper.t('This card has already been punched')})
                         }
                     } else {
                         student['start_ms'] = helper.miliseconds() - 1000
                         student['end_ms'] = helper.miliseconds() + (10 * 1000)
                         wattingList.value.unshift(student)  
                         addPunchLog(student)
-                        emitter.emit('toaster-success', { message: `জরুরি অবস্থায় পাঞ্চ গ্রহণ করা হয়েছে`, duration: 5000})
+                        emitter.emit('toaster-success', { message: helper.t('Punch has been accepted in emergency mode'), duration: 5000})
                     } 
 
                     storage('wattingList').value = wattingList.value;
@@ -1240,7 +1239,7 @@ async function __punchToSubmitAttendance(barcode='play-417-2024', {
 
         if(!emergency_mode.value){
             if(!(/^[a-z_0-9]+-\d{1,}-sound(1|2|3)/gi.test(barcode))){
-                emitter.emit('toaster-error', { message: `বারকোড সঠিক নয় (${barcode})`, duration: 5000})
+                emitter.emit('toaster-error', { message: helper.t('Barcode is invalid ({barcode})', { barcode }), duration: 5000})
                 return
             }
         }
@@ -1254,7 +1253,7 @@ async function __punchToSubmitAttendance(barcode='play-417-2024', {
         if(source === 'device'){
             // Without internet device punch not allowed
             if(appAccessData.value?.internet === false){
-                emitter.emit('toaster-error', { message: 'ইন্টারনেট সংযোগ ছাড়া, ডিভাইস পাঞ্চ করার অনুমতি নেই'})
+                emitter.emit('toaster-error', { message: helper.t('Device punch is not allowed without internet connection')})
                 return
             }
         }
@@ -1267,14 +1266,14 @@ async function __punchToSubmitAttendance(barcode='play-417-2024', {
                 
             
             if(student.status !== 1){
-                return emitter.emit('toaster-error', { message: 'এই স্টুডেন্টটি আপাতত নিষ্ক্রিয় আছে'})
+                return emitter.emit('toaster-error', { message: helper.t('This student is currently inactive')})
             } 
 
 
             
             let shifts = helper.getShifts(classes.value, class_short, false)
             if (!shifts?.length) {
-                return emitter.emit('toaster-success', {message: `${class_name} এর জন্য শিফট নির্ধারণ করা হয়নি`})
+                return emitter.emit('toaster-success', {message: helper.t('No shift has been configured for {name}', { name: class_name })})
                 
             } else {
 
@@ -1298,7 +1297,7 @@ async function __punchToSubmitAttendance(barcode='play-417-2024', {
                 const late_consideration_minute = CONFIG.value?.settings?.attendance?.late_consideration_minute || 0
                 const punch_separator_gap_in_seconds = CONFIG.value?.settings?.attendance?.punch_separator_gap_in_seconds || 5
                 let ___concatedShifts = helper.getShifts(classes.value, class_short, true)
-                const punch_not_allowed_message = `শিফটের বাহিরে উপস্থিতি গ্রহণযোগ্য নয়! (${___concatedShifts})`
+                const punch_not_allowed_message = helper.t('Attendance is not allowed outside the shift! ({shifts})', { shifts: ___concatedShifts })
 
 
                 if(!today_entries?.length){
@@ -1386,7 +1385,7 @@ async function __punchToSubmitAttendance(barcode='play-417-2024', {
 
                             let entry_count_by_shift = today_entries.filter(entry => entry.shift_duration === payload.shift_duration)
                             if(entry_count_by_shift?.length === 2){
-                                emitter.emit('toaster-error', {message: `এই শিফটের জন্য ${entry_count_by_shift.length} টি এন্ট্রি আছে। আর নতুন এন্ট্রি সম্ভব নয়।`})
+                                emitter.emit('toaster-error', {message: helper.t('There are already {count} entries for this shift. No new entry is possible.', { count: entry_count_by_shift.length })})
                                 return
                             }
 
@@ -1430,7 +1429,7 @@ async function __punchToSubmitAttendance(barcode='play-417-2024', {
                 if(payload.remarks){
                     emitter.emit('toaster-success', { message: payload.remarks })
                 } else {
-                    emitter.emit('toaster-error', { message: 'Attendence Failed!' })
+                    emitter.emit('toaster-error', { message: helper.t('Attendance failed!') })
 
                 }
                 
@@ -1544,7 +1543,7 @@ async function __punchToSubmitAttendance(barcode='play-417-2024', {
 function onIframeMessage(e) {
     if (e.data && e.data.event === 'recorded_url_copied') {
         emitter.emit('recorder_url_received', { url: e.data.url })
-        emitter.emit('toaster-success', { message: 'Recorded URL copied' })
+        emitter.emit('toaster-success', { message: helper.t('Recorded URL copied') })
     }
 }
 

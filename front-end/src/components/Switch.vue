@@ -6,15 +6,15 @@
     --sw-boxHeight: ${sw.boxHeight};
     --sw-left: ${sw.left};
   `" >
-    <div @click.stop="onClick" :class="{'switch-flexar': inline, 'grayscale': disabled}" :style="` --s-yes:'${yes}'; --s-no:'${no};'`">
-        <label v-if="label" class="main-label" >{{label}}</label>
+    <div @click.stop="onClick" :class="{'switch-flexar': inline, 'grayscale': disabled}" :style="` --s-yes:'${localizedYes}'; --s-no:'${localizedNo};'`">
+        <label v-if="label" class="main-label" >{{ localizedLabel }}</label>
         <div class="switch-area" :class="{['-size-' + size]: true}" >
           <label class="switch" :class="{['-size-' + size]: true}" > 
             <input type="checkbox" :disabled="disabled" :v-model="modelValue" :checked="is_checked" class="switch-input" :class="{['-size-' + size]: true}" @change="(e)=>{
               $emit('update:modelValue', emtiableValue(e.target.checked));
               $emit('change', emtiableValue(e.target.checked));
             }" >
-            <span class="switch-label" :data-on="yes" :data-off="no" :class="{['-size-' + size]: true, 'bothVisible': bothVisible}"></span>
+            <span class="switch-label" :data-on="localizedYes" :data-off="localizedNo" :class="{['-size-' + size]: true, 'bothVisible': bothVisible}"></span>
             <span class="switch-handle" :class="{['-size-' + size]: true, 'bothVisible': bothVisible}"></span>
           </label>
         </div>
@@ -73,6 +73,7 @@ let props = defineProps({
   },  
 })
 let emit = defineEmits([ 'update:modelValue', 'change', 'click'])
+const helper = inject('helper', null)
 let timeout = null
 function onClick(e) {
   clearTimeout(timeout)
@@ -103,6 +104,10 @@ const is_checked = computed(() => {
     return yesValue == props.modelValue;
   }
 })
+
+const localizedYes = computed(() => helper?.t ? helper.t(props.yes) : props.yes)
+const localizedNo = computed(() => helper?.t ? helper.t(props.no) : props.no)
+const localizedLabel = computed(() => helper?.t ? helper.t(props.label) : props.label)
 
 let sw = computed(() => {
   let { size } = props;

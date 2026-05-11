@@ -24,6 +24,7 @@ import { ref, inject } from "vue";
 import { useRoute } from "vue-router";
 let http = inject('http');
 let emitter = inject('emitter');
+let helper = inject('helper');
 import BtnLoader from './BtnLoader.vue'
 
 
@@ -52,7 +53,7 @@ async function uploadNow(){
     loading.value = true
     const url = forceAsNewEntity.value ? '/students/import?force_as_newentity=true' : '/students/import'
     http.post(url, {file: file.value}, {formData: true}).then(response => {
-      emitter.emit('toaster-success', {message: 'import সম্পন্ন হয়েছে'})
+      emitter.emit('toaster-success', {message: helper.t('Import completed')})
       file.value = null;
     }).finally(()=>{
       fileInputField.value = false

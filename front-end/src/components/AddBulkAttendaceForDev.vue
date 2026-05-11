@@ -239,22 +239,22 @@ async function AddBulkAttendanceNow() {
     if(inserting.value) return
 
     if(!payload.class_short){
-        return emitter.emit('toaster-error', { message: 'Please select a class', duration: 1000 })
+        return emitter.emit('toaster-error', { message: helper.t('Please select a class'), duration: 1000 })
     }
     if(!payload.shifts?.length){
-        return emitter.emit('toaster-error', { message: 'Please select shifts', duration: 1000 })
+        return emitter.emit('toaster-error', { message: helper.t('Please select shifts'), duration: 1000 })
     }
     
     if(!payload.selected_students?.length){
-        return emitter.emit('toaster-error', { message: `No students found in ${getSelectedClass.value.class_name}`, duration: 1000 })
+        return emitter.emit('toaster-error', { message: helper.t('No students found in {name}', { name: getSelectedClass.value.class_name }), duration: 1000 })
     }
 
     if(!payload.dates.startDate || !payload.dates.endDate){
-        return emitter.emit('toaster-error', { message: 'Please select date range', duration: 1000 })
+        return emitter.emit('toaster-error', { message: helper.t('Please select date range'), duration: 1000 })
     }
   
     if(!payload.dates?.startDate?.length){
-        return emitter.emit('toaster-error', { message: 'No valid dates found in the selected range (considering weekends)' })
+        return emitter.emit('toaster-error', { message: helper.t('No valid dates found in the selected range (considering weekends)') })
     }
 
     let date_range = helper.createDateRange(payload.dates.startDate, payload.dates.endDate)
@@ -323,7 +323,7 @@ async function AddBulkAttendanceNow() {
 
     // console.log({records, all_records});
 
-    if(!confirm(`Are you sure to add ${all_records.length} new records` )) return
+    if(!confirm(helper.t('Are you sure to add {count} new records?', { count: all_records.length }))) return
 
     inserting.value = true
     for (const item of all_records){
@@ -338,7 +338,7 @@ async function AddBulkAttendanceNow() {
 
 async function deleteAllDataForSelectedClass(){
 
-    if(!confirm(`Are you sure to delete all attendance data for ${payload.class_short} from ${payload.dates?.startDate} to ${payload.dates?.endDate}?`)) return
+    if(!confirm(helper.t('Are you sure to delete all attendance data for {className} from {startDate} to {endDate}?', { className: payload.class_short, startDate: payload.dates?.startDate, endDate: payload.dates?.endDate }))) return
     let student_ids = payload.class_short ? all_students.value.filter(s => s.class_short == payload.class_short).map(s => s.dakhela) : all_students.value.map(s => s.dakhela)
     let params = {
         student_ids,
@@ -350,10 +350,10 @@ async function deleteAllDataForSelectedClass(){
         if(response.status == 200){
             emitter.emit('toaster-success', { message: response.data?.message})
         } else {
-            emitter.emit('toaster-error', { message: 'Deleted failed!'})
+            emitter.emit('toaster-error', { message: helper.t('Delete failed!')})
         }
     } catch (error) {
-        emitter.emit('toaster-error', { message: 'Deleted failed'})
+        emitter.emit('toaster-error', { message: helper.t('Delete failed')})
     }
 }
 

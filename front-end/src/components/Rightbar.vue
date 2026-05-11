@@ -108,7 +108,7 @@ defineExpose({unmount})
     
                 <slot name="header">
                     <div class="header">
-                            <h2>{{ title ? title : '&nbsp;'}}</h2>
+                            <h2>{{ title ? helper.t(title) : '&nbsp;'}}</h2>
                         
                         <div class="button-area">
                             <template v-if="useRoute().query?.dev === 'true'">

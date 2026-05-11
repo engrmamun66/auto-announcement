@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from 'vue'
+import { inject } from 'vue'
 
 let props = defineProps({
     modelValue: {
@@ -19,6 +20,7 @@ let props = defineProps({
 })
 
 let emits = defineEmits(['update:modelValue', 'close'])
+const helper = inject('helper', null)
 
 function close(){
     emits("update:modelValue", false);
@@ -36,7 +38,7 @@ function close(){
                 <a v-if="closeIconInOutside" @click.stop.prevent="close()" class="modal__close modal__close--outside">×</a>
                 <div class="modal__content fadeUp" @click.stop="false">
                     <slot name="title">
-                        <h3 v-if="title">{{title}}</h3>
+                        <h3 v-if="title">{{ helper?.t ? helper.t(title) : title }}</h3>
                     </slot>
                     <slot>
                         Lorem ipsum dolor sit amet consectetur adipisicing elit. Sapiente nihil assumenda voluptates voluptatem repellat cumque esse numquam quam soluta natus, deserunt facere maiores quos nobis similique, quis, nisi vel minus!

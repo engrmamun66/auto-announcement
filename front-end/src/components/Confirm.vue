@@ -31,11 +31,11 @@
                     </template>
                     <template v-else>
                       <slot>
-                        Are you confirm?
+                        {{ helper.t('Are you sure?') }}
                       </slot>
                     </template>
                   </h4>
-                  <input v-if="tekeNote" v-model="note_text" type="text" class="form-control cb-input" placeholder="আনুগ্রহ করে বাতিলের কারণ লিখুন...">
+                  <input v-if="tekeNote" v-model="note_text" type="text" class="form-control cb-input" :placeholder="helper.t('Please write the cancel reason...')">
               </div>
             </div>
             <hr>
@@ -100,12 +100,13 @@ let emit = defineEmits(['update:modelValue', 'yes', 'no', ' close'])
 
 let note_text = ref(null)
 let emitter = inject('emitter')
+const helper = inject('helper')
 
 
 let yes = (event) => {
   if(props.tekeNote){
     if(!note_text.value){
-      emitter.emit('toaster-error', {message: 'আনুগ্রহ করে বাতিলের কারণ লিখুন!'})
+      emitter.emit('toaster-error', {message: helper.t('Please write the cancel reason!')})
       return
     }
   }

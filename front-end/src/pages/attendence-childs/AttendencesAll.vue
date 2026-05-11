@@ -62,7 +62,7 @@ function deleteAttedence(item, note_text = null){
     if(response.status === 200){
       liveAttendenceList.value = liveAttendenceList.value.filter(_item => _item.id != item.id)
       attendenceList.value = attendenceList.value.filter(_item => _item.id != item.id)
-      emitter.emit('toaster-success', {message: 'Attendence Deleted!'})
+      emitter.emit('toaster-success', {message: helper.t('Attendance deleted!')})
     }
   })
 }

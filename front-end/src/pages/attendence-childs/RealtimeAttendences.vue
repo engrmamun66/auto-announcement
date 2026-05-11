@@ -205,11 +205,11 @@ watch(
 );
 
 function deleteAttedence(item){
-  if(!confirm("Delete this attendance?")) return
+  if(!confirm(helper.t('Delete this attendance?'))) return
   http.delete(`/attendence-delete/${item.id}`).then(response => {
     if(response.status === 200){
       liveAttendenceList.value = liveAttendenceList.value.filter(_item => _item.id != item.id)
-      emitter.emit('toaster-success', {message: 'Attendence Deleted!'})
+      emitter.emit('toaster-success', {message: helper.t('Attendance deleted!')})
     }
   })
 }

@@ -210,6 +210,7 @@ import BtnLoader from './BtnLoader.vue'
 
 const http = inject('http')
 const emitter = inject('emitter')
+const helper = inject('helper')
 const classes = inject('classes', [])
 const all_students = inject('all_students', [])
 const all_students_non_copied = inject('all_students_non_copied', [])
@@ -282,7 +283,7 @@ async function fetchStudentsByClass(class_short) {
     studentsForRevert.value = data.filter((s) => isCopiedStudent(s))
   } catch (error) {
     console.warn('fetchStudentsByClass_error', error)
-    emitter?.emit?.('toaster-error', { message: 'Failed to load students for selected class.' })
+    emitter?.emit?.('toaster-error', { message: helper.t('Failed to load students for selected class.') })
     setDefaultStudents()
   }
 }
@@ -309,7 +310,7 @@ const existingDakhelas = computed(() => {
 
 const setupError = computed(() => {
   const adjustment = Number(payload.adjustment_dakhela)
-  if (!Number.isFinite(adjustment)) return 'Adjustment dakhela is required.'
+  if (!Number.isFinite(adjustment)) return helper.t('Adjustment dakhela is required.')
   return ''
 })
 
@@ -401,11 +402,11 @@ async function startClone() {
 
   const items = planItems.value.filter((item) => item.status === 'ok')
   if (!items.length) {
-    emitter?.emit?.('toaster-warning', { message: 'No students to clone.' })
+    emitter?.emit?.('toaster-warning', { message: helper.t('No students to clone.') })
     return
   }
 
-  if (!confirm(`Clone ${items.length} students?`)) return
+  if (!confirm(helper.t('Clone {count} students?', { count: items.length }))) return
 
   cloning.value = true
   progress.total = items.length
@@ -432,9 +433,9 @@ async function startClone() {
   cloning.value = false
 
   if (progress.failed > 0) {
-    emitter?.emit?.('toaster-error', { message: `Cloned with ${progress.failed} errors.` })
+    emitter?.emit?.('toaster-error', { message: helper.t('Cloned with {count} errors.', { count: progress.failed }) })
   } else {
-    emitter?.emit?.('toaster-success', { message: `Cloned ${progress.total} students successfully.` })
+    emitter?.emit?.('toaster-success', { message: helper.t('Cloned {count} students successfully.', { count: progress.total }) })
   }
 
   await getAllStudents()
@@ -446,11 +447,11 @@ async function deleteAllCloned() {
 
   const items = clonedStudents.value
   if (!items.length) {
-    emitter?.emit?.('toaster-warning', { message: 'No cloned students to delete.' })
+    emitter?.emit?.('toaster-warning', { message: helper.t('No cloned students to delete.') })
     return
   }
 
-  if (!confirm(`Delete ${items.length} cloned students?`)) return
+  if (!confirm(helper.t('Delete {count} cloned students?', { count: items.length }))) return
 
   reverting.value = true
   revertProgress.total = items.length
@@ -473,9 +474,9 @@ async function deleteAllCloned() {
   reverting.value = false
 
   if (revertProgress.failed > 0) {
-    emitter?.emit?.('toaster-error', { message: `Delete completed with ${revertProgress.failed} errors.` })
+    emitter?.emit?.('toaster-error', { message: helper.t('Delete completed with {count} errors.', { count: revertProgress.failed }) })
   } else {
-    emitter?.emit?.('toaster-success', { message: `Deleted ${revertProgress.total} cloned students.` })
+    emitter?.emit?.('toaster-success', { message: helper.t('Deleted {count} cloned students.', { count: revertProgress.total }) })
   }
 
   await getAllStudents()

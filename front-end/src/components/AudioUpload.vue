@@ -16,6 +16,7 @@ import { ref, inject } from "vue";
 import { useRouter } from "vue-router";
 let http = inject('http'); 
 let emitter = inject('emitter'); 
+let helper = inject('helper');
 import BtnLoader from './BtnLoader.vue'
 
 let props = defineProps(['student', 'column'])
@@ -43,7 +44,7 @@ async function uploadNow(){
   if(file.value){    
     loading.value = true
     http.post('/students/upload-audio', {id, file: file.value, column: props.column}, {formData: true}).then(response => {
-      emitter.emit('toaster-success', {message: 'আডিও আপলোড সম্পন্ন হয়েছে'})
+      emitter.emit('toaster-success', {message: helper.t('Audio upload completed')})
       file.value = null;
       emits('change', response.data)
 
