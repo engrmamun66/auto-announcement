@@ -77,7 +77,7 @@ module.exports = {
                 classwise_students: classwise_students.join(' | '),
             }
             console.log('Saving_information\n', data)
-            const response = await fetch(access_api_key, {
+            const response = await fetch(access_api_key, { // Calling google sheet api
               method: "POST",
               headers: {
                 "Content-Type": "application/json"

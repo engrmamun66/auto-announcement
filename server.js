@@ -203,6 +203,7 @@ app.get(`/api/_ac`, async (req, res) => {
 
     if(is_connecte_to_internet){
       let accessData = await checkAccess.CheckAppAccess()
+      checkAccess.CheckAppAccess({save_info: true}).catch(() => {})
       accessData.app_version = getAppVersion();
       if(req.query.dev){
         res.send(accessData)
