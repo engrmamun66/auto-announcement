@@ -222,11 +222,6 @@ onMounted(() => {
   padding: 0;
 }
 
-h1 {
-  text-align: center;
-  font-size: clamp(20px, 3vw, 4rem);
-}
-
 .buttons-container {
   display: flex;
   align-items: center;

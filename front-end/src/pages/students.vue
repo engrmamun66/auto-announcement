@@ -146,8 +146,9 @@ function hide_modals(event){
   }
 }
 watch(addMode, (bool) => {
-  if(bool){ 
+  if(bool){
     document.addEventListener('keyup', hide_modals)
+    scheduleUiLocalization(100)
   }else {
     document.removeEventListener('keyup', hide_modals)
   }
