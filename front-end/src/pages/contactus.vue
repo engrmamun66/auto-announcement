@@ -239,10 +239,9 @@ function CopyCode() {
       </div>
     </div>
 
-    <div class="footer">
+    <div class="footer" data-no-auto-i18n="true">
       <p>
-        © 2023 SoftPro IT. All rights reserved. | Bootstrap Information Cards
-        Example
+        © {{ new Date().getFullYear() }} Calling Bird. All rights reserved.
       </p>
       <button class="restart-btn" @click="restartServer" :disabled="restarting">
         <i class='bx bx-refresh' :class="{ 'bx-spin': restarting }"></i>

@@ -406,6 +406,8 @@ module.exports = {
     'Dakhela': 'Dakhela',
     'Year': 'Year',
     'Class': 'Class',
+    'Submit': 'Submit',
+    'Just-Out': 'Just-Out',
   },
   attendance: {
     vacation_types: [

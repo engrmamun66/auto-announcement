@@ -406,6 +406,8 @@ module.exports = {
     'Dakhela': 'দাখেলা',
     'Year': 'বছর',
     'Class': 'শ্রেণী',
+    'Submit': 'সাবমিট',
+    'Just-Out': 'বেরিয়েছে',
   },
   attendance: {
     vacation_types: [

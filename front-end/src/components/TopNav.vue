@@ -268,7 +268,6 @@ onMounted(()=>{
 
 <style scoped>
 .madrasha-title {
-  background: #f8f9fa;
   color: #ff0;
   font-size: 17px;
   text-shadow: 1px 2px 2px rgb(0,0,0);
@@ -318,6 +317,7 @@ onMounted(()=>{
 .topnav__logo{
   width: 200px;
   border: 6px;
+  border-radius: 10px;
 }
 
 .topnav__toggle{
