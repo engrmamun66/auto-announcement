@@ -280,9 +280,9 @@ watch(
 
     <hr class="only-show-onprint">
 
-    <div class="bg-dark-subtle border class-button-list hide_onprint p-3 radius-10">
+    <div class="bg-dark-subtle border class-button-list hide_onprint p-3 radius-10" data-no-auto-i18n="true">
         <button
-            v-for="(cls, index) in classes"
+            v-for="(cls, index) in classes.filter(c => c.isActive === true)"
             :key="index"
             type="button"
             class="class-button"
