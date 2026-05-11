@@ -27,8 +27,8 @@ function getStudentInfo(db){
       if (err) {
         return reject(err)
       }
-      let exact_students = students.filter(s => s.dakhela < 1000).length
-      let duplicate_cards = students.filter(s => s.dakhela > 1000).length
+      let exact_students = students.filter(s => s.name.indexOf('Copied') === -1).length
+      let duplicate_cards = students.filter(s => s.name.indexOf('Copied') !== -1).length
       let groups = utils.listGroupBy(students, 'class_short')
       const classwise_students = []
       Object.keys(groups).forEach(class_short => {
