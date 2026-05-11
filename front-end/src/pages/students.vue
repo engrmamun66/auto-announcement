@@ -899,25 +899,25 @@ watch(fixedWidthSoundCol, (newVal) => {
       <template #thead>
         <thead>
           <tr>
-            <th>Class</th>
+            <th class="d-none d-md-table-cell">Class</th>
             <th>Name</th>
-            <th>Image</th>
-            <th>Card Owner</th>
-            <th>Phone</th> 
+            <th class="d-none d-md-table-cell">Image</th>
+            <th class="d-none d-lg-table-cell">Card Owner</th>
+            <th class="d-none d-md-table-cell">Phone</th>
             <th>Dakhela</th>
-            <th>Year</th>
+            <th class="d-none d-lg-table-cell">Year</th>
             <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
-              <th @dblclick="fixedWidthSoundCol = !fixedWidthSoundCol" :style="fixedWidthSoundCol ? 'width: 300px;' : ''" tooltip="Double Click" flow="down">
-                Sound 
+              <th class="d-none d-lg-table-cell" @dblclick="fixedWidthSoundCol = !fixedWidthSoundCol" :style="fixedWidthSoundCol ? 'width: 300px;' : ''" tooltip="Double Click" flow="down">
+                Sound
                 <template v-if="fixedWidthSoundCol">
                   <i class='bx bx-arrow-from-right transformY-3px' ></i>
                   <i class='bx bx-arrow-from-left transformY-3px' ></i>
                 </template>
               </th>
-            </template> 
+            </template>
             <th>Status</th>
             <th>Punch</th>
-            <th>Action</th> 
+            <th>Action</th>
           </tr>
         </thead>
       </template>
@@ -925,16 +925,22 @@ watch(fixedWidthSoundCol, (newVal) => {
         <template v-if="students?.length">
           <template v-for="(std, i) in students.toReversed()">
             <tr @auxclick="log(std)" :style="!std.status ? 'opacity: 0.4' : ''"  >
-              <td class="text-left" data-no-auto-i18n="true" @click.stop="log(std)"> {{ std.class }} </td> 
-              <td class="text-left cp" @click.stop="prepareToEdit(std)" :student-id="std.id" >{{ std.name.split('||')?.[0] }}</td>
-              <td>
+              <td class="text-left d-none d-md-table-cell" data-no-auto-i18n="true" @click.stop="log(std)"> {{ std.class }} </td>
+              <td class="text-left cp" @click.stop="prepareToEdit(std)" :student-id="std.id">
+                {{ std.name.split('||')?.[0] }}
+                <div class="d-md-none mt-1">
+                  <small class="text-muted d-block" data-no-auto-i18n="true">{{ std.class }}</small>
+                  <small v-if="std.phone_number" class="text-muted">{{ String(std.phone_number).slice(0,3) + '...' + String(std.phone_number).slice(-3) }}</small>
+                </div>
+              </td>
+              <td class="d-none d-md-table-cell">
                 <img class="profile-thumb" :src="std.profile_image || '/default-profile-image.png'" alt="profile" />
               </td>
-              <td> 
+              <td class="d-none d-lg-table-cell">
                 <p class="mb-1">{{ callbacks.getCardOwnerName(std?.card_owner) }}</p>
                 <div class="student-note" tooltip="Note" v-if="std?.note">{{ std?.note }}</div>
-              </td> 
-              <td>
+              </td>
+              <td class="d-none d-md-table-cell">
                 <span v-if="std.phone_number" class="text-muted small">{{ String(std.phone_number).slice(0,3) + '...' + String(std.phone_number).slice(-3) }}</span>
               </td>
               <td> 
@@ -961,10 +967,10 @@ watch(fixedWidthSoundCol, (newVal) => {
                 
               </td> 
               
-              <td> {{ std.year }} </td> 
+              <td class="d-none d-lg-table-cell"> {{ std.year }} </td>
               <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
                 <template v-for="column in ['sound1']">
-                  <td> 
+                  <td class="d-none d-lg-table-cell">
                     <!-- Sound -->
                     <template v-if="std[column]">            
                       <template v-if="!std[`isPlaying_${column}`]">            
