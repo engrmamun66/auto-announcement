@@ -394,7 +394,7 @@ function applyLanguageSettings() {
         packs: CONFIG.value?.lang_packs || {},
         strings: CONFIG.value?.lang_pack || {},
     })
-    moment.locale(langCode.value === 'bn' ? 'bn' : 'en')
+    moment.locale('en')
 }
 
 function localizeAppDom() {

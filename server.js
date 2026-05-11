@@ -26,7 +26,7 @@ if (fs.existsSync(configPath)) {
   config = fulfillMisingConfigKeys(require(configPath), config);
 }
 global.config = config
-moment.locale(global.config?.settings?.lang_bn === false ? 'en' : 'bn')
+moment.locale('en')
 
 const cors = require('cors'); 
 const express = require('express')
