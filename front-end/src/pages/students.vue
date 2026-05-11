@@ -138,7 +138,6 @@ let columnName = ref('sound1')
 let targetStdForBarcode = ref(null)
 let editModeTabIndex = ref(1)
 provide('editModeTabIndex', editModeTabIndex)
-let only_attendance_feature = CONFIG.value?.settings?.attendance?.only_attendance_feature === true
 function hide_modals(event){
   if (event.key === 'Escape') { 
     targetStd.value = null
@@ -606,7 +605,7 @@ watch(fixedWidthSoundCol, (newVal) => {
             <i class="bx bx-link" style="pointer-events: none;"></i>
           </button>
         </div>
-        <template v-if="!only_attendance_feature">
+        <template v-if="!CONFIG.value?.settings?.attendance?.only_attendance_feature">
           <div v-if="appAccessData?.recorder_web_url" class="btn-group me-2" style="display:inline-flex;align-items:stretch;">
             <a v-if="isIPAccess" :href="appAccessData.recorder_web_url + `?code=${CONFIG?.env?.CODE_NUMBER}`" target="_blank" class="btn" style="background:#00796B;color:#fff;">
               <i class='bx bx-microphone'></i> Recorder
@@ -627,7 +626,7 @@ watch(fixedWidthSoundCol, (newVal) => {
            <!-- <span>{{ params?.total || '0' }}</span> -->
         </Btn>
         <Btn v-if="!addMode" class="me-2" @click="addMode = !addMode;editModeTabIndex=1;clearParams();payload.id = null" ><i class='bx bx-plus'></i> Add New</Btn>
-        <template v-if="!only_attendance_feature">
+        <template v-if="!CONFIG.value?.settings?.attendance?.only_attendance_feature && PunchButtonsRef?.length">
           <Btn @click.stop="bulkPunch()" style="background: #673AB7;" :disabled="!PunchButtonsRef?.length">Bulk Punch ({{ PunchButtonsRef?.length || 0 }})</Btn>
         </template>
       </div>
@@ -836,7 +835,7 @@ watch(fixedWidthSoundCol, (newVal) => {
               <input v-model="params.name" type="text" class="form-control cb-input" @keyup.enter="getStudents">
             </div>
           </div>
-          <template v-if="!only_attendance_feature">
+          <template v-if="!CONFIG.value?.settings?.attendance?.only_attendance_feature">
             <div class="col-md-3 col-12">
               <div class="form-group">
                 <label for="email">Sound</label>
@@ -890,7 +889,7 @@ watch(fixedWidthSoundCol, (newVal) => {
             <!-- <th>Card</th> -->
             <th>{{ CONFIG?.studentTableColumns?.dakhela || 'Dakhela' }}</th>
             <th>{{ CONFIG?.studentTableColumns?.year || 'Year' }}</th>
-            <template v-if="!only_attendance_feature">
+            <template v-if="!CONFIG.value?.settings?.attendance?.only_attendance_feature">
               <th @dblclick="fixedWidthSoundCol = !fixedWidthSoundCol" :style="fixedWidthSoundCol ? 'width: 300px;' : ''" tooltip="Double Click" flow="down">
                 {{ CONFIG?.studentTableColumns?.sound || 'Sound' }} 
                 <template v-if="fixedWidthSoundCol">
@@ -923,7 +922,7 @@ watch(fixedWidthSoundCol, (newVal) => {
                 <div class="align-items-center d-flex">
                   <span class="p-1" @dblclick="params.dakhela = std.dakhela">{{ std.dakhela }}</span>
                   <!-- No need multiple card Access If using only for attendance -->
-                  <span id="CLONE___STUDENT" v-if="only_attendance_feature === false" tooltip="Cone Student">
+                  <span id="CLONE___STUDENT" v-if="CONFIG.value?.settings?.attendance?.only_attendance_feature === false" tooltip="Cone Student">
                     <i v-if="std.name && String(std.name)?.indexOf('||dakhela') > -1 === false" @click.stop="()=>{
                       std.cloneMode = !(!!(std.cloneMode));
                     }" class="bx bxs-copy-alt cp px-1">
@@ -944,7 +943,7 @@ watch(fixedWidthSoundCol, (newVal) => {
               </td> 
               
               <td> {{ std.year }} </td> 
-              <template v-if="!only_attendance_feature">
+              <template v-if="!CONFIG.value?.settings?.attendance?.only_attendance_feature">
                 <template v-for="column in ['sound1']">
                   <td> 
                     <!-- Sound -->
