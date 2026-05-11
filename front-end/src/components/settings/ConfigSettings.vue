@@ -149,16 +149,21 @@ onUnmounted(() => { if (hasSaved.value) {
   flex-shrink: 0;
   padding: 7px 14px;
   border-radius: 0px;
-  border: 1px solid #ddd; 
+  border: 1px solid #ddd;
   font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.4px;
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.15s, color 0.15s;
+  transform: translateZ(0);
+  -webkit-font-smoothing: antialiased;
+  box-shadow: none !important;
 }
 .cs__tab:not(.active):hover { background: #e8e8e8 !important; }
+.cs__tab:focus { outline: none; box-shadow: none !important; }
+.cs__tab:active { outline: none; box-shadow: none !important; }
+.cs__tab:focus-visible { outline: 2px solid var(--primaryColor, #4a90d9); outline-offset: 2px; }
 
 /* Panel */
 .cs__panel-wrap { display: flex; flex-direction: column; gap: 8px; }
