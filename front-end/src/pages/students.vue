@@ -251,6 +251,7 @@ let payload = reactive({
   card_no: null,
   card_owner: null,
   note: null,
+  phone_number: null,
   profile_image: null,
 })
 
@@ -268,6 +269,7 @@ function clearPayload(){
   payload.card_no = null
   payload.card_owner = null
   payload.note = null
+  payload.phone_number = null
   payload.profile_image = null
   clearProfileImageFile()
 
@@ -387,8 +389,7 @@ async function addStudent(){
     if(!payload.name) return emitter.emit('toaster-warning', {message: helper.t('Please enter name')})
     if(!payload.class) return emitter.emit('toaster-warning', {message: helper.t('Please select class')})
     if(!payload.dakhela) return emitter.emit('toaster-warning', {message: helper.t('Please enter dakhela number')})
-
-
+    if(payload.phone_number && !/^01\d{9}$/.test(String(payload.phone_number).trim())) return emitter.emit('toaster-warning', {message: helper.t('Invalid phone number')})
 
     is___adding.value = true
     
@@ -425,6 +426,7 @@ async function updateStudent(){
     if(!payload.name) return emitter.emit('toaster-warning', {message: helper.t('Please enter name')})
     if(!payload.class) return emitter.emit('toaster-warning', {message: helper.t('Please select class')})
     if(!payload.dakhela) return emitter.emit('toaster-warning', {message: helper.t('Please enter dakhela number')})
+    if(payload.phone_number && !/^01\d{9}$/.test(String(payload.phone_number).trim())) return emitter.emit('toaster-warning', {message: helper.t('Invalid phone number')})
     is___adding.value = true
     const formData = new FormData()
     Object.keys(payload).forEach((key) => {
@@ -639,56 +641,39 @@ watch(fixedWidthSoundCol, (newVal) => {
 
         <div class="cb-form">
           <div @click.stop="false">
-            <div class="row" :class="[payload?.id ? 'mt-2' : 'mt-4']">
+            <div class="row g-2" :class="[payload?.id ? 'mt-1' : 'mt-2']">
 
               <div class="col-12 d-flex justify-content-between align-items-center">
-                
+
                 <Tabset v-if="payload?.id" @onTab="(tab) => {
                   editModeTabIndex = tab;
                   if(tab == 2) getStudentPuchLogs();
-                }"></Tabset> 
+                }"></Tabset>
 
                 <label class="using-card-title-in-form" v-if="CONFIG?.settings?.attendance?.status && payload?.id && payload?.name">
                   {{ String(payload?.name).indexOf('Copied') > -1 ? 'This card for guardian' : 'This card for student' }}
                 </label>
 
-
               </div>
 
-
-    
                 <template v-if="editModeTabIndex == 1">
 
-                  <div class="col-12">
+                  <!-- Class + Year -->
+                  <div class="col-8">
                     <div class="form-group">
-                      <label for="email">Class</label>
-                      <select v-model="payload.class" class="form-control cb-input" id="ClassId" :disabled="payload?.id && payload.name && payload.name.indexOf('||dakhela') > -1">
+                      <label>Class</label>
+                      <select v-model="payload.class" class="form-control cb-input cb-input--sm" id="ClassId" :disabled="payload?.id && payload.name && payload.name.indexOf('||dakhela') > -1">
                         <option :value="null">-class-</option>
                         <template v-for="(cls, index) in classes" :key="index">
                           <option :value="cls.class_name">{{cls.class_name}}</option>
-                        </template>                  
+                        </template>
                       </select>
                     </div>
                   </div>
-    
-                  <div class="col-12">
+                  <div class="col-4">
                     <div class="form-group">
-                      <label for="name">Name</label>
-                      <input v-model="payload.name" type="text" class="form-control cb-input" :disabled="payload?.id && payload.name && payload.name.indexOf('||dakhela') > -1">
-                    </div>
-                  </div>
-    
-                  <div class="col-12">
-                    <div class="form-group">
-                      <label for="name">Dakhela</label>
-                      <input v-model="payload.dakhela" type="number" class="form-control cb-input" :disabled="payload?.id && payload.name && payload.name.indexOf('||dakhela') > -1">
-                    </div>
-                  </div>
-    
-                  <div class="col-12">
-                    <div class="form-group">
-                      <label for="year">Year</label> 
-                      <select v-model="payload.year" class="form-control cb-input" :disabled="payload?.id && payload.name && payload.name.indexOf('||dakhela') > -1">
+                      <label>Year</label>
+                      <select v-model="payload.year" class="form-control cb-input cb-input--sm" :disabled="payload?.id && payload.name && payload.name.indexOf('||dakhela') > -1">
                         <option :value="new Date().getFullYear()">{{ new Date().getFullYear() }}</option>
                         <option :value="new Date().getFullYear() - 1">{{ new Date().getFullYear() - 1 }}</option>
                         <option :value="new Date().getFullYear() - 2">{{ new Date().getFullYear() - 2 }}</option>
@@ -697,46 +682,71 @@ watch(fixedWidthSoundCol, (newVal) => {
                     </div>
                   </div>
 
+                  <!-- Name -->
                   <div class="col-12">
                     <div class="form-group">
-                      <label for="profile_image_input">Profile Image</label>
+                      <label>Name</label>
+                      <input v-model="payload.name" type="text" class="form-control cb-input cb-input--sm" :disabled="payload?.id && payload.name && payload.name.indexOf('||dakhela') > -1">
+                    </div>
+                  </div>
+
+                  <!-- Dakhela + Phone -->
+                  <div class="col-5">
+                    <div class="form-group">
+                      <label>Dakhela</label>
+                      <input v-model="payload.dakhela" type="number" class="form-control cb-input cb-input--sm" :disabled="payload?.id && payload.name && payload.name.indexOf('||dakhela') > -1">
+                    </div>
+                  </div>
+                  <div class="col-7">
+                    <div class="form-group">
+                      <label>Phone Number</label>
+                      <input v-model="payload.phone_number" type="text" class="form-control cb-input cb-input--sm">
+                    </div>
+                  </div>
+
+                  <!-- Note -->
+                  <div class="col-12">
+                    <div class="form-group">
+                      <label>Note</label>
+                      <input v-model="payload.note" type="text" class="form-control cb-input cb-input--sm">
+                    </div>
+                  </div>
+
+                  <!-- Profile Image -->
+                  <div class="col-12">
+                    <div class="form-group">
+                      <label>Profile Image</label>
                       <div class="d-flex align-items-center gap-2">
                         <img class="profile-thumb" :src="profileImagePreview || payload.profile_image || '/default-profile-image.png'" alt="profile" />
-                        <input v-model="payload.profile_image" type="text" class="form-control cb-input" placeholder="Image URL or path">
-                        <label for="profile_image_input" class="form-control cb-input">
-                          <span class="transformY-3px">Choose Image</span>
-                          <input id="profile_image_input" type="file" accept="image/*" class="form-control opacity-0" @change="onProfileImageChange">
+                        <input v-model="payload.profile_image" type="text" class="form-control cb-input cb-input--sm" placeholder="Image URL or path">
+                        <label for="profile_image_input" class="cb-file-btn cb-input--sm">
+                          <span>Choose Image</span>
+                          <input id="profile_image_input" type="file" accept="image/*" class="d-none" @change="onProfileImageChange">
                         </label>
                       </div>
                     </div>
                   </div>
 
-                  <div class="col-12">
-                    <div class="form-group">
-                      <label for="name">Note</label>
-                      <input v-model="payload.note" type="text" class="form-control cb-input" >
-                    </div>
-                  </div>
-
-                  <div class="col-12" v-if="CONFIG?.card_owners?.length">
+                  <!-- Card Owner -->
+                  <div class="col-12 mt-3" v-if="CONFIG?.card_owners?.length">
                     <div class="form-group d-flex align-items-center gap-3">
-                      <label>Card Owner</label>
-                      <div class="d-flex flex-wrap gap-2"> 
+                      <label class="mb-0">Card Owner</label>
+                      <div class="d-flex flex-wrap gap-2">
                         <template v-for="owner in CONFIG?.card_owners">
                           <div @click.stop="payload.card_owner = owner.id" class="d-flex justify-content-start each-owner-name">
-                              <span :class="{'checked': payload.card_owner == owner.id}" customized-radio ></span>
+                              <span :class="{'checked': payload.card_owner == owner.id}" customized-radio></span>
                               <label class="cp">{{ owner.name }}</label>
-                          </div>  
+                          </div>
                         </template>
                       </div>
                     </div>
                   </div>
-    
+
                   <div class="col-12 d-flex justify-content-center mt-3">
-                    <Btn @click.stop="clearPayload" class="red me-2" >Cancel</Btn>
-                    <Btn v-if="!payload.id" @click="addStudent" addStudentAttr class="me-0" >Submit <BtnLoader v-if="is___adding"></BtnLoader> </Btn>
-                    <Btn v-else @click="updateStudent" updateStudentAttr class="me-0" v-if="payload.name && payload.name.indexOf('||dakhela') === -1">Update <BtnLoader v-if="is___adding"></BtnLoader> </Btn>
-                  </div> 
+                    <Btn @click.stop="clearPayload" class="red me-2">Cancel</Btn>
+                    <Btn v-if="!payload.id" @click="addStudent" addStudentAttr class="me-0">Submit <BtnLoader v-if="is___adding"></BtnLoader></Btn>
+                    <Btn v-else @click="updateStudent" updateStudentAttr class="me-0" v-if="payload.name && payload.name.indexOf('||dakhela') === -1">Update <BtnLoader v-if="is___adding"></BtnLoader></Btn>
+                  </div>
                 </template>
 
 
@@ -1397,13 +1407,32 @@ watch(fixedWidthSoundCol, (newVal) => {
   margin-left: 5px;
 }
 .profile-thumb{
-  width: 38px;
-  height: 38px;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
   border-radius: 50%;
   object-fit: cover;
   border: 1px solid #cfcfcf;
   background: #fff;
 }
+.cb-form .form-group { margin-bottom: 0; }
+.cb-form label { font-size: 12px; font-weight: 600; margin-bottom: 2px; color: #555; display: block; }
+.cb-input--sm { height: 34px !important; font-size: 13px !important; padding: 4px 10px !important; }
+.cb-file-btn {
+  flex-shrink: 0;
+  height: 34px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  background: #f8f9fa;
+  color: #333;
+}
+.cb-file-btn:hover { background: #e9ecef; }
 .action-icons > *:not(:last-child){
   margin-right: 8px;
 }

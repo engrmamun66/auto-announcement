@@ -1578,7 +1578,7 @@ const force_active = computed(() => route.query.fa === 'true' || storage('active
     <template v-if="!!force_active && appUseForbiddened && appAccessData?.internet === true">
         <Lockscreen ref="LockscreenRef" @tryToUnlock="CheckAccess({loader: true})"></Lockscreen>
         <template v-if="true">
-            <div ref="disabilityAlretRef" class="disablitily-alert">
+            <div ref="disabilityAlretRef" class="disablitily-alert" data-no-auto-i18n="true">
                 <div v-html="getForbiddenedMessage" @auxclick="log({getWarningMessage})"></div>
                 <accessCheckAnimation v-if="checking_accessibility"></accessCheckAnimation>
             </div>
@@ -1596,11 +1596,11 @@ const force_active = computed(() => route.query.fa === 'true' || storage('active
         </div>
     
         <template v-if="showAccessibilityAlert && appAccessData?.internet === true">
-            <div ref="disabilityAlretRef" class="disablitily-alert" @auxclick="log({getWarningMessage})" v-html="getWarningMessage">  
+            <div ref="disabilityAlretRef" class="disablitily-alert" data-no-auto-i18n="true" @auxclick="log({getWarningMessage})" v-html="getWarningMessage">  
             </div>
         </template>
         <template v-else-if="appAccessData?.internet === false">
-            <div ref="disabilityAlretRef" class="disablitily-alert">
+            <div ref="disabilityAlretRef" class="disablitily-alert" data-no-auto-i18n="true">
                 আপনার ইন্টারনেট সংযোগটি বিচ্ছিন্ন রয়েছে। এই মুহূর্তে ডিভাইস থেকে পাঞ্চ অকার্যকর।
             </div>
         </template>

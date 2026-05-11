@@ -28,6 +28,7 @@ class myDB {
         this._addColumn('students', 'options', 'VARCHAR', 'NULL')
         this._addColumn('students', 'note', 'VARCHAR', 'NULL') 
         this._addColumn('students', 'profile_image', 'VARCHAR', 'NULL')
+        this._addColumn('students', 'phone_number', 'VARCHAR', 'NULL')
         this._addColumn('schedules', 'status', 'INTEGER', '1')
         this._addColumn('schedules', 'order_index', 'INTEGER', '1')
         this._initSettings()

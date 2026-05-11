@@ -9,6 +9,16 @@ const utils = require('./utls')
 let checkAccess = require("./checkaccess"); 
 let Backup = require("./backup"); 
  
+function normalizePhoneNumber(raw) {
+  if (!raw) return null
+  const first = String(raw).split(/[,;]/)[0]
+  let digits = first.replace(/\D/g, '')
+  if (digits.length === 13 && digits.startsWith('880')) digits = '0' + digits.slice(3)
+  else if (digits.length === 12 && digits.startsWith('88')) digits = '0' + digits.slice(2)
+  else if (digits.length === 10 && digits.startsWith('1')) digits = '0' + digits
+  return /^01\d{9}$/.test(digits) ? digits : null
+}
+
 function normalizeProfileImage(req, profile_image) {
   if (!profile_image) return null
   if (/^https?:\/\//i.test(profile_image) || /^data:/i.test(profile_image)) {
@@ -404,13 +414,13 @@ class Students {
       });
       const scheduleData = scheduleSheetName ? xlsx.utils.sheet_to_json(workbook.Sheets[scheduleSheetName], { header: 1 }) : [];
       const insertQuery = `
-        INSERT INTO students (name, dakhela, class, class_short, card_no, year, status, sound1, device_index, card_owner, options, note, profile_image)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO students (name, dakhela, class, class_short, card_no, year, status, sound1, device_index, card_owner, options, note, profile_image, phone_number)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
-  
+
       const updateQuery = `
         UPDATE students
-        SET name = ?, dakhela = ?, class = ?, class_short = ?, card_no = ?, year = ?, status = ?, sound1 = ?, device_index = ?, card_owner = ?, options = ?, note = ?, profile_image = ?
+        SET name = ?, dakhela = ?, class = ?, class_short = ?, card_no = ?, year = ?, status = ?, sound1 = ?, device_index = ?, card_owner = ?, options = ?, note = ?, profile_image = ?, phone_number = ?
         WHERE id = ?
       `;
   
@@ -490,13 +500,14 @@ class Students {
           const device_index = getValue(row, 'device_index', 11)
           const note = getValue(row, 'note', 12)
           const profile_image = headerMap.profile_image !== undefined ? getValue(row, 'profile_image') : (row.length >= 15 ? row[14] : null)
+          const phone_number = normalizePhoneNumber(getValue(row, 'phone_number'))
 
           if (forceAsNewEntity) {
             // Force insert as a new row regardless of id or existing match
             pending++;
             this.db.run(
               insertQuery,
-              [name, dakhela, className, utils.getClassShort(className), card_no, year, status || 1, sound1 || null, device_index || null, card_owner || null, options || null, note || null, profile_image || null],
+              [name, dakhela, className, utils.getClassShort(className), card_no, year, status || 1, sound1 || null, device_index || null, card_owner || null, options || null, note || null, profile_image || null, phone_number || null],
               (err) => {
                 if (err) {
                   console.error("Error inserting data (force):", err);
@@ -513,7 +524,7 @@ class Students {
             pending++;
             this.db.run(
               updateQuery,
-              [name, dakhela, className, utils.getClassShort(className), card_no, year, status || 1, sound1 || '', device_index || null, card_owner || null, options || null, note || null, profile_image || null, id],
+              [name, dakhela, className, utils.getClassShort(className), card_no, year, status || 1, sound1 || '', device_index || null, card_owner || null, options || null, note || null, profile_image || null, phone_number || null, id],
               function(err) {
                 if (err) {
                   console.error(`Error updating data with ID ${id}:`, err);
@@ -543,7 +554,7 @@ class Students {
                 // Update the existing row
                 this.db.run(
                   updateQuery,
-                  [name, dakhela, className, utils.getClassShort(className), card_no, year, status || 1, sound1 || null, device_index || null, card_owner || null, options || null, note || null, profile_image || null, existingRow.id],
+                  [name, dakhela, className, utils.getClassShort(className), card_no, year, status || 1, sound1 || null, device_index || null, card_owner || null, options || null, note || null, profile_image || null, phone_number || null, existingRow.id],
                   (err) => {
                     if (err) {
                       console.error(`Error updating data for dakhela: ${dakhela}, class: ${className}, year: ${year}:`, err);
@@ -559,7 +570,7 @@ class Students {
                 // Insert a new row
                 this.db.run(
                   insertQuery,
-                  [name, dakhela, className, utils.getClassShort(className), card_no, year, status || 1, sound1 || null, device_index || null, card_owner || null, options || null, note || null, profile_image || null],
+                  [name, dakhela, className, utils.getClassShort(className), card_no, year, status || 1, sound1 || null, device_index || null, card_owner || null, options || null, note || null, profile_image || null, phone_number || null],
                   (err) => {
                     if (err) {
                       console.error("Error inserting data:", err);
@@ -867,9 +878,9 @@ class Students {
   }
 
   addStudent(req, res) {
-    const { class: className, name, dakhela, year, card_no, card_owner, note, profile_image: profile_image_input } = req.body;
+    const { class: className, name, dakhela, year, card_no, card_owner, note, phone_number, profile_image: profile_image_input } = req.body;
     const profile_image = req.file ? `/media/${req.file.filename}` : profile_image_input;
-  
+
     const class_short = utils.getClassShort(className);
   
     if (!className || !name || !class_short || !dakhela) {
@@ -880,11 +891,11 @@ class Students {
     const tableName = this.tableName;
   
     const query = `
-      INSERT INTO ${tableName} (class, name, class_short, dakhela, year, card_no, card_owner, note, profile_image)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO ${tableName} (class, name, class_short, dakhela, year, card_no, card_owner, note, profile_image, phone_number)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
-  
-    const params = [className, name, class_short, dakhela, year || null, card_no, card_owner, note, profile_image || null];
+
+    const params = [className, name, class_short, dakhela, year || null, card_no, card_owner, note, profile_image || null, phone_number || null];
   
     const db = this.db; // Capture `this.db` reference
   
@@ -1006,7 +1017,7 @@ class Students {
 
   updateStudent(req, res) {
 
-    const { id, class: className, name, dakhela, year, card_no, card_owner, note, profile_image: profile_image_input } = req.body;
+    const { id, class: className, name, dakhela, year, card_no, card_owner, note, phone_number, profile_image: profile_image_input } = req.body;
     const profile_image = req.file ? `/media/${req.file.filename}` : profile_image_input;
   
     if (!id) {
@@ -1025,11 +1036,11 @@ class Students {
   
     const query = `
       UPDATE ${tableName}
-      SET class = ?, name = ?, class_short = ?, dakhela = ?, year = ?, card_no = ?, card_owner = ?, note = ?, profile_image = ?
+      SET class = ?, name = ?, class_short = ?, dakhela = ?, year = ?, card_no = ?, card_owner = ?, note = ?, profile_image = ?, phone_number = ?
       WHERE id = ?
     `;
 
-    const params = [className, name, class_short, dakhela, year || null, card_no, card_owner, note, profile_image || null, id];
+    const params = [className, name, class_short, dakhela, year || null, card_no, card_owner, note, profile_image || null, phone_number || null, id];
     const db = this.db; // Capture `this.db` reference
   
     db.run(query, params, function (err) {

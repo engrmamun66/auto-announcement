@@ -385,6 +385,8 @@ module.exports = {
     'Image URL or path': 'ইমেজ URL বা পাথ',
     'Choose Image': 'ছবি নির্বাচন করুন',
     'Note': 'নোট',
+    'Phone Number': 'ফোন নম্বর',
+    'Invalid phone number': 'ফোন নম্বর সঠিক নয় (01 দিয়ে শুরু, ১১ সংখ্যা হতে হবে)',
     'No log found': 'কোনো লগ পাওয়া যায়নি',
     'Sound': 'সাউন্ড',
     'Double Click': 'ডাবল ক্লিক',

@@ -385,6 +385,8 @@ module.exports = {
     'Image URL or path': 'Image URL or path',
     'Choose Image': 'Choose Image',
     'Note': 'Note',
+    'Phone Number': 'Phone Number',
+    'Invalid phone number': 'Invalid phone number (must start with 01, 11 digits)',
     'No log found': 'No log found',
     'Sound': 'Sound',
     'Double Click': 'Double Click',
