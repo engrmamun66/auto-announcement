@@ -410,6 +410,7 @@ function scheduleUiLocalization(delay = 0) {
         localizeAppDom()
     }, delay)
 }
+provide('scheduleUiLocalization', scheduleUiLocalization)
 
 watch(
     () => [langCode.value, CONFIG.value?.lang_pack, CONFIG.value?.lang_packs],

@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, inject, ref, reactive, watch, provide, onBeforeUnmount } from 'vue';
+import { onMounted, inject, ref, reactive, watch, provide, onBeforeUnmount, watchEffect } from 'vue';
 import moment from 'moment/moment'
 import { useRouter, useRoute } from 'vue-router';
 import Note from '../components/note.vue'
@@ -39,6 +39,7 @@ const callbacks = inject('callbacks');
 const all_students = inject('all_students', [])
 const all_students_non_copied = inject('all_students_non_copied', [])
 const getAllStudents = inject('getAllStudents', () => {})
+const scheduleUiLocalization = inject('scheduleUiLocalization', () => {})
 
 let students = ref([])
 let studentLogs = ref([])
@@ -799,7 +800,7 @@ watch(fixedWidthSoundCol, (newVal) => {
           <div class="col-md-3 col-12">
             <div class="form-group">
               <label for="email">Class</label>
-              <select v-model="params.class_name" @change="getStudents" class="form-control cb-input" id="ClassId">
+              <select data-no-auto-i18n="true" v-model="params.class_name" @change="getStudents" class="form-control cb-input" id="ClassId">
                 <option :value="null">-class-</option>
                 <template v-for="(cls, index) in classes" :key="index">
                   <option :value="cls.class_name">{{cls.class_name}}</option>
@@ -908,7 +909,7 @@ watch(fixedWidthSoundCol, (newVal) => {
       <template #rows>
         <template v-if="students?.length">
           <template v-for="(std, i) in students.toReversed()">
-            <tr @auxclick="log(std)">
+            <tr @auxclick="log(std)" :style="!std.status ? 'opacity: 0.4' : ''"  >
               <td class="text-left" data-no-auto-i18n="true" @click.stop="log(std)"> {{ std.class }} </td> 
               <td class="text-left cp" @click.stop="prepareToEdit(std)" :student-id="std.id" >{{ std.name.split('||')?.[0] }}</td>
               <td>
