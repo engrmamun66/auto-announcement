@@ -16,7 +16,7 @@
         </div>
 
         <!-- Active tab content -->
-        <div v-if="activeKey" class="cs__panel-wrap">
+        <div v-if="activeKey" class="cs__panel-wrap" data-no-auto-i18n="true">
           <div class="cs__panel">
             <FormNode :obj="drafts" :propKey="activeKey" :depth="0" />
           </div>
