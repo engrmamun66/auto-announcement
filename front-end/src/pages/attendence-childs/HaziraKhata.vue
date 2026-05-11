@@ -294,7 +294,7 @@ watch(
     </div> 
 
     <div class="legend-bar">
-      <div class="legend-row bg-dark-subtle p-2 radius-10">
+      <div class="legend-row bg-dark-subtle p-2 radius-10" data-no-auto-i18n="true">
         <div v-for="item in legendItems" :key="item.code" class="legend-item">
           <span class="legend-badge" :class="item.class">{{ item.code }}</span>
           <span>{{ item.label }}</span>
@@ -320,7 +320,7 @@ watch(
       <div class="daily-grid" :style="{ '--day-count': dayColumns.length }">
         <div class="daily-grid-row daily-grid-header">
           <div class="daily-grid-cell sticky-col sticky-head">Students Name</div>
-          <div v-for="day in dayColumns" :key="day.date" class="daily-grid-cell day-header" :title="day.dayName">
+          <div v-for="day in dayColumns" :key="day.date" class="daily-grid-cell day-header" :title="day.dayName" data-no-auto-i18n="true">
             {{ day.label }}
           </div>
         </div>
