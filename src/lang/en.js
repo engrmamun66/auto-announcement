@@ -400,6 +400,12 @@ module.exports = {
     '{text} (use Enter & Arrow to select)': '{text} (use Enter & Arrow to select)',
     'Add New "{name}"': 'Add New "{name}"',
     'Are you sure to create "{name}"?': 'Are you sure to create "{name}"?',
+    'Name': 'Name',
+    'Image': 'Image',
+    'Owner': 'Owner',
+    'Dakhela': 'Dakhela',
+    'Year': 'Year',
+    'Class': 'Class',
   },
   attendance: {
     vacation_types: [

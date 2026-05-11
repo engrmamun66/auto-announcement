@@ -307,6 +307,7 @@ onMounted(()=>{
 
 .topnav__logo{
   width: 200px;
+  border: 6px;
 }
 
 .topnav__toggle{

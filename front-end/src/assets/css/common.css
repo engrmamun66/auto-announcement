@@ -8,6 +8,7 @@ body {
   background: -webkit-var(--grad1);
   filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#DDB4F6", endColorstr="#8DD0FC", GradientType=1 );
   padding-bottom: 40px;
+  overflow-x: hidden;
 }
 body[warning="false"][forbidden="true"] {
   background: var(--primaryColor);
@@ -49,6 +50,12 @@ body:not([forbidden]):not(.user-interacted)::after {
   background-position: 60% -30%;
   background-size: cover;
   background-repeat: repeat-y;
+}
+
+@media screen and (max-width: 500px) {
+  .page-contents {
+    padding: 10px;
+  }
 }
 
 .bg1 {

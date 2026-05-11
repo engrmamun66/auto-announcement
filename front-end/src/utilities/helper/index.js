@@ -136,6 +136,9 @@ const helper = {
             if (parent.closest?.('[data-no-auto-i18n="true"]')) {
               return NodeFilter.FILTER_REJECT
             }
+            if (parent.closest?.('.em-picker, .em-date')) {
+              return NodeFilter.FILTER_REJECT
+            }
             return NodeFilter.FILTER_ACCEPT
           },
         }

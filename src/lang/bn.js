@@ -400,6 +400,12 @@ module.exports = {
     '{text} (use Enter & Arrow to select)': '{text} (নির্বাচনে Enter ও Arrow ব্যবহার করুন)',
     'Add New "{name}"': 'নতুন যোগ করুন "{name}"',
     'Are you sure to create "{name}"?': 'আপনি কি "{name}" তৈরি করতে চান?',
+    'Name': 'নাম',
+    'Image': 'ছবি',
+    'Owner': 'মালিক',
+    'Dakhela': 'দাখেলা',
+    'Year': 'বছর',
+    'Class': 'শ্রেণী',
   },
   attendance: {
     vacation_types: [

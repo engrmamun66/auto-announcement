@@ -606,7 +606,7 @@ watch(fixedWidthSoundCol, (newVal) => {
             <i class="bx bx-link" style="pointer-events: none;"></i>
           </button>
         </div>
-        <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
+        <template v-if="!only_attendance_feature">
           <div v-if="appAccessData?.recorder_web_url" class="btn-group me-2" style="display:inline-flex;align-items:stretch;">
             <a v-if="isIPAccess" :href="appAccessData.recorder_web_url + `?code=${CONFIG?.env?.CODE_NUMBER}`" target="_blank" class="btn" style="background:#00796B;color:#fff;">
               <i class='bx bx-microphone'></i> Recorder
@@ -627,7 +627,7 @@ watch(fixedWidthSoundCol, (newVal) => {
            <!-- <span>{{ params?.total || '0' }}</span> -->
         </Btn>
         <Btn v-if="!addMode" class="me-2" @click="addMode = !addMode;editModeTabIndex=1;clearParams();payload.id = null" ><i class='bx bx-plus'></i> Add New</Btn>
-        <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
+        <template v-if="!only_attendance_feature">
           <Btn @click.stop="bulkPunch()" style="background: #673AB7;" :disabled="!PunchButtonsRef?.length">Bulk Punch ({{ PunchButtonsRef?.length || 0 }})</Btn>
         </template>
       </div>
@@ -836,16 +836,18 @@ watch(fixedWidthSoundCol, (newVal) => {
               <input v-model="params.name" type="text" class="form-control cb-input" @keyup.enter="getStudents">
             </div>
           </div>
-          <div class="col-md-3 col-12">
-            <div class="form-group">
-              <label for="email">Sound</label>
-              <select v-model="params.sound1" @change="getStudents" class="form-control cb-input">
-                <option :value="null">-All-</option>
-                <option value="no_sound">No</option> 
-                <option value="has_sound">Yes</option> 
-              </select>
+          <template v-if="!only_attendance_feature">
+            <div class="col-md-3 col-12">
+              <div class="form-group">
+                <label for="email">Sound</label>
+                <select v-model="params.sound1" @change="getStudents" class="form-control cb-input">
+                  <option :value="null">-All-</option>
+                  <option value="no_sound">No</option> 
+                  <option value="has_sound">Yes</option> 
+                </select>
+              </div>
             </div>
-          </div>
+          </template>
           <div class="col-md-12 mt-4 mt-md-2">
             <div class="form-group mt-md-3"> 
                 <div class="d-flex justify-content-between w-100">
@@ -888,13 +890,15 @@ watch(fixedWidthSoundCol, (newVal) => {
             <!-- <th>Card</th> -->
             <th>{{ CONFIG?.studentTableColumns?.dakhela || 'Dakhela' }}</th>
             <th>{{ CONFIG?.studentTableColumns?.year || 'Year' }}</th>
-            <th @dblclick="fixedWidthSoundCol = !fixedWidthSoundCol" :style="fixedWidthSoundCol ? 'width: 300px;' : ''" tooltip="Double Click" flow="down">
-              {{ CONFIG?.studentTableColumns?.sound || 'Sound' }} 
-              <template v-if="fixedWidthSoundCol">
-                <i class='bx bx-arrow-from-right transformY-3px' ></i>
-                <i class='bx bx-arrow-from-left transformY-3px' ></i>
-              </template>
-            </th>
+            <template v-if="!only_attendance_feature">
+              <th @dblclick="fixedWidthSoundCol = !fixedWidthSoundCol" :style="fixedWidthSoundCol ? 'width: 300px;' : ''" tooltip="Double Click" flow="down">
+                {{ CONFIG?.studentTableColumns?.sound || 'Sound' }} 
+                <template v-if="fixedWidthSoundCol">
+                  <i class='bx bx-arrow-from-right transformY-3px' ></i>
+                  <i class='bx bx-arrow-from-left transformY-3px' ></i>
+                </template>
+              </th>
+            </template>
             <!-- <th>Sound-2</th> -->
             <th>{{ CONFIG?.studentTableColumns?.status || 'Status' }}</th>
             <th>{{ CONFIG?.studentTableColumns?.punch || 'Punch' }}</th>
@@ -940,42 +944,44 @@ watch(fixedWidthSoundCol, (newVal) => {
               </td> 
               
               <td> {{ std.year }} </td> 
-              <template v-for="column in ['sound1']">
-                <td> 
-                  <!-- Sound -->
-                  <template v-if="std[column]">            
-                    <template v-if="!std[`isPlaying_${column}`]">            
-                      <div class="d-flex align-items-center">
-                        <Btn  @click.stop="playThis(i, `isPlaying_${column}`, std); " class="radius-10 sm sound w-100" style="padding: 2px auto;" >
-                          <i class='bx bx-play size-1 transformY-3px'></i>&nbsp;Play
-                        </Btn>
-                        <!-- <span v-if="std.name.indexOf('||dakhela') > -1 === false" class="ms-2 me-1 cp" @click.stop="deleteAudio(std, column)" > -->
-                        <span class="ms-2 me-1 cp" @click.stop="deleteAudio(std, column)" >
-                          <i class='bx bxs-trash-alt text-danger size-1' ></i>
-                        </span>
-                      </div> 
-                    </template>
+              <template v-if="!only_attendance_feature">
+                <template v-for="column in ['sound1']">
+                  <td> 
+                    <!-- Sound -->
+                    <template v-if="std[column]">            
+                      <template v-if="!std[`isPlaying_${column}`]">            
+                        <div class="d-flex align-items-center">
+                          <Btn  @click.stop="playThis(i, `isPlaying_${column}`, std); " class="radius-10 sm sound w-100" style="padding: 2px auto;" >
+                            <i class='bx bx-play size-1 transformY-3px'></i>&nbsp;Play
+                          </Btn>
+                          <!-- <span v-if="std.name.indexOf('||dakhela') > -1 === false" class="ms-2 me-1 cp" @click.stop="deleteAudio(std, column)" > -->
+                          <span class="ms-2 me-1 cp" @click.stop="deleteAudio(std, column)" >
+                            <i class='bx bxs-trash-alt text-danger size-1' ></i>
+                          </span>
+                        </div> 
+                      </template>
+                      <template v-else>
+                        <Player  :src="std[column]" @close="std[`isPlaying_${column}`] = false" :fire-end-event="true" @ended="std[`isPlaying_${column}`] = false"></Player>
+                      </template>
+                    </template>  
                     <template v-else>
-                      <Player  :src="std[column]" @close="std[`isPlaying_${column}`] = false" :fire-end-event="true" @ended="std[`isPlaying_${column}`] = false"></Player>
-                    </template>
-                  </template>  
-                  <template v-else>
-
-                    <div class="d-flex align-items-center">
-                      <AudioUpload :student="std" :column="column" @change="({audio_path, audio_url})=>{
-                        std[column] = audio_url
-                      }" ></AudioUpload>
-                      <span tooltip="Rcord Sound" @click="targetStd=std;columnName=column">
-                        <i class='bx bxs-microphone p-1 ms-1 cp' ></i>
-                      </span>
-                      <!-- Here -->
-                      <span v-if="appAccessData?.recorder_web_url" tooltip="Paste recorded URL" @click.stop="linkPopup={std,column};linkPopupUrl=''">
-                        <i class='bx bx-link p-1 ms-1 cp'></i>
-                      </span>
-                    </div>
-
-                  </template>  
-                </td> 
+  
+                      <div class="d-flex align-items-center">
+                        <AudioUpload :student="std" :column="column" @change="({audio_path, audio_url})=>{
+                          std[column] = audio_url
+                        }" ></AudioUpload>
+                        <span tooltip="Rcord Sound" @click="targetStd=std;columnName=column">
+                          <i class='bx bxs-microphone p-1 ms-1 cp' ></i>
+                        </span>
+                        <!-- Here -->
+                        <span v-if="appAccessData?.recorder_web_url" tooltip="Paste recorded URL" @click.stop="linkPopup={std,column};linkPopupUrl=''">
+                          <i class='bx bx-link p-1 ms-1 cp'></i>
+                        </span>
+                      </div>
+  
+                    </template>  
+                  </td> 
+                </template>
               </template>
               <td> <Switch size="sm" v-model="std.status" @change="async (status) => {
                 await http.post('/students/update-status', {id: std.id, status} );

@@ -246,19 +246,24 @@ onMounted(()=>{
     <div id="REPORTING_TAB_AREA" class="d-flex justify-content-between align-items-start">
       <ul class="nav nav-tabs mt-0 mb-3 bottom-borderless">
          <li class="nav-item">
-           <a @click.stop="tab = 1" @auxclick.stop="clearAllAndRelaod()" class="nav-link cp text-black" :class="{'active': tab == 1}" ><i class='bx bx-time-five transformY-2px' ></i>Realtime</a>
+           <a @click.stop="tab = 1" @auxclick.stop="clearAllAndRelaod()" class="nav-link cp text-black" :class="{'active': tab == 1}">
+             <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3" fill="currentColor" stroke="none"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/></svg>Realtime</a>
          </li>
          <li class="nav-item">
-           <a @click.stop="tab = 5" class="nav-link cp text-black" :class="{'active': tab == 5}" ><i class='bx bx-timer transformY-2px'></i>Hazira</a>
-         </li>   
+           <a @click.stop="tab = 5" class="nav-link cp text-black" :class="{'active': tab == 5}">
+             <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><polyline points="9 16 11 18 15 14"/></svg>Hazira</a>
+         </li>
          <li class="nav-item">
-           <a @click.stop="tab = 3" class="nav-link cp text-black" :class="{'active': tab == 3}" ><i class='bx bx-run transformY-2px' ></i>Leaves</a>
-          </li>   
-          <li class="nav-item">
-            <a @click.stop="tab = 4" class="nav-link cp text-black" :class="{'active': tab == 4}" ><i class='bx bx-timer transformY-2px'></i>Reporting</a>
-          </li>   
-          <li class="nav-item">
-           <a @click.stop="tab = 2" class="nav-link cp text-black" :class="{'active': tab == 2}" ><i class='bx bx-history transformY-2px' ></i>Logs</a>
+           <a @click.stop="tab = 3" class="nav-link cp text-black" :class="{'active': tab == 3}">
+             <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><circle cx="12" cy="7" r="3"/><path d="M5 21v-2a7 7 0 0 1 14 0v2"/><line x1="17" y1="11" x2="22" y2="11"/><line x1="19" y1="9" x2="19" y2="13"/></svg>Leaves</a>
+         </li>
+         <li class="nav-item">
+           <a @click.stop="tab = 4" class="nav-link cp text-black" :class="{'active': tab == 4}">
+             <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Reporting</a>
+         </li>
+         <li class="nav-item">
+           <a @click.stop="tab = 2" class="nav-link cp text-black" :class="{'active': tab == 2}">
+             <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/><line x1="12" y1="8" x2="12" y2="12"/><polyline points="12 12 15 14"/></svg>Logs</a>
          </li>   
       </ul>
 
@@ -276,7 +281,7 @@ onMounted(()=>{
           </div>
         </div>   
       <div v-else-if="tab == 2">
-          <div class="d-flex justify-content-center align-items-center gap-2">
+        <div class="d-flex flex-wrap justify-content-center align-items-center gap-2">
             
           <div class="d-flex"  >
             <Pagination v-if="attendenceParams?.totalPages > 1" v-model="attendenceParams" @jumpToPage="(page_no) => {
@@ -372,7 +377,31 @@ onMounted(()=>{
 
 
 <style scoped>
- 
+#REPORTING_TAB_AREA {
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
 
- 
+#REPORTING_TAB_AREA > ul.nav-tabs {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  width: 100%;
+}
+
+#REPORTING_TAB_AREA > ul.nav-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+#REPORTING_TAB_AREA > ul.nav-tabs .nav-link {
+  white-space: nowrap;
+}
+
+@media (min-width: 768px) {
+  #REPORTING_TAB_AREA > ul.nav-tabs {
+    width: auto;
+    overflow-x: visible;
+  }
+}
 </style>
