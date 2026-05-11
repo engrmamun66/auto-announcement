@@ -408,6 +408,8 @@ module.exports = {
     'Class': 'Class',
     'Submit': 'Submit',
     'Just-Out': 'Just-Out',
+    'In': 'In',
+    'Out': 'Out',
   },
   attendance: {
     vacation_types: [

@@ -408,6 +408,8 @@ module.exports = {
     'Class': 'শ্রেণী',
     'Submit': 'সাবমিট',
     'Just-Out': 'বেরিয়েছে',
+    'In': 'আসা',
+    'Out': 'যাওয়া',
   },
   attendance: {
     vacation_types: [
