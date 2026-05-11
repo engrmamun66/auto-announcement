@@ -22,9 +22,34 @@ const http = Axios.create({
         'content-type': 'application/json'
     }
 });
+
+function normalizeBanglaDigits(value) {
+    return String(value).replace(/[০-৯]/g, (digit) => {
+        return String('০১২৩৪৫৬৭৮৯'.indexOf(digit))
+    })
+}
+
+function normalizeQueryParams(value) {
+    if (Array.isArray(value)) {
+        return value.map(normalizeQueryParams)
+    }
+    if (value && typeof value === 'object' && Object.getPrototypeOf(value) === Object.prototype) {
+        return Object.fromEntries(
+            Object.entries(value).map(([key, innerValue]) => [key, normalizeQueryParams(innerValue)])
+        )
+    }
+    if (typeof value === 'string') {
+        return normalizeBanglaDigits(value)
+    }
+    return value
+}
+
 http.interceptors.request.use((config) => {
     if(config.formData === true){
         config.headers = { ...config.headers, ...{ "Content-Type": "multipart/form-data" }}
+    }
+    if (config.params) {
+        config.params = normalizeQueryParams(config.params)
     }
     return config
 });

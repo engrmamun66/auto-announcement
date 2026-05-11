@@ -37,12 +37,27 @@ function getLocalizedTitle(title, langCode = 'en') {
   return title || '';
 }
 
-function enrichLocalizedTypes(items = [], langCode = 'en') {
+function getTypeTitleKey(item = {}) {
+  if (item?.title_key) return item.title_key;
+  return getCanonicalTitle(item?.title);
+}
+
+function getTypeTitleLabel(item = {}, langCode = 'en') {
+  if (item?.title_label) return item.title_label;
+  return getLocalizedTitle(item?.title, langCode);
+}
+
+function normalizeLocalizedTypes(items = [], langCode = 'en') {
   return (Array.isArray(items) ? items : []).map((item) => ({
     ...item,
-    title_key: getCanonicalTitle(item?.title),
-    title_label: getLocalizedTitle(item?.title, langCode),
+    title_key: getTypeTitleKey(item),
+    title_label: getTypeTitleLabel(item, langCode),
   }));
+}
+
+function getAttendanceLangConfig(langCode = 'en') {
+  const langSource = langCode === 'bn' ? bnLang : enLang;
+  return cloneData(langSource?.attendance || {});
 }
 
 module.exports = function (config, utils, Backup) {
@@ -62,13 +77,17 @@ module.exports = function (config, utils, Backup) {
     config.settings.with_speaker_controls.switch_mode = track?.switch_mode || 'auto';
     const runtimeConfig = cloneData(config);
     const lang_code = getLanguageCode(runtimeConfig);
+    const attendanceLangConfig = getAttendanceLangConfig(lang_code);
 
-    runtimeConfig.settings.attendance.vacation_types = enrichLocalizedTypes(
-      runtimeConfig?.settings?.attendance?.vacation_types,
+    runtimeConfig.settings = runtimeConfig.settings || {};
+    runtimeConfig.settings.attendance = runtimeConfig.settings.attendance || {};
+
+    runtimeConfig.settings.attendance.vacation_types = normalizeLocalizedTypes(
+      attendanceLangConfig?.vacation_types || runtimeConfig?.settings?.attendance?.vacation_types,
       lang_code
     );
-    runtimeConfig.settings.attendance.stuents_leave_types = enrichLocalizedTypes(
-      runtimeConfig?.settings?.attendance?.stuents_leave_types,
+    runtimeConfig.settings.attendance.stuents_leave_types = normalizeLocalizedTypes(
+      attendanceLangConfig?.stuents_leave_types || runtimeConfig?.settings?.attendance?.stuents_leave_types,
       lang_code
     );
 
