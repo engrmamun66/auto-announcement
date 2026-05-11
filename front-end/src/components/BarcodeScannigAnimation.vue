@@ -1,31 +1,3 @@
-<script setup>
-import { inject } from  'vue'
-
-defineProps({
-    scannig: {
-        default: true,
-        required: false,
-    }
-})
-
-let emergency_mode = inject('emergency_mode')
-let isIPAccess = inject('isIPAccess')
-let sendRemoteAction = inject('sendRemoteAction')
-
-function toggle(){
-  emergency_mode.value = !emergency_mode.value
-
-  if(isIPAccess){
-    sendRemoteAction({
-      from: 'ip',
-      action: 'toogle_emergency_mode',
-      data: emergency_mode.value,
-    })
-  }
-}
-
-</script>
-
 <template>
   <div @dblclick="toggle" v-bind="$attrs" class="preloader-scan cp">
     <ul>
@@ -59,6 +31,38 @@ function toggle(){
     </div>
   </div>
 </template>
+
+
+
+<script setup>
+import { inject } from  'vue'
+
+defineProps({
+    scannig: {
+        default: true,
+        required: false,
+    }
+})
+
+let emergency_mode = inject('emergency_mode')
+let isIPAccess = inject('isIPAccess')
+let sendRemoteAction = inject('sendRemoteAction')
+
+function toggle(){
+  emergency_mode.value = !emergency_mode.value
+
+  if(isIPAccess){
+    sendRemoteAction({
+      from: 'ip',
+      action: 'toogle_emergency_mode',
+      data: emergency_mode.value,
+    })
+  }
+}
+
+</script>
+
+
 
 <style scoped>
 .preloader-scan {
