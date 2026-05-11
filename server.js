@@ -63,7 +63,7 @@ const utils = require('./src/utls');
 const socket = require('./socket/socket');
 const DB = new classDB()
 const { getSettings } = require('./src/settings');
-const DB_CONFIG_KEYS = ['settings','classes','logo','css_vars','date_range_list','studentTableColumns','card_owners','card_not_set_message'];
+const DB_CONFIG_KEYS = Object.keys(config).filter(k => k !== 'env');
 getSettings(DB.db).then(dbSettings => {
     DB_CONFIG_KEYS.forEach(k => { if (dbSettings[k] !== undefined) global.config[k] = dbSettings[k]; });
 }).catch(() => {});

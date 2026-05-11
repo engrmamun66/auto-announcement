@@ -6,7 +6,12 @@ module.exports = (db) => {
 
     router.get('/settings', async (req, res) => {
         try {
-            res.json(await getSettings(db));
+            const data = await getSettings(db);
+            const order = Object.keys(global.config || {}).filter(k => k !== 'env');
+            const ordered = {};
+            order.forEach(k => { if (k in data) ordered[k] = data[k]; });
+            Object.keys(data).forEach(k => { if (!(k in ordered)) ordered[k] = data[k]; });
+            res.json(ordered);
         } catch(e) {
             res.status(500).json({ error: e.message });
         }
@@ -15,8 +20,8 @@ module.exports = (db) => {
     router.post('/settings/reset', async (req, res) => {
         try {
             await resetAllSettings(db);
-            const DB_KEYS = ['settings','classes','logo','css_vars','date_range_list','studentTableColumns','card_owners','card_not_set_message'];
             const cfg = require('./../../config.example');
+            const DB_KEYS = Object.keys(cfg).filter(k => k !== 'env');
             DB_KEYS.forEach(k => { if (global.config) global.config[k] = cfg[k]; });
             res.json({ success: true });
         } catch(e) {

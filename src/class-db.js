@@ -39,16 +39,7 @@ class myDB {
         if (fs.existsSync(configPath)) {
           cfg = Object.assign({}, cfg, require(configPath));
         }
-        const keys = [
-            ['settings',           cfg.settings],
-            ['classes',            cfg.classes],
-            ['logo',               cfg.logo],
-            ['css_vars',           cfg.css_vars],
-            ['date_range_list',    cfg.date_range_list],
-            ['studentTableColumns',cfg.studentTableColumns],
-            ['card_owners',        cfg.card_owners],
-            ['card_not_set_message', cfg.card_not_set_message],
-        ];
+        const keys = Object.keys(cfg).filter(k => k !== 'env').map(k => [k, cfg[k]]);
         this.db.serialize(() => {
             // Seed default values from config.example.js — skips if key already exists in DB
             keys.forEach(([key, value]) => {
