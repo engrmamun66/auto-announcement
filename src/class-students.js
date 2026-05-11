@@ -333,6 +333,10 @@ class Students {
       const data = (students || []).map((student) => {
         student.sound1 = student.sound1 ? utils.audioFullUrl(req, student.sound1) : null
         student.profile_image = normalizeProfileImage(req, student.profile_image)
+        const correctShort = utils.getClassShort(student.class)
+        if (correctShort && correctShort !== '<>' && student.class_short !== correctShort) {
+          student.class_short = correctShort
+        }
         return student
       })
       res.send(data);
