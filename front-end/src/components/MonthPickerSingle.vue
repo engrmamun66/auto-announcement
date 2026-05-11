@@ -4,7 +4,7 @@
       <button class="month-nav" type="button" @click.stop="shiftMonth(-1)">
         <i class='bx bx-chevron-left'></i>
       </button>
-      <div class="month-label">{{ monthLabel }}</div>
+      <div class="month-label" data-no-auto-i18n="true">{{ monthLabel }}</div>
       <button class="month-nav" type="button" @click.stop="shiftMonth(1)" :disabled="isFutureDisabled">
         <i class='bx bx-chevron-right'></i>
       </button>
