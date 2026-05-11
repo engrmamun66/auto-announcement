@@ -20,7 +20,6 @@ const SHIFTS = {
 // ╔══════════════════════════════════════════════════════════════╗
 // ║  NOT saved to DB  →  env{}                                   ║
 // ║  Saved to DB      →  settings, classes, logo, css_vars,      ║
-// ║                       date_range_list, studentTableColumns,  ║
 // ║                       card_owners, card_not_set_message      ║
 // ║  DB keys are editable from Settings panel in the UI.         ║
 // ╚══════════════════════════════════════════════════════════════╝
@@ -297,17 +296,6 @@ module.exports = {
                shifts: [ SHIFTS?.first, SHIFTS?.second ],
           },
      ],
-     studentTableColumns: {
-          class: 'Class',
-          name: 'Name',
-          dakhela: 'Dakhela',
-          year: 'Year',
-          sound: 'Sound',
-          status: 'Status',
-          punch: 'Punch',
-          card_owner: 'Owner',
-          note: 'Note',
-     },
      card_not_set_message: 'Unknown',
      card_owners: [
           {

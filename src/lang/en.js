@@ -386,6 +386,7 @@ module.exports = {
     'Choose Image': 'Choose Image',
     'Note': 'Note',
     'Phone Number': 'Phone Number',
+    'Phone Number(11 Digit': 'Phone Number(11 Digit)',
     'Invalid phone number': 'Invalid phone number (must start with 01, 11 digits)',
     'No log found': 'No log found',
     'Sound': 'Sound',
@@ -423,6 +424,8 @@ module.exports = {
     'Just-Out': 'Just-Out',
     'In': 'In',
     'Out': 'Out',
+    'Phone': 'Phone',
+    'Card': 'Card',
   },
   attendance: {
     vacation_types: [

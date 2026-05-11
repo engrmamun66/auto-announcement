@@ -30,7 +30,6 @@ function resetAllSettings(db) {
         ['logo',                cfg.logo],
         ['css_vars',            cfg.css_vars],
         ['date_range_list',     cfg.date_range_list],
-        ['studentTableColumns', cfg.studentTableColumns],
         ['card_owners',         cfg.card_owners],
         ['card_not_set_message',cfg.card_not_set_message],
     ];

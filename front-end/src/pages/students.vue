@@ -609,7 +609,7 @@ watch(fixedWidthSoundCol, (newVal) => {
             <i class="bx bx-link" style="pointer-events: none;"></i>
           </button>
         </div>
-        <template v-if="!CONFIG.value?.settings?.attendance?.only_attendance_feature">
+        <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
           <div v-if="appAccessData?.recorder_web_url" class="btn-group me-2" style="display:inline-flex;align-items:stretch;">
             <a v-if="isIPAccess" :href="appAccessData.recorder_web_url + `?code=${CONFIG?.env?.CODE_NUMBER}`" target="_blank" class="btn" style="background:#00796B;color:#fff;">
               <i class='bx bx-microphone'></i> Recorder
@@ -630,7 +630,7 @@ watch(fixedWidthSoundCol, (newVal) => {
            <!-- <span>{{ params?.total || '0' }}</span> -->
         </Btn>
         <Btn v-if="!addMode" class="me-2" @click="addMode = !addMode;editModeTabIndex=1;clearParams();payload.id = null" ><i class='bx bx-plus'></i> Add New</Btn>
-        <template v-if="!CONFIG.value?.settings?.attendance?.only_attendance_feature && PunchButtonsRef?.length">
+        <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature && PunchButtonsRef?.length">
           <Btn @click.stop="bulkPunch()" style="background: #673AB7;" :disabled="!PunchButtonsRef?.length">Bulk Punch ({{ PunchButtonsRef?.length || 0 }})</Btn>
         </template>
       </div>
@@ -661,7 +661,7 @@ watch(fixedWidthSoundCol, (newVal) => {
                   <!-- Class + Year -->
                   <div class="col-8">
                     <div class="form-group">
-                      <label>Class</label>
+                      <label>Class <sup>*</sup></label>
                       <select v-model="payload.class" class="form-control cb-input cb-input--sm" id="ClassId" :disabled="payload?.id && payload.name && payload.name.indexOf('||dakhela') > -1">
                         <option :value="null">-class-</option>
                         <template v-for="(cls, index) in classes" :key="index">
@@ -672,7 +672,7 @@ watch(fixedWidthSoundCol, (newVal) => {
                   </div>
                   <div class="col-4">
                     <div class="form-group">
-                      <label>Year</label>
+                      <label>Year <sup>*</sup></label>
                       <select v-model="payload.year" class="form-control cb-input cb-input--sm" :disabled="payload?.id && payload.name && payload.name.indexOf('||dakhela') > -1">
                         <option :value="new Date().getFullYear()">{{ new Date().getFullYear() }}</option>
                         <option :value="new Date().getFullYear() - 1">{{ new Date().getFullYear() - 1 }}</option>
@@ -685,7 +685,7 @@ watch(fixedWidthSoundCol, (newVal) => {
                   <!-- Name -->
                   <div class="col-12">
                     <div class="form-group">
-                      <label>Name</label>
+                      <label>Name <sup>*</sup></label>
                       <input v-model="payload.name" type="text" class="form-control cb-input cb-input--sm" :disabled="payload?.id && payload.name && payload.name.indexOf('||dakhela') > -1">
                     </div>
                   </div>
@@ -693,24 +693,29 @@ watch(fixedWidthSoundCol, (newVal) => {
                   <!-- Dakhela + Phone -->
                   <div class="col-5">
                     <div class="form-group">
-                      <label>Dakhela</label>
+                      <label>Dakhela <sup>*</sup></label>
                       <input v-model="payload.dakhela" type="number" class="form-control cb-input cb-input--sm" :disabled="payload?.id && payload.name && payload.name.indexOf('||dakhela') > -1">
                     </div>
                   </div>
                   <div class="col-7">
                     <div class="form-group">
-                      <label>Phone Number</label>
-                      <input v-model="payload.phone_number" type="text" class="form-control cb-input cb-input--sm">
+                      <label>Phone Number(11 Digit) <sup>*</sup></label>
+                      <div class="position-relative">
+                        <input v-model="payload.phone_number" type="text" class="form-control cb-input cb-input--sm" style="padding-right: 28px;">
+                        <span class="phone-valid-icon" :class="{ 'text-success': /^01\d{9}$/.test(String(payload.phone_number).trim()), 'text-danger': !/^01\d{9}$/.test(String(payload.phone_number).trim()) }">
+                          <i :class="{ 'bx bx-check-circle': /^01\d{9}$/.test(String(payload.phone_number).trim()), 'bx bx-x-circle': !/^01\d{9}$/.test(String(payload.phone_number).trim()) }"></i>
+                        </span>
+                      </div>
                     </div>
                   </div>
 
                   <!-- Note -->
-                  <div class="col-12">
+                  <!-- <div class="col-12">
                     <div class="form-group">
                       <label>Note</label>
                       <input v-model="payload.note" type="text" class="form-control cb-input cb-input--sm">
                     </div>
-                  </div>
+                  </div> -->
 
                   <!-- Profile Image -->
                   <div class="col-12">
@@ -847,7 +852,7 @@ watch(fixedWidthSoundCol, (newVal) => {
               <input v-model="params.name" type="text" class="form-control cb-input" @keyup.enter="getStudents">
             </div>
           </div>
-          <template v-if="!CONFIG.value?.settings?.attendance?.only_attendance_feature">
+          <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
             <div class="col-md-3 col-12">
               <div class="form-group">
                 <label for="email">Sound</label>
@@ -894,26 +899,25 @@ watch(fixedWidthSoundCol, (newVal) => {
       <template #thead>
         <thead>
           <tr>
-            <th>{{ CONFIG?.studentTableColumns?.class || 'Class' }}</th>
-            <th>{{ CONFIG?.studentTableColumns?.name || 'Name' }}</th>
-            <th>{{ CONFIG?.studentTableColumns?.profile_image || 'Image' }}</th>
-            <th>{{ CONFIG?.studentTableColumns?.card_owner || 'Card Owner' }}</th>
-            <!-- <th>Card</th> -->
-            <th>{{ CONFIG?.studentTableColumns?.dakhela || 'Dakhela' }}</th>
-            <th>{{ CONFIG?.studentTableColumns?.year || 'Year' }}</th>
-            <template v-if="!CONFIG.value?.settings?.attendance?.only_attendance_feature">
+            <th>Class</th>
+            <th>Name</th>
+            <th>Image</th>
+            <th>Card Owner</th>
+            <th>Phone</th> 
+            <th>Dakhela</th>
+            <th>Year</th>
+            <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
               <th @dblclick="fixedWidthSoundCol = !fixedWidthSoundCol" :style="fixedWidthSoundCol ? 'width: 300px;' : ''" tooltip="Double Click" flow="down">
-                {{ CONFIG?.studentTableColumns?.sound || 'Sound' }} 
+                Sound 
                 <template v-if="fixedWidthSoundCol">
                   <i class='bx bx-arrow-from-right transformY-3px' ></i>
                   <i class='bx bx-arrow-from-left transformY-3px' ></i>
                 </template>
               </th>
-            </template>
-            <!-- <th>Sound-2</th> -->
-            <th>{{ CONFIG?.studentTableColumns?.status || 'Status' }}</th>
-            <th>{{ CONFIG?.studentTableColumns?.punch || 'Punch' }}</th>
-            <th>{{ CONFIG?.studentTableColumns?.action || 'Action' }}</th> 
+            </template> 
+            <th>Status</th>
+            <th>Punch</th>
+            <th>Action</th> 
           </tr>
         </thead>
       </template>
@@ -930,11 +934,14 @@ watch(fixedWidthSoundCol, (newVal) => {
                 <p class="mb-1">{{ callbacks.getCardOwnerName(std?.card_owner) }}</p>
                 <div class="student-note" tooltip="Note" v-if="std?.note">{{ std?.note }}</div>
               </td> 
+              <td>
+                <span v-if="std.phone_number" class="text-muted small">{{ String(std.phone_number).slice(0,3) + '...' + String(std.phone_number).slice(-3) }}</span>
+              </td>
               <td> 
                 <div class="align-items-center d-flex">
                   <span class="p-1" @dblclick="params.dakhela = std.dakhela">{{ std.dakhela }}</span>
                   <!-- No need multiple card Access If using only for attendance -->
-                  <span id="CLONE___STUDENT" v-if="CONFIG.value?.settings?.attendance?.only_attendance_feature === false" tooltip="Cone Student">
+                  <span id="CLONE___STUDENT" v-if="CONFIG?.settings?.attendance?.only_attendance_feature === false" tooltip="Cone Student">
                     <i v-if="std.name && String(std.name)?.indexOf('||dakhela') > -1 === false" @click.stop="()=>{
                       std.cloneMode = !(!!(std.cloneMode));
                     }" class="bx bxs-copy-alt cp px-1">
@@ -955,7 +962,7 @@ watch(fixedWidthSoundCol, (newVal) => {
               </td> 
               
               <td> {{ std.year }} </td> 
-              <template v-if="!CONFIG.value?.settings?.attendance?.only_attendance_feature">
+              <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
                 <template v-for="column in ['sound1']">
                   <td> 
                     <!-- Sound -->
@@ -1433,6 +1440,7 @@ watch(fixedWidthSoundCol, (newVal) => {
   color: #333;
 }
 .cb-file-btn:hover { background: #e9ecef; }
+.phone-valid-icon { position: absolute; right: 7px; top: 50%; transform: translateY(-50%); font-size: 15px; line-height: 1; pointer-events: none; }
 .action-icons > *:not(:last-child){
   margin-right: 8px;
 }

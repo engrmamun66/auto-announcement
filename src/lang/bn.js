@@ -146,7 +146,8 @@ module.exports = {
     'Date Range List': 'তারিখ পরিসীমা তালিকা',
     'Student Table Columns': 'শিক্ষার্থী টেবিল কলাম',
     'Card Not Set Message': 'কার্ড সেট না থাকলে বার্তা',
-    'Card Owners': 'কার্ড মালিক',
+    'Card Owners': 'কার্ডধারী',
+    'Card Owner': 'কার্ডধারী',
     'Action': 'অ্যাকশন',
     'Order': 'ক্রম',
     'Type': 'ধরন',
@@ -386,6 +387,7 @@ module.exports = {
     'Choose Image': 'ছবি নির্বাচন করুন',
     'Note': 'নোট',
     'Phone Number': 'ফোন নম্বর',
+    'Phone Number(11 Digit': 'ফোন নম্বর(১১ সংখ্যা)',
     'Invalid phone number': 'ফোন নম্বর সঠিক নয় (01 দিয়ে শুরু, ১১ সংখ্যা হতে হবে)',
     'No log found': 'কোনো লগ পাওয়া যায়নি',
     'Sound': 'সাউন্ড',
@@ -423,6 +425,8 @@ module.exports = {
     'Just-Out': 'বেরিয়েছে',
     'In': 'আসা',
     'Out': 'যাওয়া',
+    'Phone': 'ফোন',
+    'Card': 'কার্ড',
   },
   attendance: {
     vacation_types: [
