@@ -56,6 +56,9 @@ module.exports = {
     'Future': 'ভবিষ্যৎ',
     'Vacation': 'অবকাশ',
     'Leave': 'ছুটি',
+    'minutes_consideration_given': 'মিনিট বিবেচনা দেওয়া হয়েছে।',
+    'min_late': 'মিনিট দেরি',
+    'min_early': 'মিনিট আগে',
     'No shift logs are available for this date.': 'এই তারিখে কোনো শিফট লগ পাওয়া যায়নি।',
     'No reason provided': 'কোনো কারণ দেওয়া হয়নি',
     'Open Student Page': 'শিক্ষার্থীর পৃষ্ঠা খুলুন',
@@ -427,6 +430,9 @@ module.exports = {
     'Out': 'যাওয়া',
     'Phone': 'ফোন',
     'Card': 'কার্ড',
+    'Normal': 'স্বাভাবিক',
+    'Medium': 'মধ্যম',
+    'Faster': 'দ্রুত',
   },
   attendance: {
     vacation_types: [

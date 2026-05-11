@@ -56,6 +56,9 @@ module.exports = {
     'Future': 'Future',
     'Vacation': 'Vacation',
     'Leave': 'Leave',
+    'minutes_consideration_given': 'minutes of consideration given.',
+    'min_late': 'min late',
+    'min_early': 'min early',
     'No shift logs are available for this date.': 'No shift logs are available for this date.',
     'No reason provided': 'No reason provided',
     'Open Student Page': 'Open Student Page',
@@ -426,6 +429,9 @@ module.exports = {
     'Out': 'Out',
     'Phone': 'Phone',
     'Card': 'Card',
+    'Normal': 'Normal',
+    'Medium': 'Medium',
+    'Faster': 'Faster',
   },
   attendance: {
     vacation_types: [
