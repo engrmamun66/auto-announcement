@@ -222,15 +222,19 @@ async function loadDailyLogs(classShortOverride = null) {
   }
 }
 
+const getActiveClasses = (list) => (list || []).filter(c => c.isActive !== false)
+
 watch(classes, (list) => {
-  if (!selectedClassShort.value && list?.length) {
-    selectedClassShort.value = list[0]?.class_short || null
+  if (!selectedClassShort.value) {
+    const active = getActiveClasses(list)
+    selectedClassShort.value = active[0]?.class_short || null
   }
 }, { immediate: true })
 
 const selectFistClass = () => {
-    if (!selectedClassShort.value && classes.value?.length) {
-    selectedClassShort.value = classes.value[0]?.class_short || null
+  if (!selectedClassShort.value) {
+    const active = getActiveClasses(classes.value)
+    selectedClassShort.value = active[0]?.class_short || null
   }
   if (selectedClassShort.value) {
     hasLoaded.value = true
@@ -282,7 +286,7 @@ watch(
 
     <div class="bg-dark-subtle border class-button-list hide_onprint p-3 radius-10" data-no-auto-i18n="true">
         <button
-            v-for="(cls, index) in classes.filter(c => c.isActive === true)"
+            v-for="(cls, index) in getActiveClasses(classes)"
             :key="index"
             type="button"
             class="class-button"
