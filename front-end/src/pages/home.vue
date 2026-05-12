@@ -65,6 +65,12 @@ function toggleEmergencyMode() {
   }
 }
 
+const barcodePlaceholder = computed(() =>
+  emergency_mode.value
+    ? helper.t('Emergency mode activated')
+    : helper.t('Student ID')
+)
+
 const all_students = inject('all_students', [])
 
 let manually_paused_the_playlist = inject('manually_paused_the_playlist')
@@ -256,11 +262,11 @@ function recallAllPunchedStudents(){
                <btn @click="toggleSettings = !toggleSettings" class="px-3 shadow me-2"><i class='bx bx-list-ul'></i></btn>
           </div> -->
           
-          <div class="relative w-100 me-2">
-               <!-- <EmergencyMode v-if="emergency_mode"></EmergencyMode>
-               <EmergencyMode v-if="emergency_mode" style="left:calc(100% - 40px)"></EmergencyMode> -->
+          <div class="relative w-100 me-2" data-no-auto-i18n="true">
+               <EmergencyMode v-if="emergency_mode"></EmergencyMode>
+               <EmergencyMode v-if="emergency_mode" style="left:calc(100% - 40px)"></EmergencyMode>
                <input id="BARCODE_INPUT" type="text" @keyup.enter="inputBarcode" @paste="inputBarcode" class="form-control px-4 py-2 text-center py-1 cb-input" 
-               :placeholder="emergency_mode ? helper.t('Emergency mode activated') : helper.t('Student ID')">
+               placeholder="Student ID">
           </div>
 
           <div v-if="is_started_schedule" class="me-2 p-1 px-2 play-pause" 
