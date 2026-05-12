@@ -412,7 +412,7 @@ class Students {
     try {
       const workbook = xlsx.readFile(filePath);
       const sheetName = workbook.SheetNames[0]; // Assuming data is in the first sheet
-      const scheduleSheetName = workbook.SheetNames.find((name) => String(name).toLowerCase() === 'schedules') || workbook.SheetNames[1];
+      const scheduleSheetName = workbook.SheetNames.find((name) => String(name).toLowerCase() === 'schedules') || null;
       const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName], {
         header: 1,
       });
