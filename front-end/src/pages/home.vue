@@ -58,6 +58,13 @@ let sendRemoteAction = inject('sendRemoteAction')
 let emergency_mode = inject('emergency_mode')
 let palylistComponent = inject('palylistComponent')
 
+function toggleEmergencyMode() {
+  emergency_mode.value = !emergency_mode.value
+  if (isIPAccess) {
+    sendRemoteAction({ from: 'ip', action: 'toogle_emergency_mode', data: emergency_mode.value })
+  }
+}
+
 const all_students = inject('all_students', [])
 
 let manually_paused_the_playlist = inject('manually_paused_the_playlist')
@@ -250,18 +257,29 @@ function recallAllPunchedStudents(){
           </div> -->
           
           <div class="relative w-100 me-2">
-               <EmergencyMode v-if="emergency_mode"></EmergencyMode>
-               <EmergencyMode v-if="emergency_mode" style="left:calc(100% - 40px)"></EmergencyMode>
-               <input id="BARCODE_INPUT" type="text" @keyup.enter="inputBarcode" @paste="inputBarcode" class="form-control px-4 py-2 text-center py-1 cb-input" :placeholder="emergency_mode ? 'Emergency mode activated' : 'Student ID'">
+               <!-- <EmergencyMode v-if="emergency_mode"></EmergencyMode>
+               <EmergencyMode v-if="emergency_mode" style="left:calc(100% - 40px)"></EmergencyMode> -->
+               <input id="BARCODE_INPUT" type="text" @keyup.enter="inputBarcode" @paste="inputBarcode" class="form-control px-4 py-2 text-center py-1 cb-input" 
+               :placeholder="emergency_mode ? helper.t('Emergency mode activated') : helper.t('Student ID')">
           </div>
 
-          <div v-if="!manually_paused_the_playlist" @click="handlePayPause()" class="me-2 p-1 play-pause"><i class='bx bx-pause'></i></div>
-          <div v-else @click="handlePayPause()" class="me-2 p-1 play-pause"><i class='bx bx-play'></i></div>
+          <div v-if="is_started_schedule" class="me-2 p-1 px-2 play-pause" 
+          :class="{ 'emergency-active': emergency_mode }" 
+          @click="toggleEmergencyMode()"
+          :tooltip="emergency_mode ? helper.t('Emergency mode ON') : helper.t('Emergency mode OFF')" flow="down" style="--tfsize:12px"
+           >
+               <i class='bx bxs-bell-ring'></i>
+          </div>
+
+          <div v-if="!manually_paused_the_playlist" @click="handlePayPause()" class="me-2 p-1 px-2 play-pause"><i class='bx bx-pause'></i></div>
+          <div v-else @click="handlePayPause()" class="me-2 p-1 px-2 play-pause"><i class='bx bx-play'></i></div>
 
           <!-- Add here a button group (Normal & Faster) with icon prefix -->
           <div class="btn-group me-2" role="group">
                <template v-for="item in speedList">
-                    <button :tooltip="`Playback Speed(${item.value})`" type="button" class="btn btn-outline-primary playbackButton" :class="{'active': playback_speed === item.value }" @click="onClickSpeed(item)">{{ item.label }}</button>
+                    <button :tooltip="helper.t('Playback Speed({value})').replace('{value}', item.value)" flow="down" style="--tfsize:12px" type="button" class="btn btn-outline-primary playbackButton" :class="{'active': playback_speed === item.value }" @click="onClickSpeed(item)">
+                         {{ item.label }}
+                    </button>
                </template>
           </div>
 
@@ -522,7 +540,16 @@ function recallAllPunchedStudents(){
     border-radius: 5px;
     font-size: 18px;
     cursor: pointer;
-} 
+}
+.play-pause.emergency-active {
+  background: #dc3545;
+  border-color: #dc3545;
+  animation: emergency-pulse 1s infinite;
+}
+@keyframes emergency-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
 .sections {
   display: flex;
   gap: 20px;
