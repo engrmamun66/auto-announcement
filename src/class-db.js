@@ -72,7 +72,7 @@ class myDB {
             this.db.serialize(() => {
                 keys.forEach(([key, cfgValue]) => {
                     if (!(key in existing)) {
-                        // New key — insert with config default
+                        console.log(`[settings] new key inserted: "${key}"`);
                         this.db.run(
                             `INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)`,
                             [key, JSON.stringify(cfgValue)],
@@ -85,6 +85,23 @@ class myDB {
                         // Object value — deep-fill any child keys missing from DB
                         const merged = deepMerge(cfgValue, existing[key]);
                         if (JSON.stringify(merged) !== JSON.stringify(existing[key])) {
+                            function getMissingKeys(base, current, prefix = '') {
+                                const missing = [];
+                                Object.keys(base).forEach(k => {
+                                    const path = prefix ? `${prefix}.${k}` : k;
+                                    if (!(k in current)) {
+                                        missing.push(path);
+                                    } else if (
+                                        base[k] !== null && typeof base[k] === 'object' && !Array.isArray(base[k]) &&
+                                        current[k] !== null && typeof current[k] === 'object' && !Array.isArray(current[k])
+                                    ) {
+                                        missing.push(...getMissingKeys(base[k], current[k], path));
+                                    }
+                                });
+                                return missing;
+                            }
+                            const missingKeys = getMissingKeys(cfgValue, existing[key]);
+                            if (missingKeys.length) console.log(`[settings] "${key}" missing child keys added:`, missingKeys);
                             this.db.run(
                                 `UPDATE settings SET value = ? WHERE key = ?`,
                                 [JSON.stringify(merged), key],
