@@ -264,7 +264,7 @@ function recallAllPunchedStudents(){
           
           <div class="relative w-100 me-2" data-no-auto-i18n="true">
                <EmergencyMode v-if="emergency_mode"></EmergencyMode>
-               <EmergencyMode v-if="emergency_mode" style="left:calc(100% - 40px)"></EmergencyMode>
+               <EmergencyMode v-if="emergency_mode" style="left:calc(100% - 30px)"></EmergencyMode>
                <input id="BARCODE_INPUT" type="text" @keyup.enter="inputBarcode" @paste="inputBarcode" class="form-control px-4 py-2 text-center py-1 cb-input" 
                placeholder="Student ID">
           </div>

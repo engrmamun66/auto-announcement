@@ -8,14 +8,16 @@
 
 <style scoped>
  .blink-container {
-  position: absolute;
-  left: 3px;
-  opacity: 0.8;
+    position: absolute;
+    left: 13px;
+    opacity: .8;
+    top: 11px;
+    opacity: 0.7;
 }
 
 .led-box {
-  height: 30px;
-  width: 30px;
+  height: 15px;
+  width: 15px;
   margin: 2px 0;
   float: left;
 }
@@ -34,6 +36,7 @@
   border-radius: 5px; 
   box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #4e0f0f 0 -1px 9px, rgba(255, 0, 0, 0.5) 0 2px 12px; 
   animation: blinkRed 0.5s infinite;
+  zoom: 0.5;
 }
  
 @keyframes blinkRed {
