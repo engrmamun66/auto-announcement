@@ -843,7 +843,7 @@ function canReOrderSchedule(item, action='up'){
             </template>
             <template v-else>
               <tr>
-                  <td colspan="88" class="text-center">No student found</td>                 
+                  <td colspan="88" class="text-center">{{ helper.t('No student found') }}</td>
               </tr>
             </template>
           </template>
