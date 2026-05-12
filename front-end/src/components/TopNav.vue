@@ -184,7 +184,7 @@ let showConfirmModal = ref(false)
 let showUpdateModal = ref(false)
 let updateDone = ref(false)
 let temp_updating = ref(false)
-const autoUpdateEnabled = ref(storage('cb_auto_update', false).value)
+const autoUpdateEnabled = ref(storage('cb_auto_update', true).value)
 watch(autoUpdateEnabled, (val) => { storage('cb_auto_update').value = val })
 
 const isNewVersion = computed(() => {
