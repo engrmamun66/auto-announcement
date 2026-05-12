@@ -1,5 +1,5 @@
 <template>
-  <Rightbar title="Settings" @unmount="$emit('unmount')">
+  <Rightbar ref="theRightbar" title="Settings" @unmount="$emit('unmount')">
     <div class="cs">
       <div v-if="loading" class="cs__loading">Loading...</div>
       <template v-else>
@@ -16,19 +16,20 @@
         </div>
 
         <!-- Active tab content -->
-        <div v-if="activeKey" class="cs__panel-wrap" data-no-auto-i18n="true">
-          <div class="cs__panel">
+        <div v-if="activeKey" class="cs__panel-wrap" >
+          <div class="cs__panel" data-no-auto-i18n="true">
             <FormNode :obj="drafts" :propKey="activeKey" :depth="0" />
           </div>
           <p v-if="errors[activeKey]" class="cs__error">{{ errors[activeKey] }}</p>
           <div class="cs__actions">
             <button class="cs__btn cs__btn--reset-all" @click="resetAll" :disabled="resettingAll">
-              {{ resettingAll ? 'Resetting...' : 'Reset All to Default' }}
+              Reset All to Default <BtnLoader v-if="resettingAll"></BtnLoader>
             </button>
             <div class="cs__actions-right">
               <button class="cs__btn cs__btn--reset" @click="resetDraft(activeKey)">Reset</button>
+              <button class="cs__btn cs__btn--close" @click="theRightbar.unmount()">Close</button>
               <button class="cs__btn cs__btn--save" @click="save(activeKey)" :disabled="saving[activeKey]">
-                {{ saving[activeKey] ? 'Saving...' : 'Save' }}
+                Save <BtnLoader v-if="saving[activeKey]"></BtnLoader>
               </button>
             </div>
           </div>
@@ -43,10 +44,12 @@
 import { ref, reactive, inject, onMounted, onUnmounted } from 'vue';
 import Rightbar from '../Rightbar.vue';
 import FormNode from './FormNode.vue';
+import BtnLoader from '../BtnLoader.vue';
 
 const emit = defineEmits(['unmount']);
 const http = inject('http');
 
+const theRightbar = ref(true);
 const loading = ref(true);
 const activeKey = ref(null);
 const settings = ref({});
@@ -111,7 +114,7 @@ async function save(key) {
   try {
     await http.post(`/settings/${key}`, { value: drafts[key] });
     settings.value[key] = JSON.parse(JSON.stringify(drafts[key]));
-    hasSaved.value = true;
+    hasSaved.value = true; 
   } catch(e) {
     errors[key] = 'Save failed';
   } finally {
@@ -186,6 +189,8 @@ onUnmounted(() => { if (hasSaved.value) {
 .cs__btn--save:disabled { opacity: 0.6; cursor: not-allowed; }
 .cs__btn--reset { background: #f0f0f0; color: #555; }
 .cs__btn--reset:hover { background: #e0e0e0; }
+.cs__btn--close { background: #fff5f5; color: #c0392b; border: 1px solid #f5c6cb; }
+.cs__btn--close:hover { background: #ffe0e0; border-color: #e74c3c; }
 .cs__btn--reset-all { background: #fff3f3; color: #c0392b; border: 1px solid #f5c6cb; }
 .cs__btn--reset-all:hover { background: #ffe0e0; }
 .cs__btn--reset-all:disabled { opacity: 0.6; cursor: not-allowed; }
