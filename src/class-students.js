@@ -449,9 +449,10 @@ class Students {
       let not_found = 0;
       let pending = 0;
       let studentLoopDone = false;
+      let scheduleLoopDone = false;
 
       const finalizeImport = () => {
-        if (!studentLoopDone || pending > 0) return;
+        if (!studentLoopDone || !scheduleLoopDone || pending > 0) return;
         fs.unlink(filePath, () => {});
         if (!errorOccurred) {
           callback(null, { total: created + updated, created, updated, not_found });
@@ -611,11 +612,7 @@ class Students {
 
         this.db.serialize(() => {
           scheduleData.forEach((row, i) => {
-            if (i === 0 && scheduleHasHeader) {
-              console.log("Skipping schedule header row:", row, row.length, scheduleData[1]?.length, scheduleData[1]);
-              return;
-            }
-
+            if (i === 0 && scheduleHasHeader) return;
             if (row.length === 0) return;
 
             const id = getScheduleValue(row, 'id', 0)
@@ -623,9 +620,9 @@ class Students {
             const title = getScheduleValue(row, 'title', 2)
             const start_time = getScheduleValue(row, 'start_time', 3)
             const end_time = getScheduleValue(row, 'end_time', 4)
-            const order_index = getScheduleValue(row, 'order_index', 5)
-            const status = getScheduleValue(row, 'status', 6)
-            const classes = getScheduleValue(row, 'classes', 7)
+            const classes = getScheduleValue(row, 'classes', 5)
+            const order_index = getScheduleValue(row, 'order_index', 8)
+            const status = getScheduleValue(row, 'status', 7)
 
             if (!type || !start_time || !end_time || !classes) {
               console.log("Skipping invalid schedule row:", row);
@@ -637,31 +634,41 @@ class Students {
             const statusNum = Number(status)
             const resolvedStatus = (statusNum === 0 || statusNum === 1) ? statusNum : 1
 
-            if (id) {
-              this.db.run(
+            const scheduleParams = [Number(type) || type, resolvedTitle, start_time, end_time, resolvedOrder, resolvedStatus, classes]
+            const db = this.db
+            pending++
+            if (id && !forceAsNewEntity) {
+              db.run(
                 updateScheduleQuery,
-                [Number(type) || type, resolvedTitle, start_time, end_time, resolvedOrder, resolvedStatus, classes, id],
-                (err) => {
-                  if (err) {
-                    console.error(`Error updating schedule with ID ${id}:`, err);
-                    errorOccurred = true;
+                [...scheduleParams, id],
+                function(err) {
+                  if (err) { console.error(`Error updating schedule ${id}:`, err); errorOccurred = true; pending--; finalizeImport(); return; }
+                  if (this.changes === 0) {
+                    db.run(insertScheduleQuery, scheduleParams, (err2) => {
+                      if (err2) { console.error("Error inserting schedule (fallback):", err2); errorOccurred = true; }
+                      pending--; finalizeImport()
+                    })
+                  } else {
+                    pending--; finalizeImport()
                   }
                 }
               );
             } else {
-              this.db.run(
+              db.run(
                 insertScheduleQuery,
-                [Number(type) || type, resolvedTitle, start_time, end_time, resolvedOrder, resolvedStatus, classes],
+                scheduleParams,
                 (err) => {
-                  if (err) {
-                    console.error("Error inserting schedule data:", err);
-                    errorOccurred = true;
-                  }
+                  if (err) { console.error("Error inserting schedule:", err); errorOccurred = true; }
+                  pending--; finalizeImport()
                 }
               );
             }
           })
+          scheduleLoopDone = true
+          finalizeImport()
         })
+      } else {
+        scheduleLoopDone = true
       }
   
 
