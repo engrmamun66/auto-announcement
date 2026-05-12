@@ -361,6 +361,7 @@ module.exports = {
     'Live attendance list is currently empty.': 'Live attendance list is currently empty.',
     'Emergency mode activated': 'Emergency mode activated',
     'Emergency Mode': 'Emergency Mode',
+    'Filter': 'Filter',
     'Emergency mode ON': 'Emergency mode ON',
     'Emergency mode OFF': 'Emergency mode OFF',
     'Student ID': 'Student ID',

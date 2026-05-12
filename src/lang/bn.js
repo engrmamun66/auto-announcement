@@ -135,6 +135,7 @@ module.exports = {
     'Puch Times': 'পাঞ্চ সময়',
     'Punch Times': 'পাঞ্চ সময়',
     'Call Times': 'কল সময়',
+    'Filter': 'ফিল্টার',
     'Filter Classes': 'ক্লাস ফিল্টার করুন',
     'AND': 'এবং',
     'OR': 'অথবা',
