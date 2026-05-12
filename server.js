@@ -55,6 +55,7 @@ webSocket()
 const classDB = require('./src/class-db')
 const students = require('./src/class-students');
 const schedules = require('./src/class-schedules');
+const ClassSms = require('./src/class-sms');
 const PunchLoogClass = require('./src/class-punchlog');
 const AttendenceClass = require('./src/class-attendence');
 const LeavAndVacationsClass = require('./src/class-leave-and-vacations');
@@ -67,8 +68,9 @@ const DB_CONFIG_KEYS = Object.keys(config).filter(k => k !== 'env');
 getSettings(DB.db).then(dbSettings => {
     DB_CONFIG_KEYS.forEach(k => { if (dbSettings[k] !== undefined) global.config[k] = dbSettings[k]; });
 }).catch(() => {});
-const Students = new students(DB.db) 
+const Students = new students(DB.db)
 const Schedules = new schedules(DB.db)
+const Sms = new ClassSms(DB.db)
 const PunchLog = new PunchLoogClass() 
 const Attendence = new AttendenceClass(DB.db) 
 const LeavAndVacations = new LeavAndVacationsClass(DB.db) 
@@ -236,6 +238,7 @@ app.use('/api', require('./src/routes/config')(config, utils, Backup));
 app.use('/api', require('./src/routes/misc')(utils, Backup, { DEVICE_API_BASE_URL }));
 app.use('/api', require('./src/routes/refresh')(utils));
 app.use('/api', require('./src/routes/settings')(DB.db));
+app.use('/api', require('./src/routes/sms')(Sms));
 
 app.get('/api/update-app', async (req, res) => {
     const { downloadFromUrl } = require('./src/zipper/download-from-url');

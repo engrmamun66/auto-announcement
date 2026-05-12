@@ -265,6 +265,20 @@ class myDB {
               }
             );
 
+            this.db.run(
+              `
+              CREATE TABLE IF NOT EXISTS sms_templates (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title TEXT NOT NULL,
+                message TEXT NOT NULL,
+                type TEXT DEFAULT 'custom', -- 'in' | 'out' | 'custom'
+                created TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+              )`,
+              (err) => {
+                if (err) console.error("Error creating sms_templates table:", err.message);
+              }
+            );
+
 
 
         } catch (error) {

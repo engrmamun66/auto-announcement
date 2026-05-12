@@ -120,6 +120,19 @@ module.exports = {
                weekends: ['Friday'], // Saturday, 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'
                
           },
+          sms: {
+               enabled: false,                    // master on/off
+               provider: 'ssl_wireless',          // ssl_wireless | muthofon | custom
+               api_base_url: 'https://secure.sms.net.bd/api/v3',  // SSL Wireless
+               api_key: '',                       // API key / token from provider
+               sender_id: 'CBSMS',               // approved sender ID (6-11 chars)
+               send_on_in: true,                  // send SMS when student punches IN
+               send_on_out: false,                // send SMS when student punches OUT
+               // {name}, {time}, {date}, {status} are replaced at send time
+               in_message_template: 'Dear Parent, {name} has arrived at {time} on {date}.',
+               out_message_template: 'Dear Parent, {name} has left at {time} on {date}.',
+               only_if_phone_number: true,        // skip student if no phone_number set
+          }
      },
      date_range_list: [
           "This Week",

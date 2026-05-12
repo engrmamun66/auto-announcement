@@ -67,6 +67,9 @@
             <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
           </svg>
         </button>
+        <button v-if="CONFIG?.settings?.sms?.enabled" class="topnav__update-btn topnav__sms-btn" tooltip="Send SMS" flow="down" @click="showSmsModal = true">
+          <i class='bx bxs-message-rounded-dots' style="font-size:16px"></i>
+        </button>
         <button class="topnav__update-btn" tooltip="Settings" flow="down" @click="showSettingsPanel = true">
           <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="3"/>
@@ -101,6 +104,7 @@
   </header>
   <cloneStudents v-if="show_cloner_component" @unmount="show_cloner_component = false"></cloneStudents>
   <ConfigSettings v-if="showSettingsPanel" @unmount="showSettingsPanel = false" />
+  <SmsModal v-if="showSmsModal" @close="showSmsModal = false" />
 
   <Teleport to="body">
     <div v-if="showConfirmModal" class="update-modal-overlay">
@@ -145,6 +149,7 @@ import Btn from './Btn.vue'
 import cloneStudents from './cloneStudents.vue'
 import BtnLoader from './BtnLoader.vue';
 import ConfigSettings from './settings/ConfigSettings.vue'
+import SmsModal from './SmsModal.vue'
 
 let logoEl = ref(null)
 let logo_wrapper = ref(null)
@@ -180,6 +185,7 @@ const storage = inject('storage');
 const helper = inject('helper');
 let show_cloner_component = ref(false)
 let showSettingsPanel = ref(false)
+let showSmsModal = ref(false)
 let showConfirmModal = ref(false)
 let showUpdateModal = ref(false)
 let updateDone = ref(false)
@@ -393,6 +399,9 @@ onMounted(()=>{
 }
 .topnav__update-btn:hover {
   color: #4caf50;
+}
+.topnav__sms-btn:hover {
+  color: #3a7bd5 !important;
 }
 
 .topnav__dev{
