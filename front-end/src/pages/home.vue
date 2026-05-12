@@ -272,7 +272,7 @@ function recallAllPunchedStudents(){
           <div v-if="is_started_schedule" class="me-2 p-1 px-2 play-pause" 
           :class="{ 'emergency-active': emergency_mode }" 
           @click="toggleEmergencyMode()"
-          :tooltip="emergency_mode ? helper.t('Emergency mode ON') : helper.t('Emergency mode OFF')" flow="down" style="--tfsize:12px"
+          :tooltip="helper.t('Emergency Mode')" flow="down" style="--tfsize:12px"
            >
                <i class='bx bxs-bell-ring'></i>
           </div>

@@ -360,6 +360,7 @@ module.exports = {
     'No Attendance Records Found': 'No Attendance Records Found',
     'Live attendance list is currently empty.': 'Live attendance list is currently empty.',
     'Emergency mode activated': 'Emergency mode activated',
+    'Emergency Mode': 'Emergency Mode',
     'Emergency mode ON': 'Emergency mode ON',
     'Emergency mode OFF': 'Emergency mode OFF',
     'Student ID': 'Student ID',

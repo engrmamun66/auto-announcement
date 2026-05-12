@@ -361,6 +361,7 @@ module.exports = {
     'No Attendance Records Found': 'কোনো উপস্থিতির রেকর্ড পাওয়া যায়নি',
     'Live attendance list is currently empty.': 'লাইভ উপস্থিতির তালিকা বর্তমানে খালি।',
     'Emergency mode activated': 'জরুরি মোড চালু আছে',
+    'Emergency mode': 'জরুরি মোড চালু',
     'Emergency mode ON': 'জরুরি মোড চালু',
     'Emergency mode OFF': 'জরুরি মোড বন্ধ',
     'Student ID': 'শিক্ষার্থী আইডি',
