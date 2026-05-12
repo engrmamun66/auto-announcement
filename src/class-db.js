@@ -35,29 +35,73 @@ class myDB {
     }
 
     _initSettings(){
-        let cfg = require('./../config.example');
-        const configPath = path.join(global.DIR, 'config.js');
-        if (fs.existsSync(configPath)) {
-          cfg = Object.assign({}, cfg, require(configPath));
+        // Deep merge: base keys + user overrides, but user partial objects don't wipe base child keys
+        function deepMerge(base, override) {
+            if (
+                base !== null && typeof base === 'object' && !Array.isArray(base) &&
+                override !== null && typeof override === 'object' && !Array.isArray(override)
+            ) {
+                const result = Object.assign({}, base);
+                Object.keys(override).forEach(k => {
+                    result[k] = deepMerge(base[k], override[k]);
+                });
+                return result;
+            }
+            return override !== undefined ? override : base;
         }
+
+        let exampleCfg = require('./../config.example');
+        const configPath = path.join(global.DIR, 'config.js');
+        let userCfg = {};
+        if (fs.existsSync(configPath)) {
+          userCfg = require(configPath);
+        }
+        const cfg = deepMerge(exampleCfg, userCfg);
         const keys = Object.keys(cfg).filter(k => k !== 'env').map(k => [k, cfg[k]]);
-        this.db.serialize(() => {
-            // Seed default values from config.example.js — skips if key already exists in DB
-            keys.forEach(([key, value]) => {
+        const knownKeys = keys.map(([k]) => k);
+
+        // Read all current settings first, then diff and apply
+        this.db.all(`SELECT key, value FROM settings`, [], (err, rows) => {
+            if (err) { console.error('_initSettings read error:', err.message); return; }
+
+            const existing = {};
+            (rows || []).forEach(row => {
+                try { existing[row.key] = JSON.parse(row.value); } catch { existing[row.key] = row.value; }
+            });
+
+            this.db.serialize(() => {
+                keys.forEach(([key, cfgValue]) => {
+                    if (!(key in existing)) {
+                        // New key — insert with config default
+                        this.db.run(
+                            `INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)`,
+                            [key, JSON.stringify(cfgValue)],
+                            (e) => { if (e) console.error('_initSettings insert error:', e.message); }
+                        );
+                    } else if (
+                        cfgValue !== null && typeof cfgValue === 'object' && !Array.isArray(cfgValue) &&
+                        existing[key] !== null && typeof existing[key] === 'object' && !Array.isArray(existing[key])
+                    ) {
+                        // Object value — deep-fill any child keys missing from DB
+                        const merged = deepMerge(cfgValue, existing[key]);
+                        if (JSON.stringify(merged) !== JSON.stringify(existing[key])) {
+                            this.db.run(
+                                `UPDATE settings SET value = ? WHERE key = ?`,
+                                [JSON.stringify(merged), key],
+                                (e) => { if (e) console.error('_initSettings merge error:', e.message); }
+                            );
+                        }
+                    }
+                });
+
+                // Remove stale keys no longer in config
+                const placeholders = knownKeys.map(() => '?').join(', ');
                 this.db.run(
-                    `INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)`,
-                    [key, JSON.stringify(value)],
-                    (err) => { if (err) console.error('_initSettings error:', err.message); }
+                    `DELETE FROM settings WHERE key NOT IN (${placeholders})`,
+                    knownKeys,
+                    (e) => { if (e) console.error('_initSettings cleanup error:', e.message); }
                 );
             });
-            // Remove any settings key that no longer exists in config.example.js
-            const knownKeys = keys.map(([k]) => k);
-            const placeholders = knownKeys.map(() => '?').join(', ');
-            this.db.run(
-                `DELETE FROM settings WHERE key NOT IN (${placeholders})`,
-                knownKeys,
-                (err) => { if (err) console.error('_initSettings cleanup error:', err.message); }
-            );
         });
     }
 
