@@ -164,7 +164,6 @@ export default {
   <div data-no-auto-i18n="true">
     <FullCalendar :options="calendarOptions" />
   </div>
-  <RightBar v-if="showRightbar" ref="rightbar" @unmount="showRightbar = false"></RightBar>
 </template>
 
 
