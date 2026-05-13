@@ -403,7 +403,7 @@ function localizeAppDom() {
     helper.localizeDom(root)
 }
 
-function scheduleUiLocalization(delay = 10) {
+function scheduleUiLocalization(delay = 0) {
     clearTimeout(uiLocalizationTimer)
     uiLocalizationTimer = setTimeout(async () => {
         await nextTick()
