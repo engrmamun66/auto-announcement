@@ -242,13 +242,17 @@ async function loadDailyLogs(classShortOverride = null) {
 const getActiveClasses = (list) => (list || []).filter(c => c.isActive !== false)
 
 watch(classes, (list) => {
-  const active = getActiveClasses(list)
-  if (active.length) selectedClassShort.value = active[0].class_short
+  if (!selectedClassShort.value) {
+    const active = getActiveClasses(list)
+    if (active.length) selectedClassShort.value = active[0].class_short
+  }
 }, { immediate: true })
 
 const selectFistClass = () => {
-  const active = getActiveClasses(classes.value)
-  selectedClassShort.value = active[0]?.class_short || null
+  if (!selectedClassShort.value) {
+    const active = getActiveClasses(classes.value)
+    selectedClassShort.value = active[0]?.class_short || null
+  }
   if (selectedClassShort.value) {
     hasLoaded.value = true
     loadDailyLogs(selectedClassShort.value)
