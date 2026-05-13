@@ -318,12 +318,12 @@ watch(
     </div>
 
     <div v-if="loading" class="text-muted mt-2">Loading daily logs...</div>
-    <div v-else-if="errorMessage" class="text-danger mt-2">{{ errorMessage }}</div>
+    <div v-else-if="errorMessage" class="text-danger mt-2" >{{ errorMessage }}</div>
 
-    <div v-else class="daily-grid-wrapper" ref="gridScrollRef">
+    <div v-else class="daily-grid-wrapper" ref="gridScrollRef" data-no-auto-i18n="true">
       <div class="daily-grid" :style="{ '--day-count': dayColumns.length }">
         <div class="daily-grid-row daily-grid-header">
-          <div class="daily-grid-cell sticky-col sticky-head">Students Name</div>
+          <div class="daily-grid-cell sticky-col sticky-head">{{ helper.t('Students Name') }}</div>
           <div v-for="day in dayColumns" :key="day.date" class="daily-grid-cell day-header" :title="day.dayName" data-no-auto-i18n="true">
             {{ day.label }}
           </div>

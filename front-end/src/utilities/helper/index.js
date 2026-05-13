@@ -53,6 +53,23 @@ function replaceTemplateParams(template = '', params = {}) {
 
 const helper = { 
     log: console.log,
+    // ====================================================== //
+    // ===================== t function ===================== //
+    // ====================================================== //
+    t(text = '', params = {}) {
+      if (text === null || text === undefined) return ''
+
+      if (typeof text === 'object' && !Array.isArray(text)) {
+        return helper.localizedText(text, params)
+      }
+
+      const canonical = canonicalizeText(String(text))
+      const translated = __i18nState.code === 'en'
+        ? applyDictionary(canonical, __i18nState.packs.en || {})
+        : applyDictionary(canonical, __i18nState.packs[__i18nState.code] || {})
+
+      return replaceTemplateParams(translated, params)
+    },
     setLanguage({ code = 'en', packs = {}, strings = {} } = {}) {
       const nextCode = code === 'bn' ? 'bn' : 'en'
       const nextPacks = { ...(__i18nState.packs || {}), ...(packs || {}) }
@@ -70,20 +87,7 @@ const helper = {
     getLanguageCode() {
       return __i18nState.code
     },
-    t(text = '', params = {}) {
-      if (text === null || text === undefined) return ''
-
-      if (typeof text === 'object' && !Array.isArray(text)) {
-        return helper.localizedText(text, params)
-      }
-
-      const canonical = canonicalizeText(String(text))
-      const translated = __i18nState.code === 'en'
-        ? applyDictionary(canonical, __i18nState.packs.en || {})
-        : applyDictionary(canonical, __i18nState.packs[__i18nState.code] || {})
-
-      return replaceTemplateParams(translated, params)
-    },
+    
     localizedText(value = '', params = {}) {
       if (value && typeof value === 'object' && !Array.isArray(value)) {
         const selected = __i18nState.code === 'bn'
