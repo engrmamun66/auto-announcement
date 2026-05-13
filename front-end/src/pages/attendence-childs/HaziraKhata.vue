@@ -249,10 +249,8 @@ watch(classes, (list) => {
 }, { immediate: true })
 
 const selectFistClass = () => {
-  if (!selectedClassShort.value) {
-    const active = getActiveClasses(classes.value)
-    selectedClassShort.value = active[0]?.class_short || null
-  }
+  const active = getActiveClasses(classes.value)
+  selectedClassShort.value = active[0]?.class_short || null
   if (selectedClassShort.value) {
     hasLoaded.value = true
     loadDailyLogs(selectedClassShort.value)
