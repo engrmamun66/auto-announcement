@@ -79,6 +79,7 @@ module.exports = {
     'Loading daily logs...': 'দৈনিক লগ লোড হচ্ছে...',
     'No data found.': 'কোনো তথ্য পাওয়া যায়নি।',
     'No student found': 'কোনো শিক্ষার্থী পাওয়া যায়নি',
+    'recipient(s) with phone': 'ফোন আছে এমন প্রাপক',
     'First shift required': 'প্রথম শিফট আবশ্যক',
     'Last shift required': 'শেষ শিফট আবশ্যক',
     'All shifts required': 'সব শিফট আবশ্যক',

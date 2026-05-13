@@ -402,16 +402,16 @@ input[type="checkbox"] {
   height: 0px;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--primaryColor);
-  background: #e2e2e2;
+  background: var(--primaryColor, #2c3e50);
   border: 0px none #ffffff;
-  border-radius: 0px;
+  border-radius: 4px;
+  opacity: 0.7;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--primaryColor);
+  background: var(--secondaryColor, #4d566b);
 }
 ::-webkit-scrollbar-thumb:active {
-  background: #3877e4;
+  background: var(--primaryColor, #2c3e50);
 }
 ::-webkit-scrollbar-track {
   background: transparent;

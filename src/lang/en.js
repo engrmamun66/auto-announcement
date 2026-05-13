@@ -79,6 +79,7 @@ module.exports = {
     'Loading daily logs...': 'Loading daily logs...',
     'No data found.': 'No data found.',
     'No student found': 'No student found',
+    'recipient(s) with phone': 'recipient(s) with phone',
     'First shift required': 'First shift required',
     'Last shift required': 'Last shift required',
     'All shifts required': 'All shifts required',
