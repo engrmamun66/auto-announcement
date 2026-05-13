@@ -12,11 +12,18 @@ const callbacks = inject("callbacks");
 const http = inject("http");
 const helper = inject("helper");
 
-const selectedClassShort = ref(null)
-const selectedRange = ref([
-  moment().startOf('month').format('YYYY-MM-DD'),
-  moment().endOf('month').format('YYYY-MM-DD'),
-])
+const STORE_CLASS = 'hazira_class'
+const STORE_RANGE = 'hazira_range'
+
+const _savedClass = localStorage.getItem(STORE_CLASS)
+const _savedRange = (() => { try { return JSON.parse(localStorage.getItem(STORE_RANGE)) } catch { return null } })()
+
+const selectedClassShort = ref(_savedClass || null)
+const selectedRange = ref(
+  Array.isArray(_savedRange) && _savedRange.length === 2
+    ? _savedRange
+    : [moment().startOf('month').format('YYYY-MM-DD'), moment().endOf('month').format('YYYY-MM-DD')]
+)
 
 const log = console.log
 const loading = ref(false)
@@ -82,13 +89,23 @@ const legendItems = [
 function handleMonthChange(dates = []) {
   if (!Array.isArray(dates) || dates.length < 2) return
   selectedRange.value = [dates[0], dates[1]]
+  localStorage.setItem(STORE_RANGE, JSON.stringify(selectedRange.value))
 }
 
 function handleClassSelect(classShort) {
   if (!classShort) return
   selectedClassShort.value = classShort
+  localStorage.setItem(STORE_CLASS, classShort)
   hasLoaded.value = true
   loadDailyLogs(classShort)
+}
+
+function resetHaziraState() {
+  localStorage.removeItem(STORE_CLASS)
+  localStorage.removeItem(STORE_RANGE)
+  selectedRange.value = [moment().startOf('month').format('YYYY-MM-DD'), moment().endOf('month').format('YYYY-MM-DD')]
+  const active = getActiveClasses(classes.value)
+  if (active.length) handleClassSelect(active[0].class_short)
 }
 
 function scrollGrid(direction) {
@@ -225,13 +242,17 @@ async function loadDailyLogs(classShortOverride = null) {
 const getActiveClasses = (list) => (list || []).filter(c => c.isActive !== false)
 
 watch(classes, (list) => {
-  const active = getActiveClasses(list)
-  if (active.length) selectedClassShort.value = active[0].class_short
+  if (!selectedClassShort.value) {
+    const active = getActiveClasses(list)
+    if (active.length) selectedClassShort.value = active[0].class_short
+  }
 }, { immediate: true })
 
 const selectFistClass = () => {
-  const active = getActiveClasses(classes.value)
-  selectedClassShort.value = active[0]?.class_short || null
+  if (!selectedClassShort.value) {
+    const active = getActiveClasses(classes.value)
+    selectedClassShort.value = active[0]?.class_short || null
+  }
   if (selectedClassShort.value) {
     hasLoaded.value = true
     loadDailyLogs(selectedClassShort.value)
@@ -309,6 +330,7 @@ watch(
             <i class='bx bx-chevron-right'></i>
           </button>
         </div>
+        <button class="hazira-reset-btn" :tooltip="'Reset to first class & current month'" flow="left" @click="resetHaziraState"><i class='bx bx-reset'></i></button>
         <MonthPickerSingle :onChange="handleMonthChange" />
       </div>
     </div>
@@ -520,6 +542,12 @@ watch(
 .legend-scroll-btn:active{
   transform: translateY(1px);
 }
+.hazira-reset-btn {
+  background: #fff; border: 1px solid #e5e7eb; border-radius: 6px;
+  padding: 4px 7px; cursor: pointer; color: #6b7280; font-size: 15px;
+  display: inline-flex; align-items: center;
+}
+.hazira-reset-btn:hover { background: #fef3f2; color: #e53e3e; border-color: #fca5a5; }
 
 .legend-item{
   display: inline-flex;
