@@ -3,7 +3,7 @@
     <div class="sms-modal">
 
       <div class="sms-modal__header">
-        <span><i class='bx bxs-message-rounded-dots'></i> Send SMS</span>
+        <span><i class='bx bxs-message-rounded-dots'></i> {{ helper.t('Send SMS') }}</span>
         <button class="sms-modal__close" @click="$emit('close')"><i class='bx bx-x'></i></button>
       </div>
 
@@ -12,13 +12,13 @@
         <!-- Left: recipients -->
         <div class="sms-panel">
           <div class="sms-panel__title-row">
-            <div class="sms-panel__title">Recipients</div>
-            <button class="sms-uncheck-btn" @click="tab === 'class' ? selectedClasses = [] : selectedDakhelas = []">Uncheck all</button>
+            <div class="sms-panel__title">{{ helper.t('Recipients') }}</div>
+            <button class="sms-uncheck-btn" @click="tab === 'class' ? selectedClasses = [] : selectedDakhelas = []">{{ helper.t('Uncheck all') }}</button>
           </div>
 
           <div class="sms-tabs">
-            <button :class="['sms-tab', tab === 'class' && 'sms-tab--active']" @click="tab='class'">By Class</button>
-            <button :class="['sms-tab', tab === 'students' && 'sms-tab--active']" @click="tab='students'">Select Students</button>
+            <button :class="['sms-tab', tab === 'class' && 'sms-tab--active']" @click="tab='class'">{{ helper.t('By Class') }}</button>
+            <button :class="['sms-tab', tab === 'students' && 'sms-tab--active']" @click="tab='students'">{{ helper.t('Select Students') }}</button>
           </div>
 
           <!-- Class tab -->
@@ -34,12 +34,12 @@
 
           <!-- Students tab -->
           <template v-else>
-            <input v-model="studentSearch" placeholder="Search name / dakhela..." class="sms-search" />
+            <input v-model="studentSearch" :placeholder="helper.t('Search name / dakhela...')" class="sms-search" />
             <div class="sms-student-list">
               <label v-for="s in filteredStudents" :key="s.id" class="sms-check">
                 <input type="checkbox" :value="s.dakhela" v-model="selectedDakhelas" />
                 <span class="sms-std-name">{{ s.name.split('||')[0] }}</span>
-                <small class="text-muted">{{ s.class_short }} · {{ s.phone_number || 'no phone' }}</small>
+                <small class="text-muted">{{ s.class_short }} · {{ s.phone_number || helper.t('no phone') }}</small>
               </label>
             </div>
           </template>
@@ -51,49 +51,49 @@
 
         <!-- Right: message -->
         <div class="sms-panel">
-          <div class="sms-panel__title">Message</div>
+          <div class="sms-panel__title">{{ helper.t('Message') }}</div>
 
           <div class="sms-template-row">
             <select v-model="selectedTemplateId" class="sms-select">
-              <option value="">-- Select template --</option>
+              <option value="">{{ helper.t('-- Select template --') }}</option>
               <option v-for="t in templates" :key="t.id" :value="t.id">{{ t.title }}</option>
             </select>
-            <button class="sms-icon-btn" tooltip="Save as template" @click="showSaveTemplate = !showSaveTemplate"><i class='bx bx-save'></i></button>
-            <button v-if="selectedTemplateId" class="sms-icon-btn sms-icon-btn--danger" tooltip="Delete template" @click="deleteTemplate"><i class='bx bx-trash'></i></button>
+            <button class="sms-icon-btn" :tooltip="helper.t('Save as template')" @click="showSaveTemplate = !showSaveTemplate"><i class='bx bx-save'></i></button>
+            <button v-if="selectedTemplateId" class="sms-icon-btn sms-icon-btn--danger" :tooltip="helper.t('Delete template')" @click="deleteTemplate"><i class='bx bx-trash'></i></button>
           </div>
 
           <div v-if="showSaveTemplate" class="sms-save-tpl">
-            <input v-model="newTemplateTitle" placeholder="Template title..." class="sms-search" />
+            <input v-model="newTemplateTitle" :placeholder="helper.t('Template title...')" class="sms-search" />
             <select v-model="newTemplateType" class="sms-select" style="width:120px">
-              <option value="custom">Custom</option>
-              <option value="in">Check-in</option>
-              <option value="out">Check-out</option>
+              <option value="custom">{{ helper.t('Custom') }}</option>
+              <option value="in">{{ helper.t('Check-in') }}</option>
+              <option value="out">{{ helper.t('Check-out') }}</option>
             </select>
-            <button class="sms-icon-btn sms-icon-btn--primary" @click="saveTemplate">Save</button>
+            <button class="sms-icon-btn sms-icon-btn--primary" @click="saveTemplate">{{ helper.t('Save') }}</button>
           </div>
 
           <textarea
             v-model="message"
             class="sms-textarea"
-            placeholder="Type message... use {name}, {time}, {date}, {class}"
+            :placeholder="helper.t('Type message or select template')"
             rows="5"
           ></textarea>
-          <small>Type message... use {name}, {time}, {date}, {class}</small>
+          <small>{{ helper.t('Type message... use {name}, {time}, {date}, {class}') }}</small>
 
-          <div class="sms-char-count">{{ message.length }} chars · ~{{ Math.ceil(message.length / 160) }} SMS</div>
+          <div class="sms-char-count">{{ message.length }} {{ helper.t('chars') }} · ~{{ Math.ceil(message.length / 160) }} SMS</div>
 
           <div class="sms-preview" v-if="message">
-            <div class="sms-preview__label">Preview</div>
+            <div class="sms-preview__label">{{ helper.t('Preview') }}</div>
             <div class="sms-preview__text">{{ resolveMessage(message, previewStudent) }}</div>
           </div>
 
           <button class="sms-send-btn" :disabled="sending || !resolvedNumbers.length || !message.trim()" @click="sendSms">
-            <template v-if="sending"><i class='bx bx-loader-alt bx-spin'></i> Sending...</template>
-            <template v-else><i class='bx bx-send'></i> Send to {{ resolvedNumbers.length }} recipient(s)</template>
+            <template v-if="sending"><i class='bx bx-loader-alt bx-spin'></i> {{ helper.t('Sending...') }}</template>
+            <template v-else><i class='bx bx-send'></i> {{ helper.t('Send to') }} {{ resolvedNumbers.length }} {{ helper.t('recipient(s)') }}</template>
           </button>
 
           <div v-if="sendResult" :class="['sms-result', sendResult.ok ? 'sms-result--ok' : 'sms-result--err']">
-            {{ sendResult.ok ? `Sent successfully` : `Error: ${sendResult.error}` }}
+            {{ sendResult.ok ? helper.t('Sent successfully') : `${helper.t('Error')}: ${sendResult.error}` }}
           </div>
         </div>
       </div>
@@ -203,7 +203,7 @@ async function saveTemplate() {
 
 async function deleteTemplate() {
   if (!selectedTemplateId.value) return;
-  if (!confirm('Delete this template?')) return;
+  if (!confirm(helper.t('Delete this template?'))) return;
   await http.delete(`/sms/templates/${selectedTemplateId.value}`);
   templates.value = templates.value.filter(t => t.id != selectedTemplateId.value);
   selectedTemplateId.value = '';
@@ -240,7 +240,7 @@ onMounted(loadTemplates);
 }
 .sms-modal {
   background: #fff; border-radius: 14px; width: min(96vw, 860px);
-  max-height: 90vh; display: flex; flex-direction: column; overflow: hidden;
+  min-height: 70vh; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden;
   box-shadow: 0 8px 40px rgba(0,0,0,0.25);
 }
 .sms-modal__header {
@@ -262,23 +262,23 @@ onMounted(loadTemplates);
 }
 .sms-panel + .sms-panel { border-left: 1px solid #e5e7eb; }
 .sms-panel__title { font-size: 12px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; }
-.sms-tabs { display: flex; gap: 0; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; }
+.sms-tabs { display: flex; gap: 0; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; flex-shrink: 0; }
 .sms-tab { flex: 1; padding: 6px; background: #f9fafb; border: none; font-size: 12px; font-weight: 600; cursor: pointer; color: #374151; }
 .sms-tab--active { background: var(--grad3, #3a7bd5); color: #fff; }
-.sms-class-list, .sms-student-list { display: flex; flex-direction: column; gap: 6px; overflow-y: auto; max-height: 220px; }
+.sms-class-list, .sms-student-list { display: flex; flex-direction: column; gap: 6px; overflow-y: auto; }
 .sms-check { display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; padding: 4px 6px; border-radius: 6px; }
 .sms-check:hover { background: #f3f4f6; }
 .sms-check input { cursor: pointer; }
 .sms-std-name { font-weight: 600; }
 .sms-recipient-count { font-size: 12px; color: #6b7280; margin-top: auto; padding-top: 6px; border-top: 1px solid #f3f4f6; }
 .sms-search { width: 100%; padding: 6px 10px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 13px; outline: none; }
-.sms-select { flex: 1; padding: 6px 10px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 13px; outline: none; background: #fff; }
+.sms-select { flex: 1; padding: 6px 32px 6px 10px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 13px; outline: none; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E") no-repeat right 10px center; appearance: none; -webkit-appearance: none; cursor: pointer; }
 .sms-template-row { display: flex; gap: 6px; align-items: center; }
 .sms-save-tpl { display: flex; gap: 6px; align-items: center; }
 .sms-icon-btn { padding: 6px 10px; border: 1px solid #e5e7eb; border-radius: 8px; background: #f9fafb; cursor: pointer; font-size: 15px; display: flex; align-items: center; }
 .sms-icon-btn--danger { color: #dc2626; border-color: #fca5a5; }
 .sms-icon-btn--primary { background: var(--grad3, #3a7bd5); color: #fff; border-color: transparent; }
-.sms-textarea { width: 100%; border: 1px solid #e5e7eb; border-radius: 8px; padding: 8px 10px; font-size: 13px; resize: vertical; outline: none; font-family: inherit; box-sizing: border-box; }
+.sms-textarea { width: 100%; border: 1px solid #e5e7eb; border-radius: 8px; padding: 8px 10px; font-size: 13px; resize: vertical; outline: none; font-family: inherit; box-sizing: border-box; min-height: 120px; }
 .sms-char-count { font-size: 11px; color: #9ca3af; text-align: right; }
 .sms-preview { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 10px; }
 .sms-preview__label { font-size: 11px; font-weight: 700; color: #16a34a; margin-bottom: 4px; }
