@@ -32,7 +32,6 @@
                     <th>Active</th>
                     <th>Shifts</th>
                     <th></th>
-                    <th></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -54,14 +53,10 @@
                         <Switch v-model="cls.isActive" :size="'sm'" />
                       </td>
                       <td class="cs-cls-shifts-cell">
-                        <div class="cs-cls-shifts-display">
+                        <button class="cs-cls-shifts-toggle" @click="expandedShifts[idx] = !expandedShifts[idx]">
                           <span v-for="(sh, si) in (cls.shifts||[])" :key="si" class="cs-cls-shift-badge">{{ sh.start }}–{{ sh.end }}</span>
-                          <span v-if="!(cls.shifts||[]).length" class="cs-cls-shift-empty">no shifts</span>
-                        </div>
-                      </td>
-                      <td class="cs-cls-eye-cell">
-                        <button class="cs-cls-eye-btn" :class="{ active: expandedShifts[idx] }" :tooltip="expandedShifts[idx] ? 'Hide shifts' : 'Edit shifts'" @click="expandedShifts[idx] = !expandedShifts[idx]">
-                          <i :class="expandedShifts[idx] ? 'bx bx-hide' : 'bx bx-show'"></i>
+                          <span v-if="!(cls.shifts||[]).length" class="cs-cls-shift-empty">+ shifts</span>
+                          <i :class="expandedShifts[idx] ? 'bx bx-chevron-up' : 'bx bx-chevron-down'" class="cs-cls-chev"></i>
                         </button>
                       </td>
                       <td>
@@ -69,21 +64,17 @@
                       </td>
                     </tr>
                     <!-- Shifts expanded row -->
-                    <tr class="cs-cls-shifts-row">
-                      <td colspan="9" class="cs-cls-shifts-td">
-                        <Transition name="shifts-expand">
-                          <div v-if="expandedShifts[idx]" class="cs-cls-shifts-wrap">
-                            <TransitionGroup name="shift-item" tag="div" class="cs-cls-shifts-items">
-                              <div v-for="(sh, si) in (cls.shifts||[])" :key="sh.start+'_'+si" class="cs-cls-shift-item">
-                                <span class="cs-cls-shift-label">#{{ si+1 }}</span>
-                                <label>Start <input class="cs-cls-input cs-cls-input--time" type="time" v-model="sh.start" /></label>
-                                <label>End <input class="cs-cls-input cs-cls-input--time" type="time" v-model="sh.end" /></label>
-                                <button class="cs-cls-del" @click="cls.shifts.splice(si,1)">×</button>
-                              </div>
-                            </TransitionGroup>
-                            <button class="cs-cls-shift-add" @click="(cls.shifts = cls.shifts||[]).push({start:'08:00',end:'10:00'})">+ Add Shift</button>
+                    <tr v-if="expandedShifts[idx]" class="cs-cls-shifts-row">
+                      <td colspan="8">
+                        <div class="cs-cls-shifts-wrap">
+                          <div v-for="(sh, si) in (cls.shifts||[])" :key="si" class="cs-cls-shift-item">
+                            <span class="cs-cls-shift-label">#{{ si+1 }}</span>
+                            <label>Start <input class="cs-cls-input cs-cls-input--time" type="time" v-model="sh.start" /></label>
+                            <label>End <input class="cs-cls-input cs-cls-input--time" type="time" v-model="sh.end" /></label>
+                            <button class="cs-cls-del" @click="cls.shifts.splice(si,1)">×</button>
                           </div>
-                        </Transition>
+                          <button class="cs-cls-shift-add" @click="(cls.shifts = cls.shifts||[]).push({start:'08:00',end:'10:00'})">+ Add Shift</button>
+                        </div>
                       </td>
                     </tr>
                   </template>
@@ -307,30 +298,13 @@ onUnmounted(() => { if (hasSaved.value) {
 .cs-cls-add { margin-top: 8px; width: 100%; padding: 7px; border: 1px dashed #b0c4de; border-radius: 7px; background: #f8fbff; color: #3a7bd5; font-size: 13px; font-weight: 600; cursor: pointer; }
 .cs-cls-add:hover { background: #e8f4fd; }
 .cs-cls-shifts-cell { white-space: nowrap; }
-.cs-cls-shifts-display { display: inline-flex; align-items: center; gap: 4px; flex-wrap: wrap; max-width: 160px; padding: 3px 0; }
+.cs-cls-shifts-toggle { background: none; border: 1px solid #e0e0e0; border-radius: 5px; padding: 4px 20px 4px 6px; cursor: pointer; font-size: 11px; display: inline-flex; align-items: flex-start; gap: 3px; flex-wrap: wrap; max-width: 160px; position: relative; }
+.cs-cls-shifts-toggle:hover { background: #f0f4ff; border-color: #b0c4de; }
 .cs-cls-shift-badge { background: #e8f0fe; color: #3a7bd5; border-radius: 4px; padding: 1px 5px; font-size: 10px; font-weight: 600; }
-.cs-cls-shift-empty { color: #bbb; font-size: 11px; font-style: italic; }
-.cs-cls-eye-cell { width: 28px; text-align: center; }
-.cs-cls-eye-btn { background: none; border: 1.5px solid #d1d5db; border-radius: 6px; width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; color: #9ca3af; font-size: 15px; transition: border-color 0.15s, color 0.15s, background 0.15s; }
-.cs-cls-eye-btn:hover { border-color: #3a7bd5; color: #3a7bd5; background: #f0f4ff; }
-.cs-cls-eye-btn.active { border-color: #3a7bd5; color: #3a7bd5; background: #e8f0fe; }
+.cs-cls-shift-empty { color: #aaa; font-size: 11px; }
+.cs-cls-chev { position: absolute; top: 2px; right: 4px; font-size: 13px; color: #888; }
 .cs-cls-shifts-row td { padding: 0; background: #f9fbff; }
-.cs-cls-shifts-td { padding: 0 !important; }
-.cs-cls-shifts-wrap { padding: 10px 14px; display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; overflow: hidden; flex-direction: column; }
-.cs-cls-shifts-items { display: contents; }
-
-/* Expand/collapse row animation */
-.shifts-expand-enter-active { transition: max-height 0.32s cubic-bezier(0.4,0,0.2,1), opacity 0.22s ease; overflow: hidden; max-height: 300px; }
-.shifts-expand-leave-active { transition: max-height 0.22s cubic-bezier(0.4,0,0.2,1), opacity 0.18s ease; overflow: hidden; }
-.shifts-expand-enter-from { max-height: 0; opacity: 0; }
-.shifts-expand-leave-to { max-height: 0; opacity: 0; }
-.shifts-expand-enter-to, .shifts-expand-leave-from { max-height: 300px; opacity: 1; }
-
-/* Individual shift item add/remove animation */
-.shift-item-enter-active { transition: all 0.22s cubic-bezier(0.4,0,0.2,1); }
-.shift-item-leave-active { transition: all 0.18s cubic-bezier(0.4,0,0.2,1); position: absolute; }
-.shift-item-enter-from { opacity: 0; transform: translateY(-8px) scale(0.96); }
-.shift-item-leave-to { opacity: 0; transform: translateX(12px) scale(0.94); }
+.cs-cls-shifts-wrap { padding: 10px 14px; display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; }
 .cs-cls-shift-item { display: flex; align-items: center; gap: 6px; background: #fff; border: 1px solid #e0e0e0; border-radius: 7px; padding: 6px 10px; font-size: 12px; }
 .cs-cls-shift-label { font-weight: 700; color: #888; min-width: 20px; }
 .cs-cls-shift-item label { display: flex; align-items: center; gap: 4px; color: #555; }
