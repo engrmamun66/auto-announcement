@@ -45,7 +45,7 @@
           </template>
 
           <div class="sms-recipient-count">
-            <i class='bx bx-user'></i> {{ resolvedNumbers.length }} recipient(s) with phone
+            <i class='bx bx-user'></i> {{ resolvedNumbers.length }} {{ helper.t('recipient(s) with phone') }}
           </div>
         </div>
 
@@ -111,6 +111,7 @@ const http = inject('http');
 const classes = inject('classes');
 const all_students_non_copied = inject('all_students_non_copied');
 const emitter = inject('emitter');
+const helper = inject('helper');
 
 const tab = ref('class');
 const selectedClasses = ref([]);
