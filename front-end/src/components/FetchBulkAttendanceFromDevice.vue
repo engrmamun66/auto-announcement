@@ -3,34 +3,34 @@
     <Rightbar
       ref="RightbarRef"
       v-if="showRightbar"
-      title="Fetch Bulk Attendance"
+      :title="helper.t('Fetch Bulk Attendance')"
       @unmount="showRightbar = false; $emit('unmount')"
       :largestMode="false"
     >
     <div class="alert alert-info small mb-2">
-      <div><strong>এই টুলটি কী করে?</strong> ডিভাইস (BioTime) থেকে নির্দিষ্ট সময়ের পাঞ্চ লিস্ট এনে এখানে দেখায়।</div>
-      <div><strong>কিভাবে ব্যবহার করবেন:</strong> Start/End সময় দিন → <b>Fetch Logs</b> চাপুন → তালিকা দেখে <b>Submit Attendance</b> দিন।</div>
+      <div><strong>{{ helper.t('What does this tool do?') }}</strong> {{ helper.t('This shows punch logs from the BioTime device for a selected time range.') }}</div>
+      <div><strong>{{ helper.t('How to use:') }}</strong> {{ helper.t('Give start/end time -> press Fetch Logs -> review the list -> press Submit Attendance.') }}</div>
       <!-- <div><strong>নোট:</strong> শুধু যেসব Emp Code আমাদের সিস্টেমে আছে সেগুলোই “Matched” হবে, বাকি গুলো “Skipped”.</div> -->
     </div>
     <div class="row g-3">
       <div class="col-6">
-        <label for="">Start Time</label>
+        <label for="">{{ helper.t('Start Time') }}</label>
         <input v-model="payload.start_time" type="datetime-local" class="form-control cb-input" />
       </div>
       <div class="col-6">
-        <label for="">End Time</label>
+        <label for="">{{ helper.t('End Time') }}</label>
         <input v-model="payload.end_time" type="datetime-local" class="form-control cb-input" />
       </div>
 
       <div class="col-12">
         <div class="d-flex align-items-center gap-2">
           <Btn class="" @click.stop="fetchLogs" :disabled="fetching">
-            <template v-if="fetching">Fetching...</template>
-            <template v-else>Fetch Logs</template>
+            <template v-if="fetching">{{ helper.t('Fetching...') }}</template>
+            <template v-else>{{ helper.t('Fetch Logs') }}</template>
           </Btn>
           <Btn class="white">Total: <span class="badge text-white bg-secondary">{{ logs.length }}</span></Btn>
-          <Btn class="white">Matched: <span class="badge text-white bg-success">{{ matchedCount }}</span></Btn>
-          <Btn class="white">Skipped: <span class="badge text-white bg-danger">{{ skippedCount }}</span></Btn>
+          <Btn class="white">{{ helper.t('Matched') }}: <span class="badge text-white bg-success">{{ matchedCount }}</span></Btn>
+          <Btn class="white">{{ helper.t('Skipped') }}: <span class="badge text-white bg-danger">{{ skippedCount }}</span></Btn>
         </div>
       </div>
 
@@ -39,9 +39,9 @@
           <table class="table table-sm table-striped align-middle">
             <thead>
               <tr>
-                <th>Emp Code</th>
-                <th>Punch Time</th>
-                <th>Status</th>
+                <th>{{ helper.t('Emp Code') }}</th>
+                <th>{{ helper.t('Punch Time') }}</th>
+                <th>{{ helper.t('Status') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -49,12 +49,12 @@
                 <td>{{ item.emp_code }}</td>
                 <td>{{ item.punch_time }}</td>
                 <td>
-                  <span v-if="hasStudent(item)" class="badge bg-success">Matched</span>
-                  <span v-else class="badge bg-danger">Skipped</span>
+                  <span v-if="hasStudent(item)" class="badge bg-success">{{ helper.t('Matched') }}</span>
+                  <span v-else class="badge bg-danger">{{ helper.t('Skipped') }}</span>
                 </td>
               </tr>
               <tr v-if="!previewLogs.length">
-                <td colspan="3" class="text-center text-muted">No logs found.</td>
+                <td colspan="3" class="text-center text-muted">{{ helper.t('No logs found.') }}</td>
               </tr>
             </tbody>
           </table>
@@ -68,10 +68,10 @@
           Importing {{ progress.done }} / {{ progress.total }} (Skipped {{ progress.skipped }})
         </div>
         <div class="d-flex gap-2">
-          <Btn class="red" @click.stop="clearLogs" :disabled="fetching || inserting">Clear</Btn>
+          <Btn class="red" @click.stop="clearLogs" :disabled="fetching || inserting">{{ helper.t('Clear') }}</Btn>
           <Btn @click.stop="submitLogs" :disabled="!logs.length || inserting">
-            <template v-if="inserting">Submitting...</template>
-            <template v-else>Submit Attendance</template>
+            <template v-if="inserting">{{ helper.t('Submitting...') }}</template>
+            <template v-else>{{ helper.t('Submit Attendance') }}</template>
           </Btn>
         </div>
       </div>

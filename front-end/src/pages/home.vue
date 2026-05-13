@@ -265,8 +265,8 @@ function recallAllPunchedStudents(){
           <div class="relative w-100 me-2" data-no-auto-i18n="true">
                <EmergencyMode v-if="emergency_mode"></EmergencyMode>
                <EmergencyMode v-if="emergency_mode" style="left:calc(100% - 30px)"></EmergencyMode>
-               <input id="BARCODE_INPUT" type="text" @keyup.enter="inputBarcode" @paste="inputBarcode" class="form-control px-4 py-2 text-center py-1 cb-input" 
-               placeholder="Student ID">
+               <input id="BARCODE_INPUT" type="text" @keyup.enter="inputBarcode" @paste="inputBarcode" class="form-control px-4 py-2 text-center py-1 cb-input"
+               :placeholder="barcodePlaceholder">
           </div>
 
           <div v-if="is_started_schedule" class="me-2 p-1 px-2 play-pause" 
@@ -291,7 +291,7 @@ function recallAllPunchedStudents(){
 
           <div v-if="isUsingSpeakerAutoControl" class="me-2 p-1 position-relative" @click.stop="showSwithBoardModal = !showSwithBoardModal">
                <img :src="borad_image_url" alt="" class="board-image">
-               <span class="manual-mode" v-if="!isSpeakersAutoMode">manual</span>
+               <span class="manual-mode" v-if="!isSpeakersAutoMode">{{ helper.t('manual') }}</span>
           </div> 
          
           <BarcodeScannigAnimation v-if="is_started_schedule" :scannig="is_started_schedule" class="me-1"  ></BarcodeScannigAnimation> 
@@ -330,7 +330,7 @@ function recallAllPunchedStudents(){
                               </template>
                               <!-- Incomming puch -->
                               <template v-if="callbacks.incoming_punch_schedules().length">                                    
-                                   <h4 class="p-2 border3 radius-5 my-2 shadow me-1" style="background:var(--grad1)">Incoming punch...</h4>
+                                   <h4 class="p-2 border3 radius-5 my-2 shadow me-1" style="background:var(--grad1)">{{ helper.t('Incoming punch...') }}</h4>
                                    <template v-for="item in callbacks.incoming_punch_schedules()">
                                         <li class="mb-2" >                    
                                              <h4 class="mb-1"> 
@@ -351,7 +351,7 @@ function recallAllPunchedStudents(){
                               </template>
                               <!-- Times up puch -->
                               <template v-if="true">
-                                  <h4 v-if="callbacks.timesup_punch_schedules()?.length" class="p-2 border3 radius-5 my-2 shadow me-1" style="background:var(--grad1)">Times Up</h4>
+                                  <h4 v-if="callbacks.timesup_punch_schedules()?.length" class="p-2 border3 radius-5 my-2 shadow me-1" style="background:var(--grad1)">{{ helper.t('Times Up') }}</h4>
                                   <template v-for="item in callbacks.timesup_punch_schedules()">
                                          <li class="mb-2" >                    
                                               <h4 class="mb-1"> 
@@ -389,7 +389,7 @@ function recallAllPunchedStudents(){
                               </template>
                               <!-- Incomming call -->
                               <template v-if="callbacks.incoming_call_schedules().length">
-                                   <h4 class="p-2 border3 radius-5 my-2 shadow me-1" style="background:var(--grad1)">Incoming call...</h4>
+                                   <h4 class="p-2 border3 radius-5 my-2 shadow me-1" style="background:var(--grad1)">{{ helper.t('Incoming call...') }}</h4>
                                    <template v-for="item in callbacks.incoming_call_schedules()">
                                         <li class="mb-0" >                    
                                              <h4> 
@@ -411,7 +411,7 @@ function recallAllPunchedStudents(){
                               </template>
                                <!-- Times up puch -->
                                <template v-if="true">
-                                   <h4 v-if="callbacks.timesup_call_schedules()?.length" class="p-2 border3 radius-5 my-2 shadow me-1" style="background:var(--grad1)">Times Up</h4>
+                                   <h4 v-if="callbacks.timesup_call_schedules()?.length" class="p-2 border3 radius-5 my-2 shadow me-1" style="background:var(--grad1)">{{ helper.t('Times Up') }}</h4>
                                   <template v-for="item in callbacks.timesup_call_schedules()">
                                          <li class="mb-2" >                    
                                               <h4 class="mb-1"> 
@@ -431,11 +431,11 @@ function recallAllPunchedStudents(){
 
           <div class="single-section watting-list relative">
                <div class="header-and-tools">
-                    <h4 class="header-title"> Puch Board </h4> 
+                    <h4 class="header-title"> {{ helper.t('Puch Board') }} </h4>
                     <div class="right-section" v-if="wattingList?.length">
-                         <span class="outlined" >Waitting: {{ wattingList.filter(student => !student.is_called).length }}/{{ wattingList.length }}</span>
-                         <span class="outlined" >Completed: {{ wattingList.filter(student => student.is_called).length }}/{{ wattingList.length }}</span>
-                         <button class="action-button" @click.stop="showRecallConfirmation = true" ><i class='bx bxs-speaker transformY-1px' ></i> Recall All</button>
+                         <span class="outlined" >{{ helper.t('Waitting:') }} {{ wattingList.filter(student => !student.is_called).length }}/{{ wattingList.length }}</span>
+                         <span class="outlined" >{{ helper.t('Completed:') }} {{ wattingList.filter(student => student.is_called).length }}/{{ wattingList.length }}</span>
+                         <button class="action-button" @click.stop="showRecallConfirmation = true" ><i class='bx bxs-speaker transformY-1px' ></i> {{ helper.t('Recall All') }}</button>
                     </div> 
                </div>
                <div class="set-max-height" id="students_card_container">
@@ -461,7 +461,7 @@ function recallAllPunchedStudents(){
                                         <div class="class-name panch-time mt-1 cp" @click="log({student, currentItem: storage('currentItem').value}) ">
                                              <div class="d-flex justify-content-between align-items-center" @click.stop="()=>{ router.push({name: 'students', query: { dakhela: student.dakhela, barcode, log: true }}) }" >
                                                   <label :tooltip="!student?.call_slot ? '' : 'Punched: ' + moment(student.punch_exact_time_text).format('hh:mm:ss A')" class="cp"> 
-                                                       <span v-if="!student?.call_slot && student?.emergency_mode " class="text-danger">Emergency Call</span>
+                                                       <span v-if="!student?.call_slot && student?.emergency_mode " class="text-danger">{{ helper.t('Emergency Call') }}</span>
                                                        <span v-else v-html="student?.call_slot"></span>
                                                         
                                                   </label>
@@ -484,7 +484,7 @@ function recallAllPunchedStudents(){
                                                   <label class="cp text-danger">
                                                        এই অডিওটি পুনরায় রেকর্ড করুন!
                                                   </label>
-                                                  <button class="click-here">Click Here</button>
+                                                  <button class="click-here">{{ helper.t('Click Here') }}</button>
                                              </div>
                                         </div>
                                    <div class="icons"> 
@@ -498,9 +498,9 @@ function recallAllPunchedStudents(){
                                              'has-error': student?.sound1_haserror,
                                         }">
                                              <i v-if="student.is_called && !student?.sound1_haserror" class='bx bx-sync size-09 transformY-2px' ></i>
-                                             {{ student?.sound1_haserror ? 'Error' : (!student.is_called ? (isPayingThisCard(student) ? (manually_paused_the_playlist ? 'Paused' : 'Calling...') : 'Waitting') : 'Completed') }}
+                                             {{ student?.sound1_haserror ? helper.t('Error') : (!student.is_called ? (isPayingThisCard(student) ? (manually_paused_the_playlist ? helper.t('Paused') : helper.t('Calling...')) : 'Waitting') : 'Completed') }}
                                         </span>
-                                        <span v-if="student?.total_punch > 1" class='header-span-item comp'>Punched: {{ student?.total_punch }}</span> 
+                                        <span v-if="student?.total_punch > 1" class='header-span-item comp'>{{ helper.t('Punched:') }} {{ student?.total_punch }}</span>
                                    </div>
                                    <span @click="removeFromWattingList(student, i)" class="card-canceller">
                                              <i class='bx bx-x'></i>
@@ -511,7 +511,7 @@ function recallAllPunchedStudents(){
                     </div>
                     <div v-else>
                          <div class="p-5 text-muted w-100 radius-5" style="border: 1px solid #949494;height:">
-                              <h5 class="text-center">Punch Board is Empty</h5>
+                              <h5 class="text-center">{{ helper.t('Punch Board is Empty') }}</h5>
                          </div>
                     </div>
                </div>

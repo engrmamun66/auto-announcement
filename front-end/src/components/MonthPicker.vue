@@ -209,9 +209,9 @@ export default {
 
 .month-label{
   font-weight: 600;
-  color: #1f2937;
-  min-width: 80px;
+  color: #1f2937; 
   text-align: center;
+  min-width: 82px;
 }
 
 .month-nav{

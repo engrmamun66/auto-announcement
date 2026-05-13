@@ -1,5 +1,5 @@
 <template>
-  <Rightbar ref="theRightbar" title="Settings" @unmount="$emit('unmount')">
+  <Rightbar ref="theRightbar" :title="helper.t('Settings')" @unmount="$emit('unmount')">
     <div class="cs">
       <div v-if="loading" class="cs__loading">Loading...</div>
       <template v-else>
@@ -23,13 +23,13 @@
           <p v-if="errors[activeKey]" class="cs__error">{{ errors[activeKey] }}</p>
           <div class="cs__actions">
             <button class="cs__btn cs__btn--reset-all" @click="resetAll" :disabled="resettingAll">
-              Reset All to Default <BtnLoader v-if="resettingAll"></BtnLoader>
+              {{ helper.t('Reset All to Default') }} <BtnLoader v-if="resettingAll"></BtnLoader>
             </button>
             <div class="cs__actions-right">
-              <button class="cs__btn cs__btn--reset" @click="resetDraft(activeKey)">Reset</button>
-              <button class="cs__btn cs__btn--close" @click="theRightbar.unmount()">Close</button>
+              <button class="cs__btn cs__btn--reset" @click="resetDraft(activeKey)">{{ helper.t('Reset') }}</button>
+              <button class="cs__btn cs__btn--close" @click="theRightbar.unmount()">{{ helper.t('Close') }}</button>
               <button class="cs__btn cs__btn--save" @click="save(activeKey)" :disabled="saving[activeKey]">
-                Save <BtnLoader v-if="saving[activeKey]"></BtnLoader>
+                {{ helper.t('Save') }} <BtnLoader v-if="saving[activeKey]"></BtnLoader>
               </button>
             </div>
           </div>
@@ -48,6 +48,7 @@ import BtnLoader from '../BtnLoader.vue';
 
 const emit = defineEmits(['unmount']);
 const http = inject('http');
+const helper = inject('helper');
 
 const theRightbar = ref(true);
 const loading = ref(true);

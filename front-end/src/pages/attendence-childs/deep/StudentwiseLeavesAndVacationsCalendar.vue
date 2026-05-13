@@ -326,9 +326,9 @@ let filteredAllStudents = computed(() => {
 
     <div class="d-flex justify-content-between column-gap-3 flex-wrap mb-2">
       <div class="d-flex justify-content-center column-gap-3 mb-2">
-        <div class="form-group" tooltip="Select A Class">
+        <div class="form-group" :tooltip="helper.t('Select A Class')">
           <select class="form-control cb-input" v-model="tab3_class_short" style="min-width: 350px" >
-            <option :value="null">-All Classes-</option>
+            <option :value="null">{{ helper.t('-All Classes-') }}</option>
             <template v-for="(eachClass, index) in classes" :key="index">
               <option :value="eachClass.class_short">{{ eachClass.class_name }}</option>
             </template>                  
@@ -354,13 +354,13 @@ let filteredAllStudents = computed(() => {
       <div class="d-flex justify-content-center column-gap-3 mb-2">
         <ul class="nav nav-tabs d2 mt-0 mb-3 bottom-borderless">
             <li class="nav-item">
-              <a @click.stop="leave_filter_type = 1; onInitAndNextPrev(dateRange)" class="nav-link cp text-black button-group" :class="{'active': leave_filter_type==1}" >Person Leaves <span class="badge bg-secondary" v-if="leave_filter_type==1">{{ totalEventsCount?.length }}</span> </a>
+              <a @click.stop="leave_filter_type = 1; onInitAndNextPrev(dateRange)" class="nav-link cp text-black button-group" :class="{'active': leave_filter_type==1}" >{{ helper.t('Person Leaves') }} <span class="badge bg-secondary" v-if="leave_filter_type==1">{{ totalEventsCount?.length }}</span> </a>
             </li>
             <li class="nav-item">
-              <a @click.stop="leave_filter_type = 2; onInitAndNextPrev(dateRange)" class="nav-link cp text-black button-group" :class="{'active': leave_filter_type==2}" >Institute Leaves <span class="badge bg-secondary" v-if="leave_filter_type==2">{{ totalEventsCount?.length }}</span> </a>
-            </li>       
+              <a @click.stop="leave_filter_type = 2; onInitAndNextPrev(dateRange)" class="nav-link cp text-black button-group" :class="{'active': leave_filter_type==2}" >{{ helper.t('Institute Leaves') }} <span class="badge bg-secondary" v-if="leave_filter_type==2">{{ totalEventsCount?.length }}</span> </a>
+            </li>
             <li class="nav-item">
-              <a @click.stop="leave_filter_type = 3; onInitAndNextPrev(dateRange)" class="nav-link cp text-black button-group" :class="{'active': leave_filter_type==3}" >All Leaves <span class="badge bg-secondary" v-if="leave_filter_type==3">{{ totalEventsCount?.length }}</span> </a>
+              <a @click.stop="leave_filter_type = 3; onInitAndNextPrev(dateRange)" class="nav-link cp text-black button-group" :class="{'active': leave_filter_type==3}" >{{ helper.t('All Leaves') }} <span class="badge bg-secondary" v-if="leave_filter_type==3">{{ totalEventsCount?.length }}</span> </a>
             </li>       
           </ul>
       </div>
@@ -401,10 +401,10 @@ let filteredAllStudents = computed(() => {
           </tbody>
         </table>
       </div>
-      <p class="mb-0"><strong>Do you want to delete all?</strong></p>
+      <p class="mb-0"><strong>{{ helper.t('Do you want to delete all?') }}</strong></p>
     </confirm>
     <Modal v-model="showDetailsModal" @yes="deleteVacations">
-      <template #title>Details View</template>
+      <template #title>{{ helper.t('Details View') }}</template>
       <div class="overflow-y-auto modal-table" style="max-height: 400px;">
         <table class="w-100">
           <tbody>
@@ -421,8 +421,8 @@ let filteredAllStudents = computed(() => {
       </div>
 
       <div class="d-flex justify-content-end column-gap-2">
-        <Btn @click="showDetailsModal = false">Close</Btn>
-        <Btn @click="deleteVacations();showDetailsModal = false" class="red">Delete</Btn>
+        <Btn @click="showDetailsModal = false">{{ helper.t('Close') }}</Btn>
+        <Btn @click="deleteVacations();showDetailsModal = false" class="red">{{ helper.t('Delete') }}</Btn>
       </div>
 
     </Modal>
@@ -436,7 +436,7 @@ let filteredAllStudents = computed(() => {
       
       <div class="row">
         <div class="col-12 mb-3">
-          <label for="">Select Date Range</label>
+          <label for="">{{ helper.t('Select Date Range') }}</label>
           <div class="position-relative">
             <EmDateTimePicker ref="dateRangePickerRef"
               v-model="pickerModelValue"
@@ -467,7 +467,7 @@ let filteredAllStudents = computed(() => {
         
         <div class="col-12 mb-3">
           <label class="form-check-label" >
-            Select Vacation Type
+            {{ helper.t('Select Vacation Type') }}
           </label>
           <div class="vacationtypes">
             <div class="row">
@@ -487,21 +487,21 @@ let filteredAllStudents = computed(() => {
                 <div class="form-check" @click="showTextArea = true;payload.reason = ''">
                   <input @click="showTextArea = true; payload.reason = ''" class="form-check-input" type="radio" name="vacation_type" :value="''" :checked="!stuents_leave_types.map(vt=>helper.optionTitleKey(vt)).includes(payload.reason)" >
                   <label class="form-check-label" for="other">
-                    Other Vacation
+                    {{ helper.t('Other Vacation') }}
                   </label>
                 </div>
               </div>
             </div>
 
             <div v-if="showTextArea" class="form-group mt-2">
-             <label>Write custom note for vacation type</label>
+             <label>{{ helper.t('Write custom note for vacation type') }}</label>
              <textarea ref="textAreaRef" v-model="payload.reason" class="form-control cb-input cb-textarea"></textarea>
             </div>
           </div>
 
           <div class="d-flex justify-content-start mt-3 pt-2 gap-2">
-            <Btn class="red" @click="onCancel">Cancel</Btn>
-            <Btn @click="onSubmit">Save Now <BtnLoader v-if="showBtnLoader"></BtnLoader> </Btn>
+            <Btn class="red" @click="onCancel">{{ helper.t('Cancel') }}</Btn>
+            <Btn @click="onSubmit">{{ helper.t('Save Now') }} <BtnLoader v-if="showBtnLoader"></BtnLoader> </Btn>
           </div>
 
         </div>

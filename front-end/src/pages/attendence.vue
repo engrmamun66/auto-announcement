@@ -247,23 +247,23 @@ onMounted(()=>{
       <ul class="nav nav-tabs mt-0 mb-3 bottom-borderless">
          <li class="nav-item">
            <a @click.stop="tab = 1" @auxclick.stop="clearAllAndRelaod()" class="nav-link cp text-black" :class="{'active': tab == 1}">
-             <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3" fill="currentColor" stroke="none"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/></svg>Realtime</a>
+             <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3" fill="currentColor" stroke="none"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/></svg>{{ helper.t('Realtime') }}</a>
          </li>
          <li class="nav-item">
            <a @click.stop="tab = 5" class="nav-link cp text-black" :class="{'active': tab == 5}">
-             <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><polyline points="9 16 11 18 15 14"/></svg>Hazira</a>
+             <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><polyline points="9 16 11 18 15 14"/></svg>{{ helper.t('Hazira') }}</a>
          </li>
          <li class="nav-item">
            <a @click.stop="tab = 3" class="nav-link cp text-black" :class="{'active': tab == 3}">
-             <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><circle cx="12" cy="7" r="3"/><path d="M5 21v-2a7 7 0 0 1 14 0v2"/><line x1="17" y1="11" x2="22" y2="11"/><line x1="19" y1="9" x2="19" y2="13"/></svg>Leaves</a>
+             <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><circle cx="12" cy="7" r="3"/><path d="M5 21v-2a7 7 0 0 1 14 0v2"/><line x1="17" y1="11" x2="22" y2="11"/><line x1="19" y1="9" x2="19" y2="13"/></svg>{{ helper.t('Leaves') }}</a>
          </li>
          <li class="nav-item">
            <a @click.stop="tab = 4" class="nav-link cp text-black" :class="{'active': tab == 4}">
-             <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Reporting</a>
+             <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>{{ helper.t('Reporting') }}</a>
          </li>
          <li class="nav-item">
            <a @click.stop="tab = 2" class="nav-link cp text-black" :class="{'active': tab == 2}">
-             <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/><line x1="12" y1="8" x2="12" y2="12"/><polyline points="12 12 15 14"/></svg>Logs</a>
+             <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/><line x1="12" y1="8" x2="12" y2="12"/><polyline points="12 12 15 14"/></svg>{{ helper.t('Logs') }}</a>
          </li>   
       </ul>
 
@@ -273,10 +273,10 @@ onMounted(()=>{
             <Btn class="white">Out: <span class="badge text-white bg-warning">{{ Ahelper.count.out(liveAttendenceList) }}</span></Btn>
             <Btn class="white">Late: <span class="badge text-white bg-danger">{{ Ahelper.count.late(liveAttendenceList) }}</span></Btn>
             <Btn class="white">Total: <span class="badge text-white bg-success">{{ liveAttendenceList?.length }}</span></Btn>
-            <Btn id="transaction_bulk_fetch" class="" @click="show_bulk_device_fetch = true">Get Attendace From History </Btn>
+            <Btn id="transaction_bulk_fetch" class="" @click="show_bulk_device_fetch = true">{{ helper.t('Get Attendace From History') }}</Btn>
             <Btn class="red" :disabled="!hasLiveAttendence || clearingLive" @click="clearAllAndRelaod" >
-              <template v-if="clearingLive">Clearing...</template>
-              <template v-else>Clear All</template>
+              <template v-if="clearingLive">{{ helper.t('Clearing...') }}</template>
+              <template v-else>{{ helper.t('Clear All') }}</template>
             </Btn>
           </div>
         </div>   
@@ -289,14 +289,14 @@ onMounted(()=>{
             }" ></Pagination>
           </div> 
 
-          <div class="form-group" tooltip="Sort By">
+          <div class="form-group" :tooltip="helper.t('Sort By')">
             <select class="form-control cb-input" v-model="sortby_column" >
               <template v-for="(column, index) in sortby_columns" :key="index">
                 <option :value="column.id">{{ column.title }}</option>
               </template>                  
             </select>
           </div>
-          <div class="form-group" tooltip="Sort Direction">
+          <div class="form-group" :tooltip="helper.t('Sort Direction')">
             <select class="form-control cb-input" v-model="sort_direction" >
               <template v-for="(direction, index) in ['ASC', 'DESC']" :key="index">
                 <option :value="direction">{{ direction }}</option>
@@ -304,7 +304,7 @@ onMounted(()=>{
             </select>
           </div>
 
-          <div class="form-group" tooltip="Per Page">
+          <div class="form-group" :tooltip="helper.t('Per Page')">
             <select v-model="pagination_perpage" class="form-control cb-input" style="width: 110px">
               <template v-for="(limit, index) in perpage_limits" :key="index">
                 <option :value="limit">Limit {{ limit }}</option>
@@ -318,10 +318,10 @@ onMounted(()=>{
         <div class="d-flex justify-content-end column-gap-3">
           <ul class="nav nav-tabs d2 mt-0 mb-3 bottom-borderless">
             <li class="nav-item">
-              <a @click.stop="leaveAndWeekendSubTab = 1" class="nav-link cp text-black" :class="{'active': leaveAndWeekendSubTab==1}" >Class Wise</a>
+              <a @click.stop="leaveAndWeekendSubTab = 1" class="nav-link cp text-black" :class="{'active': leaveAndWeekendSubTab==1}" >{{ helper.t('Class Wise') }}</a>
             </li>
             <li class="nav-item">
-              <a @click.stop="leaveAndWeekendSubTab = 2" class="nav-link cp text-black" :class="{'active': leaveAndWeekendSubTab==2}" >Student Wise</a>
+              <a @click.stop="leaveAndWeekendSubTab = 2" class="nav-link cp text-black" :class="{'active': leaveAndWeekendSubTab==2}" >{{ helper.t('Student Wise') }}</a>
             </li>       
           </ul>
         </div>

@@ -5,17 +5,17 @@
     </a>
 
     <span v-if="isIPAccess" @click="sendRemoteAction()" class="topnav__wifi" :class="is_connected_with_main_app ? 'topnav__wifi--on' : 'topnav__wifi--off'"
-      :tooltip="is_connected_with_main_app ? 'Connected to main app' : 'Not connected to main app'" flow="down">
+      :tooltip="is_connected_with_main_app ? helper.t('Connected to main app') : helper.t('Not connected to main app')" flow="down">
       <i :class="is_connected_with_main_app ? 'bx bx-wifi' : 'bx bx-wifi-off'"></i>
     </span>
     <span v-if="isIPAccess && is_connected_with_main_app" class="topnav__wifi" :class="!main_app_user_is_active ? 'topnav__wifi--on' : 'topnav__wifi--off'"
-      :tooltip="main_app_user_is_active ? 'Main app is busy' : 'You can control remotely'" flow="down">
+      :tooltip="main_app_user_is_active ? helper.t('Main app is busy') : helper.t('You can control remotely')" flow="down">
       <i class="bx bx-mouse"></i>
     </span>
  
 
     <span v-if="!isIPAccess && !isUserActive" class="topnav__wifi topnav__wifi--on"
-      tooltip="User is not active" flow="down">
+      :tooltip="helper.t('User is not active')" flow="down">
       <i class='bx bx-loader-circle topnav__hypnotize'></i>
     </span>
 
@@ -26,41 +26,41 @@
     <nav class="topnav__links" :class="{ 'is-open': isOpen }">
       <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
         <RouterLink id="nav-link-home" :to="{name: 'home', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active': route.name === 'home'}" @click="sendRemoteAction({from: 'ip', action: 'onClick', selector: '#nav-link-home'})">
-          <i class='bx bxs-home pre-icon'></i> Dashboard
+          <i class='bx bxs-home pre-icon'></i> {{ helper.t('Dashboard') }}
         </RouterLink>
       </template>
       <template v-if="CONFIG?.settings?.attendance?.status">
         <RouterLink id="nav-link-attendence" :to="{name: 'attendence', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active attendence-tab': route.name === 'attendence'}" 
         @click="sendRemoteAction({from: 'ip', action: 'onClick', selector: '#nav-link-attendence'})"
         @dblclick.prevent="show_bulk_attedance_component = true" >
-          <i class='bx bx-user-pin pre-icon'></i> Attendence
+          <i class='bx bx-user-pin pre-icon'></i> {{ helper.t('Attendence') }}
         </RouterLink>
       </template>
       <RouterLink id="nav-link-students" :to="{name: 'students', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active students-tab': route.name === 'students'}" 
         @click="sendRemoteAction({from: 'ip', action: 'onClick', selector: '#nav-link-students'})"
         @dblclick.prevent="show_cloner_component = true" >
-        <i class='bx bxs-user pre-icon'></i> Students
+        <i class='bx bxs-user pre-icon'></i> {{ helper.t('Students') }}
       </RouterLink>
       <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
         <RouterLink id="nav-link-shedules" :to="{name: 'shedules', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active': route.name === 'shedules'}" @click="sendRemoteAction({from: 'ip', action: 'onClick', selector: '#nav-link-shedules'})">
-          <i class='bx bxs-calendar pre-icon' ></i> Shedules
+          <i class='bx bxs-calendar pre-icon' ></i> {{ helper.t('Shedules') }}
         </RouterLink>
       </template>
       <RouterLink id="nav-link-import" :to="{name: 'import', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active': route.name === 'import'}" @click="sendRemoteAction({from: 'ip', action: 'onClick', selector: '#nav-link-import'})">
-        <i class='bx bxs-file-import pre-icon' ></i> Import
+        <i class='bx bxs-file-import pre-icon' ></i> {{ helper.t('Import') }}
       </RouterLink>
       <RouterLink id="nav-link-contact" :to="{name: 'ContactUs', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active': route.name === 'ContactUs'}" 
         @click="sendRemoteAction({from: 'ip', action: 'onClick', selector: '#nav-link-contact'})"
          >
-        Contact
-      </RouterLink> 
+        {{ helper.t('Contact') }}
+      </RouterLink>
 
       <div class="topnav__version">
         <span v-if="isNewVersion" class="topnav__new-version" @click="showVersionUpdateModal">
-          New: v{{ appAccessData?.incoming_version }}
+          {{ helper.t('New:') }} v{{ appAccessData?.incoming_version }}
         </span>
         <span class="topnav__version-text" v-else-if="appAccessData?.app_version">v{{ appAccessData?.app_version }}</span>
-        <button class="topnav__update-btn" tooltip="Update App" flow="down" @click="showVersionUpdateModal">
+        <button class="topnav__update-btn" :tooltip="helper.t('Update App')" flow="down" @click="showVersionUpdateModal">
           <svg v-if="!isNewVersion" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="23 4 23 10 17 10"/>
             <polyline points="1 20 1 14 7 14"/>
@@ -70,7 +70,7 @@
         <button v-if="CONFIG?.settings?.sms?.enabled" class="topnav__update-btn topnav__sms-btn" tooltip="Send SMS" flow="down" @click="showSmsModal = true">
           <i class='bx bxs-message-rounded-dots' style="font-size:16px"></i>
         </button>
-        <button class="topnav__update-btn" tooltip="Settings" flow="down" @click="showSettingsPanel = true">
+        <button class="topnav__update-btn" :tooltip="helper.t('Settings')" flow="down" @click="showSettingsPanel = true">
           <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="3"/>
             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
@@ -81,21 +81,21 @@
 
       <div v-if="useRoute().query.dev === 'true'" class="topnav__dev">
         <span class="border cp me-1 text-white px-1 size-08" @click.prevent.stop="$goto({name: 'env'})">
-          <span tooltip="Show Config.js" flow="left">Config</span>
+          <span :tooltip="helper.t('Show Config.js')" flow="left">{{ helper.t('Config') }}</span>
         </span>
         <span class="border cp me-1 text-white px-1 size-08" @click.prevent.stop="show_bulk_attedance_component = true">
-          <span tooltip="Bulk Attendence" flow="left">Bulk</span>
+          <span :tooltip="helper.t('Bulk Attendence')" flow="left">{{ helper.t('Bulk') }}</span>
         </span>
         <span class="border cp me-0 text-white px-1 size-08" @click.prevent.stop="show_cloner_component = true">
-          <span tooltip="Clone Students" flow="left">Clone</span>
+          <span :tooltip="helper.t('Clone Students')" flow="left">{{ helper.t('Clone') }}</span>
         </span>
         <span class="border cp me-0 text-white px-1 size-08" @click.prevent.stop="getTemporaryZip">
-          <span tooltip="Temporary update" flow="left">
+          <span :tooltip="helper.t('Temporary update')" flow="left">
             <template v-if="temp_updating">
-                Temp<BtnLoader></BtnLoader>
+                {{ helper.t('Temp') }}<BtnLoader></BtnLoader>
             </template>
             <template v-else>
-              Temp
+              {{ helper.t('Temp') }}
             </template>
           </span>
         </span>
@@ -109,7 +109,7 @@
   <Teleport to="body">
     <div v-if="showConfirmModal" class="update-modal-overlay">
       <div class="update-modal update-modal--confirm">
-        <p class="update-modal__title">Update App?</p>
+        <p class="update-modal__title">{{ helper.t('Update App?') }}</p>
         <p class="update-modal__sub" v-if="appAccessData?.incoming_version">
           v{{ appAccessData.app_version }} → v{{ appAccessData.incoming_version }}
         </p>
@@ -118,11 +118,11 @@
         </p>
         <label class="update-modal__checkbox">
           <input type="checkbox" v-model="autoUpdateEnabled" @change="maybeAutoUpdate" />
-          Allow automatic update
+          {{ helper.t('Allow automatic update') }}
         </label>
         <div class="update-modal__actions">
-          <button class="update-modal__btn update-modal__btn--cancel" @click="showConfirmModal = false">Cancel</button>
-          <button class="update-modal__btn update-modal__btn--ok" @click="confirmAndUpdate">Update</button>
+          <button class="update-modal__btn update-modal__btn--cancel" @click="showConfirmModal = false">{{ helper.t('Cancel') }}</button>
+          <button class="update-modal__btn update-modal__btn--ok" @click="confirmAndUpdate">{{ helper.t('Update') }}</button>
         </div>
       </div>
     </div>
@@ -131,11 +131,11 @@
       <div class="update-modal">
         <template v-if="!updateDone">
           <div class="update-modal__spinner"></div>
-          <p class="update-modal__text">Updating app...</p>
+          <p class="update-modal__text">{{ helper.t('Updating app...') }}</p>
         </template>
         <template v-else>
           <div class="update-modal__check">✓</div>
-          <p class="update-modal__text">Update successful! Reloading...</p>
+          <p class="update-modal__text">{{ helper.t('Update successful! Reloading...') }}</p>
         </template>
       </div>
     </div>

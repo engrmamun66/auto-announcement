@@ -103,11 +103,11 @@ onMounted(() => {
 
 <template>
      <div class="d-flex justify-content-between align-items-center mb-4">
-          <h1>Import Students</h1>  
+          <h1>{{ helper.t('Import Students') }}</h1>
           <div class="right-align" >
-               <!-- <Btn v-if="useRoute().query.dev == 'true'" @click="eraseAll" class="red me-1" ><i class='bx bxs-eraser' ></i> Delete All Students <BtnLoader v-if="loading"></BtnLoader> </Btn> -->
-               <Btn @click="eraseAll" v-if="true" class="red me-1" ><i class='bx bxs-eraser' ></i> Delete All Students <BtnLoader v-if="loading"></BtnLoader> </Btn>
-               <Btn @click="getBackup" ><i class='bx bxs-file-export' ></i> Export All <BtnLoader v-if="loading"></BtnLoader> </Btn>
+               <!-- <Btn v-if="useRoute().query.dev == 'true'" @click="eraseAll" class="red me-1" ><i class='bx bxs-eraser' ></i> {{ helper.t('Delete All Students') }} <BtnLoader v-if="loading"></BtnLoader> </Btn> -->
+               <Btn @click="eraseAll" v-if="true" class="red me-1" ><i class='bx bxs-eraser' ></i> {{ helper.t('Delete All Students') }} <BtnLoader v-if="loading"></BtnLoader> </Btn>
+               <Btn @click="getBackup" ><i class='bx bxs-file-export' ></i> {{ helper.t('Export All') }} <BtnLoader v-if="loading"></BtnLoader> </Btn>
 
           </div>
      </div>

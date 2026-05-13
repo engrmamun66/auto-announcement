@@ -404,6 +404,12 @@ function localizeAppDom() {
 }
 
 function scheduleUiLocalization(delay = 0) {
+    /**
+     * Disabled: DOM scanning was slowing the app. 
+     * All strings now use helper.t() explicitly.
+     */
+    return 
+    
     clearTimeout(uiLocalizationTimer)
     uiLocalizationTimer = setTimeout(async () => {
         await nextTick()

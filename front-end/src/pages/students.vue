@@ -597,14 +597,14 @@ watch(fixedWidthSoundCol, (newVal) => {
 <template>
 
     <div class="d-flex justify-content-between align-items-center flex-wrap">
-      <h1>{{ !addMode ? 'Students' : 'Add Student'}}  </h1> 
+      <h1>{{ !addMode ? helper.t('Students') : helper.t('Add Student') }}</h1>
 
       <div class="d-flex justify-content-end align-items-center flex-wrap gap-2">
         <div v-if="!isIPAccess" class="btn-group me-2" style="display:inline-flex;align-items:stretch;">
 
-          <Btn style="background: #1565C0;border-top-right-radius: 0px; border-bottom-right-radius: 0px;" @click="openPhoneModal"><i class='bx bx-qr'></i> Open With Phone</Btn>
+          <Btn style="background: #1565C0;border-top-right-radius: 0px; border-bottom-right-radius: 0px;" @click="openPhoneModal"><i class='bx bx-qr'></i> {{ helper.t('Open With Phone') }}</Btn>
           <button class="btn" style="background:#005a4a;color:#fff;border-left:1px solid rgba(255,255,255,0.2);padding:0 12px;display:inline-flex;align-items:center;justify-content:center;"
-            tooltip="Copy link"
+            :tooltip="helper.t('Copy link')"
             @click.prevent="copyPhoneUrl">
             <i class="bx bx-link" style="pointer-events: none;"></i>
           </button>
@@ -612,13 +612,13 @@ watch(fixedWidthSoundCol, (newVal) => {
         <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
           <div v-if="appAccessData?.recorder_web_url" class="btn-group me-2" style="display:inline-flex;align-items:stretch;">
             <a v-if="isIPAccess" :href="appAccessData.recorder_web_url + `?code=${CONFIG?.env?.CODE_NUMBER}`" target="_blank" class="btn" style="background:#00796B;color:#fff;">
-              <i class='bx bx-microphone'></i> Recorder
+              <i class='bx bx-microphone'></i> {{ helper.t('Recorder') }}
             </a>
             <Btn v-else style="background:#00796B;border-top-right-radius:0;border-bottom-right-radius:0;" @click="recorderMounted = true; showRecorder = true">
-              <i class='bx bx-microphone'></i> Recorder
+              <i class='bx bx-microphone'></i> {{ helper.t('Recorder') }}
             </Btn>
             <button class="btn" style="background:#005a4a;color:#fff;border-left:1px solid rgba(255,255,255,0.2);padding:0 12px;display:inline-flex;align-items:center;justify-content:center;"
-              tooltip="Copy link"
+              :tooltip="helper.t('Copy link')"
               @click.prevent.stop="copyRecorderUrl">
               <i class="bx bx-link" style="pointer-events: none;"></i>
             </button>
@@ -636,7 +636,7 @@ watch(fixedWidthSoundCol, (newVal) => {
       </div>
     </div>
 
-    <modal v-model="addMode" :title="!payload?.id ? 'Add Student' : (editModeTabIndex == 1 ? 'Update Student' : 'Guardian Punch History')" :width="editModeTabIndex == 2 ? '700px' : '500px'" :close-on-esc="true" :close-on-click-away="true" >
+    <modal v-model="addMode" :title="!payload?.id ? helper.t('Add Student') : (editModeTabIndex == 1 ? helper.t('Update Student') : helper.t('Guardian Punch History'))" :width="editModeTabIndex == 2 ? '700px' : '500px'" :close-on-esc="true" :close-on-click-away="true" >
       <div class="w-100" >
 
         <div class="cb-form">
@@ -651,7 +651,7 @@ watch(fixedWidthSoundCol, (newVal) => {
                 }"></Tabset>
 
                 <label class="using-card-title-in-form" v-if="CONFIG?.settings?.attendance?.status && payload?.id && payload?.name">
-                  {{ String(payload?.name).indexOf('Copied') > -1 ? 'This card for guardian' : 'This card for student' }}
+                  {{ String(payload?.name).indexOf('Copied') > -1 ? helper.t('This card for guardian') : helper.t('This card for student') }}
                 </label>
 
               </div>
@@ -661,7 +661,7 @@ watch(fixedWidthSoundCol, (newVal) => {
                   <!-- Class + Year -->
                   <div class="col-8">
                     <div class="form-group">
-                      <label>Class <sup>*</sup></label>
+                      <label>{{ helper.t('Class') }} <sup>*</sup></label>
                       <select v-model="payload.class" class="form-control cb-input cb-input--sm" id="ClassId" :disabled="payload?.id && payload.name && payload.name.indexOf('||dakhela') > -1">
                         <option :value="null">-class-</option>
                         <template v-for="(cls, index) in classes" :key="index">
@@ -672,7 +672,7 @@ watch(fixedWidthSoundCol, (newVal) => {
                   </div>
                   <div class="col-4">
                     <div class="form-group">
-                      <label>Year <sup>*</sup></label>
+                      <label>{{ helper.t('Year') }} <sup>*</sup></label>
                       <select v-model="payload.year" class="form-control cb-input cb-input--sm" :disabled="payload?.id && payload.name && payload.name.indexOf('||dakhela') > -1">
                         <option :value="new Date().getFullYear()">{{ new Date().getFullYear() }}</option>
                         <option :value="new Date().getFullYear() - 1">{{ new Date().getFullYear() - 1 }}</option>
@@ -685,7 +685,7 @@ watch(fixedWidthSoundCol, (newVal) => {
                   <!-- Name -->
                   <div class="col-12">
                     <div class="form-group">
-                      <label>Name <sup>*</sup></label>
+                      <label>{{ helper.t('Name') }} <sup>*</sup></label>
                       <input v-model="payload.name" type="text" class="form-control cb-input cb-input--sm" :disabled="payload?.id && payload.name && payload.name.indexOf('||dakhela') > -1">
                     </div>
                   </div>
@@ -693,13 +693,13 @@ watch(fixedWidthSoundCol, (newVal) => {
                   <!-- Dakhela + Phone -->
                   <div class="col-5">
                     <div class="form-group">
-                      <label>Dakhela <sup>*</sup></label>
+                      <label>{{ helper.t('Dakhela') }} <sup>*</sup></label>
                       <input v-model="payload.dakhela" type="number" class="form-control cb-input cb-input--sm" :disabled="payload?.id && payload.name && payload.name.indexOf('||dakhela') > -1">
                     </div>
                   </div>
                   <div class="col-7">
                     <div class="form-group">
-                      <label>Phone Number(11 Digit) <sup>*</sup></label>
+                      <label>{{ helper.t('Phone Number(11 Digit') }} <sup>*</sup></label>
                       <div class="position-relative">
                         <input v-model="payload.phone_number" type="text" class="form-control cb-input cb-input--sm" style="padding-right: 28px;">
                         <span class="phone-valid-icon" :class="{ 'text-success': /^01\d{9}$/.test(String(payload.phone_number).trim()), 'text-danger': !/^01\d{9}$/.test(String(payload.phone_number).trim()) }">
@@ -720,12 +720,12 @@ watch(fixedWidthSoundCol, (newVal) => {
                   <!-- Profile Image -->
                   <div class="col-12">
                     <div class="form-group">
-                      <label>Profile Image</label>
+                      <label>{{ helper.t('Profile Image') }}</label>
                       <div class="d-flex align-items-center gap-2">
                         <img class="profile-thumb" :src="profileImagePreview || payload.profile_image || '/default-profile-image.png'" alt="profile" />
-                        <input v-model="payload.profile_image" type="text" class="form-control cb-input cb-input--sm" placeholder="Image URL or path">
+                        <input v-model="payload.profile_image" type="text" class="form-control cb-input cb-input--sm" :placeholder="helper.t('Image URL or path')">
                         <label for="profile_image_input" class="cb-file-btn cb-input--sm">
-                          <span>Choose Image</span>
+                          <span>{{ helper.t('Choose Image') }}</span>
                           <input id="profile_image_input" type="file" accept="image/*" class="d-none" @change="onProfileImageChange">
                         </label>
                       </div>
@@ -735,7 +735,7 @@ watch(fixedWidthSoundCol, (newVal) => {
                   <!-- Card Owner -->
                   <div class="col-12 mt-3" v-if="CONFIG?.card_owners?.length">
                     <div class="form-group d-flex align-items-center gap-3">
-                      <label class="mb-0">Card Owner</label>
+                      <label class="mb-0">{{ helper.t('Card Owner') }}</label>
                       <div class="d-flex flex-wrap gap-2">
                         <template v-for="owner in CONFIG?.card_owners">
                           <div @click.stop="payload.card_owner = owner.id" class="d-flex justify-content-start each-owner-name">
@@ -748,9 +748,9 @@ watch(fixedWidthSoundCol, (newVal) => {
                   </div>
 
                   <div class="col-12 d-flex justify-content-center mt-3">
-                    <Btn @click.stop="clearPayload" class="red me-2">Cancel</Btn>
-                    <Btn v-if="!payload.id" @click="addStudent" addStudentAttr class="me-0">Submit <BtnLoader v-if="is___adding"></BtnLoader></Btn>
-                    <Btn v-else @click="updateStudent" updateStudentAttr class="me-0" v-if="payload.name && payload.name.indexOf('||dakhela') === -1">Update <BtnLoader v-if="is___adding"></BtnLoader></Btn>
+                    <Btn @click.stop="clearPayload" class="red me-2">{{ helper.t('Cancel') }}</Btn>
+                    <Btn v-if="!payload.id" @click="addStudent" addStudentAttr class="me-0">{{ helper.t('Submit') }} <BtnLoader v-if="is___adding"></BtnLoader></Btn>
+                    <Btn v-else @click="updateStudent" updateStudentAttr class="me-0" v-if="payload.name && payload.name.indexOf('||dakhela') === -1">{{ helper.t('Update') }} <BtnLoader v-if="is___adding"></BtnLoader></Btn>
                   </div>
                 </template>
 
@@ -780,7 +780,7 @@ watch(fixedWidthSoundCol, (newVal) => {
                         </template>
                         <template v-else> 
                           <tr>
-                            <td colspan="44">No log found</td> 
+                            <td colspan="44">{{ helper.t('No log found') }}</td>
                           </tr>  
                         </template>
                       </tbody>
@@ -815,7 +815,7 @@ watch(fixedWidthSoundCol, (newVal) => {
         <div class="row">
           <div class="col-md-3 col-12">
             <div class="form-group">
-              <label for="email">Class</label>
+              <label for="email">{{ helper.t('Class') }}</label>
               <select data-no-auto-i18n="true" v-model="params.class_name" @change="getStudents" class="form-control cb-input" id="ClassId">
                 <option :value="null">-class-</option>
                 <template v-for="(cls, index) in classes" :key="index">
@@ -827,7 +827,7 @@ watch(fixedWidthSoundCol, (newVal) => {
           </div>
           <div class="col-md-3 col-12">
             <div class="form-group sssffefefasdgsadfg">
-              <label for="email">Dakhela
+              <label for="email">{{ helper.t('Dakhela') }}
 
                 <span tooltip="All Smillar">
                   <input v-model="only_similler_students" :value="only_similler_students" style="opacity: 0.7;" type="checkbox" @change="()=>{
@@ -848,14 +848,14 @@ watch(fixedWidthSoundCol, (newVal) => {
           </div> -->
           <div class="col-md-3 col-12">
             <div class="form-group">
-              <label for="name">Name</label>
+              <label for="name">{{ helper.t('Name') }}</label>
               <input v-model="params.name" type="text" class="form-control cb-input" @keyup.enter="getStudents">
             </div>
           </div>
           <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
             <div class="col-md-3 col-12">
               <div class="form-group">
-                <label for="email">Sound</label>
+                <label for="email">{{ helper.t('Sound') }}</label>
                 <select v-model="params.sound1" @change="getStudents" class="form-control cb-input">
                   <option :value="null">-All-</option>
                   <option value="no_sound">No</option> 
@@ -899,25 +899,25 @@ watch(fixedWidthSoundCol, (newVal) => {
       <template #thead>
         <thead>
           <tr>
-            <th class="d-none d-md-table-cell">Class</th>
-            <th>Name</th>
-            <th class="d-none d-md-table-cell">Image</th>
-            <th class="d-none d-lg-table-cell">Card Owner</th>
-            <th class="d-none d-md-table-cell">Phone</th>
-            <th>Dakhela</th>
-            <th class="d-none d-lg-table-cell">Year</th>
+            <th class="d-none d-md-table-cell">{{ helper.t('Class') }}</th>
+            <th>{{ helper.t('Name') }}</th>
+            <th class="d-none d-md-table-cell">{{ helper.t('Image') }}</th>
+            <th class="d-none d-lg-table-cell">{{ helper.t('Card Owner') }}</th>
+            <th class="d-none d-md-table-cell">{{ helper.t('Phone') }}</th>
+            <th>{{ helper.t('Dakhela') }}</th>
+            <th class="d-none d-lg-table-cell">{{ helper.t('Year') }}</th>
             <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
-              <th class="d-none d-lg-table-cell" @dblclick="fixedWidthSoundCol = !fixedWidthSoundCol" :style="fixedWidthSoundCol ? 'width: 300px;' : ''" tooltip="Double Click" flow="down">
-                Sound
+              <th class="d-none d-lg-table-cell" @dblclick="fixedWidthSoundCol = !fixedWidthSoundCol" :style="fixedWidthSoundCol ? 'width: 300px;' : ''" :tooltip="helper.t('Double Click')" flow="down">
+                {{ helper.t('Sound') }}
                 <template v-if="fixedWidthSoundCol">
                   <i class='bx bx-arrow-from-right transformY-3px' ></i>
                   <i class='bx bx-arrow-from-left transformY-3px' ></i>
                 </template>
               </th>
             </template>
-            <th>Status</th>
+            <th>{{ helper.t('Status') }}</th>
             <th>Punch</th>
-            <th>Action</th>
+            <th>{{ helper.t('Action') }}</th>
           </tr>
         </thead>
       </template>
@@ -938,7 +938,7 @@ watch(fixedWidthSoundCol, (newVal) => {
               </td>
               <td class="d-none d-lg-table-cell">
                 <p class="mb-1">{{ callbacks.getCardOwnerName(std?.card_owner) }}</p>
-                <div class="student-note" tooltip="Note" v-if="std?.note">{{ std?.note }}</div>
+                <div class="student-note" :tooltip="helper.t('Note')" v-if="std?.note">{{ std?.note }}</div>
               </td>
               <td class="d-none d-md-table-cell">
                 <span v-if="std.phone_number" class="text-muted small">{{ String(std.phone_number).slice(0,3) + '...' + String(std.phone_number).slice(-3) }}</span>
@@ -947,7 +947,7 @@ watch(fixedWidthSoundCol, (newVal) => {
                 <div class="align-items-center d-flex">
                   <span class="p-1" @dblclick="params.dakhela = std.dakhela">{{ std.dakhela }}</span>
                   <!-- No need multiple card Access If using only for attendance -->
-                  <span id="CLONE___STUDENT" v-if="CONFIG?.settings?.attendance?.only_attendance_feature === false" tooltip="Cone Student">
+                  <span id="CLONE___STUDENT" v-if="CONFIG?.settings?.attendance?.only_attendance_feature === false" :tooltip="helper.t('Cone Student')">
                     <i v-if="std.name && String(std.name)?.indexOf('||dakhela') > -1 === false" @click.stop="()=>{
                       std.cloneMode = !(!!(std.cloneMode));
                     }" class="bx bxs-copy-alt cp px-1">
@@ -958,7 +958,7 @@ watch(fixedWidthSoundCol, (newVal) => {
                 <template v-if="std?.cloneMode">
                   <div class="std-clone-area">
                     <input type="number" @input="std.dakhela_new = $event.target.value" />
-                    <button @click="onClickClone(std)">Copy</button>
+                    <button @click="onClickClone(std)">{{ helper.t('Copy') }}</button>
                   </div>
                   <p v-if="std?.error_message" class="text-danger">
                     {{ std.error_message }} 
@@ -976,7 +976,7 @@ watch(fixedWidthSoundCol, (newVal) => {
                       <template v-if="!std[`isPlaying_${column}`]">            
                         <div class="d-flex align-items-center">
                           <Btn  @click.stop="playThis(i, `isPlaying_${column}`, std); " class="radius-10 sm sound w-100" style="padding: 2px auto;" >
-                            <i class='bx bx-play size-1 transformY-3px'></i>&nbsp;Play
+                            <i class='bx bx-play size-1 transformY-3px'></i>&nbsp;{{ helper.t('Play') }}
                           </Btn>
                           <!-- <span v-if="std.name.indexOf('||dakhela') > -1 === false" class="ms-2 me-1 cp" @click.stop="deleteAudio(std, column)" > -->
                           <span class="ms-2 me-1 cp" @click.stop="deleteAudio(std, column)" >
@@ -994,11 +994,11 @@ watch(fixedWidthSoundCol, (newVal) => {
                         <AudioUpload :student="std" :column="column" @change="({audio_path, audio_url})=>{
                           std[column] = audio_url
                         }" ></AudioUpload>
-                        <span tooltip="Rcord Sound" @click="targetStd=std;columnName=column">
+                        <span :tooltip="helper.t('Rcord Sound')" @click="targetStd=std;columnName=column">
                           <i class='bx bxs-microphone p-1 ms-1 cp' ></i>
                         </span>
                         <!-- Here -->
-                        <span v-if="appAccessData?.recorder_web_url" tooltip="Paste recorded URL" @click.stop="linkPopup={std,column};linkPopupUrl=''">
+                        <span v-if="appAccessData?.recorder_web_url" :tooltip="helper.t('Paste recorded URL')" @click.stop="linkPopup={std,column};linkPopupUrl=''">
                           <i class='bx bx-link p-1 ms-1 cp'></i>
                         </span>
                       </div>
@@ -1083,7 +1083,7 @@ watch(fixedWidthSoundCol, (newVal) => {
         </template>
         <template v-else>
           <tr>
-              <td colspan="88" class="text-center">No student found</td>                 
+              <td colspan="88" class="text-center">{{ helper.t('No student found') }}</td>
           </tr>
         </template>
       </template>
@@ -1096,8 +1096,8 @@ watch(fixedWidthSoundCol, (newVal) => {
       }" ></Pagination>
     </div> 
     <div v-if="route.query.barcode" class="d-flex justify-content-center mt-3 ">
-      <router-link :to="{name: 'home', query: {barcode: route.query.barcode}}" class="bg1 border2 radius-5 text-center text-black-50" style="width: 200px">Back And Push Barcode</router-link>
-    </div>  
+      <router-link :to="{name: 'home', query: {barcode: route.query.barcode}}" class="bg1 border2 radius-5 text-center text-black-50" style="width: 200px">{{ helper.t('Back And Push Barcode') }}</router-link>
+    </div>
 
   
     <!-- Recorder iframe overlay -->
@@ -1114,31 +1114,31 @@ watch(fixedWidthSoundCol, (newVal) => {
     </Teleport>
 
     <!-- Open With Phone Modal -->
-    <modal v-if="showPhoneModal" title="Open With Phone" @close="showPhoneModal = false">
+    <modal v-if="showPhoneModal" :title="helper.t('Open With Phone')" @close="showPhoneModal = false">
       <div class="phone-modal">
         <div class="phone-modal__qr">
           <img v-if="qrDataUrl" :src="qrDataUrl" />
           <div v-else class="phone-modal__qr-spinner"><div class="recorder-spinner"></div></div>
         </div>
-        <p class="phone-modal__hint"><i class='bx bx-scan'></i> Point your phone camera at the QR code to open the app</p>
+        <p class="phone-modal__hint"><i class='bx bx-scan'></i> {{ helper.t('Point your phone camera at the QR code to open the app') }}</p>
         <div class="phone-modal__url-row">
           <a :href="buildPhoneUrl()" target="_blank" class="phone-modal__url">{{ buildPhoneUrl() }}</a>
           <button @click="copyPhoneUrl" class="phone-modal__copy-btn" :class="{ 'phone-modal__copy-btn--copied': copiedPhoneUrl }">
             <i :class="copiedPhoneUrl ? 'bx bx-check' : 'bx bx-copy'"></i>
-            {{ copiedPhoneUrl ? 'Copied!' : 'Copy' }}
+            {{ copiedPhoneUrl ? helper.t('Copied!') : helper.t('Copy') }}
           </button>
         </div>
       </div>
     </modal>
 
     <!-- Bulk Punch Modal -->
-    <modal v-if="showBulkPunchModal" title="Bulk Punch" @close="!bulkPunchRunning && (showBulkPunchModal = false)" :close-on-esc="!bulkPunchRunning" :close-on-click-away="false">
+    <modal v-if="showBulkPunchModal" :title="helper.t('Bulk Punch')" @close="!bulkPunchRunning && (showBulkPunchModal = false)" :close-on-esc="!bulkPunchRunning" :close-on-click-away="false">
       <div>
         <p class="mb-3">Punch <strong>{{ PunchButtonsRef?.length }}</strong> displayed students?</p>
 
         <template v-if="bulkPunchRunning || bulkPunchDone">
           <div class="mb-2 d-flex justify-content-between">
-            <small>{{ bulkPunchDone ? 'Done!' : 'Punching...' }}</small>
+            <small>{{ bulkPunchDone ? helper.t('Done!') : helper.t('Punching...') }}</small>
             <small>{{ bulkPunchProgress }}%</small>
           </div>
           <div class="progress mb-3" style="height:10px">
@@ -1146,22 +1146,22 @@ watch(fixedWidthSoundCol, (newVal) => {
               :style="{width: bulkPunchProgress + '%'}" :aria-valuenow="bulkPunchProgress" aria-valuemin="0" aria-valuemax="100">
             </div>
           </div>
-          <Btn v-if="bulkPunchDone" class="w-100" @click="showBulkPunchModal = false">Close</Btn>
+          <Btn v-if="bulkPunchDone" class="w-100" @click="showBulkPunchModal = false">{{ helper.t('Close') }}</Btn>
         </template>
 
         <template v-else>
           <div class="d-flex gap-2">
-            <Btn class="red flex-fill" @click="showBulkPunchModal = false">Cancel</Btn>
-            <Btn class="green flex-fill" @click="startBulkPunch()">Start Punch</Btn>
+            <Btn class="red flex-fill" @click="showBulkPunchModal = false">{{ helper.t('Cancel') }}</Btn>
+            <Btn class="green flex-fill" @click="startBulkPunch()">{{ helper.t('Start Punch') }}</Btn>
           </div>
         </template>
       </div>
     </modal>
 
     <!-- Audio Recorder Modal -->
-    <modal v-if="linkPopup" title="Paste Recorded Audio URL" @close="linkPopup=null;linkPopupUrl=''">
+    <modal v-if="linkPopup" :title="helper.t('Paste Recorded Audio URL')" @close="linkPopup=null;linkPopupUrl=''">
       <div class="p-2">
-        <input v-model="linkPopupUrl" type="text" class="form-control cb-input mb-2" placeholder="Paste recorded audio URL here..." autofocus />
+        <input v-model="linkPopupUrl" type="text" class="form-control cb-input mb-2" :placeholder="helper.t('Paste recorded audio URL here...')" autofocus />
         <Btn class="w-100" @click="saveAudioFromUrl" :disabled="linkPopupLoading || !linkPopupUrl">
           <BtnLoader v-if="linkPopupLoading"></BtnLoader>
           <span v-else>Upload</span>

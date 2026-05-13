@@ -452,12 +452,12 @@ function canReOrderSchedule(item, action='up'){
 <template>
     <div>
         <div class="d-flex justify-content-between align-items-center flex-wrap">
-           <h1>{{ !addUpdateMode ? `${tab == 1 ? 'Punch Schedules' : 'Call Schedules'}` : (payload.id ? 'Update Schedule' : 'Add Schedule')}}</h1> 
+           <h1>{{ !addUpdateMode ? `${tab == 1 ? helper.t('Punch Times') : helper.t('Call Times')}` : (payload.id ? helper.t('Update Schedule') : helper.t('Add Schedule')) }}</h1>
        
            <div class="d-flex justify-content-end">
               <!--  -->
-               <Btn v-if="!addUpdateMode" class="me-2" @click="addUpdateMode = true" ><i class='bx bx-plus'></i> Add Schedule</Btn>
-               <Btn v-else class="me-2 red" @click="clearPayload()" >Cancel</Btn>
+               <Btn v-if="!addUpdateMode" class="me-2" @click="addUpdateMode = true" ><i class='bx bx-plus'></i> {{ helper.t('Add Schedule') }}</Btn>
+               <Btn v-else class="me-2 red" @click="clearPayload()" >{{ helper.t('Cancel') }}</Btn>
                <!-- <Btn @click="router.push({name: 'import'})"><i class='bx bxs-file-import' ></i> Import</Btn> -->
              </div>
         </div>
@@ -466,7 +466,7 @@ function canReOrderSchedule(item, action='up'){
 
 
 
-      <Modal v-model="addUpdateMode" :title="payload?.id ? `Update Schedule` : `Add ${payload.type == 2 ? 'Call' : 'Punch'} Schedule`">
+      <Modal v-model="addUpdateMode" :title="payload?.id ? helper.t('Update Schedule') : helper.t('Add Schedule')">
         <div class="w-100 d-flex justify-content-center">
   
           <form @submit.prevent="false" class="cb-form" @click="clickOnDocumentBody">
@@ -487,15 +487,15 @@ function canReOrderSchedule(item, action='up'){
         
               <div class="col-12">
                 <div class="form-group">
-                  <label for="">Title</label>
+                  <label for="">{{ helper.t('Title') }}</label>
                   <input v-model="payload.title" type="text" class="form-control cb-input">
                 </div>
               </div>
               
               <div class="col-12">
                 <div class="form-group">
-                  <label for="">Classes </label>
-                  <BaseSelectMultiple placeholder="Select Class" v-model="payload.classes" :label="false" :data="classes" displayKey="class_name" valueKey="class_name" maxHeight="200px" ></BaseSelectMultiple>
+                  <label for="">{{ helper.t('Classes') }}</label>
+                  <BaseSelectMultiple :placeholder="helper.t('Select Class')" v-model="payload.classes" :label="false" :data="classes" displayKey="class_name" valueKey="class_name" maxHeight="200px" ></BaseSelectMultiple>
                 </div>
               </div>
 
@@ -503,7 +503,7 @@ function canReOrderSchedule(item, action='up'){
                 <div class="row">
 
                   <div class="col-12">
-                    <label class="group-header">{{ payload.type == 1 ? 'Set Punch time' : 'Set Call Time' }}</label>
+                    <label class="group-header">{{ payload.type == 1 ? helper.t('Punch Times') : helper.t('Call Times') }}</label>
                   </div>
 
                   <div class="col-6">
@@ -690,12 +690,12 @@ function canReOrderSchedule(item, action='up'){
 
 
               <div class="col-12 d-flex justify-content-center mt-3">
-                <Btn @click.stop="clearPayload()" class="red me-2" >Cancel</Btn>
+                <Btn @click.stop="clearPayload()" class="red me-2" >{{ helper.t('Cancel') }}</Btn>
                 <Btn class="me-0" @click.stop="() => {
                   clickOnDocumentBody()
                   if(payload.id) updateSchedule()
                   else addSchedule()
-                }" > {{ payload.id ? 'Update' : 'Submit' }} <BtnLoader v-if="is___adding"></BtnLoader> </Btn>
+                }" > {{ payload.id ? helper.t('Update') : helper.t('Submit') }} <BtnLoader v-if="is___adding"></BtnLoader> </Btn>
               </div> 
 
             </div>
@@ -711,10 +711,10 @@ function canReOrderSchedule(item, action='up'){
       <div class="d-flex justify-content-between align-items-end flex-wrap gap-3 mt-4 mb-3">
         <ul class="nav nav-tabs bottom-borderless mb-0">
           <li class="nav-item">
-            <a @click.stop="tab = 1" class="nav-link cp text-black" :class="{'active': tab==1}" >Puch Times</a>
+            <a @click.stop="tab = 1" class="nav-link cp text-black" :class="{'active': tab==1}" >{{ helper.t('Puch Times') }}</a>
           </li>
           <li class="nav-item">
-            <a @click.stop="tab = 2" class="nav-link cp text-black" :class="{'active': tab==2}" >Call Times</a>
+            <a @click.stop="tab = 2" class="nav-link cp text-black" :class="{'active': tab==2}" >{{ helper.t('Call Times') }}</a>
           </li>
           <!-- <li v-if="CONFIG?.settings?.with_speaker_controls?.status" class="nav-item">
             <a @click.stop="tab = 3" class="nav-link cp text-black" :class="{'active': tab==3}" >Speaker Ports</a>
@@ -735,7 +735,7 @@ function canReOrderSchedule(item, action='up'){
               v-model="selectedFilterClasses"
               :data="activeClasses"
               :label="false"
-              placeholder="Classes"
+              :placeholder="helper.t('Classes')"
               displayKey="class_name"
               valueKey="class_short"
               :search="true"
@@ -752,13 +752,13 @@ function canReOrderSchedule(item, action='up'){
           <template #thead>
             <thead>
               <tr> 
-                <th>Title</th>
-                <th>Stat Time</th>
-                <th>End Time</th>
-                <th class="text-center" tooltip="Click to toggle expand/collapse all" flow="down" @click="toggleExpandCollapseAll()">Classes</th>
-                <th tooltip="Click to on/off all" flow="down" @click.stop="toggleOnOffAll()">Status</th>
-                <th>Action</th> 
-                <th>Order</th> 
+                <th>{{ helper.t('Title') }}</th>
+                <th>{{ helper.t('Stat Time') }}</th>
+                <th>{{ helper.t('End Time') }}</th>
+                <th class="text-center" tooltip="Click to toggle expand/collapse all" flow="down" @click="toggleExpandCollapseAll()">{{ helper.t('Classes') }}</th>
+                <th tooltip="Click to on/off all" flow="down" @click.stop="toggleOnOffAll()">{{ helper.t('Status') }}</th>
+                <th>{{ helper.t('Action') }}</th>
+                <th>{{ helper.t('Order') }}</th>
               </tr>
             </thead>
           </template>

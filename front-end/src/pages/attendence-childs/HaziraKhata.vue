@@ -317,7 +317,7 @@ watch(
       </div>
     </div>
 
-    <div v-if="loading" class="text-muted mt-2">Loading daily logs...</div>
+    <div v-if="loading" class="text-muted mt-2">{{ helper.t('Loading daily logs...') }}</div>
     <div v-else-if="errorMessage" class="text-danger mt-2" >{{ errorMessage }}</div>
 
     <div v-else class="daily-grid-wrapper" ref="gridScrollRef" data-no-auto-i18n="true">

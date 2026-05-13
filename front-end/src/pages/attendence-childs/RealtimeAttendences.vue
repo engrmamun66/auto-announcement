@@ -3,16 +3,16 @@
    
   <div class="mt-3 live-attendace-area">
     <div class="live-attendace-header">
-      <div class="live-attendace-title">Realtime Attendance</div>
+      <div class="live-attendace-title">{{ helper.t('Realtime Attendance') }}</div>
       <div class="live-attendace-legend">
         <span class="legend-item">
-          <span class="legend-dot legend-present"></span> Present
+          <span class="legend-dot legend-present"></span> {{ helper.t('Present') }}
         </span>
         <span class="legend-item">
-          <span class="legend-dot legend-late"></span> Late
+          <span class="legend-dot legend-late"></span> {{ helper.t('Late') }}
         </span>
         <span class="legend-item">
-          <span class="legend-dot legend-out"></span> Just-Out
+          <span class="legend-dot legend-out"></span> {{ helper.t('Just-Out') }}
         </span>
       </div>
     </div>
@@ -44,7 +44,7 @@
                         'live_data': item?.live_data,
                     }"
                     >
-                    <button class="card-menu-toggle" type="button" @click.stop="toggleCardMenu(item, i)" aria-label="Card menu">
+                    <button class="card-menu-toggle" type="button" @click.stop="toggleCardMenu(item, i)" :aria-label="helper.t('Card menu')">
                       <i class="bx bx-menu"></i>
                     </button>
                     <div v-if="isCardMenuOpen(item, i)" class="card-menu">
@@ -66,21 +66,21 @@
                     </div>
 
                     <ul class="list-unstyled mb-2">
-                        <li><strong>Class :</strong> <span class="ms-1">{{ getStudent(item)?.class || "Unknown" }}</span></li>
+                        <li><strong>{{ helper.t('Class :') }}</strong> <span class="ms-1">{{ getStudent(item)?.class || "Unknown" }}</span></li>
                         <li :tooltip="(late_consideration_minute && item?.in_time) ? `${late_consideration_minute} ${helper.t('minutes_consideration_given')}` : ''">
-                            <strong>Status :</strong> 
-                            <span status class="ms-1">{{ item?.in_time ? item?.status : 'Just-Out' }}</span>
+                            <strong>{{ helper.t('Status :') }}</strong>
+                            <span status class="ms-1">{{ item?.in_time ? item?.status : helper.t('Just-Out') }}</span>
                             <span v-if="item?.in_time && item?.late_in_minute" class="ms-1">{{ item?.late_in_minute > 0 ? `${item?.late_in_minute} ${helper.t('min_late')}` : `${Math.abs(item?.late_in_minute)} ${helper.t('min_early')}` }}</span>
                         </li>
                         <li>
                           <template v-if="item?.in_time">
-                              <strong>In Time :</strong> <span class="ms-1">{{ Ahelper.timeFromTime(item?.in_time) }}</span>
+                              <strong>{{ helper.t('In Time :') }}</strong> <span class="ms-1">{{ Ahelper.timeFromTime(item?.in_time) }}</span>
                           </template>
                           <template v-else>
-                              <strong>Out Time :</strong> <span class="ms-1">{{ Ahelper.timeFromTime(item?.out_time) }}</span>
+                              <strong>{{ helper.t('Out Time :') }}</strong> <span class="ms-1">{{ Ahelper.timeFromTime(item?.out_time) }}</span>
                           </template>
                         </li>
-                        <li><strong>Shift :</strong> <span class="ms-1">{{ Ahelper.printShift(item?.shift_duration) }}</span> </li>
+                        <li><strong>{{ helper.t('Shift :') }}</strong> <span class="ms-1">{{ Ahelper.printShift(item?.shift_duration) }}</span> </li>
                     </ul>
 
                     <div v-if="item?.remarks" class="remarks small d-flex justify-content-between align-items-center"> 
@@ -105,9 +105,9 @@
           <div
           class="text-center no-data-card d-flex flex-column justify-content-center align-items-center"
           >
-          <h5 class="text-muted mb-2 fs-4">No Attendance Records Found</h5>
+          <h5 class="text-muted mb-2 fs-4">{{ helper.t('No Attendance Records Found') }}</h5>
           <p class="text-secondary mb-0">
-              <span class="badge bg-white text-danger fs-5">Live attendance list is currently empty.</span>
+              <span class="badge bg-white text-danger fs-5">{{ helper.t('Live attendance list is currently empty.') }}</span>
           </p>
           </div>
       </div>
