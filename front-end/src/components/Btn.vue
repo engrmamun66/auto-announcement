@@ -26,83 +26,75 @@ defineEmits(['click'])
 <style scoped>
 button {
   background: var(--grad3);
-  border-radius: 5px;
+  border-radius: 8px;
   color: white;
-  padding: 6px 15px;
+  padding: 7px 18px;
   position: relative;
   text-align: center;
-  border: none; /* Removes default border for button */
+  border: none;
   text-decoration: none;
-  cursor: pointer; /* Adds pointer cursor on hover */
+  cursor: pointer;
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  transition: opacity 0.15s, box-shadow 0.15s, transform 0.1s;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
 }
-button.with-cbinput{
-  padding: 7px 15px; 
+button:hover {
+  opacity: 0.88;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 }
-button.sm{
-  padding: 6px 15px;
+button:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  opacity: 1;
+}
+button.with-cbinput {
+  padding: 8px 18px;
+}
+button.sm {
+  padding: 5px 13px;
   font-size: 12px;
+  border-radius: 6px;
 }
-button.xsm{
+button.xsm {
   padding: 2px 10px;
-  font-size: 10px;
+  font-size: 11px;
+  border-radius: 5px;
 }
-button.red{
-  background: #e25e16;
-  background-color: #e25e16;
+button.red {
+  background: linear-gradient(90deg, #c0392b 0%, #e74c3c 100%);
 }
 button.white,
-button.white:active
-{
+button.white:active,
+button.white:hover {
   color: var(--primaryColor);
   background: #ffffff;
-  background-color: #ffffff;
+  border: 1.5px solid #e5e7eb;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  cursor: default;
+  opacity: 1;
 }
-button.sound{
-  color: black;
-  background: #ddf9f09c;
-  background-color: #ddf9f09c;
+button.sound {
+  color: #065f46;
+  background: #d1fae5;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
 }
-button.sound:hover{
-  color: black;
-  background: #ddf9f09c;
-  background-color: #ddf9f09c;
-}
-
-
-button:active {
-  background-color: var(--primaryColor);
-}
-button.color:active {
-  background-color: #d23109;
+button.sound:hover {
+  background: #a7f3d0;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+  opacity: 1;
 }
 button.sound:active {
-  background-color: #bbf3e1;
+  background: #6ee7b7;
 }
-
-
- 
-button:hover {
-  background: var(--secondaryColor);
+button.opacity-50 {
+  opacity: 0.45 !important;
+  cursor: not-allowed;
+  pointer-events: none;
 }
-
-button.red:hover {
-  background: #df5330;
-}
- 
-button.sound:hover {
-  background: #bbf3e1;
-}
-
-button.white:hover{
-  color: var(--primaryColor);
-  background: #ffffff;
-  background-color: #ffffff;
-  cursor: default;
-}
- 
 
 div.right-align > emb-buttons:not(:last-child) {
   margin-right: 20px;
 }
-
 </style>
