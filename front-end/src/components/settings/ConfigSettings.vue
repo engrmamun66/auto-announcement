@@ -17,7 +17,75 @@
 
         <!-- Active tab content -->
         <div v-if="activeKey" class="cs__panel-wrap" >
-          <div class="cs__panel" data-no-auto-i18n="true">
+
+          <!-- Classes: custom table view -->
+          <template v-if="activeKey === 'classes'">
+            <div class="cs__panel cs__panel--table" data-no-auto-i18n="true">
+              <table class="cs-cls-table">
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th>#</th>
+                    <th>Class Name</th>
+                    <th>Short</th>
+                    <th>Display Name</th>
+                    <th>Active</th>
+                    <th>Shifts</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <template v-for="(cls, idx) in drafts['classes']" :key="idx">
+                    <tr
+                      draggable="true"
+                      :class="{ 'cs-cls-drag-over': dragOverIdx === idx }"
+                      @dragstart="dragStartIdx = idx"
+                      @dragover.prevent="dragOverIdx = idx"
+                      @drop.prevent="clsDrop(idx)"
+                      @dragend="dragOverIdx = null"
+                    >
+                      <td class="cs-cls-drag">⠿</td>
+                      <td class="cs-cls-num">{{ idx + 1 }}</td>
+                      <td><input class="cs-cls-input" v-model="cls.class_name" /></td>
+                      <td><input class="cs-cls-input cs-cls-input--sm" v-model="cls.class_short" /></td>
+                      <td><input class="cs-cls-input cs-cls-input--sm" v-model="cls.display_name" /></td>
+                      <td class="cs-cls-active">
+                        <Switch v-model="cls.isActive" :size="'sm'" />
+                      </td>
+                      <td class="cs-cls-shifts-cell">
+                        <button class="cs-cls-shifts-toggle" @click="expandedShifts[idx] = !expandedShifts[idx]">
+                          <span v-for="(sh, si) in (cls.shifts||[])" :key="si" class="cs-cls-shift-badge">{{ sh.start }}–{{ sh.end }}</span>
+                          <span v-if="!(cls.shifts||[]).length" class="cs-cls-shift-empty">+ shifts</span>
+                          <i :class="expandedShifts[idx] ? 'bx bx-chevron-up' : 'bx bx-chevron-down'" class="cs-cls-chev"></i>
+                        </button>
+                      </td>
+                      <td>
+                        <button class="cs-cls-del" @click="drafts['classes'].splice(idx, 1)">×</button>
+                      </td>
+                    </tr>
+                    <!-- Shifts expanded row -->
+                    <tr v-if="expandedShifts[idx]" class="cs-cls-shifts-row">
+                      <td colspan="8">
+                        <div class="cs-cls-shifts-wrap">
+                          <div v-for="(sh, si) in (cls.shifts||[])" :key="si" class="cs-cls-shift-item">
+                            <span class="cs-cls-shift-label">#{{ si+1 }}</span>
+                            <label>Start <input class="cs-cls-input cs-cls-input--time" type="time" v-model="sh.start" /></label>
+                            <label>End <input class="cs-cls-input cs-cls-input--time" type="time" v-model="sh.end" /></label>
+                            <button class="cs-cls-del" @click="cls.shifts.splice(si,1)">×</button>
+                          </div>
+                          <button class="cs-cls-shift-add" @click="(cls.shifts = cls.shifts||[]).push({start:'08:00',end:'10:00'})">+ Add Shift</button>
+                        </div>
+                      </td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+              <button class="cs-cls-add" @click="drafts['classes'].push({ class_name: '', class_short: '', display_name: '', isActive: true, speaker_ports: [], shifts: [] })">+ Add Class</button>
+            </div>
+          </template>
+
+          <!-- All other tabs: generic FormNode -->
+          <div v-else class="cs__panel" data-no-auto-i18n="true">
             <FormNode :obj="drafts" :propKey="activeKey" :depth="0" />
           </div>
           <p v-if="errors[activeKey]" class="cs__error">{{ errors[activeKey] }}</p>
@@ -45,6 +113,7 @@ import { ref, reactive, inject, onMounted, onUnmounted } from 'vue';
 import Rightbar from '../Rightbar.vue';
 import FormNode from './FormNode.vue';
 import BtnLoader from '../BtnLoader.vue';
+import Switch from '../Switch.vue';
 
 const emit = defineEmits(['unmount']);
 const http = inject('http');
@@ -59,6 +128,19 @@ const saving = reactive({});
 const errors = reactive({});
 const hasSaved = ref(false);
 const resettingAll = ref(false);
+const dragStartIdx = ref(null);
+const dragOverIdx = ref(null);
+const expandedShifts = reactive({});
+
+function clsDrop(toIdx) {
+  const arr = drafts['classes'];
+  const from = dragStartIdx.value;
+  if (from === null || from === toIdx) { dragOverIdx.value = null; return; }
+  const item = arr.splice(from, 1)[0];
+  arr.splice(toIdx, 0, item);
+  dragStartIdx.value = null;
+  dragOverIdx.value = null;
+}
 
 
 function tabGrad(idx, active) {
@@ -196,4 +278,37 @@ onUnmounted(() => { if (hasSaved.value) {
 .cs__btn--reset-all:hover { background: #ffe0e0; }
 .cs__btn--reset-all:disabled { opacity: 0.6; cursor: not-allowed; }
 .cs__error { color: #e53e3e; font-size: 12px; margin: 0; }
+
+/* Classes table */
+.cs__panel--table { padding: 10px; overflow-x: auto; }
+.cs-cls-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.cs-cls-table th { padding: 6px 8px; background: #f5f5f5; border-bottom: 2px solid #e0e0e0; text-align: left; font-weight: 700; color: #555; white-space: nowrap; }
+.cs-cls-table td { padding: 4px 6px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+.cs-cls-table tr:hover td { background: #fafafa; }
+.cs-cls-drag { cursor: grab; color: #bbb; font-size: 16px; user-select: none; padding: 0 4px; }
+.cs-cls-drag:active { cursor: grabbing; }
+.cs-cls-num { color: #aaa; font-size: 11px; min-width: 20px; }
+.cs-cls-input { width: 100%; border: 1px solid #e0e0e0; border-radius: 5px; padding: 4px 7px; font-size: 12px; outline: none; box-sizing: border-box; }
+.cs-cls-input:focus { border-color: var(--primaryColor, #3a7bd5); }
+.cs-cls-input--sm { max-width: 90px; }
+.cs-cls-active { text-align: center; }
+.cs-cls-del { background: none; border: none; color: #e53e3e; font-size: 17px; cursor: pointer; padding: 0 4px; line-height: 1; }
+.cs-cls-del:hover { color: #c0392b; }
+.cs-cls-drag-over td { background: #e8f4fd !important; }
+.cs-cls-add { margin-top: 8px; width: 100%; padding: 7px; border: 1px dashed #b0c4de; border-radius: 7px; background: #f8fbff; color: #3a7bd5; font-size: 13px; font-weight: 600; cursor: pointer; }
+.cs-cls-add:hover { background: #e8f4fd; }
+.cs-cls-shifts-cell { white-space: nowrap; }
+.cs-cls-shifts-toggle { background: none; border: 1px solid #e0e0e0; border-radius: 5px; padding: 4px 20px 4px 6px; cursor: pointer; font-size: 11px; display: inline-flex; align-items: flex-start; gap: 3px; flex-wrap: wrap; max-width: 160px; position: relative; }
+.cs-cls-shifts-toggle:hover { background: #f0f4ff; border-color: #b0c4de; }
+.cs-cls-shift-badge { background: #e8f0fe; color: #3a7bd5; border-radius: 4px; padding: 1px 5px; font-size: 10px; font-weight: 600; }
+.cs-cls-shift-empty { color: #aaa; font-size: 11px; }
+.cs-cls-chev { position: absolute; top: 2px; right: 4px; font-size: 13px; color: #888; }
+.cs-cls-shifts-row td { padding: 0; background: #f9fbff; }
+.cs-cls-shifts-wrap { padding: 10px 14px; display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; }
+.cs-cls-shift-item { display: flex; align-items: center; gap: 6px; background: #fff; border: 1px solid #e0e0e0; border-radius: 7px; padding: 6px 10px; font-size: 12px; }
+.cs-cls-shift-label { font-weight: 700; color: #888; min-width: 20px; }
+.cs-cls-shift-item label { display: flex; align-items: center; gap: 4px; color: #555; }
+.cs-cls-input--time { width: 90px; }
+.cs-cls-shift-add { padding: 5px 12px; border: 1px dashed #b0c4de; border-radius: 7px; background: #f8fbff; color: #3a7bd5; font-size: 12px; cursor: pointer; }
+.cs-cls-shift-add:hover { background: #e8f4fd; }
 </style>

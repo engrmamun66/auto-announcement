@@ -376,6 +376,8 @@ module.exports = {
     'Completed:': 'Completed:',
     'Recall All': 'Recall All',
     'Punched:': 'Punched:',
+    'Punch': 'Punch',
+    'Call': 'Call',
     'Emergency Call': 'Emergency Call',
     'Click Here': 'Click Here',
     'Error': 'Error',

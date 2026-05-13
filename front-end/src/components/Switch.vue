@@ -315,8 +315,8 @@ let sw = computed(() => {
 }
 
 .switch-input:not(:checked) ~ .switch-handle {
-  background: var(--grad3);
-} 
+  background: #e74c3c;
+}
 
 .switch-input:checked ~ .switch-handle {
   left: var(--sw-left);

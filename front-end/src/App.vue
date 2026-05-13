@@ -222,7 +222,7 @@ async function getConfig({switch_mode=''}={}){
         let response = await http.get('/config', { params: { switch_mode } })
         if(response.status == 200){
             CONFIG.value = response.data
-            classes.value = response.data.classes
+            classes.value = Array.from(response.data.classes).filter(c => c?.isActive)
             storage('CONFIG').value = response.data
         }
     } catch (error) {

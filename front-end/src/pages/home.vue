@@ -40,9 +40,9 @@ const isUsingSpeakerAutoControl = inject('isUsingSpeakerAutoControl');
 const isSpeakersAutoMode = inject('isSpeakersAutoMode');
 
 let speedList = [
-     {label: 'Normal', value: 1.0},
-     {label: 'Medium', value: 1.25},
-     {label: 'Faster', value: 1.5},
+     {label: helper.t('Normal'), value: 1.0},
+     {label: helper.t('Medium'), value: 1.25},
+     {label: helper.t('Faster'), value: 1.5},
 ]
 
 const log = console.log
@@ -305,8 +305,8 @@ function recallAllPunchedStudents(){
      <div class="sections mt-3">
           <div class="single-section class-list " v-if="toggleSettings">
                <div class="tab-view" >
-                    <div :class="{'active': tab==1}" @click="tab=1">Punch</div>
-                    <div :class="{'active': tab==2}" @click="tab=2">Call</div>
+                    <div :class="{'active': tab==1}" @click="tab=1">{{ helper.t('Punch') }}</div>
+                    <div :class="{'active': tab==2}" @click="tab=2">{{ helper.t('Call') }}</div>
                </div>
                <div class="inner-list">
                     <ul>
