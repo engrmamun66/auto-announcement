@@ -87,6 +87,7 @@ let last_mouse_keyboard_activity = ref(new Date().getTime())
 const isUserActive = ref(false)
 const main_app_user_is_active = ref(false)
 const allow_to_reaload = ref(false)
+const showSmsModal = ref(false)
 
 watch(isUserActive, (bool) => {
     sendRemoteAction({from: 'localhost', action: 'is_active_main_user', data: isUserActive.value})
@@ -468,6 +469,7 @@ provide('switches_PreviewInHomePage', switches_PreviewInHomePage)
 provide('isUsingSpeakerAutoControl', isUsingSpeakerAutoControl)
 provide('isSpeakersAutoMode', isSpeakersAutoMode) 
 provide('last_requested_ports_for_auto_mode', last_requested_ports_for_auto_mode) 
+provide('showSmsModal', showSmsModal) 
 
 
 
@@ -610,7 +612,7 @@ function _______SEAPRATOR______(){}
 
 function focusBarcodeInput__and__startAnnoucement(){
     callbacks.clearWattingList()
-    if(is_started_schedule.value && !isIPAccess){
+    if(is_started_schedule.value && !isIPAccess && !showSmsModal.value){
         let inputEl = document.getElementById('BARCODE_INPUT')
         if(inputEl) inputEl.focus()
     }

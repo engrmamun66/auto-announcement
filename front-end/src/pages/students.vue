@@ -629,10 +629,10 @@ watch(fixedWidthSoundCol, (newVal) => {
           <span class="bg-success- p-1">{{ all_students_non_copied?.length }}</span>
            <!-- <span>{{ params?.total || '0' }}</span> -->
         </Btn>
-        <Btn v-if="!addMode" class="me-2" @click="addMode = !addMode;editModeTabIndex=1;clearParams();payload.id = null" ><i class='bx bx-plus'></i> Add New</Btn>
-        <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature && PunchButtonsRef?.length">
+        <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
           <Btn @click.stop="bulkPunch()" style="background: #673AB7;" :disabled="!PunchButtonsRef?.length">Bulk Punch ({{ PunchButtonsRef?.length || 0 }})</Btn>
         </template>
+        <Btn v-if="!addMode" class="me-2" @click="addMode = !addMode;editModeTabIndex=1;clearParams();payload.id = null" ><i class='bx bx-plus'></i> Add New</Btn>
       </div>
     </div>
 
@@ -916,7 +916,12 @@ watch(fixedWidthSoundCol, (newVal) => {
               </th>
             </template>
             <th>{{ helper.t('Status') }}</th>
-            <th>Punch</th>
+            <th>
+              {{ helper.t('Punch') }}
+              <template v-if="CONFIG?.settings?.attendance?.status">
+                / {{ helper.t('Attendance') }}
+              </template>
+            </th>
             <th>{{ helper.t('Action') }}</th>
           </tr>
         </thead>
@@ -924,7 +929,7 @@ watch(fixedWidthSoundCol, (newVal) => {
       <template #rows>
         <template v-if="students?.length">
           <template v-for="(std, i) in students.toReversed()">
-            <tr @auxclick="log(std)" :style="!std.status ? 'opacity: 0.4' : ''"  >
+            <tr @auxclick="log(std)" :style="!std.status ? 'opacity: 0.9' : ''"  >
               <td class="text-left d-none d-md-table-cell" data-no-auto-i18n="true" @click.stop="log(std)"> {{ std.class }} </td>
               <td class="text-left cp" @click.stop="prepareToEdit(std)" :student-id="std.id">
                 {{ std.name.split('||')?.[0] }}
@@ -1370,38 +1375,47 @@ watch(fixedWidthSoundCol, (newVal) => {
   flex-wrap: wrap;
   justify-content: flex-start;
 }
-.class-short-btn{
-  padding: 1px 10px;
+.class-short-btn {
+  padding: 5px 14px;
   text-align: center;
   background: var(--grad3);
   margin-right: 5px;
-  border-radius: 5px;
+  border-radius: 20px;
   color: white;
   margin-bottom: 5px;
-  transition: all 0.3s;
   border: 2px solid transparent;
-  scale: 1;
-  transition: 0.3s all;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s, background 0.15s;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+  position: relative;
+}
+.class-short-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.22);
+}
+.class-short-btn:active {
+  transform: translateY(0px);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+.class-short-btn.active {
+  border-color: #fbbf24;
+  background: linear-gradient(90deg, #92400e 0%, #b45309 100%);
+  box-shadow: 0 0 0 3px rgba(251,191,36,0.35), 0 3px 8px rgba(0,0,0,0.25);
+  transform: translateY(-1px);
+  z-index: 1;
 }
 .class-short-btn.for-call,
 .class-short-btn.attendence {
   width: 104px;
 }
-.class-short-btn.for-call{
+.class-short-btn.for-call {
   background: #00529e;
 }
-.class-short-btn.for-attendence{
+.class-short-btn.for-attendence {
   background: #009a9e;
-}
-.class-short-btn:hover{
-  box-shadow: 0px 3px 0px rgba(0, 0, 0, 0.126), 0px 6px 4px rgba(0, 0, 0, 0.465);
-}
-.class-short-btn.active{ 
-  border: 2px solid #fa6548;
-  box-shadow: 0px 3px 10px rgba(252, 210, 0, 0.881), 0px 6px 4px rgba(0, 0, 0, 0.465), inset 0px 3px 2px rgba(252, 210, 0, 0.881);
-  text-shadow: -1px 1px 0px black; 
-  /* scale: 1.1; */
-  z-index: 1;
 }
 .std-clone-area{
   display: flex;

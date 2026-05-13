@@ -38,4 +38,12 @@ defineProps({
 </div>
 </template>
 
- 
+<style scoped>
+.table-container {
+  border-radius: 12px;
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+  margin-top: 15px;
+}
+</style>

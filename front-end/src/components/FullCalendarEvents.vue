@@ -197,9 +197,6 @@ export default {
 .fc-event-main{
   cursor: pointer;
 }
-.fc-event-main{
-  /* overflow-x: hidden; */
-}
 .cal-day-event-item{
   padding: 0px 5px;
   padding-left: 5px;

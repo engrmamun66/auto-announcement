@@ -561,41 +561,78 @@ kbd {
 
 .table-container {
   max-width: 100%;
+  overflow-x: auto;
   overflow-y: auto;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  border: 1px solid #e5e7eb;
+  background: #fff;
+}
+
+.table {
+  margin-bottom: 0 !important;
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
 }
 
 td {
-  padding: 5px 20px !important;
+  padding: 9px 18px !important;
+  font-size: 13.5px;
+  color: #374151;
+  border-bottom: 1px solid #f3f4f6 !important;
+  vertical-align: middle !important;
 }
 
 th {
-  padding: 10px 20px !important;
+  padding: 11px 18px !important;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #6b7280;
+  white-space: nowrap;
 }
- 
+
 thead tr {
-    background-color: #fff!important;
-    box-shadow: inset -0px -2px 4px 0px #00000057;
+  background: linear-gradient(90deg, #f8fafc 0%, #f1f5f9 100%) !important;
+  box-shadow: none !important;
+  border-bottom: 2px solid #e5e7eb !important;
 }
 thead tr thead tr {
-    background-color: transparent!important;
-    box-shadow: none;
+  background: transparent !important;
+  box-shadow: none;
 }
+
+thead th:first-child { border-radius: 12px 0 0 0; }
+thead th:last-child  { border-radius: 0 12px 0 0; }
+
 tbody td {
-  background-color: #ffffffb0 !important;
+  background-color: #ffffff !important;
 }
 tbody td tbody td {
   background-color: transparent !important;
 }
 
-th a,
-td a {
-  color: black;
-  text-decoration: none;
+tbody tr:last-child td {
+  border-bottom: none !important;
 }
 
-/* Adding table tar hover */
+th a,
+td a {
+  color: #374151;
+  text-decoration: none;
+}
+th a:hover,
+td a:hover {
+  color: var(--primaryColor);
+}
+
+tbody tr {
+  transition: background 0.12s;
+}
 tbody tr:hover td {
-  background-color: #ffffffd1 !important;
+  background-color: #f0f9ff !important;
 }
 
 .nav-tabs.d2 .nav-link {
