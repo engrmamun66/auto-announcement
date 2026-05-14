@@ -645,6 +645,8 @@ watch(fixedWidthSoundCol, (newVal) => {
       </div>
     </div>
 
+
+    <!-- <form -->
     <modal v-model="addMode" :title="!payload?.id ? helper.t('Add Student') : (editModeTabIndex == 1 ? helper.t('Update Student') : helper.t('Guardian Punch History'))" :width="editModeTabIndex == 2 ? '700px' : '500px'" :close-on-esc="true" :close-on-click-away="true" >
       <div class="w-100" >
 
@@ -742,19 +744,21 @@ watch(fixedWidthSoundCol, (newVal) => {
                   </div>
 
                   <!-- Card Owner -->
-                  <div class="col-12 mt-3" v-if="CONFIG?.card_owners?.length">
-                    <div class="form-group d-flex align-items-center gap-3">
-                      <label class="mb-0">{{ helper.t('Card Owner') }}</label>
-                      <div class="d-flex flex-wrap gap-2">
-                        <template v-for="owner in CONFIG?.card_owners">
-                          <div @click.stop="payload.card_owner = owner.id" class="d-flex justify-content-start each-owner-name">
-                              <span :class="{'checked': payload.card_owner == owner.id}" customized-radio></span>
-                              <label class="cp">{{ owner.name }}</label>
-                          </div>
-                        </template>
-                      </div>
-                    </div>
-                  </div>
+                   <template v-if="CONFIG?.settings?.attendance?.status">
+                     <div class="col-12 mt-3" v-if="CONFIG?.card_owners?.length">
+                       <div class="form-group d-flex align-items-center gap-3">
+                         <label class="mb-0">{{ helper.t('Card Owner') }}</label>
+                         <div class="d-flex flex-wrap gap-2">
+                           <template v-for="owner in CONFIG?.card_owners">
+                             <div @click.stop="payload.card_owner = owner.id" class="d-flex justify-content-start each-owner-name">
+                                 <span :class="{'checked': payload.card_owner == owner.id}" customized-radio></span>
+                                 <label class="cp">{{ owner.name }}</label>
+                             </div>
+                           </template>
+                         </div>
+                       </div>
+                     </div>
+                   </template>
 
                   <div class="col-12 d-flex justify-content-center mt-3">
                     <Btn @click.stop="clearPayload" class="red me-2">{{ helper.t('Cancel') }}</Btn>

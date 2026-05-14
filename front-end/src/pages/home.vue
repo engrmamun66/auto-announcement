@@ -295,7 +295,7 @@ function recallAllPunchedStudents(){
           </div> 
          
           <BarcodeScannigAnimation v-if="is_started_schedule" :scannig="is_started_schedule" class="me-1"  ></BarcodeScannigAnimation> 
-          <Switch v-model="is_started_schedule" @click="checkSchedule" size="lg" yes="Started" no="Stopped" :bothVisible="false" class="me-2" ></Switch> 
+          <Switch v-model="is_started_schedule" @click="checkSchedule" size="lg" :yes="helper.t('Started')" :no="helper.t('Stopped')" :bothVisible="false" class="me-2" ></Switch>
      </div>
 
      

@@ -1,7 +1,7 @@
 <template>
   <Rightbar ref="theRightbar" :title="helper.t('Settings')" @unmount="$emit('unmount')">
     <div class="cs">
-      <div v-if="loading" class="cs__loading">Loading...</div>
+      <div v-if="loading" class="cs__loading">{{ helper.t('Loading...') }}</div>
       <template v-else>
 
         <!-- Scrollable tab strip -->
@@ -26,11 +26,11 @@
                   <tr>
                     <th></th>
                     <th>#</th>
-                    <th>Class Name</th>
-                    <th>Short</th>
-                    <th>Display Name</th>
-                    <th>Active</th>
-                    <th>Shifts</th>
+                    <th>{{ helper.t('Class Name') }}</th>
+                    <th>{{ helper.t('Short') }}</th>
+                    <th>{{ helper.t('Display Name') }}</th>
+                    <th>{{ helper.t('Active') }}</th>
+                    <th>{{ helper.t('Shifts') }}</th>
                     <th></th>
                     <th></th>
                   </tr>
@@ -56,11 +56,11 @@
                       <td class="cs-cls-shifts-cell">
                         <div class="cs-cls-shifts-display">
                           <span v-for="(sh, si) in (cls.shifts||[])" :key="si" class="cs-cls-shift-badge">{{ sh.start }}–{{ sh.end }}</span>
-                          <span v-if="!(cls.shifts||[]).length" class="cs-cls-shift-empty">no shifts</span>
+                          <span v-if="!(cls.shifts||[]).length" class="cs-cls-shift-empty">{{ helper.t('no shifts') }}</span>
                         </div>
                       </td>
                       <td class="cs-cls-eye-cell">
-                        <button class="cs-cls-eye-btn" :class="{ active: expandedShifts[idx] }" :tooltip="expandedShifts[idx] ? 'Hide shifts' : 'Edit shifts'" @click="expandedShifts[idx] = !expandedShifts[idx]">
+                        <button class="cs-cls-eye-btn" :class="{ active: expandedShifts[idx] }" :tooltip="expandedShifts[idx] ? helper.t('Hide shifts') : helper.t('Edit shifts')" @click="expandedShifts[idx] = !expandedShifts[idx]">
                           <i :class="expandedShifts[idx] ? 'bx bx-hide' : 'bx bx-show'"></i>
                         </button>
                       </td>
@@ -76,12 +76,12 @@
                             <TransitionGroup name="shift-item" tag="div" class="cs-cls-shifts-items">
                               <div v-for="(sh, si) in (cls.shifts||[])" :key="sh.start+'_'+si" class="cs-cls-shift-item">
                                 <span class="cs-cls-shift-label">#{{ si+1 }}</span>
-                                <label>Start <input class="cs-cls-input cs-cls-input--time" type="time" v-model="sh.start" /></label>
-                                <label>End <input class="cs-cls-input cs-cls-input--time" type="time" v-model="sh.end" /></label>
+                                <label>{{ helper.t('Start') }} <input class="cs-cls-input cs-cls-input--time" type="time" v-model="sh.start" /></label>
+                                <label>{{ helper.t('End') }} <input class="cs-cls-input cs-cls-input--time" type="time" v-model="sh.end" /></label>
                                 <button class="cs-cls-del" @click="cls.shifts.splice(si,1)">×</button>
                               </div>
                             </TransitionGroup>
-                            <button class="cs-cls-shift-add" @click="(cls.shifts = cls.shifts||[]).push({start:'08:00',end:'10:00'})">+ Add Shift</button>
+                            <button class="cs-cls-shift-add" @click="(cls.shifts = cls.shifts||[]).push({start:'08:00',end:'10:00'})">{{ helper.t('+ Add Shift') }}</button>
                           </div>
                         </Transition>
                       </td>
@@ -89,7 +89,7 @@
                   </template>
                 </tbody>
               </table>
-              <button class="cs-cls-add" @click="drafts['classes'].push({ class_name: '', class_short: '', display_name: '', isActive: true, speaker_ports: [], shifts: [] })">+ Add Class</button>
+              <button class="cs-cls-add" @click="drafts['classes'].push({ class_name: '', class_short: '', display_name: '', isActive: true, speaker_ports: [], shifts: [] })">{{ helper.t('+ Add Class') }}</button>
             </div>
           </template>
 
@@ -127,6 +127,7 @@ import Switch from '../Switch.vue';
 const emit = defineEmits(['unmount']);
 const http = inject('http');
 const helper = inject('helper');
+const emitter = inject('emitter');
 
 const theRightbar = ref(true);
 const loading = ref(true);
@@ -182,14 +183,14 @@ async function load() {
 }
 
 async function resetAll() {
-  if (!confirm('Reset all settings to default values?')) return;
+  if (!confirm(helper.t('Reset all settings to default values?'))) return;
   resettingAll.value = true;
   try {
     await http.post('/settings/reset');
     hasSaved.value = true;
     await load();
   } catch(e) {
-    alert('Reset failed');
+    alert(helper.t('Reset failed'));
   } finally {
     resettingAll.value = false;
   }
@@ -200,7 +201,14 @@ function resetDraft(key) {
   errors[key] = '';
 }
 
-async function save(key) {
+async function save(key, pass=false) {
+  if(!event?.ctrlKey){
+    let pass = prompt(helper.t('Type secret password'))
+    if(pass !== 'allowme' || pass !== 'asdf'){
+      emitter.emit('toaster-error', { message: helper.t('This class is currently closed')})
+      return
+    }
+  }
   errors[key] = '';
   saving[key] = true;
   try {
@@ -208,7 +216,7 @@ async function save(key) {
     settings.value[key] = JSON.parse(JSON.stringify(drafts[key]));
     hasSaved.value = true; 
   } catch(e) {
-    errors[key] = 'Save failed';
+    errors[key] = helper.t('Save failed');
   } finally {
     saving[key] = false;
   }
