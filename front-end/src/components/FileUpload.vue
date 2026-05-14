@@ -3,16 +3,16 @@
         <h3>Upload Files</h3>
         <div class="drop_box">
         <header>
-            <h4>{{file ? file?.name : 'Select File here'}}</h4>
+            <h4>{{file ? file?.name : helper.t('Select File here')}}</h4>
         </header>
-        <p>Files Supported: Excel Only</p>
+        <p>{{ helper.t('Files Supported: Excel Only') }}</p>
         <input v-if="fileInputField" ref="uploader" @change="onChangeFile" type="file" hidden accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"   id="fileID" style="display:none;">
-        <Btn v-if="!file?.name"  @click="open" >Choose File</Btn>
-        <Btn v-if="file?.name" @click.stop="uploadNow()" >Upload Now <BtnLoader v-if="loading"></BtnLoader></Btn>
+        <Btn v-if="!file?.name"  @click="open" >{{ helper.t('Choose File') }}</Btn>
+        <Btn v-if="file?.name" @click.stop="uploadNow()" >{{ helper.t('Upload Now') }} <BtnLoader v-if="loading"></BtnLoader></Btn>
         <label v-if="useRoute().query.dev == 'true'" class="mt-2 d-flex align-items-center gap-2" style="cursor:pointer;font-size:13px;">
-          <input type="checkbox" v-model="forceAsNewEntity" /> Force data as new entry
+          <input type="checkbox" v-model="forceAsNewEntity" /> {{ helper.t('Force data as new entry') }}
         </label>
-        <a :href="`${BASE_URL}/sample.xlsx`" class="mt-2">Download Sample File</a>
+        <a :href="`${BASE_URL}/sample.xlsx`" class="mt-2">{{ helper.t('Download Sample File') }}</a>
         
         </div>  
     </div> 

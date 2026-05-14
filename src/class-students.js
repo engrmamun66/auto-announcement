@@ -83,7 +83,9 @@ function appendActiveClassFilter(query = '', queryParams = [], { classShortColum
   };
 }
 
-class Students { 
+const STUDENT_COLUMNS = ['id','name','dakhela','class','class_short','card_no','year','status','sound1','created','card_owner','options','note','device_index','profile_image','phone_number']
+
+class Students {
 
   constructor(db) {
     this.tableName = "students";
@@ -448,6 +450,8 @@ class Students {
         WHERE id = ?
       `;
 
+      const defaultColumns = STUDENT_COLUMNS
+
       let errorOccurred = false;
       let created = 0;
       let updated = 0;
@@ -469,48 +473,43 @@ class Students {
         utils.restartServer();
       };
 
+      // Build headerMap from first row, matched against defaultColumns only
       const headerRow = data[0] || []
       const headerMap = {}
-      if (headerRow && headerRow.length && headerRow.some((h) => String(h).toLowerCase() === 'id' || String(h).toLowerCase() === 'name')) {
-        headerRow.forEach((h, idx) => {
-          headerMap[String(h).trim().toLowerCase()] = idx
-        })
+      headerRow.forEach((h, idx) => {
+        const key = String(h || '').trim().toLowerCase()
+        if (key && defaultColumns.includes(key)) headerMap[key] = idx
+      })
+
+      // Require name, dakhela, class in header
+      const missingCols = ['name', 'dakhela', 'class'].filter(c => headerMap[c] === undefined)
+      if (missingCols.length) {
+        return callback(`Missing required columns in Excel header: ${missingCols.join(', ')}`)
       }
-      const hasHeader = Object.keys(headerMap).length > 0
-      const getValue = (row, key, fallbackIndex) => {
-        if (headerMap[key] !== undefined) return row[headerMap[key]]
-        if (fallbackIndex !== undefined) return row[fallbackIndex]
-        return undefined
-      }
-  
+
+      const getCol = (row, key) => headerMap[key] !== undefined ? row[headerMap[key]] : undefined
+
       this.db.serialize(() => {
         data.forEach((row, i) => {
-          if (i === 0 && hasHeader) {
-            // Skip the header row
-            console.log("Skipping header row:", row, row.length, data[1]?.length, data[1]);
-            return;
-          }
-  
-          const name = getValue(row, 'name', 1)
-          if (row.length === 0 || !name) {
-            // Skip empty rows or rows without a name
-            console.log("Skipping empty row or invalid data:", row);
-            return;
-          }
-  
-          const id = getValue(row, 'id', 0)
-          const dakhela = getValue(row, 'dakhela', 2)
-          const className = getValue(row, 'class', 3) || getValue(row, 'class_name', 3)
-          const card_no = getValue(row, 'card_no', 5)
-          const year = getValue(row, 'year', 6) || new Date().getFullYear()
-          const status = parseInt(getValue(row, 'status', 7)) || 1
-          const sound1 = getValue(row, 'sound1', 8)
-          const card_owner = getValue(row, 'card_owner', 9)
-          const options = getValue(row, 'options', 10)
-          const device_index = getValue(row, 'device_index', 11)
-          const note = getValue(row, 'note', 12)
-          const profile_image = headerMap.profile_image !== undefined ? getValue(row, 'profile_image') : (row.length >= 15 ? row[14] : null)
-          const phone_number = normalizePhoneNumber(getValue(row, 'phone_number'))
+          if (i === 0) return // skip header row
+          if (!row.length) return // skip empty rows
+
+          const name = getCol(row, 'name')
+          if (!name) return // skip rows without name
+
+          const id          = getCol(row, 'id')
+          const dakhela     = getCol(row, 'dakhela')
+          const className   = getCol(row, 'class')
+          const card_no     = getCol(row, 'card_no') || null
+          const year        = getCol(row, 'year') || new Date().getFullYear()
+          const status      = parseInt(getCol(row, 'status')) || 1
+          const sound1      = getCol(row, 'sound1') || null
+          const card_owner  = getCol(row, 'card_owner') || null
+          const options     = getCol(row, 'options') || null
+          const note        = getCol(row, 'note') || null
+          const device_index = getCol(row, 'device_index') || null
+          const profile_image = getCol(row, 'profile_image') || null
+          const phone_number = normalizePhoneNumber(getCol(row, 'phone_number'))
 
           if (forceAsNewEntity) {
             // Force insert as a new row regardless of id or existing match
@@ -693,11 +692,6 @@ class Students {
         return;
       }
 
-      if (rows.length === 0) {
-        res.status(404).send({ message: "No data found in the students table." });
-        return;
-      }
-
       const schedulesQuery = `SELECT * FROM schedules ORDER BY id ASC`;
 
       this.db.all(schedulesQuery, [], (scheduleErr, schedules) => {
@@ -708,16 +702,31 @@ class Students {
 
         try {
           // Create worksheets
-          const worksheet = xlsx.utils.json_to_sheet(rows);
+          const worksheet = rows.length
+            ? xlsx.utils.json_to_sheet(rows)
+            : xlsx.utils.aoa_to_sheet([STUDENT_COLUMNS]);
           const schedulesSheet = xlsx.utils.json_to_sheet(schedules || []);
+
+          const boldHeaderRow = (ws) => {
+            const ref = ws['!ref']
+            if (!ref) return
+            const range = xlsx.utils.decode_range(ref)
+            for (let c = range.s.c; c <= range.e.c; c++) {
+              const addr = xlsx.utils.encode_cell({ r: 0, c })
+              if (!ws[addr]) ws[addr] = { t: 's', v: '' }
+              ws[addr].s = { font: { bold: true } }
+            }
+          }
+          boldHeaderRow(worksheet)
+          boldHeaderRow(schedulesSheet)
 
           // Create a new workbook and append worksheets
           const workbook = xlsx.utils.book_new();
           xlsx.utils.book_append_sheet(workbook, worksheet, "Students");
           xlsx.utils.book_append_sheet(workbook, schedulesSheet, "Schedules");
           const fileName = `students_export_${moment().format('YYYY_MMM_DD')}_${Date.now()}.xlsx`
-          const filePath = path.join( DIR, "/public/exports", fileName );    
-          xlsx.writeFile(workbook, filePath);
+          const filePath = path.join( DIR, "/public/exports", fileName );
+          xlsx.writeFile(workbook, filePath, { cellStyles: true });
 
           res.download(filePath, "students_export.xlsx", (err) => {
             if (err) {

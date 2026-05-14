@@ -11,7 +11,7 @@ module.exports = function (Students, { upload, audioUpload, imageUpload }) {
   router.post('/students/import', upload.single('file'), (req, res) => {
     if (!req.file) return res.status(400).send('No file uploaded.');
     Students.importExcel(req.file.path, req.query.force_as_newentity === 'true', (error, message) => {
-      if (error) return res.status(500).send(`Failed to import data: ${error.message}`);
+      if (error) return res.status(500).send(`Failed to import data: ${error?.message || error}`);
       res.send(message);
     });
   });
