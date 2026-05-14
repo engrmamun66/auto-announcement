@@ -78,6 +78,7 @@ let user_interacted = ref(false)
 let last_mouse_activity_time = ref(moment().format('Y-MM-DD HH:mm:ss'))
 let emergency_mode = ref(false)
 let LockscreenRef = ref(null)
+let lockscreenDismissing = ref(false)
 let disabilityAlretRef = ref(null)
 let manually_paused_the_playlist = ref(false)
 let showSwithBoardModal = ref(false)
@@ -195,7 +196,7 @@ let getWarningMessage = computed(()=>{
 
     const afterPaymonth = moment(last_paid_month).add(1, 'month').format('MMMM')
  
-    let stopAfter = moment(last_paid_month).endOf('month').add(stop_after_day + 1, 'day')
+    let stopAfter = moment(last_paid_month).endOf('month').add(stop_after_day, 'day')
     let left_days = stopAfter.diff(moment(), 'day')  
 
     warning_message = warning_message.replace('{{month}}', afterPaymonth)
@@ -299,10 +300,11 @@ async function CheckAccess({loader=false}={}){
 
         checking_accessibility.value = false
 
-        if(LockscreenRef.value){
-            if(showAccessibilityAlert.value){
-                
-            }
+        if(LockscreenRef.value && !appUseForbiddened.value){
+            // access just granted — play shutter animation, then unmount
+            lockscreenDismissing.value = true
+            LockscreenRef.value.unlock()
+            setTimeout(() => { lockscreenDismissing.value = false }, 800)
         }
         setTimeout(() => {
             if(disabilityAlretRef.value){
@@ -1583,14 +1585,12 @@ const force_active = computed(() => route.query.fa === 'true' || storage('active
         <routerView />
     </SideBar> -->
     <Toaster @onToaster="onToaster"></Toaster>
-    <template v-if="!!force_active && appUseForbiddened && appAccessData?.internet === true">
-        <Lockscreen ref="LockscreenRef" @tryToUnlock="CheckAccess({loader: true})"></Lockscreen>
-        <template v-if="true">
-            <div ref="disabilityAlretRef" class="disablitily-alert" data-no-auto-i18n="true">
-                <div v-html="getForbiddenedMessage" @auxclick="log({getWarningMessage})"></div>
-                <accessCheckAnimation v-if="checking_accessibility"></accessCheckAnimation>
-            </div>
-        </template>
+    <template v-if="(appUseForbiddened || lockscreenDismissing) && appAccessData?.internet === true">
+        <Lockscreen ref="LockscreenRef" :message="getForbiddenedMessage" :checking="checking_accessibility" @tryToUnlock="CheckAccess({loader: true})"></Lockscreen>
+        <div ref="disabilityAlretRef" class="disablitily-alert" data-no-auto-i18n="true">
+            <div v-html="getForbiddenedMessage" @auxclick="log({getWarningMessage})"></div>
+            <accessCheckAnimation v-if="checking_accessibility"></accessCheckAnimation>
+        </div>
     </template>
     <template v-else>
         <TopNav></TopNav>
