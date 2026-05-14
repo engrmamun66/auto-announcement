@@ -221,6 +221,7 @@ module.exports = {
     'Clear': 'পরিষ্কার করুন',
     'Submitting...': 'জমা হচ্ছে...',
     'Submit Attendance': 'উপস্থিতি জমা দিন',
+    'Total': 'মোট',
     'Start and end time required.': 'শুরুর এবং শেষের সময় আবশ্যক।',
     'Failed to fetch logs.': 'লগ আনতে ব্যর্থ হয়েছে।',
     'Are you sure to submit {count} logs?': 'আপনি কি {count}টি লগ জমা দিতে চান?',

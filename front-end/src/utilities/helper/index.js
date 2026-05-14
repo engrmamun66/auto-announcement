@@ -7,8 +7,6 @@ const __i18nState = {
     en: {},
     bn: {},
   },
-  textNodeOriginals: new WeakMap(),
-  attrOriginals: new WeakMap(),
 }
 
 function sortDictionaryEntries(dictionary = {}) {
@@ -122,72 +120,6 @@ const helper = {
       }
 
       return helper.t(canonicalReason)
-    },
-    localizeDom(root = document.body) {
-      if (typeof window === 'undefined' || !root) return
-
-      const treeWalker = document.createTreeWalker(
-        root,
-        NodeFilter.SHOW_TEXT,
-        {
-          acceptNode(node) {
-            const parent = node?.parentElement
-            if (!parent) return NodeFilter.FILTER_REJECT
-            if (!String(node?.nodeValue || '').trim()) return NodeFilter.FILTER_REJECT
-            if (['SCRIPT', 'STYLE', 'NOSCRIPT', 'TEXTAREA'].includes(parent.tagName)) {
-              return NodeFilter.FILTER_REJECT
-            }
-            if (parent.closest?.('[data-no-auto-i18n="true"]')) {
-              return NodeFilter.FILTER_REJECT
-            }
-            if (parent.closest?.('.em-picker, .em-date')) {
-              return NodeFilter.FILTER_REJECT
-            }
-            return NodeFilter.FILTER_ACCEPT
-          },
-        }
-      )
-
-      let currentNode = null
-      while ((currentNode = treeWalker.nextNode())) {
-        const original = __i18nState.textNodeOriginals.get(currentNode) ?? currentNode.nodeValue
-        if (!__i18nState.textNodeOriginals.has(currentNode)) {
-          __i18nState.textNodeOriginals.set(currentNode, original)
-        }
-
-        const translated = helper.t(original)
-        if (translated !== currentNode.nodeValue) {
-          currentNode.nodeValue = translated
-        }
-      }
-
-      const translatableElements = []
-      if (root instanceof Element) {
-        translatableElements.push(root)
-        translatableElements.push(...root.querySelectorAll('[placeholder],[title],[tooltip],[aria-label]'))
-      }
-
-      translatableElements.forEach((element) => {
-        if (!(element instanceof Element)) return
-
-        let cache = __i18nState.attrOriginals.get(element)
-        if (!cache) {
-          cache = {}
-          __i18nState.attrOriginals.set(element, cache)
-        }
-
-        ;['placeholder', 'title', 'tooltip', 'aria-label'].forEach((attr) => {
-          if (!element.hasAttribute(attr)) return
-          if (!(attr in cache)) {
-            cache[attr] = element.getAttribute(attr) || ''
-          }
-
-          const translated = helper.t(cache[attr])
-          if (translated !== element.getAttribute(attr)) {
-            element.setAttribute(attr, translated)
-          }
-        })
-      })
     },
     goto: function(payload){
       let route = null

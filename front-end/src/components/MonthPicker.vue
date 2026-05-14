@@ -4,7 +4,7 @@
       <button class="month-nav" type="button" @click.stop="shiftStart(-1)">
         <i class='bx bx-chevron-left'></i>
       </button>
-      <div class="month-label" data-no-auto-i18n="true">{{ startLabel }}</div>
+      <div class="month-label">{{ startLabel }}</div>
       <button class="month-nav" type="button" @click.stop="shiftStart(1)" :disabled="isFutureStartDisabled">
         <i class='bx bx-chevron-right'></i>
       </button>
@@ -14,7 +14,7 @@
       <button class="month-nav" type="button" @click.stop="shiftEnd(-1)">
         <i class='bx bx-chevron-left'></i>
       </button>
-      <div class="month-label" data-no-auto-i18n="true">{{ endLabel }}</div>
+      <div class="month-label">{{ endLabel }}</div>
       <button class="month-nav" type="button" @click.stop="shiftEnd(1)" :disabled="isFutureEndDisabled">
         <i class='bx bx-chevron-right'></i>
       </button>

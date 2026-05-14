@@ -47,7 +47,6 @@ watch(
                 storage('attendance_tab').value = 1
             } 
         }
-        scheduleUiLocalization()
     }
 )
 
@@ -395,8 +394,6 @@ async function controlSounds({student=null, ports=[], openAll=false}={}){
 
 }
 let isMountedAppDotVue = ref(false)
-let uiLocalizationTimer = null
-let uiLocalizationObserver = null
 
 function applyLanguageSettings() {
     helper.setLanguage({
@@ -407,32 +404,10 @@ function applyLanguageSettings() {
     moment.locale('en')
 }
 
-function localizeAppDom() {
-    const root = document.getElementById('my-app')
-    if (!root) return
-    helper.localizeDom(root)
-}
-
-function scheduleUiLocalization(delay = 0) {
-    /**
-     * Disabled: DOM scanning was slowing the app. 
-     * All strings now use helper.t() explicitly.
-     */
-    return 
-    
-    clearTimeout(uiLocalizationTimer)
-    uiLocalizationTimer = setTimeout(async () => {
-        await nextTick()
-        localizeAppDom()
-    }, delay)
-}
-provide('scheduleUiLocalization', scheduleUiLocalization)
-
 watch(
     () => [langCode.value, CONFIG.value?.lang_pack, CONFIG.value?.lang_packs],
     () => {
         applyLanguageSettings()
-        scheduleUiLocalization()
     },
     { deep: true, immediate: true }
 )
@@ -845,19 +820,6 @@ onMounted(async ()=>{
     await getSchedules() 
     await getConfig()
     applyLanguageSettings()
-    scheduleUiLocalization(80)
-
-    const appRoot = document.getElementById('my-app')
-    if (appRoot) {
-        uiLocalizationObserver = new MutationObserver(() => {
-            scheduleUiLocalization()
-        })
-        uiLocalizationObserver.observe(appRoot, {
-            childList: true,
-            subtree: true,
-            characterData: true,
-        })
-    }
 
     if(CONFIG.value?.settings?.click_me_to_allow_sound?.status === false){
         document.body.classList.add('user-interacted')
@@ -1567,11 +1529,6 @@ function onIframeMessage(e) {
 }
 
 onBeforeUnmount(() => {
-    clearTimeout(uiLocalizationTimer)
-    if (uiLocalizationObserver) {
-        uiLocalizationObserver.disconnect()
-        uiLocalizationObserver = null
-    }
     window.removeEventListener('beforeunload', handleBeforeUnload)
     window.removeEventListener('message', onIframeMessage)
 })
@@ -1595,7 +1552,7 @@ const force_active = computed(() => route.query.fa === 'true' || storage('active
     <Toaster @onToaster="onToaster"></Toaster>
     <template v-if="(appUseForbiddened || lockscreenDismissing) && appAccessData?.internet === true">
         <Lockscreen ref="LockscreenRef" :message="getForbiddenedMessage" :checking="checking_accessibility" @tryToUnlock="CheckAccess({loader: true})"></Lockscreen>
-        <div ref="disabilityAlretRef" class="disablitily-alert" data-no-auto-i18n="true">
+        <div ref="disabilityAlretRef" class="disablitily-alert">
             <div v-html="getForbiddenedMessage" @auxclick="log({getWarningMessage})"></div>
             <accessCheckAnimation v-if="checking_accessibility"></accessCheckAnimation>
         </div>
@@ -1612,11 +1569,11 @@ const force_active = computed(() => route.query.fa === 'true' || storage('active
         </div>
     
         <template v-if="showAccessibilityAlert && appAccessData?.internet === true">
-            <div ref="disabilityAlretRef" :class="['disablitily-alert', { 'jump-after-a-while': isLastActiveDay }]" data-no-auto-i18n="true" @auxclick="log({getWarningMessage})" v-html="getWarningMessage">
+            <div ref="disabilityAlretRef" :class="['disablitily-alert', { 'jump-after-a-while': isLastActiveDay }]" @auxclick="log({getWarningMessage})" v-html="getWarningMessage">
             </div>
         </template>
         <template v-else-if="appAccessData?.internet === false">
-            <div ref="disabilityAlretRef" class="disablitily-alert offline" data-no-auto-i18n="true">
+            <div ref="disabilityAlretRef" class="disablitily-alert offline">
                 আপনার ইন্টারনেট সংযোগটি বিচ্ছিন্ন রয়েছে। এই মুহূর্তে ডিভাইস থেকে পাঞ্চ অকার্যকর।
             </div>
         </template>

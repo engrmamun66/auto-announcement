@@ -237,7 +237,7 @@ function CopyCode() {
       </div>
     </div>
 
-    <div class="footer" data-no-auto-i18n="true">
+    <div class="footer">
       <p>
         © {{ new Date().getFullYear() }} Calling Bird. All rights reserved.
       </p>

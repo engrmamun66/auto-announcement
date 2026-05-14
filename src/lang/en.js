@@ -202,6 +202,7 @@ module.exports = {
     'Files Supported: Excel Only': 'Files Supported: Excel Only',
     'Choose File': 'Choose File',
     'Upload Now': 'Upload Now',
+    'Total': 'Total',
     'Force data as new entry': 'Force data as new entry',
     'Download Sample File': 'Download Sample File',
     'Import completed': 'Import completed',

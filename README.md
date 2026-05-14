@@ -23,13 +23,9 @@ copy and pate the shortcut of open.bat
   - `dakhela`
   - `class`
 - বাকি column গুলো optional: `id`, `class_short`, `card_no`, `year`, `status`, `sound1`, `created`, `card_owner`, `options`, `note`, `device_index`, `profile_image`, `phone_number`
+- `class_short` দেওয়া না হলে **config থেকে স্বয়ংক্রিয়ভাবে** নেওয়া হবে (`class` নামের সাথে config-এর class list মিলিয়ে)।
 - `year` খালি থাকলে current year বসবে।
 - `status` খালি থাকলে `1` (active) বসবে।
 
 
-To skip DOM lang change add
-[data-no-auto-i18n="true"] // But not in use
-
-localizeDom() // But not in use
-localizeAppDom() 
-is main DOM change able funciton
+All UI strings use `helper.t()` for translation. DOM-based localization (`localizeDom`, `localizeAppDom`, `data-no-auto-i18n`) has been removed.

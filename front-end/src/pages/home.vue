@@ -262,7 +262,7 @@ function recallAllPunchedStudents(){
                <btn @click="toggleSettings = !toggleSettings" class="px-3 shadow me-2"><i class='bx bx-list-ul'></i></btn>
           </div> -->
           
-          <div class="relative w-100 me-2" data-no-auto-i18n="true">
+          <div class="relative w-100 me-2">
                <EmergencyMode v-if="emergency_mode"></EmergencyMode>
                <EmergencyMode v-if="emergency_mode" style="left:calc(100% - 30px)"></EmergencyMode>
                <input id="BARCODE_INPUT" type="text" @keyup.enter="inputBarcode" @paste="inputBarcode" class="form-control px-4 py-2 text-center py-1 cb-input"
@@ -322,7 +322,7 @@ function recallAllPunchedStudents(){
                                                   {{ helper.formatTime(item.start_time) }} - {{ helper.formatTime(item.end_time) }}
                                              </p>
                                              <div class="d-flex flex-wrap">
-                                                  <p class="m-1 p-1 border3 radius-5" v-for="cls in item.classes" data-no-auto-i18n="true">{{ helper.ucfirst(cls.display_name) }}</p>
+                                                  <p class="m-1 p-1 border3 radius-5" v-for="cls in item.classes">{{ helper.ucfirst(cls.display_name) }}</p>
                                              </div>                                    
                                         </li>
 
@@ -340,7 +340,7 @@ function recallAllPunchedStudents(){
                                                   {{ helper.formatTime(item.start_time) }} - {{ helper.formatTime(item.end_time) }}
                                              </p>
                                              <div class="d-flex flex-wrap mb-3">
-                                                  <span class="m-1 classes-left w-100" data-no-auto-i18n="true">
+                                                  <span class="m-1 classes-left w-100">
                                                        <span v-for="cls in item.classes">
                                                             {{ helper.ucfirst(cls.display_name) }}
                                                        </span>
@@ -357,7 +357,7 @@ function recallAllPunchedStudents(){
                                               <h4 class="mb-1"> 
                                                   {{ helper.ucfirst(item?.title) }}
                                               </h4>
-                                              <p class="time-duration" data-no-auto-i18n="true"> 
+                                              <p class="time-duration"> 
                                                    {{ helper.formatTime(item.start_time) }} - {{ helper.formatTime(item.end_time) }}
                                               </p>  
                                          </li>

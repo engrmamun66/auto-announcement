@@ -39,7 +39,6 @@ const callbacks = inject('callbacks');
 const all_students = inject('all_students', [])
 const all_students_non_copied = inject('all_students_non_copied', [])
 const getAllStudents = inject('getAllStudents', () => {})
-const scheduleUiLocalization = inject('scheduleUiLocalization', () => {})
 
 let students = ref([])
 let studentLogs = ref([])
@@ -121,7 +120,7 @@ let ___params = {
     "totalPages": 1,
     "limit": 100,
 
-    class_name: null,
+    class_short: null,
     name: null,
     card_no: null,
     dakhela: route.query?.dakhela || null,
@@ -149,7 +148,6 @@ function hide_modals(event){
 watch(addMode, (bool) => {
   if(bool){
     document.addEventListener('keyup', hide_modals)
-    scheduleUiLocalization(100)
   }else {
     document.removeEventListener('keyup', hide_modals)
   }
@@ -172,9 +170,12 @@ async function getStudents({id=null}={}){
   try {
     // console.log('params.value', params.value);
     let parameters = {...params.value, id}
+    delete parameters.class_name
+    delete parameters.total
+    delete parameters.totalPages
 
     if(only_similler_students.value && parameters.dakhela){
-      parameters.class_name = null;
+      parameters.class_short = null;
       parameters.name = null;
       parameters.card_no = null;
       let dakehela_number = Number(parameters.dakhela)
@@ -219,14 +220,12 @@ function playThis (i, key = "isPlaying_sound1", student) {
  
 async function clearParams({dakhela=null, id=null, get=true}={}){
 
-  if(!get) getStudents()
-  
   params.value.page_no = 1
   params.value.total = 3
   params.value.totalPages = 1
   params.value.limit = 100 
     
-  params.value.class_name = null
+  params.value.class_short = null
   params.value.name = null
   params.value.card_no = null
   params.value.dakhela = dakhela
@@ -634,14 +633,14 @@ watch(fixedWidthSoundCol, (newVal) => {
           </div>
         </template>
         <Btn class="me-2" style="background: #673AB7;" :tooltip="`params.total = ${params?.total}`" >
-          Total: 
+          {{ helper.t('Total') }}: 
           <span class="bg-success- p-1">{{ all_students_non_copied?.length }}</span>
            <!-- <span>{{ params?.total || '0' }}</span> -->
         </Btn>
         <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
-          <Btn @click.stop="bulkPunch()" style="background: #673AB7;" :disabled="!PunchButtonsRef?.length">Bulk Punch ({{ PunchButtonsRef?.length || 0 }})</Btn>
+          <Btn @click.stop="bulkPunch()" style="background: #673AB7;" :disabled="!PunchButtonsRef?.length">{{ helper.t('Bulk Punch') }} ({{ PunchButtonsRef?.length || 0 }})</Btn>
         </template>
-        <Btn v-if="!addMode" class="me-2" @click="addMode = !addMode;editModeTabIndex=1;clearParams();payload.id = null" ><i class='bx bx-plus'></i> Add New</Btn>
+        <Btn v-if="!addMode" class="me-2" @click="addMode = !addMode;editModeTabIndex=1;clearParams();payload.id = null" ><i class='bx bx-plus'></i> {{ helper.t('Add New') }}</Btn>
       </div>
     </div>
 
@@ -829,10 +828,10 @@ watch(fixedWidthSoundCol, (newVal) => {
           <div class="col-md-3 col-12">
             <div class="form-group">
               <label for="email">{{ helper.t('Class') }}</label>
-              <select data-no-auto-i18n="true" v-model="params.class_name" @change="getStudents" class="form-control cb-input" id="ClassId">
+              <select v-model="params.class_short" @change="getStudents" class="form-control cb-input" id="ClassId">
                 <option :value="null">-{{helper.t('class')}}-</option>
                 <template v-for="(cls, index) in classes" :key="index">
-                  <option :value="cls.class_name">{{cls.class_name}}</option>
+                  <option :value="cls.class_short">{{cls.class_name}}</option>
                 </template>
                 
               </select>
@@ -901,8 +900,8 @@ watch(fixedWidthSoundCol, (newVal) => {
           <div class="col-12 mt-4 w-100 all-class-buttons-to-filter-area d-none d-md-block">
             <div class="all-class-buttons-to-filter">
               <template v-for="cls in classes">
-                <button data-no-auto-i18n="true" class="class-short-btn" :class="{'active': params.class_name === cls.class_name}" var="cls?.display_name || cls.class_short" 
-                @click="clearParams();params.page_no = 1;params.class_name = cls.class_name;getStudents()" >{{ helper.ucfirst(cls?.display_name || cls.class_short) }}</button>
+                <button class="class-short-btn" :class="{'active': params.class_short === cls.class_short}" var="cls?.display_name || cls.class_short"
+                @click="clearParams({get: false});params.page_no = 1;params.class_short = cls.class_short;getStudents()" >{{ helper.ucfirst(cls?.display_name || cls.class_short) }}</button>
               </template>
 
             </div>
@@ -923,7 +922,9 @@ watch(fixedWidthSoundCol, (newVal) => {
             <th class="d-none d-md-table-cell">{{ helper.t('Class') }}</th>
             <th>{{ helper.t('Name') }}</th>
             <th class="d-none d-md-table-cell">{{ helper.t('Image') }}</th>
-            <th class="d-none d-lg-table-cell">{{ helper.t('Card Owner') }}</th>
+            <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
+              <th class="d-none d-lg-table-cell">{{ helper.t('Card Owner') }}</th>
+            </template>
             <th class="d-none d-md-table-cell">{{ helper.t('Phone') }}</th>
             <th>{{ helper.t('Dakhela') }}</th>
             <th class="d-none d-lg-table-cell">{{ helper.t('Year') }}</th>
@@ -951,21 +952,23 @@ watch(fixedWidthSoundCol, (newVal) => {
         <template v-if="students?.length">
           <template v-for="(std, i) in students.toReversed()">
             <tr @auxclick="log(std)" :style="!std.status ? 'opacity: 0.9' : ''"  >
-              <td class="text-left d-none d-md-table-cell" data-no-auto-i18n="true" @click.stop="log(std)"> {{ std.class }} </td>
+              <td class="text-left d-none d-md-table-cell" @click.stop="log(std)"> {{ std.class }} </td>
               <td class="text-left cp" @click.stop="prepareToEdit(std)" :student-id="std.id">
                 {{ std.name.split('||')?.[0] }}
                 <div class="d-md-none mt-1">
-                  <small class="text-muted d-block" data-no-auto-i18n="true">{{ std.class }}</small>
+                  <small class="text-muted d-block">{{ std.class }}</small>
                   <small v-if="std.phone_number" class="text-muted">{{ String(std.phone_number).slice(0,3) + '...' + String(std.phone_number).slice(-3) }}</small>
                 </div>
               </td>
               <td class="d-none d-md-table-cell">
                 <img class="profile-thumb" :src="std.profile_image || '/default-profile-image.png'" alt="profile" />
               </td>
-              <td class="d-none d-lg-table-cell">
-                <p class="mb-1">{{ callbacks.getCardOwnerName(std?.card_owner) }}</p>
-                <div class="student-note" :tooltip="helper.t('Note')" v-if="std?.note">{{ std?.note }}</div>
-              </td>
+              <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
+                <td class="d-none d-lg-table-cell">
+                  <p class="mb-1">{{ callbacks.getCardOwnerName(std?.card_owner) }}</p>
+                  <div class="student-note" :tooltip="helper.t('Note')" v-if="std?.note">{{ std?.note }}</div>
+                </td>
+              </template>
               <td class="d-none d-md-table-cell">
                 <span v-if="std.phone_number" class="text-muted small">{{ String(std.phone_number).slice(0,3) + '...' + String(std.phone_number).slice(-3) }}</span>
               </td>

@@ -301,7 +301,7 @@ watch(
 
     <hr class="only-show-onprint">
 
-    <div class="bg-dark-subtle border class-button-list hide_onprint p-3 radius-10" data-no-auto-i18n="true">
+    <div class="bg-dark-subtle border class-button-list hide_onprint p-3 radius-10">
         <button
             v-for="(cls, index) in getActiveClasses(classes)"
             :key="index"
@@ -315,7 +315,7 @@ watch(
     </div> 
 
     <div class="legend-bar">
-      <div class="legend-row bg-dark-subtle p-2 radius-10" data-no-auto-i18n="true">
+      <div class="legend-row bg-dark-subtle p-2 radius-10">
         <div v-for="item in legendItems" :key="item.code" class="legend-item">
           <span class="legend-badge" :class="item.class">{{ item.code }}</span>
           <span>{{ item.label }}</span>
@@ -338,11 +338,11 @@ watch(
     <div v-if="loading" class="text-muted mt-2">{{ helper.t('Loading daily logs...') }}</div>
     <div v-else-if="errorMessage" class="text-danger mt-2" >{{ errorMessage }}</div>
 
-    <div v-else class="daily-grid-wrapper" ref="gridScrollRef" data-no-auto-i18n="true">
+    <div v-else class="daily-grid-wrapper" ref="gridScrollRef">
       <div class="daily-grid" :style="{ '--day-count': dayColumns.length }">
         <div class="daily-grid-row daily-grid-header">
           <div class="daily-grid-cell sticky-col sticky-head">{{ helper.t('Students Name') }}</div>
-          <div v-for="day in dayColumns" :key="day.date" class="daily-grid-cell day-header" :title="day.dayName" data-no-auto-i18n="true">
+          <div v-for="day in dayColumns" :key="day.date" class="daily-grid-cell day-header" :title="day.dayName">
             {{ day.label }}
           </div>
         </div>

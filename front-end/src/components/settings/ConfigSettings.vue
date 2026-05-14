@@ -20,7 +20,7 @@
 
           <!-- Classes: custom table view -->
           <template v-if="activeKey === 'classes'">
-            <div class="cs__panel cs__panel--table" data-no-auto-i18n="true">
+            <div class="cs__panel cs__panel--table">
               <table class="cs-cls-table">
                 <thead>
                   <tr>
@@ -94,7 +94,7 @@
           </template>
 
           <!-- All other tabs: generic FormNode -->
-          <div v-else class="cs__panel" data-no-auto-i18n="true">
+          <div v-else class="cs__panel">
             <FormNode :obj="drafts" :propKey="activeKey" :depth="0" />
           </div>
           <p v-if="errors[activeKey]" class="cs__error">{{ errors[activeKey] }}</p>
@@ -204,7 +204,7 @@ function resetDraft(key) {
 async function save(key, pass=false) {
   if(!event?.ctrlKey){
     let pass = prompt(helper.t('Type secret password'))
-    if(pass !== 'allowme' || pass !== 'asdf'){
+    if(pass !== 'allowme' && pass !== 'asdf'){
       emitter.emit('toaster-error', { message: helper.t('This class is currently closed')})
       return
     }

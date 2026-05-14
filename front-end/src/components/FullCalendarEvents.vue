@@ -161,7 +161,7 @@ export default {
 }
 </script>
 <template>
-  <div data-no-auto-i18n="true">
+  <div>
     <FullCalendar :options="calendarOptions" />
   </div>
 </template>
