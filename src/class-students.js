@@ -502,8 +502,8 @@ class Students {
           const dakhela = getValue(row, 'dakhela', 2)
           const className = getValue(row, 'class', 3) || getValue(row, 'class_name', 3)
           const card_no = getValue(row, 'card_no', 5)
-          const year = getValue(row, 'year', 6)
-          const status = getValue(row, 'status', 7)
+          const year = getValue(row, 'year', 6) || new Date().getFullYear()
+          const status = parseInt(getValue(row, 'status', 7)) || 1
           const sound1 = getValue(row, 'sound1', 8)
           const card_owner = getValue(row, 'card_owner', 9)
           const options = getValue(row, 'options', 10)

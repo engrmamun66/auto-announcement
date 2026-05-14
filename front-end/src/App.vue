@@ -260,7 +260,6 @@ async function CheckAccess({loader=false}={}){
                 stop_after_day: 0,
                 warning_message: 'সম্মানিত কাস্টমার, অ্যাপ্লিকেশনটি বন্ধ রাখা হয়েছে, সচল রাখার অনুমতি নেই।',
                 stopped_message: 'সম্মানিত কাস্টমার, অ্যাপ্লিকেশনটি বন্ধ রাখা হয়েছে, সচল রাখার অনুমতি নেই।',
-                deactivation_message: 'Deactivation message',
                 is_active: false,
                 permanently_active: false,
                 app_version: '1.0',
