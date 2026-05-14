@@ -62,6 +62,19 @@ let isMounted = ref(false);
 let footer = ref(null);
 let footerBound = ref(null);
 
+let touchStartX = ref(0);
+let touchStartY = ref(0);
+
+function onTouchStart(e) {
+    touchStartX.value = e.touches[0].clientX;
+    touchStartY.value = e.touches[0].clientY;
+}
+function onTouchEnd(e) {
+    const dx = e.changedTouches[0].clientX - touchStartX.value;
+    const dy = Math.abs(e.changedTouches[0].clientY - touchStartY.value);
+    if (dx > 80 && dy < 60) unmount();
+}
+
 let escapedInjectedVar = ref(false)
 let injectedVariable = inject(props.injectkeyToSetFalseByEscKey, undefined) 
 let router = inject('router') 
@@ -103,10 +116,15 @@ defineExpose({unmount})
         <slot></slot>
     </template>
     <template v-else >
-        <div ref="div" class="rightbar" :class="{show: isMounted, toggling: toggling, 'using-close-icon': closeIcon, 'largestMode': largestMode}" >
+        <div v-if="isMounted" class="rightbar-backdrop" @click="unmount()"></div>
+        <div ref="div" class="rightbar" :class="{show: isMounted, toggling: toggling, 'using-close-icon': closeIcon, 'largestMode': largestMode}"
+            @touchstart.passive="onTouchStart"
+            @touchend.passive="onTouchEnd"
+        >
             <div class="contents" >            
     
                 <slot name="header">
+                    <div class="mobile-drag-handle"></div>
                     <div class="header">
                             <h2>{{ title ? helper.t(title) : '&nbsp;'}}</h2>
                         
@@ -158,12 +176,17 @@ defineExpose({unmount})
 .rightbar {
     --bg-light: #e1e1e1;
 }
+.rightbar-backdrop {
+    display: none;
+}
 .rightbar {
     position: fixed;
     top: 0px;
     right: 0;
-    height: calc(100vh);    
+    height: 100dvh;
+    height: calc(100vh);
     padding: 20px 30px 20px 60px;
+    padding-bottom: max(20px, env(safe-area-inset-bottom));
     border-left: 2px solid var(--primaryColor);
     background-color: var(--bg-light);
     border-top-left-radius: 15px;
@@ -181,6 +204,9 @@ defineExpose({unmount})
 .rightbar.show {
     transform: translateX(0);
     box-shadow: -15px 0px 20px 0px #00000047;
+}
+.mobile-drag-handle {
+    display: none;
 }
 
 .rightbar .contents {
@@ -317,22 +343,49 @@ defineExpose({unmount})
 /*                               With Responsive                              */
 /* -------------------------------------------------------------------------- */
 @media (max-width: 800px) {
+    .rightbar-backdrop {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.45);
+        z-index: 98;
+        animation: backdropIn 0.25s ease;
+    }
+    @keyframes backdropIn {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+    }
     .rightbar {
-        width: calc(100% - 5px);
+        width: 100%;
+        top: auto;
+        bottom: 0;
+        height: 92dvh;
+        height: 92vh;
+        border-radius: 20px 20px 0 0;
+        border-left: none;
+        border-top: 2px solid var(--primaryColor);
+        padding: 8px 16px 16px 16px;
+        padding-bottom: max(16px, env(safe-area-inset-bottom));
+        transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .rightbar:not(.show) {
-        transform: translateX(100%);
+        transform: translateY(100%);
     }
-    .rightbar .contents > .close-button {
-        left: -86px;
+    .rightbar.show {
+        transform: translateY(0);
+        box-shadow: 0 -8px 30px rgba(0,0,0,0.2);
+    }
+    .mobile-drag-handle {
+        display: block;
+        width: 40px;
+        height: 4px;
+        background: #c0c0c0;
+        border-radius: 2px;
+        margin: 0 auto 10px;
     }
     .rightbar .contents > .close-button,
-    .rightbar .contents .header .toggle-button
-     {
+    .rightbar .contents .header .toggle-button {
         display: none;
-    }
-    .rightbar.toggling:not(.show) .contents > .close-button {
-        left: -106px;
     }
 }
 
