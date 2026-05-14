@@ -95,7 +95,7 @@ class Students {
     const limit = parseInt(req.query.limit) || 10;
     const offset = (page_no - 1) * limit;
   
-    const { id, name, class_name, sound1, dakhela, card_no, only_similler_students } = req.query;
+    const { id, name, class_name, sound1, dakhela, card_no, only_similler_students, phone_number } = req.query;
   
     let query = `SELECT * FROM ${this.tableName} WHERE 1=1`;
     let queryParams = [];
@@ -140,6 +140,11 @@ class Students {
 
     } 
   
+    if (phone_number) {
+      query += ` AND phone_number LIKE ?`;
+      queryParams.push(`%${phone_number}%`);
+    }
+
     if (sound1) {
       if (sound1 === 'has_sound') {
         query += ` AND sound1 IS NOT NULL`;

@@ -207,8 +207,15 @@ let getWarningMessage = computed(()=>{
 })
 
 
+let isLastActiveDay = computed(() => {
+    const { last_paid_month, stop_after_day, permanently_active } = appAccessData.value || {}
+    if (!last_paid_month || permanently_active) return false
+    const lastDay = moment(last_paid_month).endOf('month').add(stop_after_day, 'days')
+    return moment().isSame(lastDay, 'day')
+})
+
 let getForbiddenedMessage = computed(()=>{
-    let { 
+    let {
         last_paid_month,
         stopped_message,
     } = appAccessData.value || {}
@@ -1604,11 +1611,11 @@ const force_active = computed(() => route.query.fa === 'true' || storage('active
         </div>
     
         <template v-if="showAccessibilityAlert && appAccessData?.internet === true">
-            <div ref="disabilityAlretRef" class="disablitily-alert" data-no-auto-i18n="true" @auxclick="log({getWarningMessage})" v-html="getWarningMessage">  
+            <div ref="disabilityAlretRef" :class="['disablitily-alert', { 'jump-after-a-while': isLastActiveDay }]" data-no-auto-i18n="true" @auxclick="log({getWarningMessage})" v-html="getWarningMessage">
             </div>
         </template>
         <template v-else-if="appAccessData?.internet === false">
-            <div ref="disabilityAlretRef" class="disablitily-alert" data-no-auto-i18n="true">
+            <div ref="disabilityAlretRef" class="disablitily-alert offline" data-no-auto-i18n="true">
                 আপনার ইন্টারনেট সংযোগটি বিচ্ছিন্ন রয়েছে। এই মুহূর্তে ডিভাইস থেকে পাঞ্চ অকার্যকর।
             </div>
         </template>
@@ -1643,7 +1650,7 @@ const force_active = computed(() => route.query.fa === 'true' || storage('active
     font-size: 15px;
     font-weight: 600;
     color: #1a1000;
-    background: linear-gradient(135deg, #ffe033 0%, #ffc800 60%, #ffb300 100%);
+    background: linear-gradient(135deg, #ffe033 0%, #ffc800 50%, #ffb300 100%);
     border-top: 2px solid #e6a800;
     box-shadow: 0 -4px 20px rgba(0,0,0,0.18);
     animation: da-slidein 0.35s cubic-bezier(0.22,1,0.36,1);
@@ -1664,6 +1671,20 @@ const force_active = computed(() => route.query.fa === 'true' || storage('active
 @keyframes da-slidein {
     from { transform: translateY(100%); opacity: 0; }
     to   { transform: translateY(0);    opacity: 1; }
+}
+
+.disablitily-alert.jump-after-a-while {
+    background: linear-gradient(135deg, #ffe033 0%, #f96c34 50%, #ffb300 100%);
+    animation: da-slidein 0.35s cubic-bezier(0.22,1,0.36,1), da-jump 4s ease-in-out 3s infinite;
+}
+@keyframes da-jump {
+    /* first 25% = 1s of motion, remaining 75% = 3s of rest */
+    0%        { transform: translateY(0); }
+    6%        { transform: translateY(-12px); }
+    12%       { transform: translateY(-7px); }
+    18%       { transform: translateY(-12px); }
+    24%       { transform: translateY(-3px); }
+    25%, 100% { transform: translateY(0); }
 }
 </style>
  

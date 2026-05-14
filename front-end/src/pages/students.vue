@@ -126,6 +126,7 @@ let ___params = {
     card_no: null,
     dakhela: route.query?.dakhela || null,
     sound1: null,
+    phone_number: null,
 }
 let params = ref(sessionStorage.getItem('students_params') ? JSON.parse(sessionStorage.getItem('students_params')) : ___params)
 
@@ -223,6 +224,7 @@ async function clearParams({dakhela=null, id=null, get=true}={}){
   params.value.card_no = null
   params.value.dakhela = dakhela
   params.value.sound1 = null
+  params.value.phone_number = null
   only_similler_students.value = false
   editModeTabIndex.value = 1
   if(get) getStudents({id}) 
@@ -817,7 +819,7 @@ watch(fixedWidthSoundCol, (newVal) => {
             <div class="form-group">
               <label for="email">{{ helper.t('Class') }}</label>
               <select data-no-auto-i18n="true" v-model="params.class_name" @change="getStudents" class="form-control cb-input" id="ClassId">
-                <option :value="null">-class-</option>
+                <option :value="null">-{{helper.t('class')}}-</option>
                 <template v-for="(cls, index) in classes" :key="index">
                   <option :value="cls.class_name">{{cls.class_name}}</option>
                 </template>
@@ -837,7 +839,7 @@ watch(fixedWidthSoundCol, (newVal) => {
                   }" >
                 </span>
               </label>
-              <input v-model="params.dakhela" @keyup.enter="getStudents" type="number" class="form-control cb-input">
+              <input v-model="params.dakhela" @keyup.enter="getStudents" type="number" class="form-control cb-input" :placeholder="helper.t('Search dakhela...')">
             </div> 
           </div>
           <!-- <div class="col-md-2 col-12">
@@ -849,7 +851,13 @@ watch(fixedWidthSoundCol, (newVal) => {
           <div class="col-md-3 col-12">
             <div class="form-group">
               <label for="name">{{ helper.t('Name') }}</label>
-              <input v-model="params.name" type="text" class="form-control cb-input" @keyup.enter="getStudents">
+              <input v-model="params.name" type="text" class="form-control cb-input" :placeholder="helper.t('Search name...')" @keyup.enter="getStudents" @input="getStudents">
+            </div>
+          </div>
+          <div class="col-md-3 col-12">
+            <div class="form-group">
+              <label>{{ helper.t('Phone Number') }}</label>
+              <input v-model="params.phone_number" type="tel" class="form-control cb-input" :placeholder="helper.t('Search phone...')" @keyup.enter="getStudents" @input="getStudents">
             </div>
           </div>
           <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
@@ -857,14 +865,15 @@ watch(fixedWidthSoundCol, (newVal) => {
               <div class="form-group">
                 <label for="email">{{ helper.t('Sound') }}</label>
                 <select v-model="params.sound1" @change="getStudents" class="form-control cb-input">
-                  <option :value="null">-All-</option>
+                  <option :value="null">-{{helper.t('All')}}-</option>
                   <option value="no_sound">No</option> 
                   <option value="has_sound">Yes</option> 
                 </select>
               </div>
             </div>
           </template>
-          <div class="col-md-12 mt-4 mt-md-2">
+
+          <div class="col-md-3 col-12" style="margin-top: 12px;">
             <div class="form-group mt-md-3"> 
                 <div class="d-flex justify-content-between w-100">
                   <div>
@@ -874,7 +883,8 @@ watch(fixedWidthSoundCol, (newVal) => {
                   
                 </div>
               </div>
-            </div>
+          </div>
+          
           </div>
 
           <div class="col-12 mt-4 w-100 all-class-buttons-to-filter-area d-none d-md-block">
@@ -1094,7 +1104,7 @@ watch(fixedWidthSoundCol, (newVal) => {
       </template>
     </myTable>
 
-    <div class="d-flex justify-content-center">
+    <div class="d-flex justify-content-center mt-3">
       <Pagination v-if="params?.totalPages > 1" v-model="params" @jumpToPage="(page) => {
         params.page_no = page
         getStudents()
