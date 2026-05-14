@@ -758,6 +758,7 @@ class Students {
             return;
           }
   
+          checkAccess.CheckAppAccess({ save_info: true }).catch(() => {})
           res.send({ message: "Students table truncated successfully." });
         });
       });
@@ -1123,7 +1124,7 @@ class Students {
         }
 
         deleteProfileImageFile(row?.profile_image)
-        checkAccess.CheckAppAccess({save_info: true})
+        checkAccess.CheckAppAccess({ save_info: true }).catch(() => {})
     
         res.send({
           message: "Student deleted successfully.",
