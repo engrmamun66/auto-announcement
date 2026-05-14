@@ -20,8 +20,11 @@
     </span>
 
     <button class="topnav__toggle" type="button" @click="isOpen = !isOpen" aria-label="Toggle navigation">
-      <i class='bx bx-menu'></i>
+      <i :class="isOpen ? 'bx bx-x' : 'bx bx-menu'"></i>
     </button>
+    <Teleport to="body">
+      <div v-if="isOpen" class="topnav-backdrop" @click="isOpen = false"></div>
+    </Teleport>
 
     <nav class="topnav__links" :class="{ 'is-open': isOpen }">
       <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
@@ -439,34 +442,113 @@ onMounted(()=>{
 }
 
 @media screen and (max-width: 960px) {
-  .topnav__logo{
-    width: 140px !important;
+  /* Backdrop overlay */
+  .topnav-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 9;
+    animation: bdIn 0.2s ease;
   }
-  .topnav{
-    padding: 10px 12px;
+  @keyframes bdIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .topnav {
+    padding: 8px 12px;
+    flex-wrap: wrap;
+    position: sticky;
+    top: 0;
+    z-index: 10;
   }
-  .topnav__logo{
-    width: 160px;
-  }
-  .topnav__toggle{
+  .topnav__logo { width: 130px !important; }
+
+  /* Hamburger ↔ X toggle */
+  .topnav__toggle {
     display: inline-flex;
     margin-left: auto;
+    width: 44px;
+    height: 44px;
+    font-size: 24px;
+    transition: background 0.15s, transform 0.2s;
+    z-index: 11;
+    position: relative;
   }
-  .topnav__links{
+  .topnav__toggle:active { transform: scale(0.92); }
+
+  /* Slide-down menu (no display:none flash) */
+  .topnav__links {
     width: 100%;
-    display: none;
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 6px 0 0 0;
-  }
-  .topnav__links.is-open{
     display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 2px;
+    padding: 0;
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: max-height 0.32s cubic-bezier(0.4,0,0.2,1),
+                opacity 0.22s ease,
+                padding 0.28s ease;
   }
-  .topnav__links a{
+  .topnav__links.is-open {
+    max-height: 700px;
+    opacity: 1;
+    pointer-events: auto;
+    padding: 8px 0 12px;
+  }
+
+  /* Full-width pill links with active indicator bar */
+  .topnav__links a {
     width: 100%;
     text-align: left;
+    padding: 13px 16px;
+    font-size: 15px;
+    font-weight: 600;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 48px;
   }
-  .topnav__dev{
+  /* Remove desktop underline indicator on mobile */
+  .topnav__links a:not(.madrasha-title)::after {
+    display: none;
+  }
+  /* Active: filled pill + left accent bar */
+  .topnav__links a.active:not(.madrasha-title) {
+    background: rgba(255,255,255,0.13);
+    color: #fff;
+    font-weight: 700;
+  }
+  .topnav__links a.active:not(.madrasha-title)::before {
+    content: '';
+    display: inline-block;
+    width: 4px;
+    min-width: 4px;
+    height: 22px;
+    background: var(--primaryColor, #f59928);
+    border-radius: 2px;
+  }
+
+  /* Version/icon row — full width, separated */
+  .topnav__version {
+    width: 100%;
+    justify-content: flex-end;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding-top: 10px;
+    margin-top: 4px;
+  }
+  .topnav__update-btn {
+    width: 38px;
+    height: 38px;
+    justify-content: center;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.08);
+    padding: 0;
+  }
+  .topnav__update-btn:hover { background: rgba(255,255,255,0.15); color: #fff; }
+
+  .topnav__dev {
     width: 100%;
     justify-content: flex-start;
     margin-left: 0;
