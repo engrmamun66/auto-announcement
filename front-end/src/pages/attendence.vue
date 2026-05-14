@@ -388,6 +388,7 @@ onMounted(()=>{
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   width: 100%;
+  flex-shrink: 0;
 }
 
 #REPORTING_TAB_AREA > ul.nav-tabs::-webkit-scrollbar {
@@ -398,10 +399,28 @@ onMounted(()=>{
   white-space: nowrap;
 }
 
+/* Controls row wraps on mobile */
+#REPORTING_TAB_AREA > div {
+  width: 100%;
+}
+
+#REPORTING_TAB_AREA > div > div {
+  flex-wrap: wrap;
+}
+
 @media (min-width: 768px) {
   #REPORTING_TAB_AREA > ul.nav-tabs {
     width: auto;
     overflow-x: visible;
+    flex-shrink: 1;
+  }
+
+  #REPORTING_TAB_AREA > div {
+    width: auto;
+  }
+
+  #REPORTING_TAB_AREA > div > div {
+    flex-wrap: nowrap;
   }
 }
 </style>
