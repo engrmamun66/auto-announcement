@@ -207,7 +207,7 @@ const isNewVersion = computed(() => {
     if (!installed || !incoming) return false;
     return incoming !== installed;
 })
-const realod_after = 2000
+const realod_after = 4000
 const checking_accessibility = inject('checking_accessibility')
 watch(checking_accessibility, (bool) => {
   if (route.query.dev === 'true'){
