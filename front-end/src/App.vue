@@ -1628,17 +1628,42 @@ const force_active = computed(() => route.query.fa === 'true' || storage('active
     background-color: var(--primaryColor);
     background-color: #ffd602;
 }
-.disablitily-alert{
+.disablitily-alert {
     position: fixed;
-    bottom: 0px;
-    left: 0px;
+    bottom: 0;
+    left: 0;
     width: 100%;
-    min-height: 40px;
     z-index: 333;
-    background-color: #ffd602;
-    padding: 8px 20px;
-    text-align: center; 
+    padding: 10px 24px 10px 20px;
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #1a1000;
+    background: linear-gradient(135deg, #ffe033 0%, #ffc800 60%, #ffb300 100%);
+    border-top: 2px solid #e6a800;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.18);
+    animation: da-slidein 0.35s cubic-bezier(0.22,1,0.36,1);
+    letter-spacing: 0.01em;
+    line-height: 1.5;
+    text-align: center;
+}
+.disablitily-alert .da-icon {
     font-size: 20px;
+    flex-shrink: 0;
+    opacity: 0.75;
+}
+.disablitily-alert.offline {
+    background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
+    border-top-color: #444;
+    color: #e0e0e0;
+}
+@keyframes da-slidein {
+    from { transform: translateY(100%); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
 }
 </style>
  
