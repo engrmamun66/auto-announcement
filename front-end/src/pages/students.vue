@@ -163,6 +163,11 @@ watch(targetStd, (_targetStd) => {
 })
 // let filterForm
 
+function debounce(fn, delay) {
+  let timer
+  return (...args) => { clearTimeout(timer); timer = setTimeout(() => fn(...args), delay) }
+}
+
 async function getStudents({id=null}={}){
   try {
     // console.log('params.value', params.value);
@@ -199,6 +204,8 @@ async function getStudents({id=null}={}){
     console.warn('getStudents_error::', error);
   }
 }
+
+const getStudentsDebounced = debounce(getStudents, 300)
 
 function playThis (i, key = "isPlaying_sound1", student) {
  
@@ -839,7 +846,7 @@ watch(fixedWidthSoundCol, (newVal) => {
                   }" >
                 </span>
               </label>
-              <input v-model="params.dakhela" @keyup.enter="getStudents" type="number" class="form-control cb-input" :placeholder="helper.t('Search dakhela...')">
+              <input v-model="params.dakhela" @keyup="getStudentsDebounced" @input="getStudentsDebounced" type="number" class="form-control cb-input" :placeholder="helper.t('Search dakhela...')">
             </div> 
           </div>
           <!-- <div class="col-md-2 col-12">
@@ -851,13 +858,13 @@ watch(fixedWidthSoundCol, (newVal) => {
           <div class="col-md-3 col-12">
             <div class="form-group">
               <label for="name">{{ helper.t('Name') }}</label>
-              <input v-model="params.name" type="text" class="form-control cb-input" :placeholder="helper.t('Search name...')" @keyup.enter="getStudents" @input="getStudents">
+              <input v-model="params.name" type="text" class="form-control cb-input" :placeholder="helper.t('Search name...')" @keyup="getStudentsDebounced" @input="getStudentsDebounced">
             </div>
           </div>
           <div class="col-md-3 col-12">
             <div class="form-group">
               <label>{{ helper.t('Phone Number') }}</label>
-              <input v-model="params.phone_number" type="tel" class="form-control cb-input" :placeholder="helper.t('Search phone...')" @keyup.enter="getStudents" @input="getStudents">
+              <input v-model="params.phone_number" type="tel" class="form-control cb-input" :placeholder="helper.t('Search phone...')" @keyup="getStudentsDebounced" @input="getStudentsDebounced">
             </div>
           </div>
           <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
