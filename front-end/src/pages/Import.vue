@@ -38,6 +38,32 @@ async function eraseAll() {
           
      }
 }
+
+
+async function exportAll(){
+     loading.value = true;
+     try {
+          let response = await http.get('/students/export', {responseType: "blob"})
+          const url = window.URL.createObjectURL(new Blob([response.data]));
+          const link = document.createElement("a");
+          link.href = url;
+
+          // Set the downloaded file name
+          link.setAttribute("download", "students_export.xlsx");
+
+          // Append the link to the document, trigger download, and clean up
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          window.URL.revokeObjectURL(url);
+          setTimeout(() => {
+               loading.value = false;
+          }, 500);
+
+     } catch (error) {
+          loading.value = false;
+     }
+}
  
 </script>
 
@@ -47,7 +73,7 @@ async function eraseAll() {
           <div class="right-align" >
                <!-- <Btn v-if="useRoute().query.dev == 'true'" @click="eraseAll" class="red me-1" ><i class='bx bxs-eraser' ></i> {{ helper.t('Delete All Students') }} <BtnLoader v-if="loading"></BtnLoader> </Btn> -->
                <Btn @click="eraseAll" v-if="true" class="red me-1" ><i class='bx bxs-eraser' ></i> {{ helper.t('Delete All Students') }} <BtnLoader v-if="loading"></BtnLoader> </Btn>
-               <Btn @click="getBackup" ><i class='bx bxs-file-export' ></i> {{ helper.t('Export All') }} <BtnLoader v-if="loading"></BtnLoader> </Btn>
+               <Btn @click="exportAll" ><i class='bx bxs-file-export' ></i> {{ helper.t('Export All') }} <BtnLoader v-if="loading"></BtnLoader> </Btn>
 
           </div>
      </div>
