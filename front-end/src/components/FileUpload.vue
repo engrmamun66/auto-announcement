@@ -25,6 +25,7 @@ import { useRoute } from "vue-router";
 let http = inject('http');
 let emitter = inject('emitter');
 let helper = inject('helper');
+let getAllStudents = inject('getAllStudents');
 import BtnLoader from './BtnLoader.vue'
 
 
@@ -56,6 +57,7 @@ async function uploadNow(){
       emitter.emit('toaster-success', {message: helper.t('Import completed')})
       file.value = null;
     }).finally(()=>{
+      getAllStudents()
       fileInputField.value = false
       setTimeout(() => {
         loading.value = false       

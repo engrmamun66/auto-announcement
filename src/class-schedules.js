@@ -8,7 +8,6 @@ const moment = require('moment')
 const utils = require('./utls')
  
 
-const { classes } = global.config
 class Schedules { 
 
  

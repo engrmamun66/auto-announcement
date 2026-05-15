@@ -1,7 +1,6 @@
 const fs = require('fs')
 const path = require('path')
 const EvaluateCss = require('./process')
-const { classes } = global.config
 const { exec } = require("child_process");
 const moment = require('moment')
 
@@ -101,12 +100,18 @@ module.exports = {
         return `${req.protocol}://${req.get("host")}${audio_path}`
     },
     getClassName(className){
-        let _class = classes.find(c => c.class_name == className)         
-        return _class?.class_name || '<>'       
+        const classes = global.config?.classes || []
+        let _class = classes.find(c => c.class_name == className)
+        return _class?.class_name || '<>'
     },
     getClassShort(className){
-        let _class = classes.find(c => c.class_name == className)         
-        return _class?.class_short || '<>'
+        const normalized = String(className || '').trim().toLowerCase()
+        const classes = global.config?.classes || []
+        let _class = classes.find(c =>
+            String(c.class_name || '').trim().toLowerCase() === normalized ||
+            String(c.class_short || '').trim().toLowerCase() === normalized
+        )
+        return _class?.class_short || null
     },
     encodeString: function (data='') {
         try {

@@ -341,7 +341,7 @@ class Students {
         student.sound1 = student.sound1 ? utils.audioFullUrl(req, student.sound1) : null
         student.profile_image = normalizeProfileImage(req, student.profile_image)
         const correctShort = utils.getClassShort(student.class)
-        if (correctShort && correctShort !== '<>' && student.class_short !== correctShort) {
+        if (correctShort && student.class_short !== correctShort) {
           student.class_short = correctShort
         }
         return student
@@ -470,7 +470,6 @@ class Students {
         } else {
           callback("Failed to upload some rows. Check logs for details.");
         }
-        utils.restartServer();
       };
 
       // Build headerMap from first row, matched against defaultColumns only
@@ -494,12 +493,25 @@ class Students {
           if (i === 0) return // skip header row
           if (!row.length) return // skip empty rows
 
-          const name = getCol(row, 'name')
-          if (!name) return // skip rows without name
+          const name      = getCol(row, 'name')
+          const dakhela   = getCol(row, 'dakhela')
+          const className = getCol(row, 'class')
 
-          const id          = getCol(row, 'id')
-          const dakhela     = getCol(row, 'dakhela')
-          const className   = getCol(row, 'class')
+          const missingFields = []
+          if (!name)      missingFields.push('name')
+          if (!dakhela)   missingFields.push('dakhela')
+          if (!className) missingFields.push('class')
+          if (missingFields.length) {
+            console.warn(`[import] row ${i} skipped — missing: ${missingFields.join(', ')} | name="${name || ''}"`)
+            return
+          }
+
+          const id = getCol(row, 'id')
+          const class_short = getCol(row, 'class_short') || utils.getClassShort(className)
+          if (!class_short) {
+            console.warn(`[import] row ${i} skipped — class_short unresolved for class="${className}"`)
+            return
+          }
           const card_no     = getCol(row, 'card_no') || null
           const year        = getCol(row, 'year') || new Date().getFullYear()
           const status      = parseInt(getCol(row, 'status')) || 1
@@ -516,7 +528,7 @@ class Students {
             pending++;
             this.db.run(
               insertQuery,
-              [name, dakhela, className, utils.getClassShort(className), card_no, year, status || 1, sound1 || null, device_index || null, card_owner || null, options || null, note || null, profile_image || null, phone_number || null],
+              [name, dakhela, className, class_short, card_no, year, status || 1, sound1 || null, device_index || null, card_owner || null, options || null, note || null, profile_image || null, phone_number || null],
               (err) => {
                 if (err) {
                   console.error("Error inserting data (force):", err);
@@ -533,7 +545,7 @@ class Students {
             pending++;
             this.db.run(
               updateQuery,
-              [name, dakhela, className, utils.getClassShort(className), card_no, year, status || 1, sound1 || '', device_index || null, card_owner || null, options || null, note || null, profile_image || null, phone_number || null, id],
+              [name, dakhela, className, class_short, card_no, year, status || 1, sound1 || '', device_index || null, card_owner || null, options || null, note || null, profile_image || null, phone_number || null, id],
               function(err) {
                 if (err) {
                   console.error(`Error updating data with ID ${id}:`, err);
@@ -563,7 +575,7 @@ class Students {
                 // Update the existing row
                 this.db.run(
                   updateQuery,
-                  [name, dakhela, className, utils.getClassShort(className), card_no, year, status || 1, sound1 || null, device_index || null, card_owner || null, options || null, note || null, profile_image || null, phone_number || null, existingRow.id],
+                  [name, dakhela, className, class_short, card_no, year, status || 1, sound1 || null, device_index || null, card_owner || null, options || null, note || null, profile_image || null, phone_number || null, existingRow.id],
                   (err) => {
                     if (err) {
                       console.error(`Error updating data for dakhela: ${dakhela}, class: ${className}, year: ${year}:`, err);
@@ -579,7 +591,7 @@ class Students {
                 // Insert a new row
                 this.db.run(
                   insertQuery,
-                  [name, dakhela, className, utils.getClassShort(className), card_no, year, status || 1, sound1 || null, device_index || null, card_owner || null, options || null, note || null, profile_image || null, phone_number || null],
+                  [name, dakhela, className, class_short, card_no, year, status || 1, sound1 || null, device_index || null, card_owner || null, options || null, note || null, profile_image || null, phone_number || null],
                   (err) => {
                     if (err) {
                       console.error("Error inserting data:", err);

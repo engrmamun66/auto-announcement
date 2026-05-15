@@ -14,32 +14,10 @@ const emitter = inject('emitter');
 let http = inject('http'); 
 let moment = inject('moment'); 
 const helper = inject('helper');
+const getAllStudents = inject('getAllStudents');
 let loading = ref(false);
 
-async function getBackup(){
-     loading.value = true;
-     try {
-          let response = await http.get('/students/export', {responseType: "blob"})
-          const url = window.URL.createObjectURL(new Blob([response.data]));
-          const link = document.createElement("a");
-          link.href = url;
-
-          // Set the downloaded file name
-          link.setAttribute("download", "students_export.xlsx");
-
-          // Append the link to the document, trigger download, and clean up
-          document.body.appendChild(link);
-          link.click();
-          link.remove();
-          window.URL.revokeObjectURL(url);
-          setTimeout(() => {
-               loading.value = false;
-          }, 500);
-
-     } catch (error) {
-          loading.value = false;
-     }
-}
+ 
 
 
 async function eraseAll() {
@@ -55,50 +33,13 @@ async function eraseAll() {
                if(response.status == 200){
                     emitter.emit('toaster-success', {message: helper.t('All students have been deleted')})
                }
+               getAllStudents()
           })
      } catch (error) {
           
      }
 }
-
-let backupLinks = ref([])
-
-function getBackupDetails() {
-     try {
-          http.get('/backup-list').then(response => {
-               if(response.status == 200){
-                    let dataObject = response.data.data
-                    if(dataObject && typeof dataObject === 'object'){
-                         let linkArray = Object.entries(dataObject).map(([key, value]) => {
-                              return ({filename: key, ...value})
-                         })
-                         linkArray.forEach(item => {
-                              if(item.filename.endsWith('-2.zip')){
-                                   item['label'] = 'Latest'
-                                   backupLinks.value[0] = item
-                              }
-                              else if(item.filename.endsWith('-1.zip')){
-                                   item['label'] = 'Older'
-                                   backupLinks.value[1] = item
-                              }
-                              else {
-                                   item['label'] = 'Oldest'
-                                   backupLinks.value[2] = item
-                              }
-                         }) 
-                    }
-               }
-          })
-     } catch (error) {
-          
-     }
-}
-
-onMounted(() => {
-     // getBackupDetails()
-})
  
-
 </script>
 
 <template>
