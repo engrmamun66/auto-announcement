@@ -16,6 +16,7 @@ let moment = inject('moment');
 const helper = inject('helper');
 const getAllStudents = inject('getAllStudents');
 let loading = ref(false);
+let loading2 = ref(false);
 
 const optionalCols = ['id', 'class_short', 'card_no', 'year', 'status', 'sound1', 'created', 'card_owner', 'options', 'note', 'device_index', 'profile_image', 'phone_number'];
 
@@ -28,14 +29,16 @@ async function eraseAll() {
                alert(helper.t('Wrong passcode!'))
                return
           }
+          loading2.value = true
           http.get('/students/erase-all').then(response => {
                if(response.status == 200){
                     emitter.emit('toaster-success', {message: helper.t('All students have been deleted')})
                }
                getAllStudents()
+               loading2.value = false
           })
      } catch (error) {
-          
+          loading2.value = false
      }
 }
 
@@ -72,7 +75,7 @@ async function exportAll(){
           <h1>{{ helper.t('Import Students') }}</h1>
           <div class="right-align" >
                <!-- <Btn v-if="useRoute().query.dev == 'true'" @click="eraseAll" class="red me-1" ><i class='bx bxs-eraser' ></i> {{ helper.t('Delete All Students') }} <BtnLoader v-if="loading"></BtnLoader> </Btn> -->
-               <Btn @click="eraseAll" v-if="true" class="red me-1" ><i class='bx bxs-eraser' ></i> {{ helper.t('Delete All Students') }} <BtnLoader v-if="loading"></BtnLoader> </Btn>
+               <Btn @click="eraseAll" v-if="true" class="red me-1" ><i class='bx bxs-eraser' ></i> {{ helper.t('Delete All Students') }} <BtnLoader v-if="loading2"></BtnLoader> </Btn>
                <Btn @click="exportAll" ><i class='bx bxs-file-export' ></i> {{ helper.t('Export All') }} <BtnLoader v-if="loading"></BtnLoader> </Btn>
 
           </div>
