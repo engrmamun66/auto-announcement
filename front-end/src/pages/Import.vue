@@ -17,8 +17,7 @@ const helper = inject('helper');
 const getAllStudents = inject('getAllStudents');
 let loading = ref(false);
 
- 
-
+const optionalCols = ['id', 'class_short', 'card_no', 'year', 'status', 'sound1', 'created', 'card_owner', 'options', 'note', 'device_index', 'profile_image', 'phone_number'];
 
 async function eraseAll() {
      try {
@@ -52,8 +51,61 @@ async function eraseAll() {
 
           </div>
      </div>
-     <FileUpload></FileUpload>  
+     <FileUpload></FileUpload>
 
+     <div class="card mt-4 border-0 shadow-sm">
+          <div class="card-header bg-light d-flex align-items-center gap-2">
+               <i class='bx bxs-info-circle text-primary fs-5'></i>
+               <strong>{{ helper.t('Excel Import Instructions') }}</strong>
+          </div>
+          <div class="card-body">
+               <p class="text-muted small mb-3">
+                    <i class='bx bx-check-circle text-success me-1'></i>{{ helper.t('First row must be the header row (column names)') }}<br>
+                    <i class='bx bx-check-circle text-success me-1'></i>{{ helper.t('Columns can be in any order') }}
+               </p>
+
+               <div class="row g-3">
+                    <div class="col-md-4">
+                         <div class="p-3 rounded bg-danger bg-opacity-10 h-100">
+                              <div class="fw-semibold text-danger mb-2">
+                                   <i class='bx bxs-error me-1'></i>{{ helper.t('Required Columns') }}
+                              </div>
+                              <p class="small text-muted mb-2">{{ helper.t('These 3 columns must exist in the header row:') }}</p>
+                              <div class="d-flex flex-wrap gap-1">
+                                   <span class="badge bg-danger">name</span>
+                                   <span class="badge bg-danger">dakhela</span>
+                                   <span class="badge bg-danger">class</span>
+                              </div>
+                         </div>
+                    </div>
+
+                    <div class="col-md-4">
+                         <div class="p-3 rounded bg-primary bg-opacity-10 h-100">
+                              <div class="fw-semibold text-primary mb-2">
+                                   <i class='bx bxs-tag me-1'></i>{{ helper.t('Optional Columns') }}
+                              </div>
+                              <p class="small text-muted mb-2">{{ helper.t('These columns are optional (include if available):') }}</p>
+                              <div class="d-flex flex-wrap gap-1">
+                                   <span v-for="col in optionalCols" :key="col" class="badge bg-primary bg-opacity-75">{{ col }}</span>
+                              </div>
+                         </div>
+                    </div>
+
+                    <div class="col-md-4">
+                         <div class="p-3 rounded bg-success bg-opacity-10 h-100">
+                              <div class="fw-semibold text-success mb-2">
+                                   <i class='bx bxs-magic-wand me-1'></i>{{ helper.t('Auto-filled Rules') }}
+                              </div>
+                              <ul class="small text-muted mb-0 ps-3">
+                                   <li>{{ helper.t('class_short — auto resolved from config if not provided') }}</li>
+                                   <li>{{ helper.t('year — defaults to current year if empty') }}</li>
+                                   <li>{{ helper.t('status — defaults to 1 (active) if empty') }}</li>
+                              </ul>
+                         </div>
+                    </div>
+               </div>
+          </div>
+     </div>
 
 </template>
 
