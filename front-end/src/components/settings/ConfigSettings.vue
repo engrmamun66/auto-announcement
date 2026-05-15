@@ -205,7 +205,7 @@ async function save(key, pass=false) {
   if(!event?.ctrlKey){
     let pass = prompt(helper.t('Type secret password'))
     if(pass !== 'allowme' && pass !== 'asdf'){
-      emitter.emit('toaster-error', { message: helper.t('This class is currently closed')})
+      emitter.emit('toaster-error', { message: helper.t(`Secret key not matched`)})
       return
     }
   }

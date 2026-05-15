@@ -488,6 +488,7 @@ module.exports = {
     'recipient(s)': 'প্রাপক',
     'Sent successfully': 'সফলভাবে পাঠানো হয়েছে',
     'Delete this template?': 'এই টেমপ্লেট মুছতে চান?',
+    'Secret key not matched': 'সিক্রেট কী মেলেনি',
   },
   attendance: {
     vacation_types: [

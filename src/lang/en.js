@@ -487,6 +487,7 @@ module.exports = {
     'recipient(s)': 'recipient(s)',
     'Sent successfully': 'Sent successfully',
     'Delete this template?': 'Delete this template?',
+    'Secret key not matched': 'Secret key not matched',
   },
   attendance: {
     vacation_types: [
