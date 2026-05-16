@@ -226,13 +226,16 @@ let getForbiddenedMessage = computed(()=>{
 })
 
 
-async function getConfig({switch_mode=''}={}){
+async function getConfig({switch_mode='', check=false}={}){
     try {
         let response = await http.get('/config', { params: { switch_mode } })
         if(response.status == 200){
             CONFIG.value = response.data
             classes.value = Array.from(response.data.classes).filter(c => c?.isActive)
             storage('CONFIG').value = response.data
+            if(response.data?.settings?.attendance?.only_attendance_feature){
+                router.push({ path: '/attendence', query: route.query })
+            }
         }
     } catch (error) {
         
@@ -818,7 +821,7 @@ onMounted(async ()=>{
     
     await getAllStudents()
     await getSchedules() 
-    await getConfig()
+    await getConfig({check: true})
     applyLanguageSettings()
 
     if(CONFIG.value?.settings?.click_me_to_allow_sound?.status === false){

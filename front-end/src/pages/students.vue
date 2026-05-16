@@ -449,11 +449,9 @@ async function updateStudent(){
 
     http.post(`/students/update`, formData, {formData: true}).then(response => {
       if(response.status == 200){
-        let { id } = response.data.data; 
-        if(id){          
-          clearParams({id, get: false}) 
-        }
+        let { id } = response.data.data;
         getAllStudents()
+        getStudents()
       }
     }).catch(() => {}).finally(()=>{
       clearPayload()
