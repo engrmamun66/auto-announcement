@@ -840,14 +840,15 @@ watch(fixedWidthSoundCol, (newVal) => {
           <div class="col-md-3 col-12">
             <div class="form-group sssffefefasdgsadfg">
               <label for="email">{{ helper.t('Dakhela') }}
-
-                <span tooltip="All Smillar">
-                  <input v-model="only_similler_students" :value="only_similler_students" style="opacity: 0.7;" type="checkbox" @change="()=>{
-                    if(params.dakhela){
-                      getStudents()
-                    }
-                  }" >
-                </span>
+                <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
+                  <span tooltip="All Smillar">
+                    <input v-model="only_similler_students" :value="only_similler_students" style="opacity: 0.7;" type="checkbox" @change="()=>{
+                      if(params.dakhela){
+                        getStudents()
+                      }
+                    }" >
+                  </span>
+                </template>
               </label>
               <input v-model="params.dakhela" @keyup="getStudentsDebounced" @input="getStudentsDebounced" type="number" class="form-control cb-input" :placeholder="helper.t('Search dakhela...')">
             </div> 
