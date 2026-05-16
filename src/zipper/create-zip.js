@@ -79,6 +79,9 @@ async function create_zip_with_latest_code({ file_name, for_new_setup = false, a
         directories.push(path.join(global.DIR, 'src'));
 
         files.push(path.join(global.DIR, 'config.example.js'));
+        if (for_new_setup) {
+            files.push(path.join(global.DIR, 'config.js'));
+        }
         files.push(path.join(global.DIR, 'ecosystem.config.js'));
         files.push(path.join(global.DIR, 'open.example.bat'));
         files.push(path.join(global.DIR, 'package.json'));
