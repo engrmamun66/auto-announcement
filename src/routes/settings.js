@@ -1,5 +1,8 @@
 const express = require('express');
+const fs = require('fs');
+const path = require('path');
 const { getSettings, updateSetting, resetAllSettings } = require('../settings');
+const { fillMissingKeys } = require('../fillGapConfig');
 
 module.exports = (db) => {
     const router = express.Router();
@@ -20,7 +23,12 @@ module.exports = (db) => {
     router.post('/settings/reset', async (req, res) => {
         try {
             await resetAllSettings(db);
-            const cfg = require('./../../config.example');
+            let cfg = require('./../../config.example');
+            const configPath = path.join(__dirname, './../../config.js');
+            if (fs.existsSync(configPath)) {
+                const userCfg = require(configPath);
+                cfg = fillMissingKeys(cfg, userCfg);
+            }
             const DB_KEYS = Object.keys(cfg).filter(k => k !== 'env');
             DB_KEYS.forEach(k => { if (global.config) global.config[k] = cfg[k]; });
             res.json({ success: true });

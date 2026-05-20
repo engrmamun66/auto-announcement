@@ -181,10 +181,7 @@ const helper = {
     localStorage: function (name, __defaultValue=undefined) {
       return {
         get value() {
-          if (typeof process == "undefined") {
-            var process = { client: true };
-          }
-          if (process.client && globalThis.localStorage) {
+          try {
             let data = globalThis.localStorage.getItem(name);
             if(!data) return __defaultValue
 
@@ -194,7 +191,6 @@ const helper = {
               type = parts[0]
               data = parts.slice(1).join('')
             }
-
 
             if (
               (data && data?.startsWith("{") && data?.endsWith("}")) ||
@@ -211,28 +207,23 @@ const helper = {
             else  {
               return data;
             }
-          }
+          } catch { return __defaultValue }
         },
         set value(value) {
-
-          let type = typeof value
-          if (typeof process == "undefined") {
-            var process = { client: true };
-          }
-          if (process.client && globalThis.localStorage) {
+          try {
+            let type = typeof value
             if(value === null || value === ''){
-              localStorage.removeItem(name)
+              globalThis.localStorage.removeItem(name)
             } else {
               if (value && typeof value === "object") {
                 value = JSON.stringify(value);
               }
-              let prefix = `${type}::`
-              localStorage.setItem(name, prefix + value);
+              globalThis.localStorage.setItem(name, `${type}::` + value);
             }
-          }
+          } catch { /* storage blocked by browser */ }
         },
       };
-    }, 
+    },
     time_in_miliseconds: function(time_24=''){
       let [hours, minutes] = time_24.split(":")      
       

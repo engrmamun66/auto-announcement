@@ -2,10 +2,13 @@ const fs = require('fs');
 const path = require('path');
 const sqlite3 = require("sqlite3").verbose();
 
-let config = require('./../config.example');
+const { fillMissingKeys } = require('./fillGapConfig');
+let exampleConfig = require('./../config.example');
+let config = exampleConfig;
 const configPath = path.join(__dirname, './../config.js');
 if (fs.existsSync(configPath)) {
   config = require(configPath);
+  config = fillMissingKeys(exampleConfig, config);
 }
 global.config = config
 

@@ -22,8 +22,17 @@ function updateSetting(db, key, value) {
     });
 }
 
+const { fillMissingKeys } = require('./fillGapConfig');
+const fs = require('fs');
+const path = require('path');
+
 function resetAllSettings(db) {
-    const cfg = require('./../config.example');
+    let cfg = require('./../config.example');
+    const configPath = path.join(__dirname, './../config.js');
+    if (fs.existsSync(configPath)) {
+        const userCfg = require(configPath);
+        cfg = fillMissingKeys(cfg, userCfg);
+    }
     const keys = [
         ['settings',            cfg.settings],
         ['classes',             cfg.classes],
