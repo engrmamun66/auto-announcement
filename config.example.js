@@ -132,7 +132,7 @@ module.exports = {
                in_message_template: 'Dear Parent, {name} has arrived at {time} on {date}.',
                out_message_template: 'Dear Parent, {name} has left at {time} on {date}.',
                only_if_phone_number: true,        // skip student if no phone_number set
-          }
+          },
      },
      date_range_list: [
           "This Week",
