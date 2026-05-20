@@ -16,6 +16,7 @@
     "@fullcalendar/interaction": "^6.1.19",
     "@fullcalendar/vue3": "^6.1.19",
     "axios": "^1.7.9",
+    "boxicons": "^2.1.4",
     "highcharts": "^12.5.0",
     "highcharts-vue": "^2.0.1",
     "jquery": "^3.7.1",
