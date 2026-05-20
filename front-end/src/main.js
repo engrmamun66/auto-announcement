@@ -1,5 +1,4 @@
 import './assets/css/module.css';
-import 'boxicons/css/boxicons.min.css';
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';
 import App from './App.vue';
