@@ -8,6 +8,9 @@ export default defineConfig({
   plugins: [
     vue(),
   ],
+  optimizeDeps: {
+    include: ['highcharts', 'highcharts-vue'],
+  },
   envDir: path.resolve(__dirname, '../'),
   resolve: {
     alias: {
