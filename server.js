@@ -83,8 +83,8 @@ utils.withTrackFile({version: '1.0.0', switch_mode: 'auto'}, {overwrite: false})
 
 const app = express();
 app.use(express.json());
-app.use(express.static('public'));
-app.use(express.static('front-end'));
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'front-end')));
 // Enable CORS
 app.use(cors());
  
