@@ -468,7 +468,7 @@ function recallAllPunchedStudents(){
                                              </div>
                                         </div>
 
-                                        <div v-if="callbacks.getCardOwnerName(student.card_owner) && NFIG.card_not_set_message" class="class-name panch-time mt-1 cp d-flex justify-content-between" tooltip="Card Owner">
+                                        <div v-if="callbacks.getCardOwnerName(student.card_owner) && CONFIG.card_not_set_message" class="class-name panch-time mt-1 cp d-flex justify-content-between" tooltip="Card Owner">
                                              <label v-if="student.card_owner"> <i class='bx bxs-id-card fs-5 transformY-4px'></i> {{ callbacks.getCardOwnerName(student.card_owner) }} </label> 
                                              <label v-else> <i class='bx bxs-id-card fs-5 transformY-4px'></i> {{ CONFIG.card_not_set_message }} </label> 
                                              <PlayingAnimation v-if="!student?.sound1_haserror && isPayingThisCard(student)"></PlayingAnimation>

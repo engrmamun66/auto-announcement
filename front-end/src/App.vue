@@ -233,6 +233,9 @@ async function getConfig({switch_mode='', check=false}={}){
             CONFIG.value = response.data
             classes.value = Array.from(response.data.classes).filter(c => c?.isActive)
             storage('CONFIG').value = response.data
+            if(response.data?.settings?.click_me_to_allow_sound?.status === false){
+                document.body.classList.add('user-interacted')
+            }
             if(response.data?.settings?.attendance?.only_attendance_feature){
                 router.push({ path: '/attendence', query: route.query })
             }
