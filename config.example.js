@@ -122,10 +122,11 @@ module.exports = {
           },
           sms: {
                enabled: false,                    // master on/off
-               provider: 'ssl_wireless',          // ssl_wireless | muthofon | custom
-               api_base_url: 'https://secure.sms.net.bd/api/v3',  // SSL Wireless
-               api_key: '',                       // API key / token from provider
-               sender_id: 'CBSMS',               // approved sender ID (6-11 chars)
+               provider: 'mimsms',               // ssl_wireless | mimsms | muthofon | custom
+               api_base_url: 'https://api.mimsms.com',
+               api_key: '',                       // API key from mimsms.com dashboard
+               user_name: '',                     // mimsms account email
+               sender_id: '',                     // approved sender ID / number
                send_on_in: true,                  // send SMS when student punches IN
                send_on_out: false,                // send SMS when student punches OUT
                // {name}, {time}, {date}, {status} are replaced at send time

@@ -62,21 +62,69 @@ class ClassSms {
     const smsConfig = global.config?.sms || {};
     if (!smsConfig.enabled) return res.status(403).json({ error: 'SMS not enabled in config' });
 
-    const { api_base_url, api_key, sender_id } = smsConfig;
+    const { api_base_url, api_key, sender_id, provider, user_name } = smsConfig;
     if (!api_key) return res.status(400).json({ error: 'api_key not configured' });
 
     try {
-      const result = await this._dispatch(api_base_url, api_key, sender_id, numbers, message);
+      const result = await this._dispatch({ api_base_url, api_key, sender_id, provider, user_name }, numbers, message);
       res.json({ ok: true, result });
     } catch (e) {
       res.status(500).json({ error: e.message });
     }
   }
 
-  _dispatch(base_url, api_key, sender_id, numbers, message) {
+  _dispatch({ api_base_url, api_key, sender_id, provider, user_name }, numbers, message) {
+    if (provider === 'mimsms') {
+      return this._dispatchMimSms({ api_base_url, api_key, sender_id, user_name }, numbers, message);
+    }
+    return this._dispatchSslWireless({ api_base_url, api_key, sender_id }, numbers, message);
+  }
+
+  _dispatchMimSms({ api_base_url, api_key, sender_id, user_name }, numbers, message) {
+    return new Promise((resolve, reject) => {
+      const base = api_base_url || 'https://api.mimsms.com';
+      const parsed = url.parse(base);
+      const isHttps = parsed.protocol === 'https:';
+      const lib = isHttps ? https : http_module;
+
+      const body = JSON.stringify({
+        UserName: user_name,
+        Apikey: api_key,
+        MobileNumber: numbers.join(','),
+        SenderName: sender_id,
+        TransactionType: 'T',
+        Message: message,
+      });
+
+      const options = {
+        hostname: parsed.hostname,
+        port: parsed.port || (isHttps ? 443 : 80),
+        path: '/api/SmsSending/OneToMany',
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Content-Length': Buffer.byteLength(body),
+          'Authorization': 'bearer',
+        },
+      };
+
+      const req = lib.request(options, (resp) => {
+        let data = '';
+        resp.on('data', d => { data += d; });
+        resp.on('end', () => {
+          try { resolve(JSON.parse(data)); } catch { resolve(data); }
+        });
+      });
+      req.on('error', reject);
+      req.write(body);
+      req.end();
+    });
+  }
+
+  _dispatchSslWireless({ api_base_url, api_key, sender_id }, numbers, message) {
     return new Promise((resolve, reject) => {
       const to = numbers.join(',');
-      const parsed = url.parse(base_url);
+      const parsed = url.parse(api_base_url);
       const isHttps = parsed.protocol === 'https:';
       const lib = isHttps ? https : http_module;
 
