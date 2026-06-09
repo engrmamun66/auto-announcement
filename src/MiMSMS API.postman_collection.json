@@ -1,0 +1,1061 @@
+{
+  "info": {
+    "_postman_id": "ec55941a-13d0-4bb4-960b-8760cc1095c3",
+    "name": "MiMSMS API",
+    "description": "This collection covers the core SMS API endpoints provided by **MiMSMS** (`api.mimsms.com`). It is intended for developers and integrators working with the MiMSMS platform to send, manage, and monitor SMS messages programmatically.\n\n**Endpoints included:**\n\n- **Send SMS** – Send a single SMS message to one recipient via POST.\n    \n- **Send One to Many** – Broadcast a single message to multiple recipients in one request.\n    \n- **Send Dynamic SMS (DSMS)** – Send personalized/dynamic messages with variable content per recipient.\n    \n- **Sent SMS (Query)** – Retrieve sent SMS records using query parameters via GET.\n    \n- **Send One to Many (Query)** – Trigger a one-to-many send using query string parameters via GET.\n    \n- **Check DLR** – Check the Delivery Report (DLR) status of a sent message.\n    \n- **Balance Check** – Retrieve the current SMS credit balance for an account via POST.\n    \n- **Balance Check (Query)** – Retrieve the SMS credit balance using query parameters via GET.\n    \n- **Incoming SMS** – Pull inbound/incoming SMS messages received on the platform.\n    \n\nBoth POST (JSON body) and GET (query string) variants are available for key operations, offering flexibility in integration approach.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "7101740"
+  },
+  "item": [
+    {
+      "name": "Send SMS",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "bearer"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"ApiKey\": \"VTSJEXXXXXXXXXX9CL\",\r\n    \"MobileNumber\": \"8801844XXXXXX\",\r\n    \"SenderName\": \"iSMS\",\r\n    \"UserName\": \"abcd@example.com\",\r\n    \"TransactionType\": \"T\",\r\n    \"Message\": \"Welcome to MiM Digital\",\r\n    \"CampaignId\": \"null\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://api.mimsms.com/api/SmsSending/SMS",
+          "protocol": "https",
+          "host": [
+            "api",
+            "mimsms",
+            "com"
+          ],
+          "path": [
+            "api",
+            "SmsSending",
+            "SMS"
+          ]
+        },
+        "description": "• Recommended OTP & Transactional SMS  \n• Multiple numbers can be separated by a comma only for promotional SMS.  \n• Sending promotional messages must require prior approval from the regulatory.  \n• Each message successfully submitted to MiMSMS platform is uniquely identified with the trxnId. Furthermore, the Transaction ID can be used for checking delivery status or sent messages logs.  \n• status is the object that further describes the state of sent message. For a full list of available statuses, please check."
+      },
+      "response": [
+        {
+          "name": "Send SMS",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "bearer"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"ApiKey\": \"VTSJEXXXXXXXXXX9CL\",\r\n    \"MobileNumber\": \"8801844XXXXXX\",\r\n    \"SenderName\": \"iSMS\",\r\n    \"CampaignName\": \"\",\r\n    \"UserName\": \"abcd@example.com\",\r\n    \"TransactionType\": \"T\",\r\n    \"MessageId\": \"\",\r\n    \"Message\": \"Welcome to MiM Digital\",\r\n    \"CampaignId\": \"null\",\r\n    \"SmsData\": null\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://api.mimsms.com/api/SmsSending/SMS",
+              "protocol": "https",
+              "host": [
+                "api",
+                "mimsms",
+                "com"
+              ],
+              "path": [
+                "api",
+                "SmsSending",
+                "SMS"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Transfer-Encoding",
+              "value": "chunked"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "Server",
+              "value": "Microsoft-IIS/10.0"
+            },
+            {
+              "key": "X-Powered-By",
+              "value": "ASP.NET"
+            },
+            {
+              "key": "Date",
+              "value": "Sat, 25 May 2024 10:05:40 GMT"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n    \"statusCode\": \"200\",\n    \"status\": \"Success\",\n    \"trxnId\": \"133611051403609881\",\n    \"responseResult\": \"SMS Send Successfuly\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Send One to Many",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "bearer"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"UserName\": \"abcd@example.com\",\r\n    \"Apikey\": \"VTSJEXXXX9X9CL\",\r\n    \"MobileNumber\": \"8801844xxxxxx,8801713xxxxxx\",\r\n    \"SenderName\": \"iSMS\",\r\n    \"TransactionType\": \"T\",\r\n    \"Message\": \"Hello one to many from MiM SMS\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://api.mimsms.com/api/SmsSending/OneToMany",
+          "protocol": "https",
+          "host": [
+            "api",
+            "mimsms",
+            "com"
+          ],
+          "path": [
+            "api",
+            "SmsSending",
+            "OneToMany"
+          ]
+        },
+        "description": "• Multiple numbers can be separated by a comma.  \n• Each message successfully submitted to MiMSMS platform is uniquely identified with the trxnId. Furthermore, the Transaction ID can be used for checking delivery status or sent messages logs.  \n• status is the object that further describes the state of sent message. For a full list of available statuses, please check."
+      },
+      "response": [
+        {
+          "name": "Send One to Many",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "bearer"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"UserName\": \"abcd@example.com\",\r\n    \"Apikey\": \"VTSJEXXXX9X9CL\",\r\n    \"MobileNumber\": \"8801844xxxxxx,8801713xxxxxx\",\r\n    \"CampaignId\": \"null\",\r\n    \"SenderName\": \"iSMS\",\r\n    \"TransactionType\": \"T\",\r\n    \"Message\": \"Hello one to many from MiM SMS\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://api.mimsms.com/api/SmsSending/OneToMany",
+              "protocol": "https",
+              "host": [
+                "api",
+                "mimsms",
+                "com"
+              ],
+              "path": [
+                "api",
+                "SmsSending",
+                "OneToMany"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Transfer-Encoding",
+              "value": "chunked"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "Server",
+              "value": "Microsoft-IIS/10.0"
+            },
+            {
+              "key": "X-Powered-By",
+              "value": "ASP.NET"
+            },
+            {
+              "key": "Date",
+              "value": "Sat, 25 May 2024 10:07:26 GMT"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n    \"statusCode\": \"Success\",\n    \"status\": \"200\",\n    \"trxnId\": \"133611052461205495\",\n    \"responseResult\": \"SMS Send Successfuly\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Send Dynamic SMS",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "bearer"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"UserName\": \"abcd@example.com\",\r\n    \"Apikey\": \"VTSJXXXX9X9CL\",\r\n    \"SenderName\": \"018960iSMS50628\",\r\n    \"TransactionType\": \"D\",\r\n    \"SmsData\": [\r\n        {\r\n            \"MobNumber\": \"880184490xxxx\",\r\n            \"Message\": \"Dynamic Messages 1\"\r\n        },\r\n        {\r\n            \"MobNumber\": \"880171353xxxx\",\r\n            \"Message\": \"Dynamic Messages 2\"\r\n        }\r\n    ]\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://api.mimsms.com/api/SmsSending/DSMS",
+          "protocol": "https",
+          "host": [
+            "api",
+            "mimsms",
+            "com"
+          ],
+          "path": [
+            "api",
+            "SmsSending",
+            "DSMS"
+          ]
+        },
+        "description": "Send specific messages to multiple destinations by calling one API method only once. This way you'll send specific SMS messages to multiple destinations in a single request."
+      },
+      "response": [
+        {
+          "name": "Send Dynamic SMS",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "bearer",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"UserName\": \"abcd@example.com\",\r\n    \"Apikey\": \"VTSJXXXX9X9CL\",\r\n    \"SenderName\": \"018960iSMS50628\",\r\n    \"TransactionType\": \"D\",\r\n    \"SmsData\": [\r\n        {\r\n            \"MobNumber\": \"880184490xxxx\",\r\n            \"Message\": \"Dynamic Messages 1\"\r\n        },\r\n        {\r\n            \"MobNumber\": \"880171353xxxx\",\r\n            \"Message\": \"Dynamic Messages 2\"\r\n        }\r\n    ]\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://api.mimsms.com/api/SmsSending/DSMS",
+              "protocol": "https",
+              "host": [
+                "api",
+                "mimsms",
+                "com"
+              ],
+              "path": [
+                "api",
+                "SmsSending",
+                "DSMS"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Transfer-Encoding",
+              "value": "chunked"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "Server",
+              "value": "Microsoft-IIS/10.0"
+            },
+            {
+              "key": "X-Powered-By",
+              "value": "ASP.NET"
+            },
+            {
+              "key": "Date",
+              "value": "Mon, 18 Dec 2023 11:38:00 GMT"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n    \"statusCode\": \"200\",\n    \"status\": \"Success\",\n    \"trxnId\": \"ZICU7TMXV9B6ZG8_C28\",\n    \"responseResult\": \"SMS Send Successfuly\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Sent SMS (Query)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://api.mimsms.com/api/SmsSending/Send?UserName=asdf@mimsms.com&Apikey=JFGDJKFHDFDDDGG&MobileNumber=880171353xxxx&SenderName=iSMS&TransactionType=T&Message=Welcome to MiM SMS",
+          "protocol": "https",
+          "host": [
+            "api",
+            "mimsms",
+            "com"
+          ],
+          "path": [
+            "api",
+            "SmsSending",
+            "Send"
+          ],
+          "query": [
+            {
+              "key": "UserName",
+              "value": "asdf@mimsms.com"
+            },
+            {
+              "key": "Apikey",
+              "value": "JFGDJKFHDFDDDGG"
+            },
+            {
+              "key": "MobileNumber",
+              "value": "880171353xxxx"
+            },
+            {
+              "key": "SenderName",
+              "value": "iSMS"
+            },
+            {
+              "key": "TransactionType",
+              "value": "T"
+            },
+            {
+              "key": "Message",
+              "value": "Welcome to MiM SMS"
+            }
+          ]
+        },
+        "description": "similar to the previous method, this method allows sending SMS messages passing parameters directly as query string variables."
+      },
+      "response": [
+        {
+          "name": "Sent SMS (Query)",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://api.mimsms.com/api/SmsSending/Send?UserName=asdf@mimsms.com&Apikey=JFGDJKFHDFDDDGG&MobileNumber=880171353xxxx&SenderName=iSMS&TransactionType=T&Message=Welcome to MiM SMS",
+              "protocol": "https",
+              "host": [
+                "api",
+                "mimsms",
+                "com"
+              ],
+              "path": [
+                "api",
+                "SmsSending",
+                "Send"
+              ],
+              "query": [
+                {
+                  "key": "UserName",
+                  "value": "asdf@mimsms.com"
+                },
+                {
+                  "key": "Apikey",
+                  "value": "JFGDJKFHDFDDDGG"
+                },
+                {
+                  "key": "MobileNumber",
+                  "value": "880171353xxxx"
+                },
+                {
+                  "key": "SenderName",
+                  "value": "iSMS"
+                },
+                {
+                  "key": "TransactionType",
+                  "value": "T"
+                },
+                {
+                  "key": "Message",
+                  "value": "Welcome to MiM SMS"
+                }
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Transfer-Encoding",
+              "value": "chunked"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "Server",
+              "value": "Microsoft-IIS/10.0"
+            },
+            {
+              "key": "X-Powered-By",
+              "value": "ASP.NET"
+            },
+            {
+              "key": "Date",
+              "value": "Thu, 12 Sep 2024 08:45:02 GMT"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n    \"statusCode\": \"200\",\n    \"status\": \"Success\",\n    \"responseResult\": \"SMS Send Successfuly\",\n    \"trxnId\": \"133706043022339846\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Send One to Many (Query)",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "bearer",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://api.mimsms.com/api/SmsSending/SendOneToMany?UserName=asdf@mimsms.com&Apikey=JHJGJHHKJHJHGJG&MobileNumber=880184490xxxx,880171353xxxx&SenderName=8809617620712&TransactionType=T&Message=One to many API check from MiMSMS",
+          "protocol": "https",
+          "host": [
+            "api",
+            "mimsms",
+            "com"
+          ],
+          "path": [
+            "api",
+            "SmsSending",
+            "SendOneToMany"
+          ],
+          "query": [
+            {
+              "key": "UserName",
+              "value": "asdf@mimsms.com"
+            },
+            {
+              "key": "Apikey",
+              "value": "JHJGJHHKJHJHGJG"
+            },
+            {
+              "key": "MobileNumber",
+              "value": "880184490xxxx,880171353xxxx"
+            },
+            {
+              "key": "SenderName",
+              "value": "8809617620712"
+            },
+            {
+              "key": "TransactionType",
+              "value": "T"
+            },
+            {
+              "key": "Message",
+              "value": "One to many API check from MiMSMS"
+            }
+          ]
+        },
+        "description": "similar to the previous method, this method allows sending SMS messages passing parameters directly as query string variables."
+      },
+      "response": [
+        {
+          "name": "Send One to Many (Query)",
+          "originalRequest": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "bearer",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://api.mimsms.com/api/SmsSending/SendOneToMany?SenderName=8809617620712&TransactionType=T&UserName=asdf@mimsms.com&Apikey=JHJGJHHKJHJHGJG&MobileNumber=880184490xxxx,880171353xxxx&Message=One to many API check from MiMSMS",
+              "protocol": "https",
+              "host": [
+                "api",
+                "mimsms",
+                "com"
+              ],
+              "path": [
+                "api",
+                "SmsSending",
+                "SendOneToMany"
+              ],
+              "query": [
+                {
+                  "key": "SenderName",
+                  "value": "8809617620712"
+                },
+                {
+                  "key": "TransactionType",
+                  "value": "T"
+                },
+                {
+                  "key": "UserName",
+                  "value": "asdf@mimsms.com"
+                },
+                {
+                  "key": "Apikey",
+                  "value": "JHJGJHHKJHJHGJG"
+                },
+                {
+                  "key": "MobileNumber",
+                  "value": "880184490xxxx,880171353xxxx"
+                },
+                {
+                  "key": "Message",
+                  "value": "One to many API check from MiMSMS"
+                }
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Transfer-Encoding",
+              "value": "chunked"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "Server",
+              "value": "Microsoft-IIS/10.0"
+            },
+            {
+              "key": "X-Powered-By",
+              "value": "ASP.NET"
+            },
+            {
+              "key": "Date",
+              "value": "Thu, 12 Sep 2024 08:48:53 GMT"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n    \"statusCode\": \"200\",\n    \"status\": \"Success\",\n    \"trxnId\": \"133706045331855477\",\n    \"responseResult\": \"'2' Send Successfuly and Failed '0'\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Check DLR",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "bearer"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"ApiKey\": \"KJJJHGJFHGVJKHJJK\",\r\n    \"UserName\": \"asdf@mimsms.com\",\r\n    \"MobileNumber\": \"880184490xxxx\",\r\n    \"trxnId\": \"133704351815943482\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://api.mimsms.com/api/SmsSending/DlrApi",
+          "protocol": "https",
+          "host": [
+            "api",
+            "mimsms",
+            "com"
+          ],
+          "path": [
+            "api",
+            "SmsSending",
+            "DlrApi"
+          ]
+        },
+        "description": "After you have sent a couple of messages, you are able to check if they were successfully delivered by making this request."
+      },
+      "response": [
+        {
+          "name": "Check DLR",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "bearer"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"ApiKey\": \"KJJJHGJFHGVJKHJJK\",\r\n    \"UserName\": \"asdf@mimsms.com\",\r\n    \"MobileNumber\": \"880184490xxxx\",\r\n    \"trxnId\": \"133704351815943482\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://api.mimsms.com/api/SmsSending/DlrApi",
+              "protocol": "https",
+              "host": [
+                "api",
+                "mimsms",
+                "com"
+              ],
+              "path": [
+                "api",
+                "SmsSending",
+                "DlrApi"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Transfer-Encoding",
+              "value": "chunked"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "Server",
+              "value": "Microsoft-IIS/10.0"
+            },
+            {
+              "key": "X-Powered-By",
+              "value": "ASP.NET"
+            },
+            {
+              "key": "Date",
+              "value": "Sat, 31 Aug 2024 07:16:22 GMT"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n    \"statusCode\": \"200\",\n    \"status\": \"Ok\",\n    \"trxnId\": \"133695552025435239\",\n    \"dlrCode\": \"0\",\n    \"operatorStatus\": \"DELIVERED\",\n    \"receiverMobile\": \"8801844909020\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Balance Check",
+      "protocolProfileBehavior": {
+        "disabledSystemHeaders": {
+          "accept-encoding": true,
+          "connection": true
+        }
+      },
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"UserName\": \"abcd@mimsms.com\",\r\n    \"Apikey\": \"VTSSFDFDF9X9CL\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://api.mimsms.com/api/SmsSending/balanceCheck",
+          "protocol": "https",
+          "host": [
+            "api",
+            "mimsms",
+            "com"
+          ],
+          "path": [
+            "api",
+            "SmsSending",
+            "balanceCheck"
+          ]
+        },
+        "description": "You can check your balance from API."
+      },
+      "response": [
+        {
+          "name": "Balance Check",
+          "originalRequest": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{   \r\n    \"UserName\":\"abcd@mimsms.com\",\r\n    \"Apikey\":\"XKFGEDFDFXXXRZCM\"\r\n\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://api.mimsms.com/api/SmsSending/Balance",
+              "protocol": "https",
+              "host": [
+                "api",
+                "mimsms",
+                "com"
+              ],
+              "path": [
+                "api",
+                "SmsSending",
+                "Balance"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Transfer-Encoding",
+              "value": "chunked"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "Server",
+              "value": "Microsoft-IIS/10.0"
+            },
+            {
+              "key": "X-Powered-By",
+              "value": "ASP.NET"
+            },
+            {
+              "key": "Date",
+              "value": "Tue, 19 Dec 2023 08:32:57 GMT"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n    \"statusCode\": \"200\",\n    \"status\": \"Ok\",\n    \"trxnId\": \"\",\n    \"responseResult\": \"12812.5\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Balance Check (Query)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "bearer",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "https://api.mimsms.com/api/SmsSending/balanceCheck?UserName=asdf@mimsms.com&Apikey=JHHKHKHK",
+          "protocol": "https",
+          "host": [
+            "api",
+            "mimsms",
+            "com"
+          ],
+          "path": [
+            "api",
+            "SmsSending",
+            "balanceCheck"
+          ],
+          "query": [
+            {
+              "key": "UserName",
+              "value": "asdf@mimsms.com"
+            },
+            {
+              "key": "Apikey",
+              "value": "JHHKHKHK"
+            }
+          ]
+        },
+        "description": "You can check your balance from API."
+      },
+      "response": [
+        {
+          "name": "Query Balance Check",
+          "originalRequest": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "bearer",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "https://api.mimsms.com/api/SmsSending/balanceCheck?UserName=asdf@mimsms.com&Apikey=JKLJKJJLKKJB",
+              "protocol": "https",
+              "host": [
+                "api",
+                "mimsms",
+                "com"
+              ],
+              "path": [
+                "api",
+                "SmsSending",
+                "balanceCheck"
+              ],
+              "query": [
+                {
+                  "key": "UserName",
+                  "value": "asdf@mimsms.com"
+                },
+                {
+                  "key": "Apikey",
+                  "value": "JKLJKJJLKKJB"
+                }
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Transfer-Encoding",
+              "value": "chunked"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "Server",
+              "value": "Microsoft-IIS/10.0"
+            },
+            {
+              "key": "X-Powered-By",
+              "value": "ASP.NET"
+            },
+            {
+              "key": "Date",
+              "value": "Tue, 19 Dec 2023 08:39:48 GMT"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n    \"statusCode\": \"200\",\n    \"status\": \"Ok\",\n    \"responseResult\": \"12812.5\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Incoming SMS",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://api.mimsms.com/api/IncomingApi/PullSMS?UserName=asdf@mimsms.com&Apikey=XXXXXXXXXXXXXX",
+          "protocol": "https",
+          "host": [
+            "api",
+            "mimsms",
+            "com"
+          ],
+          "path": [
+            "api",
+            "IncomingApi",
+            "PullSMS"
+          ],
+          "query": [
+            {
+              "key": "UserName",
+              "value": "asdf@mimsms.com"
+            },
+            {
+              "key": "Apikey",
+              "value": "XXXXXXXXXXXXXX"
+            }
+          ]
+        },
+        "description": "With 2-Way SMS, MiM SMS turns simple text messaging into a powerful interactive communication tool.  \nHere is the JSON request example for getting Inbound SMS Reports."
+      },
+      "response": [
+        {
+          "name": "IncomingSMS",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://api.mimsms.com/api/IncomingApi/PullSMS?UserName=support@mimsms.com&Apikey=VTSJEWP6AT9X9CL",
+              "protocol": "https",
+              "host": [
+                "api",
+                "mimsms",
+                "com"
+              ],
+              "path": [
+                "api",
+                "IncomingApi",
+                "PullSMS"
+              ],
+              "query": [
+                {
+                  "key": "UserName",
+                  "value": "support@mimsms.com"
+                },
+                {
+                  "key": "Apikey",
+                  "value": "VTSJEWP6AT9X9CL"
+                }
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": null,
+          "header": [
+            {
+              "key": "Transfer-Encoding",
+              "value": "chunked"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "Server",
+              "value": "Microsoft-IIS/10.0"
+            },
+            {
+              "key": "X-Powered-By",
+              "value": "ASP.NET"
+            },
+            {
+              "key": "Date",
+              "value": "Sun, 21 Sep 2025 07:37:21 GMT"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n    \"statusCode\": \"200\",\n    \"status\": \"Success\",\n    \"messageId\": \"188\",\n    \"sender\": \"8801844909020\",\n    \"receiver\": \"8809617623000\",\n    \"message_Text\": \"This is a test message for 2 way\",\n    \"message_time\": \"9/21/2025 1:37:12 PM\",\n    \"trxnId\": \"MQUKCT2PFDI7D6W\"\n}"
+        },
+        {
+          "name": "IncomingSMS",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://api.mimsms.com/api/IncomingApi/PullSMS?UserName=support@mimsms.com&Apikey=VTSJEWP6AT9X9CL",
+              "protocol": "https",
+              "host": [
+                "api",
+                "mimsms",
+                "com"
+              ],
+              "path": [
+                "api",
+                "IncomingApi",
+                "PullSMS"
+              ],
+              "query": [
+                {
+                  "key": "UserName",
+                  "value": "support@mimsms.com"
+                },
+                {
+                  "key": "Apikey",
+                  "value": "VTSJEWP6AT9X9CL"
+                }
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": null,
+          "header": [
+            {
+              "key": "Transfer-Encoding",
+              "value": "chunked"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "Server",
+              "value": "Microsoft-IIS/10.0"
+            },
+            {
+              "key": "X-Powered-By",
+              "value": "ASP.NET"
+            },
+            {
+              "key": "Date",
+              "value": "Sun, 21 Sep 2025 07:34:30 GMT"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n    \"statusCode\": \"200\",\n    \"status\": \"Data Not Found\",\n    \"trxt_Id\": \"KQ04CNEZCLPW09C\"\n}"
+        }
+      ]
+    }
+  ]
+}
