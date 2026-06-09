@@ -193,6 +193,7 @@ async function submitLogs({ skipConfirm = false } = {}){
       remarks: 'bulk_device_fetch',
       device_index: 0,
       silent_mode: props.isAutomatic,
+      skipSms: true,
     })
     progress.done += 1
   }
