@@ -194,7 +194,7 @@ class Attendance {
                     const message = template
                       .replace(/{name}/g, student.name?.split('||')[0] || 'Student')
                       .replace(/{class}/g, student.class || 'N/F')
-                      .replace(/{date}/g, moment(row.date || '').format('DD MMMM, YYYY'))
+                      .replace(/{date}/g, moment(row.date || '').locale('bn').format('DD MMMM, YYYY'))
                       .replace(/{time}/g, formattedTime)
                     Sms._sendSmsInternal([student.phone_number], message).catch(err => {
                       console.error('SMS send error:', err.message);

@@ -33,7 +33,7 @@ function getDayMoment(time = '') {
 
 function formatTimeWithPeriod(timeString) {
   const period = getDayMoment(timeString);
-  const time = moment(timeString, ['HH:mm:ss']).format('hh:mm A');
+  const time = moment(timeString, ['HH:mm:ss']).locale('bn').format('hh:mm A');
   return `${period} ${time}`;
 }
 
