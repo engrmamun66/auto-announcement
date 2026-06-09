@@ -237,11 +237,11 @@ async function getConfig({switch_mode='', check=false}={}){
                 document.body.classList.add('user-interacted')
             }
             if(response.data?.settings?.attendance?.only_attendance_feature){
-                router.push({ path: '/attendence', query: route.query })
+                if(route.name === 'home') router.push({ path: '/attendence', query: route.query })
             }
         }
     } catch (error) {
-        
+        console.log('getConfig_error', error);
     }
 }
 
@@ -1193,12 +1193,13 @@ async function punchToSubmitAttendance(barcode='play-417-2024', {
     delay=0,
     punch_time=moment(),
     silent_mode=false,
+    skipSms=false,
 }={} ){
     if(!delay){
-        await __punchToSubmitAttendance(barcode, { message, source, device_index, remarks, punch_time, silent_mode });
+        await __punchToSubmitAttendance(barcode, { message, source, device_index, remarks, punch_time, silent_mode, skipSms });
     } else {
         setTimeout(async () => {
-            await __punchToSubmitAttendance(barcode, { message, source, device_index, remarks, punch_time, silent_mode });
+            await __punchToSubmitAttendance(barcode, { message, source, device_index, remarks, punch_time, silent_mode, skipSms });
         }, delay);
     }
 }
@@ -1210,6 +1211,7 @@ async function __punchToSubmitAttendance(barcode='play-417-2024', {
     remarks='',
     punch_time=moment(), // actually punch dateTime
     silent_mode=false,
+    skipSms=false,
 }={} ){
      try {
 
@@ -1307,7 +1309,7 @@ async function __punchToSubmitAttendance(barcode='play-417-2024', {
                     }
                     if(payload.late_in_minute > 0) payload.status = 'Late'
                     payload.remarks = 'First In Today' 
-                    await addAttendance(payload)
+                    await addAttendance(payload, { skipSms })
 
                 } else {
                     let last_enty = today_entries.at(-1)
@@ -1404,7 +1406,7 @@ async function __punchToSubmitAttendance(barcode='play-417-2024', {
                             }
 
 
-                            await addAttendance(payload)
+                            await addAttendance(payload, { skipSms })
 
                             
                         } else {
@@ -1466,8 +1468,9 @@ async function __punchToSubmitAttendance(barcode='play-417-2024', {
 
 
 
-                async function addAttendance(payload){
-                    let response = await http.post('/attendence-add', payload)
+                async function addAttendance(payload, {skipSms=false}={}){
+
+                    let response = await http.post('/attendence-add', payload, { params: { skipSms }})
                     if(response.status === 200){
                         let attendenceData = response.data.data
                         if(!silent_mode){

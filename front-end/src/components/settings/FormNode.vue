@@ -20,7 +20,10 @@ const type = computed(() => {
         return (typeof v[0] === 'object' && v[0] !== null) ? 'array-object' : 'array-primitive';
     }
     if (typeof v === 'object') return 'object';
-    if (typeof v === 'string') return (v.includes('\n') || v.length > 120) ? 'textarea' : 'string';
+    if (typeof v === 'string') {
+        const isMessageTemplate = /message_template/i.test(props.propKey);
+        return (isMessageTemplate || v.includes('\n') || v.length > 120) ? 'textarea' : 'string';
+    }
     return 'string';
 });
 

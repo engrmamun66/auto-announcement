@@ -5,7 +5,8 @@ const upload = multer({ dest: DIR + "/public" });
 const fs = require("fs");
 const path = require("path");
 const moment = require('moment')
-const utils = require('./utls') 
+const utils = require('./utls')
+const { formatTimeWithPeriod } = require('./utils') 
 
 class Attendance {
     constructor(db) {
@@ -157,13 +158,53 @@ class Attendance {
       ];
     
       const db = this.db;
-    
+      const Sms = this.Sms;
+
       db.run(query, params, function (err) {
         if (err) return res.status(500).send({ error: err.message });
-    
+
         const insertedId = this.lastID;
         db.get(`SELECT * FROM attendance WHERE id = ?`, [insertedId], (err, row) => {
           if (err) return res.status(500).send({ error: err.message });
+
+          // Send SMS if enabled
+          const skipSms = req.query?.skipSms === 'true';
+          if (row && row.student_id && row.date && !skipSms) {
+            db.get(`SELECT * FROM students WHERE dakhela = ?`, [row.student_id], (err, student) => {
+              if (!err && student && student.phone_number) {
+                const smsConfig = global.config?.settings?.sms;
+                if (smsConfig?.enabled && Sms) {
+                  let shouldSendSms = false;
+                  let template = null;
+                  let time = null;
+
+                  // Identify if check-in or check-out
+                  if (row.in_time && smsConfig?.send_on_in) {
+                    shouldSendSms = true;
+                    template = smsConfig?.in_message_template;
+                    time = row.in_time;
+                  } else if (row.out_time && smsConfig?.send_on_out) {
+                    shouldSendSms = true;
+                    template = smsConfig?.out_message_template;
+                    time = row.out_time;
+                  }
+
+                  if (shouldSendSms && template) {
+                    const formattedTime = formatTimeWithPeriod(time || '');
+                    const message = template
+                      .replace(/{name}/g, student.name?.split('||')[0] || 'Student')
+                      .replace(/{class}/g, student.class || 'N/F')
+                      .replace(/{date}/g, moment(row.date || '').format('DD MMMM, YYYY'))
+                      .replace(/{time}/g, formattedTime)
+                    Sms._sendSmsInternal([student.phone_number], message).catch(err => {
+                      console.error('SMS send error:', err.message);
+                    });
+                  }
+                }
+              }
+            });
+          }
+
           res.send({
             message: "Row inserted successfully.",
             data: row

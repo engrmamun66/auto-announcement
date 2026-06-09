@@ -130,8 +130,22 @@ module.exports = {
                send_on_in: true,                  // send SMS when student punches IN
                send_on_out: false,                // send SMS when student punches OUT
                // {name}, {time}, {date}, {status} are replaced at send time
-               in_message_template: 'Dear Parent, {name} has arrived at {time} on {date}.',
-               out_message_template: 'Dear Parent, {name} has left at {time} on {date}.',
+               in_message_template: `
+               🕌 তালীমুল কুরআন মহিলা মাদ্রাসা
+               ========================
+               🧑 নামঃ {name}
+               📚 ক্লাসঃ {class}
+               🗓️ তারিখঃ {date}
+               ⏰ প্রবেশের সময়ঃ {time} 🟢
+               `,
+               out_message_template: `
+               🕌 তালীমুল কুরআন মহিলা মাদ্রাসা
+               ========================
+               🧑 নামঃ {name}
+               📚 ক্লাসঃ {class}
+               🗓️ তারিখঃ {date}
+               ⏰ বের হওয়ার সময়ঃ {time} 🔴
+               `,
                only_if_phone_number: true,        // skip student if no phone_number set
           },
      },

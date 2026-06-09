@@ -25,18 +25,8 @@ export default defineConfig({
     outDir: 'dist',
     assetsDir: 'assets',
     emptyOutDir: true,
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true,
-        pure_funcs: ['console.log', 'console.warn', 'console.info'],
-        passes: 2,
-      },
-      mangle: true,
-      format: { comments: false },
-    },
-    sourcemap: false,
+    minify: true,
+    sourcemap: true,
     chunkSizeWarningLimit: 1600,
     watch: {
       include: ['src/**'],

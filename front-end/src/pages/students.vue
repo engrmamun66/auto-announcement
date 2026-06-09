@@ -553,15 +553,22 @@ let pickerModelValue = reactive({
   endTime: '11:00',
 })
 
+function is_skip_sms(){
+  let devmode = route.query.dev === 'true' 
+  if(!devmode) return true
+  let allow = confirm('Allow SMS')
+  if(allow) return !allow
+}
+
 function onChange_dateTimePicker(data){
   if(route.query.dev === 'true') helper.goto({name: 'attendence'}) 
-  punchToSubmitAttendance(makeCarcode(targetStudent.value), {source: 'manual_button', delay: 0, punch_time: data.startDateTime })
+  punchToSubmitAttendance(makeCarcode(targetStudent.value), {source: 'manual_button', delay: 0, punch_time: data.startDateTime, skipSms: is_skip_sms() })
 }
 
 function onClickAttendance(std){
   if(!confirm(helper.t('Are you sure to submit attendance?'))) return;
   if(route.query.dev === 'true') helper.goto({name: 'attendence'}) 
-  punchToSubmitAttendance(makeCarcode(std), {source: 'manual_button', delay: 0})
+  punchToSubmitAttendance(makeCarcode(std), {source: 'manual_button', delay: 0, skipSms: is_skip_sms()})
 }
 
 let PunchButtonsRef = ref([])
@@ -1035,10 +1042,12 @@ watch(fixedWidthSoundCol, (newVal) => {
                   </td> 
                 </template>
               </template>
-              <td> <Switch size="sm" v-model="std.status" @change="async (status) => {
+              <td> 
+                <Switch size="sm" v-model="std.status" @change="async (status) => {
                 await http.post('/students/update-status', {id: std.id, status} );
               
-              }"></Switch> </td> 
+                }"></Switch> 
+              </td> 
 
               <td>
                 <template v-if="CONFIG?.settings?.attendance?.status">

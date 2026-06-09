@@ -1,7 +1,8 @@
 const express = require('express');
 
-module.exports = function (Attendence, { getBulkPunces }) {
+module.exports = function (Attendence, { getBulkPunces, Sms }) {
   const router = express.Router();
+  Attendence.Sms = Sms;
 
   router.post('/attendence-list', (req, res) => Attendence.list(req, res));
   router.post('/attendence-reports', (req, res) => Attendence.getAttendanceReports(req, res));

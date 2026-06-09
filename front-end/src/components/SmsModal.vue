@@ -51,7 +51,17 @@
 
         <!-- Right: message -->
         <div class="sms-panel">
-          <div class="sms-panel__title">{{ helper.t('Message') }}</div>
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+            <div class="sms-panel__title">{{ helper.t('Message') }}</div>
+            <div v-if="balance !== null" class="sms-balance-top">
+              <i class='bx bx-wallet'></i>
+              <span v-if="loadingBalance">{{ helper.t('Loading...') }}</span>
+              <span v-else><strong>৳ {{ balance?.responseResult }}</strong></span>
+              <button class="sms-refresh-btn" :disabled="loadingBalance" @click="loadBalance" :tooltip="helper.t('Refresh balance')">
+                <i class='bx bx-refresh'></i>
+              </button>
+            </div>
+          </div>
 
           <div class="sms-template-row">
             <select v-model="selectedTemplateId" class="sms-select">
@@ -125,6 +135,8 @@ const newTemplateTitle = ref('');
 const newTemplateType = ref('custom');
 const sending = ref(false);
 const sendResult = ref(null);
+const balance = ref(null);
+const loadingBalance = ref(false);
 
 const activeClasses = computed(() => (classes.value || []).filter(c => c.isActive !== false));
 
@@ -186,6 +198,17 @@ async function loadTemplates() {
   } catch {}
 }
 
+async function loadBalance() {
+  loadingBalance.value = true;
+  try {
+    const res = await http.get('/sms/balance');
+    balance.value = res.data?.balance;
+  } catch {}
+  finally {
+    loadingBalance.value = false;
+  }
+}
+
 async function saveTemplate() {
   if (!newTemplateTitle.value || !message.value) return;
   try {
@@ -229,7 +252,10 @@ async function sendSms() {
   }
 }
 
-onMounted(loadTemplates);
+onMounted(() => {
+  loadTemplates();
+  loadBalance();
+});
 </script>
 
 <style scoped>
@@ -240,7 +266,7 @@ onMounted(loadTemplates);
 }
 .sms-modal {
   background: #fff; border-radius: 14px; width: min(96vw, 860px);
-  min-height: 70vh; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden;
+  min-height: 70vh; height: 90vh; display: flex; flex-direction: column; overflow: hidden;
   box-shadow: 0 8px 40px rgba(0,0,0,0.25);
 }
 .sms-modal__header {
@@ -254,11 +280,11 @@ onMounted(loadTemplates);
   display: flex; align-items: center;
 }
 .sms-modal__body {
-  display: flex; flex: 1; overflow: hidden;
+  display: flex; flex: 1; overflow: hidden; height: 100%;
 }
 .sms-panel {
   flex: 1; padding: 14px; display: flex; flex-direction: column; gap: 10px;
-  overflow-y: auto; min-width: 0;
+  overflow-y: auto; min-width: 0; min-height: 0;
 }
 .sms-panel + .sms-panel { border-left: 1px solid #e5e7eb; }
 .sms-panel__title { font-size: 12px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; }
@@ -283,6 +309,10 @@ onMounted(loadTemplates);
 .sms-preview { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 10px; }
 .sms-preview__label { font-size: 11px; font-weight: 700; color: #16a34a; margin-bottom: 4px; }
 .sms-preview__text { font-size: 13px; color: #374151; white-space: pre-wrap; }
+.sms-balance-top { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 2px 1px 0px 6px; font-size: 13px; color: #1e40af; display: flex; align-items: center; gap: 8px; }
+.sms-refresh-btn { background: none; border: none; color: #1e40af; cursor: pointer; padding: 2px 4px; display: flex; align-items: center; font-size: 16px; transition: color 0.2s; }
+.sms-refresh-btn:hover:not(:disabled) { color: #1a3a5c; }
+.sms-refresh-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .sms-send-btn {
   padding: 10px; background: var(--grad3, #3a7bd5); color: #fff;
   border: none; border-radius: 10px; font-size: 14px; font-weight: 700;

@@ -231,7 +231,7 @@ app.get(`/api/_ac`, async (req, res) => {
 
 app.use('/api', require('./src/routes/students')(Students, { upload, audioUpload, imageUpload }));
 app.use('/api', require('./src/routes/schedules')(Schedules));
-app.use('/api', require('./src/routes/attendance')(Attendence, { getBulkPunces }));
+app.use('/api', require('./src/routes/attendance')(Attendence, { getBulkPunces, Sms }));
 app.use('/api', require('./src/routes/punchlog')(PunchLog));
 app.use('/api', require('./src/routes/leave')(LeavAndVacations));
 app.use('/api', require('./src/routes/config')(config, utils, Backup));
