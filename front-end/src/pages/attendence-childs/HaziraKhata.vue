@@ -36,6 +36,21 @@ const showScrollControls = ref(false)
 const showLogRightbar = ref(false)
 const selectedLogEntry = ref(null)
 const monthPickerRef = ref(null)
+const selectedShift = ref('All')
+
+const shifts = computed(() => {
+  const shiftList = [{ name: 'All', key: 'All' }]
+  const classConfig = selectedClass.value
+  const classShifts = classConfig?.shifts
+
+  if (Array.isArray(classShifts) && classShifts.length > 0) {
+    classShifts.forEach((shift, idx) => {
+      shiftList.push({ name: `Shift ${idx + 1}`, key: idx, time: shift.start })
+    })
+  }
+
+  return shiftList
+})
 
 const weekends = computed(() => CONFIG.value?.settings?.attendance?.weekends || [])
 
@@ -93,9 +108,15 @@ function handleMonthChange(dates = []) {
   localStorage.setItem(STORE_RANGE, JSON.stringify(selectedRange.value))
 }
 
+function handleShiftChange(shiftKey) {
+  selectedShift.value = shiftKey
+  loadDailyLogs()
+}
+
 function handleClassSelect(classShort) {
   if (!classShort) return
   selectedClassShort.value = classShort
+  selectedShift.value = 'All'
   localStorage.setItem(STORE_CLASS, classShort)
   hasLoaded.value = true
   loadDailyLogs(classShort)
@@ -205,6 +226,15 @@ async function loadDailyLogs(classShortOverride = null) {
       student_ids: students.map(s => s.dakhela).filter(Boolean).join(','),
     }
 
+    if (selectedShift.value !== 'All' && typeof selectedShift.value === 'number') {
+      const classConfig = selectedClass.value
+      const classShifts = classConfig?.shifts || []
+      const selectedShiftConfig = classShifts[selectedShift.value]
+      if (selectedShiftConfig?.start) {
+        params.selectedShiftTime = selectedShiftConfig.start
+      }
+    }
+
     const response = await http.post('/attendence-reports', payload, { params })
     if (currentId !== requestId) return
 
@@ -311,7 +341,20 @@ watch(
         >
             {{ cls.class_name }}
         </button>
-    </div> 
+    </div>
+
+    <!-- Shift Tabs -->
+    <div class="shift-tabs-bar hide_onprint">
+      <button
+        v-for="shift in shifts"
+        :key="shift.key"
+        class="shift-tab"
+        :class="{ active: selectedShift === shift.key }"
+        @click="handleShiftChange(shift.key)"
+      >
+        {{ shift.name }}
+      </button>
+    </div>
 
     <div class="legend-bar">
       <div class="legend-row bg-dark-subtle p-2 radius-10">
@@ -836,5 +879,39 @@ watch(
   .class-button-list{
     max-width: 100%;
   }
+}
+
+/* Shift Tabs */
+.shift-tabs-bar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 8px;
+}
+
+.shift-tab {
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  color: #374151;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.shift-tab:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.shift-tab.active {
+  background: #111827;
+  border-color: #111827;
+  color: #ffffff;
 }
 </style>

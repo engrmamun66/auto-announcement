@@ -262,12 +262,12 @@ onMounted(() => {
 .sms-overlay {
   position: fixed; inset: 0; background: rgba(0,0,0,0.55);
   display: flex; align-items: center; justify-content: center;
-  z-index: 9999;
+  z-index: 9999; pointer-events: auto;
 }
 .sms-modal {
   background: #fff; border-radius: 14px; width: min(96vw, 860px);
   min-height: 70vh; height: 90vh; display: flex; flex-direction: column; overflow: hidden;
-  box-shadow: 0 8px 40px rgba(0,0,0,0.25);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.25); pointer-events: auto;
 }
 .sms-modal__header {
   display: flex; align-items: center; justify-content: space-between;

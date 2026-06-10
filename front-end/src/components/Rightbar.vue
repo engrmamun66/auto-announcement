@@ -76,9 +76,11 @@ function onTouchEnd(e) {
 }
 
 let escapedInjectedVar = ref(false)
-let injectedVariable = inject(props.injectkeyToSetFalseByEscKey, undefined) 
-let router = inject('router') 
-let helper = inject('helper') 
+let injectedVariable = inject(props.injectkeyToSetFalseByEscKey, undefined)
+let router = inject('router')
+let helper = inject('helper')
+let showAccessibilityAlert = inject('showAccessibilityAlert', ref(false))
+let appAccessData = inject('appAccessData', ref({})) 
 
 
 function closeByEscapeKey(event){
@@ -118,6 +120,7 @@ defineExpose({unmount})
     <template v-else >
         <div v-if="isMounted" class="rightbar-backdrop" @click="unmount()"></div>
         <div ref="div" class="rightbar" :class="{show: isMounted, toggling: toggling, 'using-close-icon': closeIcon, 'largestMode': largestMode}"
+            :style="{ paddingBottom: (showAccessibilityAlert.value && appAccessData.value?.internet === true) || !appAccessData.value?.internet ? 'calc(80px + max(20px, env(safe-area-inset-bottom)))' : 'max(20px, env(safe-area-inset-bottom))' }"
             @touchstart.passive="onTouchStart"
             @touchend.passive="onTouchEnd"
         >

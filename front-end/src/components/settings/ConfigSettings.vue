@@ -71,8 +71,7 @@
                     <!-- Shifts expanded row -->
                     <tr class="cs-cls-shifts-row">
                       <td colspan="9" class="cs-cls-shifts-td">
-                        <Transition name="shifts-expand">
-                          <div v-if="expandedShifts[idx]" class="cs-cls-shifts-wrap">
+                        <div v-if="expandedShifts[idx]" class="cs-cls-shifts-wrap">
                             <TransitionGroup name="shift-item" tag="div" class="cs-cls-shifts-items">
                               <div v-for="(sh, si) in (cls.shifts||[])" :key="sh.start+'_'+si" class="cs-cls-shift-item">
                                 <span class="cs-cls-shift-label">#{{ si+1 }}</span>
@@ -83,7 +82,6 @@
                             </TransitionGroup>
                             <button class="cs-cls-shift-add" @click="(cls.shifts = cls.shifts||[]).push({start:'08:00',end:'10:00'})">{{ helper.t('+ Add Shift') }}</button>
                           </div>
-                        </Transition>
                       </td>
                     </tr>
                   </template>
@@ -342,7 +340,7 @@ onUnmounted(() => { if (hasSaved.value) {
 .cs-cls-shift-item { display: flex; align-items: center; gap: 6px; background: #fff; border: 1px solid #e0e0e0; border-radius: 7px; padding: 6px 10px; font-size: 12px; }
 .cs-cls-shift-label { font-weight: 700; color: #888; min-width: 20px; }
 .cs-cls-shift-item label { display: flex; align-items: center; gap: 4px; color: #555; }
-.cs-cls-input--time { width: 90px; }
+.cs-cls-input--time { width: 120px; padding: 6px 10px; font-size: 14px; }
 .cs-cls-shift-add { padding: 5px 12px; border: 1px dashed #b0c4de; border-radius: 7px; background: #f8fbff; color: #3a7bd5; font-size: 12px; cursor: pointer; }
 .cs-cls-shift-add:hover { background: #e8f4fd; }
 </style>

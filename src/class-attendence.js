@@ -642,15 +642,29 @@ class Attendance {
     }
 
 
+    isPresentByShiftTime(dayAttendance = [], shiftTime = '') {
+      const rows = Array.isArray(dayAttendance) ? dayAttendance : [];
+      if (!rows.length || !shiftTime) return false;
+
+      const shiftMoment = moment(shiftTime, 'HH:mm');
+      if (!shiftMoment.isValid()) return false;
+
+      // Check if any punch record exists at or after the shift start time
+      return rows.some(att => {
+        const inTime = att?.in_time ? moment(att.in_time, 'HH:mm') : null;
+        return inTime && inTime.isValid() && inTime.isSameOrAfter(shiftMoment);
+      });
+    }
+
     modify_data_by_action(attendanceList, action, req){
 
-      
+
       if(!action) return attendanceList
       else {
         if(action === 'classwise_data'){
-          let { start_date, end_date } = req.query 
+          let { start_date, end_date, selectedShiftTime } = req.query
           let date_duration = utils.createDateRange(start_date, end_date)
-          let { leaveData, weekends, all__students, class_short: class___short, total_days } = req.body 
+          let { leaveData, weekends, all__students, class_short: class___short, total_days } = req.body
           let weekend_leaves = date_duration.filter(date => weekends.includes(moment(date).format('dddd')))
           let leaveData_excluded_weekends = leaveData.filter(leave => !weekend_leaves.includes(leave.date))
           let leaveData_group_by_date = utils.listGroupBy(leaveData_excluded_weekends, 'date')
@@ -703,7 +717,14 @@ class Attendance {
               let is_leave_day = student_leaves.length > 0
               let is_weekend = weekend_leaves.includes(date)
               let is_presentable_day = !(is_weekend || class_vacations.length > 0)
-              let is_present = is_presentable_day ? this.isPresentByPreset(date_wide_attendace, class_short) : false
+              let is_present = false
+              if (is_presentable_day) {
+                if (selectedShiftTime) {
+                  is_present = this.isPresentByShiftTime(date_wide_attendace, selectedShiftTime)
+                } else {
+                  is_present = this.isPresentByPreset(date_wide_attendace, class_short)
+                }
+              }
               let is_preset_all_shifts = is_presentable_day ? this.isPresentInAllConfiguredShifts(date_wide_attendace, class_short) : false
               let let_in_minute = shiftInfo[0]?.attendance?.late_in_minute || 0
               let in_out_count = date_wide_attendace.reduce((total, att) => {
