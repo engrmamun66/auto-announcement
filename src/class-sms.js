@@ -171,7 +171,15 @@ class ClassSms {
         let data = '';
         resp.on('data', d => { data += d; });
         resp.on('end', () => {
-          try { resolve(JSON.parse(data)); } catch { resolve(data); }
+          try {
+            const parsed = JSON.parse(data);
+            if (parsed.statusCode && parsed.statusCode !== '200') {
+              return reject(new Error(parsed.responseResult || `MiMSMS Error: ${parsed.status}`));
+            }
+            resolve(parsed);
+          } catch (e) {
+            resolve(data);
+          }
         });
       });
       req.on('error', reject);
@@ -208,7 +216,15 @@ class ClassSms {
         let data = '';
         resp.on('data', d => { data += d; });
         resp.on('end', () => {
-          try { resolve(JSON.parse(data)); } catch { resolve(data); }
+          try {
+            const parsed = JSON.parse(data);
+            if (parsed.statusCode && parsed.statusCode !== '200') {
+              return reject(new Error(parsed.responseResult || `Balance check failed: ${parsed.status}`));
+            }
+            resolve(parsed);
+          } catch (e) {
+            resolve(data);
+          }
         });
       });
       req.on('error', reject);
