@@ -1568,10 +1568,10 @@ const force_active = computed(() => route.query.fa === 'true' || storage('active
     </template>
     <template v-else>
         <TopNav></TopNav>
-        <div v-if="isMounted" class="page-contents" >
+        <div v-if="isMounted" class="page-contents" :style="{ paddingBottom: (showAccessibilityAlert && appAccessData?.internet === true) || !appAccessData?.internet ? '80px' : '0' }" >
             <routerView />
             <SwitchBoard v-if="showSwithBoardModal" @close="showSwithBoardModal = false"></SwitchBoard>
-            <Playlist ref="palylistComponent"></Playlist> 
+            <Playlist ref="palylistComponent"></Playlist>
             <AddBulkAttendaceForDev v-if="show_bulk_attedance_component" @unmount="show_bulk_attedance_component = false"></AddBulkAttendaceForDev>
             <FetchBulkAttendanceFromDevice v-if="allow_auto_fetch" :isAutomatic="true" />
 

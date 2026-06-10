@@ -35,6 +35,7 @@ const gridScrollRef = ref(null)
 const showScrollControls = ref(false)
 const showLogRightbar = ref(false)
 const selectedLogEntry = ref(null)
+const monthPickerRef = ref(null)
 
 const weekends = computed(() => CONFIG.value?.settings?.attendance?.weekends || [])
 
@@ -101,11 +102,9 @@ function handleClassSelect(classShort) {
 }
 
 function resetHaziraState() {
-  localStorage.removeItem(STORE_CLASS)
   localStorage.removeItem(STORE_RANGE)
   selectedRange.value = [moment().startOf('month').format('YYYY-MM-DD'), moment().endOf('month').format('YYYY-MM-DD')]
-  const active = getActiveClasses(classes.value)
-  if (active.length) handleClassSelect(active[0].class_short)
+  monthPickerRef.value?.resetToCurrent()
 }
 
 function scrollGrid(direction) {
@@ -331,7 +330,7 @@ watch(
           </button>
         </div>
         <button class="hazira-reset-btn" :tooltip="'Reset to first class & current month'" flow="left" @click="resetHaziraState"><i class='bx bx-reset'></i></button>
-        <MonthPickerSingle :onChange="handleMonthChange" />
+        <MonthPickerSingle ref="monthPickerRef" :onChange="handleMonthChange" />
       </div>
     </div>
 

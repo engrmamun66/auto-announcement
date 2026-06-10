@@ -36,13 +36,7 @@ export default defineConfig({
       output: {
         entryFileNames: 'assets/my-announcement.min.js',
         assetFileNames: 'assets/my-announcement.min.[ext]',
-        manualChunks(id) {
-          if (id.includes('node_modules')) {
-            if (id.includes('moment')) return 'vendor-moment'
-            if (id.includes('vue')) return 'vendor-vue'
-            return 'vendor'
-          }
-        },
+        inlineDynamicImports: true,
       },
     },
   }
