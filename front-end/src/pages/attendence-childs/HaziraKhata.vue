@@ -45,7 +45,10 @@ const shifts = computed(() => {
 
   if (Array.isArray(classShifts) && classShifts.length > 0) {
     classShifts.forEach((shift, idx) => {
-      shiftList.push({ name: `Shift ${idx + 1}`, key: idx, time: shift.start })
+      const startTime = moment(shift.start, 'HH:mm').format('hh:mm A')
+      const endTime = moment(shift.end, 'HH:mm').format('hh:mm A')
+      const duration = `${startTime} - ${endTime}`
+      shiftList.push({ name: `Shift ${idx + 1}`, key: idx, time: shift.start, duration })
     })
   }
 
@@ -352,7 +355,8 @@ watch(
         :class="{ active: selectedShift === shift.key }"
         @click="handleShiftChange(shift.key)"
       >
-        {{ shift.name }}
+        <div class="shift-tab-name">{{ shift.name }}</div>
+        <div class="shift-tab-time">{{ shift.duration || `All Shifts` }}</div>
       </button>
     </div>
 
@@ -886,7 +890,7 @@ watch(
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-start;
   padding: 8px 0;
   border-bottom: 1px solid #e5e7eb;
   margin-bottom: 8px;
@@ -896,12 +900,16 @@ watch(
   border: 1px solid #e5e7eb;
   background: #ffffff;
   color: #374151;
-  padding: 6px 14px;
+  padding: 6px 10px;
   border-radius: 6px;
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
 }
 
 .shift-tab:hover {
@@ -913,5 +921,16 @@ watch(
   background: #111827;
   border-color: #111827;
   color: #ffffff;
+}
+
+.shift-tab-name {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.shift-tab-time {
+  font-size: 10px;
+  font-weight: 400;
+  opacity: 0.8;
 }
 </style>
