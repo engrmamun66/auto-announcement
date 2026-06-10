@@ -6,7 +6,7 @@ const fs = require("fs");
 const path = require("path");
 const moment = require('moment')
 const utils = require('./utls')
-const { formatTimeWithPeriod } = require('./utils') 
+const { formatDate, formatTimeWithPeriod } = require('./utils') 
 
 class Attendance {
     constructor(db) {
@@ -194,7 +194,7 @@ class Attendance {
                     const message = template
                       .replace(/{name}/g, student.name?.split('||')[0] || 'Student')
                       .replace(/{class}/g, student.class || 'N/F')
-                      .replace(/{date}/g, moment(row.date || '').locale('bn').format('DD MMMM, YYYY'))
+                      .replace(/{date}/g, formatDate(row.date || ''))
                       .replace(/{time}/g, formattedTime)
                     Sms._sendSmsInternal([student.phone_number], message).catch(err => {
                       console.error('SMS send error:', err.message);

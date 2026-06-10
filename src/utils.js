@@ -24,7 +24,7 @@ function getDayMoment(time = '') {
   const before_19_min_sunset = t.isBefore(sunset_19_min_before);
 
   if (is_after_sunrise && is_before_sunrise_1hour) return `ভোর`;
-  else if (hour < 12) return `সকাল`;
+  else if (hour < 11) return `সকাল`;
   else if (hour < 15) return `দুপুর`;
   else if (hour >= 15 && before_20_min_sunset) return `বিকাল`;
   else if (!before_20_min_sunset && before_19_min_sunset) return `সন্ধ্যা`;
@@ -33,11 +33,16 @@ function getDayMoment(time = '') {
 
 function formatTimeWithPeriod(timeString) {
   const period = getDayMoment(timeString);
-  const time = moment(timeString, ['HH:mm:ss']).locale('bn').format('hh:mm A');
-  return `${period} ${time}`;
+  const time = moment(timeString, ['HH:mm:ss']).locale('bn').format('hh:mm:ss');
+  return `${period} - ${time}`;
+}
+
+function formatDate(date) {
+  return moment(date || '').locale('bn').format('DD MMMM, YYYY')
 }
 
 module.exports = {
   getDayMoment,
-  formatTimeWithPeriod
+  formatDate,
+  formatTimeWithPeriod,
 };
