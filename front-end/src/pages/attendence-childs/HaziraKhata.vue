@@ -346,29 +346,33 @@ watch(
         </button>
     </div>
 
-    <!-- Shift Tabs -->
-    <div class="shift-tabs-bar hide_onprint">
-      <button
-        v-for="shift in shifts"
-        :key="shift.key"
-        class="shift-tab"
-        :class="{ active: selectedShift === shift.key }"
-        @click="handleShiftChange(shift.key)"
-      >
-        <div class="shift-tab-name">{{ shift.name }}</div>
-        <div class="shift-tab-time">{{ shift.duration || `All Shifts` }}</div>
-      </button>
-    </div>
+    <!-- Shift Tabs + Legend + Controls (Single Line) -->
+    <div class="hazira-controls-bar hide_onprint">
+      <!-- Shifts -->
+      <div class="hazira-shifts-section">
+        <button
+          v-for="shift in shifts"
+          :key="shift.key"
+          class="shift-tab"
+          :class="{ active: selectedShift === shift.key }"
+          @click="handleShiftChange(shift.key)"
+        >
+          <div class="shift-tab-name">{{ shift.name }}</div>
+          <div class="shift-tab-time">{{ shift.duration || `All Shifts` }}</div>
+        </button>
+      </div>
 
-    <div class="legend-bar">
-      <div class="legend-row bg-dark-subtle p-2 radius-10">
-        <div v-for="item in legendItems" :key="item.code" class="legend-item">
+      <!-- Legend -->
+      <div class="hazira-legend-section">
+        <div v-for="item in legendItems" :key="item.code" class="legend-item-inline">
           <span class="legend-badge" :class="item.class">{{ item.code }}</span>
-          <span>{{ item.label }}</span>
+          <span class="legend-label-text">{{ item.label }}</span>
         </div>
       </div>
-      <div class="legend-actions">
-        <div v-if="showScrollControls" class="legend-scroll-controls hide_onprint">
+
+      <!-- Controls -->
+      <div class="hazira-actions-section">
+        <div v-if="showScrollControls" class="legend-scroll-controls">
           <button type="button" class="legend-scroll-btn" @click="scrollGrid(-1)" aria-label="Scroll left">
             <i class='bx bx-chevron-left'></i>
           </button>
@@ -537,27 +541,54 @@ watch(
   font-weight: 600;
 }
 
-.legend-bar{
+.hazira-controls-bar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 12px;
-  flex-wrap: wrap;
+  padding: 4px 0;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 4px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
 }
 
-.legend-row{
+.hazira-shifts-section {
   display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
+  gap: 4px;
   align-items: center;
+  flex-shrink: 0;
 }
 
-.legend-actions{
+.hazira-legend-section {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  flex-grow: 1;
+  padding: 0 8px;
+  border-left: 1px solid #e5e7eb;
+  border-right: 1px solid #e5e7eb;
+  min-width: 200px;
+}
+
+.hazira-actions-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.legend-item-inline {
   display: inline-flex;
   align-items: center;
-  justify-content: flex-end;
-  gap: 8px;
-  flex-wrap: wrap;
+  gap: 4px;
+  font-size: 11px;
+  color: #374151;
+  white-space: nowrap;
+}
+
+.legend-label-text {
+  font-size: 11px;
 }
 
 .legend-scroll-controls{
@@ -886,16 +917,6 @@ watch(
 }
 
 /* Shift Tabs */
-.shift-tabs-bar {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  padding: 8px 0;
-  border-bottom: 1px solid #e5e7eb;
-  margin-bottom: 8px;
-}
-
 .shift-tab {
   border: 1px solid #e5e7eb;
   background: #ffffff;
