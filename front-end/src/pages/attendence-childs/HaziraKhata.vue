@@ -14,6 +14,7 @@ const helper = inject("helper");
 
 const STORE_CLASS = 'hazira_class'
 const STORE_RANGE = 'hazira_range'
+const STORE_SHIFT = 'hazira_shift_'
 
 const _savedClass = localStorage.getItem(STORE_CLASS)
 const _savedRange = (() => { try { return JSON.parse(localStorage.getItem(STORE_RANGE)) } catch { return null } })()
@@ -36,7 +37,27 @@ const showScrollControls = ref(false)
 const showLogRightbar = ref(false)
 const selectedLogEntry = ref(null)
 const monthPickerRef = ref(null)
-const selectedShift = ref('All')
+
+function getSavedShift(classShort) {
+  if (!classShort) return 'All'
+  try {
+    const saved = localStorage.getItem(STORE_SHIFT + classShort)
+    if (!saved || saved === 'All') return 'All'
+    // Convert to number for shift indices (stored as numbers, retrieved as strings)
+    const num = parseInt(saved, 10)
+    return isNaN(num) ? 'All' : num
+  } catch {
+    return 'All'
+  }
+}
+
+const selectedShift = ref(getSavedShift(_savedClass))
+
+watch(selectedClassShort, (newClassShort) => {
+  if (newClassShort) {
+    selectedShift.value = getSavedShift(newClassShort)
+  }
+})
 
 const shifts = computed(() => {
   const shiftList = [{ name: 'All', key: 'All' }]
@@ -113,13 +134,16 @@ function handleMonthChange(dates = []) {
 
 function handleShiftChange(shiftKey) {
   selectedShift.value = shiftKey
+  if (selectedClassShort.value) {
+    localStorage.setItem(STORE_SHIFT + selectedClassShort.value, String(shiftKey))
+  }
   loadDailyLogs()
 }
 
 function handleClassSelect(classShort) {
   if (!classShort) return
   selectedClassShort.value = classShort
-  selectedShift.value = 'All'
+  selectedShift.value = getSavedShift(classShort)
   localStorage.setItem(STORE_CLASS, classShort)
   hasLoaded.value = true
   loadDailyLogs(classShort)
