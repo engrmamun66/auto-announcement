@@ -1608,20 +1608,20 @@ const force_active = computed(() => route.query.fa === 'true' || storage('active
     left: 0;
     width: 100%;
     z-index: 333;
-    padding: 10px 24px 10px 20px;
-    padding-bottom: max(10px, env(safe-area-inset-bottom));
+    padding: 8px 20px 0px 20px;
+    padding-bottom: max(10px,env(safe-area-inset-bottom));
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 10px;
-    font-size: 15px;
+    font-size: 13px;
     font-weight: 600;
     color: #1a1000;
-    background: linear-gradient(135deg, #ffe033 0%, #ffc800 50%, #ffb300 100%);
+    background: linear-gradient(135deg,#ffe033 0%,#ffc800 50%,#ffb300 100%);
     border-top: 2px solid #e6a800;
-    box-shadow: 0 -4px 20px rgba(0,0,0,0.18);
-    animation: da-slidein 0.35s cubic-bezier(0.22,1,0.36,1);
-    letter-spacing: 0.01em;
+    box-shadow: 0 -4px 20px #0000002e;
+    animation: da-slidein-4060e807 .35s cubic-bezier(.22,1,.36,1);
+    letter-spacing: .01em;
     line-height: 1.5;
     text-align: center;
 }
