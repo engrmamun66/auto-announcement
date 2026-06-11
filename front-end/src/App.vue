@@ -44,7 +44,7 @@ watch(
     (newPath, oldPath) => { 
         if(isMountedAppDotVue.value){
             if(newPath !== '/attendence'){
-                storage('attendance_tab').value = 1
+                // storage('attendance_tab').value = 1
             } 
         }
     }
