@@ -102,7 +102,7 @@ const legendItems = [
   { code: 'L', label: 'Leave', class: 'status-leave' },
   { code: 'W', label: 'Weekend', class: 'status-weekend' },
   { code: 'V', label: 'Vacation', class: 'status-vacation' },
-  { code: '-', label: 'Future/Closed', class: 'status-future' },
+  { code: '-', label: 'Future', class: 'status-future' },
 ]
 
 function handleMonthChange(dates = []) {
@@ -366,7 +366,7 @@ watch(
       <div class="hazira-legend-section">
         <div v-for="item in legendItems" :key="item.code" class="legend-item-inline">
           <span class="legend-badge" :class="item.class">{{ item.code }}</span>
-          <span class="legend-label-text">{{ item.label }}</span>
+          <span class="legend-label-text" :tooltip="helper.t(item.label)" style="--tfsize:11px" flow="right" >{{ item.label }}</span>
         </div>
       </div>
 
