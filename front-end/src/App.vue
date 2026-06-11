@@ -142,21 +142,35 @@ let appAccessData = ref({...storage('appAccessData').value || {internet: navigat
 
 
 let showAccessibilityAlert = computed(() => {
-    let { 
-        last_paid_month, 
+    // Get warning days config (1, 3, 7, etc.)
+    const showWarningDays = appAccessData.value?.show_warning_before
+    if (!showWarningDays || showWarningDays === 0) return false
+
+    let {
+        last_paid_month,
         permanently_active,
+        stop_after_day,
     } = appAccessData.value || {}
 
-    if(!appAccessData.value || !last_paid_month){ 
+    if(!appAccessData.value || !last_paid_month){
         return false
-    } 
+    }
     if(permanently_active) return false // if, permanently_active === true, warning never show
 
-    const endofPayMonth = moment(last_paid_month).endOf('month').add(1, 'day')
-    const endofPayMonth_time = endofPayMonth.valueOf()
-    const current_time = moment().hour(11).minute(59).second(59).valueOf()
+    // Parse date in local timezone, normalize to start of day
+    const paidMonthDate = moment(last_paid_month).startOf('day')
 
-    return current_time > endofPayMonth_time
+    // Calculate when access stops (end of paid month + stop_after_day)
+    const accessStopDate = paidMonthDate.clone().endOf('month').add(stop_after_day || 0, 'days').startOf('day')
+
+    // Calculate when warning should start showing (stop date - warning days)
+    const warningStartDate = accessStopDate.clone().subtract(showWarningDays, 'days')
+
+    // Get current date (start of day for comparison)
+    const currentDate = moment().startOf('day')
+
+    // Show warning if current date is between warning start date and access stop date (inclusive)
+    return currentDate.isBetween(warningStartDate, accessStopDate, 'day', '[]')
 })
 
 let appUseForbiddened = computed(() => { 
@@ -267,6 +281,7 @@ async function CheckAccess({loader=false}={}){
                 stopped_message: 'সম্মানিত কাস্টমার, অ্যাপ্লিকেশনটি বন্ধ রাখা হয়েছে, সচল রাখার অনুমতি নেই।',
                 is_active: false,
                 permanently_active: false,
+                show_warning_before: 7,
                 app_version: '1.0',
                 latest_api_url: 'https://script.google.com/macros/s/AKfycbxB9NH2EcezdfFE-649d7cY3UGx8iYXmXXhUgelv4A8Kd6Bj2SI7bSJO3zcTJWIMJlY5A/exec',
                 /**
