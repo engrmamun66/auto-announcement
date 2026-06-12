@@ -315,17 +315,17 @@ async function deleteMultipleAttendance(){
             <option value="Late">{{ helper.t('Late') }}</option>
           </select>
         </div>
-        <div class="form-group mb-2">
+        <div v-if="editFormData.in_time" class="form-group mb-2">
           <label>{{ helper.t('Late') }} </label>
           <input v-model="editFormData.late_in_minute" type="number" class="form-control" disabled />
         </div>
-        <div class="form-group mb-2">
+        <div v-if="editFormData.in_time" class="form-group mb-2">
           <label>{{ helper.t('In Time') }}</label>
-          <input v-model="editFormData.in_time" :disabled="!editFormData.in_time" @change="calculateLateAndStatus" type="time" class="form-control" />
+          <input v-model="editFormData.in_time" @change="calculateLateAndStatus" type="time" class="form-control" />
         </div>
-        <div class="form-group mb-2">
+        <div v-if="editFormData.out_time" class="form-group mb-2">
           <label>{{ helper.t('Out Time') }}</label>
-          <input v-model="editFormData.out_time" :disabled="!editFormData.out_times" type="time" class="form-control" />
+          <input v-model="editFormData.out_time" type="time" class="form-control" />
         </div>
         
         <div class="form-group mb-2">
