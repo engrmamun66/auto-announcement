@@ -1622,7 +1622,7 @@ const force_active = computed(() => route.query.fa === 'true' || storage('active
     bottom: 0;
     left: 0;
     width: 100%;
-    z-index: 333;
+    z-index: 2;
     padding: 8px 20px 0px 20px;
     padding-bottom: max(10px,env(safe-area-inset-bottom));
     display: flex;

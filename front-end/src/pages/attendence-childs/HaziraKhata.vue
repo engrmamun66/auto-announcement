@@ -215,7 +215,7 @@ function startPreview(target, entry, index, isLast) {
   const showAbove = spaceBelow < tooltipHeight + 10
 
   const tooltipTop = showAbove
-    ? top - tooltipHeight - 8
+    ? top - tooltipHeight - 40
     : bottom + 5
 
   tartCellStyles.value = {
@@ -497,7 +497,7 @@ watch(
                 :flow="index === 0 ? 'left' : 'up'"
                 :aria-label="`Show log for ${student.name || 'student'} on ${day.date}`"
                 @click.stop="openShowLog(buildLogPayload(student, day))"
-                @mouseover.stop="startPreview($event.target, buildLogPayload(student, day), index, index === dailyLogs.length - 1)"
+                @mouseenter.stop="startPreview($event.target, buildLogPayload(student, day), index, index === dailyLogs.length - 1)"
                 @mouseleave.stop="endPreview()"
                 @auxclick="log({
                   student,
