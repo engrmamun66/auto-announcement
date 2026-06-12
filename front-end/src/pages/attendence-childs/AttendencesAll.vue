@@ -82,14 +82,11 @@ function prepareToDelete(item){
 }
 
 function calculateLateAndStatus(){
-
-  const shiftStart = moment(editingItem.value.start, 'HH:mm')
+  const shiftStartStr = editingItem.value.shift_duration.split(' - ')[0].trim()
+  const shiftStart = moment(shiftStartStr, 'HH:mm')
   const inTime = moment(editFormData.value.in_time, 'HH:mm')
 
-  if(!shiftStart.isValid() || !inTime.isValid()){
-    console.log('Invalid time format:', {start: editingItem.value.start, in_time: editFormData.value.in_time})
-    return
-  }
+  if(!shiftStart.isValid() || !inTime.isValid()) return
 
   const totalLateMinutes = Math.max(0, inTime.diff(shiftStart, 'minutes'))
 
