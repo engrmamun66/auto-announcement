@@ -6,6 +6,7 @@ import { useRoute } from 'vue-router';
 import MonthPickerSingle from '../../components/MonthPickerSingle.vue'
 import HaziraShowLogRightbar from '../../components/hazira/HaziraShowLogRightbar.vue'
 import Rightbar from '../../components/Rightbar.vue'
+import { set } from 'lodash';
 
 const CONFIG = inject("CONFIG");
 const classes = inject("classes");
@@ -14,6 +15,7 @@ const callbacks = inject("callbacks");
 const http = inject("http");
 const helper = inject("helper");
 const emitter = inject("emitter");
+const liveAttendenceList = inject("liveAttendenceList");
 
 const STORE_CLASS = 'hazira_class'
 const STORE_RANGE = 'hazira_range'
@@ -62,6 +64,17 @@ watch(selectedClassShort, (newClassShort) => {
     selectedShift.value = getSavedShift(newClassShort)
   }
 })
+
+let timeout = null
+
+watch(liveAttendenceList, (len, prev) => {
+    console.log('=watching');
+    clearTimeout(timeout)
+    timeout = setTimeout(() => {
+      loadDailyLogs(selectedClassShort.value) 
+    }, 100);
+  }
+);
 
 const shifts = computed(() => {
   const shiftList = [{ name: 'All', key: 'All' }]
