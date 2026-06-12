@@ -577,9 +577,6 @@ watch(
                   color: getCellStatus(student, day.date).code === '-' ? '#6b7280' : '#ffffff',
                   border: 'none'
                 }"
-                :tooltip="getCellStatus(student, day.date).code !== '-' ? getCellStatus(student, day.date).text : ''"
-                :flow="index === 0 ? 'left' : 'up'"
-                style="--tfsize:11px"
               >
                 {{ getHaziraIconColor(getCellStatus(student, day.date).code).emoji }}
               </span>
