@@ -275,7 +275,7 @@ async function onDateTimePickerChange(data) {
                   @click.stop="openPicker(shift)"
                   title="Add attendance for this shift"
                 >
-                  {{ helper.t('+ Add') }}
+                  + Attendance
                  
                   <EmDateTimePicker
                     v-if="shift.showPicker"
