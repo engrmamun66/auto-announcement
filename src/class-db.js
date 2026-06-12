@@ -315,7 +315,6 @@ class myDB {
               // DROP TABLE IF EXIST hazira_icon_and_colors;
               // DROP TABLE hazira_icon_and_colors;
               `
-              DROP TABLE hazira_icon_and_colors;
               CREATE TABLE IF NOT EXISTS hazira_icon_and_colors (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 status TEXT NOT NULL UNIQUE,
