@@ -603,6 +603,8 @@ watch(
                 @click.stop="openShowLog(buildLogPayload(student, day))"
                 @mouseenter.stop="startPreview($event.target, buildLogPayload(student, day), index, index === dailyLogs.length - 1)"
                 @mouseleave.stop="endPreview()"
+                @touchstart.stop="startPreview($event.target, buildLogPayload(student, day), index, index === dailyLogs.length - 1)"
+                @touchend.stop="endPreview()"
                 @auxclick="log({
                   student,
                   date: day.date,
