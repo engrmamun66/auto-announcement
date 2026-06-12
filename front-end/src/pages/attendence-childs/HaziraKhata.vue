@@ -636,14 +636,11 @@ watch(
                   @click="updateHaziraColor(itemIdx, color)"
                   :title="color">
                 </button>
-                <div class="color-picker-wrapper">
-                  <label class="color-picker-label">Custom</label>
-                  <input type="color"
-                    :value="item.bg_color"
-                    @input="updateHaziraColor(itemIdx, $event.target.value)"
-                    class="color-picker-input"
-                    :title="'Pick any color'">
-                </div>
+                <input type="color"
+                  :value="item.bg_color"
+                  @input="updateHaziraColor(itemIdx, $event.target.value)"
+                  class="color-picker-input"
+                  :title="'Custom color picker'">
               </div>
             </div>
           </div>
@@ -1420,7 +1417,7 @@ watch(
 
 .emoji-btn {
   font-size: 18px;
-  padding: 4px 8px;
+  padding: 0px 8px;
   border: 2px solid #e5e7eb;
   border-radius: 6px;
   background: white;
@@ -1440,8 +1437,8 @@ watch(
 }
 
 .color-btn {
-  width: 36px;
-  height: 36px;
+  width: 33px;
+  height: 33px;
   border: 2px solid #e5e7eb;
   border-radius: 6px;
   cursor: pointer;
@@ -1458,44 +1455,19 @@ watch(
   box-shadow: 0 0 0 2px #e5e7eb;
 }
 
-.color-picker-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  padding: 6px;
-  border: 2px solid #e5e7eb;
-  border-radius: 6px;
-  background: #f9fafb;
-  transition: all 0.15s ease;
-}
-
-.color-picker-wrapper:hover {
-  border-color: #3b82f6;
-  background: #eff6ff;
-}
-
-.color-picker-label {
-  font-size: 9px;
-  font-weight: 600;
-  color: #6b7280;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
 .color-picker-input {
   width: 36px;
   height: 36px;
-  border: none;
-  border-radius: 4px;
+  border: 2px solid #e5e7eb;
+  border-radius: 6px;
   cursor: pointer;
   transition: all 0.15s ease;
-  padding: 0;
+  padding: 2px;
 }
 
 .color-picker-input:hover {
-  transform: scale(1.08);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  border-color: #3b82f6;
+  transform: scale(1.05);
 }
 
 </style>
