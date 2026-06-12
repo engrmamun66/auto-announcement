@@ -1,6 +1,7 @@
 <script setup>
 import moment from 'moment/moment'
 import { inject, ref, reactive, onMounted, onBeforeUnmount, computed, watch } from "vue";
+import { useRoute } from 'vue-router';
 import Ahelper from "./../attendacnceHelper";
 
 const CONFIG = inject("CONFIG");
@@ -277,7 +278,18 @@ async function deleteVacations(){
 }
 
 let studentnameorid = ref('')
+const route = useRoute()
 let selectedStudents = ref(storage('studentwise_vacation_selected_students').value || [])
+
+// Auto-select student from query param
+if (route.query.dakhela && !selectedStudents.value.length) {
+  const dakhela = Number(route.query.dakhela)
+  const studentToSelect = all_students.value.find(s => s.dakhela == dakhela)
+  if (studentToSelect) {
+    selectedStudents.value = [studentToSelect]
+  }
+}
+
 let getStudent = computed(()=>selectedStudents.value?.length ? (typeof selectedStudents.value[0] == 'object' ? selectedStudents.value[0] : all_students.value.find(s => s.dakhela == selectedStudents.value[0])) : null)
 watch(selectedStudents, (val) => {
   storage('studentwise_vacation_selected_students').value = val

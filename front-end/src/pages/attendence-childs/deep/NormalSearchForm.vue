@@ -1,6 +1,7 @@
 <script setup>
 import moment from 'moment/moment'
 import { inject, ref, reactive, onMounted, onBeforeUnmount, computed, watch } from "vue";
+import { useRoute } from 'vue-router';
 import Ahelper from "./../attendacnceHelper";
 import myTable from '../../../components/myTable.vue'
 import Pagination from '../../../components/Pagination.vue'
@@ -26,8 +27,18 @@ const emit = defineEmits(['onBtnSubmit', 'onBtnClear']);
 let log = console.log
 
 // For multiple select of students
+const route = useRoute()
 let selectedStudents = ref([])
 let search_text = ref('')
+
+// Auto-select student from query param
+if (route.query.dakhela && !selectedStudents.value.length) {
+  const dakhela = Number(route.query.dakhela)
+  const studentToSelect = all_students.value.find(s => s.dakhela == dakhela)
+  if (studentToSelect) {
+    selectedStudents.value = [studentToSelect]
+  }
+}
 
 let attPayload = reactive({ 
   //-------------

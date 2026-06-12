@@ -44,11 +44,7 @@ onMounted(()=>{
 
      <template v-if="reportingViewTab == 1">
       <ReportingOverview></ReportingOverview>
-     </template>
-     <template v-else-if="reportingViewTab == 2">
-      <!-- <ReportingOverview></ReportingOverview> -->
-       {{ reportingViewTab }}
-     </template>
+     </template> 
 
     
      

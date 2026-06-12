@@ -121,7 +121,15 @@ let loadingStudentAttendance = ref(false)
 let attendanceViewMode = ref('compact') // details | compact
 let studentMonthView = ref('attendance') // attendance | vacations
 let reportLeaves = ref([])
-let studentSearchId = ref('')
+let studentSearchId = ref(route?.query?.dakhela || '')
+
+// Auto-open student report when dakhela from query param
+if (route?.query?.dakhela) {
+  onMounted(async () => {
+    await new Promise(resolve => setTimeout(resolve, 100))
+    openStudentMonthlyById()
+  })
+}
 
 const reportTitle = computed(() => {
   if (activeReportTab.value === 'single-class-summary' && selectedSummaryClass.value) {

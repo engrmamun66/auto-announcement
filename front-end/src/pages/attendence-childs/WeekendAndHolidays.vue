@@ -1,6 +1,7 @@
 <script setup>
 import moment from 'moment/moment'
 import { inject, ref, reactive, onMounted, onBeforeUnmount, computed, watch } from "vue";
+import { useRoute } from 'vue-router';
 import Ahelper from "./attendacnceHelper";
 import myTable from '../../components/myTable.vue'
 import FullCalendar from '../../components/FullCalendar.vue'
@@ -23,6 +24,11 @@ const attendenceParams = inject("attendenceParams");
 const liveAttendenceList = inject("liveAttendenceList");
 const getAttendeceList = inject("getAttendeceList");
 const leaveAndWeekendSubTab = inject("leaveAndWeekendSubTab");
+const route = useRoute()
+
+if (route.query.dakhela) {
+  leaveAndWeekendSubTab.value = 2
+}
 
 const pagiation_positon = CONFIG.value?.settings?.attendance?.pagination?.pagiation_positon || 'bottom_center'
 

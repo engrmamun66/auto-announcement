@@ -31,8 +31,8 @@ const liveAttendenceList = inject('liveAttendenceList');
 
 let tab = ref(Number(storage('attendance_tab').value || '1'))  
 
-watch(tab, (tab_name) => { 
-  storage('attendance_tab').value = tab_name
+watch(tab, (tabindex) => { 
+  storage('attendance_tab').value = tabindex
 })
 
 const clearingLive = ref(false)

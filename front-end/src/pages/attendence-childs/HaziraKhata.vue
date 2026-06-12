@@ -2,7 +2,7 @@
 <script setup>
 import moment from 'moment/moment'
 import { inject, ref, computed, watch, onMounted, onBeforeUnmount, nextTick, provide } from "vue";
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import MonthPickerSingle from '../../components/MonthPickerSingle.vue'
 import HaziraShowLogRightbar from '../../components/hazira/HaziraShowLogRightbar.vue'
 import Rightbar from '../../components/Rightbar.vue'
@@ -16,6 +16,7 @@ const http = inject("http");
 const helper = inject("helper");
 const emitter = inject("emitter");
 const liveAttendenceList = inject("liveAttendenceList");
+const parent_tab = inject("parent_tab");
 
 const STORE_CLASS = 'hazira_class'
 const STORE_RANGE = 'hazira_range'
@@ -32,6 +33,7 @@ const selectedRange = ref(
 )
 
 const route = useRoute()
+const router = useRouter()
 const log = console.log
 const loading = ref(false)
 const errorMessage = ref('')
@@ -43,6 +45,7 @@ const showScrollControls = ref(false)
 const showLogRightbar = ref(false)
 const selectedLogEntry = ref(null)
 const monthPickerRef = ref(null)
+const activeStudentMenu = ref(null)
 
 function getSavedShift(classShort) {
   if (!classShort) return 'All'
@@ -225,6 +228,93 @@ function resetHaziraState() {
   localStorage.removeItem(STORE_RANGE)
   selectedRange.value = [moment().startOf('month').format('YYYY-MM-DD'), moment().endOf('month').format('YYYY-MM-DD')]
   monthPickerRef.value?.resetToCurrent()
+}
+
+let studentMenuStyles = ref({})
+
+function toggleStudentMenu(dakhela, event) {
+  if (activeStudentMenu.value === dakhela) {
+    activeStudentMenu.value = null
+    return
+  }
+
+  activeStudentMenu.value = dakhela
+  nextTick(() => {
+    const trigger = event.target.closest('.student-menu-trigger')
+    if (!trigger) return
+
+    const rect = trigger.getBoundingClientRect()
+    const menuWidth = 160
+    const menuHeight = 120
+
+    const spaceBelow = window.innerHeight - rect.bottom
+    const spaceAbove = rect.top
+    const spaceRight = window.innerWidth - rect.right
+    const spaceLeft = rect.left
+
+    let top, bottom, left, right
+
+    // Position vertically
+    if (spaceBelow > menuHeight + 10) {
+      top = rect.bottom + 5
+      bottom = 'auto'
+    } else if (spaceAbove > menuHeight + 10) {
+      top = 'auto'
+      bottom = window.innerHeight - rect.top - 10
+    } else {
+      // Center vertically
+      top = rect.top + rect.height / 2 - menuHeight / 2
+      bottom = 'auto'
+    }
+
+    // Position horizontally
+    if (spaceRight > menuWidth + 10) {
+      left = rect.right + 8
+      right = 'auto'
+    } else if (spaceLeft > menuWidth + 10) {
+      left = 'auto'
+      right = window.innerWidth - rect.left - 30
+    } else {
+      // Center horizontally
+      left = rect.left + rect.width / 2 - menuWidth / 2
+      right = 'auto'
+    }
+
+    studentMenuStyles.value = {
+      position: 'fixed',
+      top: top !== 'auto' ? top + 'px' : 'auto',
+      bottom: bottom !== 'auto' ? bottom + 'px' : 'auto',
+      left: left !== 'auto' ? left + 'px' : 'auto',
+      right: right !== 'auto' ? right + 'px' : 'auto',
+    }
+  })
+}
+
+function openAddLeaveModal(student) {
+  router.push({
+    path: route.path,
+    query: { ...route.query, dakhela: student.dakhela }
+  })
+  activeStudentMenu.value = null
+  parent_tab.value = 3
+}
+
+function openReportModal(student) {
+  router.push({
+    path: route.path,
+    query: { ...route.query, dakhela: student.dakhela }
+  })
+  activeStudentMenu.value = null
+  parent_tab.value = 4
+}
+
+function openStudentLogs(student) {
+  router.push({
+    path: route.path,
+    query: { ...route.query, dakhela: student.dakhela }
+  })
+  activeStudentMenu.value = null
+  parent_tab.value = 2
 }
 
 function scrollGrid(direction) {
@@ -568,15 +658,34 @@ watch(
         <div class="daily-grid-row daily-grid-header">
           <div class="daily-grid-cell sticky-col sticky-head">{{ helper.t('Students Name') }}</div>
           <div v-for="day in dayColumns" :key="day.date" class="daily-grid-cell day-header" :title="day.dayName">
+            <!-- 01 Sat, 02 Sun -->
             {{ day.label }}
           </div>
         </div>
 
         <div v-for="(student, index) in dailyLogs" :key="student.dakhela" class="daily-grid-row">
-          <div class="daily-grid-cell sticky-col student-cell">
-            <router-link :to="`/students?dakhela=${student.dakhela}${route.query.dev ? '&dev=' + route.query.dev : ''}`" class="student-name-link">
-              <div class="student-name">{{ student.name || '-' }} ({{ student.dakhela  }})</div>
-            </router-link>
+          <div class="daily-grid-cell sticky-col student-cell" :class="{'matched-dakhela': route.query?.dakhela == student.dakhela}">
+            <div class="student-name-wrapper">
+              <router-link :to="`/students?dakhela=${student.dakhela}${route.query.dev ? '&dev=' + route.query.dev : ''}`" class="student-name-link">
+                <div class="student-name">{{ student.name || '-' }} ({{ student.dakhela  }})</div>
+              </router-link>
+              <div class="student-menu-trigger">
+                <button class="student-menu-icon" @click.stop="toggleStudentMenu(student.dakhela, $event)" :aria-label="`Menu for ${student.name}`">
+                  <i class='bx bx-dots-vertical-rounded'></i>
+                </button>
+                <div v-if="activeStudentMenu === student.dakhela" class="student-menu-dropdown" :style="studentMenuStyles">
+                  <button class="menu-item" @click.stop="openAddLeaveModal(student)">
+                    <i class='bx bx-calendar-plus'></i> Add Leave
+                  </button>
+                  <button class="menu-item" @click.stop="openReportModal(student)">
+                    <i class='bx bx-file-blank'></i> Show Report
+                  </button>
+                  <button class="menu-item" @click.stop="openStudentLogs(student)">
+                    <i class='bx bx-list-check'></i> Show Logs
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
           <div v-for="(day, index2) in dayColumns" :key="day.date" class="daily-grid-cell day-cell">
             <div
@@ -952,6 +1061,10 @@ watch(
   justify-content: center;
   font-size: 11px;
 }
+.daily-grid-cell.matched-dakhela{
+  border-left: 3px solid #20b020 !important;
+  background: #b0b5b026 !important;
+}
 
 .daily-grid-empty{
   padding: 18px 10px;
@@ -990,6 +1103,18 @@ watch(
   height: 100%;
 }
 
+.student-name-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+}
+
+.student-name-link {
+  flex: 1;
+  min-width: 0;
+}
+
 .student-name-link:hover .student-name {
   color: #3b82f6;
   text-decoration: underline;
@@ -1000,6 +1125,81 @@ watch(
   font-size: 12px;
   color: #111827;
   transition: color 0.15s ease;
+}
+
+.student-menu-trigger {
+  position: relative;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.student-cell:hover .student-menu-trigger {
+  opacity: 1;
+}
+
+.student-menu-icon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+  padding: 2px;
+}
+
+.student-menu-icon:hover {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.student-menu-dropdown {
+  position: fixed;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 10000;
+  min-width: 160px;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  background: transparent;
+  color: #374151;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.menu-item:first-child {
+  border-radius: 5px 5px 0 0;
+}
+
+.menu-item:last-child {
+  border-radius: 0 0 5px 5px;
+}
+
+.menu-item:hover {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.menu-item i {
+  font-size: 14px;
 }
  
 .day-cell{
@@ -1067,10 +1267,10 @@ watch(
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 37px;
-  height: 37px;
+  width: 100%;
+  height: 100%;
   padding: 0;
-  border: 1px solid rgba(255, 255, 255, 0.42);
+  border: 1px solid rgba(255, 255, 255, 0.023);
   border-radius: 0px;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.04)),
