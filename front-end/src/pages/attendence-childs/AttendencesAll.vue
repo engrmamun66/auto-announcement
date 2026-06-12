@@ -209,7 +209,7 @@ async function deleteMultipleAttendance(){
           Clear Selection
         </button>
       </div>
-      <myTable topMarginClass="">
+      <myTable class="mt-0">
         <template #thead>
           <thead>
             <tr>

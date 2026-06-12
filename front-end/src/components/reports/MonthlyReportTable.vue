@@ -1,5 +1,5 @@
 <template>
-  <myTable topMarginClass="mt-2">
+  <myTable class="mt-2">
     <template #thead>
       <thead>
         <tr>

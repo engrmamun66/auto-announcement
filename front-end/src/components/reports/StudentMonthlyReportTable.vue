@@ -10,7 +10,7 @@
       </h6>
       <!-- <button class="btn btn-sm btn-close-light hide_onprint" @click="$emit('close')">Back</button> -->
     </div>
-    <myTable topMarginClass="mt-2">
+    <myTable class="mt-2">
       <template #thead>
         <thead>
           <tr>

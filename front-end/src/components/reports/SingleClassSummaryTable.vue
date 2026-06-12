@@ -3,7 +3,7 @@
     <!-- <div class="d-flex justify-content-center align-items-center hide_onprint">
       <h5 class="table-title">{{ classInfo.class_name }} Summary</h5>
     </div> -->
-    <myTable topMarginClass="mt-2">
+    <myTable class="mt-2">
       <template #thead>
         <thead>
           <tr>

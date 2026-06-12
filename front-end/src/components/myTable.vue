@@ -43,7 +43,6 @@ defineProps({
   border-radius: 12px;
   overflow-x: auto;
   overflow-y: visible;
-  -webkit-overflow-scrolling: touch;
-  margin-top: 15px;
+  -webkit-overflow-scrolling: touch; 
 }
 </style>

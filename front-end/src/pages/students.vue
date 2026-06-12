@@ -921,7 +921,7 @@ watch(fixedWidthSoundCol, (newVal) => {
     </div>
  
 
-    <myTable>
+    <myTable class="mt-3">
       <template #thead>
         <thead>
           <tr>
