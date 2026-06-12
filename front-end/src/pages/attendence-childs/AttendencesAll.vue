@@ -308,10 +308,7 @@ async function deleteMultipleAttendance(){
         </div>
         <div class="form-group mb-2">
           <label>{{ helper.t('Status') }}</label>
-          <select v-model="editFormData.status" class="form-control" :disabled="!editFormData.in_time">
-            <template v-if="editFormData.out_time" value="">
-              <option value="">Just Out</option>
-            </template>
+          <select v-model="editFormData.status" class="form-control" :disabled="true">
             <option value="">{{ helper.t('Select Status') }}</option>
             <option value="Present">{{ helper.t('Present') }}</option>
             <option value="Absent">{{ helper.t('Absent') }}</option>
