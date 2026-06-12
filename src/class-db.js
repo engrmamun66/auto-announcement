@@ -138,7 +138,7 @@ class myDB {
         this.db.serialize(() => {
             defaultData.forEach(item => {
                 this.db.run(
-                    `INSERT OR REPLACE INTO hazira_icon_and_colors (status, active_emoji, emojis, bg_color, bg_colors) VALUES (?, ?, ?, ?, ?)`,
+                    `INSERT OR IGNORE INTO hazira_icon_and_colors (status, active_emoji, emojis, bg_color, bg_colors) VALUES (?, ?, ?, ?, ?)`,
                     [
                         item.status,
                         item.active_emoji,

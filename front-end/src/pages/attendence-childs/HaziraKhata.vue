@@ -516,7 +516,7 @@ watch(
           <span class="legend-badge" :style="{
             backgroundColor: item.bg_color,
             color: item.status === 'Future' ? '#000000' : '#ffffff',
-            border: item.status === 'Future' ? '1px solid #d1d5db' : 'none'
+            border: '1px solid #d1d5db'
           }">{{ item.active_emoji }}</span>
           <span class="legend-label-text" :tooltip="helper.t(item.label)" style="--tfsize:11px" flow="right" >{{ item.label }}</span>
         </div>
