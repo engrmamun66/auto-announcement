@@ -2,6 +2,7 @@
 <script setup>
 import moment from 'moment/moment'
 import { inject, ref, computed, watch, onMounted, onBeforeUnmount, nextTick, provide } from "vue";
+import { useRoute } from 'vue-router';
 import MonthPickerSingle from '../../components/MonthPickerSingle.vue'
 import HaziraShowLogRightbar from '../../components/hazira/HaziraShowLogRightbar.vue'
 import Rightbar from '../../components/Rightbar.vue'
@@ -28,6 +29,7 @@ const selectedRange = ref(
     : [moment().startOf('month').format('YYYY-MM-DD'), moment().endOf('month').format('YYYY-MM-DD')]
 )
 
+const route = useRoute()
 const log = console.log
 const loading = ref(false)
 const errorMessage = ref('')
@@ -156,6 +158,10 @@ function updateHaziraColor(itemIdx, color){
     newSettings[itemIdx] = {...newSettings[itemIdx], bg_color: color}
     haziraIconSettings.value = newSettings
   }
+}
+
+function getColorPickerValue(color) {
+  return color === 'transparent' ? '#E5E7EB' : color
 }
 
 async function saveHaziraSettings(){
@@ -554,7 +560,9 @@ watch(
 
         <div v-for="(student, index) in dailyLogs" :key="student.dakhela" class="daily-grid-row">
           <div class="daily-grid-cell sticky-col student-cell">
-            <div class="student-name">{{ student.name || '-' }} ({{ student.dakhela  }})</div>
+            <router-link :to="`/students?dakhela=${student.dakhela}${route.query.dev ? '&dev=' + route.query.dev : ''}`" class="student-name-link">
+              <div class="student-name">{{ student.name || '-' }} ({{ student.dakhela  }})</div>
+            </router-link>
           </div>
           <div v-for="(day, index2) in dayColumns" :key="day.date" class="daily-grid-cell day-cell">
             <div
@@ -636,8 +644,9 @@ watch(
                   @click="updateHaziraColor(itemIdx, color)"
                   :title="color">
                 </button>
+                <div class="color-separator"></div>
                 <input type="color"
-                  :value="item.bg_color"
+                  :value="getColorPickerValue(item.bg_color)"
                   @input="updateHaziraColor(itemIdx, $event.target.value)"
                   class="color-picker-input"
                   :title="'Custom color picker'">
@@ -959,10 +968,23 @@ watch(
   gap: 2px;
 }
 
+.student-name-link {
+  text-decoration: none;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.student-name-link:hover .student-name {
+  color: #3b82f6;
+  text-decoration: underline;
+}
+
 .student-name{
   font-weight: 600;
   font-size: 12px;
   color: #111827;
+  transition: color 0.15s ease;
 }
  
 .day-cell{
@@ -1453,6 +1475,13 @@ watch(
 .color-btn.active {
   border-color: #111827;
   box-shadow: 0 0 0 2px #e5e7eb;
+}
+
+.color-separator {
+  width: 1px;
+  height: 36px;
+  background-color: #e5e7eb;
+  margin: 0 2px;
 }
 
 .color-picker-input {
