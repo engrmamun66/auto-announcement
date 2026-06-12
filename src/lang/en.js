@@ -377,6 +377,8 @@ module.exports = {
     'Logs': 'Logs',
     'Reporting': 'Reporting',
     'Leaves': 'Leaves',
+    'Show Report': 'Show Report',
+    'Show Logs': 'Show Logs',
     'Get Attendace From History': 'Get Attendace From History',
     'Clearing...': 'Clearing...',
     'Clear All': 'Clear All',

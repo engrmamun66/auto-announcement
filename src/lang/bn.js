@@ -379,6 +379,8 @@ module.exports = {
     'Logs': 'লগ',
     'Reporting': 'রিপোর্টিং',
     'Leaves': 'ছুটি',
+    'Show Report': 'রিপোর্ট দেখুন',
+    'Show Logs': 'লগ দেখুন',
     'Get Attendace From History': 'হিস্টরি থেকে উপস্থিতি আনুন',
     'Clearing...': 'পরিষ্কার হচ্ছে...',
     'Clear All': 'সব পরিষ্কার করুন',

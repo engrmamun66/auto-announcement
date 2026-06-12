@@ -675,13 +675,13 @@ watch(
                 </button>
                 <div v-if="activeStudentMenu === student.dakhela" class="student-menu-dropdown" :style="studentMenuStyles">
                   <button class="menu-item" @click.stop="openAddLeaveModal(student)">
-                    <i class='bx bx-calendar-plus'></i> Add Leave
+                    <i class='bx bx-calendar-plus'></i> {{ helper.t('Leaves') }}
                   </button>
                   <button class="menu-item" @click.stop="openReportModal(student)">
-                    <i class='bx bx-file-blank'></i> Show Report
+                    <i class='bx bx-file-blank'></i> {{ helper.t('Show Report') }}
                   </button>
                   <button class="menu-item" @click.stop="openStudentLogs(student)">
-                    <i class='bx bx-list-check'></i> Show Logs
+                    <i class='bx bx-list-check'></i> {{ helper.t('Show Logs') }}
                   </button>
                 </div>
               </div>
