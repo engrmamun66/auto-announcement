@@ -54,7 +54,15 @@ let showDeleteConfirmationModal = ref(false)
 let selectedItems = ref(new Set())
 let showEditModal = ref(false)
 let editingItem = ref(null)
-let editFormData = ref({})
+let editFormData = ref({
+  date: null,
+  status: null,
+  out_time: null,
+  late_in_minute: null,
+  in_time: null,
+  out_time: null,
+  shift_duration: null,
+})
 
 const selectAll = computed({
   get: () => selectedItems.value.size === attendenceList.value?.length && attendenceList.value?.length > 0,
@@ -73,6 +81,26 @@ function prepareToDelete(item){
   console.log('prepareToDeleteprepareToDelete');
 }
 
+function calculateLateAndStatus(){
+
+  const shiftStart = moment(editingItem.value.start, 'HH:mm')
+  const inTime = moment(editFormData.value.in_time, 'HH:mm')
+
+  if(!shiftStart.isValid() || !inTime.isValid()){
+    console.log('Invalid time format:', {start: editingItem.value.start, in_time: editFormData.value.in_time})
+    return
+  }
+
+  const totalLateMinutes = Math.max(0, inTime.diff(shiftStart, 'minutes'))
+
+  const lateMinutes = totalLateMinutes > late_consideration_minute
+    ? totalLateMinutes - late_consideration_minute
+    : 0
+
+  editFormData.value.late_in_minute = lateMinutes
+  editFormData.value.status = lateMinutes > 0 ? 'Late' : 'Present'
+}
+
 function openEditModal(item){
   editingItem.value = item
   editFormData.value = {
@@ -85,6 +113,10 @@ function openEditModal(item){
   }
   showEditModal.value = true
 }
+
+watch(() => editFormData.value.in_time, () => {
+  calculateLateAndStatus()
+})
 
 async function saveEditedAttendance(){
   if(!editingItem.value) return
@@ -275,23 +307,11 @@ async function deleteMultipleAttendance(){
       <div class="edit-form">
         <div class="form-group mb-2">
           <label>{{ helper.t('Date') }}</label>
-          <input v-model="editFormData.date" type="date" class="form-control" />
-        </div>
-        <div class="form-group mb-2">
-          <label>{{ helper.t('In Time') }}</label>
-          <input v-model="editFormData.in_time" :disabled="!editFormData.in_time" type="time" class="form-control" />
-        </div>
-        <div class="form-group mb-2">
-          <label>{{ helper.t('Out Time') }}</label>
-          <input v-model="editFormData.out_time" :disabled="!editFormData.out_time" type="time" class="form-control" />
-        </div>
-        <div class="form-group mb-2">
-          <label>{{ helper.t('Late') }}</label>
-          <input v-model="editFormData.late_in_minute" type="number" class="form-control" />
+          <input v-model="editFormData.date" :disabled="true" type="date" class="form-control" />
         </div>
         <div class="form-group mb-2">
           <label>{{ helper.t('Status') }}</label>
-          <select v-model="editFormData.status" class="form-control" :disabled="editFormData.out_time">
+          <select v-model="editFormData.status" class="form-control" :disabled="!editFormData.in_time">
             <template v-if="editFormData.out_time" value="">
               <option value="">Just Out</option>
             </template>
@@ -302,11 +322,22 @@ async function deleteMultipleAttendance(){
           </select>
         </div>
         <div class="form-group mb-2">
-          <label>{{ helper.t('Shift Duration') }}</label>
-          <input v-model="editFormData.shift_duration" type="text" class="form-control" />
+          <label>{{ helper.t('Late') }} </label>
+          <input v-model="editFormData.late_in_minute" type="number" class="form-control" disabled />
         </div>
-
-        <pre>{{ editFormData }}</pre>
+        <div class="form-group mb-2">
+          <label>{{ helper.t('In Time') }}</label>
+          <input v-model="editFormData.in_time" :disabled="!editFormData.in_time" @change="calculateLateAndStatus" type="time" class="form-control" />
+        </div>
+        <div class="form-group mb-2">
+          <label>{{ helper.t('Out Time') }}</label>
+          <input v-model="editFormData.out_time" :disabled="!editFormData.out_times" type="time" class="form-control" />
+        </div>
+        
+        <div class="form-group mb-2">
+          <label>{{ helper.t('Shift Duration') }}</label>
+          <input v-model="editFormData.shift_duration" :disabled="true" type="text" class="form-control" />
+        </div>
         
       </div>
       <template #footer>
