@@ -4,6 +4,7 @@ import moment from 'moment/moment'
 import { inject, ref, computed, watch, onMounted, onBeforeUnmount, nextTick, provide } from "vue";
 import MonthPickerSingle from '../../components/MonthPickerSingle.vue'
 import HaziraShowLogRightbar from '../../components/hazira/HaziraShowLogRightbar.vue'
+import Rightbar from '../../components/Rightbar.vue'
 
 const CONFIG = inject("CONFIG");
 const classes = inject("classes");
@@ -11,6 +12,7 @@ const all_students_non_copied = inject("all_students_non_copied");
 const callbacks = inject("callbacks");
 const http = inject("http");
 const helper = inject("helper");
+const emitter = inject("emitter");
 
 const STORE_CLASS = 'hazira_class'
 const STORE_RANGE = 'hazira_range'
@@ -117,14 +119,65 @@ const dayColumns = computed(() => {
   })
 })
 
-const legendItems = [
-  { code: 'P', label: 'Present', class: 'status-present' },
-  { code: 'A', label: 'Absent', class: 'status-absent' },
-  { code: 'L', label: 'Leave', class: 'status-leave' },
-  { code: 'W', label: 'Weekend', class: 'status-weekend' },
-  { code: 'V', label: 'Vacation', class: 'status-vacation' },
-  { code: '-', label: 'Future', class: 'status-future' },
-]
+let showHaziraSettingsPanel = ref(false)
+let haziraIconSettings = ref([])
+
+let legendItems = computed(() => {
+  return haziraIconSettings.value.map(item => ({
+    code: item.active_emoji,
+    label: item.status,
+    class: `status-${item.status.toLowerCase()}`,
+    ...item
+  }))
+})
+
+async function loadHaziraIconColors(){
+  try {
+    const response = await http.get('/hazira-icon-colors')
+    if(response.status === 200 && response.data?.data){
+      haziraIconSettings.value = JSON.parse(JSON.stringify(response.data.data))
+    }
+  } catch(error){
+    console.error('Failed to load hazira icon colors:', error)
+  }
+}
+
+function updateHaziraEmoji(itemIdx, emoji){
+  if(itemIdx >= 0 && itemIdx < haziraIconSettings.value.length){
+    const newSettings = [...haziraIconSettings.value]
+    newSettings[itemIdx] = {...newSettings[itemIdx], active_emoji: emoji}
+    haziraIconSettings.value = newSettings
+  }
+}
+
+function updateHaziraColor(itemIdx, color){
+  if(itemIdx >= 0 && itemIdx < haziraIconSettings.value.length){
+    const newSettings = [...haziraIconSettings.value]
+    newSettings[itemIdx] = {...newSettings[itemIdx], bg_color: color}
+    haziraIconSettings.value = newSettings
+  }
+}
+
+async function saveHaziraSettings(){
+  try {
+    const payload = haziraIconSettings.value.map(item => ({
+      status: item.status,
+      active_emoji: item.active_emoji,
+      emojis: item.emojis,
+      bg_color: item.bg_color,
+      bg_colors: item.bg_colors
+    }))
+    const response = await http.post('/hazira-icon-colors', payload)
+    if(response.status === 200){
+      emitter.emit('toaster-success', {message: 'Hazira settings updated!'})
+      loadHaziraIconColors()
+      showHaziraSettingsPanel.value = false
+    }
+  } catch(error){
+    console.error('Failed to save hazira settings:', error)
+    emitter.emit('toaster-error', {message: 'Failed to save settings'})
+  }
+}
 
 function handleMonthChange(dates = []) {
   if (!Array.isArray(dates) || dates.length < 2) return
@@ -354,6 +407,26 @@ watch(classes, (list) => {
   }
 }, { immediate: true })
 
+const getHaziraIconColor = (statusCode) => {
+  const statusMap = {
+    'P': 'Present',
+    'A': 'Absent',
+    'L': 'Leave',
+    'V': 'Vacation',
+    'W': 'Weekend',
+  }
+  const statusName = statusMap[statusCode]
+  const item = haziraIconSettings.value.find(h => h.status === statusName)
+  if(item) {
+    return {
+      emoji: item.active_emoji,
+      bgColor: item.bg_color,
+      status: item.status
+    }
+  }
+  return { emoji: statusCode, bgColor: '#F3F4F6', status: 'Unknown' }
+}
+
 const selectFistClass = () => {
   if (!selectedClassShort.value) {
     const active = getActiveClasses(classes.value)
@@ -366,6 +439,7 @@ const selectFistClass = () => {
 }
 
 onMounted(() => {
+  loadHaziraIconColors()
   helper.delay(selectFistClass, 500)
   window.addEventListener('resize', updateScrollControls)
   setTimeout(updateScrollControls, 0)
@@ -438,14 +512,20 @@ watch(
 
       <!-- Legend -->
       <div class="hazira-legend-section">
-        <div v-for="item in legendItems" :key="item.code" class="legend-item-inline">
-          <span class="legend-badge" :class="item.class">{{ item.code }}</span>
+        <div v-for="item in legendItems" :key="item.status" class="legend-item-inline">
+          <span class="legend-badge" :style="{
+            backgroundColor: item.bg_color,
+            color: item.status === 'Future' ? '#000000' : '#ffffff',
+            border: item.status === 'Future' ? '1px solid #d1d5db' : 'none'
+          }">{{ item.active_emoji }}</span>
           <span class="legend-label-text" :tooltip="helper.t(item.label)" style="--tfsize:11px" flow="right" >{{ item.label }}</span>
         </div>
+        <button class="hazira-reset-btn" :tooltip="'Customize icons & colors'" flow="right" @click="showHaziraSettingsPanel = true"><i class='bx bx-palette'></i></button>
       </div>
 
       <!-- Controls -->
       <div class="hazira-actions-section">
+
         <div v-if="showScrollControls" class="legend-scroll-controls">
           <button type="button" class="legend-scroll-btn" @click="scrollGrid(-1)" aria-label="Scroll left">
             <i class='bx bx-chevron-left'></i>
@@ -454,6 +534,7 @@ watch(
             <i class='bx bx-chevron-right'></i>
           </button>
         </div>
+        
         <button class="hazira-reset-btn" :tooltip="'Reset to first class & current month'" flow="left" @click="resetHaziraState"><i class='bx bx-reset'></i></button>
         <MonthPickerSingle ref="monthPickerRef" :onChange="handleMonthChange" />
       </div>
@@ -482,12 +563,16 @@ watch(
             >
               <span
                 class="status-pill"
-                :class="getCellStatus(student, day.date).class"
+                :style="{
+                  backgroundColor: getHaziraIconColor(getCellStatus(student, day.date).code).bgColor,
+                  color: getCellStatus(student, day.date).code === '-' ? '#000000' : '#ffffff',
+                  border: getCellStatus(student, day.date).code === '-' ? '1px solid #d1d5db' : 'none'
+                }"
                 :tooltip="getCellStatus(student, day.date).code !== '-' ? getCellStatus(student, day.date).text : ''"
                 :flow="index === 0 ? 'left' : 'up'"
                 style="--tfsize:11px"
               >
-                {{ getCellStatus(student, day.date).code }}
+                {{ getHaziraIconColor(getCellStatus(student, day.date).code).emoji }}
               </span>
 
               <button v-if="getCellStatus(student, day.date).code !== '-'"
@@ -523,6 +608,54 @@ watch(
       @unmount="closeShowLog"
       @attendance-submitted="loadDailyLogs(selectedClassShort)"
     />
+
+    <Rightbar v-if="showHaziraSettingsPanel" title="Hazira Settings" size="xsm" @unmount="showHaziraSettingsPanel = false" :largestMode="false">
+      <div class="hazira-settings-panel">
+        <div v-for="(item, itemIdx) in haziraIconSettings" :key="item.status" class="hazira-setting-item">
+          <div class="setting-label">{{ item.status }}</div>
+          <div class="setting-content">
+            <div class="emoji-selector">
+              <span class="emoji-label">Icon:</span>
+              <div class="emoji-buttons">
+                <button v-for="(emoji, emojiIdx) in item.emojis" :key="emojiIdx"
+                  class="emoji-btn"
+                  :class="{ active: emoji === item.active_emoji }"
+                  @click="updateHaziraEmoji(itemIdx, emoji)"
+                  :title="emoji">
+                  {{ emoji }}
+                </button>
+              </div>
+            </div>
+            <div class="color-selector">
+              <span class="color-label">Color:</span>
+              <div class="color-buttons">
+                <button v-for="(color, colorIdx) in item.bg_colors" :key="colorIdx"
+                  class="color-btn"
+                  :class="{ active: color === item.bg_color }"
+                  :style="{ backgroundColor: color }"
+                  @click="updateHaziraColor(itemIdx, color)"
+                  :title="color">
+                </button>
+                <div class="color-picker-wrapper">
+                  <label class="color-picker-label">Custom</label>
+                  <input type="color"
+                    :value="item.bg_color"
+                    @input="updateHaziraColor(itemIdx, $event.target.value)"
+                    class="color-picker-input"
+                    :title="'Pick any color'">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <template #footer>
+        <div class="d-flex gap-2 justify-content-start mt-3">
+          <button class="btn btn-secondary" @click="showHaziraSettingsPanel = false">Close</button>
+          <button class="btn" style="background-color: var(--primaryColor); color: white; border: none;" @click="saveHaziraSettings">Save Changes</button>
+        </div>
+      </template>
+    </Rightbar>
 
     <template v-if="targetCellEntry">
     <!-- <template v-if="true"> -->
@@ -1234,6 +1367,135 @@ watch(
   color: #9ca3af;
   font-size: 10px;
   text-align: center;
+}
+
+.hazira-settings-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.hazira-setting-item {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 12px;
+  background: #f9fafb;
+}
+
+.setting-label {
+  font-weight: 700;
+  font-size: 13px;
+  color: #111827;
+  margin-bottom: 8px;
+}
+
+.setting-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.emoji-selector,
+.color-selector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.emoji-label,
+.color-label {
+  font-weight: 600;
+  font-size: 11px;
+  color: #6b7280;
+  min-width: 50px;
+}
+
+.emoji-buttons,
+.color-buttons {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.emoji-btn {
+  font-size: 18px;
+  padding: 4px 8px;
+  border: 2px solid #e5e7eb;
+  border-radius: 6px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.emoji-btn:hover {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+
+.emoji-btn.active {
+  border-color: #3b82f6;
+  background: #dbeafe;
+  box-shadow: 0 0 0 2px #eff6ff;
+}
+
+.color-btn {
+  width: 36px;
+  height: 36px;
+  border: 2px solid #e5e7eb;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.color-btn:hover {
+  border-color: #3b82f6;
+  transform: scale(1.05);
+}
+
+.color-btn.active {
+  border-color: #111827;
+  box-shadow: 0 0 0 2px #e5e7eb;
+}
+
+.color-picker-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 6px;
+  border: 2px solid #e5e7eb;
+  border-radius: 6px;
+  background: #f9fafb;
+  transition: all 0.15s ease;
+}
+
+.color-picker-wrapper:hover {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+
+.color-picker-label {
+  font-size: 9px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.color-picker-input {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  padding: 0;
+}
+
+.color-picker-input:hover {
+  transform: scale(1.08);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 </style>

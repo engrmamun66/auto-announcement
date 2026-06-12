@@ -125,6 +125,35 @@ class myDB {
         });
     }
 
+    _initHaziraIconColors(){
+        const defaultData = [
+            { status: 'Present', active_emoji: 'P', emojis: ['P', '✅', '🙋', '✔️', '🟢', '👍'], bg_color: '#16A34A', bg_colors: ['#16A34A', '#DCFCE7', '#86EFAC'] },
+            { status: 'Absent', active_emoji: 'A', emojis: ['A', '❌', '🚫', '⛔', '🔴', '🙈'], bg_color: '#DC2626', bg_colors: ['#DC2626', '#FEE2E2', '#FCA5A5'] },
+            { status: 'Leave', active_emoji: 'L', emojis: ['L', '📝', '📄', '✈️', '🏖️', '🙏'], bg_color: '#2563EB', bg_colors: ['#2563EB', '#DBEAFE', '#93C5FD'] },
+            { status: 'Weekend', active_emoji: 'W', emojis: ['W', '🎉', '🌴', '😎', '🍹', '🛌'], bg_color: '#F59E0B', bg_colors: ['#F59E0B', '#FEF9C3', '#FCD34D'] },
+            { status: 'Vacation', active_emoji: 'V', emojis: ['V', '🏝️', '✈️', '🧳', '🌞', '📸'], bg_color: '#A855F7', bg_colors: ['#A855F7', '#EDE9FE', '#D8B4FE'] },
+            { status: 'Future', active_emoji: '-', emojis: ['-', '⏳', '📅', '🌫️', '🔜', '▫️'], bg_color: 'transparent', bg_colors: ['transparent', '#E5E7EB', '#D1D5DB'] }
+        ];
+
+        this.db.serialize(() => {
+            defaultData.forEach(item => {
+                this.db.run(
+                    `INSERT OR REPLACE INTO hazira_icon_and_colors (status, active_emoji, emojis, bg_color, bg_colors) VALUES (?, ?, ?, ?, ?)`,
+                    [
+                        item.status,
+                        item.active_emoji,
+                        JSON.stringify(item.emojis),
+                        item.bg_color,
+                        JSON.stringify(item.bg_colors)
+                    ],
+                    (err) => {
+                        if (err) console.error(`Error initializing hazira_icon_and_colors for ${item.status}:`, err.message);
+                    }
+                );
+            });
+        });
+    }
+
     _createDatabase(){
         // Initialize SQLite Database
         const db = new sqlite3.Database(`${this.DATABASE_PATH}`, (err) => {
@@ -282,7 +311,23 @@ class myDB {
               }
             );
 
-
+            this.db.run(
+              // DROP TABLE IF EXIST hazira_icon_and_colors;
+              `
+              CREATE TABLE IF NOT EXISTS hazira_icon_and_colors (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                status TEXT NOT NULL UNIQUE,
+                active_emoji TEXT DEFAULT 'P',
+                emojis TEXT NOT NULL, -- JSON array
+                bg_color TEXT DEFAULT '#DCFCE7',
+                bg_colors TEXT NOT NULL, -- JSON array
+                created TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+              )`,
+              (err) => {
+                if (err) console.error("Error creating hazira_icon_and_colors table:", err.message);
+                else this._initHaziraIconColors();
+              }
+            );
 
         } catch (error) {
             console.log('ddfdf', error);

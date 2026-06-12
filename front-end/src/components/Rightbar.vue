@@ -41,6 +41,11 @@ let props = defineProps({
         required: false,
         type: String,
     },
+    size: {
+        default: 'default',
+        required: false,
+        type: String,
+    },
 })
 
 
@@ -119,7 +124,7 @@ defineExpose({unmount})
     </template>
     <template v-else >
         <div v-if="isMounted" class="rightbar-backdrop" @click="unmount()"></div>
-        <div ref="div" class="rightbar" :class="{show: isMounted, toggling: toggling, 'using-close-icon': closeIcon, 'largestMode': largestMode}"
+        <div ref="div" class="rightbar" :class="{show: isMounted, toggling: toggling, 'using-close-icon': closeIcon, 'largestMode': largestMode, 'size-sm': size === 'sm', 'size-xsm': size === 'xsm'}"
             :style="{ paddingBottom: (showAccessibilityAlert.value && appAccessData.value?.internet === true) || !appAccessData.value?.internet ? 'calc(80px + max(20px, env(safe-area-inset-bottom)))' : 'max(20px, env(safe-area-inset-bottom))' }"
             @touchstart.passive="onTouchStart"
             @touchend.passive="onTouchEnd"
@@ -129,7 +134,7 @@ defineExpose({unmount})
                 <slot name="header">
                     <div class="mobile-drag-handle"></div>
                     <div class="header">
-                            <h2>{{ title ? helper.t(title) : '&nbsp;'}}</h2>
+                            <h4>{{ title ? helper.t(title) : '&nbsp;'}}</h4>
                         
                         <div class="button-area">
                             <template v-if="useRoute().query?.dev === 'true'">
@@ -318,6 +323,37 @@ defineExpose({unmount})
     width: 100%;
     left:0px;
     bottom: 0px;
+}
+
+
+/* -------------------------------------------------------------------------- */
+/*                              Size Variants                                */
+/* -------------------------------------------------------------------------- */
+@media (min-width:801px) {
+    .rightbar.size-sm {
+        width: 600px;
+    }
+    .rightbar.size-xsm {
+        width: 500px;
+    }
+}
+
+@media (min-width:1200px) {
+    .rightbar.size-sm {
+        width: 600px;
+    }
+    .rightbar.size-xsm {
+        width: 500px;
+    }
+}
+
+@media (min-width:1800px) {
+    .rightbar.size-sm {
+        width: 600px;
+    }
+    .rightbar.size-xsm {
+        width: 500px;
+    }
 }
 
 

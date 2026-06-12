@@ -161,5 +161,50 @@ module.exports = function (config, utils, Backup) {
     }
   });
 
+  router.get('/hazira-icon-colors', (req, res) => {
+    try {
+      const db = global.db;
+      db.all(`SELECT status, active_emoji, emojis, bg_color, bg_colors FROM hazira_icon_and_colors ORDER BY id`, [], (err, rows) => {
+        if (err) {
+          return res.status(500).send({ error: err.message });
+        }
+        const data = (rows || []).map(row => ({
+          status: row.status,
+          active_emoji: row.active_emoji,
+          emojis: JSON.parse(row.emojis),
+          bg_color: row.bg_color,
+          bg_colors: JSON.parse(row.bg_colors)
+        }));
+        res.send({ success: true, data });
+      });
+    } catch (error) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  router.post('/hazira-icon-colors', (req, res) => {
+    try {
+      const db = global.db;
+      const data = req.body;
+      if (!Array.isArray(data)) {
+        return res.status(400).send({ error: 'Expected array of hazira icon settings' });
+      }
+      db.serialize(() => {
+        data.forEach(item => {
+          db.run(
+            `UPDATE hazira_icon_and_colors SET active_emoji = ?, bg_color = ? WHERE status = ?`,
+            [item.active_emoji, item.bg_color, item.status],
+            (err) => {
+              if (err) console.error(`Error updating hazira settings for ${item.status}:`, err.message);
+            }
+          );
+        });
+        res.send({ success: true });
+      });
+    } catch (error) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
   return router;
 };

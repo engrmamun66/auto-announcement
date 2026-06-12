@@ -63,6 +63,7 @@ const Backup = require('./src/backup');
 const utils = require('./src/utls');
 const socket = require('./socket/socket');
 const DB = new classDB()
+global.db = DB.db
 const { getSettings } = require('./src/settings');
 const DB_CONFIG_KEYS = Object.keys(config).filter(k => k !== 'env');
 getSettings(DB.db).then(dbSettings => {
