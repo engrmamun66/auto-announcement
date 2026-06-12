@@ -125,7 +125,7 @@ defineExpose({unmount})
     <template v-else >
         <div v-if="isMounted" class="rightbar-backdrop" @click="unmount()"></div>
         <div ref="div" class="rightbar" :class="{show: isMounted, toggling: toggling, 'using-close-icon': closeIcon, 'largestMode': largestMode, 'size-sm': size === 'sm', 'size-xsm': size === 'xsm'}"
-            :style="{ paddingBottom: (showAccessibilityAlert.value && appAccessData.value?.internet === true) || !appAccessData.value?.internet ? 'calc(80px + max(20px, env(safe-area-inset-bottom)))' : 'max(20px, env(safe-area-inset-bottom))' }"
+            :style="{ paddingBottom: (showAccessibilityAlert.value && appAccessData.value?.internet === true) || !appAccessData.value?.internet ? 'calc(20px + max(20px, env(safe-area-inset-bottom)))' : 'max(20px, env(safe-area-inset-bottom))' }"
             @touchstart.passive="onTouchStart"
             @touchend.passive="onTouchEnd"
         >
