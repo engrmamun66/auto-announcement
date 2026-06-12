@@ -206,8 +206,25 @@ function formatTime(value) {
 
 function startPreview(target, entry, index, isLast) {
   let { top, bottom, left, width } = target.getBoundingClientRect()
-  tartCellStyles.value.style['left'] = (left - 140) + 'px'
-  tartCellStyles.value.style['top'] = (bottom + -1) + 'px'
+  const tooltipWidth = 240
+  const tooltipHeight = 180
+  const cellCenter = left + (width / 2)
+  const tooltipLeft = cellCenter - (tooltipWidth / 2)
+
+  const spaceBelow = window.innerHeight - bottom
+  const showAbove = spaceBelow < tooltipHeight + 10
+
+  const tooltipTop = showAbove
+    ? top - tooltipHeight - 8
+    : bottom + 5
+
+  tartCellStyles.value = {
+    style: {
+      left: tooltipLeft + 'px',
+      top: tooltipTop + 'px'
+    },
+    'data-arrow': showAbove ? 'down' : 'up'
+  }
   targetCellEntry.value = entry
 }
 
@@ -476,7 +493,7 @@ watch(
               <button v-if="getCellStatus(student, day.date).code !== '-'"
                 type="button"
                 class="status-menu-toggle"
-                :tooltip="getCellStatus(student, day.date).code !== '-' ? getCellStatus(student, day.date).text : ''"
+                :__tooltip="getCellStatus(student, day.date).code !== '-' ? getCellStatus(student, day.date).text : ''"
                 :flow="index === 0 ? 'left' : 'up'"
                 :aria-label="`Show log for ${student.name || 'student'} on ${day.date}`"
                 @click.stop="openShowLog(buildLogPayload(student, day))"
@@ -511,8 +528,15 @@ watch(
     <!-- <template v-if="true"> -->
       <div id="quick_details" v-bind="tartCellStyles">
         <div class="qd-header">
-          <div class="qd-name">{{ targetCellEntry.student?.name }}</div>
-          <div class="qd-date">{{ moment(targetCellEntry.date).format('DD MMM YYYY') }}</div>
+          <div class="qd-header-top">
+            <div>
+              <div class="qd-name">{{ targetCellEntry.student?.name }}</div>
+              <div class="qd-date">{{ moment(targetCellEntry.date).format('DD MMM YYYY') }}</div>
+            </div>
+            <div class="qd-status-badge" :class="targetCellEntry.status?.class">
+              {{ targetCellEntry.status?.text || '-' }}
+            </div>
+          </div>
         </div>
         <div class="qd-shifts">
           <template v-if="targetCellEntry.byDate?.shiftInfo?.length">
@@ -1051,70 +1075,135 @@ watch(
 #quick_details{
   position: fixed;
   z-index: 9;
-  width: 280px;
+  width: 240px;
   background-color: white;
-  padding: 12px;
-  border-radius: 6px;
+  padding: 8px;
+  border-radius: 5px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  font-size: 13px;
+  font-size: 11px;
+}
+
+#quick_details::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+}
+
+#quick_details[data-arrow="up"]::before {
+  top: -8px;
+  border-bottom: 8px solid white;
+  filter: drop-shadow(0 -2px 2px rgba(0, 0, 0, 0.1));
+}
+
+#quick_details[data-arrow="down"]::before {
+  bottom: -8px;
+  border-top: 8px solid white;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.1));
 }
 
 .qd-header {
-  margin-bottom: 10px;
-  padding-bottom: 8px;
+  margin-bottom: 6px;
+  padding-bottom: 5px;
   border-bottom: 1px solid #e5e7eb;
+}
+
+.qd-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 6px;
 }
 
 .qd-name {
   font-weight: 700;
-  font-size: 13px;
+  font-size: 11px;
   color: #111827;
-  margin-bottom: 4px;
+  margin-bottom: 1px;
 }
 
 .qd-date {
-  font-size: 11px;
+  font-size: 9px;
   color: #6b7280;
+}
+
+.qd-status-badge {
+  flex-shrink: 0;
+  padding: 3px 6px;
+  border-radius: 3px;
+  font-size: 9px;
+  font-weight: 700;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.qd-status-badge.status-present {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.qd-status-badge.status-absent {
+  background-color: #fee2e2;
+  color: #7f1d1d;
+}
+
+.qd-status-badge.status-leave {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.qd-status-badge.status-weekend {
+  background-color: #e5e7eb;
+  color: #374151;
+}
+
+.qd-status-badge.status-vacation {
+  background-color: #e9d5ff;
+  color: #6b21a8;
 }
 
 .qd-shifts {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 5px;
 }
 
 .qd-shift-item {
-  padding: 8px;
+  padding: 5px;
   background-color: #f9fafb;
-  border-radius: 4px;
-  border-left: 3px solid #3b82f6;
+  border-radius: 3px;
+  border-left: 2px solid #3b82f6;
 }
 
 .qd-shift-label {
   font-weight: 600;
-  font-size: 12px;
+  font-size: 10px;
   color: #1f2937;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .qd-shift-time {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  font-size: 12px;
-  margin-bottom: 4px;
+  gap: 5px;
+  font-size: 10px;
+  margin-bottom: 2px;
 }
 
 .qd-time-item {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
 }
 
 .qd-time-label {
   font-weight: 600;
   color: #6b7280;
-  min-width: 28px;
+  min-width: 22px;
 }
 
 .qd-time-val {
@@ -1123,10 +1212,10 @@ watch(
 }
 
 .qd-status {
-  font-size: 11px;
+  font-size: 9px;
   font-weight: 600;
-  padding: 2px 6px;
-  border-radius: 3px;
+  padding: 1px 4px;
+  border-radius: 2px;
   display: inline-block;
 }
 
@@ -1141,9 +1230,9 @@ watch(
 }
 
 .qd-no-shifts {
-  padding: 8px;
+  padding: 5px;
   color: #9ca3af;
-  font-size: 12px;
+  font-size: 10px;
   text-align: center;
 }
 
