@@ -420,6 +420,7 @@ const getHaziraIconColor = (statusCode) => {
     'L': 'Leave',
     'V': 'Vacation',
     'W': 'Weekend',
+    '-': 'Future',
   }
   const statusName = statusMap[statusCode]
   const item = haziraIconSettings.value.find(h => h.status === statusName)

@@ -206,8 +206,8 @@ onMounted(() => {
 <style>
 :root {
   --snakbar-white: #fff;
-  --snakbar-green: #015af0;
-  --snakbar-blue: #2896f3;
+  --snakbar-green: var(--primaryColor);
+  --snakbar-blue: var(--secondaryColor);
   --snakbar-yellow: #bf9303;
   --snakbar-red: #f55153;
   --snakbar-duration: 0.25s;

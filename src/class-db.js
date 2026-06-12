@@ -130,7 +130,7 @@ class myDB {
             { status: 'Present', active_emoji: 'P', emojis: ['P', '✅', '🙋', '✔️', '🟢', '👍'], bg_color: '#16A34A', bg_colors: ['#16A34A', '#DCFCE7', '#86EFAC'] },
             { status: 'Absent', active_emoji: 'A', emojis: ['A', '❌', '🚫', '⛔', '🔴', '🙈'], bg_color: '#DC2626', bg_colors: ['#DC2626', '#FEE2E2', '#FCA5A5'] },
             { status: 'Leave', active_emoji: 'L', emojis: ['L', '📝', '📄', '✈️', '🏖️', '🙏'], bg_color: '#2563EB', bg_colors: ['#2563EB', '#DBEAFE', '#93C5FD'] },
-            { status: 'Weekend', active_emoji: 'W', emojis: ['W', '🎉', '🌴', '😎', '🍹', '🛌'], bg_color: '#F59E0B', bg_colors: ['#F59E0B', '#FEF9C3', '#FCD34D'] },
+            { status: 'Weekend', active_emoji: 'W', emojis: ['W', '🎉', '🌴', '😎', '🍹', '🛌'], bg_color: '#3d4b5e', bg_colors: ['#3d4b5e', '#FEE2E2', '#FCA5A5'] },
             { status: 'Vacation', active_emoji: 'V', emojis: ['V', '🏝️', '✈️', '🧳', '🌞', '📸'], bg_color: '#A855F7', bg_colors: ['#A855F7', '#EDE9FE', '#D8B4FE'] },
             { status: 'Future', active_emoji: '-', emojis: ['-', '⏳', '📅', '🌫️', '🔜', '▫️'], bg_color: 'transparent', bg_colors: ['transparent', '#E5E7EB', '#D1D5DB'] }
         ];
