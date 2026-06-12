@@ -641,16 +641,18 @@ watch(
                 <button v-for="(color, colorIdx) in item.bg_colors" :key="colorIdx"
                   class="color-btn"
                   :class="{ active: color === item.bg_color }"
-                  :style="{ backgroundColor: color }"
+                  :style="{ backgroundColor: color, border: color === 'transparent' ? '2px dashed #d1d5db' : '2px solid #e5e7eb' }"
                   @click="updateHaziraColor(itemIdx, color)"
                   :title="color">
+                  <span v-if="color === 'transparent'" style="font-size: 12px; color: #9ca3af;">-</span>
                 </button>
                 <div class="color-separator"></div>
                 <input type="color"
                   :value="getColorPickerValue(item.bg_color)"
                   @input="updateHaziraColor(itemIdx, $event.target.value)"
                   class="color-picker-input"
-                  :title="'Custom color picker'">
+                  :title="'Custom color picker'"
+                  placeholder="Pick color">
               </div>
             </div>
           </div>
