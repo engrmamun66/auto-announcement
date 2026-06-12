@@ -504,6 +504,7 @@ module.exports = {
     'Sent successfully': 'সফলভাবে পাঠানো হয়েছে',
     'Delete this template?': 'এই টেমপ্লেট মুছতে চান?',
     'Secret key not matched': 'সিক্রেট কী মেলেনি',
+    'Shift Duration': 'শিফটের সময়কাল',
   },
   attendance: {
     vacation_types: [

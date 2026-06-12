@@ -503,6 +503,7 @@ module.exports = {
     'Sent successfully': 'Sent successfully',
     'Delete this template?': 'Delete this template?',
     'Secret key not matched': 'Secret key not matched',
+    'Shift Duration': 'Shift Duration',
   },
   attendance: {
     vacation_types: [

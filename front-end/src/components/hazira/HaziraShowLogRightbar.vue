@@ -21,7 +21,6 @@ const log = console.log
 
 const pickerModelValue = ref(new Date)
 const pendingShiftData = ref(null)
-const showDatePicker = ref(false)
 const defaultStatus = { code: '-', text: 'N/A', class: 'status-empty' }
 
 const activeEntry = computed(() => props.entry || {})
@@ -204,7 +203,6 @@ async function onDateTimePickerChange(data) {
   // Reset and close picker (keep modal open to show updated data)
   pendingShiftData.value = null
   pickerModelValue.value = null
-  showDatePicker.value = false
 
   // Emit event to refresh parent data — rightbar entry updates reactively
   emit('attendance-submitted')
@@ -282,7 +280,7 @@ async function onDateTimePickerChange(data) {
                   <EmDateTimePicker
                     v-if="shift.showPicker"
                     @changeTime="onDateTimePickerChange"
-                    @close="showDatePicker = false"
+                    @close="shift.showPicker = false"
                     :displayFormat="'DD-MMM-Y'"
                     :startDate="activeEntry?.date"
                     :startTime="shift.start"
@@ -290,11 +288,11 @@ async function onDateTimePickerChange(data) {
                     :timePicker="true"
                     :onlyTimePicker="true"
                     :pickTimeFirst="true"
-                    :__invisible="true"
+                    :invisible="true"
                     :autoOpen="true"
                     :timePickerButtons="true"
                     :use24FormatTimeForEvents="true"
-                    displayIn="bottom_left"
+                    displayIn="modal"
                     :buttons="{applyBtn: 'Set Attendance', todayBtn: false}"
                   />  
                 </button>

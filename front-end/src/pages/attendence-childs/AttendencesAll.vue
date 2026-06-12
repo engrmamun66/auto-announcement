@@ -4,6 +4,7 @@ import { inject, ref, reactive, onMounted, onBeforeUnmount, computed, watch } fr
 import Ahelper from "./attendacnceHelper";
 import myTable from '../../components/myTable.vue'
 import Confirm from '../../components/Confirm.vue'
+import Rightbar from '../../components/Rightbar.vue'
 import NormalSearchForm from './deep/NormalSearchForm.vue'
 
 const CONFIG = inject("CONFIG");
@@ -51,6 +52,9 @@ onMounted(()=>{
 let targetItem = ref(null)
 let showDeleteConfirmationModal = ref(false)
 let selectedItems = ref(new Set())
+let showEditModal = ref(false)
+let editingItem = ref(null)
+let editFormData = ref({})
 
 const selectAll = computed({
   get: () => selectedItems.value.size === attendenceList.value?.length && attendenceList.value?.length > 0,
@@ -67,7 +71,43 @@ function prepareToDelete(item){
   targetItem.value = item
   showDeleteConfirmationModal.value = true
   console.log('prepareToDeleteprepareToDelete');
+}
 
+function openEditModal(item){
+  editingItem.value = item
+  editFormData.value = {
+    in_time: item.in_time || '',
+    out_time: item.out_time || '',
+    date: item.date || '',
+    status: item.status || '',
+    shift_duration: item.shift_duration || '',
+    late_in_minute: item.late_in_minute || ''
+  }
+  showEditModal.value = true
+}
+
+async function saveEditedAttendance(){
+  if(!editingItem.value) return
+
+  try {
+    const payload = {
+      id: editingItem.value.id,
+      ...editFormData.value
+    }
+    const response = await http.post('/attendence-update', payload)
+    if(response.status === 200){
+      const index = attendenceList.value.findIndex(item => item.id === editingItem.value.id)
+      if(index > -1){
+        attendenceList.value[index] = {...attendenceList.value[index], ...editFormData.value}
+      }
+      showEditModal.value = false
+      editingItem.value = null
+      emitter.emit('toaster-success', {message: helper.t('Attendance updated!')})
+    }
+  } catch(error){
+    console.error('saveEditedAttendance error:', error)
+    emitter.emit('toaster-error', {message: helper.t('Failed to update attendance')})
+  }
 }
 function deleteAttedence(item, note_text = null){
   http.delete(`/attendence-delete/${item.id}`).then(response => {
@@ -197,12 +237,15 @@ async function deleteMultipleAttendance(){
                 </td>                   
                 <td>{{ Ahelper.printShift(item?.shift_duration) }}</td> 
                                 
-                <td> 
-                  <div class="d-flex justify-content-center action-icons">
-                      <span tooltip="Delete student">
-                        <i @click.stop="prepareToDelete(item)" class='bx bx-trash text-danger cp' ></i>
+                <td>
+                  <div class="d-flex justify-content-center action-icons gap-2">
+                      <span tooltip="Edit attendance">
+                        <i @click.stop="openEditModal(item)" class='bx bx-edit text-primary cp'></i>
                       </span>
-                    </div>  
+                      <span tooltip="Delete attendance">
+                        <i @click.stop="prepareToDelete(item)" class='bx bx-trash text-danger cp'></i>
+                      </span>
+                    </div>
                 </td>                   
                 
             </tr> 
@@ -219,13 +262,54 @@ async function deleteMultipleAttendance(){
         </template>
       </myTable> 
 
-      
+
     </div>
     <Confirm v-model="showDeleteConfirmationModal" @yes="(note_text) => {
       deleteAttedence(targetItem, note_text)
     }" :tekeNote="false" >
             আপনি কি উপস্থিতিটিকে সম্পূর্ণ বাতিল করতে চান?
     </Confirm>
+
+    <!-- Edit Rightbar -->
+    <Rightbar v-if="showEditModal" title="Edit Attendance" @unmount="showEditModal = false" :largestMode="false">
+      <div class="edit-form">
+        <div class="form-group">
+          <label>{{ helper.t('Date') }}</label>
+          <input v-model="editFormData.date" type="date" class="form-control" />
+        </div>
+        <div class="form-group">
+          <label>{{ helper.t('In Time') }}</label>
+          <input v-model="editFormData.in_time" type="time" class="form-control" />
+        </div>
+        <div class="form-group">
+          <label>{{ helper.t('Out Time') }}</label>
+          <input v-model="editFormData.out_time" type="time" class="form-control" />
+        </div>
+        <div class="form-group">
+          <label>{{ helper.t('Status') }}</label>
+          <select v-model="editFormData.status" class="form-control">
+            <option value="">{{ helper.t('Select Status') }}</option>
+            <option value="Present">{{ helper.t('Present') }}</option>
+            <option value="Absent">{{ helper.t('Absent') }}</option>
+            <option value="Late">{{ helper.t('Late') }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>{{ helper.t('Shift Duration') }}</label>
+          <input v-model="editFormData.shift_duration" type="text" class="form-control" />
+        </div>
+        <div class="form-group">
+          <label>{{ helper.t('Late') }}</label>
+          <input v-model="editFormData.late_in_minute" type="number" class="form-control" />
+        </div>
+      </div>
+      <template #footer>
+        <div class="d-flex gap-2 justify-content-start mt-2">
+          <button class="btn btn-secondary" @click="showEditModal = false">{{ helper.t('Cancel') }}</button>
+          <button class="btn btn-primary" @click="saveEditedAttendance">{{ helper.t('Save') }}</button>
+        </div>
+      </template>
+    </Rightbar>
   </div>
 </template>
 
