@@ -574,8 +574,8 @@ watch(
                 class="status-pill"
                 :style="{
                   backgroundColor: getHaziraIconColor(getCellStatus(student, day.date).code).bgColor,
-                  color: getCellStatus(student, day.date).code === '-' ? '#000000' : '#ffffff',
-                  border: getCellStatus(student, day.date).code === '-' ? '1px solid #d1d5db' : 'none'
+                  color: getCellStatus(student, day.date).code === '-' ? '#6b7280' : '#ffffff',
+                  border: 'none'
                 }"
                 :tooltip="getCellStatus(student, day.date).code !== '-' ? getCellStatus(student, day.date).text : ''"
                 :flow="index === 0 ? 'left' : 'up'"
