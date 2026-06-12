@@ -193,6 +193,27 @@ function openShowLog(entry) {
   selectedLogEntry.value = entry
   showLogRightbar.value = true
 }
+let tartCellStyles = ref({
+  style: { }
+})
+let targetCellEntry = ref(null)
+
+function formatTime(value) {
+  if (!value) return '-'
+  const time = moment(value, ['HH:mm:ss', 'HH:mm'], true)
+  return time.isValid() ? time.format('hh:mm A') : value
+}
+
+function startPreview(target, entry, index, isLast) {
+  let { top, bottom, left, width } = target.getBoundingClientRect()
+  tartCellStyles.value.style['left'] = (left - 140) + 'px'
+  tartCellStyles.value.style['top'] = (bottom + -1) + 'px'
+  targetCellEntry.value = entry
+}
+
+function endPreview() {
+  targetCellEntry.value = null
+}
 
 function closeShowLog() {
   showLogRightbar.value = false
@@ -459,13 +480,15 @@ watch(
                 :flow="index === 0 ? 'left' : 'up'"
                 :aria-label="`Show log for ${student.name || 'student'} on ${day.date}`"
                 @click.stop="openShowLog(buildLogPayload(student, day))"
+                @mouseover.stop="startPreview($event.target, buildLogPayload(student, day), index, index === dailyLogs.length - 1)"
+                @mouseleave.stop="endPreview()"
                 @auxclick="log({
                   student,
                   date: day.date,
                   text: getCellStatus(student, day.date).code,
                 })"
               >
-                <i class='bx bx-info-circle'></i>
+                <i class='bx bx-info-circle nc'></i>
               </button>
             </div>
           </div>
@@ -483,6 +506,39 @@ watch(
       @unmount="closeShowLog"
       @attendance-submitted="loadDailyLogs(selectedClassShort)"
     />
+
+    <template v-if="targetCellEntry">
+    <!-- <template v-if="true"> -->
+      <div id="quick_details" v-bind="tartCellStyles">
+        <div class="qd-header">
+          <div class="qd-name">{{ targetCellEntry.student?.name }}</div>
+          <div class="qd-date">{{ moment(targetCellEntry.date).format('DD MMM YYYY') }}</div>
+        </div>
+        <div class="qd-shifts">
+          <template v-if="targetCellEntry.byDate?.shiftInfo?.length">
+            <div v-for="(shift, idx) in targetCellEntry.byDate.shiftInfo" :key="idx" class="qd-shift-item">
+              <div class="qd-shift-label">Shift {{ idx + 1 }}</div>
+              <div class="qd-shift-time">
+                <div class="qd-time-item">
+                  <span class="qd-time-label">In:</span>
+                  <span class="qd-time-val">{{ formatTime(shift?.attendance?.in_time) }}</span>
+                </div>
+                <div class="qd-time-item">
+                  <span class="qd-time-label">Out:</span>
+                  <span class="qd-time-val">{{ formatTime(shift?.attendance?.out_time)}}</span>
+                </div>
+              </div>
+              <!-- <div v-if="shift.is_present" class="qd-status present">Present</div>
+              <div v-else class="qd-status absent">Absent</div> -->
+            </div>
+          </template>
+          <template v-else>
+            <div class="qd-no-shifts">No shifts</div>
+          </template>
+        </div>
+      </div>
+    </template>
+
   </div>
 </template>
 
@@ -820,8 +876,8 @@ watch(
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 30px;
-  height: 30px;
+  width: 37px;
+  height: 37px;
   padding: 0;
   border: 1px solid rgba(255, 255, 255, 0.42);
   border-radius: 0px;
@@ -991,4 +1047,104 @@ watch(
   font-weight: 400;
   opacity: 0.8;
 }
+
+#quick_details{
+  position: fixed;
+  z-index: 9;
+  width: 280px;
+  background-color: white;
+  padding: 12px;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  font-size: 13px;
+}
+
+.qd-header {
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.qd-name {
+  font-weight: 700;
+  font-size: 13px;
+  color: #111827;
+  margin-bottom: 4px;
+}
+
+.qd-date {
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.qd-shifts {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.qd-shift-item {
+  padding: 8px;
+  background-color: #f9fafb;
+  border-radius: 4px;
+  border-left: 3px solid #3b82f6;
+}
+
+.qd-shift-label {
+  font-weight: 600;
+  font-size: 12px;
+  color: #1f2937;
+  margin-bottom: 4px;
+}
+
+.qd-shift-time {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+.qd-time-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.qd-time-label {
+  font-weight: 600;
+  color: #6b7280;
+  min-width: 28px;
+}
+
+.qd-time-val {
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.qd-status {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 3px;
+  display: inline-block;
+}
+
+.qd-status.present {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.qd-status.absent {
+  background-color: #fee2e2;
+  color: #7f1d1d;
+}
+
+.qd-no-shifts {
+  padding: 8px;
+  color: #9ca3af;
+  font-size: 12px;
+  text-align: center;
+}
+
 </style>
