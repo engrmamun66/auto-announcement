@@ -325,6 +325,14 @@ const helper = {
       str = String(str);
       return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()
     },
+    lower: (str) => {
+      if(!str) return '' 
+      return str.toLowerCase()
+    },
+    upper: (str) => {
+      if(!str) return '' 
+      return str.toUpperCase()
+    },
     wordForm: function (word, number) {
       if (number >= -1 && number <= 1) return word;
       else return `${word}s`;

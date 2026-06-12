@@ -1,7 +1,8 @@
 <script setup>
 import moment from 'moment/moment'
-import { computed, inject } from 'vue'
+import { computed, inject, ref, nextTick, reactive } from 'vue'
 import Rightbar from '../Rightbar.vue'
+import EmDateTimePicker from '../EmDateTimePicker.vue'
 
 const props = defineProps({
   entry: {
@@ -10,9 +11,17 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['unmount'])
+const emit = defineEmits(['unmount', 'attendance-submitted'])
 const CONFIG = inject('CONFIG', { value: {} })
 const helper = inject('helper')
+const punchToSubmitAttendance = inject('punchToSubmitAttendance')
+const makeCarcode = inject('makeCarcode')
+const http = inject('http')
+const log = console.log
+
+const pickerModelValue = ref(new Date)
+const pendingShiftData = ref(null)
+const showDatePicker = ref(false)
 const defaultStatus = { code: '-', text: 'N/A', class: 'status-empty' }
 
 const activeEntry = computed(() => props.entry || {})
@@ -124,12 +133,81 @@ function shiftTitle(shift, index) {
 
 function shiftDuration(shift) {
   if (shift?.attendance?.shift_duration) return shift.attendance.shift_duration
-  if (shift?.start || shift?.end) return `${shift?.start || '-'} - ${shift?.end || '-'}`
+  if (shift?.start || shift?.end) return `${moment(shift?.start, 'HH:mm').format('hh:mm A') || '-'} - ${moment(shift?.end, 'HH:mm').format('hh:mm A') || '-'}`
   return '-'
 }
 
 function leaveType(leave) {
   return leave?.type || 'leave'
+}
+
+let start_date = ref(new Date)
+let start_time = ref(new Date)
+
+async function openPicker(shift) {
+  pendingShiftData.value = shift
+  shift.showPicker = true
+}
+
+async function deleteAttendance(shift) {
+  if (!shift?.attendance?.id) return
+  if (!confirm(helper.t('Delete this attendance?'))) return
+
+  try {
+    const date = activeEntry.value?.date
+    // Use stored shift_duration from attendance record
+    const shiftDuration = shift?.attendance?.shift_duration
+    // Use dakhela (stored in attendance table), not database id
+    const studentId = student.value?.dakhela
+
+    if (!shiftDuration) {
+      console.error('Missing shift_duration')
+      return
+    }
+
+    // Delete all records for shift (IN + OUT) by criteria
+    await http.delete(`/attendence-delete/${shift.attendance.id}`, {
+      data: {
+        student_id: studentId,
+        date: date,
+        shift_duration: shiftDuration
+      }
+    })
+
+    // Refresh parent data
+    emit('attendance-submitted')
+  } catch (error) {
+    console.error('Delete attendance error:', error)
+    alert('Failed to delete attendance')
+  }
+}
+
+async function onDateTimePickerChange(data) {
+  if (!pendingShiftData.value) return
+
+  const in_punchTime = moment(data.startDateTime).format('YYYY-MM-DD HH:mm:ss')
+  const punchDate = moment(data.startDateTime).format('YYYY-MM-DD')
+  const out_punchTime = moment(`${punchDate} ${pendingShiftData.value.end}`, 'YYYY-MM-DD HH:mm').format('YYYY-MM-DD HH:mm:ss')
+  await punchToSubmitAttendance(makeCarcode(student.value), {
+    source: 'manual_button',
+    delay: 0,
+    punch_time: in_punchTime,
+    skipSms: false,
+  })
+  await punchToSubmitAttendance(makeCarcode(student.value), {
+    source: 'manual_button',
+    delay: 0,
+    punch_time: out_punchTime,
+    skipSms: false,
+  })
+
+  // Reset and close picker (keep modal open to show updated data)
+  pendingShiftData.value = null
+  pickerModelValue.value = null
+  showDatePicker.value = false
+
+  // Emit event to refresh parent data — rightbar entry updates reactively
+  emit('attendance-submitted')
 }
 </script>
 
@@ -155,23 +233,27 @@ function leaveType(leave) {
         </div>
 
         <div class="log-rule">
-          <span class="log-rule__label">Present Rule</span>
+          <span class="log-rule__label">{{ helper.t('Present Rule') }}</span>
           <span class="log-rule__value">{{ attendancePresetRuleLabel }}</span>
         </div>
       </div>
 
       <section class="log-section">
-        <div class="section-title">Day Summary</div>
+        <div class="section-title">{{ helper.t('Day Summary') }}</div>
         <div class="summary-grid">
-          <div v-for="item in summaryItems" :key="item.label" class="summary-card">
-            <span>{{ item.label }}</span>
-            <strong>{{ item.value }}</strong>
-          </div>
+          <template v-for="(item, i) in summaryItems" :key="item.label">
+            <template v-if="['Weekend', 'Presentable', 'Shift Logs', 'In/Out Count', 'Leave Entries'].includes(item.label)">
+              <div class="summary-card" @click="log(item.label)">
+                <span>{{ item.label }}</span>
+                <strong>{{ item.value }}</strong>
+              </div>
+            </template>
+          </template>
         </div>
       </section>
 
       <section class="log-section">
-        <div class="section-title">Shift Logs</div>
+        <div class="section-title">{{ helper.t('Shift Logs') }}</div>
 
         <template v-if="shiftInfo.length">
           <div
@@ -185,27 +267,67 @@ function leaveType(leave) {
                 <div class="shift-subtitle">{{ shiftDuration(shift) }}</div>
               </div>
 
-              <span class="shift-state" :class="{ present: shift?.is_present }">
-                {{ shift?.is_present ? 'Present' : 'Missing' }}
-              </span>
+              <div class="shift-card__actions">
+                <span class="shift-state" :class="{ present: shift?.is_present }">
+                  {{ shift?.is_present ? helper.t('Present') : helper.t('Missing') }}
+                </span>
+                <button
+                  v-if="!shift?.attendance?.id"
+                  class="add-attendance-btn-inline"
+                  @click.stop="openPicker(shift)"
+                  title="Add attendance for this shift"
+                >
+                  {{ helper.t('+ Add') }}
+                 
+                  <EmDateTimePicker
+                    v-if="shift.showPicker"
+                    @changeTime="onDateTimePickerChange"
+                    @close="showDatePicker = false"
+                    :displayFormat="'DD-MMM-Y'"
+                    :startDate="activeEntry?.date"
+                    :startTime="shift.start"
+                    :rangePicker="false"
+                    :timePicker="true"
+                    :onlyTimePicker="true"
+                    :pickTimeFirst="true"
+                    :__invisible="true"
+                    :autoOpen="true"
+                    :timePickerButtons="true"
+                    :use24FormatTimeForEvents="true"
+                    displayIn="bottom_left"
+                    :buttons="{applyBtn: 'Set Attendance', todayBtn: false}"
+                  />  
+                </button>
+              </div>
             </div>
 
             <div class="shift-grid">
               <div>
-                <span>In Time</span>
+                <span>{{ helper.t('In Time') }}</span>
                 <strong>{{ formatTime(shift?.attendance?.in_time) }}</strong>
               </div>
               <div>
-                <span>Out Time</span>
+                <span>{{ helper.t('Out Time') }}</span>
                 <strong>{{ formatTime(shift?.attendance?.out_time) }}</strong>
               </div>
               <div>
-                <span>Status</span>
-                <strong>{{ shift?.attendance?.status || (shift?.is_present ? 'Present' : 'Absent') }}</strong>
+                <span>{{ helper.t('Status') }}</span>
+                <strong>{{ shift?.attendance?.status || (shift?.is_present ? helper.t('Present') : helper.t('Absent')) }}</strong>
               </div>
               <div>
-                <span>Late</span>
+                <span>{{ helper.t('Late') }}</span>
                 <strong>{{ formatLateMinute(shift?.attendance?.late_in_minute) }}</strong>
+              </div>
+              <div v-if="shift?.attendance?.id" class="shift-action">
+                <span>&nbsp;</span>
+                <button
+                  type="button"
+                  class="delete-btn"
+                  @click="deleteAttendance(shift)"
+                  :title="helper.t('Delete')"
+                >
+                  <i class="bx bx-trash"></i>
+                </button>
               </div>
             </div>
 
@@ -214,19 +336,19 @@ function leaveType(leave) {
                 {{ shift.attendance.remarks }}
               </div>
               <div v-if="shift?.attendance?.created" class="shift-created">
-                Logged {{ formatDateTime(shift.attendance.created) }}
+                {{ helper.t('Logged') }} {{ formatDateTime(shift.attendance.created) }}
               </div>
             </div>
           </div>
         </template>
 
         <div v-else class="empty-card">
-          No shift logs are available for this date.
+          {{ helper.t('No shift logs are available for this date.') }}
         </div>
       </section>
 
       <section v-if="leaveEntries.length" class="log-section">
-        <div class="section-title">Leave Entries</div>
+        <div class="section-title">{{ helper.t('Leave Entries') }}</div>
 
         <div class="leave-list">
           <div
@@ -238,10 +360,12 @@ function leaveType(leave) {
               <span class="leave-type">{{ leaveType(leave) }}</span>
               <span class="leave-date">{{ leave?.date || activeEntry?.date || '-' }}</span>
             </div>
-            <div class="leave-reason">{{ leave?.reason || leave?.title || 'No reason provided' }}</div>
+            <div class="leave-reason">{{ leave?.reason || leave?.title || helper.t('No reason provided') }}</div>
           </div>
         </div>
       </section>
+
+      
     </div>
   </Rightbar>
 </template>
@@ -254,6 +378,7 @@ function leaveType(leave) {
 }
 
 .log-hero{
+  position: relative;
   display: grid;
   grid-template-columns: 72px 1fr;
   gap: 14px;
@@ -292,7 +417,9 @@ function leaveType(leave) {
 }
 
 .log-status{
-  grid-column: 1 / -1;
+  position: absolute;
+  top: 16px;
+  right: 16px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -409,6 +536,13 @@ function leaveType(leave) {
   gap: 10px;
 }
 
+.shift-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
 .shift-title{
   font-size: 15px;
   font-weight: 800;
@@ -446,11 +580,55 @@ function leaveType(leave) {
   gap: 5px;
 }
 
+.shift-action{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.delete-btn{
+  padding: 6px 8px;
+  border: 1px solid #dc2626;
+  background: #fee2e2;
+  color: #dc2626;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.delete-btn:hover{
+  background: #fecaca;
+  border-color: #b91c1c;
+  color: #b91c1c;
+}
+
 .shift-footer{
   display: grid;
   gap: 6px;
   padding-top: 10px;
   border-top: 1px dashed #dbe3ef;
+}
+
+.add-attendance-btn-inline {
+  padding: 5px 10px;
+  border: none;
+  background: #1e293b;
+  color: #ffffff;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.add-attendance-btn-inline:hover {
+  background: #0f172a;
 }
 
 .shift-remarks,

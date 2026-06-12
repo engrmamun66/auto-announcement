@@ -3,7 +3,9 @@
     "allow": [
       "Bash(npm install:*)",
       "Bash(lsof -ti:2424)",
-      "Bash(xargs kill -9)"
+      "Bash(xargs kill -9)",
+      "Bash(find /Users/mamun -name \"pickerStore.js\" 2>/dev/null)",
+      "Read(//Users/mamun/**)"
     ]
   }
 }

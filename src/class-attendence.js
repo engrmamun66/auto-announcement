@@ -241,35 +241,44 @@ class Attendance {
     // Delete attendance
     delete(req, res) {
       const { id } = req.params;
-      if (!id) return res.status(400).send({ error: "ID required." });
-  
-      const query = `DELETE FROM ${this.tableName} WHERE id = ?`;
-      this.db.run(query, [id], function (err) {
-        if (err) return res.status(500).send({ error: err.message });
-        res.send({ message: "Attendance deleted.", deleted: this.changes });
-      });
+      const { student_id, date, shift_duration } = req.body || {};
+
+      // Delete all records for shift (handles both IN and OUT times)
+      if (student_id && date && shift_duration) {
+        const query = `DELETE FROM ${this.tableName} WHERE student_id = ? AND date = ? AND shift_duration = ?`;
+        this.db.run(query, [student_id, date, shift_duration], function (err) {
+          if (err) return res.status(500).send({ error: err.message });
+          res.send({ message: "Attendance deleted.", deleted: this.changes });
+        });
+      } else if (id) {
+        // Fallback: delete by ID only
+        const query = `DELETE FROM ${this.tableName} WHERE id = ?`;
+        this.db.run(query, [id], function (err) {
+          if (err) return res.status(500).send({ error: err.message });
+          res.send({ message: "Attendance deleted.", deleted: this.changes });
+        });
+      } else {
+        return res.status(400).send({ error: "ID or shift details required." });
+      }
     }
 
 
     // Delete attendance
     deleteBulk(req, res) {
+      const { ids } = req.body;
 
-      const { student_ids, start_date, end_date } = req.query;
-      if (!student_ids || !start_date || !end_date) {
-        return res.status(400).send({ error: "student_ids, start_date, and end_date are required for bulk deletion." });
+      if (!ids || !Array.isArray(ids) || ids.length === 0) {
+        return res.status(400).send({ error: "ids array is required for bulk deletion." });
       }
 
-      const ids = Array.isArray(student_ids)
-        ? student_ids.map(Number).filter(Boolean)
-        : String(student_ids).split(",").map(Number).filter(Boolean);
-
-      if (ids.length === 0) {
-        return res.status(400).send({ error: "No valid student IDs provided." });
+      const recordIds = ids.map(Number).filter(Boolean);
+      if (recordIds.length === 0) {
+        return res.status(400).send({ error: "No valid record IDs provided." });
       }
 
-      const placeholders = ids.map(() => '?').join(',');
-      const query = `DELETE FROM ${this.tableName} WHERE student_id IN (${placeholders}) AND date BETWEEN ? AND ?`;
-      const params = [...ids, start_date, end_date];
+      const placeholders = recordIds.map(() => '?').join(',');
+      const query = `DELETE FROM ${this.tableName} WHERE id IN (${placeholders})`;
+      const params = recordIds;
 
       this.db.run(query, params, function (err) {
         if (err) {
@@ -277,7 +286,6 @@ class Attendance {
         }
         res.send({ message: `Deleted ${this.changes} attendance records.`, deletedCount: this.changes });
       });
- 
     }
 
 
@@ -693,14 +701,25 @@ class Attendance {
 
               let shiftInfo = student_shifts.map(shift => {
                 let duration_text  = `${shift.start} - ${shift.end}`
-                let find = date_wide_attendace.find(att => att.shift_duration === duration_text)
+                // Get all records for this shift (may have separate IN/OUT records)
+                let shiftRecords = date_wide_attendace.filter(att => att.shift_duration === duration_text)
+                // Merge IN and OUT times from multiple records
+                let merged = null
+                if (shiftRecords.length > 0) {
+                  merged = { ...shiftRecords[0] }
+                  // Combine in_time and out_time from all records
+                  shiftRecords.forEach(record => {
+                    if (record.in_time) merged.in_time = record.in_time
+                    if (record.out_time) merged.out_time = record.out_time
+                  })
+                }
                 let shiftItem = {
                   ...shift,
-                  is_present: Boolean(find),
-                  attendance: find ? { ...find } : null,
+                  is_present: Boolean(merged),
+                  attendance: merged,
                 }
                 if(!attendance){
-                  attendance = find || null
+                  attendance = merged || null
                 }
                 return shiftItem
               })

@@ -51,7 +51,7 @@ let toggling = ref(false);
 function unmount(){
     document.body.click() // to hide datePickers
     isMounted.value = false;
-    setTimeout(()=> emits('unmount', null), 750);
+    setTimeout(()=> emits('unmount', null), 350);
 }
 function toggle(){
     isMounted.value = !isMounted.value;
@@ -194,7 +194,7 @@ defineExpose({unmount})
     background-color: var(--bg-light);
     border-top-left-radius: 15px;
     border-bottom-left-radius: 15px;
-    transition: transform 0.8s;
+    transition: transform 0.4s;
     border-top: 1px solid #252525;
     z-index: 99;
 }

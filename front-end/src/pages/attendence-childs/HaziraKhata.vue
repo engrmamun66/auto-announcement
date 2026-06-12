@@ -1,7 +1,7 @@
 
 <script setup>
 import moment from 'moment/moment'
-import { inject, ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from "vue";
+import { inject, ref, computed, watch, onMounted, onBeforeUnmount, nextTick, provide } from "vue";
 import MonthPickerSingle from '../../components/MonthPickerSingle.vue'
 import HaziraShowLogRightbar from '../../components/hazira/HaziraShowLogRightbar.vue'
 
@@ -285,6 +285,18 @@ async function loadDailyLogs(classShortOverride = null) {
     }))
     await nextTick()
     updateScrollControls()
+
+    // Refresh rightbar entry if modal is open (show updated attendance)
+    if (showLogRightbar.value && selectedLogEntry.value) {
+      const updatedStudent = dailyLogs.value.find(s => s.dakhela === selectedLogEntry.value.student?.dakhela)
+      if (updatedStudent) {
+        selectedLogEntry.value = buildLogPayload(updatedStudent, {
+          date: selectedLogEntry.value.date,
+        })
+      }
+    } 
+
+
   } catch (error) {
     if (currentId !== requestId) return
     console.warn('HaziraKhata__error', error)
@@ -421,11 +433,11 @@ watch(
           </div>
         </div>
 
-        <div v-for="(student, studentIndex) in dailyLogs" :key="student.dakhela" class="daily-grid-row">
+        <div v-for="(student, index) in dailyLogs" :key="student.dakhela" class="daily-grid-row">
           <div class="daily-grid-cell sticky-col student-cell">
             <div class="student-name">{{ student.name || '-' }} ({{ student.dakhela  }})</div>
           </div>
-          <div v-for="(day) in dayColumns" :key="day.date" class="daily-grid-cell day-cell">
+          <div v-for="(day, index2) in dayColumns" :key="day.date" class="daily-grid-cell day-cell">
             <div
               class="status-cell"
               :class="{ 'is-interactive': getCellStatus(student, day.date).code !== '-' }"
@@ -434,7 +446,7 @@ watch(
                 class="status-pill"
                 :class="getCellStatus(student, day.date).class"
                 :tooltip="getCellStatus(student, day.date).code !== '-' ? getCellStatus(student, day.date).text : ''"
-                :flow="studentIndex === 0 ? 'left' : 'up'"
+                :flow="index === 0 ? 'left' : 'up'"
                 style="--tfsize:11px"
               >
                 {{ getCellStatus(student, day.date).code }}
@@ -444,7 +456,7 @@ watch(
                 type="button"
                 class="status-menu-toggle"
                 :tooltip="getCellStatus(student, day.date).code !== '-' ? getCellStatus(student, day.date).text : ''"
-                :flow="studentIndex === 0 ? 'left' : 'up'"
+                :flow="index === 0 ? 'left' : 'up'"
                 :aria-label="`Show log for ${student.name || 'student'} on ${day.date}`"
                 @click.stop="openShowLog(buildLogPayload(student, day))"
                 @auxclick="log({
@@ -469,6 +481,7 @@ watch(
       v-if="showLogRightbar && selectedLogEntry"
       :entry="selectedLogEntry"
       @unmount="closeShowLog"
+      @attendance-submitted="loadDailyLogs(selectedClassShort)"
     />
   </div>
 </template>
@@ -811,7 +824,7 @@ watch(
   height: 30px;
   padding: 0;
   border: 1px solid rgba(255, 255, 255, 0.42);
-  border-radius: 999px;
+  border-radius: 0px;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.04)),
     rgba(15, 23, 42, 0.34);

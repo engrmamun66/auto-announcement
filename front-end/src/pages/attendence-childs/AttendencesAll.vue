@@ -50,6 +50,18 @@ onMounted(()=>{
 
 let targetItem = ref(null)
 let showDeleteConfirmationModal = ref(false)
+let selectedItems = ref(new Set())
+
+const selectAll = computed({
+  get: () => selectedItems.value.size === attendenceList.value?.length && attendenceList.value?.length > 0,
+  set: (val) => {
+    if (val) {
+      selectedItems.value = new Set(attendenceList.value?.map(item => item.id) || [])
+    } else {
+      selectedItems.value.clear()
+    }
+  }
+})
 
 function prepareToDelete(item){
   targetItem.value = item
@@ -65,6 +77,36 @@ function deleteAttedence(item, note_text = null){
       emitter.emit('toaster-success', {message: helper.t('Attendance deleted!')})
     }
   })
+}
+
+async function toggleItemSelection(itemId, checked){
+  if(checked){
+    selectedItems.value.add(itemId)
+  } else {
+    selectedItems.value.delete(itemId)
+  }
+  selectedItems.value = new Set(selectedItems.value)
+}
+
+async function deleteMultipleAttendance(){
+  if(selectedItems.value.size === 0) return
+
+  const count = selectedItems.value.size
+  if(!confirm(helper.t(`Delete {count} attendance record(s)?`, {count}))) return
+
+  try {
+    const itemIds = Array.from(selectedItems.value)
+    await http.delete('/attendence-delete-bulk', { data: { ids: itemIds } })
+
+    liveAttendenceList.value = liveAttendenceList.value.filter(_item => !selectedItems.value.has(_item.id))
+    attendenceList.value = attendenceList.value.filter(_item => !selectedItems.value.has(_item.id))
+    selectedItems.value.clear()
+
+    emitter.emit('toaster-success', {message: helper.t(`{count} attendance record(s) deleted!`, {count})})
+  } catch(error){
+    console.error('deleteMultipleAttendance error:', error)
+    emitter.emit('toaster-error', {message: helper.t('Failed to delete records')})
+  }
 }
 
 
@@ -90,16 +132,27 @@ function deleteAttedence(item, note_text = null){
      
     
     <div class="col-md-8">
+      <div v-if="selectedItems.size > 0" class="d-flex gap-2 mb-3">
+        <button class="btn btn-sm btn-danger" @click="deleteMultipleAttendance">
+          <i class='bx bx-trash'></i> Delete Selected ({{ selectedItems.size }})
+        </button>
+        <button class="btn btn-sm btn-secondary" @click="selectedItems.clear()">
+          Clear Selection
+        </button>
+      </div>
       <myTable topMarginClass="">
         <template #thead>
           <thead>
-            <tr> 
+            <tr>
+              <th style="width: 40px;">
+                <input type="checkbox" v-model="selectAll" />
+              </th>
               <th>Name</th>
-              <th>Class</th>  
-              <th>Date</th>  
-              <th>Summarised Status</th>  
-              <th>Shift</th>  
-              <th>Action</th>  
+              <th>Class</th>
+              <th>Date</th>
+              <th>Summarised Status</th>
+              <th>Shift</th>
+              <th>Action</th>
             </tr>
           </thead>
         </template>
@@ -107,7 +160,9 @@ function deleteAttedence(item, note_text = null){
           <template v-if="attendenceList?.length">
             <template v-for="(item, i) in attendenceList">
               <tr>
-                  
+                <td style="width: 40px;">
+                  <input type="checkbox" :checked="selectedItems.has(item.id)" @change="e => toggleItemSelection(item.id, e.target.checked)" />
+                </td>
                 <td @auxclick.stop="log(item)"> 
                   <span @click.stop="NormalSearchFormRef.udpateSelectedStudentAndSearch(getStudent(item))" class="badge text-white bg-secondary cp" tooltip="Student ID">
                     {{ getStudent(item)?.dakhela }}
