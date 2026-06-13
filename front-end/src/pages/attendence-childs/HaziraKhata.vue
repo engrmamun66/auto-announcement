@@ -426,7 +426,7 @@ function startPreview(target, entry, index, isLast) {
 
     const tooltipTop = showAbove
       ? top - tooltipHeight - 10
-      : bottom + 5
+      : bottom + 10
 
     tartCellStyles.value = {
       style: {
@@ -1574,13 +1574,16 @@ watch(
 }
 
 #quick_details{
+  --qdcolor: #ffffff;
+}
+#quick_details{
   position: fixed;
   z-index: 9;
   width: 240px;
-  background-color: white;
+  background-color: var(--qdcolor);
   padding: 8px;
   border-radius: 5px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.555);
   font-size: 11px;
 }
 
@@ -1597,13 +1600,13 @@ watch(
 
 #quick_details[data-arrow="up"]::before {
   top: -8px;
-  border-bottom: 8px solid white;
+  border-bottom: 8px solid var(--qdcolor);
   filter: drop-shadow(0 -2px 2px rgba(0, 0, 0, 0.1));
 }
 
 #quick_details[data-arrow="down"]::before {
   bottom: -8px;
-  border-top: 8px solid white;
+  border-top: 8px solid var(--qdcolor);
   filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.1));
 }
 
