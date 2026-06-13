@@ -36,13 +36,11 @@ watch(tab, (tabindex) => {
 })
 
 function handleTabChange(newTab) {
-  const query = { ...route.query }
-  delete query.classShort
-  delete query.type
+  const query =  route.query.dev ? {dev: route.query.dev} : {}
 
   router.push({
+    query,
     path: route.path,
-    query
   })
 
   tab.value = newTab

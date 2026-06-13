@@ -32,8 +32,33 @@ const attendancePresetCountBy = computed(() => {
 console.log('=====:::ReportingOverview.vue')
 
 const log = console.log
-let defaultStart = ref(moment().startOf('month').format('Y-MM-DD'))
-let defaultEnd = ref(moment().add(0, 'month').endOf('month').format('Y-MM-DD'))
+let defaultStart = ref(route?.query?.start_date || moment().startOf('month').format('Y-MM-DD'))
+let defaultEnd = ref(route?.query?.end_date || moment().add(0, 'month').endOf('month').format('Y-MM-DD'))
+
+// Sync query params to localStorage so MonthPicker reads correct values
+watch(() => route.query.start_date, (newStartDate) => {
+  if (newStartDate) {
+    const startMoment = moment(newStartDate, 'YYYY-MM-DD')
+    const endMoment = route.query.end_date
+      ? moment(route.query.end_date, 'YYYY-MM-DD')
+      : startMoment.clone().endOf('month')
+
+    // Set localStorage to override MonthPicker's saved preference
+    const payload = {
+      startYear: startMoment.year(),
+      startMonth: startMoment.month(),
+      endYear: endMoment.year(),
+      endMonth: endMoment.month(),
+    }
+    if (typeof window !== 'undefined' && window.localStorage) {
+      window.localStorage.setItem('monthPickerRange', JSON.stringify(payload))
+    }
+
+    // Also update refs
+    defaultStart.value = newStartDate
+    defaultEnd.value = endMoment.format('Y-MM-DD')
+  }
+}, { immediate: true })
 
 function checkEndDate(){
   let end = moment(defaultEnd.value, 'YYYY-MM-DD');

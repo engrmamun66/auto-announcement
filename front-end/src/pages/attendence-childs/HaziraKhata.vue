@@ -321,7 +321,7 @@ function toggleStudentMenu(dakhela, event) {
   })
 }
 
-function navigateTo(item, tab, { _for = 'student', route_path = route.path, type = 'month' } = {}) {
+function navigateTo(item, tab, { _for = 'student', route_path = route.path, type = 'month', start_date = null, end_date = null } = {}) {
   activeStudentMenu.value = null
   activeClassMenu.value = null
   parent_tab.value = tab
@@ -336,8 +336,21 @@ function navigateTo(item, tab, { _for = 'student', route_path = route.path, type
     delete query.dakhela
   }
 
+  // Get month from MonthPickerSingle if available
+  if (!start_date && monthPickerRef.value?.monthValue) {
+    const pickedMonth = monthPickerRef.value.monthValue
+    start_date = pickedMonth.clone().startOf('month').format('YYYY-MM-DD')
+  }
+
   if (type) {
     query.type = type
+  }
+
+  if (start_date) {
+    query.start_date = start_date
+  }
+  if (end_date) {
+    query.end_date = end_date
   }
 
   router.push({
@@ -660,7 +673,7 @@ watch(
                             <i class='bx bx-calendar'></i> {{ helper.t('Monthly Report') }}
                         </button>
                         <button class="menu-item" @click.stop="navigateTo(cls, 4, { _for: 'class', type: 'summary' })">
-                            <i class='bx bx-file-blank'></i> {{ helper.t('Summary Report') }}
+                            <i class='bx bx-calendar'></i> {{ helper.t('Summary Report') }}
                         </button>
                         <button class="menu-item" @click.stop="navigateTo(cls, 4, { _for: 'class', type: 'chart' })">
                             <i class='bx bx-bar-chart'></i> {{ helper.t('Chart Report') }}
