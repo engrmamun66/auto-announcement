@@ -410,27 +410,32 @@ function formatTime(value) {
 }
 
 function startPreview(target, entry, index, isLast) {
-  let { top, bottom, left, width } = target.getBoundingClientRect()
-  const tooltipWidth = 240
-  const tooltipHeight = 180
-  const cellCenter = left + (width / 2)
-  const tooltipLeft = cellCenter - (tooltipWidth / 2)
-
-  const spaceBelow = window.innerHeight - bottom
-  const showAbove = spaceBelow < tooltipHeight + 10
-
-  const tooltipTop = showAbove
-    ? top - tooltipHeight - 40
-    : bottom + 5
-
-  tartCellStyles.value = {
-    style: {
-      left: tooltipLeft + 'px',
-      top: tooltipTop + 'px'
-    },
-    'data-arrow': showAbove ? 'down' : 'up'
-  }
   targetCellEntry.value = entry
+
+  nextTick(() => {
+    const quickDetails = document.getElementById('quick_details')
+    const tooltipHeight = quickDetails ? quickDetails.offsetHeight : 180
+    const tooltipWidth = 240
+
+    let { top, bottom, left, width } = target.getBoundingClientRect()
+    const cellCenter = left + (width / 2)
+    const tooltipLeft = cellCenter - (tooltipWidth / 2)
+
+    const spaceBelow = window.innerHeight - bottom
+    const showAbove = spaceBelow < tooltipHeight + 10
+
+    const tooltipTop = showAbove
+      ? top - tooltipHeight - 10
+      : bottom + 5
+
+    tartCellStyles.value = {
+      style: {
+        left: tooltipLeft + 'px',
+        top: tooltipTop + 'px'
+      },
+      'data-arrow': showAbove ? 'down' : 'up'
+    }
+  })
 }
 
 function endPreview() {
