@@ -217,9 +217,25 @@ function handleMonthChange(dates = []) {
 
 function handleShiftChange(shiftKey) {
   selectedShift.value = shiftKey
-  if (selectedClassShort.value) {
-    localStorage.setItem(STORE_SHIFT + selectedClassShort.value, String(shiftKey))
-  }
+
+  // Apply shift to all classes
+  classes.value.forEach(cls => {
+    const key = STORE_SHIFT + cls.class_short
+    let valueToSave = shiftKey
+
+    // If shift is a number, check if it exists for this class
+    if (typeof shiftKey === 'number' || (typeof shiftKey === 'string' && /^\d+$/.test(shiftKey))) {
+      const shiftIndex = typeof shiftKey === 'number' ? shiftKey : parseInt(shiftKey, 10)
+      const classShifts = cls.shifts || []
+      // If shift index doesn't exist for this class, set "All"
+      if (shiftIndex >= classShifts.length) {
+        valueToSave = 'All'
+      }
+    }
+
+    localStorage.setItem(key, String(valueToSave))
+  })
+
   loadDailyLogs()
 }
 
