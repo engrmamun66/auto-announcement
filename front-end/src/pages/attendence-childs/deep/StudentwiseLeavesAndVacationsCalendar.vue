@@ -282,7 +282,8 @@ const route = useRoute()
 let selectedStudents = ref(storage('studentwise_vacation_selected_students').value || [])
 
 // Auto-select student from query param
-if (route.query.dakhela && !selectedStudents.value.length) {
+console.log('route.query.dakhela', route.query.dakhela);
+if (route.query.dakhela) {
   const dakhela = Number(route.query.dakhela)
   const studentToSelect = all_students.value.find(s => s.dakhela == dakhela)
   if (studentToSelect) {
@@ -291,6 +292,18 @@ if (route.query.dakhela && !selectedStudents.value.length) {
 }
 
 let getStudent = computed(()=>selectedStudents.value?.length ? (typeof selectedStudents.value[0] == 'object' ? selectedStudents.value[0] : all_students.value.find(s => s.dakhela == selectedStudents.value[0])) : null)
+
+// Update student when query param changes
+watch(() => route.query.dakhela, (newDakhela) => {
+  if (newDakhela) {
+    const dakhela = Number(newDakhela)
+    const studentToSelect = all_students.value.find(s => s.dakhela == dakhela)
+    if (studentToSelect && getStudent.value?.dakhela !== dakhela) {
+      selectedStudents.value = [studentToSelect]
+    }
+  }
+})
+
 watch(selectedStudents, (val) => {
   storage('studentwise_vacation_selected_students').value = val
   onInitAndNextPrev(dateRange.value)

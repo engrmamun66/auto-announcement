@@ -231,6 +231,37 @@ function resetHaziraState() {
 }
 
 let studentMenuStyles = ref({})
+let activeClassMenu = ref(null)
+let classMenuStyles = ref({})
+
+function toggleClassMenu(classShort, event) {
+  if (activeClassMenu.value === classShort) {
+    activeClassMenu.value = null
+    return
+  }
+
+  activeClassMenu.value = classShort
+  nextTick(() => {
+    const trigger = event.target.closest('.class-menu-trigger')
+    if (!trigger) return
+
+    const rect = trigger.getBoundingClientRect()
+    const menuWidth = 160
+    const menuHeight = 120
+
+    // Position at bottom-right
+    const top = rect.bottom + 5
+    const right = window.innerWidth - rect.right - 10
+
+    classMenuStyles.value = {
+      position: 'fixed',
+      top: top + 'px',
+      right: right + 'px',
+      left: 'auto',
+      bottom: 'auto',
+    }
+  })
+}
 
 function toggleStudentMenu(dakhela, event) {
   if (activeStudentMenu.value === dakhela) {
@@ -290,32 +321,31 @@ function toggleStudentMenu(dakhela, event) {
   })
 }
 
-function openAddLeaveModal(student) {
-  router.push({
-    path: route.path,
-    query: { ...route.query, dakhela: student.dakhela }
-  })
+function navigateTo(item, tab, { _for = 'student', route_path = route.path, type = 'month' } = {}) {
   activeStudentMenu.value = null
-  parent_tab.value = 3
+  activeClassMenu.value = null
+  parent_tab.value = tab
+
+  const query = { ...route.query }
+
+  if (_for === 'student') {
+    query.dakhela = item.dakhela
+    delete query.classShort
+  } else if (_for === 'class') {
+    query.classShort = item.class_short
+    delete query.dakhela
+  }
+
+  if (type) {
+    query.type = type
+  }
+
+  router.push({
+    path: route_path,
+    query
+  })
 }
 
-function openReportModal(student) {
-  router.push({
-    path: route.path,
-    query: { ...route.query, dakhela: student.dakhela }
-  })
-  activeStudentMenu.value = null
-  parent_tab.value = 4
-}
-
-function openStudentLogs(student) {
-  router.push({
-    path: route.path,
-    query: { ...route.query, dakhela: student.dakhela }
-  })
-  activeStudentMenu.value = null
-  parent_tab.value = 2
-}
 
 function scrollGrid(direction) {
   const el = gridScrollRef.value
@@ -548,10 +578,21 @@ const selectFistClass = () => {
   }
 }
 
+function closeMenusOnClickOutside(event) {
+  const target = event.target
+  const isMenuTrigger = target.closest('.student-menu-trigger') || target.closest('.class-menu-trigger')
+
+  if (!isMenuTrigger) {
+    activeStudentMenu.value = null
+    activeClassMenu.value = null
+  }
+}
+
 onMounted(() => {
   loadHaziraIconColors()
   helper.delay(selectFistClass, 500)
   window.addEventListener('resize', updateScrollControls)
+  document.addEventListener('click', closeMenusOnClickOutside)
   setTimeout(updateScrollControls, 0)
   setTimeout(updateScrollControls, 1000)
   setTimeout(updateScrollControls, 1500)
@@ -559,6 +600,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', updateScrollControls)
+  document.removeEventListener('click', closeMenusOnClickOutside)
 })
 
 watch(
@@ -592,16 +634,41 @@ watch(
     <hr class="only-show-onprint">
 
     <div class="bg-dark-subtle border class-button-list hide_onprint p-3 radius-10">
-        <button
-            v-for="(cls, index) in getActiveClasses(classes)"
-            :key="index"
-            type="button"
-            class="class-button"
-            :class="{ active: cls.class_short === selectedClassShort }"
-            @click="handleClassSelect(cls.class_short)"
-        >
-            {{ cls.class_name }}
-        </button>
+        <div v-for="(cls, index) in getActiveClasses(classes)" :key="index" class="class-button-wrapper">
+            <button
+                type="button"
+                class="class-button"
+                :class="{ active: cls.class_short === selectedClassShort }"
+                @click="handleClassSelect(cls.class_short)"
+            >
+                <span class="class-button-name">{{ cls.class_name }}</span>
+                <div class="class-menu-trigger">
+                    <button class="class-menu-icon" @click.stop="toggleClassMenu(cls.class_short, $event)" :aria-label="`Menu for ${cls.class_name}`">
+                        <i class='bx bx-dots-vertical-rounded'></i>
+                    </button>
+                    <div v-if="activeClassMenu === cls.class_short" class="class-menu-dropdown" :style="classMenuStyles" @mouseleave="activeClassMenu = null">
+                        <button class="menu-item" @click.stop="navigateTo(cls, 3, { _for: 'class' })">
+                            <i class='bx bx-user'></i> {{ helper.t('Students') }}
+                        </button>
+                        <button class="menu-item" @click.stop="navigateTo(cls, 3, { _for: 'class' })">
+                            <i class='bx bx-calendar-plus'></i> {{ helper.t('Leaves') }}
+                        </button>
+                        <button class="menu-item" @click.stop="navigateTo(cls, 2, { _for: 'class' })">
+                          <i class='bx bx-list-check'></i> {{ helper.t('Show Logs') }}
+                        </button>
+                        <button class="menu-item" @click.stop="navigateTo(cls, 4, { _for: 'class', type: 'month' })">
+                            <i class='bx bx-calendar'></i> {{ helper.t('Monthly Report') }}
+                        </button>
+                        <button class="menu-item" @click.stop="navigateTo(cls, 4, { _for: 'class', type: 'summary' })">
+                            <i class='bx bx-file-blank'></i> {{ helper.t('Summary Report') }}
+                        </button>
+                        <button class="menu-item" @click.stop="navigateTo(cls, 4, { _for: 'class', type: 'chart' })">
+                            <i class='bx bx-bar-chart'></i> {{ helper.t('Chart Report') }}
+                        </button>
+                    </div>
+                </div>
+            </button>
+        </div>
     </div>
 
     <!-- Shift Tabs + Legend + Controls (Single Line) -->
@@ -632,7 +699,6 @@ watch(
         </div>
         <button class="hazira-reset-btn" :tooltip="'Customize icons & colors'" flow="right" @click="showHaziraSettingsPanel = true"><i class='bx bx-palette'></i></button>
       </div>
-
       <!-- Controls -->
       <div class="hazira-actions-section">
 
@@ -673,14 +739,14 @@ watch(
                 <button class="student-menu-icon" @click.stop="toggleStudentMenu(student.dakhela, $event)" :aria-label="`Menu for ${student.name}`">
                   <i class='bx bx-dots-vertical-rounded'></i>
                 </button>
-                <div v-if="activeStudentMenu === student.dakhela" class="student-menu-dropdown" :style="studentMenuStyles">
-                  <button class="menu-item" @click.stop="openAddLeaveModal(student)">
+                <div v-if="activeStudentMenu === student.dakhela" class="student-menu-dropdown" :style="studentMenuStyles" @mouseleave="activeStudentMenu = null">
+                  <button class="menu-item" @click.stop="navigateTo(student, 3)">
                     <i class='bx bx-calendar-plus'></i> {{ helper.t('Leaves') }}
                   </button>
-                  <button class="menu-item" @click.stop="openReportModal(student)">
+                  <button class="menu-item" @click.stop="navigateTo(student, 4)">
                     <i class='bx bx-file-blank'></i> {{ helper.t('Show Report') }}
                   </button>
-                  <button class="menu-item" @click.stop="openStudentLogs(student)">
+                  <button class="menu-item" @click.stop="navigateTo(student, 2)">
                     <i class='bx bx-list-check'></i> {{ helper.t('Show Logs') }}
                   </button>
                 </div>
@@ -870,16 +936,24 @@ watch(
     justify-content: center;
 }
 
+.class-button-wrapper {
+  position: relative;
+}
+
 .class-button{
   border: 1px solid #e5e7eb;
   background: #ffffff;
   color: #374151;
   padding: 6px 12px;
-  border-radius: 999px;
+  padding-right: 3px;
+  border-radius: 6px;
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .class-button:hover{
@@ -890,6 +964,58 @@ watch(
   background: #111827;
   border-color: #111827;
   color: #ffffff;
+}
+
+.class-button-name {
+  flex: 1;
+  white-space: nowrap;
+}
+
+.class-menu-trigger {
+  position: relative;
+  flex-shrink: 0;
+  opacity: 1;
+  transition: opacity 0.15s ease;
+  display: flex;
+  align-items: center;
+}
+
+.class-menu-icon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.15s ease;
+  padding: 0;
+  font-size: 14px;
+}
+
+.class-button.active .class-menu-icon {
+  color: #ffffff;
+}
+
+.class-menu-icon:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.class-button.active .class-menu-icon:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.class-menu-dropdown {
+  position: fixed;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 10000;
+  min-width: 160px;
 }
 
 .daily-report-title{
@@ -1130,12 +1256,8 @@ watch(
 .student-menu-trigger {
   position: relative;
   flex-shrink: 0;
-  opacity: 0;
-  transition: opacity 0.15s ease;
-}
-
-.student-cell:hover .student-menu-trigger {
   opacity: 1;
+  transition: opacity 0.15s ease;
 }
 
 .student-menu-icon {

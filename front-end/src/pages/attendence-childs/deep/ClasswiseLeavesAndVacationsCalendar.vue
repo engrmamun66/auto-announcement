@@ -1,6 +1,7 @@
 <script setup>
 import moment from 'moment/moment'
 import { inject, ref, reactive, onMounted, onBeforeUnmount, computed, watch } from "vue";
+import { useRoute } from 'vue-router';
 import Ahelper from "./../attendacnceHelper";
 
 const CONFIG = inject("CONFIG");
@@ -34,10 +35,31 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'onBtnSubmit', 'onBtnClear']);
 
+const route = useRoute()
 let log = console.log
 let showRightbar = ref(false)
 let isSelectedAllClasses = ref(1)
 let selectedClasses = ref([...classes.value])
+
+// let tab3_class_short = inject('tab3_class_short')
+let tab3_class_short = ref(route.query.classShort || null)
+
+// Auto-select class from query param
+if (route.query.classShort) {
+  const classShort = route.query.classShort
+  const classToSelect = classes.value.find(c => c.class_short === classShort)
+  if (classToSelect) {
+    selectedClasses.value = [classToSelect]
+    isSelectedAllClasses.value = 0
+  }
+}
+
+// Update when query param changes
+watch(() => route.query.classShort, (newClassShort) => {
+  if (newClassShort) {
+    tab3_class_short.value = newClassShort
+  }
+})
 
 let RightbarRef = ref(null)
 let showTextArea = ref(false)
@@ -49,8 +71,6 @@ let targetedVacationToDelete = ref(null)
 let showDeleteModal = ref(null)
 let showDetailsModal = ref(null)
 
-// let tab3_class_short = inject('tab3_class_short')
-let tab3_class_short = ref(null)
 
 watch(tab3_class_short, (classShort) => {
   onInitAndNextPrev(dateRange.value)

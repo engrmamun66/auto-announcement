@@ -3,10 +3,10 @@
     <template #thead>
       <thead>
         <tr>
-          <th MonthlyReportTable>Class</th>
+          <th MonthlyReportTable>{{ helper.t('Class') }}</th>
           <th v-for="m in monthKeys" :key="'h-' + m">{{ formatMonth(m) }}</th>
-          <th MonthlyReportTable>Total</th>
-          <th class="hide_onprint">Action</th>
+          <th MonthlyReportTable>{{ helper.t('Total') }}</th>
+          <th class="hide_onprint">{{ helper.t('Action') }}</th>
         </tr>
       </thead>
     </template>
@@ -18,7 +18,7 @@
         </td>
         <td>{{ getClassReport(cls.class_short, 'total')?.present_percent || 0 }}%</td>
         <td>
-          <button class="btn btn-sm btn-secondary hide_onprint" @click="$emit('details', cls)">Details</button>
+          <button class="btn btn-sm btn-secondary hide_onprint" @click="$emit('details', cls)">{{ helper.t('Details') }}</button>
         </td>
       </tr>
     </template>
@@ -26,9 +26,11 @@
 </template>
 
 <script setup>
+import { inject } from 'vue'
 import moment from 'moment/moment'
 import myTable from '../myTable.vue'
 
+const helper = inject('helper')
 const props = defineProps({
   classes: { type: Array, default: () => [] },
   classWise: { type: Object, default: () => ({}) },

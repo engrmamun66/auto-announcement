@@ -40,6 +40,18 @@ if (route.query.dakhela && !selectedStudents.value.length) {
   }
 }
 
+// Update student when query param changes
+watch(() => route.query.dakhela, (newDakhela) => {
+  if (newDakhela) {
+    const dakhela = Number(newDakhela)
+    const studentToSelect = all_students.value.find(s => s.dakhela == dakhela)
+    if (studentToSelect && selectedStudents.value[0]?.dakhela !== dakhela) {
+      selectedStudents.value = [studentToSelect]
+      submitSearch()
+    }
+  }
+})
+
 let attPayload = reactive({ 
   //-------------
   date: null,

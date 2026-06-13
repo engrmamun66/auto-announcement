@@ -2,7 +2,7 @@
   <div v-if="selectedStudent">
     <div class="d-flex justify-content-between align-items-center mb-2">
       <h6 class="table-title table-title-highlight">
-        Attendance Of: {{ selectedStudent.name || '-' }}
+        {{ helper.t('Attendance Of') }}: {{ selectedStudent.name || '-' }}
         <span class="table-title-meta">
           ({{ selectedStudent.class_name || selectedStudent.class_short || '-' }} • {{ selectedStudent.dakhela }})
         </span>
@@ -14,7 +14,7 @@
             :class="{ active: viewMode === 'compact' }"
             @click="$emit('changeView', 'compact')"
           >
-            Compact
+            {{ helper.t('Compact') }}
           </button>
 
           <button
@@ -22,21 +22,21 @@
             :class="{ active: viewMode === 'details' }"
             @click="$emit('changeView', 'details')"
           >
-            Details
+            {{ helper.t('Details') }}
           </button>
           <button
             class="btn btn-sm btn-outline-secondary"
             :class="{ active: viewMode === 'chart' }"
             @click="$emit('changeView', 'chart')"
           >
-            Chart
+            {{ helper.t('Chart') }}
           </button>
         </div>
         <!-- <button class="btn btn-sm btn-close-light hide_onprint" @click="$emit('close')">Back</button> -->
       </div>
     </div>
 
-    <div v-if="loading" class="text-muted">Loading...</div>
+    <div v-if="loading" class="text-muted">{{ helper.t('Loading') }}...</div>
 
     <StudentsAttendacePerformance
       v-else-if="viewMode === 'chart'"
@@ -49,12 +49,12 @@
       <template #thead>
         <thead>
           <tr>
-            <th StudentAttendanceDetails>Date</th>
-            <th>In</th>
-            <th>Out</th>
-            <th>Status</th>
-            <th>Late(min)</th>
-            <th>Shift</th>
+            <th StudentAttendanceDetails>{{ helper.t('Date') }}</th>
+            <th>{{ helper.t('In') }}</th>
+            <th>{{ helper.t('Out') }}</th>
+            <th>{{ helper.t('Status') }}</th>
+            <th>{{ helper.t('Late(min)') }}</th>
+            <th>{{ helper.t('Shift') }}</th>
             <!-- <th>Remarks</th> -->
           </tr>
         </thead>
@@ -70,7 +70,7 @@
           <!-- <td>{{ row.remarks || '-' }}</td> -->
         </tr>
         <tr v-if="!rows.length">
-          <td colspan="7" class="text-center text-muted">No attendance data found.</td>
+          <td colspan="7" class="text-center text-muted">{{ helper.t('No attendance data found') }}</td>
         </tr>
       </template>
     </myTable>
@@ -79,12 +79,12 @@
       <template #thead>
         <thead>
           <tr>
-            <th StudentAttendanceDetails>Date</th>
-            <th>In</th>
-            <th>Out</th>
-            <th>Status</th>
-            <th>Late(max)</th>
-            <th>Entries</th>
+            <th StudentAttendanceDetails>{{ helper.t('Date') }}</th>
+            <th>{{ helper.t('In') }}</th>
+            <th>{{ helper.t('Out') }}</th>
+            <th>{{ helper.t('Status') }}</th>
+            <th>{{ helper.t('Late(max)') }}</th>
+            <th>{{ helper.t('Entries') }}</th>
           </tr>
         </thead>
       </template>
@@ -98,7 +98,7 @@
           <td>{{ group.rows?.length || 0 }}</td>
         </tr>
         <tr v-if="!grouped.length">
-          <td colspan="6" class="text-center text-muted">No attendance data found.</td>
+          <td colspan="6" class="text-center text-muted">{{ helper.t('No attendance data found') }}</td>
         </tr>
       </template>
     </myTable>
@@ -106,9 +106,11 @@
 </template>
 
 <script setup>
+import { inject } from 'vue'
 import myTable from '../myTable.vue'
 import StudentsAttendacePerformance from './StudentsAttendacePerformance.vue'
 
+const helper = inject('helper')
 defineProps({
   selectedStudent: { type: Object, default: null },
   rows: { type: Array, default: () => [] },

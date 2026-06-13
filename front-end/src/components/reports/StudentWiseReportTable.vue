@@ -7,21 +7,21 @@
           :class="{ active: activeView === 'monthly' }"
           @click="activeView = 'monthly'"
         >
-          Monthly
+          {{ helper.t('Monthly') }}
         </button>
         <button
           class="btn btn-sm btn-outline-secondary"
           :class="{ active: activeView === 'summary' }"
           @click="activeView = 'summary'"
         >
-          Summary
+          {{ helper.t('Summary') }}
         </button>
         <button
           class="btn btn-sm btn-outline-secondary"
           :class="{ active: activeView === 'chart' }"
           @click="activeView = 'chart'"
         >
-          Chart
+          {{ helper.t('Chart') }}
         </button>
       </div>
 
@@ -32,7 +32,7 @@
           @click="setSort('desc')"
         >
           <i class='bx bx-sort-down transformY-2px'></i>
-          Sort
+          {{ helper.t('Sort') }}
         </button>
         <button
           class="btn btn-sm btn-outline-secondary"
@@ -40,7 +40,7 @@
           @click="setSort('asc')"
         >
           <i class='bx bx-sort-up transformY-2px'></i>
-          Sort
+          {{ helper.t('Sort') }}
         </button>
       </div>
     </div>
@@ -70,11 +70,12 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, inject } from 'vue'
 import StudentWiseMonthlyTable from './StudentWiseMonthlyTable.vue'
 import StudentWiseRankingTable from './StudentWiseRankingTable.vue'
 import StudentsChart from './StudentsChart.vue'
 
+const helper = inject('helper')
 defineProps({
   students: { type: Array, default: () => [] },
   monthKeys: { type: Array, default: () => [] },

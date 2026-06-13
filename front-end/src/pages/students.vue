@@ -120,14 +120,17 @@ let ___params = {
     "totalPages": 1,
     "limit": 100,
 
-    class_short: null,
+    class_short: route.query?.classShort || null,
     name: null,
     card_no: null,
-    dakhela: route.query?.dakhela || null,
+    dakhela: !route.query?.classShort ? route.query?.dakhela || null : null,
     sound1: null,
     phone_number: null,
 }
 let params = ref(sessionStorage.getItem('students_params') ? JSON.parse(sessionStorage.getItem('students_params')) : ___params)
+if(route.query?.classShort || route.query?.dakhela){
+  params.value = ___params
+}
 
 watch(params, (newVal, oldVal) => {
   sessionStorage.setItem('students_params', JSON.stringify(newVal))

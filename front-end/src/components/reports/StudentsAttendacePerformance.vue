@@ -1,13 +1,14 @@
 <template>
   <div class="performance-chart">
     <highcharts v-if="hasData" :options="chartOptions" />
-    <div v-else class="text-muted">No attendance data found.</div>
+    <div v-else class="text-muted">{{ helper.t('No attendance data found') }}</div>
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, inject } from 'vue'
 
+const helper = inject('helper')
 const props = defineProps({
   selectedStudent: { type: Object, default: null },
   grouped: { type: Array, default: () => [] },
@@ -17,9 +18,9 @@ const props = defineProps({
 const statusToScore = (status) => {
   if (!status) return null
   const normalized = String(status).toLowerCase()
-  if (normalized === 'present') return 1
-  if (normalized === 'absent') return 0
-  if (normalized === 'leave') return 0.5
+  if (normalized === helper.t('Present').toLowerCase()) return 1
+  if (normalized === helper.t('Absent').toLowerCase()) return 0
+  if (normalized === helper.t('Leave').toLowerCase()) return 0.5
   return null
 }
 
@@ -53,12 +54,12 @@ const chartOptions = computed(() => {
       min: 0,
       max: 1,
       tickPositions: [0, 0.5, 1],
-      title: { text: 'Attendance' },
+      title: { text: helper.t('Attendance') },
       labels: {
         formatter: function () {
-          if (this.value === 1) return 'Present'
-          if (this.value === 0.5) return 'Leave'
-          if (this.value === 0) return 'Absent'
+          if (this.value === 1) return helper.t('Present')
+          if (this.value === 0.5) return helper.t('Leave')
+          if (this.value === 0) return helper.t('Absent')
           return ''
         },
       },
@@ -66,7 +67,7 @@ const chartOptions = computed(() => {
     tooltip: {
       formatter: function () {
         const point = this.point || {}
-        return `<b>${point.date || ''}</b><br/>Status: ${point.status || '-'}`;
+        return `<b>${point.date || ''}</b><br/>${helper.t('Status')}: ${point.status || '-'}`;
       },
     },
     plotOptions: {
@@ -81,7 +82,7 @@ const chartOptions = computed(() => {
     },
     series: [
       {
-        name: 'Attendance',
+        name: helper.t('Attendance'),
         data: chartData.value.map(p => ({
           y: p.y,
           date: p.date,

@@ -107,10 +107,10 @@ watch(activeReportTab, (_activeReportTab) => {
 const mainReportTabs = ['summary', 'monthly', 'ranking', 'chart2']
 let lastMainTab = ref('monthly')
 const reportTabs = [
-  { key: 'monthly', label: 'Monthly' },
-  { key: 'summary', label: 'Summary' },
-  { key: 'ranking', label: 'Ranking' },
-  { key: 'chart2', label: 'Chart' },
+  { key: 'monthly', label: helper.t('Monthly') },
+  { key: 'summary', label: helper.t('Summary') },
+  { key: 'ranking', label: helper.t('Ranking') },
+  { key: 'chart2', label: helper.t('Chart') },
 ]
 let selectedSummaryClass = ref(null)
 let singleClassReport = ref(null)
@@ -122,6 +122,7 @@ let attendanceViewMode = ref('compact') // details | compact
 let studentMonthView = ref('attendance') // attendance | vacations
 let reportLeaves = ref([])
 let studentSearchId = ref(route?.query?.dakhela || '')
+let classSearchShort = ref(route?.query?.classShort || '')
 
 // Auto-open student report when dakhela from query param
 if (route?.query?.dakhela) {
@@ -131,14 +132,80 @@ if (route?.query?.dakhela) {
   })
 }
 
+// Auto-open class summary when classShort from query param
+if (route?.query?.classShort) {
+  onMounted(async () => {
+    await new Promise(resolve => setTimeout(resolve, 100))
+    openClassSummaryByShort()
+    // Apply type from query param if present
+    if (route?.query?.type) {
+      const typeMap = {
+        'month': 'monthly',
+        'summary': 'summary',
+        'ranking': 'ranking',
+        'chart': 'chart2'
+      }
+      const reportType = typeMap[route.query.type] || route.query.type
+      if (mainReportTabs.includes(reportType)) {
+        activeReportTab.value = reportType
+      }
+    }
+  })
+}
+
+// Update when query param changes (e.g., from HaziraKhata navigation)
+watch(() => route.query.dakhela, (newDakhela) => {
+  if (newDakhela && String(newDakhela) !== String(studentSearchId.value)) {
+    studentSearchId.value = String(newDakhela)
+    helper.delay(openStudentMonthlyById, 100)
+  }
+})
+
+// Update when classShort query param changes and apply type
+watch(() => route.query.classShort, (newClassShort) => {
+  if (newClassShort && String(newClassShort) !== String(classSearchShort.value)) {
+    classSearchShort.value = String(newClassShort)
+    helper.delay(openClassSummaryByShort, 100)
+    // Apply type from query param if present
+    if (route?.query?.type) {
+      const typeMap = {
+        'month': 'monthly',
+        'summary': 'summary',
+        'ranking': 'ranking',
+        'chart': 'chart2'
+      }
+      const reportType = typeMap[route.query.type] || route.query.type
+      if (mainReportTabs.includes(reportType)) {
+        activeReportTab.value = reportType
+      }
+    }
+  }
+})
+
+// Set report type from query param
+watch(() => route.query.type, (newType) => {
+  if (newType) {
+    const typeMap = {
+      'month': 'monthly',
+      'summary': 'summary',
+      'ranking': 'ranking',
+      'chart': 'chart2'
+    }
+    const reportType = typeMap[newType] || newType
+    if (mainReportTabs.includes(reportType)) {
+      activeReportTab.value = reportType
+    }
+  }
+}, { immediate: true })
+
 const reportTitle = computed(() => {
   if (activeReportTab.value === 'single-class-summary' && selectedSummaryClass.value) {
-    return `${selectedSummaryClass.value.class_name || selectedSummaryClass.value.class_short} Summary`
+    return `${selectedSummaryClass.value.class_name || selectedSummaryClass.value.class_short} ${helper.t('Summary')}`
   }
-  if (activeReportTab.value === 'monthly') return 'Monthly Report'
-  if (activeReportTab.value === 'ranking') return 'Ranking Report'
-  if (activeReportTab.value === 'chart2') return 'Class Summary Chart'
-  return 'Attendance Summary'
+  if (activeReportTab.value === 'monthly') return helper.t('Monthly Report')
+  if (activeReportTab.value === 'ranking') return helper.t('Ranking Report')
+  if (activeReportTab.value === 'chart2') return helper.t('Class Summary Chart')
+  return helper.t('Attendance Summary')
 })
 
 const printDate = computed(() => moment().format('DD MMMM, Y - hh:mm A'))
@@ -162,7 +229,7 @@ const breadcrumbs = computed(() => {
 
   if (activeReportTab.value === 'single-class-summary') {
     items.push({
-      label: 'Summary',
+      label: helper.t('Summary'),
       onClick: () => {
         closeSingleStudentAttendance()
         closeClassSummary()
@@ -171,7 +238,7 @@ const breadcrumbs = computed(() => {
 
     if (selectedSummaryClass.value) {
       items.push({
-        label: selectedSummaryClass.value.class_name || selectedSummaryClass.value.class_short || 'Class',
+        label: selectedSummaryClass.value.class_name || selectedSummaryClass.value.class_short || helper.t('Class'),
         onClick: () => {
           activeReportTab.value = 'single-class-summary'
           selectedStudent.value = null
@@ -185,7 +252,7 @@ const breadcrumbs = computed(() => {
       })
 
       items.push({
-        label: 'Students',
+        label: helper.t('Students'),
         onClick: () => {
           activeReportTab.value = 'single-class-summary'
           selectedStudent.value = null
@@ -200,7 +267,7 @@ const breadcrumbs = computed(() => {
 
       if (selectedStudent.value) {
         items.push({
-          label: selectedStudent.value.name || selectedStudent.value.dakhela || 'Student',
+          label: selectedStudent.value.name || selectedStudent.value.dakhela || helper.t('Student'),
           onClick: selectedStudentMonth.value ? () => {
             selectedStudentMonth.value = null
             attendanceViewMode.value = 'compact'
@@ -225,7 +292,7 @@ const breadcrumbs = computed(() => {
     return items
   }
 
-  const tabLabel = reportTabs.find(tab => tab.key === activeReportTab.value)?.label || 'Summary'
+  const tabLabel = reportTabs.find(tab => tab.key === activeReportTab.value)?.label || helper.t('Summary')
   items.push({ label: tabLabel, onClick: null })
   return items
 })
@@ -293,6 +360,15 @@ function openClassSummary(cls){
   singleStudentAttendance.value = []
   attendanceViewMode.value = 'compact'
   loadSingleClassSummaryReport(cls.class_short, [defaultStart.value, defaultEnd.value])
+}
+
+function openClassSummaryByShort(){
+  const raw = String(classSearchShort.value || '').trim()
+  if(!raw) return
+  const found = classes.value.find(c => c.class_short === raw)
+  if(!found) return
+  openClassSummary(found)
+  
 }
 
 function closeClassSummary(){
@@ -471,10 +547,10 @@ function getPresentShiftNumbers(rows = [], class_short){
 }
 
 function computePresentStatus(rows=[], class_short){
-  if(!rows?.length) return 'Absent'
+  if(!rows?.length) return helper.t('Absent')
   const shiftDurations = getShiftDurations(class_short)
   if(!shiftDurations.length){
-    return rows.length ? 'Present' : 'Absent'
+    return rows.length ? helper.t('Present') : helper.t('Absent')
   }
   const presentShiftNumbers = getPresentShiftNumbers(rows, class_short)
   const presentShiftSet = new Set(presentShiftNumbers)
@@ -512,7 +588,7 @@ function computePresentStatus(rows=[], class_short){
     }
   }
 
-  return isPresent ? 'Present' : 'Absent'
+  return isPresent ? helper.t('Present') : helper.t('Absent')
 }
 
 function getFirstIn(rows=[]){
@@ -672,7 +748,7 @@ const selectedStudentMonthVacations = computed(() => {
   const rangeEnd = moment.min(monthEnd, getEffectiveEndDate())
 
   const classLabel = (short) => {
-    if(!short || short === '_all_') return 'All Classes'
+    if(!short || short === '_all_') return helper.t('All Classes')
     const cls = (classes.value || []).find(c => c.class_short === short)
     return cls?.class_name || short
   }
@@ -693,7 +769,7 @@ const selectedStudentMonthVacations = computed(() => {
     })
     .map(l => ({
       ...l,
-      scope: l.type === 'vacation' ? classLabel(l.class_short) : 'Student',
+      scope: l.type === 'vacation' ? classLabel(l.class_short) : helper.t('Student'),
     }))
     .sort((a, b) => String(a.date).localeCompare(String(b.date)))
 })
@@ -766,7 +842,7 @@ onMounted(()=>{
               v-model="studentSearchId"
               type="search"
               class="form-control"
-              placeholder="Student ID"
+              :placeholder="helper.t('Student ID')"
               @keyup.enter="openStudentMonthlyById"
               @keyup="(e) => {
                 if(e.key == 'Escape'){

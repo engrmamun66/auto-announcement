@@ -3,13 +3,13 @@
     <template #thead>
       <thead>
         <tr>
-          <th SummaryTable>Class</th>
-          <th>Students</th>
-          <th>Open&nbsp;Days</th>
-          <th>Present</th>
-          <th>Absent</th>
-          <th>Present(%)</th>
-          <th class="hide_onprint">Action</th>
+          <th SummaryTable>{{ helper.t('Class') }}</th>
+          <th>{{ helper.t('Students') }}</th>
+          <th>{{ helper.t('Open Days') }}</th>
+          <th>{{ helper.t('Present') }}</th>
+          <th>{{ helper.t('Absent') }}</th>
+          <th>{{ helper.t('Present(%)') }}</th>
+          <th class="hide_onprint">{{ helper.t('Action') }}</th>
         </tr>
       </thead>
     </template>
@@ -22,7 +22,7 @@
         <td>{{ getClassReport(cls.class_short)?.total_absent || 0 }}</td>
         <td>{{ getClassReport(cls.class_short)?.present_percent || 0 }}%</td>
         <td>
-          <button class="btn btn-sm btn-secondary hide_onprint" @click="$emit('details', cls)">Details</button>
+          <button class="btn btn-sm btn-secondary hide_onprint" @click="$emit('details', cls)">{{ helper.t('Details') }}</button>
         </td>
       </tr>
     </template>
@@ -30,8 +30,10 @@
 </template>
 
 <script setup>
+import { inject } from 'vue'
 import myTable from '../myTable.vue'
 
+const helper = inject('helper')
 const props = defineProps({
   classes: { type: Array, default: () => [] },
   classWise: { type: Object, default: () => ({}) },

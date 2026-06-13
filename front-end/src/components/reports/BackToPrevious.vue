@@ -1,11 +1,13 @@
 <template>
   <span class="back-to-previous" @click="$emit('click')">
     <i class="fa fa-arrow-left me-2"></i>
-    Back to view
+    {{ helper.t('Back to view') }}
   </span>
 </template>
 
 <script setup>
+import { inject } from 'vue'
+const helper = inject('helper')
 defineEmits(['click'])
 </script>
 

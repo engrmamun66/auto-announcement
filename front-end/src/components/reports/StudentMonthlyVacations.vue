@@ -2,7 +2,7 @@
   <div v-if="selectedStudent">
     <div class="d-flex justify-content-between align-items-center mb-2">
       <h6 class="table-title table-title-highlight">
-        Vacations & Leaves:
+        {{ helper.t('Vacations & Leaves') }}:
         {{ selectedStudent.name || '-' }}
         <span class="table-title-meta">
           ({{ selectedStudent.class_name || selectedStudent.class_short || '-' }} • {{ selectedStudent.dakhela }})
@@ -15,10 +15,10 @@
       <template #thead>
         <thead>
           <tr>
-            <th>Type</th>
-            <th>Date</th>
-            <th>Scope</th>
-            <th>Reason</th>
+            <th>{{ helper.t('Type') }}</th>
+            <th>{{ helper.t('Date') }}</th>
+            <th>{{ helper.t('Scope') }}</th>
+            <th>{{ helper.t('Reason') }}</th>
           </tr>
         </thead>
       </template>
@@ -29,7 +29,7 @@
               class="badge"
               :class="row.type === 'vacation' ? 'bg-warning text-dark' : 'bg-info'"
             >
-              {{ row.type === 'vacation' ? 'Vacation' : 'Leave' }}
+              {{ row.type === 'vacation' ? helper.t('Vacation') : helper.t('Leave') }}
             </span>
           </td>
           <td>{{ row.date || '-' }}</td>
@@ -37,7 +37,7 @@
           <td>{{ row.reason || '-' }}</td>
         </tr>
         <tr v-if="!rows.length">
-          <td colspan="4" class="text-center text-muted">No vacations or leaves found.</td>
+          <td colspan="4" class="text-center text-muted">{{ helper.t('No vacations or leaves found') }}</td>
         </tr>
       </template>
     </myTable>
@@ -45,8 +45,10 @@
 </template>
 
 <script setup>
+import { inject } from 'vue'
 import myTable from '../myTable.vue'
 
+const helper = inject('helper')
 defineProps({
   rows: { type: Array, default: () => [] },
   selectedStudent: { type: Object, default: null },

@@ -18,6 +18,9 @@
       <button class="month-nav" type="button" @click.stop="shiftEnd(1)" :disabled="isFutureEndDisabled">
         <i class='bx bx-chevron-right'></i>
       </button>
+      <button class="month-reset-btn" type="button" @click.stop="resetToCurrentMonth" :title="'Reset to current month'">
+        <i class='bx bx-reset'></i>
+      </button>
     </div>
   </div>
 </template>
@@ -178,6 +181,11 @@ export default {
       this.onChange([this.startValue, this.endValue])
       this.saveToStorage()
     },
+    resetToCurrentMonth() {
+      this.startMonth = moment().startOf('month')
+      this.endMonth = moment().endOf('month')
+      this.setDatesAndEmit()
+    },
   },
   mounted() {
     this.loadFromStorage()
@@ -241,6 +249,30 @@ export default {
   opacity: 0.6;
   cursor: not-allowed;
   background: #e5e7eb;
+}
+
+.month-reset-btn{
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 6px;
+  background: #f3f4f6;
+  color: #6b7280;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.month-reset-btn:hover{
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.month-reset-btn:active{
+  transform: scale(0.95);
 }
 
 @media (max-width: 720px) {

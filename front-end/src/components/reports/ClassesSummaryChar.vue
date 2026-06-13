@@ -1,13 +1,14 @@
 <template>
   <div class="summary-chart mt-4">
     <highcharts v-if="hasData" :options="chartOptions" />
-    <div v-else class="text-muted">No data found.</div>
+    <div v-else class="text-muted">{{ helper.t('No data found') }}</div>
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, inject } from 'vue'
 
+const helper = inject('helper')
 const props = defineProps({
   classes: { type: Array, default: () => [] },
   classWise: { type: Object, default: () => ({}) },
@@ -41,7 +42,7 @@ const chartOptions = computed(() => {
     yAxis: {
       min: 0,
       max: 100,
-      title: { text: 'Present (%)' },
+      title: { text: helper.t('Present(%)') },
     },
     tooltip: { pointFormat: '<b>{point.y}%</b>' },
     plotOptions: {
@@ -59,7 +60,7 @@ const chartOptions = computed(() => {
     },
     series: [
       {
-        name: 'Present %',
+        name: helper.t('Present(%)'),
         data,
         color: '#198754',
       },

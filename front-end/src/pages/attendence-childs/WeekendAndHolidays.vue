@@ -29,6 +29,21 @@ const route = useRoute()
 if (route.query.dakhela) {
   leaveAndWeekendSubTab.value = 2
 }
+else if (route.query.classShort) {
+  leaveAndWeekendSubTab.value = 1
+}
+
+// Update tab when query param changes
+watch(() => route.query.dakhela, (newDakhela) => {
+  if (newDakhela) {
+    leaveAndWeekendSubTab.value = 2
+  }
+})
+watch(() => route.query.classShort, (newclassShort) => {
+  if (newclassShort) {
+    leaveAndWeekendSubTab.value = 1
+  }
+})
 
 const pagiation_positon = CONFIG.value?.settings?.attendance?.pagination?.pagiation_positon || 'bottom_center'
 

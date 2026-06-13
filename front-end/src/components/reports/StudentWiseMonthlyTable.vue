@@ -3,11 +3,11 @@
     <template #thead>
       <thead>
         <tr>
-          <th StudentWiseMonthlyTable>Student Name</th>
-          <th>Dakhela</th>
+          <th StudentWiseMonthlyTable>{{ helper.t('Student Name') }}</th>
+          <th>{{ helper.t('Dakhela') }}</th>
           <th v-for="m in monthKeys" :key="'h-' + m">{{ formatMonth(m) }}</th>
-          <th StudentWiseMonthlyTable>Total</th>
-          <th class="hide_onprint">Action</th>
+          <th StudentWiseMonthlyTable>{{ helper.t('Total') }}</th>
+          <th class="hide_onprint">{{ helper.t('Action') }}</th>
         </tr>
       </thead>
     </template>
@@ -20,21 +20,22 @@
         </td>
         <td>{{ std.present_percent || 0 }}%</td>
         <td>
-          <button class="btn btn-sm btn-secondary hide_onprint" @click="$emit('details', std)">Detail</button>
+          <button class="btn btn-sm btn-secondary hide_onprint" @click="$emit('details', std)">{{ helper.t('Details') }}</button>
         </td>
       </tr>
       <tr v-if="!students.length">
-        <td :colspan="monthKeys.length + 4" class="text-center text-muted">No students found.</td>
+        <td :colspan="monthKeys.length + 4" class="text-center text-muted">{{ helper.t('No students found') }}</td>
       </tr>
     </template>
   </myTable>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, inject } from 'vue'
 import moment from 'moment/moment'
 import myTable from '../myTable.vue'
 
+const helper = inject('helper')
 const props = defineProps({
   students: { type: Array, default: () => [] },
   monthKeys: { type: Array, default: () => [] },

@@ -3,10 +3,10 @@
     <template #thead>
       <thead>
         <tr>
-          <th RankingTable>Ranking</th>
-          <th>Class</th>
-          <th RangkigTable>Present(%)</th>
-          <th class="hide_onprint">Action</th>
+          <th RankingTable>{{ helper.t('Ranking') }}</th>
+          <th>{{ helper.t('Class') }}</th>
+          <th RangkigTable>{{ helper.t('Present(%)') }}</th>
+          <th class="hide_onprint">{{ helper.t('Action') }}</th>
         </tr>
       </thead>
     </template>
@@ -21,7 +21,7 @@
             :disabled="!getClassInfo(clsShort)"
             @click="$emit('details', getClassInfo(clsShort))"
           >
-            Details
+            {{ helper.t('Details') }}
           </button>
         </td>
       </tr>
@@ -30,8 +30,10 @@
 </template>
 
 <script setup>
+import { inject } from 'vue'
 import myTable from '../myTable.vue'
 
+const helper = inject('helper')
 const props = defineProps({
   rankings: { type: Array, default: () => [] },
   classes: { type: Array, default: () => [] },
