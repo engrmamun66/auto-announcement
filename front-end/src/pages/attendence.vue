@@ -36,7 +36,7 @@ watch(tab, (tabindex) => {
 })
 
 function handleTabChange(newTab) {
-  const query =  route.query.dev ? {dev: route.query.dev} : {}
+  const query =  route.query.dev ? {'dev': route.query.dev} : {}
 
   router.push({
     query,

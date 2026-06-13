@@ -15,6 +15,8 @@
 <script>
 import moment from 'moment/moment'
 
+const STORAGE_KEY = 'monthPickerSingleValue'
+
 export default {
   name: "MonthPickerSingle",
   props: {
@@ -36,7 +38,15 @@ export default {
     },
   },
   data() {
-    let month = this.defaultValue ? moment(this.defaultValue, 'YYYY-MM-DD') : moment().startOf('month')
+    let month
+
+    if (this.defaultValue) {
+      month = moment(this.defaultValue, 'YYYY-MM-DD')
+    } else {
+      const saved = localStorage.getItem(STORAGE_KEY)
+      month = saved ? moment(saved, 'YYYY-MM-DD') : moment().startOf('month')
+    }
+
     if (!month.isValid()) month = moment().startOf('month')
     month = month.startOf('month')
 
@@ -83,6 +93,9 @@ export default {
       }).format('YYYY-MM-DD')
 
       this.endValue = this.monthValue.clone().endOf('month').format('YYYY-MM-DD')
+
+      localStorage.setItem(STORAGE_KEY, this.startValue)
+
       this.onChange([this.startValue, this.endValue])
     },
   },

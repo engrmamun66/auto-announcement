@@ -675,13 +675,13 @@ watch(
                           <i class='bx bx-list-check'></i> {{ helper.t('Show Logs') }}
                         </button>
                         <button class="menu-item" @click.stop="navigateTo(cls, 4, { _for: 'class', type: 'month' })">
-                            <i class='bx bx-calendar'></i> {{ helper.t('Monthly Report') }}
+                            <i class='bx bx-calendar'></i> {{ helper.t('Report (monthly)') }}
                         </button>
                         <button class="menu-item" @click.stop="navigateTo(cls, 4, { _for: 'class', type: 'summary' })">
-                            <i class='bx bx-calendar'></i> {{ helper.t('Summary Report') }}
+                            <i class='bx bx-calendar'></i> {{ helper.t('Report (summary)') }}
                         </button>
                         <button class="menu-item" @click.stop="navigateTo(cls, 4, { _for: 'class', type: 'chart' })">
-                            <i class='bx bx-bar-chart'></i> {{ helper.t('Chart Report') }}
+                            <i class='bx bx-bar-chart'></i> {{ helper.t('Report (chart)') }}
                         </button>
                     </div>
                 </div>
