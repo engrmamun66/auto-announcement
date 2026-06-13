@@ -166,19 +166,8 @@ watch(() => route.query.classShort, (newClassShort) => {
   if (newClassShort && String(newClassShort) !== String(classSearchShort.value)) {
     classSearchShort.value = String(newClassShort)
     helper.delay(openClassSummaryByShort, 100)
-    // Apply type from query param if present
-    if (route?.query?.type) {
-      const typeMap = {
-        'month': 'monthly',
-        'summary': 'summary',
-        'ranking': 'ranking',
-        'chart': 'chart2'
-      }
-      const reportType = typeMap[route.query.type] || route.query.type
-      if (mainReportTabs.includes(reportType)) {
-        activeReportTab.value = reportType
-      }
-    }
+    // Don't change activeReportTab when classShort is set - it will stay in single-class-summary
+    // The type param will be passed to StudentWiseReportTable instead
   }
 })
 
@@ -302,6 +291,16 @@ const monthKeys = computed(() => {
   let firstClass = Object.keys(classWise || {})[0]
   if(!firstClass) return []
   return Object.keys(classWise[firstClass] || {}).filter(k => k !== 'total').sort()
+})
+
+const studentWiseReportActiveView = computed(() => {
+  if (!route?.query?.type) return 'monthly'
+  const typeMap = {
+    'month': 'monthly',
+    'summary': 'summary',
+    'chart': 'chart'
+  }
+  return typeMap[route.query.type] || 'monthly'
 })
 
 function getClassReport(class_short, monthKey='total'){
@@ -945,6 +944,7 @@ onMounted(()=>{
         <StudentWiseReportTable
           :students="singleClassReport.students"
           :monthKeys="monthKeys"
+          :activeView="studentWiseReportActiveView"
           @details="loadSingleStudentAttendance"
         />
       </div>

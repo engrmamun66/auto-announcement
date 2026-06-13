@@ -70,19 +70,26 @@
 </template>
 
 <script setup>
-import { ref, inject } from 'vue'
+import { ref, inject, watch } from 'vue'
 import StudentWiseMonthlyTable from './StudentWiseMonthlyTable.vue'
 import StudentWiseRankingTable from './StudentWiseRankingTable.vue'
 import StudentsChart from './StudentsChart.vue'
 
 const helper = inject('helper')
-defineProps({
+const props = defineProps({
   students: { type: Array, default: () => [] },
   monthKeys: { type: Array, default: () => [] },
+  activeView: { type: String, default: 'monthly' },
 })
 defineEmits(['details'])
 
-const activeView = ref('monthly')
+const activeView = ref(props.activeView)
+
+watch(() => props.activeView, (newView) => {
+  if (newView) {
+    activeView.value = newView
+  }
+})
 const sortOrder = ref('desc')
 
 function setSort(order){
