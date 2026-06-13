@@ -36,6 +36,7 @@ const route = useRoute()
 const router = useRouter()
 const log = console.log
 const loading = ref(false)
+const isMounted = ref(false)
 const errorMessage = ref('')
 const dailyLogs = ref([])
 const todayStr = ref(moment().format('YYYY-MM-DD'))
@@ -135,6 +136,13 @@ const dayColumns = computed(() => {
       dayName: dateObj.format('ddd'),
     }
   })
+})
+
+const skeletonRowCount = computed(() => {
+  const classShort = selectedClassShort.value
+  if (!classShort) return 8
+  const students = getClassStudents(classShort)
+  return students.length || 12
 })
 
 let showHaziraSettingsPanel = ref(false)
@@ -552,6 +560,7 @@ async function loadDailyLogs(classShortOverride = null) {
     dailyLogs.value = []
   } finally {
     if (currentId === requestId) loading.value = false
+    isMounted.value = true
   }
 }
 
@@ -734,7 +743,24 @@ watch(
       </div>
     </div>
 
-    <div v-if="loading" class="text-muted mt-2">{{ helper.t('Loading daily logs...') }}</div>
+    <div v-if="loading || !isMounted" class="daily-grid-wrapper" ref="gridScrollRef">
+      <div class="daily-grid" :style="{ '--day-count': dayColumns.length }">
+        <div class="daily-grid-row daily-grid-header">
+          <div class="daily-grid-cell sticky-col sticky-head skeleton-head"></div>
+          <div v-for="day in dayColumns" :key="day.date" class="daily-grid-cell day-header skeleton-head"></div>
+        </div>
+
+        <div v-for="n in skeletonRowCount" :key="'skeleton-' + n" class="daily-grid-row">
+          <div class="daily-grid-cell sticky-col student-cell">
+            <div class="skeleton-text" style="width: 70%; height: 18px;"></div>
+          </div>
+          <div v-for="day in dayColumns" :key="'skeleton-cell-' + day.date" class="daily-grid-cell day-cell">
+            <div class="skeleton-pill"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div v-else-if="errorMessage" class="text-danger mt-2" >{{ errorMessage }}</div>
 
     <div v-else class="daily-grid-wrapper" ref="gridScrollRef">
@@ -1849,6 +1875,35 @@ watch(
 .color-picker-input:hover {
   border-color: #3b82f6;
   transform: scale(1.05);
+}
+
+@keyframes shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+
+.skeleton-head {
+  background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+  height: 20px;
+  border-radius: 4px;
+}
+
+.skeleton-text {
+  background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+  border-radius: 4px;
+}
+
+.skeleton-pill {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+  border-radius: 6px;
 }
 
 </style>
