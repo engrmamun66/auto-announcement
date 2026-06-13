@@ -1426,12 +1426,6 @@ watch(
   box-shadow:
     0 10px 24px rgba(15, 23, 42, 0.18),
     inset 0 1px 0 rgba(255, 255, 255, 0.14);
-  transition:
-    opacity 0.18s ease,
-    transform 0.22s cubic-bezier(0.22, 1, 0.36, 1),
-    visibility 0.18s ease,
-    background-color 0.15s ease,
-    box-shadow 0.15s ease;
   z-index: 4;
 }
 
