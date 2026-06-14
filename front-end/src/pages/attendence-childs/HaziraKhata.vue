@@ -1784,7 +1784,7 @@ watch(
 .qd-time-label {
   font-weight: 600;
   color: #6b7280;
-  min-width: 22px;
+  min-width: auto;
 }
 
 .qd-time-val {
