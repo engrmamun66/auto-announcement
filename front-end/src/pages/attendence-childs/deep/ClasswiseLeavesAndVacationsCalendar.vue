@@ -40,6 +40,10 @@ let log = console.log
 let showRightbar = ref(false)
 let isSelectedAllClasses = ref(1)
 let selectedClasses = ref([...classes.value])
+const calendarInitialDate = computed(() => {
+  const startDate = Array.isArray(route.query.start_date) ? route.query.start_date[0] : route.query.start_date
+  return moment(startDate, 'YYYY-MM-DD', true).isValid() ? startDate : moment().format('YYYY-MM-DD')
+})
 
 // let tab3_class_short = inject('tab3_class_short')
 let tab3_class_short = ref(route.query.classShort || null)
@@ -299,6 +303,7 @@ async function deleteVacations(){
     <FullCalendarEvents 
     :events="calendarEvents"
     :weekends="CONFIG.settings?.attendance?.weekends || []"
+    :initialDate="calendarInitialDate"
     @initAndNextPrev="onInitAndNextPrev" 
     @advacation="onAdVacation" 
     @delete="(vacations)=>{

@@ -74,7 +74,7 @@ let toggleSettings = ref(true)
 let refreshDOM = ref(true) 
 let isMounted = ref(false)
 let user_interacted = ref(false)
-let last_mouse_activity_time = ref(moment().format('Y-MM-DD HH:mm:ss'))
+let last_mouse_activity_time = ref(Date.now())
 let emergency_mode = ref(false)
 let LockscreenRef = ref(null)
 let lockscreenDismissing = ref(false)
@@ -858,13 +858,13 @@ onMounted(async ()=>{
 
     document.addEventListener('click', (event) => {
         user_interacted.value = true;
-        last_mouse_activity_time.value = moment().format('Y-MM-DD HH:mm:ss')
+        last_mouse_activity_time.value = Date.now()
         if(event.isTrusted) last_mouse_keyboard_activity.value = new Date().getTime()
         document.body.classList.add('user-interacted')
         emitter.emit('document_click')
     })
     document.addEventListener('mousemove', (event) => {
-        last_mouse_activity_time.value = moment().format('Y-MM-DD HH:mm:ss')
+        last_mouse_activity_time.value = Date.now()
         if(event.isTrusted) last_mouse_keyboard_activity.value = new Date().getTime()
         emitter.emit('document_mousemove')
     })
@@ -1001,7 +1001,7 @@ function focusCurrenPlayingSoundCard_if_userIsInavtiveForFewSeconds(){
     if(auto_focus_mode){
         
         let last_activity_time = last_mouse_activity_time.value
-        let seconds = moment(moment()).diff(last_activity_time, 'seconds')
+        let seconds = moment().diff(last_activity_time, 'seconds')
     
         if(seconds >= delay_in_seconds){
             let targetedCard = document.querySelector(`[playing=true]`)

@@ -32,6 +32,10 @@ export default {
       type: [Object, null],
       default: () => null,
     },
+    initialDate: {
+      type: String,
+      default: () => moment().format('YYYY-MM-DD'),
+    },
   },
   inject: ['CONFIG'],
   data() {
@@ -39,6 +43,7 @@ export default {
       calendarOptions: {
         plugins: [ dayGridPlugin, interactionPlugin ],        
         initialView: 'dayGridMonth', // values: dayGridMonth | dayGridDay 
+        initialDate: this.initialDate,
         weekends: true,
         headerToolbar: {
           left: 'myCustomButton',
@@ -88,11 +93,18 @@ export default {
       },
       deep: true,
       immediate: true
-    }
+    },
+    initialDate(newVal) {
+      if(!moment(newVal, 'YYYY-MM-DD', true).isValid()) return
+      this.calendarOptions.initialDate = newVal
+      const calendarApi = this.$refs.fullCalendar?.getApi()
+      if(calendarApi) calendarApi.gotoDate(newVal)
+    },
   },
   methods: {
     viewLoading: function() {
-      let dateArray =  helper.createDateRange(moment().startOf('month').format('YYYY-MM-DD'), moment().endOf('month').format('YYYY-MM-DD'), 'day')
+      let initialDate = moment(this.initialDate, 'YYYY-MM-DD', true).isValid() ? this.initialDate : moment().format('YYYY-MM-DD')
+      let dateArray =  helper.createDateRange(moment(initialDate).startOf('month').format('YYYY-MM-DD'), moment(initialDate).endOf('month').format('YYYY-MM-DD'), 'day')
       let _events = []
       dateArray.forEach((date)=>{
         _events.push({
@@ -162,7 +174,7 @@ export default {
 </script>
 <template>
   <div>
-    <FullCalendar :options="calendarOptions" />
+    <FullCalendar ref="fullCalendar" :options="calendarOptions" />
   </div>
 </template>
 

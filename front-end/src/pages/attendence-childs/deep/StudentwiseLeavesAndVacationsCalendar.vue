@@ -36,6 +36,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'onBtnSubmit', 'onBtnClear']);
 
+const route = useRoute()
 let log = console.log
 let showRightbar = ref(false) 
 
@@ -48,6 +49,11 @@ let dateRange = ref({ start_date: null, end_date: null })
 let targetedVacationToDelete = ref(null)
 let showDeleteModal = ref(null)
 let showDetailsModal = ref(null)
+
+const calendarInitialDate = computed(() => {
+  const startDate = Array.isArray(route.query.start_date) ? route.query.start_date[0] : route.query.start_date
+  return moment(startDate, 'YYYY-MM-DD', true).isValid() ? startDate : moment().format('YYYY-MM-DD')
+})
 
 
 let tab3_class_short = ref(null)
@@ -278,7 +284,6 @@ async function deleteVacations(){
 }
 
 let studentnameorid = ref('')
-const route = useRoute()
 let selectedStudents = ref(storage('studentwise_vacation_selected_students').value || [])
 
 // Auto-select student from query param
@@ -398,6 +403,7 @@ let filteredAllStudents = computed(() => {
       <FullCalendarEvents 
       :events="calendarEvents"
       :weekends="CONFIG.settings?.attendance?.weekends || []"
+      :initialDate="calendarInitialDate"
       :targetStudent="getStudent"
       @initAndNextPrev="onInitAndNextPrev" 
       @advacation="onAdVacation" 
