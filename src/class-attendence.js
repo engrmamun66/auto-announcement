@@ -265,31 +265,97 @@ class Attendance {
 
     // Delete attendance
     deleteBulk(req, res) {
-      const { ids } = req.body;
+      const { ids, student_dakhelas, start_date, end_date } = req.body;
 
-      if (!ids || !Array.isArray(ids) || ids.length === 0) {
-        return res.status(400).send({ error: "ids array is required for bulk deletion." });
+      let query, params;
+
+      // If student_dakhelas with date range provided (bulk delete by class and date)
+      if (student_dakhelas && Array.isArray(student_dakhelas) && student_dakhelas.length > 0 && start_date && end_date) {
+        const validDakhelas = student_dakhelas.map(d => Number(d)).filter(d => !isNaN(d));
+        if (validDakhelas.length === 0) {
+          return res.status(400).send({ error: "No valid dakhela numbers provided." });
+        }
+        const placeholders = validDakhelas.map(() => '?').join(',');
+        // Delete records matching dakhela numbers (student_id = dakhela) and date range
+        query = `DELETE FROM ${this.tableName} WHERE student_id IN (${placeholders})
+          AND DATE(date) >= DATE(?) AND DATE(date) <= DATE(?)`;
+        params = [...validDakhelas, start_date, end_date];
+
+        console.log('DEBUG deleteBulk:', { query, params, validDakhelas, start_date, end_date });
       }
-
-      const recordIds = ids.map(Number).filter(Boolean);
-      if (recordIds.length === 0) {
-        return res.status(400).send({ error: "No valid record IDs provided." });
+      // If record ids provided (direct delete by record IDs)
+      else if (ids && Array.isArray(ids) && ids.length > 0) {
+        const recordIds = ids.map(Number).filter(Boolean);
+        if (recordIds.length === 0) {
+          return res.status(400).send({ error: "No valid record IDs provided." });
+        }
+        const placeholders = recordIds.map(() => '?').join(',');
+        query = `DELETE FROM ${this.tableName} WHERE id IN (${placeholders})`;
+        params = recordIds;
       }
-
-      const placeholders = recordIds.map(() => '?').join(',');
-      const query = `DELETE FROM ${this.tableName} WHERE id IN (${placeholders})`;
-      const params = recordIds;
+      else {
+        return res.status(400).send({ error: "Either ids array or student_dakhelas with date range is required for bulk deletion." });
+      }
 
       this.db.run(query, params, function (err) {
         if (err) {
+          console.error('DELETE ERROR:', err);
           return res.status(500).send({ error: err.message });
         }
+        console.log('DELETE SUCCESS:', { deletedCount: this.changes });
         res.send({ message: `Deleted ${this.changes} attendance records.`, deletedCount: this.changes });
       });
     }
 
+    deleteBulkCount(req, res) {
+      const { student_dakhelas, start_date, end_date } = req.body;
 
+      if (!student_dakhelas || !Array.isArray(student_dakhelas) || student_dakhelas.length === 0 || !start_date || !end_date) {
+        return res.status(400).send({ error: "student_dakhelas, start_date, and end_date are required." });
+      }
 
+      const placeholders = student_dakhelas.map(() => '?').join(',');
+
+      // First, check how many students exist with those dakhelas
+      const studentCheckQuery = `SELECT COUNT(*) as count FROM students WHERE dakhela IN (${placeholders})`;
+      const studentParams = student_dakhelas;
+
+      this.db.get(studentCheckQuery, studentParams, (err, studentRow) => {
+        if (err) {
+          console.error('STUDENT CHECK ERROR:', err);
+          return res.status(500).send({ error: err.message });
+        }
+
+        // Then, check how many attendance records match
+        const countQuery = `SELECT COUNT(*) as count FROM ${this.tableName} WHERE student_id IN (
+          SELECT id FROM students WHERE dakhela IN (${placeholders})
+        ) AND date >= ? AND date <= ?`;
+        const params = [...student_dakhelas, start_date, end_date];
+
+        this.db.get(countQuery, params, (err, row) => {
+          if (err) {
+            console.error('COUNT ERROR:', err);
+            return res.status(500).send({ error: err.message });
+          }
+
+          console.log('DIAGNOSTIC:', {
+            studentsFound: studentRow?.count,
+            attendanceRecordsMatching: row?.count,
+            student_dakhelas,
+            start_date,
+            end_date
+          });
+
+          res.send({
+            studentsFound: studentRow?.count || 0,
+            attendanceRecordsMatching: row?.count || 0,
+            student_dakhelas,
+            start_date,
+            end_date
+          });
+        });
+      });
+    }
 
     list(req, res) {
       const MAX_LIMIT = 1000;

@@ -339,22 +339,34 @@ async function AddBulkAttendanceNow() {
 async function deleteAllDataForSelectedClass(){
 
     if(!confirm(helper.t('Are you sure to delete all attendance data for {className} from {startDate} to {endDate}?', { className: payload.class_short, startDate: payload.dates?.startDate, endDate: payload.dates?.endDate }))) return
-    let student_ids = payload.class_short ? all_students.value.filter(s => s.class_short == payload.class_short).map(s => s.dakhela) : all_students.value.map(s => s.dakhela)
-    let params = {
-        student_ids,
-        start_date: payload.dates?.startDate,
-        end_date: payload.dates?.endDate,
+    let dakhelas = payload.class_short ? all_students.value.filter(s => s.class_short == payload.class_short).map(s => s.dakhela) : all_students.value.map(s => s.dakhela)
+
+    if(!dakhelas || dakhelas.length === 0) {
+        return emitter.emit('toaster-error', { message: helper.t('No students found in selected class')})
     }
+
+    let startDate = typeof payload.dates?.startDate === 'string' ? payload.dates.startDate : moment(payload.dates?.startDate).format('YYYY-MM-DD')
+    let endDate = typeof payload.dates?.endDate === 'string' ? payload.dates.endDate : moment(payload.dates?.endDate).format('YYYY-MM-DD')
+
     try {
-        let response = await http.delete('/attendence-delete-bulk', { params })
+        let response = await http.delete('/attendence-delete-bulk', {
+            data: {
+                student_dakhelas: dakhelas,
+                start_date: startDate,
+                end_date: endDate,
+            }
+        })
         if(response.status == 200){
             emitter.emit('toaster-success', { message: response.data?.message})
         } else {
             emitter.emit('toaster-error', { message: helper.t('Delete failed!')})
         }
     } catch (error) {
+        console.error('Delete error:', error)
         emitter.emit('toaster-error', { message: helper.t('Delete failed')})
     }
+
+    emitter.emit('blulk_deleted_attendences', true)
 }
 
  

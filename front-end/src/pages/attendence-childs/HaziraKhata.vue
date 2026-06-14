@@ -639,6 +639,7 @@ onMounted(() => {
   setTimeout(updateScrollControls, 0)
   setTimeout(updateScrollControls, 1000)
   setTimeout(updateScrollControls, 1500)
+  emitter.on('blulk_deleted_attendences', ()=>loadDailyLogs(selectedClassShort.value))
 })
 
 onBeforeUnmount(() => {
@@ -939,6 +940,11 @@ watch(
                 <div class="qd-time-item">
                   <span class="qd-time-label">Out:</span>
                   <span class="qd-time-val">{{ formatTime(shift?.attendance?.out_time)}}</span>
+                </div>
+                <!-- <div v-if="shift?.attendance?.late_in_minute > 0" class="qd-time-item qd-late-item"> -->
+                <div v-if="shift?.attendance?.late_in_minute > 0" class="qd-time-item qd-late-item">
+                  <span class="qd-time-label">Late:</span>
+                  <span class="qd-time-val qd-late-val">{{ shift?.attendance?.late_in_minute }} min</span>
                 </div>
               </div>
               <!-- <div v-if="shift.is_present" class="qd-status present">Present</div>
@@ -1733,11 +1739,12 @@ watch(
 }
 
 .qd-shift-time {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 10px;
   margin-bottom: 2px;
+  flex-wrap: wrap;
 }
 
 .qd-time-item {
@@ -1755,6 +1762,16 @@ watch(
 .qd-time-val {
   font-weight: 700;
   color: #1f2937;
+}
+
+.qd-late-item {
+  padding-left: 8px;
+  border-left: 1px solid #e5e7eb;
+}
+
+.qd-late-val {
+  color: #dc2626;
+  font-weight: 700;
 }
 
 .qd-status {
