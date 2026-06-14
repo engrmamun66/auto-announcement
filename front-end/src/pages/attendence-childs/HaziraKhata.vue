@@ -980,7 +980,8 @@ watch(
                       </template> -->
                     </span>
                   </template>
-                  <template v-else-if="info.text == 'Absent'">
+                  <!-- Absent -->
+                  <template v-else>
                     <span class="late-time-display"
                       :style="{
                         backgroundColor: getHaziraIconColor(getCellStatus(student, day.date).code).bgColor,
@@ -988,7 +989,7 @@ watch(
                         border: 'none'
                       }"
                     >
-                      <!-- {{ getHaziraIconColor(getCellStatus(student, day.date).code).emoji }} -->
+                      {{ getHaziraIconColor(getCellStatus(student, day.date).code).emoji }}
                     </span>
                   </template>
 
