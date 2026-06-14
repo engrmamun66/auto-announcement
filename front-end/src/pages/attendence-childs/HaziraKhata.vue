@@ -428,10 +428,12 @@ let tartCellStyles = ref({
 let targetCellEntry = ref(null)
 
 function formatTime(value) {
-  if (!value) return '-'
+  if (!value) return ''
   const time = moment(value, ['HH:mm:ss', 'HH:mm'], true)
   return time.isValid() ? time.format('hh:mm A') : value
 }
+
+const POPUP_WIDTH = '270px'
 
 function startPreview(target, entry, index, isLast) {
   targetCellEntry.value = entry
@@ -439,7 +441,7 @@ function startPreview(target, entry, index, isLast) {
   nextTick(() => {
     const quickDetails = document.getElementById('quick_details')
     const tooltipHeight = quickDetails ? quickDetails.offsetHeight : 180
-    const tooltipWidth = 240
+    const tooltipWidth = parseInt(POPUP_WIDTH)
 
     let { top, bottom, left, width } = target.getBoundingClientRect()
     const cellCenter = left + (width / 2)
@@ -935,16 +937,26 @@ watch(
               <div class="qd-shift-time">
                 <div class="qd-time-item">
                   <span class="qd-time-label">In:</span>
-                  <span class="qd-time-val">{{ formatTime(shift?.attendance?.in_time) }}</span>
+                  <span class="qd-time-val">{{ formatTime(shift?.attendance?.in_time) || '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' }}</span>
                 </div>
                 <div class="qd-time-item">
                   <span class="qd-time-label">Out:</span>
-                  <span class="qd-time-val">{{ formatTime(shift?.attendance?.out_time)}}</span>
+                  <span class="qd-time-val">{{ formatTime(shift?.attendance?.out_time) || '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' }}</span>
                 </div>
                 <!-- <div v-if="shift?.attendance?.late_in_minute > 0" class="qd-time-item qd-late-item"> -->
-                <div v-if="shift?.attendance?.late_in_minute > 0" class="qd-time-item qd-late-item">
+                <div class="qd-time-item qd-late-item">
                   <span class="qd-time-label">Late:</span>
-                  <span class="qd-time-val qd-late-val">{{ shift?.attendance?.late_in_minute }} min</span>
+                  <span class="qd-time-val" 
+                    :class="{'qd-no-late-val': shift?.attendance?.late_in_minute < 0, 'qd-late-val': shift?.attendance?.late_in_minute > 0}"
+                    >
+                    {{ 
+                      shift?.attendance?.late_in_minute > 0 
+                      ? (shift?.attendance?.late_in_minute + ' min') 
+                      : shift?.attendance?.late_in_minute < 0 
+                        ? ('Before ' + Math.abs(shift?.attendance?.late_in_minute))  
+                        : 'No-late' 
+                    }}
+                  </span>
                 </div>
               </div>
               <!-- <div v-if="shift.is_present" class="qd-status present">Present</div>
@@ -1627,7 +1639,7 @@ watch(
 #quick_details{
   position: fixed;
   z-index: 9;
-  width: 240px;
+  width: v-bind(POPUP_WIDTH);
   background-color: var(--qdcolor);
   padding: 8px;
   border-radius: 5px;
@@ -1769,6 +1781,10 @@ watch(
   border-left: 1px solid #e5e7eb;
 }
 
+.qd-no-late-val {
+  color: #038d0c;
+  font-weight: 700;
+}
 .qd-late-val {
   color: #dc2626;
   font-weight: 700;
