@@ -22,6 +22,7 @@ const STORE_CLASS = 'hazira_class'
 const STORE_RANGE = 'hazira_range'
 const STORE_SHIFT = 'hazira_shift_'
 
+
 const _savedClass = localStorage.getItem(STORE_CLASS)
 const _savedRange = (() => { try { return JSON.parse(localStorage.getItem(STORE_RANGE)) } catch { return null } })()
 
@@ -432,8 +433,8 @@ function formatTime(value) {
   const time = moment(value, ['HH:mm:ss', 'HH:mm'], true)
   return time.isValid() ? time.format('hh:mm A') : value
 }
-
-const POPUP_WIDTH = '270px'
+const blank_space = Array.from({length: 18}).fill(' ').join('')
+const POPUP_WIDTH = '288px'
 
 function startPreview(target, entry, index, isLast) {
   targetCellEntry.value = entry
@@ -442,10 +443,24 @@ function startPreview(target, entry, index, isLast) {
     const quickDetails = document.getElementById('quick_details')
     const tooltipHeight = quickDetails ? quickDetails.offsetHeight : 180
     const tooltipWidth = parseInt(POPUP_WIDTH)
+    const padding = 10
 
     let { top, bottom, left, width } = target.getBoundingClientRect()
     const cellCenter = left + (width / 2)
-    const tooltipLeft = cellCenter - (tooltipWidth / 2)
+    let tooltipLeft = cellCenter - (tooltipWidth / 2)
+
+    // Adjust if goes off right edge
+    if (tooltipLeft + tooltipWidth > window.innerWidth - padding) {
+      tooltipLeft = window.innerWidth - tooltipWidth - padding
+    }
+
+    // Adjust if goes off left edge
+    if (tooltipLeft < padding) {
+      tooltipLeft = padding
+    }
+
+    // Calculate arrow position relative to adjusted tooltip
+    const arrowOffset = cellCenter - tooltipLeft
 
     const spaceBelow = window.innerHeight - bottom
     const showAbove = spaceBelow < tooltipHeight + 10
@@ -457,7 +472,8 @@ function startPreview(target, entry, index, isLast) {
     tartCellStyles.value = {
       style: {
         left: tooltipLeft + 'px',
-        top: tooltipTop + 'px'
+        top: tooltipTop + 'px',
+        '--arrow-offset': arrowOffset + 'px'
       },
       'data-arrow': showAbove ? 'down' : 'up'
     }
@@ -937,11 +953,11 @@ watch(
               <div class="qd-shift-time">
                 <div class="qd-time-item">
                   <span class="qd-time-label">In:</span>
-                  <span class="qd-time-val">{{ formatTime(shift?.attendance?.in_time) || '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' }}</span>
+                  <span class="qd-time-val">{{ formatTime(shift?.attendance?.in_time) || blank_space }}</span>
                 </div>
                 <div class="qd-time-item">
                   <span class="qd-time-label">Out:</span>
-                  <span class="qd-time-val">{{ formatTime(shift?.attendance?.out_time) || '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' }}</span>
+                  <span class="qd-time-val">{{ formatTime(shift?.attendance?.out_time) || blank_space }}</span>
                 </div>
                 <!-- <div v-if="shift?.attendance?.late_in_minute > 0" class="qd-time-item qd-late-item"> -->
                 <div class="qd-time-item qd-late-item">
@@ -953,7 +969,7 @@ watch(
                       shift?.attendance?.late_in_minute > 0 
                       ? (shift?.attendance?.late_in_minute + ' min') 
                       : shift?.attendance?.late_in_minute < 0 
-                        ? ('Before ' + Math.abs(shift?.attendance?.late_in_minute))  
+                        ? ('Before ' + Math.abs(shift?.attendance?.late_in_minute))
                         : 'No-late' 
                     }}
                   </span>
@@ -1650,7 +1666,7 @@ watch(
 #quick_details::before {
   content: '';
   position: absolute;
-  left: 50%;
+  left: var(--arrow-offset, 50%);
   transform: translateX(-50%);
   width: 0;
   height: 0;
