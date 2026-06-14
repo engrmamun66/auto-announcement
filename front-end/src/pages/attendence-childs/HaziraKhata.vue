@@ -1,7 +1,7 @@
 
 <script setup>
 import moment from 'moment/moment'
-import { inject, ref, computed, watch, onMounted, onBeforeUnmount, nextTick, provide } from "vue";
+import { inject, ref, reactive, computed, watch, onMounted, onBeforeUnmount, nextTick, provide } from "vue";
 import { useRoute, useRouter } from 'vue-router';
 import MonthPickerSingle from '../../components/MonthPickerSingle.vue'
 import HaziraShowLogRightbar from '../../components/hazira/HaziraShowLogRightbar.vue'
@@ -49,6 +49,20 @@ const selectedLogEntry = ref(null)
 const monthPickerRef = ref(null)
 const activeStudentMenu = ref(null)
 const currentView = ref('hazira')
+const ViewColors = {
+  white: '#ffffff',
+  black: '#000000',
+  red: '#f99494',
+  green: '#16a34a',
+}
+const LateCells = reactive({
+  present: {
+    show: false,
+  },
+  absent: {
+    show: false,
+  }, 
+})
 
 const attendancePresetCountBy = computed(() => {
   return CONFIG.value?.settings?.attendance?.preset_count_by ?? 'if_present_in_first_shift'
@@ -815,6 +829,21 @@ watch(
           <span class="legend-label-text" :tooltip="helper.t(item.label)" style="--tfsize:11px" flow="right" >{{ item.label }}</span>
         </div>
         <button class="hazira-reset-btn" :tooltip="'Customize icons & colors'" flow="right" @click="showHaziraSettingsPanel = true"><i class='bx bx-palette'></i></button>
+
+        <template v-if="currentView == 'late'">
+          <div class="late-sort-controls">
+            <label class="late-sort-checkbox">
+              <input type="checkbox" v-model="LateCells.present.show" />
+              <span>Present</span>
+            </label>
+            <label class="late-sort-checkbox">
+              <input type="checkbox" v-model="LateCells.absent.show" />
+              <span>Absent</span>
+            </label>
+            <span class="late-sort-label">Sort</span>
+          </div>
+        </template>
+
       </div>
       <!-- Controls -->
       <div class="hazira-actions-section">
@@ -939,8 +968,8 @@ watch(
                   <template v-if="info.text == 'Present'">
                     <span class="late-time-display"
                       :style="{
-                        color:  info.late_in_minute > 0 ? '#000000' : '#000000', 
-                        backgroundColor: info.late_in_minute > 0 ? '#f99494' : '#16a34a', 
+                        color:  ViewColors.black, 
+                        backgroundColor: info.late_in_minute > 0 ? ViewColors.red : ViewColors.green, 
                       }"
                     >
                     {{ info?.late_in_minute }}
@@ -955,8 +984,8 @@ watch(
                     <span class="late-time-display"
                       :style="{
                         backgroundColor: getHaziraIconColor(getCellStatus(student, day.date).code).bgColor,
-                      color: getCellStatus(student, day.date).code === '-' ? '#6b7280' : '#ffffff',
-                      border: 'none'
+                        color: getCellStatus(student, day.date).code === '-' ? '#6b7280' : '#ffffff',
+                        border: 'none'
                       }"
                     >
                       <!-- {{ getHaziraIconColor(getCellStatus(student, day.date).code).emoji }} -->
@@ -2163,6 +2192,38 @@ watch(
   background-size: 1000px 100%;
   animation: shimmer 2s infinite;
   border-radius: 6px;
+}
+
+.late-sort-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 8px;
+  border-left: 1px solid #e5e7eb;
+}
+
+.late-sort-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 12px;
+  color: #374151;
+}
+
+.late-sort-checkbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #3b82f6;
+}
+
+.late-sort-label {
+  font-size: 11px;
+  color: #6b7280;
+  font-weight: 600;
+  margin-left: 4px;
 }
 
 </style>
