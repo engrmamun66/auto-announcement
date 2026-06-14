@@ -48,6 +48,11 @@ const showLogRightbar = ref(false)
 const selectedLogEntry = ref(null)
 const monthPickerRef = ref(null)
 const activeStudentMenu = ref(null)
+const currentView = ref('hazira')
+
+const attendancePresetCountBy = computed(() => {
+  return CONFIG.value?.settings?.attendance?.preset_count_by ?? 'if_present_in_first_shift'
+})
 
 function getSavedShift(classShort) {
   if (!classShort) return 'All'
@@ -346,7 +351,7 @@ function toggleStudentMenu(dakhela, event) {
   })
 }
 
-function navigateTo(item, tab, { _for = 'student', route_path = route.path, type = 'month', start_date = null, end_date = null } = {}) {
+function navigateTo(item, tab, { _for = 'student', route_path = route.path, type = '', start_date = null, end_date = null } = {}) {
   activeStudentMenu.value = null
   activeClassMenu.value = null
   parent_tab.value = tab
@@ -410,12 +415,37 @@ function buildLogPayload(student, day) {
   const byDate = student?.byDate?.[date] || null
   const status = getCellStatus(student, date)
 
+  let shifts = byDate.shiftInfo // shift[ {....} ]
+  let shift_value = localStorage.getItem(STORE_SHIFT + selectedClassShort.value) || 'All'
+  /**
+   preset_count_by
+   ==============================================
+   All posible examples, the value of preset_count_by
+ * 'if_present_in_first_shift'
+ * 'if_present_in_last_shift'
+ * 'if_present_in_all_shifts'
+ * 'if_present_minimum_{2}_shift'. // 2 is dynamic
+ * 'if_present_in_[1, 2]'         // 1 means fist shift, 2 means 2nd shift
+ */
+  const lateInTime = shift_value === 'All'
+    ? attendancePresetCountBy.value === 'if_present_in_first_shift'
+      ? shifts[0].attendance?.late_in_minute
+      : attendancePresetCountBy.value == 'if_present_in_last_shift'
+        ? shifts[shifts.length - 1].attendance?.late_in_minute
+        : attendancePresetCountBy.value == 'if_present_in_all_shifts'
+          ? Math.floor(shifts.map(s => s.attendance?.late_in_minute > 0 ? s.attendance?.late_in_minute : 0).reduce((a, b)=> a + b, 0) / shifts.length)
+          : shifts[0].attendance?.late_in_minute
+    : (shifts?.[Number(shift_value)] || shifts?.[0])?.attendance?.late_in_minute
+
+
   return {
     student,
-    byDate,
+    byDate, 
     date,
     text: status.text,
     status,
+    shifts,
+    late_in_minute: lateInTime,
   }
 }
 
@@ -487,6 +517,13 @@ function endPreview() {
 function closeShowLog() {
   showLogRightbar.value = false
   selectedLogEntry.value = null
+}
+
+function formatLateTime(minutes) {
+  if (!minutes && minutes !== 0) return '-'
+  if (minutes > 0) return minutes + ' min'
+  if (minutes < 0) return 'Before ' + Math.abs(minutes)
+  return 'No-late'
 }
 
 function resolveStatus(item, dateStr) {
@@ -736,6 +773,24 @@ watch(
     <!-- Shift Tabs + Legend + Controls (Single Line) -->
     <div class="hazira-controls-bar hide_onprint">
       <!-- Shifts -->
+      <!-- View Tabs -->
+      <div class="hazira-view-tabs">
+        <button
+          class="view-tab"
+          :class="{ active: currentView === 'hazira' }"
+          @click="currentView = 'hazira'"
+        >
+          {{ helper.t('Hazira') }}
+        </button>
+        <button
+          class="view-tab"
+          :class="{ active: currentView === 'late' }"
+          @click="currentView = 'late'"
+        >
+          {{ helper.t('Lates') }}
+        </button>
+      </div>
+
       <div class="hazira-shifts-section">
         <button
           v-for="shift in shifts"
@@ -833,41 +888,139 @@ watch(
             </div>
           </div>
           <div v-for="(day, index2) in dayColumns" :key="day.date" class="daily-grid-cell day-cell">
-            <div
-              class="status-cell"
-              :class="{ 'is-interactive': getCellStatus(student, day.date).code !== '-' }"
-            >
-              <span
-                class="status-pill"
-                :style="{
-                  backgroundColor: getHaziraIconColor(getCellStatus(student, day.date).code).bgColor,
-                  color: getCellStatus(student, day.date).code === '-' ? '#6b7280' : '#ffffff',
-                  border: 'none'
-                }"
+            <template v-if="currentView == 'hazira'">
+              <div
+                class="status-cell"
+                :class="{ 'is-interactive': getCellStatus(student, day.date).code !== '-' }"
               >
-                {{ getHaziraIconColor(getCellStatus(student, day.date).code).emoji }}
-              </span>
+                <span
+                  class="status-pill"
+                  :style="{
+                    backgroundColor: getHaziraIconColor(getCellStatus(student, day.date).code).bgColor,
+                    color: getCellStatus(student, day.date).code === '-' ? '#6b7280' : '#ffffff',
+                    border: 'none'
+                  }"
+                >
+                  {{ getHaziraIconColor(getCellStatus(student, day.date).code).emoji }}
+                </span>
+  
+                <button v-if="getCellStatus(student, day.date).code !== '-'"
+                  type="button"
+                  class="status-menu-toggle"
+                  :__tooltip="getCellStatus(student, day.date).code !== '-' ? getCellStatus(student, day.date).text : ''"
+                  :flow="index === 0 ? 'left' : 'up'"
+                  :aria-label="`Show log for ${student.name || 'student'} on ${day.date}`"
+                  @click.stop="openShowLog(buildLogPayload(student, day))"
+                  @mouseenter.stop="startPreview($event.target, buildLogPayload(student, day), index, index === dailyLogs.length - 1)"
+                  @mouseleave.stop="endPreview()"
+                  @touchstart.stop="startPreview($event.target, buildLogPayload(student, day), index, index === dailyLogs.length - 1)"
+                  @touchend.stop="endPreview()"
+                  @auxclick="log({
+                    student,
+                    date: day.date,
+                    text: getCellStatus(student, day.date).code,
+                  })"
+                >
+                  <i class='bx bx-info-circle nc'></i>
+                </button>
+              </div>
+            </template>
+            <template v-else-if="currentView == 'late'">
+              <template v-for="(info, ii) in [buildLogPayload(student, day)]">
+                <div
+                  class="status-cell"
+                  :class="{ 'is-interactive': getCellStatus(student, day.date).code !== '-' }"
+                  @contextmenu="log({info}, info?.byDate?.is_presentable_day)"
+                >
+                <template v-if="info?.byDate?.is_presentable_day">
 
-              <button v-if="getCellStatus(student, day.date).code !== '-'"
-                type="button"
-                class="status-menu-toggle"
-                :__tooltip="getCellStatus(student, day.date).code !== '-' ? getCellStatus(student, day.date).text : ''"
-                :flow="index === 0 ? 'left' : 'up'"
-                :aria-label="`Show log for ${student.name || 'student'} on ${day.date}`"
-                @click.stop="openShowLog(buildLogPayload(student, day))"
-                @mouseenter.stop="startPreview($event.target, buildLogPayload(student, day), index, index === dailyLogs.length - 1)"
-                @mouseleave.stop="endPreview()"
-                @touchstart.stop="startPreview($event.target, buildLogPayload(student, day), index, index === dailyLogs.length - 1)"
-                @touchend.stop="endPreview()"
-                @auxclick="log({
-                  student,
-                  date: day.date,
-                  text: getCellStatus(student, day.date).code,
-                })"
-              >
-                <i class='bx bx-info-circle nc'></i>
-              </button>
-            </div>
+
+                  
+                  <template v-if="info.text == 'Present'">
+                    <span class="late-time-display"
+                      :style="{
+                        color:  info.late_in_minute > 0 ? '#000000' : '#000000', 
+                        backgroundColor: info.late_in_minute > 0 ? '#f99494' : '#16a34a', 
+                      }"
+                    >
+                    {{ info?.late_in_minute }}
+                      <!-- <template v-if="info?.late_in_minute > 0">
+                      </template>
+                      <template v-else>
+                        {{ info?.late_in_minute }}
+                      </template> -->
+                    </span>
+                  </template>
+                  <template v-else-if="info.text == 'Absent'">
+                    <span class="late-time-display"
+                      :style="{
+                        backgroundColor: getHaziraIconColor(getCellStatus(student, day.date).code).bgColor,
+                      color: getCellStatus(student, day.date).code === '-' ? '#6b7280' : '#ffffff',
+                      border: 'none'
+                      }"
+                    >
+                      <!-- {{ getHaziraIconColor(getCellStatus(student, day.date).code).emoji }} -->
+                    </span>
+                  </template>
+
+                  <button v-if="getCellStatus(student, day.date).code !== '-'"
+                    type="button"
+                    class="status-menu-toggle"
+                    :__tooltip="getCellStatus(student, day.date).code !== '-' ? getCellStatus(student, day.date).text : ''"
+                    :flow="index === 0 ? 'left' : 'up'"
+                    :aria-label="`Show log for ${student.name || 'student'} on ${day.date}`"
+                    @click.stop="openShowLog(buildLogPayload(student, day))"
+                    @mouseenter.stop="startPreview($event.target, buildLogPayload(student, day), index, index === dailyLogs.length - 1)"
+                    @mouseleave.stop="endPreview()"
+                    @touchstart.stop="startPreview($event.target, buildLogPayload(student, day), index, index === dailyLogs.length - 1)"
+                    @touchend.stop="endPreview()"
+                    @auxclick="log({
+                      student,
+                      date: day.date,
+                      text: getCellStatus(student, day.date).code,
+                    })"
+                  >
+                    <i class='bx bx-info-circle nc'></i>
+                  </button>
+
+                </template>
+                <!-- not presentable day -->
+                <template v-else>
+                  <span
+                    class="status-pill"
+                    :style="{
+                      backgroundColor: getHaziraIconColor(getCellStatus(student, day.date).code).bgColor,
+                      color: getCellStatus(student, day.date).code === '-' ? '#6b7280' : '#ffffff',
+                      border: 'none'
+                    }"
+                  >
+                    {{ getHaziraIconColor(getCellStatus(student, day.date).code).emoji }}
+                  </span>
+
+                  <button v-if="getCellStatus(student, day.date).code !== '-'"
+                    type="button"
+                    class="status-menu-toggle"
+                    :__tooltip="getCellStatus(student, day.date).code !== '-' ? getCellStatus(student, day.date).text : ''"
+                    :flow="index === 0 ? 'left' : 'up'"
+                    :aria-label="`Show log for ${student.name || 'student'} on ${day.date}`"
+                    @click.stop="openShowLog(buildLogPayload(student, day))"
+                    @mouseenter.stop="startPreview($event.target, buildLogPayload(student, day), index, index === dailyLogs.length - 1)"
+                    @mouseleave.stop="endPreview()"
+                    @touchstart.stop="startPreview($event.target, buildLogPayload(student, day), index, index === dailyLogs.length - 1)"
+                    @touchend.stop="endPreview()"
+                    @auxclick="log({
+                      student,
+                      date: day.date,
+                      text: getCellStatus(student, day.date).code,
+                    })"
+                  >
+                    <i class='bx bx-info-circle nc'></i>
+                  </button>
+
+                </template>
+                </div>
+              </template>
+            </template>
           </div>
         </div>
 
@@ -1467,6 +1620,20 @@ watch(
   transition: transform 0.2s ease, filter 0.2s ease, opacity 0.2s ease;
 }
 
+.late-time-display {
+  width: 100%;
+  height: 100%;
+  border-radius: 0px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 10px;
+  position: relative;
+  z-index: 0;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
 .status-cell.is-interactive:hover::before,
 .status-cell.is-interactive:focus-within::before{
   opacity: 1;
@@ -1611,6 +1778,33 @@ watch(
 }
 
 /* Shift Tabs */
+.hazira-view-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 0 12px;
+}
+
+.view-tab {
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  padding: 8px 16px;
+  border-bottom: 2px solid transparent;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.view-tab:hover {
+  color: #374151;
+}
+
+.view-tab.active {
+  color: #111827;
+  border-bottom-color: #3b82f6;
+}
+
 .shift-tab {
   border: 1px solid #e5e7eb;
   background: #ffffff;

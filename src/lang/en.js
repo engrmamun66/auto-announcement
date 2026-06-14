@@ -533,6 +533,7 @@ module.exports = {
     'Common Leaves': 'Common Leaves',
     'Personal Leaves': 'Personal Leaves',
     'Total Leaves': 'Total Leaves',
+    'Lates': 'Lates',
     'Lates Total': 'Lates Total',
     'Average Late': 'Average Late',
     'Monthly Attendance': 'Monthly Attendance',

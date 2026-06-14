@@ -534,6 +534,7 @@ module.exports = {
     'Common Leaves': 'সাধারণ ছুটি',
     'Personal Leaves': 'ব্যক্তিগত ছুটি',
     'Total Leaves': 'মোট ছুটি',
+    'Lates': 'লেট ম্যাপ',
     'Lates Total': 'মোট দেরি',
     'Average Late': 'গড় দেরি',
     'Monthly Attendance': 'মাসিক উপস্থিতি',

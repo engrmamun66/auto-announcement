@@ -247,18 +247,14 @@ onMounted(()=>{
   if(route.query.tab){
     tab.value = Number(route.query.tab) || 1
   }
-  // Auto-select Reporting tab if classShort or type in query
-  if(route.query.classShort || route.query.type){
-    tab.value = 4
-  }
 })
 
 // Watch for query param changes to update tab
-watch(() => route.query, (newQuery) => {
-  if((newQuery.classShort || newQuery.type) && tab.value !== 4) {
-    tab.value = 4
-  }
-}, { deep: true })
+// watch(() => route.query, (newQuery) => {
+//   if((newQuery.classShort || newQuery.type) && tab.value !== 4) {
+//     tab.value = 4
+//   }
+// }, { deep: true })
  
 </script>
 
