@@ -965,7 +965,7 @@ watch(
 
 
                   
-                  <template v-if="info.text == 'Present'">
+                  <template v-if="info.text == 'Present' && info.late_in_minute != undefined"">
                     <span class="late-time-display"
                       :style="{
                         color:  ViewColors.black, 
