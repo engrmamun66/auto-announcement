@@ -1,8 +1,8 @@
 <script setup>
 import { ref, inject, nextTick } from 'vue'
 import moment from 'moment/moment'
-import receiptImage from '/money-receipt.jpeg?url'
 
+const receiptImage = '/money-receipt.jpeg'
 const helper = inject('helper')
 const emitter = inject('emitter')
 
