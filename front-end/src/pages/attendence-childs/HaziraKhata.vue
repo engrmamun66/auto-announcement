@@ -56,8 +56,11 @@ const ViewColors = {
   green: '#16a34a',
 }
 const LateCells = reactive({
-  present: {
+  perfect_in: {
     show: false,
+  },
+  late_in: {
+    show: true,
   },
   absent: {
     show: false,
@@ -820,27 +823,32 @@ watch(
 
       <!-- Legend -->
       <div class="hazira-legend-section">
-        <div v-for="item in legendItems" :key="item.status" class="legend-item-inline">
-          <span class="legend-badge" :style="{
-            backgroundColor: item.bg_color,
-            color: item.status === 'Future' ? '#000000' : '#ffffff',
-            border: '1px solid #d1d5db'
-          }">{{ item.active_emoji }}</span>
-          <span class="legend-label-text" :tooltip="helper.t(item.label)" style="--tfsize:11px" flow="right" >{{ item.label }}</span>
-        </div>
-        <button class="hazira-reset-btn" :tooltip="'Customize icons & colors'" flow="right" @click="showHaziraSettingsPanel = true"><i class='bx bx-palette'></i></button>
 
-        <template v-if="currentView == 'late'">
+        <template v-if="currentView == 'hazira'">
+          <div v-for="item in legendItems" :key="item.status" class="legend-item-inline">
+            <span class="legend-badge" :style="{
+              backgroundColor: item.bg_color,
+              color: item.status === 'Future' ? '#000000' : '#ffffff',
+              border: '1px solid #d1d5db'
+            }">{{ item.active_emoji }}</span>
+            <span class="legend-label-text" :tooltip="helper.t(item.label)" style="--tfsize:11px" flow="right" >{{ item.label }}</span>
+          </div>
+          <button class="hazira-reset-btn" :tooltip="'Customize icons & colors'" flow="right" @click="showHaziraSettingsPanel = true"><i class='bx bx-palette'></i></button>
+        </template>
+        <template v-else-if="currentView == 'late'">
           <div class="late-sort-controls">
             <label class="late-sort-checkbox">
-              <input type="checkbox" v-model="LateCells.present.show" />
-              <span>Present</span>
+              <input type="checkbox" v-model="LateCells.late_in.show" />
+              <span>Late-in</span>
+            </label>
+            <label class="late-sort-checkbox">
+              <input type="checkbox" v-model="LateCells.perfect_in.show" />
+              <span>Prfect-in</span>
             </label>
             <label class="late-sort-checkbox">
               <input type="checkbox" v-model="LateCells.absent.show" />
-              <span>Absent</span>
+              <span>Others</span>
             </label>
-            <span class="late-sort-label">Sort</span>
           </div>
         </template>
 
@@ -966,30 +974,45 @@ watch(
 
                   
                   <template v-if="info.text == 'Present' && info.late_in_minute != undefined"">
-                    <span class="late-time-display"
-                      :style="{
-                        color:  ViewColors.black, 
-                        backgroundColor: info.late_in_minute > 0 ? ViewColors.red : ViewColors.green, 
-                      }"
-                    >
-                    {{ info?.late_in_minute }}
-                      <!-- <template v-if="info?.late_in_minute > 0">
-                      </template>
-                      <template v-else>
-                        {{ info?.late_in_minute }}
-                      </template> -->
-                    </span>
+                    <!-- Perfect In -->
+                    <template v-if="info.late_in_minute <= 0">
+                      <span class="late-time-display"
+                        :style="{
+                          color: LateCells.perfect_in.show ? ViewColors.black : 'white', 
+                          backgroundColor: LateCells.perfect_in.show ? 
+                            info.late_in_minute > 0 ? ViewColors.red : ViewColors.green
+                            : 'white', 
+                        }"
+                      >
+                      {{ LateCells.perfect_in.show ? info?.late_in_minute : '' }} 
+                      </span>
+
+                    </template>
+                    <!-- Late In -->
+                    <template v-else>
+                      <span class="late-time-display"
+                        :style="{
+                          color: LateCells.late_in.show ? ViewColors.black : 'white', 
+                          backgroundColor: LateCells.late_in.show ? 
+                            info.late_in_minute > 0 ? ViewColors.red : ViewColors.green
+                            : 'white', 
+                        }"
+                      >
+                      {{ LateCells.late_in.show ? info?.late_in_minute : '' }} 
+                      </span>
+
+                    </template>
                   </template>
                   <!-- Absent -->
                   <template v-else>
                     <span class="late-time-display"
                       :style="{
-                        backgroundColor: getHaziraIconColor(getCellStatus(student, day.date).code).bgColor,
-                        color: getCellStatus(student, day.date).code === '-' ? '#6b7280' : '#ffffff',
+                        backgroundColor: LateCells.absent.show ? getHaziraIconColor(getCellStatus(student, day.date).code).bgColor : 'white',
+                        color: LateCells.absent.show ? getCellStatus(student, day.date).code === '-' ? '#6b7280' : '#ffffff' : 'white',
                         border: 'none'
                       }"
                     >
-                      {{ getHaziraIconColor(getCellStatus(student, day.date).code).emoji }}
+                      {{ LateCells.absent.show ? getHaziraIconColor(getCellStatus(student, day.date).code).emoji : '' }}
                     </span>
                   </template>
 
@@ -1129,43 +1152,61 @@ watch(
             </div>
           </div>
         </div>
-        <div class="qd-shifts">
-          <template v-if="targetCellEntry.byDate?.shiftInfo?.length">
-            <div v-for="(shift, idx) in targetCellEntry.byDate.shiftInfo" :key="idx" class="qd-shift-item">
-              <div class="qd-shift-label">Shift {{ idx + 1 }}</div>
-              <div class="qd-shift-time">
-                <div class="qd-time-item">
-                  <span class="qd-time-label">In:</span>
-                  <span class="qd-time-val">{{ formatTime(shift?.attendance?.in_time) || blank_space }}</span>
+        <template v-if="targetCellEntry.status?.text === 'Vacation' || targetCellEntry.status?.text === 'Leave'">
+          <div class="qd-leaves">
+            <template v-if="targetCellEntry.byDate?.day_leaves?.length">
+              <div v-for="(leave, idx) in targetCellEntry.byDate.day_leaves" :key="idx" class="qd-leave-item">
+                <div class="qd-leave-label" :class="`leave-type-${leave.type?.toLowerCase()}`">
+                  {{ leave.type || 'Leave' }}
                 </div>
-                <div class="qd-time-item">
-                  <span class="qd-time-label">Out:</span>
-                  <span class="qd-time-val">{{ formatTime(shift?.attendance?.out_time) || blank_space }}</span>
-                </div>
-                <!-- <div v-if="shift?.attendance?.late_in_minute > 0" class="qd-time-item qd-late-item"> -->
-                <div class="qd-time-item qd-late-item">
-                  <span class="qd-time-label">Late:</span>
-                  <span class="qd-time-val" 
-                    :class="{'qd-no-late-val': shift?.attendance?.late_in_minute < 0, 'qd-late-val': shift?.attendance?.late_in_minute > 0}"
-                    >
-                    {{ 
-                      shift?.attendance?.late_in_minute > 0 
-                      ? (shift?.attendance?.late_in_minute + ' min') 
-                      : shift?.attendance?.late_in_minute < 0 
-                        ? ('Before ' + Math.abs(shift?.attendance?.late_in_minute))
-                        : 'No-late' 
-                    }}
-                  </span>
-                </div>
+                <div v-if="leave.reason" class="qd-leave-reason">{{ leave.reason }}</div>
+                <div v-if="leave.approved_by" class="qd-leave-approved">Approved by: {{ leave.approved_by }}</div>
               </div>
-              <!-- <div v-if="shift.is_present" class="qd-status present">Present</div>
-              <div v-else class="qd-status absent">Absent</div> -->
-            </div>
-          </template>
-          <template v-else>
-            <div class="qd-no-shifts">No shifts</div>
-          </template>
-        </div>
+            </template>
+            <template v-else>
+              <div class="qd-no-shifts">{{ targetCellEntry.status?.text }}</div>
+            </template>
+          </div>
+        </template>
+        <template v-else>
+          <div class="qd-shifts">
+            <template v-if="targetCellEntry.byDate?.shiftInfo?.length">
+              <div v-for="(shift, idx) in targetCellEntry.byDate.shiftInfo" :key="idx" class="qd-shift-item">
+                <div class="qd-shift-label">Shift {{ idx + 1 }}</div>
+                <div class="qd-shift-time">
+                  <div class="qd-time-item">
+                    <span class="qd-time-label">In:</span>
+                    <span class="qd-time-val">{{ formatTime(shift?.attendance?.in_time) || blank_space }}</span>
+                  </div>
+                  <div class="qd-time-item">
+                    <span class="qd-time-label">Out:</span>
+                    <span class="qd-time-val">{{ formatTime(shift?.attendance?.out_time) || blank_space }}</span>
+                  </div>
+                  <!-- <div v-if="shift?.attendance?.late_in_minute > 0" class="qd-time-item qd-late-item"> -->
+                  <div class="qd-time-item qd-late-item">
+                    <span class="qd-time-label">Late:</span>
+                    <span class="qd-time-val"
+                      :class="{'qd-no-late-val': shift?.attendance?.late_in_minute < 0, 'qd-late-val': shift?.attendance?.late_in_minute > 0}"
+                      >
+                      {{
+                        shift?.attendance?.late_in_minute > 0
+                        ? (shift?.attendance?.late_in_minute + ' min')
+                        : shift?.attendance?.late_in_minute < 0
+                          ? ('Before ' + Math.abs(shift?.attendance?.late_in_minute))
+                          : 'No-late'
+                      }}
+                    </span>
+                  </div>
+                </div>
+                <!-- <div v-if="shift.is_present" class="qd-status present">Present</div>
+                <div v-else class="qd-status absent">Absent</div> -->
+              </div>
+            </template>
+            <template v-else>
+              <div class="qd-no-shifts">No shifts</div>
+            </template>
+          </div>
+        </template>
       </div>
     </template>
 
@@ -2055,6 +2096,51 @@ watch(
   text-align: center;
 }
 
+.qd-leaves {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.qd-leave-item {
+  padding: 6px;
+  background-color: #f9fafb;
+  border-radius: 3px;
+  border-left: 3px solid #7c3aed;
+}
+
+.qd-leave-label {
+  font-weight: 700;
+  font-size: 11px;
+  color: #1f2937;
+  margin-bottom: 2px;
+  padding: 2px 4px;
+  border-radius: 2px;
+  display: inline-block;
+}
+
+.qd-leave-label.leave-type-leave {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.qd-leave-label.leave-type-vacation {
+  background-color: #e9d5ff;
+  color: #6b21a8;
+}
+
+.qd-leave-reason {
+  font-size: 9px;
+  color: #4b5563;
+  margin-bottom: 2px;
+}
+
+.qd-leave-approved {
+  font-size: 8px;
+  color: #6b7280;
+  font-style: italic;
+}
+
 .hazira-settings-panel {
   display: flex;
   flex-direction: column;
@@ -2198,33 +2284,37 @@ watch(
 .late-sort-controls {
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: center;
+  gap: 10px;
   padding: 0 8px;
-  border-left: 1px solid #e5e7eb;
+  height: 100%;
 }
 
 .late-sort-checkbox {
   display: flex;
-  align-items: center;
-  gap: 6px;
+  align-items: self-end;
+  gap: 4px;
   cursor: pointer;
   user-select: none;
   font-size: 12px;
   color: #374151;
+  line-height: 1;
 }
 
 .late-sort-checkbox input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   cursor: pointer;
   accent-color: #3b82f6;
+  flex-shrink: 0;
 }
 
 .late-sort-label {
   font-size: 11px;
   color: #6b7280;
   font-weight: 600;
-  margin-left: 4px;
+  margin-left: 0;
+  line-height: 1;
 }
 
 </style>
