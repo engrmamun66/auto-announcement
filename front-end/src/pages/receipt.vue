@@ -1,6 +1,7 @@
 <script setup>
 import { ref, inject, nextTick } from 'vue'
 import moment from 'moment/moment'
+import receiptImage from '/money-receipt.jpeg?url'
 
 const helper = inject('helper')
 const emitter = inject('emitter')
@@ -156,7 +157,7 @@ function editReceipt(receipt) {
             <button type="submit" style="display: none;"></button>
           </form>
         </div>
-        <img src="/money-receipt.jpeg" alt="Receipt Template" class="receipt-image">
+        <img :src="receiptImage" alt="Receipt Template" class="receipt-image">
       </div>
 
       <div class="form-actions">
@@ -187,7 +188,7 @@ function editReceipt(receipt) {
           <div class="preview-field pos-received-from-sig">{{ formData.receivedFromSig }}</div>
           <div class="preview-field pos-received-by-sig">{{ formData.receivedBySig }}</div>
         </div>
-        <img src="/money-receipt.jpeg" alt="Receipt Template" class="receipt-image">
+        <img :src="receiptImage" alt="Receipt Template" class="receipt-image">
       </div>
 
       <div class="preview-actions">
