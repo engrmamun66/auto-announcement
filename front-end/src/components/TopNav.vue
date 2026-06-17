@@ -52,9 +52,6 @@
       <RouterLink id="nav-link-import" :to="{name: 'import', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active': route.name === 'import'}" @click="sendRemoteAction({from: 'ip', action: 'onClick', selector: '#nav-link-import'})">
         <i class='bx bxs-file-import pre-icon' ></i> {{ helper.t('Import') }}
       </RouterLink>
-      <RouterLink id="nav-link-receipt" :to="{name: 'receipt', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active': route.name === 'receipt'}" @click="sendRemoteAction({from: 'ip', action: 'onClick', selector: '#nav-link-receipt'})">
-        <i class='bx bxs-receipt pre-icon' ></i> {{ helper.t('Receipt') }}
-      </RouterLink>
       <RouterLink id="nav-link-contact" :to="{name: 'ContactUs', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active': route.name === 'ContactUs'}"
         @click="sendRemoteAction({from: 'ip', action: 'onClick', selector: '#nav-link-contact'})"
          >
