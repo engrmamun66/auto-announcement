@@ -1219,22 +1219,18 @@ async function punchToSubmitAttendance(barcode='play-417-2024', {
     }
 }
 
-async function __punchToSubmitAttendance(barcode='play-417-2024', { 
-    message='', 
-    source='device', 
+async function __punchToSubmitAttendance(barcode='play-417-2024', {
+    message='',
+    source='device',
     device_index=0,
     remarks='',
-    punch_time=moment(), // actually punch dateTime
+    punch_time=moment(),
     silent_mode=false,
     skipSms=false,
 }={} ){
      try {
 
-        let DATE_FORMAT = 'YYYY-MM-DD'
-        let TIME_FORMAT = 'HH:mm:ss'
-
-        let punch__time = moment.isMoment(punch_time) ? punch_time : moment(new Date(punch_time))
-        let date = moment(punch__time).format(DATE_FORMAT)
+        const date = moment.isMoment(punch_time) ? moment(punch_time).format('YYYY-MM-DD') : moment(new Date(punch_time)).format('YYYY-MM-DD')
 
         if(barcode == 'i' || barcode == 'I'){
             emergency_mode.value = !emergency_mode.value
@@ -1248,322 +1244,54 @@ async function __punchToSubmitAttendance(barcode='play-417-2024', {
             }
         }
 
-
-        let [ class_short ] = barcode.split('-') // nursary-23-sound1-2024
-        let class_object = classes.value.find(c => c.class_short === class_short)
-        let class_name = class_object?.class_name
-
-
         if(source === 'device'){
-            // Without internet device punch not allowed
             if(appAccessData.value?.internet === false){
                 emitter.emit('toaster-error', { message: helper.t('Device punch is not allowed without internet connection')})
                 return
             }
         }
 
+        // Call backend endpoint - all calculation logic moved to API
+        let response = await http.post('/submit-attendance', {
+            barcode,
+            punch_time,
+            date,
+            source,
+            remarks,
+            device_index,
+            silent_mode,
+            skipSms
+        })
 
-        let response = await http.get('/single-student', { params: { barcode, date, with_attendance: true } })
-        if(response.status == 200){
-            let student = response.data.data;
-            let entires = response.data.entries;
-                
-            
-            if(student.status !== 1){
-                return emitter.emit('toaster-error', { message: helper.t('This student is currently inactive')})
-            } 
+        if(response.status === 200){
+            let attendenceData = response.data.data
+            let action = response.data.action
 
-
-            
-            let shifts = helper.getShifts(classes.value, class_short, false)
-            if (!shifts?.length) {
-                return emitter.emit('toaster-success', {message: helper.t('No shift has been configured for {name}', { name: class_name })})
-                
+            if(!silent_mode){
+                liveAttendenceList.value.push({...attendenceData, live_data: true})
+                callbacks.fixOverflowOfLiveAttendence()
+                setTimeout(() => {
+                    delete liveAttendenceList.value.at(-1).live_data
+                }, 700)
             } else {
-
-                let payload = {
-                    // id: null,
-                    student_id: student.dakhela,
-                    date,
-                    in_time: null,
-                    out_time: null,
-                    late_in_minute: 0, 
-                    status: 'Present', // 'Present' | 'Late' | 'Leave' | 'Absent' | 'over-stay' | 'Gone-fast',
-                    remarks,
-                    shift_duration: '', // 08:00 - 12:00
-                    device_index,
-                    shift_count: shifts?.length,
-                    shift_number: 1,
+                const maxLive = CONFIG.value?.settings?.attendance?.maximum_live_attedence || 50
+                let current = storage('liveAttendenceList').value
+                if(!Array.isArray(current)) current = []
+                current.push({...attendenceData, live_data: true})
+                if(current.length > maxLive){
+                    current = current.slice(-maxLive)
                 }
-
-                let today_entries = entires 
-                const max_permitte_entry = shifts?.length * 2
-                const late_consideration_minute = CONFIG.value?.settings?.attendance?.late_consideration_minute || 0
-                const punch_separator_gap_in_seconds = CONFIG.value?.settings?.attendance?.punch_separator_gap_in_seconds || 5
-                let ___concatedShifts = helper.getShifts(classes.value, class_short, true)
-                const punch_not_allowed_message = helper.t('Attendance is not allowed outside the shift! ({shifts})', { shifts: ___concatedShifts })
-
-
-                if(!today_entries?.length){
-
-                    // When no entry today, just create an entry
-                    payload.in_time = moment(punch__time).format(TIME_FORMAT)
-                    
-                    let runningShift = getRunningShift(shifts, punch__time) 
-                    if(!runningShift){
-                        emitter.emit('toaster-error', {message: punch_not_allowed_message})
-                        return
-                    }
-                    
-                    payload.shift_number = runningShift.shift_number
-                    payload.shift_duration = `${runningShift.start} - ${runningShift.end}`
-                    payload.late_in_minute = moment(punch__time).diff(runningShift.start_datetime, "minutes");
-                    
-                    if(late_consideration_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_consideration_minute){
-                        payload.late_in_minute = 0
-                    }
-                    if(payload.late_in_minute > 0) payload.status = 'Late'
-                    payload.remarks = 'First In Today' 
-                    await addAttendance(payload, { skipSms })
-
-                } else {
-                    let runningShift = getRunningShift(shifts, punch__time)
-                    if(!runningShift){
-                        emitter.emit('toaster-error', {message: punch_not_allowed_message})
-                        return
-                    }
-
-                    let current_shift_duration = `${runningShift.start} - ${runningShift.end}`
-
-                    // Find last entry in same shift (for completing In/Out pairs)
-                    let same_shift_entries = today_entries.filter(e => e.shift_duration === current_shift_duration)
-                    let last_enty = same_shift_entries.length > 0 ? same_shift_entries.at(-1) : today_entries.at(-1)
-
-                    let is_different_shift = last_enty.shift_duration !== current_shift_duration
-
-                    let last_punch_time = moment(punch__time).format(DATE_FORMAT) + ' ' + (last_enty.in_time || last_enty.out_time)
-                    let gap_seconds = moment(punch__time).diff(moment(last_punch_time), 'seconds')
-
-
-
-                    if(gap_seconds < punch_separator_gap_in_seconds && !is_different_shift){
-                        // Same shift AND small gap: update last punch (double-punch correction)
-                        payload = { ...payload, ...last_enty }
-
-                        payload.shift_number = runningShift.shift_number
-                        payload.shift_duration = current_shift_duration
-
-                        payload.late_in_minute = moment(punch__time).diff(runningShift.start_datetime, "minutes");
-                        
-
-                        if(last_enty.in_time){
-                            payload.in_time = moment(punch__time).format(TIME_FORMAT)
-
-                            if(late_consideration_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_consideration_minute){
-                                payload.late_in_minute = 0
-                            }
-
-
-                            if(payload.late_in_minute > 0){
-                                payload.status = 'Late'
-                            }
-                        }
-                        else if(last_enty.out_time){
-                            payload.out_time = moment(punch__time).format(TIME_FORMAT)
-                            payload.status = '' // no status
-                            payload.late_in_minute = 0
-                        }
-                        
-                        payload.remarks = 'Updated Existing Entry'
-
-                        await updateAttendance(payload)
-
-                    } else {
-                        if(today_entries?.length < max_permitte_entry){
-                            // Create a new entry 
-                            // ==================
-
-                            let runningShift = getRunningShift(shifts, punch__time)
-                            if(!runningShift){
-                                emitter.emit('toaster-error', {message: punch_not_allowed_message})
-                                return
-                            }
-
-                            payload.shift_number = runningShift.shift_number
-                            payload.shift_duration = `${runningShift.start} - ${runningShift.end}`
-
-                            let entry_count_by_shift = today_entries.filter(entry => entry.shift_duration === payload.shift_duration)
-                            if(entry_count_by_shift?.length === 2){
-                                emitter.emit('toaster-error', {message: helper.t('There are already {count} entries for this shift. No new entry is possible.', { count: entry_count_by_shift.length })})
-                                return
-                            }
-
-                            payload.late_in_minute = moment(punch__time).diff(runningShift.start_datetime, "minutes");
-
-
-                            if(last_enty.in_time){
-                                // Check if punch falls into different shift
-                                if(last_enty.shift_duration !== payload.shift_duration){
-                                    // Different shift: treat as new In time
-                                    payload.in_time = moment(punch__time).format(TIME_FORMAT)
-                                    payload.out_time = null
-
-                                    if(late_consideration_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_consideration_minute){
-                                        payload.late_in_minute = 0
-                                    }
-
-                                    if(payload.late_in_minute > 0){
-                                        payload.status = 'Late'
-                                    }
-
-                                    payload.remarks = helper.t('Added In Time')
-                                } else {
-                                    // Same shift: treat as out_time
-                                    payload.in_time = null
-                                    payload.out_time = moment(punch__time).format(TIME_FORMAT)
-                                    payload.remarks = helper.t('Added Out Time')
-                                    payload.late_in_minute = 0
-                                }
-                            }
-                            else if(last_enty.out_time){
-                                // if last is out_time, now will be in_time
-                                payload.out_time = null
-                                payload.in_time = moment(punch__time).format(TIME_FORMAT)
-
-                                if(late_consideration_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_consideration_minute){
-                                    payload.late_in_minute = 0
-                                }
-
-
-                                if(payload.late_in_minute > 0){
-                                    payload.status = 'Late'
-                                }
-
-                                payload.remarks = helper.t('Added In Time')
-                            }
-
-
-                            await addAttendance(payload, { skipSms })
-
-                            
-                        } else {
-                            console.log('==No action==')
-                        }
-                    } 
-                }
-
-                if(payload.remarks){
-                    emitter.emit('toaster-success', { message: payload.remarks })
-                } else {
-                    emitter.emit('toaster-error', { message: helper.t('Attendance failed!') })
-
-                }
-                
-        
-
-                function getRunningShift(shifts = [], punch__time=moment()) {
-                    let all_shifts = shifts.map((shift, shift_index) => {
-                        // use shift.start / shift.end instead of in_time/out_time
-                        let in_time = moment(moment(punch__time).format("YYYY-MM-DD") + ' ' + shift.start, "YYYY-MM-DD HH:mm");
-                        let out_time = moment(moment(punch__time).format("YYYY-MM-DD") + ' ' + shift.end, "YYYY-MM-DD HH:mm");
-
-                        // pick shift-specific boundary if defined
-                    
-                        let { start_before, end_after } = CONFIG.value.settings?.attendance?.boundary_time || { start_before: [30, 'minutes'], end_after: [30, 'minutes'] }
-                        let [time, unit] = start_before;
-                        let [time2, unit2] = end_after;
-
-                        let left_boundary = moment(in_time).subtract(time, unit);
-                        let right_boundary = moment(out_time).add(time2, unit2);
-
-                        let is_between = moment(punch__time).isBetween(left_boundary, right_boundary); 
-                        let is_over_right_boundary = moment(punch__time).isAfter(right_boundary);
-
-
-                        return {
-                            ...shift,
-                            start_datetime: in_time.format('YYYY-MM-DD HH:mm'),
-                            end_datetime: out_time.format('YYYY-MM-DD HH:mm'),
-                            is_between,
-                            shift_number: shift_index + 1,
-                            is_over_right_boundary,
-                        };
-                    });
-
-                    let currentShift = all_shifts.toReversed().find(s => s.is_between)
-
-                    const strict_boundary_time = CONFIG.value.settings?.attendance?.strict_boundary_time ?? false
-                    // if not strict mode, shift auto detect 
-                    if(strict_boundary_time === false && !currentShift){
-                        currentShift = all_shifts.toReversed().find(s => s.is_over_right_boundary)
-                        // if no shift is over, set first shift of day as current shift
-                        if(!currentShift) currentShift = all_shifts[0]
-                    }
-                    return currentShift
-                }
-
-
-
-
-                async function addAttendance(payload, {skipSms=false}={}){
-
-                    let response = await http.post('/attendence-add', payload, { params: { skipSms }})
-                    if(response.status === 200){
-                        let attendenceData = response.data.data
-                        if(!silent_mode){
-                            liveAttendenceList.value.push({...attendenceData, live_data: true})
-                            callbacks.fixOverflowOfLiveAttendence()
-                            setTimeout(() => {
-                                delete liveAttendenceList.value.at(-1).live_data
-                            }, 700);
-                        } else {
-                            const maxLive = CONFIG.value?.settings?.attendance?.maximum_live_attedence || 50
-                            let current = storage('liveAttendenceList').value
-                            if(!Array.isArray(current)) current = []
-                            current.push({...attendenceData, live_data: true})
-                            if(current.length > maxLive){
-                                current = current.slice(-maxLive)
-                            }
-                            storage('liveAttendenceList').value = current
-                        }
-                    } 
-                }
-
-                async function updateAttendance(payload){
-                    let response = await http.post('/attendence-update', payload)
-                    if(response.status === 200){
-                        if(!silent_mode){
-                            let targetIndex = liveAttendenceList.value.findIndex(item => item.id == payload.id)
-                            if(targetIndex > -1){
-                                liveAttendenceList.value[targetIndex] = {...liveAttendenceList.value[targetIndex], ...payload, updated_now: true}
-                            } else {
-                                liveAttendenceList.value.push(payload)
-                            } 
-                        } else {
-                            let current = storage('liveAttendenceList').value
-                            if(!Array.isArray(current)) current = []
-                            let targetIndex = current.findIndex(item => item.id == payload.id)
-                            if(targetIndex > -1){
-                                current[targetIndex] = {...current[targetIndex], ...payload, updated_now: true}
-                            } else {
-                                current.push(payload)
-                            }
-                            storage('liveAttendenceList').value = current
-                        }
-                    } 
-                }
-
-            
-
-                if(source !== 'device'){
-                    // emitter.emit('toaster-success', { message: 'কার্ডটি সফলভাবে পাঞ্চ হয়েছে।'})
-                }
+                storage('liveAttendenceList').value = current
             }
-            
+
+            emitter.emit('toaster-success', { message: response.data.message })
+        } else {
+            emitter.emit('toaster-error', { message: response.data.error || helper.t('Attendance failed!') })
         }
-          
+
      } catch (error) {
           console.warn('punchToSubmitAttendance_error::', error);
+          emitter.emit('toaster-error', { message: error.response?.data?.error || helper.t('Attendance failed!') })
      }
 }
 

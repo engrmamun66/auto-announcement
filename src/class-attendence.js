@@ -1032,6 +1032,355 @@ class Attendance {
       });
     }
 
+    processPunchRequest(punchData = {}) {
+      const {
+        barcode,
+        punch_time = moment(),
+        date = moment().format('YYYY-MM-DD'),
+        source = 'manual',
+        remarks = '',
+        device_index = 0,
+        class_short = '',
+        student = {},
+        today_entries = [],
+        shifts = [],
+      } = punchData;
+
+      const moment_punch = moment.isMoment(punch_time) ? punch_time : moment(new Date(punch_time));
+      const TIME_FORMAT = 'HH:mm:ss';
+      const DATE_FORMAT = 'YYYY-MM-DD';
+
+      const config = global.config || {};
+      const late_consideration_minute = config.settings?.attendance?.late_consideration_minute || 0;
+      const punch_separator_gap_in_seconds = config.settings?.attendance?.punch_separator_gap_in_seconds || 5;
+
+      const max_permitte_entry = shifts?.length * 2;
+      let action = null;
+      let payload = {
+        student_id: student?.dakhela,
+        date,
+        in_time: null,
+        out_time: null,
+        late_in_minute: 0,
+        status: 'Present',
+        remarks,
+        shift_duration: '',
+        device_index,
+        shift_count: shifts?.length,
+        shift_number: 1,
+      };
+
+      const getRunningShift = (shiftList = []) => {
+        const boundaryConfig = config.settings?.attendance?.boundary_time || { start_before: [30, 'minutes'], end_after: [30, 'minutes'] };
+        const [start_time, start_unit] = boundaryConfig.start_before;
+        const [end_time, end_unit] = boundaryConfig.end_after;
+
+        const all_shifts = shiftList.map((shift, idx) => {
+          const in_time = moment(`${moment_punch.format(DATE_FORMAT)} ${shift.start}`, `${DATE_FORMAT} HH:mm`);
+          const out_time = moment(`${moment_punch.format(DATE_FORMAT)} ${shift.end}`, `${DATE_FORMAT} HH:mm`);
+          const left_boundary = moment(in_time).subtract(start_time, start_unit);
+          const right_boundary = moment(out_time).add(end_time, end_unit);
+          const is_between = moment_punch.isBetween(left_boundary, right_boundary);
+          const is_over_right_boundary = moment_punch.isAfter(right_boundary);
+
+          return {
+            ...shift,
+            start_datetime: in_time.format(`${DATE_FORMAT} HH:mm`),
+            end_datetime: out_time.format(`${DATE_FORMAT} HH:mm`),
+            is_between,
+            shift_number: idx + 1,
+            is_over_right_boundary,
+          };
+        });
+
+        let currentShift = all_shifts.toReversed().find(s => s.is_between);
+        const strict_boundary_time = config.settings?.attendance?.strict_boundary_time ?? false;
+
+        if (strict_boundary_time === false && !currentShift) {
+          currentShift = all_shifts.toReversed().find(s => s.is_over_right_boundary);
+          if (!currentShift) currentShift = all_shifts[0];
+        }
+
+        return currentShift;
+      };
+
+      if (!today_entries?.length) {
+        const runningShift = getRunningShift(shifts);
+        if (!runningShift) {
+          return { error: 'No valid shift found', action: null, payload: null };
+        }
+
+        payload.in_time = moment_punch.format(TIME_FORMAT);
+        payload.shift_number = runningShift.shift_number;
+        payload.shift_duration = `${runningShift.start} - ${runningShift.end}`;
+        payload.late_in_minute = moment_punch.diff(moment(runningShift.start_datetime, `${DATE_FORMAT} HH:mm`), 'minutes');
+
+        if (late_consideration_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_consideration_minute) {
+          payload.late_in_minute = 0;
+        }
+        if (payload.late_in_minute > 0) payload.status = 'Late';
+        payload.remarks = 'First In Today';
+        action = 'create';
+      } else {
+        const runningShift = getRunningShift(shifts);
+        if (!runningShift) {
+          return { error: 'No valid shift found', action: null, payload: null };
+        }
+
+        const current_shift_duration = `${runningShift.start} - ${runningShift.end}`;
+        const same_shift_entries = today_entries.filter(e => e.shift_duration === current_shift_duration);
+        const last_enty = same_shift_entries.length > 0 ? same_shift_entries[same_shift_entries.length - 1] : today_entries[today_entries.length - 1];
+        const is_different_shift = last_enty.shift_duration !== current_shift_duration;
+
+        const last_punch_time = moment(`${moment_punch.format(DATE_FORMAT)} ${last_enty.in_time || last_enty.out_time}`);
+        const gap_seconds = moment_punch.diff(last_punch_time, 'seconds');
+
+        if (gap_seconds < punch_separator_gap_in_seconds && !is_different_shift) {
+          Object.assign(payload, last_enty);
+          payload.shift_number = runningShift.shift_number;
+          payload.shift_duration = current_shift_duration;
+          payload.late_in_minute = moment_punch.diff(moment(runningShift.start_datetime, `${DATE_FORMAT} HH:mm`), 'minutes');
+
+          if (last_enty.in_time) {
+            payload.in_time = moment_punch.format(TIME_FORMAT);
+            if (late_consideration_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_consideration_minute) {
+              payload.late_in_minute = 0;
+            }
+            if (payload.late_in_minute > 0) payload.status = 'Late';
+          } else if (last_enty.out_time) {
+            payload.out_time = moment_punch.format(TIME_FORMAT);
+            payload.status = '';
+            payload.late_in_minute = 0;
+          }
+          payload.remarks = 'Updated Existing Entry';
+          action = 'update';
+        } else if (today_entries?.length < max_permitte_entry) {
+          payload.shift_number = runningShift.shift_number;
+          payload.shift_duration = current_shift_duration;
+          payload.late_in_minute = moment_punch.diff(moment(runningShift.start_datetime, `${DATE_FORMAT} HH:mm`), 'minutes');
+
+          const entry_count_by_shift = today_entries.filter(e => e.shift_duration === payload.shift_duration);
+          if (entry_count_by_shift?.length === 2) {
+            return { error: `Already ${entry_count_by_shift.length} entries for this shift`, action: null, payload: null };
+          }
+
+          if (last_enty.in_time) {
+            if (last_enty.shift_duration !== payload.shift_duration) {
+              payload.in_time = moment_punch.format(TIME_FORMAT);
+              payload.out_time = null;
+              if (late_consideration_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_consideration_minute) {
+                payload.late_in_minute = 0;
+              }
+              if (payload.late_in_minute > 0) payload.status = 'Late';
+              payload.remarks = 'Added In Time';
+            } else {
+              payload.in_time = null;
+              payload.out_time = moment_punch.format(TIME_FORMAT);
+              payload.remarks = 'Added Out Time';
+              payload.late_in_minute = 0;
+            }
+          } else if (last_enty.out_time) {
+            payload.out_time = null;
+            payload.in_time = moment_punch.format(TIME_FORMAT);
+            if (late_consideration_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_consideration_minute) {
+              payload.late_in_minute = 0;
+            }
+            if (payload.late_in_minute > 0) payload.status = 'Late';
+            payload.remarks = 'Added In Time';
+          }
+          action = 'create';
+        } else {
+          return { error: 'Max entries reached for today', action: null, payload: null };
+        }
+      }
+
+      return { error: null, action, payload };
+    }
+
+    submitAttendanceRequest(req, res, Students) {
+      const {
+        barcode = '',
+        punch_time = moment().format(),
+        date = moment().format('YYYY-MM-DD'),
+        source = 'manual',
+        remarks = '',
+        device_index = 0,
+        silent_mode = false,
+        skipSms = false,
+      } = req.body;
+
+      if (!barcode) {
+        return res.status(400).send({ error: 'Barcode required.' });
+      }
+
+      const TIME_FORMAT = 'HH:mm:ss';
+      const DATE_FORMAT = 'YYYY-MM-DD';
+      const moment_punch = moment.isMoment(punch_time) ? punch_time : moment(new Date(punch_time));
+
+      // Extract dakhela from barcode (format: class_short-dakhela-sound)
+      const barcode_parts = barcode.split('-');
+      const dakhela = barcode_parts[1];
+
+      if (!dakhela) {
+        return res.status(400).send({ error: 'Invalid barcode format.' });
+      }
+
+      // Get student by dakhela
+      this.db.get(
+        `SELECT * FROM students WHERE dakhela = ?`,
+        [dakhela],
+        (err, student) => {
+          if (err) return res.status(500).send({ error: err.message });
+          if (!student) return res.status(400).send({ error: 'Student not found.' });
+          if (student.status !== 1) return res.status(400).send({ error: 'Student is inactive.' });
+
+          const class_short = student.class_short || '';
+          const classConfig = this.getClassConfig(class_short);
+          const shifts = Array.isArray(classConfig?.shifts) ? classConfig.shifts : [];
+
+          if (!shifts.length) {
+            return res.status(400).send({ error: `No shift configured for ${student.class_name || class_short}` });
+          }
+
+          // Get today's entries for student
+          this.db.all(
+            `SELECT * FROM ${this.tableName} WHERE student_id = ? AND date = ? ORDER BY created ASC`,
+            [student.dakhela, date],
+            (err, entries) => {
+              if (err) return res.status(500).send({ error: err.message });
+
+              const today_entries = entries || [];
+
+              // Process punch request
+              const punchResult = this.processPunchRequest({
+                barcode,
+                punch_time: moment_punch,
+                date,
+                source,
+                remarks,
+                device_index,
+                class_short,
+                student,
+                today_entries,
+                shifts,
+              });
+
+              if (punchResult.error) {
+                return res.status(400).send({ error: punchResult.error });
+              }
+
+              const { action, payload } = punchResult;
+
+              if (action === 'create') {
+                // Create new attendance
+                const insertQuery = `
+                  INSERT INTO ${this.tableName}
+                    (student_id, date, in_time, out_time, status, remarks, late_in_minute, device_index, shift_duration, shift_count, shift_number)
+                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                `;
+
+                const params = [
+                  payload.student_id,
+                  payload.date,
+                  payload.in_time || null,
+                  payload.out_time || null,
+                  payload.status,
+                  payload.remarks || null,
+                  payload.late_in_minute,
+                  payload.device_index,
+                  payload.shift_duration,
+                  payload.shift_count,
+                  payload.shift_number,
+                ];
+
+                const db = this.db;
+                const tableName = this.tableName;
+                const Sms = this.Sms;
+
+                db.run(insertQuery, params, function (err) {
+                  if (err) return res.status(500).send({ error: err.message });
+
+                  const insertedId = this.lastID;
+                  db.get(`SELECT * FROM ${tableName} WHERE id = ?`, [insertedId], (err, row) => {
+                    if (err) return res.status(500).send({ error: err.message });
+
+                    // Send SMS if enabled and not skipped
+                    if (row && row.student_id && row.date && !skipSms) {
+                      db.get(`SELECT * FROM students WHERE dakhela = ?`, [row.student_id], (err, stdnt) => {
+                        if (!err && stdnt && stdnt.phone_number) {
+                          const smsConfig = global.config?.settings?.sms;
+                          if (smsConfig?.enabled && Sms) {
+                            let shouldSendSms = false;
+                            let template = null;
+                            let time = null;
+
+                            if (row.in_time && smsConfig?.send_on_in) {
+                              shouldSendSms = true;
+                              template = smsConfig?.in_message_template;
+                              time = row.in_time;
+                            } else if (row.out_time && smsConfig?.send_on_out) {
+                              shouldSendSms = true;
+                              template = smsConfig?.out_message_template;
+                              time = row.out_time;
+                            }
+
+                            if (shouldSendSms && template) {
+                              const formattedTime = formatTimeWithPeriod(time || '');
+                              const message = template
+                                .replace(/{name}/g, stdnt.name?.split('||')[0] || 'Student')
+                                .replace(/{class}/g, stdnt.class || 'N/F')
+                                .replace(/{date}/g, formatDate(row.date || ''))
+                                .replace(/{time}/g, formattedTime);
+                              Sms._sendSmsInternal([stdnt.phone_number], message).catch(err => {
+                                console.error('SMS send error:', err.message);
+                              });
+                            }
+                          }
+                        }
+                      });
+                    }
+
+                    res.send({ message: 'Attendance created.', data: row, action: 'create' });
+                  });
+                });
+              } else if (action === 'update') {
+                // Update existing attendance
+                const updateQuery = `
+                  UPDATE ${this.tableName}
+                  SET status=?, in_time=?, out_time=?, remarks=?, late_in_minute=?, device_index=?, shift_duration=?, shift_count=?, shift_number=?, created=CURRENT_TIMESTAMP
+                  WHERE id=?
+                `;
+
+                const db = this.db;
+                db.run(
+                  updateQuery,
+                  [
+                    payload.status,
+                    payload.in_time,
+                    payload.out_time,
+                    payload.remarks,
+                    payload.late_in_minute,
+                    payload.device_index,
+                    payload.shift_duration,
+                    payload.shift_count,
+                    payload.shift_number,
+                    payload.id,
+                  ],
+                  (err) => {
+                    if (err) return res.status(500).send({ error: err.message });
+
+                    res.send({ message: 'Attendance updated.', data: payload, action: 'update' });
+                  }
+                );
+              } else {
+                res.status(400).send({ error: 'No action determined.' });
+              }
+            }
+          );
+        }
+      );
+    }
+
 
 
 
