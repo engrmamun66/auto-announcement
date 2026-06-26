@@ -291,13 +291,13 @@ onMounted(()=>{
             <Btn class="white">Out: <span class="badge text-white bg-warning">{{ Ahelper.count.out(liveAttendenceList) }}</span></Btn>
             <Btn class="white">Late: <span class="badge text-white bg-danger">{{ Ahelper.count.late(liveAttendenceList) }}</span></Btn>
             <Btn class="white">Total: <span class="badge text-white bg-success">{{ liveAttendenceList?.length }}</span></Btn>
-            <Btn id="transaction_bulk_fetch" class="" @click="show_bulk_device_fetch = true">{{ helper.t('Get Attendace From History') }}</Btn>
             <Btn class="red" :disabled="!hasLiveAttendence || clearingLive" @click="clearAllAndRelaod" >
               <template v-if="clearingLive">{{ helper.t('Clearing...') }}</template>
               <template v-else>{{ helper.t('Clear All') }}</template>
             </Btn>
+            <Btn id="transaction_bulk_fetch" class="" @click="show_bulk_device_fetch = true">{{ helper.t('Get Attendace From History') }}</Btn>
           </div>
-        </div>   
+      </div>   
       <div v-else-if="tab == 2">
         <div class="d-flex flex-wrap justify-content-center align-items-center gap-2">
             
@@ -345,19 +345,15 @@ onMounted(()=>{
         </div>
         
       </div> 
-      <div v-else-if="tab == 4">
-
-        <!-- <div class="d-flex justify-content-end column-gap-3">
-          <ul class="nav nav-tabs d2 mt-0 mb-3 bottom-borderless">
-            <li class="nav-item">
-              <a @click.stop="reportingViewTab = 1" class="nav-link cp text-black" :class="{'active': reportingViewTab==1}" >Overview</a>
-            </li>
-            <li class="nav-item">
-              <a @click.stop="reportingViewTab = 2" class="nav-link cp text-black" :class="{'active': reportingViewTab==2}" >Class Wise</a>
-            </li>       
-          </ul>
-        </div> -->
-
+      <div v-else-if="tab == 4"> 
+        <div class="d-flex justify-content-center align-items-center gap-2">
+          <Btn id="transaction_bulk_fetch" class="" @click="show_bulk_device_fetch = true">{{ helper.t('Get Attendace From History') }}</Btn>
+        </div> 
+      </div> 
+      <div v-else-if="tab == 5">
+        <div class="d-flex justify-content-center align-items-center gap-2">
+          <Btn id="transaction_bulk_fetch" class="" @click="show_bulk_device_fetch = true">{{ helper.t('Get Attendace From History') }}</Btn>
+        </div> 
       </div> 
 
     </div>
