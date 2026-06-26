@@ -244,22 +244,26 @@ async function deleteMultipleAttendance(){
                     <span class="badge text-white bg-secondary" tooltip="In/Out">
                       {{ item.in_time ? 'IN' : 'OUT' }}
                     </span> 
-                    <template v-if="item.status == 'Late'">
-                      <span class="badge text-white bg-danger" tooltip="Status">
-                        {{ item.status }}
-                      </span> 
-                      <span class="badge text-white bg-danger" tooltip="Late Time">
-                        {{ item?.late_in_minute || 0 }} {{ helper.wordForm('minute', item?.late_in_minute ) }}
-                      </span> 
-                    </template>
 
-                    <template v-else>
-                      <span class="badge text-white bg-success" tooltip="Status">
-                        {{ item.status }}
-                      </span> 
-                      <span class="badge text-white bg-success" tooltip="Late Time">
-                        {{ item?.late_in_minute || 0 }} {{ helper.wordForm('minute', item?.late_in_minute ) }}
-                      </span> 
+
+                    <template v-if="item?.in_time">
+                      <template v-if="item.status == 'Late'">
+                        <span class="badge text-white bg-danger" tooltip="Status">
+                          {{ item.status }}
+                        </span> 
+                        <span class="badge text-white bg-danger" tooltip="Late Time">
+                          {{ item?.late_in_minute || 0 }} {{ helper.wordForm('minute', item?.late_in_minute ) }}
+                        </span> 
+                      </template>
+
+                      <template v-else>
+                        <span class="badge text-white bg-success" tooltip="Status">
+                          {{ item.status }}
+                        </span> 
+                        <span class="badge text-white bg-success" tooltip="Late Time">
+                          {{ item?.late_in_minute || 0 }} {{ helper.wordForm('minute', item?.late_in_minute ) }}
+                        </span> 
+                      </template>
                     </template>
                   </div> 
                 </td>   
