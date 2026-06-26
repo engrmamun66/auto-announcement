@@ -1197,6 +1197,11 @@ class Attendance {
       return { error: null, action, payload };
     }
 
+
+    // =============================================================== //
+    // ========================Submti Attendance====================== //
+    // =============================================================== //
+
     submitAttendanceRequest(req, res, Students) {
       const {
         barcode = '',
