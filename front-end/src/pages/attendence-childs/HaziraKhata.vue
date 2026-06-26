@@ -973,7 +973,7 @@ watch(
 
 
                   
-                  <template v-if="info.text == 'Present' && info.late_in_minute != undefined"">
+                  <template v-if="info.text == 'Present' && info.late_in_minute != undefined">
                     <!-- Perfect In -->
                     <template v-if="info.late_in_minute <= 0">
                       <span class="late-time-display"
