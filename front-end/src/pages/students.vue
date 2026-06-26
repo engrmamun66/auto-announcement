@@ -1240,6 +1240,7 @@ watch(fixedWidthSoundCol, (newVal) => {
       :timePickerButtons="true"
       :use24FormatTimeForEvents="true"
       :invisible="true"
+      :pickTimeFirst="true"
       displayIn="modal" 
       :buttons="{applyBtn: 'Set-Attendace', todayBtn: false}"
       >

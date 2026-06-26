@@ -1060,8 +1060,9 @@ class Attendance {
         shift_number: 1,
       };
 
-      const getRunningShift = (shiftList = []) => {
+      const getRunningShift = (shiftList = [], punchMoment = null) => {
         const boundaryConfig = config.settings?.attendance?.boundary_time || { start_before: [30, 'minutes'], end_after: [30, 'minutes'] };
+        const strict_boundary_time = config.settings?.attendance?.strict_boundary_time ?? false
         const [start_time, start_unit] = boundaryConfig.start_before;
         const [end_time, end_unit] = boundaryConfig.end_after;
 
@@ -1071,7 +1072,6 @@ class Attendance {
           const left_boundary = moment(in_time).subtract(start_time, start_unit);
           const right_boundary = moment(out_time).add(end_time, end_unit);
           const is_between = moment_punch.isBetween(left_boundary, right_boundary);
-          const is_over_right_boundary = moment_punch.isAfter(right_boundary);
 
           return {
             ...shift,
@@ -1079,23 +1079,29 @@ class Attendance {
             end_datetime: out_time.format(`${DATE_FORMAT} HH:mm`),
             is_between,
             shift_number: idx + 1,
-            is_over_right_boundary,
+            in_moment: in_time,
+            out_moment: out_time,
           };
         });
 
         let currentShift = all_shifts.toReversed().find(s => s.is_between);
-        const strict_boundary_time = config.settings?.attendance?.strict_boundary_time ?? false;
 
-        if (strict_boundary_time === false && !currentShift) {
-          currentShift = all_shifts.toReversed().find(s => s.is_over_right_boundary);
-          if (!currentShift) currentShift = all_shifts[0];
+        if (!currentShift && !strict_boundary_time) {
+          // findding neareset shift
+          const punch = punchMoment || moment_punch;
+          currentShift = all_shifts.reduce((nearest, shift) => {
+            const shiftMid = moment(shift.in_moment).add(moment(shift.out_moment).diff(shift.in_moment) / 2);
+            const distToShift = Math.abs(punch.diff(shiftMid, 'minutes'));
+            const nearestDist = nearest ? Math.abs(punch.diff(nearest.nearest_mid, 'minutes')) : Infinity;
+            return distToShift < nearestDist ? { ...shift, nearest_mid: shiftMid } : nearest;
+          }, null);
         }
 
         return currentShift;
       };
 
       if (!today_entries?.length) {
-        const runningShift = getRunningShift(shifts);
+        const runningShift = getRunningShift(shifts, moment_punch);
         if (!runningShift) {
           return { error: 'No valid shift found', action: null, payload: null };
         }
@@ -1112,7 +1118,7 @@ class Attendance {
         payload.remarks = 'First In Today';
         action = 'create';
       } else {
-        const runningShift = getRunningShift(shifts);
+        const runningShift = getRunningShift(shifts, moment_punch);
         if (!runningShift) {
           return { error: 'No valid shift found', action: null, payload: null };
         }

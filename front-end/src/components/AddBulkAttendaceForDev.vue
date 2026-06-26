@@ -130,12 +130,18 @@
         </div>
         <template #footer>
             <div class="col-12 mt-5 d-flex column-gap-2 justify-content-between">
-                <Btn @click.stop="AddBulkAttendanceNow()">
+                <Btn @click.stop="AddBulkAttendanceNow()" v-if="!inserting">
+                  Add Bulk Attendance
+                </Btn>
+                <Btn @click.stop="AddBulkAttendanceNow()" v-if="inserting">
                   Add Bulk Attendance
                   <BtnLoader v-if="inserting"></BtnLoader>
                   <span v-if="inserting && progress.total > 0" class="ms-2">{{ progress.percent }}%</span>
                 </Btn>
-                <Btn @click.stop="deleteAllDataForSelectedClass()" class="red border" v-if="payload.class_short != 'null' && payload.dates?.startDate && payload.dates?.endDate">
+                <Btn @click.stop="cancelBulkAttendance()" class="red border ms-auto" v-if="inserting">
+                    <i class='bx bx-x'></i> Cancel
+                </Btn>
+                <Btn @click.stop="deleteAllDataForSelectedClass()" class="red border" v-if="payload.class_short != 'null' && payload.dates?.startDate && payload.dates?.endDate && !inserting">
                     <i class='bx bxs-trash' ></i> Delete Data for <span class="badge bg-danger shadow">{{ payload.class_short || 'All Classes' }}</span>
                 </Btn>
             </div>
@@ -215,8 +221,13 @@ let studentsByClass = computed(() => {
 })
 
 watch(()=>payload.class_short, () => {
-    payload.selected_students = []
     studentnameorid.value = ''
+    payload.shifts = getSelectedClass.value?.shifts || []
+    if(payload.class_short){
+        payload.selected_students = all_students_non_copied.value.filter(student => student.class_short == payload.class_short)
+    } else {
+        payload.selected_students = []
+    }
 })
 
 let getSelectedClass = computed(() => {
@@ -238,6 +249,7 @@ onMounted(()=>{
 })
 
 let inserting = ref(false)
+let cancelRequested = ref(false)
 let progress = ref({ current: 0, total: 0, percent: 0 })
 
 async function AddBulkAttendanceNow() {
@@ -331,8 +343,10 @@ async function AddBulkAttendanceNow() {
     if(!confirm(helper.t('Are you sure to add {count} new records?', { count: all_records.length }))) return
 
     inserting.value = true
+    cancelRequested.value = false
     progress.value = { current: 0, total: all_records.length, percent: 0 }
     for (const item of all_records){
+        if(cancelRequested.value) break
         await punchToSubmitAttendance(item[0], item[1])
         progress.value.current += 1
         progress.value.percent = Math.round((progress.value.current / progress.value.total) * 100)
@@ -341,7 +355,12 @@ async function AddBulkAttendanceNow() {
         }
     }
     inserting.value = false
-    progress.value = { current: 0, total: 0, percent: 0 } 
+    cancelRequested.value = false
+    progress.value = { current: 0, total: 0, percent: 0 }
+}
+
+function cancelBulkAttendance() {
+    cancelRequested.value = true
 }
 
 
