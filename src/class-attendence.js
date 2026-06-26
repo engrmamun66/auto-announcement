@@ -1334,8 +1334,8 @@ class Attendance {
                         }
                       });
                     }
-
-                    res.send({ message: 'Attendance created.', data: row, action: 'create' });
+                    
+                    res.send({ message: payload.remarks, data: row, action: 'create' });
                   });
                 });
               } else if (action === 'update') {
@@ -1364,7 +1364,7 @@ class Attendance {
                   (err) => {
                     if (err) return res.status(500).send({ error: err.message });
 
-                    res.send({ message: 'Attendance updated.', data: payload, action: 'update' });
+                    res.send({ message: payload.remarks || 'Attendance updated.', data: payload, action: 'update' });
                   }
                 );
               } else {
