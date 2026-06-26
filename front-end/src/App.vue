@@ -1327,26 +1327,31 @@ async function __punchToSubmitAttendance(barcode='play-417-2024', {
                     await addAttendance(payload, { skipSms })
 
                 } else {
-                    let last_enty = today_entries.at(-1)
+                    let runningShift = getRunningShift(shifts, punch__time)
+                    if(!runningShift){
+                        emitter.emit('toaster-error', {message: punch_not_allowed_message})
+                        return
+                    }
+
+                    let current_shift_duration = `${runningShift.start} - ${runningShift.end}`
+
+                    // Find last entry in same shift (for completing In/Out pairs)
+                    let same_shift_entries = today_entries.filter(e => e.shift_duration === current_shift_duration)
+                    let last_enty = same_shift_entries.length > 0 ? same_shift_entries.at(-1) : today_entries.at(-1)
+
+                    let is_different_shift = last_enty.shift_duration !== current_shift_duration
 
                     let last_punch_time = moment(punch__time).format(DATE_FORMAT) + ' ' + (last_enty.in_time || last_enty.out_time)
                     let gap_seconds = moment(punch__time).diff(moment(last_punch_time), 'seconds')
-                        
 
 
-                    if(gap_seconds < punch_separator_gap_in_seconds || today_entries?.length === max_permitte_entry){
-                        // need to update last punch, right now
+
+                    if(gap_seconds < punch_separator_gap_in_seconds && !is_different_shift){
+                        // Same shift AND small gap: update last punch (double-punch correction)
                         payload = { ...payload, ...last_enty }
 
-
-                        let runningShift = getRunningShift(shifts, punch__time)
-                        if(!runningShift){
-                            emitter.emit('toaster-error', {message: punch_not_allowed_message})
-                            return
-                        }
-
                         payload.shift_number = runningShift.shift_number
-                        payload.shift_duration = `${runningShift.start} - ${runningShift.end}`
+                        payload.shift_duration = current_shift_duration
 
                         payload.late_in_minute = moment(punch__time).diff(runningShift.start_datetime, "minutes");
                         
@@ -1396,12 +1401,29 @@ async function __punchToSubmitAttendance(barcode='play-417-2024', {
                             payload.late_in_minute = moment(punch__time).diff(runningShift.start_datetime, "minutes");
 
 
-                            if(last_enty.in_time){ 
-                                // if last is in_time, now will be out_time
-                                payload.in_time = null
-                                payload.out_time = moment(punch__time).format(TIME_FORMAT)
-                                payload.remarks = 'Added Out Time' 
-                                payload.late_in_minute = 0
+                            if(last_enty.in_time){
+                                // Check if punch falls into different shift
+                                if(last_enty.shift_duration !== payload.shift_duration){
+                                    // Different shift: treat as new In time
+                                    payload.in_time = moment(punch__time).format(TIME_FORMAT)
+                                    payload.out_time = null
+
+                                    if(late_consideration_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_consideration_minute){
+                                        payload.late_in_minute = 0
+                                    }
+
+                                    if(payload.late_in_minute > 0){
+                                        payload.status = 'Late'
+                                    }
+
+                                    payload.remarks = helper.t('Added In Time')
+                                } else {
+                                    // Same shift: treat as out_time
+                                    payload.in_time = null
+                                    payload.out_time = moment(punch__time).format(TIME_FORMAT)
+                                    payload.remarks = helper.t('Added Out Time')
+                                    payload.late_in_minute = 0
+                                }
                             }
                             else if(last_enty.out_time){
                                 // if last is out_time, now will be in_time
@@ -1416,8 +1438,8 @@ async function __punchToSubmitAttendance(barcode='play-417-2024', {
                                 if(payload.late_in_minute > 0){
                                     payload.status = 'Late'
                                 }
-                                
-                                payload.remarks = 'Added In Time'
+
+                                payload.remarks = helper.t('Added In Time')
                             }
 
 

@@ -216,12 +216,12 @@ async function deleteMultipleAttendance(){
               <th style="width: 40px;">
                 <input type="checkbox" v-model="selectAll" />
               </th>
-              <th>Name</th>
-              <th>Class</th>
-              <th>Date</th>
-              <th>Summarised Status</th>
-              <th>Shift</th>
-              <th>Action</th>
+              <th>{{ helper.t('Name') }}</th>
+              <th>{{ helper.t('Class') }}</th>
+              <th>{{ helper.t('Summarised Status') }}</th>
+              <th>{{ helper.t('Punch Time') }}</th>
+              <th>{{ helper.t('Shift') }}</th>
+              <th>{{ helper.t('Action') }}</th>
             </tr>
           </thead>
         </template>
@@ -239,7 +239,6 @@ async function deleteMultipleAttendance(){
                   {{ getStudent(item)?.name }}
                 </td>                   
                 <td> {{ getStudent(item)?.class }} </td>                   
-                <td style="width: 130px;"> <span class="inline">{{ item.date }}</span> </td>                   
                 <td> 
                   <div style="width: 170px" class="d-flex justify-content-between">
                     <span class="badge text-white bg-secondary" tooltip="In/Out">
@@ -263,7 +262,9 @@ async function deleteMultipleAttendance(){
                       </span> 
                     </template>
                   </div> 
-                </td>                   
+                </td>   
+                <!-- <td style="width: 130px;"> <span class="inline">{{ item.date }}</span> </td>                     -->
+                <td style="width:100px;"> <span class="inline">{{ moment(item.in_time || item.out_time, 'HH:mm:ss').format('hh:mm A') }}</span> </td>                    
                 <td>{{ Ahelper.printShift(item?.shift_duration) }}</td> 
                                 
                 <td>

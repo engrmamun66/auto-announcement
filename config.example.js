@@ -91,8 +91,8 @@ module.exports = {
                 * To fix boundary for a shift: (shift.start - 30min, shift.end + 30min)
                 */
                boundary_time: { 
-                    start_before: [10, 'minutes'], 
-                    end_after: [15, 'minutes'] 
+                    start_before: [30, 'minutes'], 
+                    end_after: [30, 'minutes'] 
                },  
                /**
                 * if strict_boundary_time = true, 
