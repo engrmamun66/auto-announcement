@@ -76,7 +76,7 @@
         </div>
 
         <div class="d-flex align-items-center gap-2">
-          <input type="checkbox" :checked="!skipSms" @change="skipSms = !$event.target.checked" id="allowSms"  />
+          <input type="checkbox" v-model="allowSms" id="allowSms"  />
           <label for="allowSms" class="form-check-label mb-0">{{ helper.t('Send SMS') }}</label>
         </div>
 
@@ -109,7 +109,7 @@ defineEmits(['unmount'])
 const showRightbar = ref(true)
 const fetching = ref(false)
 const inserting = ref(false)
-const skipSms = ref(true)
+const allowSms = ref(false)
 const logs = ref([])
 const progress = reactive({ total: 0, done: 0, skipped: 0 })
 
@@ -200,7 +200,7 @@ async function submitLogs({ skipConfirm = false } = {}){
       remarks: 'bulk_device_fetch',
       device_index: 0,
       silent_mode: props.isAutomatic,
-      skipSms: skipSms.value,
+      skipSms: !allowSms.value,
     })
     progress.done += 1
   }
