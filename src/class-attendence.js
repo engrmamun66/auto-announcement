@@ -718,18 +718,8 @@ class Attendance {
 
     isPresentByShiftTime(dayAttendance = [], shiftTime = '') {
       const rows = Array.isArray(dayAttendance) ? dayAttendance : [];
-      if (!rows.length || !shiftTime) return false;
-
-      const boundaryConfig = global.config?.settings?.attendance?.boundary_time || { start_before: [0, 'minutes'] };
-      const [beforeValue, beforeUnit] = boundaryConfig.start_before;
-      const shiftMoment = moment(shiftTime, 'HH:mm').subtract(beforeValue, beforeUnit);
-      if (!shiftMoment.isValid()) return false;
-
-      // Check if any punch record exists at or after the shift start time
-      return rows.some(att => {
-        const inTime = att?.in_time ? moment(att.in_time, 'HH:mm') : null;
-        return inTime && inTime.isValid() && inTime.isSameOrAfter(shiftMoment);
-      });
+      if (!rows.length || !shiftTime) return false; 
+      return rows.some(item => item.shift_duration === shiftTime);
     }
 
     modify_data_by_action(attendanceList, action, req){

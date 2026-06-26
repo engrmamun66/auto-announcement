@@ -602,7 +602,7 @@ async function loadDailyLogs(classShortOverride = null) {
       const classShifts = classConfig?.shifts || []
       const selectedShiftConfig = classShifts[selectedShift.value]
       if (selectedShiftConfig?.start) {
-        params.selectedShiftTime = selectedShiftConfig.start
+        params.selectedShiftTime = `${selectedShiftConfig.start} - ${selectedShiftConfig.end}`
       }
     }
 
