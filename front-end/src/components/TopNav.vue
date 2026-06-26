@@ -87,11 +87,11 @@
       </div>
 
       <div v-if="useRoute().query.dev === 'true'" class="topnav__dev">
-        <span class="border cp me-1 text-white px-1 size-08" @click.prevent.stop="$goto({name: 'env'})">
-          <span :tooltip="helper.t('Show Config.js')" flow="left">{{ helper.t('Config') }}</span>
-        </span>
         <span class="border cp me-1 text-white px-1 size-08" @click.prevent.stop="show_bulk_attedance_component = true">
           <span :tooltip="helper.t('Bulk Attendence')" flow="left">{{ helper.t('Bulk') }}</span>
+        </span>
+        <span class="border cp me-1 text-white px-1 size-08" @click.prevent.stop="$goto({name: 'env'})">
+          <span :tooltip="helper.t('Show Config.js')" flow="left">{{ helper.t('Config') }}</span>
         </span>
         <span class="border cp me-0 text-white px-1 size-08" @click.prevent.stop="show_cloner_component = true">
           <span :tooltip="helper.t('Clone Students')" flow="left">{{ helper.t('Clone') }}</span>
