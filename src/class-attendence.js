@@ -720,7 +720,9 @@ class Attendance {
       const rows = Array.isArray(dayAttendance) ? dayAttendance : [];
       if (!rows.length || !shiftTime) return false;
 
-      const shiftMoment = moment(shiftTime, 'HH:mm');
+      const boundaryConfig = global.config?.settings?.attendance?.boundary_time || { start_before: [0, 'minutes'] };
+      const [beforeValue, beforeUnit] = boundaryConfig.start_before;
+      const shiftMoment = moment(shiftTime, 'HH:mm').subtract(beforeValue, beforeUnit);
       if (!shiftMoment.isValid()) return false;
 
       // Check if any punch record exists at or after the shift start time

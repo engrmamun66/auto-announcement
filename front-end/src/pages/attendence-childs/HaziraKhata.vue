@@ -1659,7 +1659,7 @@ watch(
   isolation: isolate;
 }
 
-.status-cell::before{
+.status-cell:has(button)::before{
   content: '';
   position: absolute;
   inset: 3px;
