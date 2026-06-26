@@ -257,7 +257,7 @@ async function deleteMultipleAttendance(){
                       <span class="badge text-white bg-success" tooltip="Status">
                         {{ item.status }}
                       </span> 
-                      <span class="badge text-white bg-success" :class="{'opacity-0': !item?.late_in_minute}" tooltip="Late Time">
+                      <span class="badge text-white bg-success" tooltip="Late Time">
                         {{ item?.late_in_minute || 0 }} {{ helper.wordForm('minute', item?.late_in_minute ) }}
                       </span> 
                     </template>
