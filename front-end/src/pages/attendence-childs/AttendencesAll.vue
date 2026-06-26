@@ -241,7 +241,7 @@ async function deleteMultipleAttendance(){
                 <td> {{ getStudent(item)?.class }} </td>                   
                 <td> 
                   <div style="width: 170px" class="d-flex justify-content-between">
-                    <span class="badge text-white bg-secondary" tooltip="In/Out">
+                    <span class="badge text-white" :class="[item.in_time ? 'bg-success' : 'bg-warning']" tooltip="In/Out">
                       {{ item.in_time ? 'IN' : 'OUT' }}
                     </span> 
 
