@@ -1078,9 +1078,10 @@ watch(fixedWidthSoundCol, (newVal) => {
                       <button class="class-short-btn px-2 for-attendence" 
                       :tooltip="helper.getShifts(classes, std.class_short, false).map(shift => Ahelper.printShift(shift)).join(' | ')"
                       style="--tmaxW: 27em"
-                      @click.stop="() => {
+                      @click.stop="async() => {
                         targetStudent = std; 
                         $refs.dateTimePickerRef.setTime(moment().format('HH:mm'))
+                        await helper.wait(100)
                         $refs.dateTimePickerRef.toggle()
 
                       }" >
