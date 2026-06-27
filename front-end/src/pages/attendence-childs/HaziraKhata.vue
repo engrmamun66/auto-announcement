@@ -1016,25 +1016,32 @@ watch(
                     </span>
                   </template>
 
-                  <button v-if="getCellStatus(student, day.date).code !== '-'"
-                    type="button"
-                    class="status-menu-toggle"
-                    :__tooltip="getCellStatus(student, day.date).code !== '-' ? getCellStatus(student, day.date).text : ''"
-                    :flow="index === 0 ? 'left' : 'up'"
-                    :aria-label="`Show log for ${student.name || 'student'} on ${day.date}`"
-                    @click.stop="openShowLog(buildLogPayload(student, day))"
-                    @mouseenter.stop="startPreview($event.target, buildLogPayload(student, day), index, index === dailyLogs.length - 1)"
-                    @mouseleave.stop="endPreview()"
-                    @touchstart.stop="startPreview($event.target, buildLogPayload(student, day), index, index === dailyLogs.length - 1)"
-                    @touchend.stop="endPreview()"
-                    @auxclick="log({
-                      student,
-                      date: day.date,
-                      text: getCellStatus(student, day.date).code,
-                    })"
-                  >
-                    <i class='bx bx-info-circle nc'></i>
-                  </button>
+                  <template v-if="currentView === 'late' ?
+                    ((info.text == 'Present' && info.late_in_minute !== undefined &&
+                      ((info.late_in_minute <= 0 && LateCells.perfect_in.show) ||
+                       (info.late_in_minute > 0 && LateCells.late_in.show))) ||
+                     (info.text != 'Present' && LateCells.absent.show))
+                    : true">
+                    <button v-if="getCellStatus(student, day.date).code !== '-'"
+                      type="button"
+                      class="status-menu-toggle"
+                      :__tooltip="getCellStatus(student, day.date).code !== '-' ? getCellStatus(student, day.date).text : ''"
+                      :flow="index === 0 ? 'left' : 'up'"
+                      :aria-label="`Show log for ${student.name || 'student'} on ${day.date}`"
+                      @click.stop="openShowLog(buildLogPayload(student, day))"
+                      @mouseenter.stop="startPreview($event.target, buildLogPayload(student, day), index, index === dailyLogs.length - 1)"
+                      @mouseleave.stop="endPreview()"
+                      @touchstart.stop="startPreview($event.target, buildLogPayload(student, day), index, index === dailyLogs.length - 1)"
+                      @touchend.stop="endPreview()"
+                      @auxclick="log({
+                        student,
+                        date: day.date,
+                        text: getCellStatus(student, day.date).code,
+                      })"
+                    >
+                      <i class='bx bx-info-circle nc'></i>
+                    </button>
+                  </template>
 
                 </template>
                 <!-- not presentable day -->
