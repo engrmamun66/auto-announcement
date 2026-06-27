@@ -1137,16 +1137,34 @@ class Attendance {
           payload.shift_duration = current_shift_duration;
           payload.late_in_minute = moment_punch.diff(moment(runningShift.start_datetime, `${DATE_FORMAT} HH:mm`), 'minutes');
 
-          if (last_enty.in_time) {
-            payload.in_time = moment_punch.format(TIME_FORMAT);
-            if (late_consideration_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_consideration_minute) {
+          const shift_in_time = same_shift_entries.find(e => e.in_time)?.in_time;
+          const shift_in_time_moment = shift_in_time ? moment(`${moment_punch.format(DATE_FORMAT)} ${shift_in_time}`, `${DATE_FORMAT} HH:mm:ss`) : null;
+
+          if (shift_in_time_moment && moment_punch.isBefore(shift_in_time_moment)) {
+            // Punch is before in_time, update the check-in entry
+            const in_time_entry = same_shift_entries.find(e => e.in_time);
+            if (in_time_entry) {
+              Object.assign(payload, in_time_entry);
+              payload.in_time = moment_punch.format(TIME_FORMAT);
+              payload.late_in_minute = moment_punch.diff(moment(runningShift.start_datetime, `${DATE_FORMAT} HH:mm`), 'minutes');
+              if (late_consideration_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_consideration_minute) {
+                payload.late_in_minute = 0;
+              }
+              if (payload.late_in_minute > 0) payload.status = 'Late';
+            }
+          } else {
+            // Punch is after in_time, update the check-out entry
+            if (last_enty.in_time) {
+              payload.in_time = moment_punch.format(TIME_FORMAT);
+              if (late_consideration_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_consideration_minute) {
+                payload.late_in_minute = 0;
+              }
+              if (payload.late_in_minute > 0) payload.status = 'Late';
+            } else if (last_enty.out_time) {
+              payload.out_time = moment_punch.format(TIME_FORMAT);
+              payload.status = '';
               payload.late_in_minute = 0;
             }
-            if (payload.late_in_minute > 0) payload.status = 'Late';
-          } else if (last_enty.out_time) {
-            payload.out_time = moment_punch.format(TIME_FORMAT);
-            payload.status = '';
-            payload.late_in_minute = 0;
           }
           payload.remarks = 'Updated Existing Entry';
           action = 'update';
@@ -1170,12 +1188,25 @@ class Attendance {
               if (payload.late_in_minute > 0) payload.status = 'Late';
               payload.remarks = 'Added In Time';
             } else {
+              const shift_in_time = same_shift_entries.find(e => e.in_time)?.in_time;
+              if (shift_in_time) {
+                const new_out_time = moment_punch;
+                const existing_in_time = moment(`${moment_punch.format(DATE_FORMAT)} ${shift_in_time}`, `${DATE_FORMAT} HH:mm:ss`);
+                if (new_out_time.isBefore(existing_in_time)) {
+                  return { error: 'Out time cannot be before in time', action: null, payload: null };
+                }
+              }
               payload.in_time = null;
               payload.out_time = moment_punch.format(TIME_FORMAT);
               payload.remarks = 'Added Out Time';
               payload.late_in_minute = 0;
             }
           } else if (last_enty.out_time) {
+            const new_in_time = moment_punch;
+            const existing_out_time = moment(`${moment_punch.format(DATE_FORMAT)} ${last_enty.out_time}`, `${DATE_FORMAT} HH:mm:ss`);
+            if (new_in_time.isAfter(existing_out_time)) {
+              return { error: 'In time cannot be after out time', action: null, payload: null };
+            }
             payload.out_time = null;
             payload.in_time = moment_punch.format(TIME_FORMAT);
             if (late_consideration_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_consideration_minute) {
