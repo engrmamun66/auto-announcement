@@ -88,7 +88,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'front-end')));
 // Enable CORS
 app.use(cors());
- 
+
+// Initialize ZKTeco device command store
+app.locals.commands = { queues: {}, nextId: 1 };
+
 const audioUpload = multer({
   storage: multer.diskStorage({
     destination: (req, file, cb) => {
@@ -240,6 +243,7 @@ app.use('/api', require('./src/routes/misc')(utils, Backup, { DEVICE_API_BASE_UR
 app.use('/api', require('./src/routes/refresh')(utils));
 app.use('/api', require('./src/routes/settings')(DB.db));
 app.use('/api', require('./src/routes/sms')(Sms));
+app.use('/api', require('./src/routes/commands'));
 
 app.get('/api/update-app', async (req, res) => {
     const { downloadFromUrl } = require('./src/zipper/download-from-url');
