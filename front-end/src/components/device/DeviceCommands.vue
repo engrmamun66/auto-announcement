@@ -91,6 +91,7 @@
 
 <script setup>
 import { ref, inject, computed, watch, onMounted } from 'vue';
+import moment from 'moment';
 
 const props = defineProps({
   devices: {
@@ -110,8 +111,16 @@ const emitter = inject('emitter');
 const http = inject('http');
 const selectedDeviceId = ref('');
 const pushCommandText = ref('');
-const attStartDate = ref('');
-const attEndDate = ref('');
+const attStartDate = ref(getDefaultStartDate());
+const attEndDate = ref(getDefaultEndDate());
+
+function getDefaultStartDate() {
+  return moment().startOf('day').format('YYYY-MM-DDTHH:mm');
+}
+
+function getDefaultEndDate() {
+  return moment().format('YYYY-MM-DDTHH:mm');
+}
 
 const selectedDevice = computed(() => {
   return props.devices.find(d => d.id === selectedDeviceId.value);
