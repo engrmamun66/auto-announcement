@@ -72,6 +72,13 @@ module.exports = {
                switch_mode: 'auto', // auto || manual,
                delay_before_starting: 10, // miliseconds
           },
+          device: {
+               adjust_time: {
+                    action: 'subtract',
+                    number: 2,
+                    unit: 'hours'
+               },
+          },
           attendance: {
                status: true, // -------------------------- on/off
                only_attendance_feature: false,
@@ -341,7 +348,8 @@ module.exports = {
                id: 4,
                name: 'মাহরাম',
           },
-     ]
+     ],
+     
 
 }
  

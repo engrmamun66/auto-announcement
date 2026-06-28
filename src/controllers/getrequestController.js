@@ -63,7 +63,7 @@ class GetrequestController {
 
           // Fetch next pending command from database
           db.get(
-            'SELECT id, command, command_line FROM command_queue WHERE device_serial_number = ? AND status = ? ORDER BY created_at ASC LIMIT 1',
+            'SELECT id, command FROM command_queue WHERE device_serial_number = ? AND status = ? ORDER BY created_at ASC LIMIT 1',
             [sn, 'pending'],
             (cmdErr, row) => {
               if (cmdErr) {
@@ -94,11 +94,12 @@ class GetrequestController {
                 return res.status(200)
                   .type('text/plain')
                   .send(`${delayLine}\r\n${formattedCommand}\r\n`);
+              } else {
+                res.status(200)
+                  .type('text/plain')
+                  .send(`${delayLine}\r\nOK\r\n`);
               }
 
-              res.status(200)
-                .type('text/plain')
-                .send(`${delayLine}\r\nOK\r\n`);
             }
           );
         }

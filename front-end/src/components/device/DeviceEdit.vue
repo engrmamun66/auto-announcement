@@ -22,20 +22,22 @@
             <option v-for="brand in brands" :key="brand" :value="brand">{{ brand }}</option>
           </select>
         </div>
-        <div class="form-group">
-          <label>{{ helper.t('Polling Interval') }} (s)</label>
-          <input v-model.number="editingDevice.polling_interval" type="number" class="form-control">
-        </div>
-        <div class="form-group">
-          <Switch
-            v-model="editingDevice.status"
-            :label="helper.t('Active')"
-            :yesNoValue="[1, 0]"
-            yes="Active"
-            no="Inactive"
-            inline
-            size="lg"
-          />
+        <div class="form-row">
+          <div class="form-group">
+            <label>{{ helper.t('Polling Interval') }} (s)</label>
+            <input v-model.number="editingDevice.polling_interval" type="number" class="form-control">
+          </div>
+          <div class="form-group">
+            <Switch
+              v-model="editingDevice.status"
+              :label="helper.t('Active')"
+              :yesNoValue="[1, 0]"
+              yes="Active"
+              no="Inactive"
+              inline
+              size="lg"
+            />
+          </div>
         </div>
       </div>
 
@@ -164,6 +166,16 @@ function handleSave() {
   justify-content: flex-end;
 }
 
+.form-row {
+  display: flex;
+  gap: 15px;
+  flex-wrap: nowrap;
+}
+
+.form-row .form-group {
+  flex: 1;
+}
+
 .form-group {
   margin-bottom: 15px;
 }
@@ -205,6 +217,21 @@ function handleSave() {
 .form-control option {
   background: #fff;
   color: #333;
+}
+
+select.form-control {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-attachment: scroll;
+  padding-right: 32px;
+}
+
+select.form-control:focus {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
 }
 
 .btn {

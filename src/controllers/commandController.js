@@ -351,6 +351,34 @@ class CommandController {
 
     this.respondQueued(res, this.pushCommand(req, req.params.cn, command));
   }
+
+  setTimezone(req, res) {
+    const cn = req.params.cn;
+    const data = this.getBodyData(req);
+    const timezone = data.timezone || req.query.timezone;
+
+    if (!timezone || typeof timezone !== 'string') {
+      return res.status(400).json({ error: 'timezone is required' });
+    }
+
+    const command = `TIMEZONE ${timezone.trim()}`;
+    console.log(`🌍 Queuing timezone command for ${cn}: ${command}`);
+
+    // Queue to database
+    global.db.run(
+      'INSERT INTO command_queue (device_serial_number, command, status) VALUES (?, ?, ?)',
+      [cn, command, 'pending'],
+      function(err) {
+        if (err) {
+          console.error(`❌ Error queueing timezone command: ${err.message}`);
+          return res.status(500).json({ error: 'Failed to queue command' });
+        }
+
+        console.log(`✅ Timezone command queued for ${cn} (ID: ${this.lastID})`);
+        res.json({ success: true, message: 'Timezone command queued successfully' });
+      }
+    );
+  }
 }
 
 module.exports = new CommandController();

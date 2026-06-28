@@ -30,6 +30,46 @@
               {{ executingCommand ? helper.t('Executing...') : helper.t('Restart') }}
             </button>
           </div>
+
+          <div class="command-item">
+            <div class="command-info">
+              <h4>{{ helper.t('Push Command') }}</h4>
+              <p>{{ helper.t('Send raw command to device') }}</p>
+            </div>
+            <div class="command-input-group">
+              <input
+                v-model="pushCommandText"
+                type="text"
+                class="command-input"
+                :placeholder="helper.t('Enter command')"
+                @keyup.enter="handlePushCommand"
+              >
+              <button @click="handlePushCommand" class="command-btn push-btn" :disabled="executingCommand || !pushCommandText.trim()">
+                <i class='bx bx-send'></i>
+                {{ executingCommand ? helper.t('Sending...') : helper.t('Send') }}
+              </button>
+            </div>
+          </div>
+
+          <div class="command-item">
+            <div class="command-info">
+              <h4>{{ helper.t('Set Timezone') }}</h4>
+              <p>{{ helper.t('Configure device timezone') }}</p>
+            </div>
+            <div class="command-input-group">
+              <input
+                v-model="timezoneText"
+                type="text"
+                class="command-input"
+                :placeholder="helper.t('Enter timezone (e.g., UTC+6)')"
+                @keyup.enter="handleSetTimezone"
+              >
+              <button @click="handleSetTimezone" class="command-btn timezone-btn" :disabled="executingCommand || !timezoneText.trim()">
+                <i class='bx bx-time'></i>
+                {{ executingCommand ? helper.t('Setting...') : helper.t('Set') }}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -61,7 +101,11 @@ const props = defineProps({
 const emit = defineEmits(['restart']);
 
 const helper = inject('helper');
+const emitter = inject('emitter');
+const http = inject('http');
 const selectedDeviceId = ref('');
+const pushCommandText = ref('');
+const timezoneText = ref('');
 
 const selectedDevice = computed(() => {
   return props.devices.find(d => d.id === selectedDeviceId.value);
@@ -89,6 +133,46 @@ function handleRestart() {
     return;
   }
   emit('restart', device);
+}
+
+function handlePushCommand() {
+  if (!selectedDeviceId.value || !selectedDevice.value || !pushCommandText.value.trim()) return;
+
+  const device = selectedDevice.value;
+  const command = pushCommandText.value.trim();
+
+  http.post(`/devices/push-command/${device.serial_number}`, { command })
+    .then(() => {
+      emitter.emit('toaster-success', { message: helper.t('Command sent successfully') });
+      pushCommandText.value = '';
+    })
+    .catch((err) => {
+      console.error('Push command error:', err);
+      emitter.emit('toaster-error', { message: helper.t('Failed to send command') });
+    });
+}
+
+function handleSetTimezone() {
+  if (!selectedDeviceId.value || !selectedDevice.value || !timezoneText.value.trim()) return;
+
+  const device = selectedDevice.value;
+  const timezone = timezoneText.value.trim();
+
+  // Use fetch directly for root-level command route (not /api prefixed)
+  fetch(`/${device.serial_number}/set-timezone`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ timezone })
+  })
+    .then(res => res.json())
+    .then(() => {
+      emitter.emit('toaster-success', { message: helper.t('Timezone set successfully') });
+      timezoneText.value = '';
+    })
+    .catch((err) => {
+      console.error('Set timezone error:', err);
+      emitter.emit('toaster-error', { message: helper.t('Failed to set timezone') });
+    });
 }
 </script>
 
@@ -224,6 +308,60 @@ function handleRestart() {
 }
 
 .restart-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.command-input-group {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.command-input {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.command-input:focus {
+  outline: none;
+  border-color: #4caf50;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+}
+
+.push-btn {
+  background: #2196f3;
+  color: #fff;
+}
+
+.push-btn:hover:not(:disabled) {
+  background: #1976d2;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
+}
+
+.push-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.timezone-btn {
+  background: #ff9800;
+  color: #fff;
+}
+
+.timezone-btn:hover:not(:disabled) {
+  background: #f57c00;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(255, 152, 0, 0.3);
+}
+
+.timezone-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }

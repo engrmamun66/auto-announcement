@@ -101,7 +101,9 @@ router.post('/:cn/set-delay',       (req, res) => commandController.setDelay(req
 router.post('/:cn/restart',         (req, res) => commandController.restart(req, res));
 
 // { "command": "REBOOT" }
-router.post('/:cn/push',            (req, res) => commandController.pushRawCommand(req, res));
 router.post('/:cn/push-command',    (req, res) => commandController.pushRawCommand(req, res));
+
+// { "timezone": "UTC+6" }
+router.post('/:cn/set-timezone',    (req, res) => commandController.setTimezone(req, res));
 
 module.exports = router;

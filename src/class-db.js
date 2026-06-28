@@ -348,11 +348,12 @@ class myDB {
             );
 
             this.db.run(
-              `CREATE TABLE IF NOT EXISTS command_queue (
+              // DROP TABLE command_queue;
+              `
+              CREATE TABLE IF NOT EXISTS command_queue (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 device_serial_number TEXT NOT NULL,
                 command TEXT NOT NULL,
-                command_line TEXT NOT NULL,
                 status TEXT DEFAULT 'pending',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 sent_at TIMESTAMP DEFAULT NULL,

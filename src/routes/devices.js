@@ -89,8 +89,8 @@ module.exports = (db) => {
       // Insert command into queue
       const command = 'REBOOT';
       db.run(
-        'INSERT INTO command_queue (device_serial_number, command, command_line, status) VALUES (?, ?, ?, ?)',
-        [cn, command, command, 'pending'],
+        'INSERT INTO command_queue (device_serial_number, command, status) VALUES (?, ?, ?)',
+        [cn, command, 'pending'],
         function(err) {
           if (err) {
             console.error(`❌ Error queueing restart command: ${err.message}`);
@@ -99,6 +99,45 @@ module.exports = (db) => {
 
           console.log(`🔄 Restart command queued for ${cn} (ID: ${this.lastID})`);
           res.json({ success: true, message: 'Restart command queued' });
+        }
+      );
+    });
+  });
+
+  router.post('/devices/push-command/:cn', (req, res) => {
+    const cn = req.params.cn;
+    const { command } = req.body;
+
+    if (!command || !command.trim()) {
+      return res.status(400).json({ error: 'Command cannot be empty' });
+    }
+
+    console.log(`📤 Push command request for device: ${cn}, command: ${command}`);
+
+    // Check if device exists in database
+    db.get('SELECT id FROM devices WHERE serial_number = ?', [cn], (err, device) => {
+      if (err) {
+        console.error(`❌ Database error: ${err.message}`);
+        return res.status(500).json({ error: 'Database error' });
+      }
+
+      if (!device) {
+        console.warn(`⚠️ Device ${cn} not found in database`);
+        return res.status(404).json({ error: 'Device not found' });
+      }
+
+      // Insert command into queue
+      db.run(
+        'INSERT INTO command_queue (device_serial_number, command, status) VALUES (?, ?, ?)',
+        [cn, command.trim(), 'pending'],
+        function(err) {
+          if (err) {
+            console.error(`❌ Error queueing push command: ${err.message}`);
+            return res.status(500).json({ error: 'Failed to queue command' });
+          }
+
+          console.log(`✅ Push command queued for ${cn}: ${command.trim()} (ID: ${this.lastID})`);
+          res.json({ success: true, message: 'Command queued successfully' });
         }
       );
     });

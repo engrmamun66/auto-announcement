@@ -60,18 +60,21 @@ class CdataController {
           // Store in memory for quick access
           Store.pollingIntervals[sn] = polling_interval;
 
-          self._pushSyncTimeCommand(sn);
-
           // Create/update device in database
           const now = new Date().toISOString();
           global.db.run(
             'INSERT OR IGNORE INTO devices (serial_number, polling_interval, status, brand, created, updated) VALUES (?, ?, 1, ?, ?, ?)',
             [sn, polling_interval, 'ZKTeco', now, now],
-            (insertErr) => {
+            function(insertErr) {
               if (insertErr) {
                 console.error(`❌ Device insert error for ${sn}:`, insertErr.message);
               } else {
                 console.log(`✅ Device ${sn} checked/inserted [interval: ${polling_interval}s]`);
+                // Queue sync-time command only on first registration (this.changes = 1 means inserted)
+                if (this.changes === 1) {
+                  self._pushSyncTimeCommand(sn);
+                  console.log(`📡 First poll from ${sn}, queuing sync-time command`);
+                }
               }
               // Always update timestamp
               global.db.run(
@@ -191,7 +194,7 @@ class CdataController {
   }
 
   _writeAttendencelogToFile(sn, packIdx, newRecords) {
-    return
+    // return
     const file = path.join(this.dataDir, `${sn}_attlog.json`);
     const existing = packIdx > 1 && fs.existsSync(file) ? this._readJsonFile(file) : [];
     const records = [...existing, ...newRecords];
@@ -321,14 +324,23 @@ class CdataController {
 
   _pushSyncTimeCommand(sn) {
     try {
-      // Generate current time in format: YYYY-MM-DD HH:MM:SS
-      const now = moment().format('YYYY-MM-DD HH:mm:ss');
-      const command = `DATE ${now}`; // DATE ${now}
+      // Get current time and apply adjust_time config
+      let syncTime = moment();
+
+      const adjustConfig = global.config?.settings?.device?.adjust_time;
+      if (adjustConfig && adjustConfig.action && adjustConfig.number && adjustConfig.unit) {
+        // Apply adjustment: add or subtract time based on config
+        syncTime = syncTime[adjustConfig.action](adjustConfig.number, adjustConfig.unit);
+        console.log(`⏰ Time adjustment applied: ${adjustConfig.action} ${adjustConfig.number} ${adjustConfig.unit}`);
+      }
+
+      const now = syncTime.format('YYYY-MM-DD HH:mm:ss');
+      const command = `DATE ${now}`;
 
       // Insert into command_queue table
       global.db.run(
-        'INSERT INTO command_queue (device_serial_number, command, command_line) VALUES (?, ?, ?)',
-        [sn, command, `DATE ${now}`],
+        'INSERT INTO command_queue (device_serial_number, command) VALUES (?, ?)',
+        [sn, command],
         function(err) {
           if (err) {
             console.error(`❌ Error queueing sync-time command for ${sn}:`, err.message);
