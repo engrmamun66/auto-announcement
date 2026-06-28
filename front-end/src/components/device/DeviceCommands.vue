@@ -50,26 +50,6 @@
               </button>
             </div>
           </div>
-
-          <div class="command-item">
-            <div class="command-info">
-              <h4>{{ helper.t('Set Timezone') }}</h4>
-              <p>{{ helper.t('Configure device timezone') }}</p>
-            </div>
-            <div class="command-input-group">
-              <input
-                v-model="timezoneText"
-                type="text"
-                class="command-input"
-                :placeholder="helper.t('Enter timezone (e.g., UTC+6)')"
-                @keyup.enter="handleSetTimezone"
-              >
-              <button @click="handleSetTimezone" class="command-btn timezone-btn" :disabled="executingCommand || !timezoneText.trim()">
-                <i class='bx bx-time'></i>
-                {{ executingCommand ? helper.t('Setting...') : helper.t('Set') }}
-              </button>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -105,7 +85,6 @@ const emitter = inject('emitter');
 const http = inject('http');
 const selectedDeviceId = ref('');
 const pushCommandText = ref('');
-const timezoneText = ref('');
 
 const selectedDevice = computed(() => {
   return props.devices.find(d => d.id === selectedDeviceId.value);
@@ -149,29 +128,6 @@ function handlePushCommand() {
     .catch((err) => {
       console.error('Push command error:', err);
       emitter.emit('toaster-error', { message: helper.t('Failed to send command') });
-    });
-}
-
-function handleSetTimezone() {
-  if (!selectedDeviceId.value || !selectedDevice.value || !timezoneText.value.trim()) return;
-
-  const device = selectedDevice.value;
-  const timezone = timezoneText.value.trim();
-
-  // Use fetch directly for root-level command route (not /api prefixed)
-  fetch(`/${device.serial_number}/set-timezone`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ timezone })
-  })
-    .then(res => res.json())
-    .then(() => {
-      emitter.emit('toaster-success', { message: helper.t('Timezone set successfully') });
-      timezoneText.value = '';
-    })
-    .catch((err) => {
-      console.error('Set timezone error:', err);
-      emitter.emit('toaster-error', { message: helper.t('Failed to set timezone') });
     });
 }
 </script>
@@ -346,22 +302,6 @@ function handleSetTimezone() {
 }
 
 .push-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.timezone-btn {
-  background: #ff9800;
-  color: #fff;
-}
-
-.timezone-btn:hover:not(:disabled) {
-  background: #f57c00;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(255, 152, 0, 0.3);
-}
-
-.timezone-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }

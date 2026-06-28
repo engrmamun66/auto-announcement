@@ -581,13 +581,6 @@ module.exports = {
     'Command sent successfully': 'Command sent successfully',
     'Failed to send command': 'Failed to send command',
     'Execute Command': 'Execute Command',
-    'Set Timezone': 'Set Timezone',
-    'Configure device timezone': 'Configure device timezone',
-    'Enter timezone (e.g., UTC+6)': 'Enter timezone (e.g., UTC+6)',
-    'Set': 'Set',
-    'Setting...': 'Setting...',
-    'Timezone set successfully': 'Timezone set successfully',
-    'Failed to set timezone': 'Failed to set timezone',
   },
   attendance: {
     vacation_types: [

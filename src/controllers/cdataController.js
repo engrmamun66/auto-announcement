@@ -1,7 +1,6 @@
 const { Store } = require('../stores/GlobalStore');
 const fs = require('fs');
 const path = require('path');
-const moment = require('moment');
 
 class CdataController {
   constructor() {
@@ -70,11 +69,6 @@ class CdataController {
                 console.error(`❌ Device insert error for ${sn}:`, insertErr.message);
               } else {
                 console.log(`✅ Device ${sn} checked/inserted [interval: ${polling_interval}s]`);
-                // Queue sync-time command only on first registration (this.changes = 1 means inserted)
-                if (this.changes === 1) {
-                  self._pushSyncTimeCommand(sn);
-                  console.log(`📡 First poll from ${sn}, queuing sync-time command`);
-                }
               }
               // Always update timestamp
               global.db.run(
@@ -320,38 +314,6 @@ class CdataController {
       return acc;
     }, {});
     return data;
-  }
-
-  _pushSyncTimeCommand(sn) {
-    try {
-      // Get current time and apply adjust_time config
-      let syncTime = moment();
-
-      const adjustConfig = global.config?.settings?.device?.adjust_time;
-      if (adjustConfig && adjustConfig.action && adjustConfig.number && adjustConfig.unit) {
-        // Apply adjustment: add or subtract time based on config
-        syncTime = syncTime[adjustConfig.action](adjustConfig.number, adjustConfig.unit);
-        console.log(`⏰ Time adjustment applied: ${adjustConfig.action} ${adjustConfig.number} ${adjustConfig.unit}`);
-      }
-
-      const now = syncTime.format('YYYY-MM-DD HH:mm:ss');
-      const command = `DATE ${now}`;
-
-      // Insert into command_queue table
-      global.db.run(
-        'INSERT INTO command_queue (device_serial_number, command) VALUES (?, ?)',
-        [sn, command],
-        function(err) {
-          if (err) {
-            console.error(`❌ Error queueing sync-time command for ${sn}:`, err.message);
-          } else {
-            console.log(`⏰ Sync-time command queued for ${sn}: ${command} (ID: ${this.lastID})`);
-          }
-        }
-      );
-    } catch (err) {
-      console.error(`❌ Error pushing sync-time command for ${sn}:`, err.message);
-    }
   }
 
   _broadcastDevices() {

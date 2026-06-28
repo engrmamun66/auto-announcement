@@ -582,13 +582,6 @@ module.exports = {
     'Command sent successfully': 'কমান্ড সফলভাবে পাঠানো হয়েছে',
     'Failed to send command': 'কমান্ড পাঠাতে ব্যর্থ',
     'Execute Command': 'কমান্ড চালান',
-    'Set Timezone': 'সময় অঞ্চল সেট করুন',
-    'Configure device timezone': 'ডিভাইসের সময় অঞ্চল কনফিগার করুন',
-    'Enter timezone (e.g., UTC+6)': 'সময় অঞ্চল প্রবেশ করুন (উদা. UTC+6)',
-    'Set': 'সেট করুন',
-    'Setting...': 'সেট করছে...',
-    'Timezone set successfully': 'সময় অঞ্চল সফলভাবে সেট করা হয়েছে',
-    'Failed to set timezone': 'সময় অঞ্চল সেট করতে ব্যর্থ',
   },
   attendance: {
     vacation_types: [
