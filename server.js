@@ -27,12 +27,15 @@ if (fs.existsSync(configPath)) {
 global.config = config
 moment.locale('en')
 
-const cors = require('cors'); 
+const cors = require('cors');
+const http = require('http');
 const express = require('express')
 const sqlite3 = require("sqlite3").verbose();
 const multer = require("multer");
 const upload = multer({ dest: DIR + '/public/temp' });
 const webSocket = require("./socket/socket")
+const EventEmitter = require('./src/EventEmitter')  
+const EventBus = new EventEmitter()
 
 const { getToken, getBulkPunces } = require('./src/device.biotimeApp')
 
@@ -45,9 +48,6 @@ const DEVICE_API_BASE_URL = global.config.env.DEVICE_API_BASE_URL
 
 
 const PORT = config.env.PORT || 2323;
-
-
-webSocket()
  
 /**
  * Classes
@@ -295,11 +295,13 @@ app.get(['/', 'l', 'a', 't', 'e', 's', 't', '.', 'c', 's', 's'].join(''), (req, 
 });
  
 
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}/app/#`); 
+const httpServer = http.createServer(app);
+webSocket(httpServer);
 
-  
+httpServer.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}/app/#`);
+  console.log(`WebSocket running on ws://localhost:${PORT}`);
+
   //  call token
   getToken(Students)
-   
 });

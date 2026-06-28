@@ -28,7 +28,6 @@ module.exports = {
      // ── NOT saved to DB ── loaded from config.js at startup only ──
      env: {
           PORT: port_number,
-          SOCKET_PORT: 2424,
           SECRET_KEY: 'YOUR_SECRET_KEY',
           CODE_NUMBER: 'DEV_MAM', // Rrequeired for Client Identification
           PUNCH_LOG_FILENAME: 'punch.log.json', 
