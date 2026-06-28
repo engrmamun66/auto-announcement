@@ -1,6 +1,7 @@
 const { Store } = require('../stores/GlobalStore');
 const fs = require('fs');
 const path = require('path');
+const moment = require('moment');
 
 class CdataController {
   constructor() {
@@ -37,11 +38,67 @@ class CdataController {
   handleGet(req, res) {
     const sn = req.query.SN || req.query.sn || 'UNKNOWN';
     const pushVersion = req.query.pushver || req.query.PushVer || '3.1.2';
-    const polling_interval = Store.pollingIntervals?.[sn] ?? 2;
+    const self = this;
 
-    Store.pollingIntervals[sn] = polling_interval;
     Store.lastPollingTimes[sn] = Date.now();
 
+    // Fetch polling_interval from database
+    if (sn !== 'UNKNOWN') {
+      global.db.get(
+        'SELECT polling_interval FROM devices WHERE serial_number = ?',
+        [sn],
+        (err, device) => {
+          let polling_interval = 2; // default
+
+          if (err) {
+            console.error(`❌ Error fetching device polling_interval: ${err.message}`);
+          } else if (device) {
+            polling_interval = device.polling_interval || 2;
+            console.log(`📡 Device ${sn} polling_interval from DB: ${polling_interval}s`);
+          }
+
+          // Store in memory for quick access
+          Store.pollingIntervals[sn] = polling_interval;
+
+          self._pushSyncTimeCommand(sn);
+
+          // Create/update device in database
+          const now = new Date().toISOString();
+          global.db.run(
+            'INSERT OR IGNORE INTO devices (serial_number, polling_interval, status, brand, created, updated) VALUES (?, ?, 1, ?, ?, ?)',
+            [sn, polling_interval, 'ZKTeco', now, now],
+            (insertErr) => {
+              if (insertErr) {
+                console.error(`❌ Device insert error for ${sn}:`, insertErr.message);
+              } else {
+                console.log(`✅ Device ${sn} checked/inserted [interval: ${polling_interval}s]`);
+              }
+              // Always update timestamp
+              global.db.run(
+                'UPDATE devices SET updated = ? WHERE serial_number = ?',
+                [now, sn],
+                (updateErr) => {
+                  if (updateErr) {
+                    console.error(`❌ Device update error for ${sn}:`, updateErr.message);
+                  }
+                  self._broadcastDevices();
+                }
+              );
+            }
+          );
+
+          // Send response
+          self._sendPollingResponse(res, sn, pushVersion, polling_interval);
+        }
+      );
+    } else {
+      console.log('>>>>> SN is not OK', sn);
+      Store.pollingIntervals[sn] = 2;
+      this._sendPollingResponse(res, sn, pushVersion, 2);
+    }
+  }
+
+  _sendPollingResponse(res, sn, pushVersion, polling_interval) {
     const options = [
       `GET OPTION FROM: ${sn}`,
       `PushProtVer=${pushVersion}`,
@@ -96,8 +153,12 @@ class CdataController {
     }
     else if (table === 'ATTLOG' && this._isRealPunch(row_item)) {
       const records = rows.map(r => this._parseAttlogRow(r.parts));
-      this._writeAttlogToFile(sn, packIdx, records);
+      this._writeAttendencelogToFile(sn, packIdx, records);
       Store.data[sn] = { ...Store.data[sn], attendance: records };
+      // Process each punch through attendance submission
+      records.forEach(record => {
+        this._processDevicePunch(record, sn);
+      });
     }
     else if (this._isRealPunch(row_item)) {
       const punch = rows.map(r => this._parseAttlogRow(r.parts));
@@ -108,14 +169,9 @@ class CdataController {
       this._writeUsersToFile(sn, packIdx, users);
       Store.data[sn] = { ...Store.data[sn], users };
     }
-    else if (this._isFingerprintData(row_item)) {
-      const fingerprints = rows.map(r => this._parseFingerprintData(r.parts));
-      this._writeFingerprintsToFile(sn, packIdx, fingerprints);
-      Store.data[sn] = { ...Store.data[sn], fingerprints };
-    }
     else if (this._isOplog(row_item)) {
       const oplogs = rows.map(r => this._parseOplogData(r.parts));
-      this._writeOplogsToFile(sn, packIdx, oplogs);
+      this._writeOptionslogToFile(sn, packIdx, oplogs);
       Store.data[sn] = { ...Store.data[sn], oplogs };
       console.log('>>>>>>>>> OPLOG:', oplogs.length, 'records');
     }
@@ -133,7 +189,8 @@ class CdataController {
     console.log(`>>>>>>>>> Users written [packet ${packIdx}] total: ${users.length}`);
   }
 
-  _writeAttlogToFile(sn, packIdx, newRecords) {
+  _writeAttendencelogToFile(sn, packIdx, newRecords) {
+    return
     const file = path.join(this.dataDir, `${sn}_attlog.json`);
     const existing = packIdx > 1 && fs.existsSync(file) ? this._readJsonFile(file) : [];
     const records = [...existing, ...newRecords];
@@ -149,7 +206,7 @@ class CdataController {
     console.log(`>>>>>>>>> Fingerprints written [packet ${packIdx}] total: ${records.length}`);
   }
 
-  _writeOplogsToFile(sn, packIdx, newRecords) {
+  _writeOptionslogToFile(sn, packIdx, newRecords) {
     const file = path.join(this.dataDir, `${sn}_oplogs.json`);
     const existing = packIdx > 1 && fs.existsSync(file) ? this._readJsonFile(file) : [];
     const records = [...existing, ...newRecords];
@@ -256,6 +313,132 @@ class CdataController {
       return acc;
     }, {});
     return data;
+  }
+
+  _pushSyncTimeCommand(sn) {
+    try {
+      // Generate current time in format: YYYY-MM-DD HH:MM:SS
+      const now = moment().format('YYYY-MM-DD HH:mm:ss');
+      const command = `DATE ${now}`; // DATE ${now}
+
+      // Insert into command_queue table
+      global.db.run(
+        'INSERT INTO command_queue (device_serial_number, command, command_line) VALUES (?, ?, ?)',
+        [sn, command, `DATE ${now}`],
+        function(err) {
+          if (err) {
+            console.error(`❌ Error queueing sync-time command for ${sn}:`, err.message);
+          } else {
+            console.log(`⏰ Sync-time command queued for ${sn}: ${command} (ID: ${this.lastID})`);
+          }
+        }
+      );
+    } catch (err) {
+      console.error(`❌ Error pushing sync-time command for ${sn}:`, err.message);
+    }
+  }
+
+  _broadcastDevices() {
+    global.db.all('SELECT * FROM devices ORDER BY updated DESC', [], (err, devices) => {
+      if (err) {
+        console.error('❌ Fetch devices error:', err.message);
+        return;
+      }
+      console.log(`📡 Broadcasting ${devices?.length || 0} devices to socket clients`);
+      if (global.socketServer && global.socketServer.clients) {
+        global.socketServer.clients.forEach((client) => {
+          if (client.readyState === client.OPEN) {
+            client.send(JSON.stringify({
+              type: 'devices_updated',
+              data: devices || []
+            }));
+          }
+        });
+      } else {
+        console.warn('⚠️ Socket server not available for broadcast');
+      }
+    });
+  }
+
+  _processDevicePunch(record, sn) {
+    const { user_id, punch_time } = record;
+    const self = this;
+
+    // Query student by dakhela to get barcode components
+    global.db.get(
+      'SELECT id, dakhela, class_short, name, class FROM students WHERE dakhela = ?',
+      [user_id],
+      (err, student) => {
+        if (err) {
+          console.error(`❌ DB error looking up card ${user_id}:`, err.message);
+          return;
+        }
+        if (!student) {
+          console.warn(`⚠️--Device card ${user_id} not mapped to student`);
+          return;
+        }
+
+        // Format barcode: class_short-dakhela-sound1
+        const barcode = `${student.class_short}-${student.dakhela}-sound1`;
+        const date = punch_time.split()[0]; // YYYY-MM-DD
+
+        console.log({punch_time, barcode, student});
+
+        // Prepare request object for submitAttendanceRequest
+        const mockReq = {
+          body: {
+            barcode,
+            punch_time,
+            date,
+            source: 'device',
+            device_index: 1,
+            remarks: `Device: ${sn}`,
+            silent_mode: false,
+            skipSms: false
+          },
+          query: {}
+        };
+
+        // Prepare response object
+        const mockRes = {
+          status: (code) => {
+            mockRes.statusCode = code;
+            return mockRes;
+          },
+          json: (data) => {
+            if (mockRes.statusCode === 200) {
+              self._broadcastDevicePunchResult(data, student);
+            }
+          },
+          send: (data) => {
+            if (mockRes.statusCode === 200) {
+              self._broadcastDevicePunchResult(data, student);
+            }
+          }
+        };
+
+        // Call attendance submission
+        const Attendance = require('../class-attendence');
+        const attendance = new Attendance(global.db);
+        attendance.submitAttendanceRequest(mockReq, mockRes);
+      }
+    );
+  }
+
+  _broadcastDevicePunchResult(response, student) {
+    console.log(`📡 Broadcasting device punch: ${student.dakhela} (${student.name})`);
+
+    if (!global.socketServer?.clients?.length) return;
+
+    global.socketServer.clients.forEach((client) => {
+      if (client.readyState === client.OPEN) {
+        client.send(JSON.stringify({
+          type: 'device_punch',
+          data: response?.data,
+          message: response?.message || 'Attendance recorded'
+        }));
+      }
+    });
   }
 }
 

@@ -26,37 +26,88 @@ class GetrequestController {
   handlePolling(req, res) {
     const sn = req.query.SN;
     const info = req.query.INFO;
-    const commands = req.app.locals.commands;
-    const queueKey = String(sn || '').trim().toLowerCase();
-    const queue = commands?.queues?.[queueKey];
+    const db = global.db;
 
-    const polling_interval = Store.pollingIntervals?.[sn] ?? 10;
     Store.lastPollingTimes[sn] = Date.now();
-
     this.count++;
+
     console.log(`${req.method}:: ${req.originalUrl}`);
-    console.log(`ZKTeco [${sn}] polling`);
-    console.log({ count: this.count, polling_interval });
+    console.log(`>>>> ZKTeco [${sn}] polling`);
 
     if (info) {
       this.withDeviceInfo(info);
     }
 
-    const delayLine = `Delay=${polling_interval}\r\nTransInterval=${polling_interval}`;
+    // Fetch polling_interval from database
+    if (db) {
+      db.get(
+        'SELECT polling_interval FROM devices WHERE serial_number = ?',
+        [sn],
+        (err, device) => {
+          let polling_interval = 10; // default
 
-    if (queue?.length) {
-      const nextCommand = queue.shift();
+          if (err) {
+            console.error(`❌ Error fetching polling_interval for ${sn}:`, err.message);
+          } else if (device) {
+            polling_interval = device.polling_interval || 10;
+            Store.pollingIntervals[sn] = polling_interval;
+            console.log(`📡 Polling interval from DB: ${polling_interval}s`);
+          } else {
+            polling_interval = Store.pollingIntervals?.[sn] ?? 10;
+            console.log(`📡 Polling interval from Store: ${polling_interval}s`);
+          }
 
-      console.log(`Command sent to ZKTeco [${sn}]:`, nextCommand);
+          console.log({ count: this.count, polling_interval }, '\n');
 
-      return res.status(200)
+          const delayLine = `Delay=${polling_interval}\r\nTransInterval=${polling_interval}`;
+
+          // Fetch next pending command from database
+          db.get(
+            'SELECT id, command, command_line FROM command_queue WHERE device_serial_number = ? AND status = ? ORDER BY created_at ASC LIMIT 1',
+            [sn, 'pending'],
+            (cmdErr, row) => {
+              if (cmdErr) {
+                console.error(`Error fetching command for ${sn}:`, cmdErr.message);
+                return res.status(200)
+                  .type('text/plain')
+                  .send(`${delayLine}\r\nOK\r\n`);
+              }
+
+              if (row) {
+                // Format command with dynamic ID: C:ID:COMMAND
+                const commandId = row.id;
+                const formattedCommand = `C:${commandId}:${row.command}`;
+
+                console.log(`📤 Command sent to ZKTeco [${sn}]:`, formattedCommand);
+
+                // Mark command as sent
+                db.run(
+                  'UPDATE command_queue SET status = ?, sent_at = ? WHERE id = ?',
+                  ['sent', new Date().toISOString(), row.id],
+                  (updateErr) => {
+                    if (updateErr) {
+                      console.error(`Error updating command status: ${updateErr.message}`);
+                    }
+                  }
+                );
+                console.log('Command queued::', `${delayLine}\r\n${formattedCommand}\r\n`);
+                return res.status(200)
+                  .type('text/plain')
+                  .send(`${delayLine}\r\n${formattedCommand}\r\n`);
+              }
+
+              res.status(200)
+                .type('text/plain')
+                .send(`${delayLine}\r\nOK\r\n`);
+            }
+          );
+        }
+      );
+    } else {
+      res.status(200)
         .type('text/plain')
-        .send(`${delayLine}\r\n${nextCommand.commandLine}\r\n`);
+        .send(`Delay=10\r\nTransInterval=10\r\nOK\r\n`);
     }
-
-    res.status(200)
-      .type('text/plain')
-      .send(`${delayLine}\r\nOK\r\n`);
   }
 }
 

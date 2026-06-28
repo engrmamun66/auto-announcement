@@ -49,6 +49,9 @@
           <i class='bx bxs-calendar pre-icon' ></i> {{ helper.t('Shedules') }}
         </RouterLink>
       </template>
+      <RouterLink id="nav-link-devices" :to="{name: 'devices', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active': route.name === 'devices'}" @click="sendRemoteAction({from: 'ip', action: 'onClick', selector: '#nav-link-devices'})">
+        <i class='bx bxs-server pre-icon' ></i> {{ helper.t('Devices') }}
+      </RouterLink>
       <RouterLink id="nav-link-import" :to="{name: 'import', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active': route.name === 'import'}" @click="sendRemoteAction({from: 'ip', action: 'onClick', selector: '#nav-link-import'})">
         <i class='bx bxs-file-import pre-icon' ></i> {{ helper.t('Import') }}
       </RouterLink>

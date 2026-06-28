@@ -1229,7 +1229,13 @@ class Attendance {
     // ========================Submit Attendance====================== //
     // =============================================================== //
 
-    submitAttendanceRequest(req, res, Students) {
+    /**
+     * If synced device with our api server directly, This funciton will be use from
+     * file: src/controllers/cdataController.js 
+     * method: _processDevicePunch()
+     */
+
+    submitAttendanceRequest(req, res) {
       const {
         barcode = '',
         punch_time = moment().format(),

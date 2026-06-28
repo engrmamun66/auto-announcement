@@ -243,6 +243,8 @@ app.use('/api', require('./src/routes/misc')(utils, Backup, { DEVICE_API_BASE_UR
 app.use('/api', require('./src/routes/refresh')(utils));
 app.use('/api', require('./src/routes/settings')(DB.db));
 app.use('/api', require('./src/routes/sms')(Sms));
+app.use('/api', require('./src/routes/devices')(DB.db));
+app.use('/api', require('./src/routes/verify-password')(DB.db));
 app.use('/', require('./src/routes/commands'));
 
 app.get('/api/update-app', async (req, res) => {
