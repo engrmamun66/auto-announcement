@@ -25,18 +25,19 @@ class CdataController {
 
       if (req.method === 'GET') {
         return this.handleGet(req, res);
+      } else {
+        this.handlePost(req, rawData);
+        console.log('\n========================\n');
+        res.status(200).type('text/plain').send('OK\r\n');
       }
 
-      this.handlePost(req, rawData);
-      console.log('\n========================\n');
-      res.status(200).type('text/plain').send('OK\r\n');
     });
   }
 
   handleGet(req, res) {
     const sn = req.query.SN || req.query.sn || 'UNKNOWN';
     const pushVersion = req.query.pushver || req.query.PushVer || '3.1.2';
-    const polling_interval = Store.pollingIntervals?.[sn] ?? 10;
+    const polling_interval = Store.pollingIntervals?.[sn] ?? 2;
 
     Store.pollingIntervals[sn] = polling_interval;
     Store.lastPollingTimes[sn] = Date.now();
