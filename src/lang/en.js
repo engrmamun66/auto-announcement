@@ -581,6 +581,14 @@ module.exports = {
     'Command sent successfully': 'Command sent successfully',
     'Failed to send command': 'Failed to send command',
     'Execute Command': 'Execute Command',
+    'Get Attendance': 'Get Attendance',
+    'Retrieve attendance by date range': 'Retrieve attendance by date range',
+    'Start date': 'Start date',
+    'End date': 'End date',
+    'Fetch': 'Fetch',
+    'Fetching...': 'Fetching...',
+    'Attendance fetch command sent': 'Attendance fetch command sent',
+    'Failed to fetch attendance': 'Failed to fetch attendance',
   },
   attendance: {
     vacation_types: [

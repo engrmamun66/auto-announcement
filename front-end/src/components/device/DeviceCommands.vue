@@ -50,6 +50,31 @@
               </button>
             </div>
           </div>
+
+          <div class="command-item">
+            <div class="command-info">
+              <h4>{{ helper.t('Get Attendance') }}</h4>
+              <p>{{ helper.t('Retrieve attendance by date range') }}</p>
+            </div>
+            <div class="command-date-group">
+              <input
+                v-model="attStartDate"
+                type="datetime-local"
+                class="command-input"
+                :placeholder="helper.t('Start date')"
+              >
+              <input
+                v-model="attEndDate"
+                type="datetime-local"
+                class="command-input"
+                :placeholder="helper.t('End date')"
+              >
+              <button @click="handleGetAttendance" class="command-btn attendance-btn" :disabled="executingCommand || !attStartDate || !attEndDate">
+                <i class='bx bx-download'></i>
+                {{ executingCommand ? helper.t('Fetching...') : helper.t('Fetch') }}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -85,6 +110,8 @@ const emitter = inject('emitter');
 const http = inject('http');
 const selectedDeviceId = ref('');
 const pushCommandText = ref('');
+const attStartDate = ref('');
+const attEndDate = ref('');
 
 const selectedDevice = computed(() => {
   return props.devices.find(d => d.id === selectedDeviceId.value);
@@ -128,6 +155,31 @@ function handlePushCommand() {
     .catch((err) => {
       console.error('Push command error:', err);
       emitter.emit('toaster-error', { message: helper.t('Failed to send command') });
+    });
+}
+
+function handleGetAttendance() {
+  if (!selectedDeviceId.value || !selectedDevice.value || !attStartDate.value || !attEndDate.value) return;
+
+  const device = selectedDevice.value;
+
+  // Convert datetime-local to "YYYY-MM-DD HH:mm:ss" format
+  const startTime = new Date(attStartDate.value).toISOString().slice(0, 19).replace('T', ' ');
+  const endTime = new Date(attEndDate.value).toISOString().slice(0, 19).replace('T', ' ');
+
+  // Use fetch for root-level command route (not /api prefixed)
+  fetch(`/${device.serial_number}/get-attendance`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ startTime, endTime })
+  })
+    .then(res => res.json())
+    .then(() => {
+      emitter.emit('toaster-success', { message: helper.t('Attendance fetch command sent') });
+    })
+    .catch((err) => {
+      console.error('Get attendance error:', err);
+      emitter.emit('toaster-error', { message: helper.t('Failed to fetch attendance') });
     });
 }
 </script>
@@ -274,6 +326,13 @@ function handlePushCommand() {
   align-items: center;
 }
 
+.command-date-group {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
 .command-input {
   flex: 1;
   padding: 10px 12px;
@@ -302,6 +361,22 @@ function handlePushCommand() {
 }
 
 .push-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.attendance-btn {
+  background: #4caf50;
+  color: #fff;
+}
+
+.attendance-btn:hover:not(:disabled) {
+  background: #45a049;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+}
+
+.attendance-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }

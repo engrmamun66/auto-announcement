@@ -261,6 +261,21 @@ class CommandController {
     this.respondQueued(res, this.pushCommand(req, req.params.cn, 'CHECK'));
   }
 
+  getAttendance(req, res) {
+    const cn = req.params.cn;
+    const data = this.getBodyData(req);
+    const startTime = data.startTime || req.query.startTime;
+    const endTime = data.endTime || req.query.endTime;
+
+    let command = 'DATA RETRIEVE ATTLOG';
+    if (startTime && endTime) {
+      command = `DATA RETRIEVE ATTLOG ${startTime} ${endTime}`;
+    }
+
+    console.log(`📋 Get attendance request for ${cn}: ${command}`);
+    this.respondQueued(res, this.pushCommand(req, cn, command));
+  }
+
   clearAttlog(req, res) {
     this.respondQueued(res, this.pushCommand(req, req.params.cn, 'DATA CLEAR ATTLOG'));
   }

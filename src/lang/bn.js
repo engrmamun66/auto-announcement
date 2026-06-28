@@ -582,6 +582,14 @@ module.exports = {
     'Command sent successfully': 'কমান্ড সফলভাবে পাঠানো হয়েছে',
     'Failed to send command': 'কমান্ড পাঠাতে ব্যর্থ',
     'Execute Command': 'কমান্ড চালান',
+    'Get Attendance': 'উপস্থিতি পান',
+    'Retrieve attendance by date range': 'তারিখের পরিসর অনুযায়ী উপস্থিতি পুনরুদ্ধার করুন',
+    'Start date': 'শুরু তারিখ',
+    'End date': 'শেষ তারিখ',
+    'Fetch': 'নিয়ে আসুন',
+    'Fetching...': 'নিয়ে আসছে...',
+    'Attendance fetch command sent': 'উপস্থিতি নিয়ে আসার কমান্ড পাঠানো হয়েছে',
+    'Failed to fetch attendance': 'উপস্থিতি নিয়ে আসতে ব্যর্থ',
   },
   attendance: {
     vacation_types: [
