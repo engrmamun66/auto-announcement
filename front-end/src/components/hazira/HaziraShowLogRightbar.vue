@@ -286,7 +286,7 @@ async function onDateTimePickerChange(data) {
                     :startTime="shift.start"
                     :rangePicker="false"
                     :timePicker="true"
-                    :onlyTimePicker="true"
+                    :onlyTimePicker="false"
                     :pickTimeFirst="true"
                     :invisible="true"
                     :autoOpen="true"

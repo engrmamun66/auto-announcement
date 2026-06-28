@@ -564,13 +564,11 @@ function is_skip_sms(){
 }
 
 function onChange_dateTimePicker(data){
-  if(route.query.dev === 'true') helper.goto({name: 'attendence'}) 
   punchToSubmitAttendance(makeCarcode(targetStudent.value), {source: 'manual_button', delay: 0, punch_time: data.startDateTime, skipSms: is_skip_sms() })
 }
 
 function onClickAttendance(std){
   if(!confirm(helper.t('Are you sure to submit attendance?'))) return;
-  if(route.query.dev === 'true') helper.goto({name: 'attendence'}) 
   punchToSubmitAttendance(makeCarcode(std), {source: 'manual_button', delay: 0, skipSms: is_skip_sms()})
 }
 
@@ -1080,9 +1078,10 @@ watch(fixedWidthSoundCol, (newVal) => {
                       <button class="class-short-btn px-2 for-attendence" 
                       :tooltip="helper.getShifts(classes, std.class_short, false).map(shift => Ahelper.printShift(shift)).join(' | ')"
                       style="--tmaxW: 27em"
-                      @click.stop="() => {
+                      @click.stop="async() => {
                         targetStudent = std; 
                         $refs.dateTimePickerRef.setTime(moment().format('HH:mm'))
+                        await helper.wait(100)
                         $refs.dateTimePickerRef.toggle()
 
                       }" >
@@ -1242,6 +1241,7 @@ watch(fixedWidthSoundCol, (newVal) => {
       :timePickerButtons="true"
       :use24FormatTimeForEvents="true"
       :invisible="true"
+      :pickTimeFirst="true"
       displayIn="modal" 
       :buttons="{applyBtn: 'Set-Attendace', todayBtn: false}"
       >
