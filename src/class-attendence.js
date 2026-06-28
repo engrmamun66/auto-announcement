@@ -1229,13 +1229,27 @@ class Attendance {
     // ========================Submit Attendance====================== //
     // =============================================================== //
 
+    _emitAttendanceToSocket(responseData) {
+      if (!global.socketServer?.clients?.length) return;
+
+      global.socketServer.clients.forEach((client) => {
+        if (client.readyState === client.OPEN) {
+          client.send(JSON.stringify({
+            type: 'device_punch',
+            data: responseData?.data,
+            message: responseData?.message
+          }));
+        }
+      });
+    }
+
     /**
      * If synced device with our api server directly, This funciton will be use from
-     * file: src/controllers/cdataController.js 
+     * file: src/controllers/cdataController.js
      * method: _processDevicePunch()
      */
 
-    submitAttendanceRequest(req, res) {
+    submitAttendanceRequest(req, res, emitToSocket = false) {
       const {
         barcode = '',
         punch_time = moment().format(),
@@ -1279,14 +1293,16 @@ class Attendance {
           if (!shifts.length) {
             return res.status(400).send({ error: `No shift configured for ${student.class_name || class_short}` });
           }
-
           // Get today's entries for student
           this.db.all(
             `SELECT * FROM ${this.tableName} WHERE student_id = ? AND date = ? ORDER BY created ASC`,
             [student.dakhela, date],
             (err, entries) => {
-              if (err) return res.status(500).send({ error: err.message });
-
+              if (err) {
+                console.log(`submitAttendanceRequest__err_1:`, err)
+                return res.status(500).send({ error: err.message });
+              }
+              
               const today_entries = entries || [];
 
               // Process punch request
@@ -1306,6 +1322,8 @@ class Attendance {
               if (punchResult.error) {
                 return res.status(400).send({ error: punchResult.error });
               }
+
+
 
               const { action, payload } = punchResult;
 
@@ -1377,8 +1395,10 @@ class Attendance {
                         }
                       });
                     }
-                    
-                    res.send({ message: payload.remarks, data: row, action: 'create' });
+
+                    const responseData = { message: payload.remarks, data: row, action: 'create' };
+                    if (emitToSocket) this._emitAttendanceToSocket(responseData);
+                    res.send(responseData);
                   });
                 });
               } else if (action === 'update') {
@@ -1407,7 +1427,9 @@ class Attendance {
                   (err) => {
                     if (err) return res.status(500).send({ error: err.message });
 
-                    res.send({ message: payload.remarks || 'Attendance updated.', data: payload, action: 'update' });
+                    const responseData = { message: payload.remarks || 'Attendance updated.', data: payload, action: 'update' };
+                    if (emitToSocket) this._emitAttendanceToSocket(responseData);
+                    res.send(responseData);
                   }
                 );
               } else {

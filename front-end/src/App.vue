@@ -912,13 +912,27 @@ onMounted(async ()=>{
     isMounted.value = true;
  
     emitter.on('on_socket_message', (socket_data) => {
-        
+
+        if(socket_data.type == 'device_punch'){
+          // Device punch received from server
+          if(socket_data?.data){
+            liveAttendenceList.value.push({...socket_data.data, live_data: true})
+            callbacks.fixOverflowOfLiveAttendence()
+            setTimeout(() => {
+              delete liveAttendenceList.value.at(-1).live_data
+            }, 700)
+          }
+          if(socket_data?.message){
+            emitter.emit('toaster-success', { message: socket_data.message })
+          }
+        }
+
         if(socket_data.type == 'attendence'){
-            let { punch_time, barcode, for_attendence, device_index } = socket_data 
+            let { punch_time, barcode, for_attendence, device_index } = socket_data
             let time_and_barcode = `${punch_time}-${barcode}`
 
             let existing = storage('time_and_barcode').value
-            
+
             if(!existing || existing != time_and_barcode || useRoute()?.query?.force=='true'){
                 storage('time_and_barcode').value = time_and_barcode
                 if(for_attendence){
@@ -926,7 +940,7 @@ onMounted(async ()=>{
                 } else {
                     punchToCallStudent(barcode, { for_attendence, device_index })
                 }
-                
+
             }
         }
 

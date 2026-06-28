@@ -20,7 +20,7 @@ class GetrequestController {
       feature_flags: parts[9],
     };
 
-    console.log('INFO parsed:', info_data);
+    // console.log('INFO parsed:', info_data);
   }
 
   handlePolling(req, res) {

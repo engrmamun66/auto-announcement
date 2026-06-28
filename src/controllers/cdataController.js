@@ -182,6 +182,7 @@ class CdataController {
   }
 
   _writeUsersToFile(sn, packIdx, newUsers) {
+    return
     const file = path.join(this.dataDir, `${sn}_users.json`);
     const existing = packIdx > 1 && fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8') || '[]') : [];
     const users = [...existing, ...newUsers];
@@ -199,6 +200,7 @@ class CdataController {
   }
 
   _writeFingerprintsToFile(sn, packIdx, newRecords) {
+    return
     const file = path.join(this.dataDir, `${sn}_fingerprints.json`);
     const existing = packIdx > 1 && fs.existsSync(file) ? this._readJsonFile(file) : [];
     const records = [...existing, ...newRecords];
@@ -207,6 +209,7 @@ class CdataController {
   }
 
   _writeOptionslogToFile(sn, packIdx, newRecords) {
+    return
     const file = path.join(this.dataDir, `${sn}_oplogs.json`);
     const existing = packIdx > 1 && fs.existsSync(file) ? this._readJsonFile(file) : [];
     const records = [...existing, ...newRecords];
@@ -215,6 +218,7 @@ class CdataController {
   }
 
   _writeOthersToFile(sn, rows) {
+    return
     const file = path.join(this.dataDir, `${sn}_others.json`);
     fs.writeFileSync(file, JSON.stringify(rows, null, 2));
     console.log(`>>>>>>>>> Others written to ${file}`);
@@ -417,10 +421,10 @@ class CdataController {
           }
         };
 
-        // Call attendance submission
+        // Call attendance submission with socket emission enabled
         const Attendance = require('../class-attendence');
         const attendance = new Attendance(global.db);
-        attendance.submitAttendanceRequest(mockReq, mockRes);
+        attendance.submitAttendanceRequest(mockReq, mockRes, true);
       }
     );
   }
