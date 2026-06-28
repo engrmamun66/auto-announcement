@@ -923,7 +923,8 @@ onMounted(async ()=>{
             }, 700)
           }
           if(socket_data?.message){
-            emitter.emit('toaster-success', { message: socket_data.message })
+            const toasterType = socket_data?.message_type === 'error' ? 'toaster-error' : 'toaster-success'
+            emitter.emit(toasterType, { message: socket_data.message })
           }
         }
 

@@ -1022,7 +1022,7 @@ class Attendance {
       });
     }
 
-    processPunchRequest(punchData = {}) {
+    _processPunchRequest(punchData = {}) {
       const {
         barcode,
         punch_time = moment(),
@@ -1229,13 +1229,17 @@ class Attendance {
     // ========================Submit Attendance====================== //
     // =============================================================== //
 
-    _emitAttendanceToSocket(responseData) {
-      if (!global.socketServer?.clients?.length) return;
+    _emitAttendanceToSocket(responseData, messageType = 'success') {
+      if (!global.socketServer || !global.socketServer.clients) return;
 
-      global.socketServer.clients.forEach((client) => {
+      const clients = Array.from(global.socketServer.clients);
+      if (!clients.length) return;
+
+      clients.forEach((client) => {
         if (client.readyState === client.OPEN) {
           client.send(JSON.stringify({
             type: 'device_punch',
+            message_type: messageType,
             data: responseData?.data,
             message: responseData?.message
           }));
@@ -1306,7 +1310,7 @@ class Attendance {
               const today_entries = entries || [];
 
               // Process punch request
-              const punchResult = this.processPunchRequest({
+              const punchResult = this._processPunchRequest({
                 barcode,
                 punch_time: moment_punch,
                 date,
@@ -1319,7 +1323,10 @@ class Attendance {
                 shifts,
               });
 
+              console.log('punchResult::::::', punchResult);
+
               if (punchResult.error) {
+                if(emitToSocket) this._emitAttendanceToSocket({ message: punchResult.error, data: null }, 'error');
                 return res.status(400).send({ error: punchResult.error });
               }
 
