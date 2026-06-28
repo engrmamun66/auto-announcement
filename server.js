@@ -243,7 +243,7 @@ app.use('/api', require('./src/routes/misc')(utils, Backup, { DEVICE_API_BASE_UR
 app.use('/api', require('./src/routes/refresh')(utils));
 app.use('/api', require('./src/routes/settings')(DB.db));
 app.use('/api', require('./src/routes/sms')(Sms));
-app.use('/api', require('./src/routes/commands'));
+app.use('/', require('./src/routes/commands'));
 
 app.get('/api/update-app', async (req, res) => {
     const { downloadFromUrl } = require('./src/zipper/download-from-url');
