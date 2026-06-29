@@ -1,5 +1,5 @@
 <template>
-  <div v-if="editingDevice" class="device-modal-overlay" @click="emit('close')">
+  <div v-if="editingDevice" class="device-modal-overlay">
     <div class="device-modal" @click.stop>
       <div class="device-modal__header">
         <h2>{{ helper.t('Edit Device') }}</h2>
