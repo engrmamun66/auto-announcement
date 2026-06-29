@@ -58,7 +58,7 @@ class CdataController {
               console.log(`⏸️ Device ${sn} is inactive (status=0). Skipping polling.`);
               return res.status(200).type('text/plain').send('Delay=10\r\nOK\r\n');
             }
-            polling_interval = device.polling_interval || 2;
+            polling_interval = device.polling_interval || 5;
             console.log(`📡 Device ${sn} polling_interval from DB: ${polling_interval}s`);
           }
 

@@ -250,7 +250,7 @@ class CommandController {
 
     // Calculate exact wait time based on device polling interval
     const lastPollTime = Store.lastPollingTimes?.[cn] || 0;
-    const pollingInterval = Store.pollingIntervals?.[cn] || 2; // default 2 seconds
+    const pollingInterval = Store.pollingIntervals?.[cn] || 5; // default 2 seconds
     const nextPollTime = lastPollTime + (pollingInterval * 1000); // convert to ms
     const now = Date.now();
     let waitMs = Math.max(0, nextPollTime - now); // seconds until next poll

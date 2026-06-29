@@ -82,7 +82,7 @@ function handleSave() {
     id: props.editingDevice.id,
     name: props.editingDevice.name || '',
     brand: props.editingDevice.brand || 'ZKTeco',
-    polling_interval: props.editingDevice.polling_interval || 2,
+    polling_interval: props.editingDevice.polling_interval || 5,
     status: props.editingDevice.status ? 1 : 0
   });
 }
