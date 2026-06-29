@@ -4,7 +4,7 @@ module.exports = (db) => {
   const router = express.Router();
 
   router.get('/devices', (req, res) => {
-    db.all('SELECT * FROM devices ORDER BY updated DESC', [], (err, rows) => {
+    db.all('SELECT * FROM devices ORDER BY id DESC', [], (err, rows) => {
       if (err) {
         console.error('❌ Fetch devices error:', err.message);
         return res.status(500).json({ error: 'Fetch failed' });
@@ -15,12 +15,12 @@ module.exports = (db) => {
   });
 
   router.post('/devices/update', (req, res) => {
-    const { id, name, brand, polling_interval, status } = req.body;
+    const { id, name, brand, polling_interval, status, adjust_time } = req.body;
 
     db.run(
-      `UPDATE devices SET name = ?, brand = ?, polling_interval = ?, status = ?, updated = CURRENT_TIMESTAMP
+      `UPDATE devices SET name = ?, brand = ?, polling_interval = ?, status = ?, adjust_time = ?, updated = CURRENT_TIMESTAMP
        WHERE id = ?`,
-      [name, brand, polling_interval, status, id],
+      [name, brand, polling_interval, status, adjust_time, id],
       function(err) {
         if (err) {
           console.error('Update device error:', err.message);
