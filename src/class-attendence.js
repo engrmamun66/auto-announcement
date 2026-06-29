@@ -1356,6 +1356,7 @@ class Attendance {
                   payload.shift_number,
                 ];
 
+                const self = this;
                 const db = this.db;
                 const tableName = this.tableName;
                 const Sms = this.Sms;
@@ -1404,7 +1405,7 @@ class Attendance {
                     }
 
                     const responseData = { message: payload.remarks, data: row, action: 'create' };
-                    if (emitToSocket) this._emitAttendanceToSocket(responseData);
+                    if (emitToSocket) self._emitAttendanceToSocket(responseData);
                     res.send(responseData);
                   });
                 });

@@ -221,15 +221,31 @@ class CommandController {
     if (start) command += ` StartTime=${start}`;
     if (end) command += ` EndTime=${end}`;
 
-    this.pushCommand(req, cn, command);
+    console.log(`📋 Get attendance request for ${cn}: ${command}`);
+
+    // Queue to database
+    global.db.run(
+      'INSERT INTO command_queue (device_serial_number, command, status) VALUES (?, ?, ?)',
+      [cn, command, 'pending'],
+      function(err) {
+        if (err) {
+          console.error(`❌ Error queueing attendance command: ${err.message}`);
+        } else {
+          console.log(`✅ Attendance command queued for ${cn} (ID: ${this.lastID})`);
+        }
+      }
+    );
 
     if (Store.data?.[cn]?.attendance) {
+      console.log(`✅ Attendance found in Store, returning ${Store.data[cn].attendance.length} records`);
       return res.status(200).json({ attendance: Store.data[cn].attendance });
     }
 
+    console.log(`⏳ Waiting for next polling cycle for ${cn}...`);
     await wait(Store.nextPollingTime(cn));
 
     const attendance = Store.data?.[cn]?.attendance || [];
+    console.log(`✅ After polling wait, attendance: ${attendance.length} records`);
     res.status(200).json({ attendance });
   }
 
@@ -259,21 +275,6 @@ class CommandController {
 
   check(req, res) {
     this.respondQueued(res, this.pushCommand(req, req.params.cn, 'CHECK'));
-  }
-
-  getAttendance(req, res) {
-    const cn = req.params.cn;
-    const data = this.getBodyData(req);
-    const startTime = data.startTime || req.query.startTime;
-    const endTime = data.endTime || req.query.endTime;
-
-    let command = 'DATA RETRIEVE ATTLOG';
-    if (startTime && endTime) {
-      command = `DATA RETRIEVE ATTLOG ${startTime} ${endTime}`;
-    }
-
-    console.log(`📋 Get attendance request for ${cn}: ${command}`);
-    this.respondQueued(res, this.pushCommand(req, cn, command));
   }
 
   clearAttlog(req, res) {
