@@ -136,7 +136,6 @@ const props = defineProps({
 
 const http = inject('http')
 const emitter = inject('emitter')
-const CONFIG = inject('CONFIG')
 const helper = inject('helper')
 const all_students_non_copied = inject('all_students_non_copied')
 const makeCarcode = inject('makeCarcode')
@@ -240,8 +239,8 @@ async function fetchLogs({ silent = false } = {}){
   fetching.value = true
   try {
     // Adjust time of payload start_time and end_time
-    const ajdust_search_times = CONFIG.value?.settings?.device?.adjust_search_times
-    const operations = ajdust_search_times || `subtract(0, 'hour')` // Default adjustment
+    let adjust_search_time = String(selectedDevice.value?.adjust_time) || `subtract(0, 'minute')`
+    const operations = String(adjust_time).startsWith('add(') ? adjust_search_time.replace(/add/g, 'subtract') : adjust_search_time.replace(/subtract/g, 'add')
     let startTime = formatForApi(payload.start_time)
     let endTime = formatForApi(payload.end_time)
 

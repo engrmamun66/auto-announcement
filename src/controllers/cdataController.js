@@ -58,7 +58,7 @@ class CdataController {
               console.log(`⏸️ Device ${sn} is inactive (status=0). Skipping polling.`);
               return res.status(200).type('text/plain').send('Delay=10\r\nOK\r\n');
             }
-            polling_interval = device.polling_interval || 5;
+            polling_interval = device.polling_interval;
             console.log(`📡 Device ${sn} polling_interval from DB: ${polling_interval}s`);
           }
 
@@ -96,8 +96,8 @@ class CdataController {
       );
     } else {
       console.log('>>>>> SN is not OK', sn);
-      Store.pollingIntervals[sn] = 2;
-      this._sendPollingResponse(res, sn, pushVersion, 2);
+      Store.pollingIntervals[sn] = 6; // || 6
+      this._sendPollingResponse(res, sn, pushVersion, 6); // || 6
     }
   }
 
@@ -157,63 +157,68 @@ class CdataController {
 
 
     else if (table === 'ATTLOG' && this._isRealPunch(row_item)) {
-      const operations_add_subtract = String(global.config?.settings?.device?.adjust_time || `subtract(2, 'hour')`).replace(/^\./, '')
-      let fn;
-      try {
-        fn = new Function('moment', 'dateTime', `return moment(dateTime, 'YYYY-MM-DD HH:mm:ss').${operations_add_subtract}.format('YYYY-MM-DD HH:mm:ss')`)
-      } catch (err) {
-        console.error('Error creating time adjust function:', err.message)
-        fn = (m, dt) => dt
-      }
-      const records = rows.map(r => this._parseAttlogRow(r.parts))
-                      .map((item, index) => {
-                        try {
-                          const originalTime = moment(item.punch_time, 'YYYY-MM-DD HH:mm:ss')
-                          item.punch_time = fn(moment, item.punch_time)
-                          item.emp_code = item.user_id
-                          if(index === 0){
-                            const adjustedTime = moment(item.punch_time, 'YYYY-MM-DD HH:mm:ss')
-                            const diff = adjustedTime.diff(originalTime)
-                            const duration = moment.duration(Math.abs(diff))
-                            const direction = diff < 0 ? 'PC-Time: slower' : 'PC-Time: Faster'
-                            const sign = diff < 0 ? '-' : '+'
-                            console.log(`\n⏰ Original: ${originalTime.format('YYYY-MM-DD HH:mm:ss')} → Adjusted: ${item.punch_time} | ${sign}${Math.floor(duration.asHours())}h ${duration.minutes()}m ${duration.seconds()}s (${direction})\n`)
+      global.db.get('SELECT adjust_time FROM devices WHERE serial_number = ?', [sn], (err, device) => {
+        let operations_add_subtract = `subtract(2, 'hour')`;
+        if (!err && device && device.adjust_time) {
+          operations_add_subtract = String(device.adjust_time).replace(/^\./, '');
+        }
+
+        let fn;
+        try {
+          fn = new Function('moment', 'dateTime', `return moment(dateTime, 'YYYY-MM-DD HH:mm:ss').${operations_add_subtract}.format('YYYY-MM-DD HH:mm:ss')`)
+        } catch (err) {
+          console.error('Error creating time adjust function:', err.message)
+          fn = (m, dt) => dt
+        }
+        const records = rows.map(r => this._parseAttlogRow(r.parts))
+                        .map((item, index) => {
+                          try {
+                            const originalTime = moment(item.punch_time, 'YYYY-MM-DD HH:mm:ss')
+                            item.punch_time = fn(moment, item.punch_time)
+                            item.emp_code = item.user_id
+                            if(index === 0){
+                              const adjustedTime = moment(item.punch_time, 'YYYY-MM-DD HH:mm:ss')
+                              const diff = adjustedTime.diff(originalTime)
+                              const duration = moment.duration(Math.abs(diff))
+                              const direction = diff < 0 ? 'PC-Time: slower' : 'PC-Time: Faster'
+                              const sign = diff < 0 ? '-' : '+'
+                              console.log(`\n⏰ Original: ${originalTime.format('YYYY-MM-DD HH:mm:ss')} → Adjusted: ${item.punch_time} | ${sign}${Math.floor(duration.asHours())}h ${duration.minutes()}m ${duration.seconds()}s (${direction})\n`)
+                            }
+                          } catch (err) {
+                            console.warn('Error adjusting punch time:', err.message)
                           }
-                        } catch (err) {
-                          console.warn('Error adjusting punch time:', err.message)
-                        }
-                        return item
-                      })
+                          return item
+                        })
+
+        this._writeAttendencelogToFile(sn, packIdx, records);
+        // Initialize attendance storage if needed
+        if (!Store.data[sn]) Store.data[sn] = {};
+        if (!Store.data[sn].attendance) Store.data[sn].attendance = {};
 
 
-      this._writeAttendencelogToFile(sn, packIdx, records);
-      // Initialize attendance storage if needed
-      if (!Store.data[sn]) Store.data[sn] = {};
-      if (!Store.data[sn].attendance) Store.data[sn].attendance = {};
+        // Process each punch through attendance submission
+        // const only_attendance_feature = global.config?.settings?.attendance?.only_attendance_feature
+        const now = moment()
+        const is_realtime_punch = records?.length === 1 && moment(records?.[0]?.punch_time, 'YYYY-MM-DD HH:mm:ss').isBetween(
+            now.clone().subtract(10, 'seconds'),
+            now.clone().add(10, 'seconds')
+          )
 
-     
-      // Process each punch through attendance submission
-      // const only_attendance_feature = global.config?.settings?.attendance?.only_attendance_feature
-      const now = moment()
-      const is_realtime_punch = records?.length === 1 && moment(records?.[0]?.punch_time, 'YYYY-MM-DD HH:mm:ss').isBetween(
-          now.clone().subtract(10, 'seconds'),
-          now.clone().add(10, 'seconds')
-        )
-
-      console.log('NOW:', now.format('YYYY-MM-DD HH:mm:ss'), '| Is Realtime:', is_realtime_punch);
-      if(is_realtime_punch){
-        console.log(`✅ Realtime punch detected. Processing immediately...`);
-        records.forEach(record => {
-          this._processDevicePunch(record, sn);
-          console.log('======this._processDevicePunch======');
-        });
-      } else {
-        // Store by date key if pending, otherwise use 'all' key
-        console.log(`📋 Batch attendance (${records.length} records). Stored for manual review or bulk import.`);
-        const dateKey = Store.data[sn].pendingDateKey || 'all';
-        Store.data[sn].attendance[dateKey] = records;
-        console.log(`✅ Attendance stored [${dateKey}]: ${records.length} records`);
-      }
+        console.log('NOW:', now.format('YYYY-MM-DD HH:mm:ss'), '| Is Realtime:', is_realtime_punch);
+        if(is_realtime_punch){
+          console.log(`✅ Realtime punch detected. Processing immediately...`);
+          records.forEach(record => {
+            this._processDevicePunch(record, sn);
+            console.log('======this._processDevicePunch======');
+          });
+        } else {
+          // Store by date key if pending, otherwise use 'all' key
+          console.log(`📋 Batch attendance (${records.length} records). Stored for manual review or bulk import.`);
+          const dateKey = Store.data[sn].pendingDateKey || 'all';
+          Store.data[sn].attendance[dateKey] = records;
+          console.log(`✅ Attendance stored [${dateKey}]: ${records.length} records`);
+        }
+      });
     }
      
     else if (this._isUserData(row_item)) {

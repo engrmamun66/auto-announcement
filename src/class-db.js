@@ -331,6 +331,7 @@ class myDB {
             );
 
             this.db.run(
+              // DROP TABLE devices;
               `
               CREATE TABLE IF NOT EXISTS devices (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -339,6 +340,7 @@ class myDB {
                 brand TEXT DEFAULT 'ZKTeco',
                 status INTEGER DEFAULT 1,
                 polling_interval INTEGER DEFAULT 2,
+                adjust_time VARCHAR DEFAULT "subtract(0, 'hours')",
                 updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 created TIMESTAMP DEFAULT CURRENT_TIMESTAMP
               )`,

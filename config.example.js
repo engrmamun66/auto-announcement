@@ -72,10 +72,6 @@ module.exports = {
                switch_mode: 'auto', // auto || manual,
                delay_before_starting: 10, // miliseconds
           },
-          device: {
-               adjust_time: "subtract(2, 'hours')", 
-               adjust_search_times: "add(2, 'hours')", // when fetching bulk attendance
-          },
           attendance: {
                status: true, // -------------------------- on/off
                only_attendance_feature: false,

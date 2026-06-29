@@ -39,6 +39,10 @@
             />
           </div>
         </div>
+        <div class="form-group">
+          <label>{{ helper.t('Adjust Time') }}</label>
+          <input v-model="editingDevice.adjust_time" type="text" class="form-control" placeholder="e.g., subtract(2, 'hours')">
+        </div>
       </div>
 
       <div class="device-modal__actions">
@@ -82,7 +86,8 @@ function handleSave() {
     id: props.editingDevice.id,
     name: props.editingDevice.name || '',
     brand: props.editingDevice.brand || 'ZKTeco',
-    polling_interval: props.editingDevice.polling_interval || 5,
+    polling_interval: props.editingDevice.polling_interval,
+    adjust_time: props.editingDevice.adjust_time || `subtract(0, 'hours')`,
     status: props.editingDevice.status ? 1 : 0
   });
 }
