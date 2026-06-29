@@ -17,6 +17,7 @@
                   type="password"
                   class="form-control cb-input mt-3"
                   :placeholder="helper.t('Password')"
+                  style="background-color: white !important; color: black !important"
                   @keyup.enter="confirm()"
                   @keyup.esc="cancel()"
                 >
@@ -139,22 +140,22 @@ const close = () => {
 }
 
 .cb-input {
-  border: 1px solid #444;
-  background: #2a2a2a;
-  color: #fff;
-  border-radius: 6px;
+  border: 1px solid #444 !important;
+  background: #2a2a2a !important;
+  color: #fff !important;
+  border-radius: 6px !important;
 }
 
 .cb-input::placeholder {
-  color: #888;
+  color: #888 !important;
 }
 
 .cb-input:focus {
-  border-color: #4caf50;
-  background: #333;
-  color: #fff;
-  outline: none;
-  box-shadow: 0 0 0 0.2rem rgba(76, 175, 80, 0.25);
+  border-color: #4caf50 !important;
+  background: #333 !important;
+  color: #fff !important;
+  outline: none !important;
+  box-shadow: 0 0 0 0.2rem rgba(76, 175, 80, 0.25) !important;
 }
 
 .btn-cb {

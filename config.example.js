@@ -73,11 +73,7 @@ module.exports = {
                delay_before_starting: 10, // miliseconds
           },
           device: {
-               adjust_time: {
-                    action: 'subtract',
-                    number: 2,
-                    unit: 'hours'
-               },
+               adjust_time: "subtract(2, 'hour')", 
           },
           attendance: {
                status: true, // -------------------------- on/off

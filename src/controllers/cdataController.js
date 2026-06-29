@@ -148,9 +148,27 @@ class CdataController {
       this._writeFingerprintsToFile(sn, packIdx, fingerprints);
       Store.data[sn] = { ...Store.data[sn], fingerprints };
     }
-    // /:cn/get-attendance
+    // /:cn/get-attendance real punch will be come here
     else if (table === 'ATTLOG' && this._isRealPunch(row_item)) {
-      const records = rows.map(r => this._parseAttlogRow(r.parts));
+      const operations_add_subtract = String(global.config?.settings?.device?.adjust_time || `subtract(2, 'hour')`).replace(/^\./, '')
+      let fn;
+      try {
+        fn = new Function('dateTime', `return moment(dateTime, 'YYYY-MM-DD HH:mm:ss').${operations_add_subtract}`)
+      } catch (err) {
+        console.error('Error creating time adjust function:', err.message)
+        fn = (dt) => dt
+      }
+      const records = rows.map(r => this._parseAttlogRow(r.parts))
+                      .map(item => {
+                        try {
+                          item.punch_time = fn(item.punch_time)
+                        } catch (err) {
+                          console.warn('Error adjusting punch time:', err.message)
+                        }
+                        return item
+                      })
+
+
       this._writeAttendencelogToFile(sn, packIdx, records);
       Store.data[sn] = { ...Store.data[sn], attendance: records };
       // Process each punch through attendance submission
@@ -158,12 +176,7 @@ class CdataController {
         this._processDevicePunch(record, sn);
       });
     }
-    // auto (device real-time punch — no API trigger)
-    else if (this._isRealPunch(row_item)) {
-      console.log('====K');
-      const punch = rows.map(r => this._parseAttlogRow(r.parts));
-      Store.data[sn] = { ...Store.data[sn], lastPunch: punch[0] };
-    }
+     
     else if (this._isUserData(row_item)) {
       const users = rows.map(r => this._parseUserData(r.parts));
       this._writeUsersToFile(sn, packIdx, users);

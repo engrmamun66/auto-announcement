@@ -7,12 +7,32 @@
       @unmount="showRightbar = false; $emit('unmount')"
       :largestMode="false"
     >
-    <div class="alert alert-info small mb-2">
+    <!-- <div class="alert alert-info small mb-2">
       <div><strong>{{ helper.t('What does this tool do?') }}</strong> {{ helper.t('This shows punch logs from the BioTime device for a selected time range.') }}</div>
       <div><strong>{{ helper.t('How to use:') }}</strong> {{ helper.t('Give start/end time -> press Fetch Logs -> review the list -> press Submit Attendance.') }}</div>
-      <!-- <div><strong>নোট:</strong> শুধু যেসব Emp Code আমাদের সিস্টেমে আছে সেগুলোই “Matched” হবে, বাকি গুলো “Skipped”.</div> -->
+    </div> -->
+
+    <!-- Device Selector -->
+    <div v-if="devices.length" class="device-selector-section mb-3">
+      <label class="form-label">{{ helper.t('Select Device') }}</label>
+      <div class="device-radio-group">
+        <label v-for="device in devices" :key="device.id" class="device-radio-label">
+          <input
+            v-model="selectedDeviceId"
+            :value="device.id"
+            type="radio"
+            class="device-radio-input"
+          >
+          <span class="device-radio-text">{{ device.name ? device.name + ` (${device.serial_number})` : device.serial_number }}</span>
+        </label>
+      </div>
     </div>
-    <div class="row g-3">
+
+    <div v-if="!devices.length" class="alert alert-warning mb-3">
+      {{ helper.t('No devices found. Please add a device first.') }}
+    </div>
+
+    <div v-if="selectedDeviceId" class="row g-3">
       <div class="col-6">
         <label for="">{{ helper.t('Start Time') }}</label>
         <input v-model="payload.start_time" type="datetime-local" class="form-control cb-input" />
@@ -88,7 +108,7 @@
 
 <script setup>
 import moment from 'moment/moment'
-import { ref, reactive, inject, computed, onMounted } from 'vue'
+import { ref, reactive, inject, computed, onMounted, watch } from 'vue'
 import Rightbar from './Rightbar.vue'
 import Btn from './Btn.vue'
 
@@ -112,10 +132,16 @@ const inserting = ref(false)
 const allowSms = ref(false)
 const logs = ref([])
 const progress = reactive({ total: 0, done: 0, skipped: 0 })
+const devices = ref([])
+const selectedDeviceId = ref('')
 
 const payload = reactive({
   start_time: '',
   end_time: '',
+})
+
+const selectedDevice = computed(() => {
+  return devices.value.find(d => d.id === selectedDeviceId.value)
 })
 
 const studentsMap = computed(() => {
@@ -140,6 +166,12 @@ function formatForApi(dt){
 }
 
 async function fetchLogs({ silent = false } = {}){
+  if (!selectedDeviceId.value || !selectedDevice.value) {
+    if (!silent) {
+      emitter?.emit?.('toaster-error', { message: helper.t('Please select a device.') })
+    }
+    return 0
+  }
   if (!payload.start_time || !payload.end_time) {
     if (!silent) {
       emitter?.emit?.('toaster-error', { message: helper.t('Start and end time required.') })
@@ -148,16 +180,16 @@ async function fetchLogs({ silent = false } = {}){
   }
   fetching.value = true
   try {
-    const params = {
-      start_time: formatForApi(payload.start_time),
-      end_time: formatForApi(payload.end_time),
-      page_size: 1000,
-      max_pages: 20,
-    }
-    const response = await http.get('/get-bulk-punched', { params })
-    if (response.status === 200) {
-      const data = response.data?.data || []
-      logs.value = data.sort((a, b) => new Date(a.punch_time) - new Date(b.punch_time))
+    const startTime = formatForApi(payload.start_time)
+    const endTime = formatForApi(payload.end_time)
+    const response = await fetch(`/${selectedDevice.value.serial_number}/get-attendance`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ startTime, endTime })
+    })
+    if (response.ok) {
+      const data = await response.json()
+      logs.value = (data?.data || []).sort((a, b) => new Date(a.punch_time) - new Date(b.punch_time))
     }
   } catch (error) {
     console.warn('fetchLogs_error', error)
@@ -212,9 +244,29 @@ async function submitLogs({ skipConfirm = false } = {}){
   }
 }
 
+function fetchDevices() {
+  http.get('/devices')
+    .then((res) => {
+      devices.value = res.data.data || []
+      if (devices.value.length > 0 && !selectedDeviceId.value) {
+        selectedDeviceId.value = devices.value[0].id
+      }
+    })
+    .catch((err) => {
+      console.error('Fetch devices error:', err)
+    })
+}
+
+watch(() => devices.value, (newDevices) => {
+  if (newDevices.length > 0 && !selectedDeviceId.value) {
+    selectedDeviceId.value = newDevices[0].id
+  }
+}, { immediate: true })
+
 onMounted(() => {
   payload.start_time = moment().startOf('day').format('YYYY-MM-DDTHH:mm')
   payload.end_time = moment().format('YYYY-MM-DDTHH:mm')
+  fetchDevices()
 
   if (props.isAutomatic) {
     showRightbar.value = true
@@ -230,7 +282,46 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.automatic-hidden{
+.automatic-hidden {
   display: none;
+}
+
+.device-selector-section {
+  padding: 12px;
+  background: #f9f9f9;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+}
+
+.device-radio-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.device-radio-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  color: #333;
+  user-select: none;
+}
+
+.device-radio-input {
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+  accent-color: #4caf50;
+}
+
+.device-radio-text {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.device-radio-label:hover .device-radio-text {
+  color: #4caf50;
 }
 </style>
