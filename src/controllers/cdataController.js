@@ -191,13 +191,9 @@ class CdataController {
       if (!Store.data[sn]) Store.data[sn] = {};
       if (!Store.data[sn].attendance) Store.data[sn].attendance = {};
 
-      // Store by date key if pending, otherwise use 'all' key
-      const dateKey = Store.data[sn].pendingDateKey || 'all';
-      Store.data[sn].attendance[dateKey] = records;
-      console.log(`✅ Attendance stored [${dateKey}]: ${records.length} records`);
+     
       // Process each punch through attendance submission
       // const only_attendance_feature = global.config?.settings?.attendance?.only_attendance_feature
-
       const now = moment()
       const is_realtime_punch = records?.length === 1 && moment(records?.[0]?.punch_time, 'YYYY-MM-DD HH:mm:ss').isBetween(
           now.clone().subtract(2, 'seconds'),
@@ -205,16 +201,19 @@ class CdataController {
         )
 
       console.log('NOW:', now.format('YYYY-MM-DD HH:mm:ss'), '| Is Realtime:', is_realtime_punch);
+      console.log({is_realtime_punch});
       if(is_realtime_punch){
         console.log(`✅ Realtime punch detected. Processing immediately...`);
         records.forEach(record => {
           this._processDevicePunch(record, sn);
+          console.log('======this._processDevicePunch======');
         });
       } else {
+        // Store by date key if pending, otherwise use 'all' key
         console.log(`📋 Batch attendance (${records.length} records). Stored for manual review or bulk import.`);
-        records.forEach((record, idx) => {
-          console.log(`  [${idx + 1}] ${record.user_id} @ ${record.punch_time}`);
-        });
+        const dateKey = Store.data[sn].pendingDateKey || 'all';
+        Store.data[sn].attendance[dateKey] = records;
+        console.log(`✅ Attendance stored [${dateKey}]: ${records.length} records`);
       }
     }
      
