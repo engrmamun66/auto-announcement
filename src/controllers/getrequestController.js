@@ -41,7 +41,7 @@ class GetrequestController {
     // Fetch polling_interval from database
     if (db) {
       db.get(
-        'SELECT polling_interval FROM devices WHERE serial_number = ?',
+        'SELECT polling_interval, status FROM devices WHERE serial_number = ?',
         [sn],
         (err, device) => {
           let polling_interval = 10; // default
@@ -49,6 +49,13 @@ class GetrequestController {
           if (err) {
             console.error(`❌ Error fetching polling_interval for ${sn}:`, err.message);
           } else if (device) {
+            // Skip if device is inactive (status = 0)
+            if (device.status === 0) {
+              console.log(`⏸️ Device ${sn} is inactive (status=0). Skipping polling.`);
+              return res.status(200)
+                .type('text/plain')
+                .send(`Delay=10\r\nTransInterval=10\r\nOK\r\n`);
+            }
             polling_interval = device.polling_interval || 10;
             Store.pollingIntervals[sn] = polling_interval;
             console.log(`📡 Polling interval from DB: ${polling_interval}s`);

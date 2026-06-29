@@ -116,6 +116,7 @@ module.exports = {
     'Please select classes': 'Please select classes',
     'Please select or write vacation reason': 'Please select or write vacation reason',
     'Please select students': 'Please select students',
+    'Please select at least one record to submit.': 'Please select at least one record to submit.',
     'This Week': 'This Week',
     'Last Week': 'Last Week',
     'This Month': 'This Month',

@@ -116,6 +116,7 @@ module.exports = {
     'Please select classes': 'অনুগ্রহ করে ক্লাস নির্বাচন করুন',
     'Please select or write vacation reason': 'অনুগ্রহ করে ছুটির কারণ নির্বাচন বা লিখুন',
     'Please select students': 'অনুগ্রহ করে শিক্ষার্থী নির্বাচন করুন',
+    'Please select at least one record to submit.': 'অনুগ্রহ করে জমা দেওয়ার জন্য অন্তত একটি রেকর্ড নির্বাচন করুন।',
     'This Week': 'এই সপ্তাহ',
     'Last Week': 'গত সপ্তাহ',
     'This Month': 'এই মাস',

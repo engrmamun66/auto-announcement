@@ -43,14 +43,22 @@
       </div>
 
       <div class="col-12">
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <input
+            v-model="searchQuery"
+            type="text"
+            class="form-control cb-input"
+            :placeholder="helper.t('Search by emp code or user id...')"
+            style="max-width: 300px"
+          />
+        </div>
         <div class="d-flex align-items-center gap-2">
           <Btn class="" @click.stop="fetchLogs" :disabled="fetching">
             <template v-if="fetching">{{ helper.t('Fetching...') }}</template>
             <template v-else>{{ helper.t('Fetch Logs') }}</template>
           </Btn>
           <Btn class="white">Total: <span class="badge text-white bg-secondary">{{ logs.length }}</span></Btn>
-          <Btn class="white">{{ helper.t('Matched') }}: <span class="badge text-white bg-success">{{ matchedCount }}</span></Btn>
-          <Btn class="white">{{ helper.t('Skipped') }}: <span class="badge text-white bg-danger">{{ skippedCount }}</span></Btn>
+          <Btn class="white">Checked: <span class="badge text-white bg-info">{{ selectedIndices.size }}</span></Btn>
         </div>
       </div>
 
@@ -59,6 +67,9 @@
           <table class="table table-sm table-striped align-middle">
             <thead>
               <tr>
+                <th>
+                  <input type="checkbox" v-model="selectAll" @change="toggleSelectAll" />
+                </th>
                 <th>{{ helper.t('Emp Code') }}</th>
                 <th>{{ helper.t('Punch Time') }}</th>
                 <th>{{ helper.t('Status') }}</th>
@@ -66,7 +77,10 @@
             </thead>
             <tbody>
               <tr v-for="(item, idx) in previewLogs" :key="'log-' + idx">
-                <td>{{ item.emp_code }}</td>
+                <td>
+                  <input type="checkbox" :checked="selectedIndices.has(idx)" @change="toggleSelection(idx)" />
+                </td>
+                <td>{{ item.emp_code || item.user_id }}</td>
                 <td>{{ item.punch_time }}</td>
                 <td>
                   <span v-if="hasStudent(item)" class="badge bg-success">{{ helper.t('Matched') }}</span>
@@ -74,7 +88,9 @@
                 </td>
               </tr>
               <tr v-if="!previewLogs.length">
-                <td colspan="3" class="text-center text-muted">{{ helper.t('No logs found.') }}</td>
+                <td colspan="4" class="text-center text-muted">
+                  {{ searchQuery ? helper.t('No results found for search.') : helper.t('No logs found.') }}
+                </td>
               </tr>
             </tbody>
           </table>
@@ -134,6 +150,9 @@ const logs = ref([])
 const progress = reactive({ total: 0, done: 0, skipped: 0 })
 const devices = ref([])
 const selectedDeviceId = ref('')
+const selectedIndices = ref(new Set())
+const selectAll = ref(false)
+const searchQuery = ref('')
 
 const payload = reactive({
   start_time: '',
@@ -152,12 +171,19 @@ const studentsMap = computed(() => {
   return map
 })
 
-const previewLogs = computed(() => logs.value.slice(0, 50))
-const matchedCount = computed(() => logs.value.filter((l) => hasStudent(l)).length)
-const skippedCount = computed(() => logs.value.length - matchedCount.value)
+const filteredLogs = computed(() => {
+  if (!searchQuery.value) return logs.value
+  const query = searchQuery.value.toLowerCase()
+  return logs.value.filter(l => {
+    const code = String(l.emp_code || l.user_id || '').toLowerCase()
+    return code.includes(query)
+  })
+})
+
+const previewLogs = computed(() => filteredLogs.value.slice(0, 50)) 
 
 function hasStudent(item){
-  return studentsMap.value.has(String(item?.emp_code))
+  return studentsMap.value.has(String(item?.emp_code || item?.user_id))
 }
 
 function formatForApi(dt){
@@ -204,22 +230,54 @@ async function fetchLogs({ silent = false } = {}){
 
 function clearLogs(){
   logs.value = []
+  searchQuery.value = ''
+  selectedIndices.value.clear()
+  selectAll.value = false
   progress.total = 0
   progress.done = 0
   progress.skipped = 0
 }
 
+function toggleSelection(idx) {
+  if (selectedIndices.value.has(idx)) {
+    selectedIndices.value.delete(idx)
+  } else {
+    selectedIndices.value.add(idx)
+  }
+  updateSelectAllState()
+}
+
+function toggleSelectAll() {
+  if (selectAll.value) {
+    selectedIndices.value.clear()
+    previewLogs.value.forEach((_, idx) => selectedIndices.value.add(idx))
+  } else {
+    selectedIndices.value.clear()
+  }
+}
+
+function updateSelectAllState() {
+  selectAll.value = selectedIndices.value.size === previewLogs.value.length && previewLogs.value.length > 0
+}
+
 async function submitLogs({ skipConfirm = false } = {}){
-  if (!logs.value.length) return
-  if (!skipConfirm && !confirm(helper.t('Are you sure to submit {count} logs?', { count: logs.value.length }))) return
+  // Get selected logs only
+  const selectedLogs = Array.from(selectedIndices.value).map(idx => previewLogs.value[idx])
+
+  if (!selectedLogs.length) {
+    emitter?.emit?.('toaster-error', { message: helper.t('Please select at least one record to submit.') })
+    return
+  }
+
+  if (!skipConfirm && !confirm(helper.t('Are you sure to submit {count} logs?', { count: selectedLogs.length }))) return
 
   inserting.value = true
-  progress.total = logs.value.length
+  progress.total = selectedLogs.length
   progress.done = 0
   progress.skipped = 0
 
-  for (const item of logs.value) {
-    const student = studentsMap.value.get(String(item?.emp_code))
+  for (const item of selectedLogs) {
+    const student = studentsMap.value.get(String(item?.emp_code || item?.user_id))
     if (!student) {
       progress.skipped += 1
       progress.done += 1

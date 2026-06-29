@@ -221,9 +221,21 @@ class CommandController {
     if (start) command += ` StartTime=${start}`;
     if (end) command += ` EndTime=${end}`;
 
-    console.log(`📋 Get attendance request for ${cn}: ${command}`);
+    // Create cache key from date range
+    const dateKey = `${start || 'all'}_${end || 'all'}`;
+    console.log(`📋 Get attendance request for ${cn} [${dateKey}]: ${command}`);
 
-    // Queue to database
+    // Check if data already in Store (from prior polling)
+    if (Store.data?.[cn]?.attendance?.[dateKey]) {
+      console.log(`✅ Attendance found in Store [${dateKey}], returning ${Store.data[cn].attendance[dateKey].length} records immediately`);
+      return res.status(200).json({ data: Store.data[cn].attendance[dateKey] });
+    }
+
+    // Mark pending query with date range so cdataController knows which key to use
+    if (!Store.data[cn]) Store.data[cn] = {};
+    Store.data[cn].pendingDateKey = dateKey;
+
+    // Queue command to database
     global.db.run(
       'INSERT INTO command_queue (device_serial_number, command, status) VALUES (?, ?, ?)',
       [cn, command, 'pending'],
@@ -236,17 +248,49 @@ class CommandController {
       }
     );
 
-    if (Store.data?.[cn]?.attendance) {
-      console.log(`✅ Attendance found in Store, returning ${Store.data[cn].attendance.length} records`);
-      return res.status(200).json({ attendance: Store.data[cn].attendance });
+    // Calculate exact wait time based on device polling interval
+    const lastPollTime = Store.lastPollingTimes?.[cn] || 0;
+    const pollingInterval = Store.pollingIntervals?.[cn] || 2; // default 2 seconds
+    const nextPollTime = lastPollTime + (pollingInterval * 1000); // convert to ms
+    const now = Date.now();
+    let waitMs = Math.max(0, nextPollTime - now); // seconds until next poll
+    waitMs = Math.min(waitMs, 15000); // cap at 15 seconds max
+
+    const waitSecs = (waitMs / 1000).toFixed(2);
+    console.log(`⏳ Last poll: ${lastPollTime}, interval: ${pollingInterval}s, wait: ${waitSecs}s [${dateKey}]`);
+
+    if (waitMs > 0) {
+      await wait(waitMs);
+      console.log(`✅ Wait complete (${waitSecs}s). Checking for data...`);
     }
 
-    console.log(`⏳ Waiting for next polling cycle for ${cn}...`);
-    await wait(Store.nextPollingTime(cn));
+    // Check for data after waiting
+    if (Store.data?.[cn]?.attendance?.[dateKey]) {
+      console.log(`✅ Attendance found after polling wait [${dateKey}]: ${Store.data[cn].attendance[dateKey].length} records`);
+      return res.status(200).json({ data: Store.data[cn].attendance[dateKey] });
+    }
 
-    const attendance = Store.data?.[cn]?.attendance || [];
-    console.log(`✅ After polling wait, attendance: ${attendance.length} records`);
-    res.status(200).json({ attendance });
+    // Still no data - continue polling with shorter intervals
+    console.log(`⏳ Data not ready yet. Polling every 500ms (max 5s more)...`);
+    let attempts = 0;
+    const maxAdditionalAttempts = 10; // 10 * 500ms = 5 seconds more
+
+    while (attempts < maxAdditionalAttempts) {
+      await wait(500);
+      if (Store.data?.[cn]?.attendance?.[dateKey]) {
+        console.log(`✅ Attendance arrived after additional polling [${dateKey}]: ${Store.data[cn].attendance[dateKey].length} records`);
+        return res.status(200).json({ data: Store.data[cn].attendance[dateKey] });
+      }
+      attempts++;
+    }
+
+    // Final timeout - return 202
+    console.log(`⚠️ Timeout [${dateKey}]. Command queued but device response not yet received.`);
+    res.status(202).json({
+      data: [],
+      message: 'Attendance request queued. Device response pending. Please retry.',
+      queued: true
+    });
   }
 
   async getFingerprints(req, res) {

@@ -53,6 +53,11 @@ class CdataController {
           if (err) {
             console.error(`❌ Error fetching device polling_interval: ${err.message}`);
           } else if (device) {
+            // Skip if device is inactive (status = 0)
+            if (device.status === 0) {
+              console.log(`⏸️ Device ${sn} is inactive (status=0). Skipping polling.`);
+              return res.status(200).type('text/plain').send('Delay=10\r\nOK\r\n');
+            }
             polling_interval = device.polling_interval || 2;
             console.log(`📡 Device ${sn} polling_interval from DB: ${polling_interval}s`);
           }
@@ -149,7 +154,8 @@ class CdataController {
       this._writeFingerprintsToFile(sn, packIdx, fingerprints);
       Store.data[sn] = { ...Store.data[sn], fingerprints };
     }
-    // /:cn/get-attendance real punch will be come here
+
+
     else if (table === 'ATTLOG' && this._isRealPunch(row_item)) {
       const operations_add_subtract = String(global.config?.settings?.device?.adjust_time || `subtract(2, 'hour')`).replace(/^\./, '')
       let fn;
@@ -164,6 +170,7 @@ class CdataController {
                         try {
                           const originalTime = moment(item.punch_time, 'YYYY-MM-DD HH:mm:ss')
                           item.punch_time = fn(moment, item.punch_time)
+                          item.emp_code = item.user_id
                           if(index === 0){
                             const adjustedTime = moment(item.punch_time, 'YYYY-MM-DD HH:mm:ss')
                             const diff = adjustedTime.diff(originalTime)
@@ -180,16 +187,35 @@ class CdataController {
 
 
       this._writeAttendencelogToFile(sn, packIdx, records);
-      Store.data[sn] = { ...Store.data[sn], attendance: records };
+      // Initialize attendance storage if needed
+      if (!Store.data[sn]) Store.data[sn] = {};
+      if (!Store.data[sn].attendance) Store.data[sn].attendance = {};
+
+      // Store by date key if pending, otherwise use 'all' key
+      const dateKey = Store.data[sn].pendingDateKey || 'all';
+      Store.data[sn].attendance[dateKey] = records;
+      console.log(`✅ Attendance stored [${dateKey}]: ${records.length} records`);
       // Process each punch through attendance submission
       // const only_attendance_feature = global.config?.settings?.attendance?.only_attendance_feature
 
-      // const is_realtime_punch = records?.length == 1 && records?.[0]?.punch_time === now +/- 
+      const now = moment()
+      const is_realtime_punch = records?.length === 1 && moment(records?.[0]?.punch_time, 'YYYY-MM-DD HH:mm:ss').isBetween(
+          now.clone().subtract(2, 'seconds'),
+          now.clone().add(2, 'seconds')
+        )
 
-      console.log('NOW:');
-      records.forEach(record => {
-        this._processDevicePunch(record, sn);
-      });
+      console.log('NOW:', now.format('YYYY-MM-DD HH:mm:ss'), '| Is Realtime:', is_realtime_punch);
+      if(is_realtime_punch){
+        console.log(`✅ Realtime punch detected. Processing immediately...`);
+        records.forEach(record => {
+          this._processDevicePunch(record, sn);
+        });
+      } else {
+        console.log(`📋 Batch attendance (${records.length} records). Stored for manual review or bulk import.`);
+        records.forEach((record, idx) => {
+          console.log(`  [${idx + 1}] ${record.user_id} @ ${record.punch_time}`);
+        });
+      }
     }
      
     else if (this._isUserData(row_item)) {
