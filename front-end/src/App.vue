@@ -916,11 +916,14 @@ onMounted(async ()=>{
         if(socket_data.type == 'device_punch'){
           // Device punch received from server
           if(socket_data?.data){
-            liveAttendenceList.value.push({...socket_data.data, live_data: true})
-            callbacks.fixOverflowOfLiveAttendence()
-            setTimeout(() => {
-              delete liveAttendenceList.value.at(-1).live_data
-            }, 700)
+            const exists = liveAttendenceList.value.some(item => item.id === socket_data.data.id)
+            if(!exists){
+              liveAttendenceList.value.push({...socket_data.data, live_data: true})
+              callbacks.fixOverflowOfLiveAttendence()
+              setTimeout(() => {
+                delete liveAttendenceList.value.at(-1).live_data
+              }, 700)
+            }
           }
           if(socket_data?.message){
             const toasterType = socket_data?.message_type === 'error' ? 'toaster-error' : 'toaster-success'
@@ -1283,16 +1286,22 @@ async function __punchToSubmitAttendance(barcode='play-417-2024', {
             let action = response.data.action
 
             if(!silent_mode){
-                liveAttendenceList.value.push({...attendenceData, live_data: true})
-                callbacks.fixOverflowOfLiveAttendence()
-                setTimeout(() => {
-                    delete liveAttendenceList.value.at(-1).live_data
-                }, 700)
+                const exists = liveAttendenceList.value.some(item => item.id === attendenceData.id)
+                if(!exists){
+                  liveAttendenceList.value.push({...attendenceData, live_data: true})
+                  callbacks.fixOverflowOfLiveAttendence()
+                  setTimeout(() => {
+                      delete liveAttendenceList.value.at(-1).live_data
+                  }, 700)
+                }
             } else {
                 const maxLive = CONFIG.value?.settings?.attendance?.maximum_live_attedence || 50
                 let current = storage('liveAttendenceList').value
                 if(!Array.isArray(current)) current = []
-                current.push({...attendenceData, live_data: true})
+                const existsInCurrent = current.some(item => item.id === attendenceData.id)
+                if(!existsInCurrent){
+                  current.push({...attendenceData, live_data: true})
+                }
                 if(current.length > maxLive){
                     current = current.slice(-maxLive)
                 }

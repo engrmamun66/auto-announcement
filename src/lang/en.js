@@ -551,6 +551,7 @@ module.exports = {
     'Serial Number': 'Serial Number',
     'Brand': 'Brand',
     'Polling Interval': 'Polling Interval',
+    'Adjust Time': 'Adjust Time',
     'Created': 'Created',
     'Last Updated': 'Last Updated',
     'Edit Device': 'Edit Device',

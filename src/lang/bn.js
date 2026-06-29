@@ -550,6 +550,7 @@ module.exports = {
     'Serial Number': 'সিরিয়াল নম্বর',
     'Brand': 'ব্র্যান্ড',
     'Polling Interval': 'পোলিং ইন্টারভাল',
+    'Adjust Time': 'সময় সামঞ্জস্য করুন',
     'Created': 'তৈরি',
     'Last Updated': 'সর্বশেষ আপডেট',
     'Edit Device': 'ডিভাইস সম্পাদনা করুন',
