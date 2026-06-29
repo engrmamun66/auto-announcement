@@ -239,8 +239,8 @@ async function fetchLogs({ silent = false } = {}){
   fetching.value = true
   try {
     // Adjust time of payload start_time and end_time
-    let adjust_search_time = String(selectedDevice.value?.adjust_time) || `subtract(0, 'minute')`
-    const operations = String(adjust_time).startsWith('add(') ? adjust_search_time.replace(/add/g, 'subtract') : adjust_search_time.replace(/subtract/g, 'add')
+    let adjust_search_time = selectedDevice.value?.adjust_time || `subtract(0, 'hours')`
+    const operations = adjust_search_time
     let startTime = formatForApi(payload.start_time)
     let endTime = formatForApi(payload.end_time)
 
@@ -256,7 +256,7 @@ async function fetchLogs({ silent = false } = {}){
     const response = await fetch(`/${selectedDevice.value.serial_number}/get-attendance`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ startTime, endTime, ajdust_search_times })
+      body: JSON.stringify({ startTime, endTime, adjust_search_time })
     })
     if (response.ok) {
       const data = await response.json()
