@@ -1,6 +1,7 @@
 const { Store } = require('../stores/GlobalStore');
 const fs = require('fs');
 const path = require('path');
+const moment = require('moment');
 
 class CdataController {
   constructor() {
@@ -153,15 +154,24 @@ class CdataController {
       const operations_add_subtract = String(global.config?.settings?.device?.adjust_time || `subtract(2, 'hour')`).replace(/^\./, '')
       let fn;
       try {
-        fn = new Function('dateTime', `return moment(dateTime, 'YYYY-MM-DD HH:mm:ss').${operations_add_subtract}`)
+        fn = new Function('moment', 'dateTime', `return moment(dateTime, 'YYYY-MM-DD HH:mm:ss').${operations_add_subtract}.format('YYYY-MM-DD HH:mm:ss')`)
       } catch (err) {
         console.error('Error creating time adjust function:', err.message)
-        fn = (dt) => dt
+        fn = (m, dt) => dt
       }
       const records = rows.map(r => this._parseAttlogRow(r.parts))
-                      .map(item => {
+                      .map((item, index) => {
                         try {
-                          item.punch_time = fn(item.punch_time)
+                          const originalTime = moment(item.punch_time, 'YYYY-MM-DD HH:mm:ss')
+                          item.punch_time = fn(moment, item.punch_time)
+                          if(index === 0){
+                            const adjustedTime = moment(item.punch_time, 'YYYY-MM-DD HH:mm:ss')
+                            const diff = adjustedTime.diff(originalTime)
+                            const duration = moment.duration(Math.abs(diff))
+                            const direction = diff < 0 ? 'PC-Time: slower' : 'PC-Time: Faster'
+                            const sign = diff < 0 ? '-' : '+'
+                            console.log(`\n⏰ Original: ${originalTime.format('YYYY-MM-DD HH:mm:ss')} → Adjusted: ${item.punch_time} | ${sign}${Math.floor(duration.asHours())}h ${duration.minutes()}m ${duration.seconds()}s (${direction})\n`)
+                          }
                         } catch (err) {
                           console.warn('Error adjusting punch time:', err.message)
                         }
@@ -172,6 +182,11 @@ class CdataController {
       this._writeAttendencelogToFile(sn, packIdx, records);
       Store.data[sn] = { ...Store.data[sn], attendance: records };
       // Process each punch through attendance submission
+      // const only_attendance_feature = global.config?.settings?.attendance?.only_attendance_feature
+
+      // const is_realtime_punch = records?.length == 1 && records?.[0]?.punch_time === now +/- 
+
+      console.log('NOW:');
       records.forEach(record => {
         this._processDevicePunch(record, sn);
       });

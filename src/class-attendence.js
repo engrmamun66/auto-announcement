@@ -1323,7 +1323,7 @@ class Attendance {
                 shifts,
               });
 
-              console.log('punchResult::::::', punchResult);
+              // console.log('punchResult::::::', punchResult);
 
               if (punchResult.error) {
                 if(emitToSocket) this._emitAttendanceToSocket({ message: punchResult.error, data: null });
