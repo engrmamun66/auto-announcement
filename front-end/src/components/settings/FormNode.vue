@@ -30,6 +30,7 @@ const type = computed(() => {
 function set(v)           { props.obj[props.propKey] = v; }
 function setIdx(i, v)     { props.obj[props.propKey][i] = v; }
 function removeIdx(i)     { props.obj[props.propKey].splice(i, 1); }
+function copyKey()        { navigator.clipboard.writeText(JSON.stringify(val.value, null, 2)); }
 function deleteKey()      { delete props.obj[props.propKey]; }
 function addPrimitive()   { props.obj[props.propKey].push(''); }
 function addObject()      { const t = props.obj[props.propKey][0]; props.obj[props.propKey].push(t ? JSON.parse(JSON.stringify(t)) : {}); }
@@ -78,7 +79,12 @@ function keyToLabel(k) {
         <div v-else-if="type === 'object'" class="fn__group">
             <div v-if="depth > 0" class="fn__group-label-row">
                 <span class="fn__group-label">{{ keyToLabel(label || propKey) }}</span>
-                <button class="fn__arr-rm" @click="deleteKey()">×</button>
+                <div class="fn__group-actions">
+                    <button class="fn__group-btn" @click="copyKey()" title="Copy object to clipboard">
+                        <i class='bx bx-copy-alt'></i>
+                    </button>
+                    <button class="fn__arr-rm" @click="deleteKey()">×</button>
+                </div>
             </div>
             <div class="fn__group-body">
                 <FormNode v-for="(v, k) in val" :key="k"
@@ -221,6 +227,26 @@ function keyToLabel(k) {
     text-transform: uppercase;
     letter-spacing: 0.4px;
 }
+.fn__group-actions {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+.fn__group-btn {
+    background: #e3f2fd;
+    border: 1px solid #90caf9;
+    color: #1976d2;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    line-height: 1;
+}
+.fn__group-btn:hover { background: #bbdefb; border-color: #64b5f6; }
 .fn__group-body {
     padding-left: 12px;
     border-left: 2px solid #e8e8e8;
