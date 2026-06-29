@@ -195,6 +195,7 @@ module.exports = {
     'JSON Preview': 'JSON Preview',
     'Preview': 'Preview',
     'Save': 'Save',
+    'Saved': 'Saved successful',
     'Reset': 'Reset',
     'Saving...': 'Saving...',
     'Reset All to Default': 'Reset All to Default',
