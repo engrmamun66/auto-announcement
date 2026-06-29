@@ -4,12 +4,12 @@
     <!-- Tab Navigation -->
     <ul class="nav nav-tabs mt-0 mb-3">
       <li class="nav-item">
-        <a @click.stop="activeTab = 'devices'" class="nav-link cp text-black" :class="{'active': activeTab === 'devices'}">
+        <a @click.stop="activeTab = 'devices'; fetchDevices()" class="nav-link cp text-black" :class="{'active': activeTab === 'devices'}">
           <i class='bx bxs-server' style="vertical-align:-2px;margin-right:4px"></i> {{ helper.t('Devices') }}
         </a>
       </li>
       <li class="nav-item">
-        <a @click.stop="activeTab = 'commands'" class="nav-link cp text-black" :class="{'active': activeTab === 'commands'}">
+        <a @click.stop="activeTab = 'commands'; fetchDevices()" class="nav-link cp text-black" :class="{'active': activeTab === 'commands'}">
           <i class='bx bxs-terminal' style="vertical-align:-2px;margin-right:4px"></i> {{ helper.t('Commands') }}
         </a>
       </li>
