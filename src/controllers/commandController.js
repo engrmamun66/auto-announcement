@@ -220,9 +220,11 @@ class CommandController {
     let command = 'DATA QUERY ATTLOG';
     if (start) command += ` StartTime=${start}`;
     if (end) command += ` EndTime=${end}`;
+    command += ` PageSize=3000`;
 
     // Create cache key from date range
-    const dateKey = `${start || 'all'}_${end || 'all'}`;
+    const dateKey = (!start && !end) ? String(new Date().getTime()) : `${start || 'all'}_${end || 'all'}`;
+    
     console.log(`📋 Get attendance request for ${cn} [${dateKey}]: ${command}`);
 
     // Check if data already in Store (from prior polling)
