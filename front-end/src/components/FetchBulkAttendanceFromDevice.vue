@@ -136,6 +136,7 @@ const props = defineProps({
 
 const http = inject('http')
 const emitter = inject('emitter')
+const CONFIG = inject('CONFIG')
 const helper = inject('helper')
 const all_students_non_copied = inject('all_students_non_copied')
 const makeCarcode = inject('makeCarcode')
@@ -218,20 +219,45 @@ async function fetchLogs({ silent = false } = {}){
     }
     return 0
   }
-  if (!payload.start_time || !payload.end_time) {
-    if (!silent) {
-      emitter?.emit?.('toaster-error', { message: helper.t('Start and end time required.') })
+
+  if(selectedDevice.value){
+    if (selectAll.value) {
+      payload.start_time = ''
+      payload.end_time = ''
     }
-    return 0
+  } else {
+    if (!payload.start_time || !payload.end_time) {
+      if (!silent) {
+        emitter?.emit?.('toaster-error', { message: helper.t('Start and end time required.') })
+      }
+      return 0
+    }
+
+    // adjust time of payload start_time and end_time
+
   }
+  
   fetching.value = true
   try {
-    const startTime = formatForApi(payload.start_time)
-    const endTime = formatForApi(payload.end_time)
+    // Adjust time of payload start_time and end_time
+    const ajdust_search_times = CONFIG.value?.settings?.device?.adjust_search_times
+    const operations = ajdust_search_times || `subtract(0, 'hour')` // Default adjustment
+    let startTime = formatForApi(payload.start_time)
+    let endTime = formatForApi(payload.end_time)
+
+    if (startTime && endTime) {
+      try {
+        const adjustFn = new Function('moment', 'dateTime', `return moment(dateTime, 'YYYY-MM-DD HH:mm:ss').${operations}`)
+        startTime = adjustFn(moment, startTime).format('YYYY-MM-DD HH:mm:ss')
+        endTime = adjustFn(moment, endTime).format('YYYY-MM-DD HH:mm:ss')
+      } catch (err) {
+        console.warn('Time adjustment failed:', err.message)
+      }
+    }
     const response = await fetch(`/${selectedDevice.value.serial_number}/get-attendance`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ startTime, endTime })
+      body: JSON.stringify({ startTime, endTime, ajdust_search_times })
     })
     if (response.ok) {
       const data = await response.json()
