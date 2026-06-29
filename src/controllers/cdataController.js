@@ -148,6 +148,7 @@ class CdataController {
       this._writeFingerprintsToFile(sn, packIdx, fingerprints);
       Store.data[sn] = { ...Store.data[sn], fingerprints };
     }
+    // /:cn/get-attendance
     else if (table === 'ATTLOG' && this._isRealPunch(row_item)) {
       const records = rows.map(r => this._parseAttlogRow(r.parts));
       this._writeAttendencelogToFile(sn, packIdx, records);
@@ -157,7 +158,9 @@ class CdataController {
         this._processDevicePunch(record, sn);
       });
     }
+    // auto (device real-time punch — no API trigger)
     else if (this._isRealPunch(row_item)) {
+      console.log('====K');
       const punch = rows.map(r => this._parseAttlogRow(r.parts));
       Store.data[sn] = { ...Store.data[sn], lastPunch: punch[0] };
     }
@@ -188,7 +191,7 @@ class CdataController {
   }
 
   _writeAttendencelogToFile(sn, packIdx, newRecords) {
-    // return
+    return
     const file = path.join(this.dataDir, `${sn}_attlog.json`);
     const existing = packIdx > 1 && fs.existsSync(file) ? this._readJsonFile(file) : [];
     const records = [...existing, ...newRecords];
