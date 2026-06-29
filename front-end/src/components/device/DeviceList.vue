@@ -22,6 +22,10 @@
           <span class="device-card__value">{{ device.polling_interval }}s</span>
         </div>
         <div class="device-card__row">
+          <span class="device-card__label">{{ helper.t('Adjust Time') }}:</span>
+          <span class="device-card__value">{{ device.adjust_time }}</span>
+        </div>
+        <div class="device-card__row">
           <span class="device-card__label">{{ helper.t('Created') }}:</span>
           <span class="device-card__value">{{ formatTime(device.updated) }}</span>
         </div>
