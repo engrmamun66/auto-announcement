@@ -34,16 +34,25 @@
 
     <div v-if="selectedDeviceId" class="row g-3">
       <div class="col-6">
-        <label for="">{{ helper.t('Start Time') }}</label>
-        <input v-model="payload.start_time" type="datetime-local" class="form-control cb-input" />
+        <label for="">
+          {{ helper.t('Start Time') }}
+          <input v-model="selectAllTime" type="checkbox"> <span>All</span>
+        </label>
+        <input v-model="payload.start_time" type="datetime-local" class="form-control cb-input" :disabled="selectAllTime" />
       </div>
       <div class="col-6">
         <label for="">{{ helper.t('End Time') }}</label>
-        <input v-model="payload.end_time" type="datetime-local" class="form-control cb-input" />
+        <input v-model="payload.end_time" type="datetime-local" class="form-control cb-input" :disabled="selectAllTime" />
       </div>
 
       <div class="col-12">
-        <div class="d-flex align-items-center gap-2 mb-2">
+        <div class="d-flex justify-content-start align-items-center gap-2">
+          <Btn class="" @click.stop="fetchLogs" :disabled="fetching">
+            <template v-if="fetching">{{ helper.t('Fetch Logs') }} <BtnLoader color="white"></BtnLoader> </template>
+            <template v-else>{{ helper.t('Fetch Logs') }}</template>
+          </Btn>
+          <Btn class="white">Total: <span class="badge text-white bg-secondary">{{ logs.length }}</span></Btn>
+          <Btn class="white">Checked: <span class="badge text-white bg-info">{{ selectedIndices.size }}</span></Btn>
           <input
             v-model="searchQuery"
             type="text"
@@ -52,18 +61,10 @@
             style="max-width: 300px"
           />
         </div>
-        <div class="d-flex align-items-center gap-2">
-          <Btn class="" @click.stop="fetchLogs" :disabled="fetching">
-            <template v-if="fetching">{{ helper.t('Fetching...') }}</template>
-            <template v-else>{{ helper.t('Fetch Logs') }}</template>
-          </Btn>
-          <Btn class="white">Total: <span class="badge text-white bg-secondary">{{ logs.length }}</span></Btn>
-          <Btn class="white">Checked: <span class="badge text-white bg-info">{{ selectedIndices.size }}</span></Btn>
-        </div>
       </div>
 
       <div class="col-12" v-if="logs.length">
-        <div class="table-responsive small">
+        <div class="table-wrapper small">
           <table class="table table-sm table-striped align-middle">
             <thead>
               <tr>
@@ -127,6 +128,7 @@ import moment from 'moment/moment'
 import { ref, reactive, inject, computed, onMounted, watch } from 'vue'
 import Rightbar from './Rightbar.vue'
 import Btn from './Btn.vue'
+import BtnLoader from './BtnLoader.vue'
 
 const props = defineProps({
   isAutomatic: { type: Boolean, default: false },
@@ -153,10 +155,28 @@ const selectedDeviceId = ref('')
 const selectedIndices = ref(new Set())
 const selectAll = ref(false)
 const searchQuery = ref('')
+const selectAllTime = ref(false)
+const previousTimes = ref({ start_time: '', end_time: '' })
 
 const payload = reactive({
   start_time: '',
   end_time: '',
+})
+
+watch(selectAllTime, (newVal) => {
+  if (newVal) {
+    // Save current times before clearing
+    previousTimes.value = {
+      start_time: payload.start_time,
+      end_time: payload.end_time
+    }
+    payload.start_time = ''
+    payload.end_time = ''
+  } else {
+    // Restore previous times
+    payload.start_time = previousTimes.value.start_time
+    payload.end_time = previousTimes.value.end_time
+  }
 })
 
 const selectedDevice = computed(() => {
@@ -342,6 +362,25 @@ onMounted(() => {
 <style scoped>
 .automatic-hidden {
   display: none;
+}
+
+.table-wrapper {
+  max-height: 500px;
+  overflow-y: auto;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+}
+
+.table-wrapper thead th {
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 10;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.table-wrapper table {
+  margin-bottom: 0;
 }
 
 .device-selector-section {

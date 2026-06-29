@@ -196,12 +196,11 @@ class CdataController {
       // const only_attendance_feature = global.config?.settings?.attendance?.only_attendance_feature
       const now = moment()
       const is_realtime_punch = records?.length === 1 && moment(records?.[0]?.punch_time, 'YYYY-MM-DD HH:mm:ss').isBetween(
-          now.clone().subtract(2, 'seconds'),
-          now.clone().add(2, 'seconds')
+          now.clone().subtract(10, 'seconds'),
+          now.clone().add(10, 'seconds')
         )
 
       console.log('NOW:', now.format('YYYY-MM-DD HH:mm:ss'), '| Is Realtime:', is_realtime_punch);
-      console.log({is_realtime_punch});
       if(is_realtime_punch){
         console.log(`✅ Realtime punch detected. Processing immediately...`);
         records.forEach(record => {
@@ -395,28 +394,31 @@ class CdataController {
   }
 
   _processDevicePunch(record, sn) {
-    const { user_id, punch_time } = record;
+    const { user_id, emp_code, punch_time } = record;
     const self = this;
+
+    // Use emp_code or user_id for lookup
+    const dahela_number = emp_code || user_id;
 
     // Query student by dakhela to get barcode components
     global.db.get(
       'SELECT id, dakhela, class_short, name, class FROM students WHERE dakhela = ?',
-      [user_id],
+      [dahela_number],
       (err, student) => {
         if (err) {
-          console.error(`❌ DB error looking up card ${user_id}:`, err.message);
+          console.error(`❌ DB error looking up card ${dahela_number}:`, err.message);
           return;
         }
         if (!student) {
-          console.warn(`⚠️--Device card ${user_id} not mapped to student`);
+          console.warn(`⚠️ Device card ${dahela_number} not mapped to student`);
           return;
         }
 
         // Format barcode: class_short-dakhela-sound1
         const barcode = `${student.class_short}-${student.dakhela}-sound1`;
-        const date = punch_time.split()[0]; // YYYY-MM-DD
+        const date = punch_time.substring(0, 10); // Extract YYYY-MM-DD
 
-        console.log({punch_time, barcode, student});
+        console.log(`📍 Processing punch: ${dahela_number} (${student.name}) @ ${punch_time}`);
 
         // Prepare request object for submitAttendanceRequest
         const mockReq = {
@@ -425,10 +427,10 @@ class CdataController {
             punch_time,
             date,
             source: 'device',
-            device_index: 1,
-            remarks: `Device: ${sn}`,
-            silent_mode: false,
-            skipSms: false
+            device_index: 0,
+            remarks: `device_fetch`,
+            silent_mode: true,
+            skipSms: true
           },
           query: {}
         };

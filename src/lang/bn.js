@@ -230,7 +230,7 @@ module.exports = {
     'Fetching...': 'আনা হচ্ছে...',
     'Matched': 'ম্যাচড',
     'Skipped': 'স্কিপড',
-    'Emp Code': 'এমপ কোড',
+    'Emp Code': 'দাখেলা',
     'Punch Time': 'পাঞ্চ সময়',
     'No logs found.': 'কোনো লগ পাওয়া যায়নি।',
     'Importing {done} / {total} (Skipped {skipped})': 'ইমপোর্ট হচ্ছে {done} / {total} (স্কিপড {skipped})',
