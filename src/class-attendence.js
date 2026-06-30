@@ -1393,6 +1393,7 @@ class Attendance {
                               const message = template
                                 .replace(/{name}/g, stdnt.name?.split('||')[0] || 'Student')
                                 .replace(/{class}/g, stdnt.class || 'N/F')
+                                .replace(/{dakhela}/g, stdnt.dakhela || 'N/F')
                                 .replace(/{date}/g, formatDate(row.date || ''))
                                 .replace(/{time}/g, formattedTime);
                               Sms._sendSmsInternal([stdnt.phone_number], message).catch(err => {
