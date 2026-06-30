@@ -1100,126 +1100,190 @@ class Attendance {
         return currentShift;
       };
 
-      if (!today_entries?.length) {
+      const USE_PREVIOUSE_CODE = false
+
+      if(!USE_PREVIOUSE_CODE){
+        // Each punch creates separate entry (in_time OR out_time, not both)
         const runningShift = getRunningShift(shifts, moment_punch);
         if (!runningShift) {
           return { error: 'No valid shift found', action: null, payload: null };
         }
 
-        payload.in_time = moment_punch.format(TIME_FORMAT);
-        payload.shift_number = runningShift.shift_number;
-        payload.shift_duration = `${runningShift.start} - ${runningShift.end}`;
-        payload.late_in_minute = moment_punch.diff(moment(runningShift.start_datetime, `${DATE_FORMAT} HH:mm`), 'minutes');
+        const shiftDuration = `${runningShift.start} - ${runningShift.end}`;
+        const shiftEntry = today_entries.find(e => e.shift_duration === shiftDuration);
 
-        if (late_consideration_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_consideration_minute) {
-          payload.late_in_minute = 0;
+        // Check for duplicate punch (within punch_separator_gap)
+        if (shiftEntry) {
+          const lastPunchTime = shiftEntry.out_time || shiftEntry.in_time;
+          if (lastPunchTime) {
+            const lastMoment = moment(`${date} ${lastPunchTime}`, `${DATE_FORMAT} HH:mm:ss`);
+            const timeDiffInSeconds = moment_punch.diff(lastMoment, 'seconds');
+
+            if (timeDiffInSeconds < punch_separator_gap_in_seconds) {
+              return { error: `Duplicate punch. Wait ${punch_separator_gap_in_seconds} seconds before punching again.`, action: null, payload: null };
+            }
+          }
         }
-        if (payload.late_in_minute > 0) payload.status = 'Late';
-        payload.remarks = 'First In Today';
-        action = 'create';
+
+        if (!shiftEntry) {
+          // No entry for this shift yet - create with in_time
+          payload.in_time = moment_punch.format(TIME_FORMAT);
+          payload.shift_number = runningShift.shift_number;
+          payload.shift_duration = shiftDuration;
+          payload.late_in_minute = moment_punch.diff(moment(runningShift.start_datetime, `${DATE_FORMAT} HH:mm`), 'minutes');
+
+          if (late_consideration_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_consideration_minute) {
+            payload.late_in_minute = 0;
+          }
+          if (payload.late_in_minute > 0) payload.status = 'Late';
+          payload.remarks = 'Check In';
+          action = 'create';
+        } else if (!shiftEntry.out_time) {
+          // Entry has in_time but no out_time - create separate entry with out_time
+          payload.out_time = moment_punch.format(TIME_FORMAT);
+          payload.shift_number = runningShift.shift_number;
+          payload.shift_duration = shiftDuration;
+          payload.remarks = 'Check Out';
+          action = 'create';
+        } else {
+          // Both in_time and out_time exist - no more punches for this shift
+          return { error: 'This shift already has both check in and check out. Max 2 entries per shift.', action: null, payload: null };
+        }
       } else {
-        const runningShift = getRunningShift(shifts, moment_punch);
-        if (!runningShift) {
-          return { error: 'No valid shift found', action: null, payload: null };
-        }
 
-        const current_shift_duration = `${runningShift.start} - ${runningShift.end}`;
-        const same_shift_entries = today_entries.filter(e => e.shift_duration === current_shift_duration);
-        const last_enty = same_shift_entries.length > 0 ? same_shift_entries[same_shift_entries.length - 1] : today_entries[today_entries.length - 1];
-        const is_different_shift = last_enty.shift_duration !== current_shift_duration;
-
-        const last_punch_time = moment(`${moment_punch.format(DATE_FORMAT)} ${last_enty.in_time || last_enty.out_time}`);
-        const gap_seconds = moment_punch.diff(last_punch_time, 'seconds');
-
-        if (gap_seconds < punch_separator_gap_in_seconds && !is_different_shift) {
-          Object.assign(payload, last_enty);
+        // OLD Code
+        if (!today_entries?.length) {
+          const runningShift = getRunningShift(shifts, moment_punch);
+          if (!runningShift) {
+            return { error: 'No valid shift found', action: null, payload: null };
+          }
+  
+          payload.in_time = moment_punch.format(TIME_FORMAT);
           payload.shift_number = runningShift.shift_number;
-          payload.shift_duration = current_shift_duration;
+          payload.shift_duration = `${runningShift.start} - ${runningShift.end}`;
           payload.late_in_minute = moment_punch.diff(moment(runningShift.start_datetime, `${DATE_FORMAT} HH:mm`), 'minutes');
-
-          const shift_in_time = same_shift_entries.find(e => e.in_time)?.in_time;
-          const shift_in_time_moment = shift_in_time ? moment(`${moment_punch.format(DATE_FORMAT)} ${shift_in_time}`, `${DATE_FORMAT} HH:mm:ss`) : null;
-
-          if (shift_in_time_moment && moment_punch.isBefore(shift_in_time_moment)) {
-            // Punch is before in_time, update the check-in entry
-            const in_time_entry = same_shift_entries.find(e => e.in_time);
-            if (in_time_entry) {
-              Object.assign(payload, in_time_entry);
-              payload.in_time = moment_punch.format(TIME_FORMAT);
-              payload.late_in_minute = moment_punch.diff(moment(runningShift.start_datetime, `${DATE_FORMAT} HH:mm`), 'minutes');
-              if (late_consideration_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_consideration_minute) {
+  
+          if (late_consideration_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_consideration_minute) {
+            payload.late_in_minute = 0;
+          }
+          if (payload.late_in_minute > 0) payload.status = 'Late';
+          payload.remarks = 'First In Today';
+          action = 'create';
+        } else {
+          const runningShift = getRunningShift(shifts, moment_punch);
+          if (!runningShift) {
+            return { error: 'No valid shift found', action: null, payload: null };
+          }
+  
+  
+  
+          console.log('======1111');
+  
+          const current_shift_duration = `${runningShift.start} - ${runningShift.end}`;
+          const same_shift_entries = today_entries.filter(e => e.shift_duration === current_shift_duration);
+          const last_enty = same_shift_entries.length > 0 ? same_shift_entries[same_shift_entries.length - 1] : today_entries[today_entries.length - 1];
+          const is_different_shift = last_enty.shift_duration !== current_shift_duration;
+  
+          const last_punch_time = moment(`${moment_punch.format(DATE_FORMAT)} ${last_enty.in_time || last_enty.out_time}`);
+          const gap_seconds = moment_punch.diff(last_punch_time, 'seconds');
+  
+          if (gap_seconds < punch_separator_gap_in_seconds && !is_different_shift) {
+            Object.assign(payload, last_enty);
+            payload.shift_number = runningShift.shift_number;
+            payload.shift_duration = current_shift_duration;
+            payload.late_in_minute = moment_punch.diff(moment(runningShift.start_datetime, `${DATE_FORMAT} HH:mm`), 'minutes');
+  
+            const shift_in_time = same_shift_entries.find(e => e.in_time)?.in_time;
+            const shift_in_time_moment = shift_in_time ? moment(`${moment_punch.format(DATE_FORMAT)} ${shift_in_time}`, `${DATE_FORMAT} HH:mm:ss`) : null;
+  
+            if (shift_in_time_moment && moment_punch.isBefore(shift_in_time_moment)) {
+              // Punch is before in_time, update the check-in entry
+              const in_time_entry = same_shift_entries.find(e => e.in_time);
+              if (in_time_entry) {
+                Object.assign(payload, in_time_entry);
+                payload.in_time = moment_punch.format(TIME_FORMAT);
+                payload.late_in_minute = moment_punch.diff(moment(runningShift.start_datetime, `${DATE_FORMAT} HH:mm`), 'minutes');
+                if (late_consideration_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_consideration_minute) {
+                  payload.late_in_minute = 0;
+                }
+                if (payload.late_in_minute > 0) payload.status = 'Late';
+              }
+              console.log('========2');
+            } else {
+              // Punch is after in_time, update the check-out entry
+              if (last_enty.in_time) {
+                payload.in_time = moment_punch.format(TIME_FORMAT);
+                if (late_consideration_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_consideration_minute) {
+                  payload.late_in_minute = 0;
+                }
+                if (payload.late_in_minute > 0) payload.status = 'Late';
+              } else if (last_enty.out_time) {
+                payload.out_time = moment_punch.format(TIME_FORMAT);
+                payload.status = '';
                 payload.late_in_minute = 0;
               }
-              if (payload.late_in_minute > 0) payload.status = 'Late';
+              console.log('========3');
             }
-          } else {
-            // Punch is after in_time, update the check-out entry
+            payload.remarks = 'Updated Existing Entry';
+            action = 'update';
+          } else if (today_entries?.length < max_permitte_entry) {
+            payload.shift_number = runningShift.shift_number;
+            payload.shift_duration = current_shift_duration;
+            payload.late_in_minute = moment_punch.diff(moment(runningShift.start_datetime, `${DATE_FORMAT} HH:mm`), 'minutes');
+  
+            const entry_count_by_shift = today_entries.filter(e => e.shift_duration === payload.shift_duration);
+            if (entry_count_by_shift?.length === 2) {
+              return { error: `Already ${entry_count_by_shift.length} entries for this shift`, action: null, payload: null };
+            }
+  
+            console.log('=========4');
+  
             if (last_enty.in_time) {
-              payload.in_time = moment_punch.format(TIME_FORMAT);
-              if (late_consideration_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_consideration_minute) {
+  
+              console.log('=======5');
+              if (last_enty.shift_duration !== payload.shift_duration) {
+                payload.in_time = moment_punch.format(TIME_FORMAT);
+                payload.out_time = null;
+                if (late_consideration_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_consideration_minute) {
+                  payload.late_in_minute = 0;
+                }
+                if (payload.late_in_minute > 0) payload.status = 'Late';
+                payload.remarks = 'Added In Time';
+              } else {
+                const shift_in_time = same_shift_entries.find(e => e.in_time)?.in_time;
+                if (shift_in_time) {
+                  const new_out_time = moment_punch;
+                  const existing_in_time = moment(`${moment_punch.format(DATE_FORMAT)} ${shift_in_time}`, `${DATE_FORMAT} HH:mm:ss`);
+                  if (new_out_time.isBefore(existing_in_time)) {
+                    return { error: 'Out time cannot be before in time', action: null, payload: null };
+                  }
+                }
+                payload.in_time = null;
+                payload.out_time = moment_punch.format(TIME_FORMAT);
+                payload.remarks = 'Added Out Time';
                 payload.late_in_minute = 0;
               }
-              if (payload.late_in_minute > 0) payload.status = 'Late';
             } else if (last_enty.out_time) {
-              payload.out_time = moment_punch.format(TIME_FORMAT);
-              payload.status = '';
-              payload.late_in_minute = 0;
-            }
-          }
-          payload.remarks = 'Updated Existing Entry';
-          action = 'update';
-        } else if (today_entries?.length < max_permitte_entry) {
-          payload.shift_number = runningShift.shift_number;
-          payload.shift_duration = current_shift_duration;
-          payload.late_in_minute = moment_punch.diff(moment(runningShift.start_datetime, `${DATE_FORMAT} HH:mm`), 'minutes');
-
-          const entry_count_by_shift = today_entries.filter(e => e.shift_duration === payload.shift_duration);
-          if (entry_count_by_shift?.length === 2) {
-            return { error: `Already ${entry_count_by_shift.length} entries for this shift`, action: null, payload: null };
-          }
-
-          if (last_enty.in_time) {
-            if (last_enty.shift_duration !== payload.shift_duration) {
-              payload.in_time = moment_punch.format(TIME_FORMAT);
+              const new_in_time = moment_punch;
+              const existing_out_time = moment(`${moment_punch.format(DATE_FORMAT)} ${last_enty.out_time}`, `${DATE_FORMAT} HH:mm:ss`);
+              if (new_in_time.isBefore(existing_out_time)) {
+                return { error: 'In time cannot be before previous out time', action: null, payload: null };
+              }
               payload.out_time = null;
+              payload.in_time = moment_punch.format(TIME_FORMAT);
               if (late_consideration_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_consideration_minute) {
                 payload.late_in_minute = 0;
               }
               if (payload.late_in_minute > 0) payload.status = 'Late';
               payload.remarks = 'Added In Time';
-            } else {
-              const shift_in_time = same_shift_entries.find(e => e.in_time)?.in_time;
-              if (shift_in_time) {
-                const new_out_time = moment_punch;
-                const existing_in_time = moment(`${moment_punch.format(DATE_FORMAT)} ${shift_in_time}`, `${DATE_FORMAT} HH:mm:ss`);
-                if (new_out_time.isBefore(existing_in_time)) {
-                  return { error: 'Out time cannot be before in time', action: null, payload: null };
-                }
-              }
-              payload.in_time = null;
-              payload.out_time = moment_punch.format(TIME_FORMAT);
-              payload.remarks = 'Added Out Time';
-              payload.late_in_minute = 0;
             }
-          } else if (last_enty.out_time) {
-            const new_in_time = moment_punch;
-            const existing_out_time = moment(`${moment_punch.format(DATE_FORMAT)} ${last_enty.out_time}`, `${DATE_FORMAT} HH:mm:ss`);
-            if (new_in_time.isBefore(existing_out_time)) {
-              return { error: 'In time cannot be before previous out time', action: null, payload: null };
-            }
-            payload.out_time = null;
-            payload.in_time = moment_punch.format(TIME_FORMAT);
-            if (late_consideration_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_consideration_minute) {
-              payload.late_in_minute = 0;
-            }
-            if (payload.late_in_minute > 0) payload.status = 'Late';
-            payload.remarks = 'Added In Time';
+            action = 'create';
+          } else {
+            return { error: 'Max entries reached for today', action: null, payload: null };
           }
-          action = 'create';
-        } else {
-          return { error: 'Max entries reached for today', action: null, payload: null };
         }
       }
+
 
       return { error: null, action, payload };
     }
