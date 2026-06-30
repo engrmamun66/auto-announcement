@@ -950,6 +950,11 @@ onMounted(async ()=>{
 
         
 
+        if(socket_data.type == 'gap_time_update') {
+            const { sn, text } = socket_data
+            localStorage.setItem('gap_time__' + sn, text)
+        }
+
         if(socket_data.type == 'remote_action') {
             let { action, selector, data } = socket_data
 

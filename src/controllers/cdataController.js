@@ -182,7 +182,28 @@ class CdataController {
                               const duration = moment.duration(Math.abs(diff))
                               const direction = diff < 0 ? 'PC-Time: slower' : 'PC-Time: Faster'
                               const sign = diff < 0 ? '-' : '+'
-                              console.log(`\n⏰ Original: ${originalTime.format('YYYY-MM-DD HH:mm:ss')} → Adjusted: ${item.punch_time} | ${sign}${Math.floor(duration.asHours())}h ${duration.minutes()}m ${duration.seconds()}s (${direction})\n`)
+                              const functionName = sign == '-' ? 'subtract' : 'add'
+                              const adjustment_time = [
+                                Math.floor(duration.asHours()) ? `${functionName}(${Math.floor(duration.asHours())}, 'hour')`: false,
+                                Math.floor(duration.minutes()) ? `${functionName}(${Math.floor(duration.minutes())}, 'minute')`: false,
+                                Math.floor(duration.seconds()) ? `${functionName}(${Math.floor(duration.seconds())}, 'second')`: false,
+                              ].filter(Boolean).join('.')
+
+                              const gapTimeText = `${sign}${Math.floor(duration.asHours())}h ${duration.minutes()}m ${duration.seconds()}s (${direction})`
+                              console.log(`\n⏰ Original: ${originalTime.format('YYYY-MM-DD HH:mm:ss')} → Adjusted: ${item.punch_time} | ${gapTimeText}\n`)
+
+                              // Emit to socket clients
+                              if (global.socketServer) {
+                                global.socketServer.clients.forEach((client) => {
+                                  if (client.readyState === client.OPEN) {
+                                    client.send(JSON.stringify({
+                                      type: 'gap_time_update',
+                                      sn: sn,
+                                      text: gapTimeText + ' --- ' + adjustment_time
+                                    }))
+                                  }
+                                })
+                              }
                             }
                           } catch (err) {
                             console.warn('Error adjusting punch time:', err.message)
