@@ -1110,17 +1110,23 @@ class Attendance {
         }
 
         const shiftDuration = `${runningShift.start} - ${runningShift.end}`;
-        const shiftEntry = today_entries.find(e => e.shift_duration === shiftDuration);
+        const shiftEntries = today_entries.filter(e => e.shift_duration === shiftDuration);
+        const shiftEntry = shiftEntries[0];
 
-        // Check for duplicate punch (within punch_separator_gap)
-        if (shiftEntry) {
-          const lastPunchTime = shiftEntry.out_time || shiftEntry.in_time;
+        // Check if shift already has max entries (in_time + out_time = 2 entries)
+        if (shiftEntries.length >= 2) {
+          return { error: 'In/Out added for this shift', action: null, payload: null };
+        }
+
+        // Check for duplicate punch (within punch_separator_gap) against LAST punch overall
+        const lastEntry = today_entries.length > 0 ? today_entries[today_entries.length - 1] : null;
+        if (lastEntry) {
+          const lastPunchTime = lastEntry.out_time || lastEntry.in_time;
           if (lastPunchTime) {
             const lastMoment = moment(`${date} ${lastPunchTime}`, `${DATE_FORMAT} HH:mm:ss`);
-            const timeDiffInSeconds = moment_punch.diff(lastMoment, 'seconds');
-
+            const timeDiffInSeconds = Math.abs(moment_punch.diff(lastMoment, 'seconds'));
             if (timeDiffInSeconds < punch_separator_gap_in_seconds) {
-              return { error: `Duplicate punch. Wait ${punch_separator_gap_in_seconds} seconds before punching again.`, action: null, payload: null };
+              return { error: `Duplicate punch. Wait ${punch_separator_gap_in_seconds} seconds.`, action: null, payload: null };
             }
           }
         }
@@ -1138,16 +1144,46 @@ class Attendance {
           if (payload.late_in_minute > 0) payload.status = 'Late';
           payload.remarks = 'Check In';
           action = 'create';
-        } else if (!shiftEntry.out_time) {
-          // Entry has in_time but no out_time - create separate entry with out_time
+        } else {
+          // Entry exists - check if this is recovery scenario (punch time < existing in_time)
+          if (shiftEntry.in_time && !shiftEntry.out_time) {
+            const existingInMoment = moment(`${date} ${shiftEntry.in_time}`, `${DATE_FORMAT} HH:mm:ss`);
+            if (moment_punch.isBefore(existingInMoment)) {
+              // Recovery: Admin submitting missed check-in before existing in_time
+              // Create new entry with this punch as in_time
+              // Update existing entry: set out_time to old in_time, clear in_time
+              payload.in_time = moment_punch.format(TIME_FORMAT);
+              payload.shift_number = runningShift.shift_number;
+              payload.shift_duration = shiftDuration;
+              payload.late_in_minute = moment_punch.diff(moment(runningShift.start_datetime, `${DATE_FORMAT} HH:mm`), 'minutes');
+
+              if (late_consideration_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_consideration_minute) {
+                payload.late_in_minute = 0;
+              }
+              if (payload.late_in_minute > 0) payload.status = 'Late';
+              payload.remarks = 'Check In (Recovered)';
+              action = 'create';
+
+              // Return update info for existing entry
+              return {
+                error: null,
+                action: 'create_with_update',
+                payload,
+                updateEntry: {
+                  id: shiftEntry.id,
+                  in_time: null,
+                  out_time: shiftEntry.in_time
+                }
+              };
+            }
+          }
+
+          // Normal flow: Entry exists - create separate entry with out_time
           payload.out_time = moment_punch.format(TIME_FORMAT);
           payload.shift_number = runningShift.shift_number;
           payload.shift_duration = shiftDuration;
           payload.remarks = 'Check Out';
           action = 'create';
-        } else {
-          // Both in_time and out_time exist - no more punches for this shift
-          return { error: 'This shift already has both check in and check out. Max 2 entries per shift.', action: null, payload: null };
         }
       } else {
 
@@ -1464,6 +1500,57 @@ class Attendance {
                     const responseData = { message: payload.remarks || 'Attendance created.', data: row, action: 'create' };
                     if (emitToSocket) self._emitAttendanceToSocket(responseData);
                     res.send(responseData);
+                  });
+                });
+              } else if (action === 'create_with_update') {
+                // Recovery: Update existing entry (convert in_time to out_time), then create new entry
+                const { updateEntry } = punchResult;
+                const updateQuery = `
+                  UPDATE ${this.tableName}
+                  SET in_time=?, out_time=?
+                  WHERE id=?
+                `;
+
+                const db = this.db;
+                const tableName = this.tableName;
+                const self = this;
+                const Sms = this.Sms;
+
+                db.run(updateQuery, [updateEntry.in_time, updateEntry.out_time, updateEntry.id], (err) => {
+                  if (err) return res.status(500).send({ error: err.message });
+
+                  // Now create the new entry
+                  const insertQuery = `
+                    INSERT INTO ${tableName}
+                      (student_id, date, in_time, out_time, status, remarks, late_in_minute, device_index, shift_duration, shift_count, shift_number)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                  `;
+
+                  const params = [
+                    payload.student_id,
+                    payload.date,
+                    payload.in_time || null,
+                    payload.out_time || null,
+                    payload.status,
+                    payload.remarks || null,
+                    payload.late_in_minute,
+                    payload.device_index,
+                    payload.shift_duration,
+                    payload.shift_count,
+                    payload.shift_number,
+                  ];
+
+                  db.run(insertQuery, params, function (err) {
+                    if (err) return res.status(500).send({ error: err.message });
+
+                    const insertedId = this.lastID;
+                    db.get(`SELECT * FROM ${tableName} WHERE id = ?`, [insertedId], (err, row) => {
+                      if (err) return res.status(500).send({ error: err.message });
+
+                      const responseData = { message: 'Punch recovered and recorded.', data: row, action: 'create_with_update' };
+                      if (emitToSocket) self._emitAttendanceToSocket(responseData);
+                      res.send(responseData);
+                    });
                   });
                 });
               } else if (action === 'update') {
