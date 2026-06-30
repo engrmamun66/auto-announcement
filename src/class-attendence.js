@@ -1201,11 +1201,12 @@ class Attendance {
               payload.remarks = 'Added Out Time';
               payload.late_in_minute = 0;
             }
-          } else if (last_enty.out_time) {
+          } else if (last_enty.out_time && last_enty.shift_duration === payload.shift_duration) {
             const new_in_time = moment_punch;
             const existing_out_time = moment(`${moment_punch.format(DATE_FORMAT)} ${last_enty.out_time}`, `${DATE_FORMAT} HH:mm:ss`);
-            if (new_in_time.isAfter(existing_out_time)) {
-              return { error: 'In time cannot be after out time', action: null, payload: null };
+            if (new_in_time.isBefore(existing_out_time)) {
+              console.log('Current shift attendances:', { today_entries, same_shift_entries, last_enty, runningShift });
+              return { error: 'In time cannot be before out time', action: null, payload: null };
             }
             payload.out_time = null;
             payload.in_time = moment_punch.format(TIME_FORMAT);
