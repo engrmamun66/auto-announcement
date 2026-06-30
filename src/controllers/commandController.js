@@ -85,6 +85,35 @@ class CommandController {
     return `DATA UPDATE USERINFO ${fields.join('\t')}`;
   }
 
+  buildBatchUserInfoCommand(users) {
+    if (!Array.isArray(users) || users.length === 0) {
+      return null;
+    }
+
+    const userLines = users.map(user => {
+      const pin = this.getPin(user);
+      if (!pin) return null;
+
+      const fields = [
+        `PIN=${pin}`,
+        `Name=${user.name || user.Name || ''}`,
+        `Pri=${user.privilege || user.Pri || user.pri || 0}`,
+        `Passwd=${user.password || user.Passwd || ''}`,
+        `Card=${user.card || user.Card || ''}`,
+        `Grp=${user.group || user.Grp || 1}`,
+        `TZ=${user.timezone || user.TZ || '0000000100000000'}`,
+      ];
+
+      return fields.join('\t');
+    }).filter(Boolean);
+
+    if (userLines.length === 0) {
+      return null;
+    }
+
+    return `DATA UPDATE USERINFO\n${userLines.join('\n')}`;
+  }
+
   buildDeleteUserCommand(data) {
     const pin = this.getPin(data);
 
@@ -110,30 +139,88 @@ class CommandController {
   }
 
   addAdmin(req, res) {
+    const cn = req.params.cn;
     const data = { ...this.getBodyData(req), privilege: 6 };
     const command = this.buildUserInfoCommand(data);
     if (!command) return res.status(400).json({ error: 'pin is required' });
-    this.respondQueued(res, this.pushCommand(req, req.params.cn, command));
+
+    this.queueCommandToDb(cn, command, (err, result) => {
+      if (err) {
+        return res.status(500).json({ error: 'Failed to queue command' });
+      }
+      res.status(202).json({ status: 'queued', ...result });
+    });
   }
 
   addSuperAdmin(req, res) {
+    const cn = req.params.cn;
     const data = { ...this.getBodyData(req), privilege: 14 };
     const command = this.buildUserInfoCommand(data);
     if (!command) return res.status(400).json({ error: 'pin is required' });
-    this.respondQueued(res, this.pushCommand(req, req.params.cn, command));
+
+    this.queueCommandToDb(cn, command, (err, result) => {
+      if (err) {
+        return res.status(500).json({ error: 'Failed to queue command' });
+      }
+      res.status(202).json({ status: 'queued', ...result });
+    });
+  }
+
+  queueCommandToDb(cn, command, callback) {
+    global.db.run(
+      'INSERT INTO command_queue (device_serial_number, command, status) VALUES (?, ?, ?)',
+      [cn, command, 'pending'],
+      function(err) {
+        if (err) {
+          console.error(`❌ Error queueing command: ${err.message}`);
+          return callback(err, null);
+        }
+
+        console.log(`✅ Command queued for ${cn} (ID: ${this.lastID})`);
+        callback(null, {
+          id: this.lastID,
+          cn,
+          command,
+          status: 'pending'
+        });
+      }
+    );
   }
 
   addUser(req, res) {
+    const cn = req.params.cn;
     const command = this.buildUserInfoCommand({ ...this.getBodyData(req), privilege: 0 });
 
     if (!command) {
       return res.status(400).json({ error: 'pin is required' });
     }
 
-    this.respondQueued(res, this.pushCommand(req, req.params.cn, command));
+    this.queueCommandToDb(cn, command, (err, result) => {
+      if (err) {
+        return res.status(500).json({ error: 'Failed to queue command' });
+      }
+      res.status(202).json({ status: 'queued', ...result });
+    });
+  }
+
+  updateUser(req, res) {
+    const cn = req.params.cn;
+    const command = this.buildUserInfoCommand(this.getBodyData(req));
+
+    if (!command) {
+      return res.status(400).json({ error: 'pin is required' });
+    }
+
+    this.queueCommandToDb(cn, command, (err, result) => {
+      if (err) {
+        return res.status(500).json({ error: 'Failed to queue command' });
+      }
+      res.status(202).json({ status: 'queued', ...result });
+    });
   }
 
   removeUser(req, res) {
+    const cn = req.params.cn;
     const command = this.buildDeleteUserCommand({
       ...req.query,
       ...this.getBodyData(req),
@@ -143,10 +230,16 @@ class CommandController {
       return res.status(400).json({ error: 'pin is required' });
     }
 
-    this.respondQueued(res, this.pushCommand(req, req.params.cn, command));
+    this.queueCommandToDb(cn, command, (err, result) => {
+      if (err) {
+        return res.status(500).json({ error: 'Failed to queue command' });
+      }
+      res.status(202).json({ status: 'queued', ...result });
+    });
   }
 
   addUsers(req, res) {
+    const cn = req.params.cn;
     const data = this.getBodyData(req);
     const users = data.users;
 
@@ -154,24 +247,29 @@ class CommandController {
       return res.status(400).json({ error: 'users array is required' });
     }
 
-    const results = users.map((user) => {
-      const command = this.buildUserInfoCommand({ ...user, privilege: 0 });
+    // Add privilege 0 to all users
+    const usersWithPrivilege = users.map(user => ({ ...user, privilege: 0 }));
+    const command = this.buildBatchUserInfoCommand(usersWithPrivilege);
 
-      if (!command) {
-        return { error: 'pin is required', user };
+    if (!command) {
+      return res.status(400).json({ error: 'No valid users to add' });
+    }
+
+    this.queueCommandToDb(cn, command, (err, result) => {
+      if (err) {
+        return res.status(500).json({ error: 'Failed to queue command' });
       }
-
-      return this.pushCommand(req, req.params.cn, command);
-    });
-
-    res.status(202).json({
-      status: 'queued',
-      count: results.filter(result => !result.error).length,
-      results,
+      res.status(202).json({
+        status: 'queued',
+        count: users.length,
+        message: `Batch command queued for ${users.length} users`,
+        ...result
+      });
     });
   }
 
   removeUsers(req, res) {
+    const cn = req.params.cn;
     const data = this.getBodyData(req);
     const pins = data.pins || data.users || data.ids;
 
@@ -179,20 +277,36 @@ class CommandController {
       return res.status(400).json({ error: 'pins array is required' });
     }
 
-    const results = pins.map((item) => {
+    let completed = 0;
+    const results = [];
+
+    pins.forEach((item, index) => {
       const command = this.buildDeleteUserCommand(typeof item === 'object' ? item : { pin: item });
 
       if (!command) {
-        return { error: 'pin is required', item };
+        results[index] = { error: 'pin is required', item };
+        completed++;
+        if (completed === pins.length) {
+          res.status(202).json({
+            status: 'queued',
+            count: results.filter(result => !result.error).length,
+            results,
+          });
+        }
+        return;
       }
 
-      return this.pushCommand(req, req.params.cn, command);
-    });
-
-    res.status(202).json({
-      status: 'queued',
-      count: results.filter(result => !result.error).length,
-      results,
+      this.queueCommandToDb(cn, command, (err, result) => {
+        results[index] = err ? { error: err.message, item } : result;
+        completed++;
+        if (completed === pins.length) {
+          res.status(202).json({
+            status: 'queued',
+            count: results.filter(result => !result.error).length,
+            results,
+          });
+        }
+      });
     });
   }
 

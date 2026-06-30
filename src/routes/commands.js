@@ -53,6 +53,9 @@ router.post('/:cn/remove-user',     (req, res) => commandController.removeUser(r
 // { "users": [{ "pin": "123", "name": "John", "card": "" }, { "pin": "456", "name": "Jane", "card": "" }] }
 router.post('/:cn/add-users',       (req, res) => commandController.addUsers(req, res));
 
+// { "pin": "123", "name": "John Doe", "card": "C001", ... }
+router.post('/:cn/update-user',     (req, res) => commandController.updateUser(req, res));
+
 // { "pins": ["123", "456"] }
 router.post('/:cn/remove-users',    (req, res) => commandController.removeUsers(req, res));
 
