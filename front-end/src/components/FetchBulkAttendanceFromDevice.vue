@@ -106,7 +106,7 @@
         </div>
         <div class="d-flex gap-2">
           <Btn class="red" @click.stop="clearLogs" :disabled="fetching || inserting">{{ helper.t('Clear') }}</Btn>
-          <Btn @click.stop="submitLogs" :disabled="!logs.length || inserting">
+          <Btn @click.stop="submitLogs" :disabled="!logs.length || !selectedIndices.size || inserting">
             <template v-if="inserting">{{ helper.t('Submitting...') }}</template>
             <template v-else>{{ helper.t('Submit Attendance') }}</template>
           </Btn>
