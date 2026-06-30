@@ -128,6 +128,7 @@ module.exports = {
                sender_id: '',                     // approved sender ID / number
                send_on_in: true,                  // send SMS when student punches IN
                send_on_out: false,                // send SMS when student punches OUT
+               skip_sms_for_punch_after_shift_end: true, // skip SMS if punch-in occurs after shift end time 
                // {name}, {time}, {date}, {status} are replaced at send time
                in_message_template: `
                🕌 তালীমুল কুরআন মহিলা মাদ্রাসা

@@ -1164,6 +1164,11 @@ class Attendance {
               payload.remarks = 'Check In (Recovered)';
               action = 'create';
 
+              // Check if SMS should be skipped for punch after shift end
+              const skip_sms_config = config.settings?.sms?.skip_sms_for_punch_after_shift_end || false;
+              const shiftEndMoment = moment(runningShift.end_datetime, `${DATE_FORMAT} HH:mm`);
+              const sms_abandoned = skip_sms_config && moment_punch.isAfter(shiftEndMoment);
+
               // Return update info for existing entry
               return {
                 error: null,
@@ -1173,7 +1178,8 @@ class Attendance {
                   id: shiftEntry.id,
                   in_time: null,
                   out_time: shiftEntry.in_time
-                }
+                },
+                sms_abandoned
               };
             }
           }
@@ -1504,7 +1510,7 @@ class Attendance {
                 });
               } else if (action === 'create_with_update') {
                 // Recovery: Update existing entry (convert in_time to out_time), then create new entry
-                const { updateEntry } = punchResult;
+                const { updateEntry, sms_abandoned } = punchResult;
                 const updateQuery = `
                   UPDATE ${this.tableName}
                   SET in_time=?, out_time=?
@@ -1546,6 +1552,36 @@ class Attendance {
                     const insertedId = this.lastID;
                     db.get(`SELECT * FROM ${tableName} WHERE id = ?`, [insertedId], (err, row) => {
                       if (err) return res.status(500).send({ error: err.message });
+
+                      // Send SMS unless abandoned
+                      if (row && row.student_id && row.date && !sms_abandoned && !skipSms) {
+                        db.get(`SELECT * FROM students WHERE dakhela = ?`, [row.student_id], (err, stdnt) => {
+                          if (!err && stdnt && stdnt.phone_number) {
+                            const smsConfig = global.config?.settings?.sms;
+                            if (smsConfig?.enabled && Sms) {
+                              let shouldSendSms = false;
+                              let template = null;
+                              let time = null;
+
+                              if (row.in_time && smsConfig?.send_on_in) {
+                                shouldSendSms = true;
+                                template = smsConfig?.in_message_template;
+                                time = row.in_time;
+                              }
+
+                              if (shouldSendSms && template) {
+                                const formattedTime = formatTimeWithPeriod(time || '');
+                                const message = template
+                                  .replace(/{name}/g, stdnt.name?.split('||')[0] || 'Student')
+                                  .replace(/{class}/g, stdnt.class || 'N/F')
+                                  .replace(/{date}/g, formatDate(row.date || ''))
+                                  .replace(/{time}/g, formattedTime);
+                                Sms.sendSMS(stdnt.phone_number, message);
+                              }
+                            }
+                          }
+                        });
+                      }
 
                       const responseData = { message: 'Punch recovered and recorded.', data: row, action: 'create_with_update' };
                       if (emitToSocket) self._emitAttendanceToSocket(responseData);
