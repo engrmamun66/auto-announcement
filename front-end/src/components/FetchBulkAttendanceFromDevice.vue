@@ -314,7 +314,8 @@ async function submitLogs({ skipConfirm = false } = {}){
     return
   }
 
-  if (!skipConfirm && !confirm(helper.t('Are you sure to submit {count} logs?', { count: selectedLogs.length }))) return
+  // if (!skipConfirm && !confirm(helper.t('Are you sure to submit {count} logs?', { count: selectedLogs.length }))) return
+  // if (!skipConfirm) return
 
   inserting.value = true
   progress.total = selectedLogs.length
