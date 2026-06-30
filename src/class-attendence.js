@@ -1175,10 +1175,6 @@ class Attendance {
             return { error: 'No valid shift found', action: null, payload: null };
           }
   
-  
-  
-          console.log('======1111');
-  
           const current_shift_duration = `${runningShift.start} - ${runningShift.end}`;
           const same_shift_entries = today_entries.filter(e => e.shift_duration === current_shift_duration);
           const last_enty = same_shift_entries.length > 0 ? same_shift_entries[same_shift_entries.length - 1] : today_entries[today_entries.length - 1];
@@ -1208,7 +1204,6 @@ class Attendance {
                 }
                 if (payload.late_in_minute > 0) payload.status = 'Late';
               }
-              console.log('========2');
             } else {
               // Punch is after in_time, update the check-out entry
               if (last_enty.in_time) {
@@ -1222,7 +1217,6 @@ class Attendance {
                 payload.status = '';
                 payload.late_in_minute = 0;
               }
-              console.log('========3');
             }
             payload.remarks = 'Updated Existing Entry';
             action = 'update';
@@ -1236,11 +1230,9 @@ class Attendance {
               return { error: `Already ${entry_count_by_shift.length} entries for this shift`, action: null, payload: null };
             }
   
-            console.log('=========4');
   
             if (last_enty.in_time) {
   
-              console.log('=======5');
               if (last_enty.shift_duration !== payload.shift_duration) {
                 payload.in_time = moment_punch.format(TIME_FORMAT);
                 payload.out_time = null;
