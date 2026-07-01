@@ -14,7 +14,7 @@
 
     <!-- Device Selector -->
     <div v-if="devices.length" class="device-selector-section mb-3">
-      <label class="form-label">{{ helper.t('Select Device') }}</label>
+      <!-- <label class="form-label">{{ helper.t('Select Device') }}</label> -->
       <div class="device-radio-group">
         <label v-for="device in devices" :key="device.id" class="device-radio-label">
           <input
@@ -33,33 +33,36 @@
     </div>
 
     <div v-if="selectedDeviceId" class="row g-3">
-      <div class="col-6">
+      <div class="col-12 col-md-4">
         <label for="">
           {{ helper.t('Start Time') }}
           <input v-model="selectAllTime" type="checkbox"> <span>All</span>
         </label>
         <input v-model="payload.start_time" type="datetime-local" class="form-control cb-input" :disabled="selectAllTime" />
       </div>
-      <div class="col-6">
+      <div class="col-12 col-md-4">
         <label for="">{{ helper.t('End Time') }}</label>
         <input v-model="payload.end_time" type="datetime-local" class="form-control cb-input" :disabled="selectAllTime" />
+      </div>
+      <div class="col-12 col-md-4">
+        <label for="">&nbsp;</label>
+        <Btn class="w-100" @click.stop="fetchLogs" :disabled="fetching">
+          <template v-if="fetching">{{ helper.t('Fetch Logs') }} <BtnLoader color="white"></BtnLoader> </template>
+          <template v-else>{{ helper.t('Fetch Logs') }}</template>
+        </Btn>
       </div>
 
       <div class="col-12">
         <div class="d-flex justify-content-start align-items-center gap-2">
-          <Btn class="" @click.stop="fetchLogs" :disabled="fetching">
-            <template v-if="fetching">{{ helper.t('Fetch Logs') }} <BtnLoader color="white"></BtnLoader> </template>
-            <template v-else>{{ helper.t('Fetch Logs') }}</template>
-          </Btn>
-          <Btn class="white">Total: <span class="badge text-white bg-secondary">{{ logs.length }}</span></Btn>
-          <Btn class="white">Checked: <span class="badge text-white bg-info">{{ selectedIndices.size }}</span></Btn>
           <input
             v-model="searchQuery"
             type="text"
             class="form-control cb-input"
-            :placeholder="helper.t('Search by emp code or user id...')"
-            style="max-width: 300px"
+            :placeholder="helper.t('Search by student ID...')"
+            style="max-width: calc(100% - 233px)"
           />
+          <Btn class="white">Total: <span class="badge text-white bg-secondary">{{ logs.length }}</span></Btn>
+          <Btn class="white">Checked: <span class="badge text-white bg-info">{{ selectedIndices.size }}</span></Btn>
         </div>
       </div>
 
@@ -419,8 +422,7 @@ onMounted(() => {
 .device-radio-group {
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
-  margin-top: 8px;
+  gap: 16px; 
 }
 
 .device-radio-label {

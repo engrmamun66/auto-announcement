@@ -571,6 +571,7 @@ module.exports = {
     'Devices': 'Devices',
     'Commands': 'Commands',
     'Search device': 'Search device',
+    'Search by student ID...': 'Search by student ID...',
     'Serial Number': 'Serial Number',
     'Brand': 'Brand',
     'Polling Interval': 'Polling Interval',

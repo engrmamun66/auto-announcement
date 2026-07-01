@@ -570,6 +570,7 @@ module.exports = {
     'Devices': 'ডিভাইস',
     'Commands': 'কমান্ড',
     'Search device': 'ডিভাইস খুঁজুন',
+    'Search by student ID...': 'শিক্ষার্থী আইডি দ্বারা অনুসন্ধান...',
     'Serial Number': 'সিরিয়াল নম্বর',
     'Brand': 'ব্র্যান্ড',
     'Polling Interval': 'পোলিং ইন্টারভাল',
