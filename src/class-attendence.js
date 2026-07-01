@@ -1424,9 +1424,10 @@ class Attendance {
               // console.log('punchResult::::::', punchResult);
 
               if (punchResult.error) {
-                if(emitToSocket) this._emitAttendanceToSocket({ message: punchResult.error, data: null }, 'error');
+                if(emitToSocket) this._emitAttendanceToSocket({ message: punchResult.error + `(ID:${dakhela})`, data: null }, 'error');
                 return res.status(400).send({ error: punchResult.error });
               }
+              punchResult.remarks += `(ID:${dakhela})`
 
 
 

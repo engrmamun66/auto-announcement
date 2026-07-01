@@ -332,7 +332,7 @@ function prepareToEdit(std){
     payload[key] = std[key]
   });
   clearProfileImageFile()
-  selectedDevices.value = []
+  selectedDevices.value = devices.value
   addMode.value = true
   editModeTabIndex.value = 1
 }

@@ -39,10 +39,12 @@ const emit = defineEmits([
 
 const helper = inject('helper')
 const emitter = inject('emitter')
+const cardNoEditMode = ref(false)
 
 watch(() => props.modelValue, (newVal) => {
   if (!newVal) {
     emit('clear-payload')
+    cardNoEditMode.value = false
   }
 })
 
@@ -162,7 +164,12 @@ async function handleUpdateStudent() {
                 <div class="col-12">
                   <div class="form-group">
                     <label>{{ helper.t('Card Number') }}</label>
-                    <input v-model="payload.card_no" type="text" class="form-control cb-input cb-input--sm" :placeholder="helper.t('Enter card number')">
+                    <div class="position-relative">
+                      <input v-model="payload.card_no" type="text" class="form-control cb-input cb-input--sm" :placeholder="helper.t('Enter card number')" :disabled="payload?.id && !cardNoEditMode" style="padding-right: 28px;">
+                      <button v-if="payload?.id" type="button" class="card-no-edit-btn" :class="{ 'active': cardNoEditMode }" @click.stop="cardNoEditMode = !cardNoEditMode">
+                        <i :class="cardNoEditMode ? 'bx bx-check' : 'bx bx-edit'"></i> Edit
+                      </button>
+                    </div>
                   </div>
                 </div>
 
@@ -335,5 +342,28 @@ async function handleUpdateStudent() {
   object-fit: cover;
   border: 1px solid #cfcfcf;
   background: #fff;
+}
+.card-no-edit-btn {
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #e3e3e3;
+    border: none;
+    cursor: pointer;
+    color: #666;
+    font-size: 16px;
+    padding: 1px 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color .2s;
+    border-radius: 5px;
+}
+.card-no-edit-btn:hover {
+  color: #4caf50;
+}
+.card-no-edit-btn.active {
+  color: #4caf50;
 }
 </style>
