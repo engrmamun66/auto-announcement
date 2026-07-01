@@ -16,6 +16,11 @@ let props = defineProps({
         default: false,
         required: false,
     },
+    width: {
+        default: '600px',
+        required: false,
+        type: String,
+    },
 
 })
 
@@ -34,7 +39,7 @@ function close(){
     <Teleport to="body" >
         <!-- <div class="an-modal" v-if="modelValue" @click.stop="close()"> -->
         <div class="an-modal" v-if="modelValue" @click.stop="false">
-            <div class="modal__wrapper">
+            <div class="modal__wrapper" :style="{ width: props.width }">
                 <a v-if="closeIconInOutside" @click.stop.prevent="close()" class="modal__close modal__close--outside">×</a>
                 <div class="modal__content fadeUp" @click.stop="false">
                     <slot name="title">

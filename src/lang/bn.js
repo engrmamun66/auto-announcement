@@ -608,7 +608,7 @@ module.exports = {
     'Command sent successfully': 'কমান্ড সফলভাবে পাঠানো হয়েছে',
     'Failed to send command': 'কমান্ড পাঠাতে ব্যর্থ',
     'Execute Command': 'কমান্ড চালান',
-    'Get Attendance': 'উপস্থিতি পান',
+    'Get Attendance': 'উপস্থিতি আনুন',
     'Retrieve attendance by date range': 'তারিখের পরিসর অনুযায়ী উপস্থিতি পুনরুদ্ধার করুন',
     'Start date': 'শুরু তারিখ',
     'End date': 'শেষ তারিখ',

@@ -312,15 +312,46 @@ class CommandController {
 
   async getUsers(req, res) {
     const cn = this.resolveSnKey(req.params.cn);
+    const command = 'DATA QUERY USERINFO';
 
-    this.pushCommand(req, cn, 'DATA QUERY USERINFO');
+    console.log(`👥 Get users request for ${cn}: ${command}`);
 
-    if (Store.data?.[cn]?.users) {
-      return res.status(200).json({ users: Store.data[cn].users });
+    // Always clear cached users to force fresh fetch from device
+    if (Store.data?.[cn]) {
+      delete Store.data[cn].users;
+      console.log(`🔄 Cleared cached users for fresh fetch`);
     }
 
-    await wait(Store.nextPollingTime(cn));
+    // Queue command to database
+    global.db.run(
+      'INSERT INTO command_queue (device_serial_number, command, status) VALUES (?, ?, ?)',
+      [cn, command, 'pending'],
+      function(err) {
+        if (err) {
+          console.error(`❌ Error queueing users command: ${err.message}`);
+        } else {
+          console.log(`✅ Users command queued for ${cn} (ID: ${this.lastID})`);
+        }
+      }
+    );
 
+    // Poll for data with timeout
+    const maxWaitMs = 12000; // 12 second timeout
+    const pollIntervalMs = 200; // check every 200ms
+    const startTime = Date.now();
+
+    console.log(`⏳ Polling for fresh users data (max ${maxWaitMs}ms)...`);
+
+    while (Date.now() - startTime < maxWaitMs) {
+      if (Store.data?.[cn]?.users) {
+        const elapsed = Date.now() - startTime;
+        console.log(`✅ Fresh users data received after ${elapsed}ms: ${Store.data[cn].users.length} records`);
+        return res.status(200).json({ users: Store.data[cn].users });
+      }
+      await wait(pollIntervalMs);
+    }
+
+    console.log(`⚠️ Timeout waiting for users data after ${maxWaitMs}ms`);
     const users = Store.data?.[cn]?.users || [];
     res.status(200).json({ users });
   }
@@ -411,15 +442,46 @@ class CommandController {
 
   async getFingerprints(req, res) {
     const cn = this.resolveSnKey(req.params.cn);
+    const command = 'DATA QUERY FINGERTMP';
 
-    this.pushCommand(req, cn, 'DATA QUERY FINGERTMP');
+    console.log(`🔐 Get fingerprints request for ${cn}: ${command}`);
 
-    if (Store.data?.[cn]?.fingerprints) {
-      return res.status(200).json({ fingerprints: Store.data[cn].fingerprints });
+    // Always clear cached fingerprints to force fresh fetch from device
+    if (Store.data?.[cn]) {
+      delete Store.data[cn].fingerprints;
+      console.log(`🔄 Cleared cached fingerprints for fresh fetch`);
     }
 
-    await wait(Store.nextPollingTime(cn));
+    // Queue command to database
+    global.db.run(
+      'INSERT INTO command_queue (device_serial_number, command, status) VALUES (?, ?, ?)',
+      [cn, command, 'pending'],
+      function(err) {
+        if (err) {
+          console.error(`❌ Error queueing fingerprints command: ${err.message}`);
+        } else {
+          console.log(`✅ Fingerprints command queued for ${cn} (ID: ${this.lastID})`);
+        }
+      }
+    );
 
+    // Poll for data with timeout
+    const maxWaitMs = 12000; // 12 second timeout
+    const pollIntervalMs = 200; // check every 200ms
+    const startTime = Date.now();
+
+    console.log(`⏳ Polling for fresh fingerprints data (max ${maxWaitMs}ms)...`);
+
+    while (Date.now() - startTime < maxWaitMs) {
+      if (Store.data?.[cn]?.fingerprints) {
+        const elapsed = Date.now() - startTime;
+        console.log(`✅ Fresh fingerprints data received after ${elapsed}ms: ${Store.data[cn].fingerprints.length} records`);
+        return res.status(200).json({ fingerprints: Store.data[cn].fingerprints });
+      }
+      await wait(pollIntervalMs);
+    }
+
+    console.log(`⚠️ Timeout waiting for fingerprints data after ${maxWaitMs}ms`);
     const fingerprints = Store.data?.[cn]?.fingerprints || [];
     res.status(200).json({ fingerprints });
   }

@@ -30,5 +30,8 @@ module.exports = function (Students, { upload, audioUpload, imageUpload }) {
   router.get('/student/by-dakhela/:dakhela', (req, res) => Students.getStudentByDakhela(req, res));
   router.get('/single-student', (req, res) => Students.getStudent(req, res));
 
+  router.patch('/students/bulk-sync-card', (req, res) => Students.bulkSyncCard(req, res));
+  router.post('/students/by-classes', (req, res) => Students.getByClasses(req, res));
+
   return router;
 };

@@ -31,6 +31,28 @@
             </button>
           </div>
 
+            <div class="command-item">
+            <div class="command-info">
+              <h4>{{ helper.t('Get Users') }}</h4>
+              <p>{{ helper.t('Retrieve all users from device') }}</p>
+            </div>
+            <button @click="handleGetUsers" class="command-btn users-btn" :disabled="executingCommand || fetchingUsers">
+              <i class='bx bx-group'></i>
+              {{ fetchingUsers ? helper.t('Fetching...') : helper.t('Fetch Users') }}
+            </button>
+          </div>
+
+          <div class="command-item">
+            <div class="command-info">
+              <h4>{{ helper.t('Create Users') }}</h4>
+              <p>{{ helper.t('Add students from selected classes to device') }}</p>
+            </div>
+            <button @click="handleCreateUsers" class="command-btn create-btn" :disabled="executingCommand || fetchingUsers">
+              <i class='bx bx-plus'></i>
+              {{ fetchingUsers ? helper.t('Loading...') : helper.t('Create Users') }}
+            </button>
+          </div>
+
           <div class="command-item">
             <div class="command-info">
               <h4>{{ helper.t('Push Command') }}</h4>
@@ -75,6 +97,9 @@
               </button>
             </div>
           </div>
+
+        
+
         </div>
       </div>
 
@@ -87,11 +112,25 @@
   <div v-else class="commands-empty">
     <p>{{ helper.t('No devices found') }}</p>
   </div>
+
+  <UserListModal
+    v-model="showUsersModal"
+    :users="usersList"
+    :device="selectedDeviceForModal"
+  />
+
+  <ClassSelectionModal
+    v-model="showClassesModal"
+    :device="selectedDevice"
+    @create-users="handleCreateUsersFromClasses"
+  />
 </template>
 
 <script setup>
 import { ref, inject, computed, watch, onMounted } from 'vue';
 import moment from 'moment';
+import UserListModal from './UserListModal.vue';
+import ClassSelectionModal from './ClassSelectionModal.vue';
 
 const props = defineProps({
   devices: {
@@ -113,6 +152,11 @@ const selectedDeviceId = ref('');
 const pushCommandText = ref('');
 const attStartDate = ref(getDefaultStartDate());
 const attEndDate = ref(getDefaultEndDate());
+const fetchingUsers = ref(false);
+const usersList = ref([]);
+const showUsersModal = ref(false);
+const selectedDeviceForModal = ref(null);
+const showClassesModal = ref(false);
 
 function getDefaultStartDate() {
   return moment().startOf('day').format('YYYY-MM-DDTHH:mm');
@@ -131,6 +175,10 @@ watch(() => props.devices, (newDevices) => {
     selectedDeviceId.value = newDevices[0].id;
   }
 }, { immediate: true });
+
+watch(() => selectedDeviceId.value, () => {
+  usersList.value = [];
+});
 
 onMounted(() => {
   if (props.devices.length > 0 && !selectedDeviceId.value) {
@@ -191,11 +239,86 @@ function handleGetAttendance() {
       emitter.emit('toaster-error', { message: helper.t('Failed to fetch attendance') });
     });
 }
+
+function handleGetUsers() {
+  if (!selectedDeviceId.value || !selectedDevice.value) return;
+
+  const device = selectedDevice.value;
+  fetchingUsers.value = true;
+
+  fetch(`/${device.serial_number}/get-users`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+  })
+    .then(res => res.json())
+    .then((data) => {
+      usersList.value = data.users || [];
+      selectedDeviceForModal.value = device;
+      if (usersList.value.length > 0) {
+        emitter.emit('toaster-success', { message: `Users fetched (${usersList.value.length})` });
+        showUsersModal.value = true;
+      } else {
+        emitter.emit('toaster-warning', { message: helper.t('No users found on device') });
+      }
+    })
+    .catch((err) => {
+      console.error('Get users error:', err);
+      emitter.emit('toaster-error', { message: helper.t('Failed to fetch users') });
+      usersList.value = [];
+    })
+    .finally(() => {
+      fetchingUsers.value = false;
+    });
+}
+
+function handleCreateUsers() {
+  if (!selectedDeviceId.value || !selectedDevice.value) return;
+  showClassesModal.value = true;
+}
+
+async function handleCreateUsersFromClasses(students) {
+  if (!selectedDeviceId.value || !selectedDevice.value || !students.length) return;
+
+  const device = selectedDevice.value;
+  fetchingUsers.value = true;
+  let successCount = 0;
+
+  const users = students.map(student => ({
+    pin: String(student.dakhela || student.id),
+    name: student.name || student.fullname || '',
+    card: student.card_no || ''
+  }));
+
+  try {
+    for (const user of users) {
+      try {
+        const res = await fetch(`/${device.serial_number}/update-user`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(user)
+        });
+        if (res.ok) successCount++;
+      } catch (err) {
+        console.warn(`Failed to create user ${user.pin}:`, err);
+      }
+    }
+
+    if (successCount === users.length) {
+      emitter.emit('toaster-success', { message: `Created ${successCount} users on device` });
+    } else {
+      emitter.emit('toaster-warning', { message: `Created ${successCount} of ${users.length} users` });
+    }
+  } catch (err) {
+    console.error('Create users error:', err);
+    emitter.emit('toaster-error', { message: helper.t('Failed to create users') });
+  } finally {
+    fetchingUsers.value = false;
+  }
+}
 </script>
 
 <style scoped>
 .commands-wrapper {
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
@@ -203,42 +326,49 @@ function handleGetAttendance() {
 .commands-container {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  padding: 20px;
+  gap: 24px;
+  padding: 32px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
 }
 
 .devices-selector {
-  background: #fff;
-  border-radius: 10px;
-  padding: 20px;
-  border: 1px solid #e0e0e0;
+  background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+  border-radius: 12px;
+  padding: 24px 28px;
+  border: 1px solid #e8e8e8;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
 }
 
 .radio-group {
   display: flex;
   flex-wrap: wrap;
-  gap: 20px;
+  gap: 24px;
 }
 
 .radio-label {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   cursor: pointer;
   color: #333;
   user-select: none;
+  transition: color 0.2s;
 }
 
 .radio-input {
   cursor: pointer;
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   accent-color: #4caf50;
+  flex-shrink: 0;
 }
 
 .radio-text {
   font-size: 14px;
   font-weight: 500;
+  color: #555;
 }
 
 .radio-label:hover .radio-text {
@@ -247,169 +377,255 @@ function handleGetAttendance() {
 
 .command-card {
   background: #fff;
-  border: 1px solid #e0e0e0;
-  border-radius: 10px;
+  border: 1px solid #e8e8e8;
+  border-radius: 12px;
   overflow: hidden;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
 }
 
 .command-card__header {
-  padding: 25px 25px 15px;
-  border-bottom: 1px solid #e0e0e0;
+  padding: 28px 32px 24px;
+  border-bottom: 2px solid #f0f0f0;
+  background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
 }
 
 .command-card__header h3 {
   margin: 0;
-  color: #333;
-  font-size: 18px;
-  font-weight: 600;
+  color: #2c3e50;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
 }
 
 .command-card__body {
-  padding: 25px;
-  flex: 1;
+  padding: 32px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  gap: 32px;
 }
 
 .command-item {
   display: flex;
   align-items: center;
-  gap: 30px;
-  padding: 20px 0;
+  gap: 32px;
+  padding: 24px;
+  background: #f9f9fb;
+  border-radius: 10px;
+  border: 1px solid #f0f0f0;
+  transition: all 0.2s ease;
+}
+
+.command-item:hover {
+  background: #ffffff;
+  border-color: #e8e8e8;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .command-info {
   flex: 1;
+  min-width: 0;
 }
 
 .command-info h4 {
-  margin: 0 0 8px 0;
-  color: #333;
-  font-size: 16px;
-  font-weight: 600;
+  margin: 0 0 6px 0;
+  color: #2c3e50;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
 }
 
 .command-info p {
   margin: 0;
-  color: #666;
-  font-size: 14px;
+  color: #999;
+  font-size: 13px;
+  font-weight: 500;
 }
 
 .command-btn {
-  padding: 12px 30px;
+  padding: 11px 24px;
   border: none;
-  border-radius: 6px;
-  font-weight: 600;
-  font-size: 14px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 13px;
   cursor: pointer;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  transition: all 0.2s;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
+  flex-shrink: 0;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
 }
 
 .restart-btn {
-  background: #f44336;
+  background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
   color: #fff;
+  box-shadow: 0 2px 8px rgba(244, 67, 54, 0.2);
 }
 
 .restart-btn:hover:not(:disabled) {
-  background: #d32f2f;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(244, 67, 54, 0.3);
+  background: linear-gradient(135deg, #d32f2f 0%, #c62828 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(244, 67, 54, 0.3);
 }
 
 .restart-btn:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
 .command-input-group {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   align-items: center;
+  flex: 0 1 auto;
 }
 
 .command-date-group {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   align-items: center;
   flex-wrap: wrap;
+  flex: 0 1 auto;
 }
 
 .command-input {
-  flex: 1;
-  padding: 10px 12px;
+  padding: 10px 14px;
   border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 14px;
+  border-radius: 8px;
+  font-size: 13px;
   font-family: inherit;
-  transition: border-color 0.2s;
+  background: #fff;
+  transition: all 0.2s;
+  min-width: 140px;
 }
 
 .command-input:focus {
   outline: none;
   border-color: #4caf50;
   box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+  background: #fafafa;
 }
 
 .push-btn {
-  background: #2196f3;
+  background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
   color: #fff;
+  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.2);
 }
 
 .push-btn:hover:not(:disabled) {
-  background: #1976d2;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
+  background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(33, 150, 243, 0.3);
 }
 
 .push-btn:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
 .attendance-btn {
-  background: #4caf50;
+  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
   color: #fff;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2);
 }
 
 .attendance-btn:hover:not(:disabled) {
-  background: #45a049;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+  background: linear-gradient(135deg, #45a049 0%, #3d8b40 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(76, 175, 80, 0.3);
 }
 
 .attendance-btn:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.users-btn {
+  background: linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(156, 39, 176, 0.2);
+}
+
+.users-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #7b1fa2 0%, #6a1b9a 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(156, 39, 176, 0.3);
+}
+
+.users-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.create-btn {
+  background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(255, 152, 0, 0.2);
+}
+
+.create-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #f57c00 0%, #e65100 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(255, 152, 0, 0.3);
+}
+
+.create-btn:disabled {
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
 .commands-empty {
   background: #fff;
-  border: 1px solid #e0e0e0;
-  border-radius: 10px;
+  border: 2px dashed #e0e0e0;
+  border-radius: 12px;
   text-align: center;
-  padding: 60px 20px;
-  color: #999;
-  font-size: 14px;
+  padding: 80px 20px;
+  color: #bbb;
+  font-size: 15px;
+  font-weight: 500;
 }
 
 @media (max-width: 768px) {
+  .commands-container {
+    padding: 24px 16px;
+    gap: 20px;
+  }
+
+  .devices-selector {
+    padding: 20px 24px;
+  }
+
+  .command-card__body {
+    padding: 24px;
+    gap: 24px;
+  }
+
   .command-item {
     flex-direction: column;
     align-items: stretch;
-    gap: 15px;
+    gap: 16px;
+    padding: 20px;
   }
 
   .command-btn {
     width: 100%;
-    justify-content: center;
+    padding: 12px 20px;
+  }
+
+  .command-input-group {
+    flex-direction: column;
+  }
+
+  .command-date-group {
+    flex-direction: column;
+  }
+
+  .command-input {
+    width: 100%;
+    min-width: unset;
   }
 }
 </style>

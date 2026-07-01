@@ -253,6 +253,12 @@ class CdataController {
       Store.data[sn] = { ...Store.data[sn], oplogs };
       console.log('>>>>>>>>> OPLOG:', oplogs.length, 'records');
     }
+    else if (this._isFingerprintData(row_item)) {
+      const fingerprints = rows.map(r => this._parseFingerprintData(r.parts));
+      this._writeFingerprintsToFile(sn, packIdx, fingerprints);
+      Store.data[sn] = { ...Store.data[sn], fingerprints };
+      console.log('>>>>>>>>> FINGERPRINTS:', fingerprints.length, 'records');
+    }
     else {
       console.log('>>>>>>>>> Others:', { row_item });
       this._writeOthersToFile(sn, rows);
