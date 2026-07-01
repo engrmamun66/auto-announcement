@@ -32,7 +32,7 @@
       {{ helper.t('No devices found. Please add a device first.') }}
     </div>
 
-    <div v-if="selectedDeviceId" class="row g-3">
+    <div v-if="selectedDeviceId" class="row g-2">
       <div class="col-12 col-md-4">
         <label for="">
           {{ helper.t('Start Time') }}
