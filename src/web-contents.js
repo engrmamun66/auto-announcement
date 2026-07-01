@@ -26,7 +26,7 @@ module.exports = `
         : '<script src="./../em-datetimepicker.min.js?doc=false" async="true" defer="true"></script>'
     }
     <!-- CSS_VARS -->
-    <style>
+    <style class="custom-css">
       DYNAMIC_CUSTOM_CSS
     </style>
 </head>
