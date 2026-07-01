@@ -188,6 +188,11 @@ app.get(`/app`, (req, res) => {
       </style>
       `)
   }
+
+  // With custom CSS
+  let custom_css = config?.settings?.custom_css || '';
+  webContents = webContents.replace('DYNAMIC_CUSTOM_CSS', custom_css)
+
   res.send(webContents)
 });
 

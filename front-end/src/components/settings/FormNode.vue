@@ -22,7 +22,8 @@ const type = computed(() => {
     if (typeof v === 'object') return 'object';
     if (typeof v === 'string') {
         const isMessageTemplate = /message_template/i.test(props.propKey);
-        return (isMessageTemplate || v.includes('\n') || v.length > 120) ? 'textarea' : 'string';
+        const isCustomCss = /custom_css/i.test(props.propKey);
+        return (isMessageTemplate || isCustomCss || v.includes('\n') || v.length > 120) ? 'textarea' : 'string';
     }
     return 'string';
 });

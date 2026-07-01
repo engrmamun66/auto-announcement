@@ -177,6 +177,7 @@ module.exports = {
      --grad2: linear-gradient(90deg, rgba(118, 118, 118, 0.348) 0%, rgba(246, 231, 255, 0.486) 100%);
      --grad3: linear-gradient(90deg, var(--primaryColor) 0%, var(--secondaryColor) 100%);
      `,
+     custom_css: `body{zoom: 1}`,
     
      classes: [
           {

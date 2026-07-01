@@ -21,11 +21,14 @@ module.exports = `
     </script>
     <link rel="stylesheet" href="/dist/assets/my-announcement.min.css">
     <script type="module" src="/dist/assets/my-announcement.min.js"></script>
-    ${laod_date_picker_from_http_server 
-        ? '<script src="http://localhost:4545/assets/em-datetimepicker.min.js?doc=false" async="true" defer="true"></script>' 
+    ${laod_date_picker_from_http_server
+        ? '<script src="http://localhost:4545/assets/em-datetimepicker.min.js?doc=false" async="true" defer="true"></script>'
         : '<script src="./../em-datetimepicker.min.js?doc=false" async="true" defer="true"></script>'
     }
     <!-- CSS_VARS -->
+    <style>
+      DYNAMIC_CUSTOM_CSS
+    </style>
 </head>
 
 <body>
