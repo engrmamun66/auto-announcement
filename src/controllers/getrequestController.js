@@ -68,39 +68,44 @@ class GetrequestController {
 
           const delayLine = `Delay=${polling_interval}\r\nTransInterval=${polling_interval}`;
 
-          // Fetch next pending command from database
-          db.get(
-            'SELECT id, command FROM command_queue WHERE device_serial_number = ? AND status = ? ORDER BY created_at ASC LIMIT 1',
+          // Fetch ALL pending commands for batch processing (up to 50 commands per poll)
+          const limit = 500
+          db.all(
+            `SELECT id, command FROM command_queue WHERE device_serial_number = ? AND status = ? ORDER BY created_at ASC LIMIT ${limit}`,
             [sn, 'pending'],
-            (cmdErr, row) => {
+            (cmdErr, rows) => {
               if (cmdErr) {
-                console.error(`Error fetching command for ${sn}:`, cmdErr.message);
+                console.error(`Error fetching commands for ${sn}:`, cmdErr.message);
                 return res.status(200)
                   .type('text/plain')
                   .send(`${delayLine}\r\nOK\r\n`);
               }
 
-              if (row) {
-                // Format command with dynamic ID: C:ID:COMMAND
-                const commandId = row.id;
-                const formattedCommand = `C:${commandId}:${row.command}`;
+              if (rows && rows.length > 0) {
+                // Format all commands: C:ID:COMMAND
+                const formattedCommands = rows.map(row => `C:${row.id}:${row.command}`);
+                const commandBatch = formattedCommands.join('\r\n');
 
-                console.log(`📤 Command sent to ZKTeco [${sn}]:`, formattedCommand);
+                console.log(`📤 Batch commands sent to ZKTeco [${sn}]: ${rows.length} command(s)`);
+                rows.forEach(row => console.log(`   - C:${row.id}:${row.command}`));
 
-                // Mark command as sent
+                // Mark all commands as sent (batch update)
+                const commandIds = rows.map(r => r.id);
+                const placeholders = commandIds.map(() => '?').join(',');
                 db.run(
-                  'UPDATE command_queue SET status = ?, sent_at = ? WHERE id = ?',
-                  ['sent', new Date().toISOString(), row.id],
+                  `UPDATE command_queue SET status = ?, sent_at = ? WHERE id IN (${placeholders})`,
+                  ['sent', new Date().toISOString(), ...commandIds],
                   (updateErr) => {
                     if (updateErr) {
-                      console.error(`Error updating command status: ${updateErr.message}`);
+                      console.error(`Error updating command status for ${sn}:`, updateErr.message);
                     }
                   }
                 );
-                console.log('Command queued::', `${delayLine}\r\n${formattedCommand}\r\n`);
+
+                console.log(`Command batch queued::\n${delayLine}\r\n${commandBatch}\r\n`);
                 return res.status(200)
                   .type('text/plain')
-                  .send(`${delayLine}\r\n${formattedCommand}\r\n`);
+                  .send(`${delayLine}\r\n${commandBatch}\r\n`);
               } else {
                 res.status(200)
                   .type('text/plain')
