@@ -31,6 +31,7 @@ const showFingerprintDetails = ref(false)
 const selectedFingerprint = ref({ pin: '', userName: '' })
 const showFingerSelection = ref(false)
 const enrollingUser = ref({ pin: '', name: '' })
+const enrolledFidsForEnroll = ref([])
 
 async function fetchFingerprints() {
   if (!props.device) return;
@@ -44,8 +45,12 @@ async function fetchFingerprints() {
     const fpMap = {};
     (data.fingerprints || []).forEach(fp => {
       const pin = String(fp['FP PIN'] || fp.PIN || fp.pin);
-      if (!fpMap[pin]) fpMap[pin] = 0;
-      fpMap[pin]++;
+      const fid = parseInt(fp.FID || 0);
+      if (!fpMap[pin]) fpMap[pin] = { count: 0, fids: [] };
+      fpMap[pin].count++;
+      if (!fpMap[pin].fids.includes(fid)) {
+        fpMap[pin].fids.push(fid);
+      }
     });
     fingerprints.value = fpMap;
     console.log('Fingerprints loaded:', fpMap);
@@ -57,7 +62,13 @@ async function fetchFingerprints() {
 }
 
 function getFingerprintCount(pin) {
-  return fingerprints.value[String(pin)] || 0;
+  const fpData = fingerprints.value[String(pin)];
+  return fpData ? fpData.count : 0;
+}
+
+function getEnrolledFids(pin) {
+  const fpData = fingerprints.value[String(pin)];
+  return fpData ? fpData.fids : [];
 }
 
 function handleFingerprintClick(pin, userName) {
@@ -69,6 +80,7 @@ function handleFingerprintClick(pin, userName) {
 
 function handleEnrollFingerprint(pin, name) {
   enrollingUser.value = { pin: String(pin), name }
+  enrolledFidsForEnroll.value = getEnrolledFids(pin)
   showFingerSelection.value = true
 }
 
@@ -287,6 +299,7 @@ watch(() => props.modelValue, (newVal) => {
     :device="device"
     :pin="enrollingUser.pin"
     :userName="enrollingUser.name"
+    :enrolledFids="enrolledFidsForEnroll"
     @select-finger="handleFingerSelected"
   />
 </template>
