@@ -300,6 +300,7 @@ watch(() => props.modelValue, (newVal) => {
     :pin="enrollingUser.pin"
     :userName="enrollingUser.name"
     :enrolledFids="enrolledFidsForEnroll"
+    :onRefreshFingerprints="fetchFingerprints"
     @select-finger="handleFingerSelected"
   />
 </template>

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, inject } from 'vue'
+import { ref, inject, watch } from 'vue'
 import Modal from '../modal.vue'
 
 const props = defineProps({
@@ -19,6 +19,10 @@ const props = defineProps({
   enrolledFids: {
     type: Array,
     default: () => []
+  },
+  onRefreshFingerprints: {
+    type: Function,
+    default: null
   }
 })
 
@@ -60,6 +64,12 @@ function handleClose() {
   selectedFinger.value = null
   emit('update:modelValue', false)
 }
+
+watch(() => props.modelValue, (newVal) => {
+  if (newVal && props.onRefreshFingerprints) {
+    props.onRefreshFingerprints()
+  }
+})
 </script>
 
 <template>
