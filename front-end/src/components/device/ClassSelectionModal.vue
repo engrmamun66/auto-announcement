@@ -178,22 +178,20 @@ watch(() => props.modelValue, (newVal) => {
   >
     <div class="classes-modal-content">
       <div class="classes-stats">
-        <span class="stat-badge">Total Classes: <strong>{{ classes.length }}</strong></span>
-        <span v-if="selectedClasses.size > 0" class="stat-badge selected">Selected: <strong>{{ selectedClasses.size }}</strong></span>
+        <span class="stat-badge">{{ helper.t('Total Classes') }}: <strong>{{ classes.length }}</strong></span>
+        <span class="stat-badge selected">{{ helper.t('Selected') }}: <strong>{{ selectedClasses.size }}</strong></span>
         <div class="action-buttons">
           <button
-            v-if="selectedClasses.size > 0"
             @click="handleCreate"
-            :disabled="creating"
+            :disabled="creating || !selectedClasses.size"
             class="action-btn create-btn"
           >
             <i class='bx bx-plus'></i>
             {{ creating ? 'Loading...' : 'Create Users' }}
           </button>
           <button
-            v-if="selectedClasses.size > 0"
             @click="handleDeleteClick"
-            :disabled="creating"
+            :disabled="creating || !selectedClasses.size"
             class="action-btn delete-btn"
           >
             <i class='bx bx-trash'></i>
@@ -214,8 +212,8 @@ watch(() => props.modelValue, (newVal) => {
                   class="select-all-checkbox"
                 />
               </th>
-              <th>Class Name</th>
-              <th>Short Code</th>
+              <th>{{ helper.t('Class Name') }}</th>
+              <th>{{ helper.t('Short Code') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -232,7 +230,7 @@ watch(() => props.modelValue, (newVal) => {
               <td class="col-short">{{ cls.class_short || cls.short || '-' }}</td>
             </tr>
             <tr v-if="classes.length === 0">
-              <td colspan="3" class="text-center text-muted">No classes found</td>
+              <td colspan="3" class="text-center text-muted">{{ helper.t('No classes found') }}</td>
             </tr>
           </tbody>
         </table>

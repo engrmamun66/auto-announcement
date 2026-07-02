@@ -38,18 +38,18 @@
             </div>
             <button @click="handleGetUsers" class="command-btn users-btn" :disabled="executingCommand || fetchingUsers">
               <i class='bx bx-group'></i>
-              {{ fetchingUsers ? helper.t('Fetching...') : helper.t('Fetch Users') }}
+              {{ fetchingUsers ? helper.t('Getting...') : helper.t('Get Users') }}
             </button>
           </div>
 
           <div class="command-item">
             <div class="command-info">
-              <h4>{{ helper.t('Create Users') }}</h4>
+              <h4>{{ helper.t('Create/Delete Users') }}</h4>
               <p>{{ helper.t('Add students from selected classes to device') }}</p>
             </div>
-            <button @click="handleCreateUsers" class="command-btn create-btn" :disabled="executingCommand || fetchingUsers">
+            <button @click="handleCreateUsers" class="command-btn create-btn" :disabled="executingCommand || creatingUsers">
               <i class='bx bx-plus'></i>
-              {{ fetchingUsers ? helper.t('Loading...') : helper.t('Create Users') }}
+              {{ creatingUsers ? helper.t('Loading...') : helper.t('Open Students') }}
             </button>
           </div>
 
@@ -153,6 +153,7 @@ const pushCommandText = ref('');
 const attStartDate = ref(getDefaultStartDate());
 const attEndDate = ref(getDefaultEndDate());
 const fetchingUsers = ref(false);
+const creatingUsers = ref(false);
 const usersList = ref([]);
 const showUsersModal = ref(false);
 const selectedDeviceForModal = ref(null);
@@ -280,7 +281,7 @@ async function handleCreateUsersFromClasses(students) {
   if (!selectedDeviceId.value || !selectedDevice.value || !students.length) return;
 
   const device = selectedDevice.value;
-  fetchingUsers.value = true;
+  creatingUsers.value = true;
   let successCount = 0;
 
   const users = students.map(student => ({
@@ -312,7 +313,7 @@ async function handleCreateUsersFromClasses(students) {
     console.error('Create users error:', err);
     emitter.emit('toaster-error', { message: helper.t('Failed to create users') });
   } finally {
-    fetchingUsers.value = false;
+    creatingUsers.value = false;
   }
 }
 </script>

@@ -1,6 +1,8 @@
 <script setup>
 import { ref, inject, watch } from 'vue'
 import Modal from '../modal.vue'
+import FingerprintDetailsModal from './FingerprintDetailsModal.vue'
+import FingerSelectionModal from './FingerSelectionModal.vue'
 
 const props = defineProps({
   modelValue: Boolean,
@@ -25,6 +27,10 @@ const selectAllChecked = ref(false)
 const syncing = ref(false)
 const fingerprints = ref({})
 const loadingFingerprints = ref(false)
+const showFingerprintDetails = ref(false)
+const selectedFingerprint = ref({ pin: '', userName: '' })
+const showFingerSelection = ref(false)
+const enrollingUser = ref({ pin: '', name: '' })
 
 async function fetchFingerprints() {
   if (!props.device) return;
@@ -52,6 +58,25 @@ async function fetchFingerprints() {
 
 function getFingerprintCount(pin) {
   return fingerprints.value[String(pin)] || 0;
+}
+
+function handleFingerprintClick(pin, userName) {
+  const count = getFingerprintCount(pin)
+  if (count === 0) return
+  selectedFingerprint.value = { pin: String(pin), userName }
+  showFingerprintDetails.value = true
+}
+
+function handleEnrollFingerprint(pin, name) {
+  enrollingUser.value = { pin: String(pin), name }
+  showFingerSelection.value = true
+}
+
+async function handleFingerSelected({ fid, fingerName }) {
+  if (!props.device || !enrollingUser.value.pin) return
+
+  emitter.emit('toaster-info', { message: `Selected: ${fingerName} (FID: ${fid})` })
+  console.log(`Enroll fingerprint: PIN=${enrollingUser.value.pin}, FID=${fid}`)
 }
 
 function toggleSelectAll() {
@@ -216,8 +241,24 @@ watch(() => props.modelValue, (newVal) => {
               </td>
               <td class="col-group">{{ user.Grp || '-' }}</td>
               <td class="col-fingerprints">
-                <span v-if="loadingFingerprints" class="fp-loading">Loading...</span>
-                <span v-else class="fp-badge">{{ getFingerprintCount(user['USER PIN']) }}</span>
+                <div class="fp-controls">
+                  <span v-if="loadingFingerprints" class="fp-loading">Loading...</span>
+                  <span
+                    v-else
+                    class="fp-badge"
+                    :class="{ 'fp-clickable': getFingerprintCount(user['USER PIN']) > 0 }"
+                    @click="handleFingerprintClick(user['USER PIN'], user.Name)"
+                  >
+                    {{ getFingerprintCount(user['USER PIN']) }}
+                  </span>
+                  <button
+                    class="fp-enroll-btn"
+                    @click="handleEnrollFingerprint(user['USER PIN'], user.Name)"
+                    title="Enroll new fingerprint"
+                  >
+                    <i class='bx bx-plus-circle'></i>
+                  </button>
+                </div>
               </td>
               <td class="col-privilege">
                 <span class="privilege-badge" :class="getPrivilegeClass(parseInt(user.Pri))">
@@ -233,6 +274,21 @@ watch(() => props.modelValue, (newVal) => {
       </div>
     </div>
   </Modal>
+
+  <FingerprintDetailsModal
+    v-model="showFingerprintDetails"
+    :device="device"
+    :pin="selectedFingerprint.pin"
+    :userName="selectedFingerprint.userName"
+  />
+
+  <FingerSelectionModal
+    v-model="showFingerSelection"
+    :device="device"
+    :pin="enrollingUser.pin"
+    :userName="enrollingUser.name"
+    @select-finger="handleFingerSelected"
+  />
 </template>
 
 <style scoped>
@@ -431,6 +487,12 @@ watch(() => props.modelValue, (newVal) => {
   text-align: center;
 }
 
+.fp-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .fp-badge {
   display: inline-block;
   background: linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%);
@@ -441,6 +503,41 @@ watch(() => props.modelValue, (newVal) => {
   font-size: 12px;
   min-width: 30px;
   text-align: center;
+}
+
+.fp-badge.fp-clickable {
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.fp-badge.fp-clickable:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(156, 39, 176, 0.4);
+}
+
+.fp-enroll-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 14px;
+}
+
+.fp-enroll-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.4);
+}
+
+.fp-enroll-btn:active {
+  transform: scale(0.95);
 }
 
 .fp-loading {
