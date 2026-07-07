@@ -29,6 +29,15 @@
       </label>
     </div>
 
+
+    <div v-if="adjustedTimeInfo" class="alert-info">
+      <i class='bx bx-info-circle'></i>
+      <span>
+        <strong>Adjust Time Applied:</strong> {{ adjustedTimeInfo.original }} → {{ adjustedTimeInfo.adjusted }}
+        <br><small>Device adjust_time: <code>{{ selectedDevice?.adjust_time }}</code></small>
+      </span>
+    </div>
+
     <!-- <div class="form-group">
       <label>Status</label>
       <input v-model="devPunch.status" type="text" class="form-control" placeholder="e.g., 0">
@@ -52,7 +61,7 @@
 </template>
 
 <script setup>
-import { ref, inject, onMounted, watch } from 'vue'
+import { ref, inject, onMounted, watch, computed } from 'vue'
 
 const props = defineProps({
   devices: {
@@ -68,7 +77,7 @@ const isArtificialPunch = ref(false)
 const devPunch = ref({
   sn: localStorage.getItem('devPunch_sn') || '',
   userId: localStorage.getItem('devPunch_userId') || '',
-  punchTime: new Date().toISOString().slice(0, 16),
+  punchTime: moment().format('YYYY-MM-DDTHH:mm'),
   status: '0',
   verify: '0',
   workCode: ''
@@ -76,7 +85,7 @@ const devPunch = ref({
 
 onMounted(() => {
   // Ensure punchTime is always fresh/current on mount
-  devPunch.value.punchTime = new Date().toISOString().slice(0, 16)
+  devPunch.value.punchTime = moment().format('YYYY-MM-DDTHH:mm')
 })
 
 // Save sn and userId to localStorage
@@ -87,6 +96,46 @@ watch(() => devPunch.value.sn, (newSn) => {
 watch(() => devPunch.value.userId, (newUserId) => {
   if (newUserId) localStorage.setItem('devPunch_userId', newUserId)
 })
+
+// Get selected device
+const selectedDevice = computed(() => {
+  return props.devices.find(d => d.serial_number === devPunch.value.sn)
+})
+
+// Calculate adjusted time if not artificial punch
+const adjustedTimeInfo = computed(() => {
+  if (!selectedDevice.value) {
+    return null
+  }
+
+  let adjustTime = selectedDevice.value.adjust_time || "subtract(0, 'hour')"
+  console.log({adjustTime});
+
+  let operations = adjustTime.replace(/^\./, '')
+
+  if(!isArtificialPunch.value){
+    if (adjustTime.startsWith('subtract')) {
+      operations = operations.replace(/(subtract)/g, 'add')
+    } else if (adjustTime.startsWith('add')) {
+      operations = operations.replace(/(add)/g, 'subtract')
+    } 
+  }   
+
+  // Calculate new time
+  const punchTimeStr = devPunch.value.punchTime.replace('T', ' ') + ':00'
+  const punchMoment = moment(punchTimeStr, 'YYYY-MM-DD HH:mm:ss')
+  const adjustFn = new Function('moment', 'dateTime', `return moment(dateTime, 'YYYY-MM-DD HH:mm:ss').${operations}`)
+
+  
+  const original = punchMoment.format('YYYY-MM-DD hh:mm:ss A')
+  const adjustedMoment = adjustFn(moment, punchMoment).format('YYYY-MM-DD HH:mm:ss')
+
+  return {
+    original,
+    adjusted: adjustedMoment,
+  }
+})
+
 
 function sendDevPunch() {
   if (!devPunch.value.sn || !devPunch.value.userId) {
@@ -134,7 +183,7 @@ function sendDevPunch() {
       console.log('Dev punch response:', res.status, res.statusText)
       emitter.emit('toaster-success', { message: `Punch sent to device ${devPunch.value.sn}` })
       // Update punchTime to current (keep other fields for next punch)
-      devPunch.value.punchTime = new Date().toISOString().slice(0, 16)
+      devPunch.value.punchTime = moment().format('YYYY-MM-DDTHH:mm')
     })
     .catch(err => {
       console.error('Dev punch error:', err)
@@ -241,5 +290,41 @@ function sendDevPunch() {
 .btn-primary:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+
+.alert-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  margin-bottom: 16px;
+  background: #e3f2fd;
+  border-left: 4px solid #2196f3;
+  border-radius: 4px;
+  font-size: 13px;
+  color: #1565c0;
+  line-height: 1.5;
+}
+
+.alert-info i {
+  flex-shrink: 0;
+  margin-top: 2px;
+  font-size: 16px;
+}
+
+.alert-info span {
+  flex: 1;
+}
+
+.alert-info code {
+  display: inline-block;
+  padding: 2px 6px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 3px;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  color: #0d47a1;
+  margin-top: 4px;
 }
 </style>
