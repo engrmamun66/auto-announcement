@@ -27,8 +27,8 @@
 
     <div class="form-group checkbox-group">
       <label>
-        <input v-model="isArtificialPunch" type="checkbox">
-        <span>Artificial Punch (Dev/Test Mode)</span>
+        <input v-model="forceAsRealtime" type="checkbox">
+        <span>Force As Real-Time Punch</span>
       </label>
     </div>
 
@@ -77,7 +77,7 @@ const props = defineProps({
 const emitter = inject('emitter')
 
 const sending = ref(false)
-const isArtificialPunch = ref(true)
+const forceAsRealtime = ref(true)
 const devPunch = ref({
   sn: localStorage.getItem('devPunch_sn') || '',
   userId: localStorage.getItem('devPunch_userId') || '',
@@ -117,7 +117,7 @@ const adjustedTimeInfo = computed(() => {
 
   let operations = adjustTime.replace(/^\./, '')
 
-  if(!isArtificialPunch.value){
+  if(!forceAsRealtime.value){
     if (adjustTime.startsWith('subtract')) {
       operations = operations.replace(/(subtract)/g, 'add')
     } else if (adjustTime.startsWith('add')) {
@@ -132,7 +132,7 @@ const adjustedTimeInfo = computed(() => {
 
   
   const original = punchMoment.format('YYYY-MM-DD hh:mm:ss A')
-  const adjustedMoment = isArtificialPunch.value ? original : adjustFn(moment, punchMoment).format('YYYY-MM-DD HH:mm:ss')
+  const adjustedMoment = forceAsRealtime.value ? original : adjustFn(moment, punchMoment).format('YYYY-MM-DD HH:mm:ss')
 
   return {
     original,
@@ -156,7 +156,7 @@ function sendDevPunch() {
 
   // Use adjusted time if not artificial punch, otherwise use selected punchTime
   let dateTime
-  if (!isArtificialPunch.value && adjustedTimeInfo.value) {
+  if (!forceAsRealtime.value && adjustedTimeInfo.value) {
     dateTime = adjustedTimeInfo.value.adjusted
   } else {
     // Convert punchTime from datetime-local format to API format
@@ -172,14 +172,14 @@ function sendDevPunch() {
     devPunch.value.workCode || ''
   ].join('\t')
 
-  console.log('Sending dev punch:', { sn: devPunch.value.sn, row, isArtificial: isArtificialPunch.value })
+  console.log('Sending dev punch:', { sn: devPunch.value.sn, row, isArtificial: forceAsRealtime.value })
 
-  // Build URL with conditional artificialPunch param
+  // Build URL with conditional forceAsRealtime param
   const url = new URL(`/iclock/cdata`, window.location.origin)
   url.searchParams.append('SN', devPunch.value.sn)
   url.searchParams.append('table', 'ATTLOG')
-  if (isArtificialPunch.value) {
-    url.searchParams.append('artificialPunch', 'true')
+  if (forceAsRealtime.value) {
+    url.searchParams.append('forceAsRealtime', 'true')
   }
 
   // Send raw POST to /iclock/cdata endpoint

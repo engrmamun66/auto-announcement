@@ -220,16 +220,16 @@ class CdataController {
         // Process each punch through attendance submission
         // const only_attendance_feature = global.config?.settings?.attendance?.only_attendance_feature
         const now = moment()
-        const artificialPunch = req.query.artificialPunch === 'true'
+        const forceAsRealtime = req.query.forceAsRealtime === 'true'
         let is_realtime_punch = records?.length === 1 && moment(records?.[0]?.punch_time, 'YYYY-MM-DD HH:mm:ss').isBetween(
             now.clone().subtract(50, 'seconds'),
             now.clone().add(50, 'seconds')
           )
 
-        // Treat as real-time if marked as artificial (dev/test punch)
-        if (artificialPunch) {
+        // Treat as real-time if forced (dev/test punch)
+        if (forceAsRealtime) {
           is_realtime_punch = true
-          console.log('🧪 Artificial punch detected. Treating as real-time.')
+          console.log('🧪 Forced as real-time punch. Processing immediately.')
         }
 
         console.log('NOW:', now.format('YYYY-MM-DD HH:mm:ss'), '| Is Realtime:', is_realtime_punch);

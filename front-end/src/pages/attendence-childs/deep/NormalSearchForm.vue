@@ -31,9 +31,16 @@ const route = useRoute()
 let selectedStudents = ref([])
 let search_text = ref('')
 
-// Auto-select student from query param
+// Load last selected student from localStorage or query param
+const savedStudentDakhela = localStorage.getItem('lastSelectedStudent_dakhela')
 if (route.query.dakhela && !selectedStudents.value.length) {
   const dakhela = Number(route.query.dakhela)
+  const studentToSelect = all_students.value.find(s => s.dakhela == dakhela)
+  if (studentToSelect) {
+    selectedStudents.value = [studentToSelect]
+  }
+} else if (savedStudentDakhela && !selectedStudents.value.length) {
+  const dakhela = Number(savedStudentDakhela)
   const studentToSelect = all_students.value.find(s => s.dakhela == dakhela)
   if (studentToSelect) {
     selectedStudents.value = [studentToSelect]
@@ -80,7 +87,16 @@ watch(sortby_column, (newVal) => {
   attPayload.sort_by = newVal
   submitSearch({...pickerModelValue.value})
 })
- 
+
+// Save selected student to localStorage
+watch(() => selectedStudents.value, (newStudents) => {
+  if (newStudents.length > 0) {
+    const dakhela = typeof newStudents[0] === 'number' ? newStudents[0] : newStudents[0].dakhela
+    localStorage.setItem('lastSelectedStudent_dakhela', dakhela)
+  } else {
+    localStorage.removeItem('lastSelectedStudent_dakhela')
+  }
+}, { deep: true })
 
 let dateRangePickerRef = ref(null)
 let pickerModelValue = ref({startDate: moment().format('YYYY-MM-DD')})
