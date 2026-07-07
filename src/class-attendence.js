@@ -1625,7 +1625,9 @@ class Attendance {
                               .replace(/{date}/g, formatDate(row.date || ''))
                               .replace(/{time}/g, formattedTime);
                             console.log(`[SMS_DEBUG_RECOVERY] Sending SMS to ${stdnt.phone_number}: "${message}"`);
-                            Sms.sendSMS(stdnt.phone_number, message);
+                            Sms._sendSmsInternal([stdnt.phone_number], message).catch(err => {
+                              console.error(`[SMS_DEBUG_RECOVERY] Failed to send SMS:`, err.message);
+                            });
                           }
                         });
                       }
