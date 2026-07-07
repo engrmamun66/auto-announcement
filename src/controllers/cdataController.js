@@ -158,7 +158,7 @@ class CdataController {
 
     else if (table === 'ATTLOG' && this._isRealPunch(row_item)) {
       global.db.get('SELECT adjust_time FROM devices WHERE serial_number = ?', [sn], (err, device) => {
-        let operations_add_subtract = `subtract(2, 'hour')`;
+        let operations_add_subtract = `subtract(0, 'hour')`;
         if (!err && device && device.adjust_time) {
           operations_add_subtract = String(device.adjust_time).replace(/^\./, '');
         }
