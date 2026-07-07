@@ -1366,7 +1366,6 @@ class Attendance {
       if (!barcode) {
         return res.status(400).send({ error: 'Barcode required.' });
       }
-
       const TIME_FORMAT = 'HH:mm:ss';
       const DATE_FORMAT = 'YYYY-MM-DD';
       const moment_punch = moment.isMoment(punch_time) ? punch_time : moment(new Date(punch_time));
@@ -1468,38 +1467,62 @@ class Attendance {
                     if (err) return res.status(500).send({ error: err.message });
 
                     // Send SMS if enabled and not skipped
+                    console.log(`[SMS_DEBUG] Attendance created. skipSms=${skipSms}, row.student_id=${row?.student_id}, row.date=${row?.date}`);
                     if (row && row.student_id && row.date && !skipSms) {
                       db.get(`SELECT * FROM students WHERE dakhela = ?`, [row.student_id], (err, stdnt) => {
-                        if (!err && stdnt && stdnt.phone_number) {
-                          const smsConfig = global.config?.settings?.sms;
-                          if (smsConfig?.enabled && Sms) {
-                            let shouldSendSms = false;
-                            let template = null;
-                            let time = null;
+                        if (err) {
+                          console.log(`[SMS_DEBUG] Error fetching student:`, err.message);
+                          return;
+                        }
+                        console.log(`[SMS_DEBUG] Student found: ${stdnt?.name}, phone=${stdnt?.phone_number}`);
+                        if (!stdnt || !stdnt.phone_number) {
+                          console.log(`[SMS_DEBUG] No student or phone_number`);
+                          return;
+                        }
 
-                            if (row.in_time && smsConfig?.send_on_in) {
-                              shouldSendSms = true;
-                              template = smsConfig?.in_message_template;
-                              time = row.in_time;
-                            } else if (row.out_time && smsConfig?.send_on_out) {
-                              shouldSendSms = true;
-                              template = smsConfig?.out_message_template;
-                              time = row.out_time;
-                            }
+                        const smsConfig = global.config?.settings?.sms;
+                        console.log(`[SMS_DEBUG] SMS Config:`, { enabled: smsConfig?.enabled, send_on_in: smsConfig?.send_on_in, send_on_out: smsConfig?.send_on_out });
+                        if (!smsConfig?.enabled) {
+                          console.log(`[SMS_DEBUG] SMS not enabled in config`);
+                          return;
+                        }
+                        if (!Sms) {
+                          console.log(`[SMS_DEBUG] Sms class not available`);
+                          return;
+                        }
 
-                            if (shouldSendSms && template) {
-                              const formattedTime = formatTimeWithPeriod(time || '');
-                              const message = template
-                                .replace(/{name}/g, stdnt.name?.split('||')[0] || 'Student')
-                                .replace(/{class}/g, stdnt.class || 'N/F')
-                                .replace(/{dakhela}/g, stdnt.dakhela || 'N/F')
-                                .replace(/{date}/g, formatDate(row.date || ''))
-                                .replace(/{time}/g, formattedTime);
-                              Sms._sendSmsInternal([stdnt.phone_number], message).catch(err => {
-                                console.error('SMS send error:', err.message);
-                              });
-                            }
-                          }
+                        let shouldSendSms = false;
+                        let template = null;
+                        let time = null;
+
+                        console.log(`[SMS_DEBUG] Row times: in_time=${row.in_time}, out_time=${row.out_time}`);
+                        if (row.in_time && smsConfig?.send_on_in) {
+                          shouldSendSms = true;
+                          template = smsConfig?.in_message_template;
+                          time = row.in_time;
+                          console.log(`[SMS_DEBUG] Using in_time template`);
+                        } else if (row.out_time && smsConfig?.send_on_out) {
+                          shouldSendSms = true;
+                          template = smsConfig?.out_message_template;
+                          time = row.out_time;
+                          console.log(`[SMS_DEBUG] Using out_time template`);
+                        } else {
+                          console.log(`[SMS_DEBUG] No matching conditions for SMS (in_time=${row.in_time}, out_time=${row.out_time})`);
+                        }
+
+                        console.log(`[SMS_DEBUG] shouldSendSms=${shouldSendSms}, template=${!!template}`);
+                        if (shouldSendSms && template) {
+                          const formattedTime = formatTimeWithPeriod(time || '');
+                          const message = template
+                            .replace(/{name}/g, stdnt.name?.split('||')[0] || 'Student')
+                            .replace(/{class}/g, stdnt.class || 'N/F')
+                            .replace(/{dakhela}/g, stdnt.dakhela || 'N/F')
+                            .replace(/{date}/g, formatDate(row.date || ''))
+                            .replace(/{time}/g, formattedTime);
+                          console.log(`[SMS_DEBUG] Sending SMS to ${stdnt.phone_number}: "${message}"`);
+                          Sms._sendSmsInternal([stdnt.phone_number], message).catch(err => {
+                            console.error('[SMS_DEBUG] SMS send error:', err.message);
+                          });
                         }
                       });
                     }
@@ -1555,31 +1578,54 @@ class Attendance {
                       if (err) return res.status(500).send({ error: err.message });
 
                       // Send SMS unless abandoned
+                      console.log(`[SMS_DEBUG_RECOVERY] Punch recovered. sms_abandoned=${sms_abandoned}, skipSms=${skipSms}, student_id=${row?.student_id}`);
                       if (row && row.student_id && row.date && !sms_abandoned && !skipSms) {
                         db.get(`SELECT * FROM students WHERE dakhela = ?`, [row.student_id], (err, stdnt) => {
-                          if (!err && stdnt && stdnt.phone_number) {
-                            const smsConfig = global.config?.settings?.sms;
-                            if (smsConfig?.enabled && Sms) {
-                              let shouldSendSms = false;
-                              let template = null;
-                              let time = null;
+                          if (err) {
+                            console.log(`[SMS_DEBUG_RECOVERY] Error fetching student:`, err.message);
+                            return;
+                          }
+                          console.log(`[SMS_DEBUG_RECOVERY] Student found: ${stdnt?.name}, phone=${stdnt?.phone_number}`);
+                          if (!stdnt || !stdnt.phone_number) {
+                            console.log(`[SMS_DEBUG_RECOVERY] No student or phone_number`);
+                            return;
+                          }
 
-                              if (row.in_time && smsConfig?.send_on_in) {
-                                shouldSendSms = true;
-                                template = smsConfig?.in_message_template;
-                                time = row.in_time;
-                              }
+                          const smsConfig = global.config?.settings?.sms;
+                          console.log(`[SMS_DEBUG_RECOVERY] SMS Config:`, { enabled: smsConfig?.enabled, send_on_in: smsConfig?.send_on_in });
+                          if (!smsConfig?.enabled) {
+                            console.log(`[SMS_DEBUG_RECOVERY] SMS not enabled`);
+                            return;
+                          }
+                          if (!Sms) {
+                            console.log(`[SMS_DEBUG_RECOVERY] Sms class not available`);
+                            return;
+                          }
 
-                              if (shouldSendSms && template) {
-                                const formattedTime = formatTimeWithPeriod(time || '');
-                                const message = template
-                                  .replace(/{name}/g, stdnt.name?.split('||')[0] || 'Student')
-                                  .replace(/{class}/g, stdnt.class || 'N/F')
-                                  .replace(/{date}/g, formatDate(row.date || ''))
-                                  .replace(/{time}/g, formattedTime);
-                                Sms.sendSMS(stdnt.phone_number, message);
-                              }
-                            }
+                          let shouldSendSms = false;
+                          let template = null;
+                          let time = null;
+
+                          console.log(`[SMS_DEBUG_RECOVERY] Row in_time=${row.in_time}`);
+                          if (row.in_time && smsConfig?.send_on_in) {
+                            shouldSendSms = true;
+                            template = smsConfig?.in_message_template;
+                            time = row.in_time;
+                            console.log(`[SMS_DEBUG_RECOVERY] Using in_time template`);
+                          } else {
+                            console.log(`[SMS_DEBUG_RECOVERY] No in_time or send_on_in disabled`);
+                          }
+
+                          console.log(`[SMS_DEBUG_RECOVERY] shouldSendSms=${shouldSendSms}, template=${!!template}`);
+                          if (shouldSendSms && template) {
+                            const formattedTime = formatTimeWithPeriod(time || '');
+                            const message = template
+                              .replace(/{name}/g, stdnt.name?.split('||')[0] || 'Student')
+                              .replace(/{class}/g, stdnt.class || 'N/F')
+                              .replace(/{date}/g, formatDate(row.date || ''))
+                              .replace(/{time}/g, formattedTime);
+                            console.log(`[SMS_DEBUG_RECOVERY] Sending SMS to ${stdnt.phone_number}: "${message}"`);
+                            Sms.sendSMS(stdnt.phone_number, message);
                           }
                         });
                       }

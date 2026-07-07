@@ -462,7 +462,7 @@ class CdataController {
             device_index: 0,
             remarks: `device_fetch`,
             silent_mode: true,
-            skipSms: true
+            skipSms: false
           },
           query: {}
         };
