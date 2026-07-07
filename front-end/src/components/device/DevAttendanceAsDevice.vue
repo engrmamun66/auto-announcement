@@ -22,6 +22,13 @@
       <input v-model="devPunch.punchTime" type="datetime-local" class="form-control">
     </div>
 
+    <div class="form-group checkbox-group">
+      <label>
+        <input :disabled="true" v-model="isArtificialPunch" type="checkbox">
+        <span>Artificial Punch (Dev/Test Mode)</span>
+      </label>
+    </div>
+
     <!-- <div class="form-group">
       <label>Status</label>
       <input v-model="devPunch.status" type="text" class="form-control" placeholder="e.g., 0">
@@ -57,6 +64,7 @@ const props = defineProps({
 const emitter = inject('emitter')
 
 const sending = ref(false)
+const isArtificialPunch = ref(false)
 const devPunch = ref({
   sn: localStorage.getItem('devPunch_sn') || '',
   userId: localStorage.getItem('devPunch_userId') || '',
@@ -106,10 +114,18 @@ function sendDevPunch() {
     devPunch.value.workCode || ''
   ].join('\t')
 
-  console.log('Sending dev punch:', { sn: devPunch.value.sn, row })
+  console.log('Sending dev punch:', { sn: devPunch.value.sn, row, isArtificial: isArtificialPunch.value })
 
-  // Send raw POST to /iclock/cdata endpoint with artificialPunch flag
-  fetch(`/iclock/cdata?SN=${devPunch.value.sn}&table=ATTLOG&artificialPunch=true`, {
+  // Build URL with conditional artificialPunch param
+  const url = new URL(`/iclock/cdata`, window.location.origin)
+  url.searchParams.append('SN', devPunch.value.sn)
+  url.searchParams.append('table', 'ATTLOG')
+  if (isArtificialPunch.value) {
+    url.searchParams.append('artificialPunch', 'true')
+  }
+
+  // Send raw POST to /iclock/cdata endpoint
+  fetch(url.toString(), {
     method: 'POST',
     headers: { 'Content-Type': 'text/plain' },
     body: row
@@ -157,6 +173,28 @@ function sendDevPunch() {
   color: #2c3e50;
   margin-bottom: 6px;
   font-size: 13px;
+}
+
+.checkbox-group {
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+
+.checkbox-group label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 0;
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkbox-group input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #3498db;
 }
 
 .form-group .form-control {
