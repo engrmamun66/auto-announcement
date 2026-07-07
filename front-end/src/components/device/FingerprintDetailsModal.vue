@@ -15,6 +15,10 @@ const props = defineProps({
   userName: {
     type: String,
     default: ''
+  },
+  onRefresh: {
+    type: Function,
+    default: null
   }
 })
 
@@ -25,6 +29,7 @@ const emitter = inject('emitter')
 
 const fingerprints = ref([])
 const loading = ref(false)
+const deleting = ref(null)
 
 async function fetchFingerprintDetails() {
   if (!props.device || !props.pin) return
@@ -49,6 +54,37 @@ async function fetchFingerprintDetails() {
     emitter.emit('toaster-error', { message: 'Failed to fetch fingerprint details' })
   } finally {
     loading.value = false
+  }
+}
+
+async function handleDeleteFingerprint(fp) {
+  if (!props.device || !props.pin) return
+
+  deleting.value = fp.FID || fp.fid
+  try {
+    const response = await fetch(`/${props.device.serial_number}/delete-fingerprint`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        pin: props.pin,
+        fid: fp.FID || fp.fid
+      })
+    })
+
+    if (response.ok) {
+      emitter.emit('toaster-success', { message: `Fingerprint deleted (FID: ${fp.FID || fp.fid})` })
+      await fetchFingerprintDetails()
+      if (props.onRefresh) {
+        props.onRefresh()
+      }
+    } else {
+      emitter.emit('toaster-error', { message: 'Failed to delete fingerprint' })
+    }
+  } catch (err) {
+    console.error('Delete fingerprint error:', err)
+    emitter.emit('toaster-error', { message: 'Error deleting fingerprint' })
+  } finally {
+    deleting.value = null
   }
 }
 
@@ -106,6 +142,14 @@ watch(() => props.modelValue, (newVal) => {
               </span>
             </div>
           </div>
+          <button
+            @click="handleDeleteFingerprint(fp)"
+            :disabled="deleting === (fp.FID || fp.fid)"
+            class="delete-btn"
+          >
+            <i class='bx bx-trash'></i>
+            {{ deleting === (fp.FID || fp.fid) ? 'Deleting...' : 'Delete' }}
+          </button>
         </div>
       </div>
     </div>
@@ -153,6 +197,9 @@ watch(() => props.modelValue, (newVal) => {
 }
 
 .fingerprint-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
   padding: 16px;
   background: #f9f9fb;
   border: 1px solid #e8e8e8;
@@ -164,6 +211,33 @@ watch(() => props.modelValue, (newVal) => {
   background: #ffffff;
   border-color: #d0d0d0;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.delete-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.delete-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+}
+
+.delete-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .fp-info {

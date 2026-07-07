@@ -292,6 +292,7 @@ watch(() => props.modelValue, (newVal) => {
     :device="device"
     :pin="selectedFingerprint.pin"
     :userName="selectedFingerprint.userName"
+    :onRefresh="fetchFingerprints"
   />
 
   <FingerSelectionModal
