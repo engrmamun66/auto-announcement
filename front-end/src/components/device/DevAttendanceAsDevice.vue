@@ -19,12 +19,15 @@
 
     <div class="form-group">
       <label>Punch Date & Time</label>
-      <input v-model="devPunch.punchTime" type="datetime-local" class="form-control">
+      <div class="input-with-button">
+        <input v-model="devPunch.punchTime" type="datetime-local" class="form-control">
+        <button @click="setCurrentTime" class="btn-now">Now</button>
+      </div>
     </div>
 
     <div class="form-group checkbox-group">
       <label>
-        <input :disabled="true" v-model="isArtificialPunch" type="checkbox">
+        <input v-model="isArtificialPunch" type="checkbox">
         <span>Artificial Punch (Dev/Test Mode)</span>
       </label>
     </div>
@@ -34,7 +37,8 @@
       <i class='bx bx-info-circle'></i>
       <span>
         <strong>Adjust Time Applied:</strong> {{ adjustedTimeInfo.original }} → {{ adjustedTimeInfo.adjusted }}
-        <br><small>Device adjust_time: <code>{{ selectedDevice?.adjust_time }}</code></small>
+        <br><small>Device adjustment time: <code>{{ selectedDevice?.adjust_time }}</code></small>
+        <br><small>Applied for device with: <code>{{ adjustedTimeInfo?.operations }}</code></small>
       </span>
     </div>
 
@@ -73,7 +77,7 @@ const props = defineProps({
 const emitter = inject('emitter')
 
 const sending = ref(false)
-const isArtificialPunch = ref(false)
+const isArtificialPunch = ref(true)
 const devPunch = ref({
   sn: localStorage.getItem('devPunch_sn') || '',
   userId: localStorage.getItem('devPunch_userId') || '',
@@ -128,14 +132,19 @@ const adjustedTimeInfo = computed(() => {
 
   
   const original = punchMoment.format('YYYY-MM-DD hh:mm:ss A')
-  const adjustedMoment = adjustFn(moment, punchMoment).format('YYYY-MM-DD HH:mm:ss')
+  const adjustedMoment = isArtificialPunch.value ? original : adjustFn(moment, punchMoment).format('YYYY-MM-DD HH:mm:ss')
 
   return {
     original,
     adjusted: adjustedMoment,
+    operations,
   }
 })
 
+
+function setCurrentTime() {
+  devPunch.value.punchTime = moment().format('YYYY-MM-DDTHH:mm')
+}
 
 function sendDevPunch() {
   if (!devPunch.value.sn || !devPunch.value.userId) {
@@ -145,14 +154,14 @@ function sendDevPunch() {
 
   sending.value = true
 
-  // Use current time for real-time punch (within ±10s of server time)
-  const now = new Date()
-  const dateTime = now.getFullYear() + '-' +
-    String(now.getMonth() + 1).padStart(2, '0') + '-' +
-    String(now.getDate()).padStart(2, '0') + ' ' +
-    String(now.getHours()).padStart(2, '0') + ':' +
-    String(now.getMinutes()).padStart(2, '0') + ':' +
-    String(now.getSeconds()).padStart(2, '0')
+  // Use adjusted time if not artificial punch, otherwise use selected punchTime
+  let dateTime
+  if (!isArtificialPunch.value && adjustedTimeInfo.value) {
+    dateTime = adjustedTimeInfo.value.adjusted
+  } else {
+    // Convert punchTime from datetime-local format to API format
+    dateTime = moment(devPunch.value.punchTime, 'YYYY-MM-DDTHH:mm').format('YYYY-MM-DD HH:mm:ss')
+  }
 
   // Create tab-separated row: user_id\tpunch_time\tstatus\tverify\twork_code
   const row = [
@@ -265,6 +274,40 @@ function sendDevPunch() {
   background: #f0f0f0;
   color: #999;
   cursor: not-allowed;
+}
+
+.input-with-button {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.input-with-button .form-control {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.btn-now {
+  padding: 10px 14px;
+  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.btn-now:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.btn-now:active {
+  transform: translateY(0);
 }
 
 .btn {
