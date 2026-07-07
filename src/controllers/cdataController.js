@@ -220,10 +220,17 @@ class CdataController {
         // Process each punch through attendance submission
         // const only_attendance_feature = global.config?.settings?.attendance?.only_attendance_feature
         const now = moment()
-        const is_realtime_punch = records?.length === 1 && moment(records?.[0]?.punch_time, 'YYYY-MM-DD HH:mm:ss').isBetween(
-            now.clone().subtract(10, 'seconds'),
-            now.clone().add(10, 'seconds')
+        const artificialPunch = req.query.artificialPunch === 'true'
+        let is_realtime_punch = records?.length === 1 && moment(records?.[0]?.punch_time, 'YYYY-MM-DD HH:mm:ss').isBetween(
+            now.clone().subtract(50, 'seconds'),
+            now.clone().add(50, 'seconds')
           )
+
+        // Treat as real-time if marked as artificial (dev/test punch)
+        if (artificialPunch) {
+          is_realtime_punch = true
+          console.log('🧪 Artificial punch detected. Treating as real-time.')
+        }
 
         console.log('NOW:', now.format('YYYY-MM-DD HH:mm:ss'), '| Is Realtime:', is_realtime_punch);
         if(is_realtime_punch){
@@ -488,6 +495,7 @@ class CdataController {
         // Call attendance submission with socket emission enabled
         const Attendance = require('../class-attendence');
         const attendance = new Attendance(global.db);
+        attendance.Sms = global.Sms;
         attendance.submitAttendanceRequest(mockReq, mockRes, true);
       }
     );

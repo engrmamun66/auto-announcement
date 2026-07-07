@@ -13,6 +13,11 @@
           <i class='bx bxs-terminal' style="vertical-align:-2px;margin-right:4px"></i> {{ helper.t('Commands') }}
         </a>
       </li>
+      <li class="nav-item">
+        <a @click.stop="activeTab = 'dev-attendance'" class="nav-link cp text-black" :class="{'active': activeTab === 'dev-attendance'}">
+          <i class='bx bx-flask' style="vertical-align:-2px;margin-right:4px"></i> Dev Attendance
+        </a>
+      </li>
     </ul>
 
     <!-- Devices Tab -->
@@ -31,6 +36,11 @@
         :executingCommand="executingCommand"
         @restart="executeRestart"
       />
+    </div>
+
+    <!-- Dev Attendance Tab -->
+    <div v-show="activeTab === 'dev-attendance'" class="devices-tab-content">
+      <DevAttendanceAsDevice :devices="devices" />
     </div>
 
     <!-- Password Confirmation Modal -->
@@ -54,6 +64,7 @@ import ConfirmByPassword from '@/components/ConfirmByPassword.vue';
 import DeviceList from '@/components/device/DeviceList.vue';
 import DeviceEdit from '@/components/device/DeviceEdit.vue';
 import DeviceCommands from '@/components/device/DeviceCommands.vue';
+import DevAttendanceAsDevice from '@/components/device/DevAttendanceAsDevice.vue';
 
 const helper = inject('helper');
 const http = inject('http');

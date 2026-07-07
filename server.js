@@ -79,10 +79,12 @@ async function loadDbSettings() {
 const Students = new students(DB.db)
 const Schedules = new schedules(DB.db)
 const Sms = new ClassSms(DB.db)
-const PunchLog = new PunchLoogClass() 
-const Attendence = new AttendenceClass(DB.db) 
-const LeavAndVacations = new LeavAndVacationsClass(DB.db) 
+const PunchLog = new PunchLoogClass()
+const Attendence = new AttendenceClass(DB.db)
+const LeavAndVacations = new LeavAndVacationsClass(DB.db)
 
+global.Sms = Sms;
+Attendence.Sms = Sms;
 
 utils.createRequiredFolders()
 utils.updateRelaychannelsTxt()
