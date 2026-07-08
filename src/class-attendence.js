@@ -1383,7 +1383,10 @@ class Attendance {
         `SELECT * FROM students WHERE dakhela = ?`,
         [dakhela],
         (err, student) => {
-          if (err) return res.status(500).send({ error: err.message });
+          if (err) {
+            this._emitAttendanceToSocket({ message: `err_223:: ${err}`, data: null }, 'error');
+            return res.status(500).send({ error: err.message });
+          }
           if (!student) return res.status(400).send({ error: 'Student not found.' });
           if (student.status !== 1) return res.status(400).send({ error: 'Student is inactive.' });
 
