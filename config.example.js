@@ -120,6 +120,7 @@ module.exports = {
                
           },
           sms: {
+               // mimsms length check: https://messages.com.bd/
                enabled: false,                    // master on/off
                provider: 'mimsms',               // ssl_wireless | mimsms | muthofon | custom
                api_base_url: 'https://api.mimsms.com',

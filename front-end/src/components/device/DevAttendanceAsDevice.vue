@@ -236,7 +236,6 @@ function sendDevPunch() {
     body: row
   })
     .then(res => {
-      console.log('Dev punch response:', res.status, res.statusText)
       emitter.emit('toaster-success', { message: `Punch sent to device ${devPunch.value.sn}` })
       // Update punchTime to current (keep other fields for next punch)
       devPunch.value.punchTime = moment().format('YYYY-MM-DDTHH:mm')
