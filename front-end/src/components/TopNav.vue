@@ -301,6 +301,9 @@ onMounted(()=>{
   border-radius: 50%;
   font-size: 18px;
   flex-shrink: 0;
+  position: absolute;
+  top: 20px;
+  left: 232px;
 }
 .topnav__wifi--on  { color: #4caf50; background: rgba(76,175,80,0.15); }
 .topnav__wifi--off { color: #f44336; background: rgba(244,67,54,0.15); }
@@ -465,6 +468,12 @@ onMounted(()=>{
     z-index: 9;
     animation: bdIn 0.2s ease;
   }
+
+  .topnav__wifi { 
+    top: 13px;
+    left: 160px;
+  }
+
   @keyframes bdIn { from { opacity: 0; } to { opacity: 1; } }
 
   .topnav {
