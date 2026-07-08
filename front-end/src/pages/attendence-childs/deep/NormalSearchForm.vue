@@ -133,6 +133,8 @@ function clearSearch() {
   emit('onBtnClear', {...attPayload})
 }
 
+let tout = null
+
 function submitSearch(eventData={}) { 
   try {
     if(eventData?.startDate){
@@ -151,7 +153,10 @@ function submitSearch(eventData={}) {
     if(pagination_perpage.value){
       data.limit = pagination_perpage.value
     } 
-    emit('onBtnSubmit', data)
+    clearTimeout(tout)
+    tout = setTimeout(() => {
+      emit('onBtnSubmit', data)
+    }, 10);
   } catch (submitSearch_error) {
     console.warn({submitSearch_error});
     
