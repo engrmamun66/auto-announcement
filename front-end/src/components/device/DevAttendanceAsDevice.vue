@@ -121,7 +121,6 @@ const adjustedTimeInfo = computed(() => {
   }
 
   let adjustTime = selectedDevice.value.adjust_time || "subtract(0, 'hour')"
-  console.log({adjustTime});
 
   let operations = adjustTime.replace(/^\./, '')
 
@@ -132,7 +131,7 @@ const adjustedTimeInfo = computed(() => {
   }  
 
   // Calculate new time
-  const punchTimeStr = devPunch.value.punchTime.replace('T', ' ') + ':00'
+  const punchTimeStr = sendCurrentDateTime.value ? moment().format('YYYY-MM-DD HH:mm:ss') : devPunch.value.punchTime.replace('T', ' ') + ':00'
   const punchMoment = moment(punchTimeStr, 'YYYY-MM-DD HH:mm:ss')
   const adjustFn = new Function('moment', 'dateTime', `return moment(dateTime, 'YYYY-MM-DD HH:mm:ss').${operations}`)
 
@@ -161,12 +160,7 @@ function sendDevPunch() {
   sending.value = true
 
   // Use adjusted time if not artificial punch, otherwise use selected punchTime
-  let dateTime
-  if (sendCurrentDateTime.value) {
-    dateTime = moment(devPunch.value.punchTime, 'YYYY-MM-DDTHH:mm').format('YYYY-MM-DD HH:mm:ss')
-  } else {
-    dateTime = adjustedTimeInfo.value.adjusted
-  }
+  let dateTime = adjustedTimeInfo.value.adjusted
 
   // Create tab-separated row: user_id\tpunch_time\tstatus\tverify\twork_code
   const row = [

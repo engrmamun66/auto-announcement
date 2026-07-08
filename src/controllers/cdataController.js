@@ -163,18 +163,19 @@ class CdataController {
           operations_add_subtract = String(device.adjust_time).replace(/^\./, '');
         }
 
-        let fn;
+        let timeAdjustCallback;
         try {
-          fn = new Function('moment', 'dateTime', `return moment(dateTime, 'YYYY-MM-DD HH:mm:ss').${operations_add_subtract}.format('YYYY-MM-DD HH:mm:ss')`)
+          timeAdjustCallback = new Function('moment', 'dateTime', `return moment(dateTime, 'YYYY-MM-DD HH:mm:ss').${operations_add_subtract}.format('YYYY-MM-DD HH:mm:ss')`)
         } catch (err) {
           console.error('Error creating time adjust function:', err.message)
-          fn = (m, dt) => dt
+          timeAdjustCallback = (m, dt) => dt
         }
         const records = rows.map(r => this._parseAttlogRow(r.parts))
                         .map((item, index) => {
                           try {
                             const originalTime = moment(item.punch_time, 'YYYY-MM-DD HH:mm:ss')
-                            item.punch_time = fn(moment, item.punch_time)
+                            item.punch_time = timeAdjustCallback(moment, item.punch_time)
+                            console.log(' item.punch_time::after-adjustment:::', item.punch_time);
                             item.emp_code = item.user_id
                             if(index === 0){
                               const adjustedTime = moment(item.punch_time, 'YYYY-MM-DD HH:mm:ss')
