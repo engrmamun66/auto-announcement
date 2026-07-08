@@ -1384,11 +1384,17 @@ class Attendance {
         [dakhela],
         (err, student) => {
           if (err) {
-            this._emitAttendanceToSocket({ message: `err_223:: ${err}`, data: null }, 'error');
+            if (emitToSocket) this._emitAttendanceToSocket({ message: `E1:: ${err}`, data: null }, 'error');
             return res.status(500).send({ error: err?.message });
           }
-          if (!student) return res.status(400).send({ error: 'Student not found.' });
-          if (student.status !== 1) return res.status(400).send({ error: 'Student is inactive.' });
+          if (!student){
+            if (emitToSocket) this._emitAttendanceToSocket({ message: `Student not found (dakhela: ${dakhela})`, data: null }, 'error');
+            return res.status(400).send({ error: 'Student not found.' })
+          };
+          if (student.status !== 1) {
+            if (emitToSocket) this._emitAttendanceToSocket({ message: `Student is inactive (dakhela: ${dakhela})`, data: null }, 'error');
+            return res.status(400).send({ error: 'Student is inactive.' });
+          }
 
           const class_short = student.class_short || '';
           const classConfig = this.getClassConfig(class_short);
@@ -1399,7 +1405,7 @@ class Attendance {
             console.log(`::::${errorMsg}`);
 
             // Emit error via socket
-            this._emitAttendanceToSocket({ message: errorMsg, data: null }, 'error');
+            if (emitToSocket) this._emitAttendanceToSocket({ message: errorMsg, data: null }, 'error');
 
             return res.status(400).send({ error: errorMsg });
           }
@@ -1410,6 +1416,7 @@ class Attendance {
             (err, entries) => {
               if (err) {
                 console.log(`submitAttendanceRequest__err_1:`, err)
+                if (emitToSocket) this._emitAttendanceToSocket({ message: `E2:: ${err}`, data: null }, 'error');
                 return res.status(500).send({ error: err.message });
               }
               
