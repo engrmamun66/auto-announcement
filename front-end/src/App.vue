@@ -912,13 +912,31 @@ onMounted(async ()=>{
     isMounted.value = true;
  
     emitter.on('on_socket_message', (socket_data) => {
-        
+
+        if(socket_data.type == 'device_punch'){
+          // Device punch received from server
+          if(socket_data?.data){
+            const exists = liveAttendenceList.value.some(item => item.id === socket_data.data.id)
+            if(!exists){
+              liveAttendenceList.value.push({...socket_data.data, live_data: true})
+              callbacks.fixOverflowOfLiveAttendence()
+              setTimeout(() => {
+                delete liveAttendenceList.value.at(-1).live_data
+              }, 700)
+            }
+          }
+          if(socket_data?.message){
+            const toasterType = socket_data?.message_type === 'error' ? 'toaster-error' : 'toaster-success'
+            emitter.emit(toasterType, { message: socket_data.message })
+          }
+        }
+
         if(socket_data.type == 'attendence'){
-            let { punch_time, barcode, for_attendence, device_index } = socket_data 
+            let { punch_time, barcode, for_attendence, device_index } = socket_data
             let time_and_barcode = `${punch_time}-${barcode}`
 
             let existing = storage('time_and_barcode').value
-            
+
             if(!existing || existing != time_and_barcode || useRoute()?.query?.force=='true'){
                 storage('time_and_barcode').value = time_and_barcode
                 if(for_attendence){
@@ -926,11 +944,16 @@ onMounted(async ()=>{
                 } else {
                     punchToCallStudent(barcode, { for_attendence, device_index })
                 }
-                
+
             }
         }
 
         
+
+        if(socket_data.type == 'gap_time_update') {
+            const { sn, text } = socket_data
+            localStorage.setItem('gap_time__' + sn, text)
+        }
 
         if(socket_data.type == 'remote_action') {
             let { action, selector, data } = socket_data
@@ -1268,16 +1291,22 @@ async function __punchToSubmitAttendance(barcode='play-417-2024', {
             let action = response.data.action
 
             if(!silent_mode){
-                liveAttendenceList.value.push({...attendenceData, live_data: true})
-                callbacks.fixOverflowOfLiveAttendence()
-                setTimeout(() => {
-                    delete liveAttendenceList.value.at(-1).live_data
-                }, 700)
+                const exists = liveAttendenceList.value.some(item => item.id === attendenceData.id)
+                if(!exists){
+                  liveAttendenceList.value.push({...attendenceData, live_data: true})
+                  callbacks.fixOverflowOfLiveAttendence()
+                  setTimeout(() => {
+                      delete liveAttendenceList.value.at(-1).live_data
+                  }, 700)
+                }
             } else {
                 const maxLive = CONFIG.value?.settings?.attendance?.maximum_live_attedence || 50
                 let current = storage('liveAttendenceList').value
                 if(!Array.isArray(current)) current = []
-                current.push({...attendenceData, live_data: true})
+                const existsInCurrent = current.some(item => item.id === attendenceData.id)
+                if(!existsInCurrent){
+                  current.push({...attendenceData, live_data: true})
+                }
                 if(current.length > maxLive){
                     current = current.slice(-maxLive)
                 }

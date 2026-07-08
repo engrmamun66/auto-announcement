@@ -29,3 +29,16 @@ copy and pate the shortcut of open.bat
 
 
 All UI strings use `helper.t()` for translation. DOM-based localization (`localizeDom`, `localizeAppDom`, `data-no-auto-i18n`) has been removed.
+
+
+## Device Communication Sequence
+
+```text
+1. GET  /iclock/cdata?SN=DEVICE_SN    ← server options fetch
+2. POST /iclock/registry?SN=DEVICE_SN ← device registers
+3. GET  /iclock/getrequest?SN=...      ← heartbeat / command poll
+4. POST /iclock/cdata?SN=...&table=ATTLOG  ← attendance upload
+5. POST /iclock/devicecmd?SN=...       ← command result
+```
+
+---

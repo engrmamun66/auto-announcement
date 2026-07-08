@@ -49,6 +49,9 @@
           <i class='bx bxs-calendar pre-icon' ></i> {{ helper.t('Shedules') }}
         </RouterLink>
       </template>
+      <RouterLink id="nav-link-devices" :to="{name: 'devices', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active': route.name === 'devices'}" @click="sendRemoteAction({from: 'ip', action: 'onClick', selector: '#nav-link-devices'})">
+        <i class='bx bxs-server pre-icon' ></i> {{ helper.t('Devices') }}
+      </RouterLink>
       <RouterLink id="nav-link-import" :to="{name: 'import', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active': route.name === 'import'}" @click="sendRemoteAction({from: 'ip', action: 'onClick', selector: '#nav-link-import'})">
         <i class='bx bxs-file-import pre-icon' ></i> {{ helper.t('Import') }}
       </RouterLink>
@@ -298,6 +301,9 @@ onMounted(()=>{
   border-radius: 50%;
   font-size: 18px;
   flex-shrink: 0;
+  position: absolute;
+  top: 20px;
+  left: 232px;
 }
 .topnav__wifi--on  { color: #4caf50; background: rgba(76,175,80,0.15); }
 .topnav__wifi--off { color: #f44336; background: rgba(244,67,54,0.15); }
@@ -462,6 +468,12 @@ onMounted(()=>{
     z-index: 9;
     animation: bdIn 0.2s ease;
   }
+
+  .topnav__wifi { 
+    top: 13px;
+    left: 160px;
+  }
+
   @keyframes bdIn { from { opacity: 0; } to { opacity: 1; } }
 
   .topnav {

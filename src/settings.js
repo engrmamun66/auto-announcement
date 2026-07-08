@@ -38,6 +38,7 @@ function resetAllSettings(db) {
         ['classes',             cfg.classes],
         ['logo',                cfg.logo],
         ['css_vars',            cfg.css_vars],
+        ['custom_css',          cfg.custom_css],
         ['date_range_list',     cfg.date_range_list],
         ['card_owners',         cfg.card_owners],
         ['card_not_set_message',cfg.card_not_set_message],

@@ -27,16 +27,20 @@ if (fs.existsSync(configPath)) {
 global.config = config
 moment.locale('en')
 
-const cors = require('cors'); 
+const cors = require('cors');
+const http = require('http');
 const express = require('express')
 const sqlite3 = require("sqlite3").verbose();
 const multer = require("multer");
 const upload = multer({ dest: DIR + '/public/temp' });
 const webSocket = require("./socket/socket")
+const EventEmitter = require('./src/EventEmitter')  
+const EventBus = new EventEmitter()
 
 const { getToken, getBulkPunces } = require('./src/device.biotimeApp')
 
-let webContents = require("./src/web-contents"); 
+let webContents = require("./src/web-contents");
+console.log('Initial webContents includes DYNAMIC_CUSTOM_CSS:', webContents.includes('DYNAMIC_CUSTOM_CSS'));
 let checkAccess = require("./src/checkaccess"); 
 const DEVICE_API_BASE_URL = global.config.env.DEVICE_API_BASE_URL
 
@@ -45,9 +49,6 @@ const DEVICE_API_BASE_URL = global.config.env.DEVICE_API_BASE_URL
 
 
 const PORT = config.env.PORT || 2323;
-
-
-webSocket()
  
 /**
  * Classes
@@ -66,16 +67,24 @@ const DB = new classDB()
 global.db = DB.db
 const { getSettings } = require('./src/settings');
 const DB_CONFIG_KEYS = Object.keys(config).filter(k => k !== 'env');
-getSettings(DB.db).then(dbSettings => {
+
+async function loadDbSettings() {
+  try {
+    const dbSettings = await getSettings(DB.db);
     DB_CONFIG_KEYS.forEach(k => { if (dbSettings[k] !== undefined) global.config[k] = dbSettings[k]; });
-}).catch(() => {});
+  } catch (err) {
+    console.error('Error loading DB settings:', err.message);
+  }
+}
 const Students = new students(DB.db)
 const Schedules = new schedules(DB.db)
 const Sms = new ClassSms(DB.db)
-const PunchLog = new PunchLoogClass() 
-const Attendence = new AttendenceClass(DB.db) 
-const LeavAndVacations = new LeavAndVacationsClass(DB.db) 
+const PunchLog = new PunchLoogClass()
+const Attendence = new AttendenceClass(DB.db)
+const LeavAndVacations = new LeavAndVacationsClass(DB.db)
 
+global.Sms = Sms;
+Attendence.Sms = Sms;
 
 utils.createRequiredFolders()
 utils.updateRelaychannelsTxt()
@@ -88,7 +97,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'front-end')));
 // Enable CORS
 app.use(cors());
- 
+
+// Initialize ZKTeco device command store
+app.locals.commands = { queues: {}, nextId: 1 };
+
 const audioUpload = multer({
   storage: multer.diskStorage({
     destination: (req, file, cb) => {
@@ -157,27 +169,28 @@ app.get(`/app`, (req, res) => {
     }
   });
 
+  let html = webContents;
+
   // With logo
   let logo_url = config?.logo?.image_url || 'logo.example.png'
   if(!logo_url.startsWith('http') && !logo_url.startsWith('data:image/')){
     logo_url = `../${logo_url}`
   }
-  webContents = webContents.replace('DYNAMIC_LOGO_URL', logo_url)
+  html = html.replace('DYNAMIC_LOGO_URL', logo_url)
 
   // With logo_width
-  let logo_width = config?.logo?.width || '200px' 
-  webContents = webContents.replace('DYNAMIC_LOGO_WIDTH', logo_width)
+  let logo_width = config?.logo?.width || '200px'
+  html = html.replace('DYNAMIC_LOGO_WIDTH', logo_width)
 
   // With logo area padding
-  let logo_padding = config?.logo?.padding || '10px' 
-  webContents = webContents.replace('DYNAMIC_LOGO_AREA_PADDING', logo_padding)
+  let logo_padding = config?.logo?.padding || '10px'
+  html = html.replace('DYNAMIC_LOGO_AREA_PADDING', logo_padding)
 
-
-  webContents = webContents.replace('ENV_VARIABLES_IN_JSON_FROMAT', JSON.stringify({...(config.env || {}), LOCAL_IP}))
+  html = html.replace('ENV_VARIABLES_IN_JSON_FROMAT', JSON.stringify({...(config.env || {}), LOCAL_IP}))
 
   // With CSS variables
   if(config.css_vars){
-    webContents = webContents.replace('<!-- CSS_VARS -->', `
+    html = html.replace('<!-- CSS_VARS -->', `
       <style id="ROOTS">
       :root{
         ${config.css_vars}
@@ -185,7 +198,12 @@ app.get(`/app`, (req, res) => {
       </style>
       `)
   }
-  res.send(webContents)
+
+  // With custom CSS
+  let custom_css = global.config?.custom_css || '';
+  html = html.replace('DYNAMIC_CUSTOM_CSS', custom_css);
+
+  res.send(html)
 });
 
 
@@ -240,6 +258,9 @@ app.use('/api', require('./src/routes/misc')(utils, Backup, { DEVICE_API_BASE_UR
 app.use('/api', require('./src/routes/refresh')(utils));
 app.use('/api', require('./src/routes/settings')(DB.db));
 app.use('/api', require('./src/routes/sms')(Sms));
+app.use('/api', require('./src/routes/devices')(DB.db));
+app.use('/api', require('./src/routes/verify-password')(DB.db));
+app.use('/', require('./src/routes/commands'));
 
 app.get('/api/update-app', async (req, res) => {
     const { downloadFromUrl } = require('./src/zipper/download-from-url');
@@ -291,11 +312,18 @@ app.get(['/', 'l', 'a', 't', 'e', 's', 't', '.', 'c', 's', 's'].join(''), (req, 
 });
  
 
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}/app/#`); 
+const httpServer = http.createServer(app);
+webSocket(httpServer);
 
-  
-  //  call token
-  getToken(Students)
-   
-});
+async function startServer() {
+  await loadDbSettings();
+  httpServer.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}/app/#`);
+    console.log(`WebSocket running on ws://localhost:${PORT}`);
+
+    //  call token
+    getToken(Students)
+  });
+}
+
+startServer();

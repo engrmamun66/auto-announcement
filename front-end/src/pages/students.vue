@@ -16,6 +16,8 @@ import AudioRecorAndUpload from '../components/AudioRecorAndUpload.vue'
 import RecoringAnimation from '../components/RecoringAnimation.vue'
 import Tabset from '../components/Tabset.vue'
 import EmDateTimePicker from '../components/EmDateTimePicker.vue'
+import StudentAddEdit from '../components/StudentAddEdit.vue'
+import CloneStudent from '../components/CloneStudent.vue'
 import Ahelper from './../pages/attendence-childs/attendacnceHelper'
 
 
@@ -269,6 +271,10 @@ let payload = reactive({
 let is___adding = ref(false)
 let profileImageFile = ref(null)
 let profileImagePreview = ref('')
+let devices = ref([])
+let selectedDevices = ref([])
+let showCloneModal = ref(false)
+let studentToClone = ref(null)
 
 function clearPayload(){
   payload.id = null
@@ -284,9 +290,41 @@ function clearPayload(){
   payload.profile_image = null
   clearProfileImageFile()
 
-  addMode.value = false 
-  is___adding.value = false 
+  addMode.value = false
+  is___adding.value = false
   editModeTabIndex.value = 1
+}
+
+async function getDevices(){
+  try {
+    const response = await http.get('/devices')
+    if(response.status == 200){
+      devices.value = response.data.data || response.data || []
+      selectedDevices.value = devices.value
+    }
+  } catch (error) {
+    console.warn('getDevices_error::', error)
+  }
+}
+
+function startAddingNewStudent(){
+  addMode.value = true
+  editModeTabIndex.value = 1
+  clearParams()
+  payload.id = null
+  payload.class = null
+  payload.name = null
+  payload.class_short = null
+  payload.dakhela = null
+  payload.year = new Date().getFullYear()
+  payload.phone_number = null
+  payload.profile_image = null
+  payload.card_owner = null
+  payload.note = null
+  payload.card_no = null
+  clearProfileImageFile()
+  selectedDevices.value = devices.value
+  is___adding.value = false
 }
 
 function prepareToEdit(std){
@@ -294,6 +332,7 @@ function prepareToEdit(std){
     payload[key] = std[key]
   });
   clearProfileImageFile()
+  selectedDevices.value = devices.value
   addMode.value = true
   editModeTabIndex.value = 1
 }
@@ -321,50 +360,16 @@ onBeforeUnmount(() => {
  
 
 
-async function onClickClone(std){
-  try {
+function onClickClone(std){
+  studentToClone.value = std
+  showCloneModal.value = true
+}
 
-    const data = {}
-
-    Object.keys(payload).forEach(key => {
-      data[key] = std[key]
-    });
-
-    std._cloning = true
-
-    if(!std.sound1){
-      emitter.emit('toaster-warning', { message: helper.t('Please record sound before copying') })
-      return
-    }
-
-
-    if(!std.dakhela_new){
-      emitter.emit('toaster-warning', {message: helper.t('Please enter the new dakhela number')})
-      return
-    }
-    
-    data.dakhela_new = Math.abs(Number(std.dakhela_new)) 
-    console.log('data.dakhela_newdata.dakhela_new///', data.dakhela_new);
-    
-    
-    http.post(`/students/clone/${std.id}`, data).then(async (response) => {
-      if(response.status == 200){
-        std.cloneMode = false
-        clearParams({dakhela: std.dakhela})
-        only_similler_students.value = true
-        await getStudents()
-        getAllStudents()
-      }
-    }).catch((err) => { 
-      if(err.response.data?.message){
-        emitter.emit('toaster-error', { message: err.response.data?.message })
-      }
-    }).finally(()=>{
-      
-    })
-  } catch (error) {
-    console.warn('getStudents_error::', error);
-  }
+function onCloneSuccess(){
+  clearParams({dakhela: studentToClone.value?.dakhela})
+  only_similler_students.value = true
+  getStudents()
+  getAllStudents()
 }
 
 async function getStudentByDakhela(dakhela){
@@ -416,13 +421,42 @@ async function addStudent(){
       formData.append('profile_image_file', profileImageFile.value)
     }
 
-    http.post('/students/add', formData, {formData: true}).then(response => {
+    http.post('/students/add', formData, {formData: true}).then(async response => {
       if(response.status == 200){
-        let { id } = response.data.data; 
-        if(id){          
-          clearParams({id}) 
+        let { id } = response.data.data;
+        if(id){
+          clearParams({id})
         }
         getAllStudents()
+
+        if(selectedDevices.value?.length){
+          try {
+            const userData = {
+              pin: payload.dakhela,
+              name: payload.name,
+              card: payload.card_no || '',
+              privilege: 0
+            }
+            let successCount = 0
+            for (const device of selectedDevices.value) {
+              const deviceSn = typeof device === 'object' ? device.serial_number : device
+              const response = await fetch(`/${deviceSn}/add-user`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(userData)
+              })
+              if(response.ok) successCount++
+            }
+            if(successCount === selectedDevices.value.length){
+              emitter.emit('toaster-success', { message: helper.t('Student added to {count} device(s)', { count: selectedDevices.value.length }) })
+            } else {
+              emitter.emit('toaster-warning', { message: helper.t('Student added to {count} of {total} device(s)', { count: successCount, total: selectedDevices.value.length }) })
+            }
+          } catch (error) {
+            emitter.emit('toaster-warning', { message: helper.t('Student added but failed to add to device') })
+            console.warn('add_to_device_error::', error)
+          }
+        }
       }
     }).catch(() => {}).finally(()=>{
       clearPayload()
@@ -450,11 +484,40 @@ async function updateStudent(){
       formData.append('profile_image_file', profileImageFile.value)
     }
 
-    http.post(`/students/update`, formData, {formData: true}).then(response => {
+    http.post(`/students/update`, formData, {formData: true}).then(async response => {
       if(response.status == 200){
         let { id } = response.data.data;
         getAllStudents()
         getStudents()
+
+        if(selectedDevices.value?.length){
+          try {
+            const userData = {
+              pin: payload.dakhela,
+              name: payload.name,
+              card: payload.card_no || '',
+              privilege: 0
+            }
+            let successCount = 0
+            for (const device of selectedDevices.value) {
+              const deviceSn = typeof device === 'object' ? device.serial_number : device
+              const response = await fetch(`/${deviceSn}/update-user`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(userData)
+              })
+              if(response.ok) successCount++
+            }
+            if(successCount === selectedDevices.value.length){
+              emitter.emit('toaster-success', { message: helper.t('Student updated on {count} device(s)', { count: selectedDevices.value.length }) })
+            } else {
+              emitter.emit('toaster-warning', { message: helper.t('Student updated on {count} of {total} device(s)', { count: successCount, total: selectedDevices.value.length }) })
+            }
+          } catch (error) {
+            emitter.emit('toaster-warning', { message: helper.t('Student updated but failed to update on device') })
+            console.warn('update_to_device_error::', error)
+          }
+        }
       }
     }).catch(() => {}).finally(()=>{
       clearPayload()
@@ -478,13 +541,37 @@ async function deleteStudent(id, i){
     // }
 
     
-    http.delete(`/students/delete/${id}`).then(response => {
+    const studentToDelete = students.value[i]
+
+    http.delete(`/students/delete/${id}`).then(async (response) => {
       if(response.status == 200){
          students.value.splice(i, 1)
-      }
-    }).catch(() => {}).finally(()=>{ 
 
-    }).finally(() => {
+        // Remove student from all devices
+        if(devices.value?.length && studentToDelete?.dakhela){
+          try {
+            let successCount = 0
+            for(const device of devices.value){
+              const deviceSn = typeof device === 'object' ? device.serial_number : device
+              const devResponse = await fetch(`/${deviceSn}/remove-user`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ pin: studentToDelete.dakhela })
+              })
+              if(devResponse.ok) successCount++
+            }
+
+            if(successCount === devices.value.length){
+              emitter.emit('toaster-success', { message: helper.t('Student deleted from {count} device(s)', { count: devices.value.length }) })
+            } else if(successCount > 0){
+              emitter.emit('toaster-warning', { message: helper.t('Student deleted from {count} of {total} device(s)', { count: successCount, total: devices.value.length }) })
+            }
+          } catch (deviceError) {
+            emitter.emit('toaster-warning', { message: helper.t('Student deleted but failed to remove from devices') })
+          }
+        }
+      }
+    }).catch(() => {}).finally(() => {
       getStudents()
       getAllStudents()
     })
@@ -516,7 +603,7 @@ async function getStudentPuchLogs({date=null, day=null}={}){
 }
  
 onMounted(async()=>{
-  
+
   emitter.on('document_clicked', ()=>{
     addMode.value = false
     editModeTabIndex.value = 1
@@ -528,6 +615,7 @@ onMounted(async()=>{
     linkPopupUrl.value = url || ''
   })
 
+  await getDevices()
   await getStudents()
 
   if(route.query.dakhela){
@@ -646,175 +734,43 @@ watch(fixedWidthSoundCol, (newVal) => {
         <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
           <Btn @click.stop="bulkPunch()" style="background: #673AB7;" :disabled="!PunchButtonsRef?.length">{{ helper.t('Bulk Punch') }} ({{ PunchButtonsRef?.length || 0 }})</Btn>
         </template>
-        <Btn v-if="!addMode" class="me-2" @click="addMode = !addMode;editModeTabIndex=1;clearParams();payload.id = null" ><i class='bx bx-plus'></i> {{ helper.t('Add New') }}</Btn>
+        <Btn v-if="!addMode" class="me-2" @click="startAddingNewStudent" ><i class='bx bx-plus'></i> {{ helper.t('Add New') }}</Btn>
       </div>
     </div>
 
 
-    <!-- <form -->
-    <modal v-model="addMode" :title="!payload?.id ? helper.t('Add Student') : (editModeTabIndex == 1 ? helper.t('Update Student') : helper.t('Guardian Punch History'))" :width="editModeTabIndex == 2 ? '700px' : '500px'" :close-on-esc="true" :close-on-click-away="true" >
-      <div class="w-100" >
+    <!-- Student Add/Edit Modal -->
+    <StudentAddEdit
+      v-model="addMode"
+      :payload="payload"
+      :editModeTabIndex="editModeTabIndex"
+      @update:editModeTabIndex="(tab) => editModeTabIndex = tab"
+      :classes="classes"
+      :profileImagePreview="profileImagePreview"
+      :profileImageFile="profileImageFile"
+      :devices="devices"
+      :selectedDevices="selectedDevices"
+      @update:selectedDevices="(val) => selectedDevices = val"
+      :isAdding="is___adding"
+      :studentLogs="studentLogs"
+      :appAccessData="appAccessData"
+      :CONFIG="CONFIG"
+      :students="students"
+      @add-student="addStudent"
+      @update-student="updateStudent"
+      @get-punch-logs="getStudentPuchLogs"
+      @profile-image-change="onProfileImageChange"
+      @clear-payload="clearPayload"
+    />
 
-        <div class="cb-form">
-          <div @click.stop="false">
-            <div class="row g-2" :class="[payload?.id ? 'mt-1' : 'mt-2']">
-
-              <div class="col-12 d-flex justify-content-between align-items-center">
-
-                <Tabset v-if="payload?.id" @onTab="(tab) => {
-                  editModeTabIndex = tab;
-                  if(tab == 2) getStudentPuchLogs();
-                }"></Tabset>
-
-                <label class="using-card-title-in-form" v-if="CONFIG?.settings?.attendance?.status && payload?.id && payload?.name">
-                  {{ String(payload?.name).indexOf('Copied') > -1 ? helper.t('This card for guardian') : helper.t('This card for student') }}
-                </label>
-
-              </div>
-
-                <template v-if="editModeTabIndex == 1">
-
-                  <!-- Class + Year -->
-                  <div class="col-8">
-                    <div class="form-group">
-                      <label>{{ helper.t('Class') }} <sup>*</sup></label>
-                      <select v-model="payload.class" class="form-control cb-input cb-input--sm" id="ClassId" :disabled="payload?.id && payload.name && payload.name.indexOf('||dakhela') > -1">
-                        <option :value="null">-class-</option>
-                        <template v-for="(cls, index) in classes" :key="index">
-                          <option :value="cls.class_name">{{cls.class_name}}</option>
-                        </template>
-                      </select>
-                    </div>
-                  </div>
-                  <div class="col-4">
-                    <div class="form-group">
-                      <label>{{ helper.t('Year') }} <sup>*</sup></label>
-                      <select v-model="payload.year" class="form-control cb-input cb-input--sm" :disabled="payload?.id && payload.name && payload.name.indexOf('||dakhela') > -1">
-                        <option :value="new Date().getFullYear()">{{ new Date().getFullYear() }}</option>
-                        <option :value="new Date().getFullYear() - 1">{{ new Date().getFullYear() - 1 }}</option>
-                        <option :value="new Date().getFullYear() - 2">{{ new Date().getFullYear() - 2 }}</option>
-                        <option :value="new Date().getFullYear() - 3">{{ new Date().getFullYear() - 3 }}</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <!-- Name -->
-                  <div class="col-12">
-                    <div class="form-group">
-                      <label>{{ helper.t('Name') }} <sup>*</sup></label>
-                      <input v-model="payload.name" type="text" class="form-control cb-input cb-input--sm" :disabled="payload?.id && payload.name && payload.name.indexOf('||dakhela') > -1">
-                    </div>
-                  </div>
-
-                  <!-- Dakhela + Phone -->
-                  <div class="col-5">
-                    <div class="form-group">
-                      <label>{{ helper.t('Dakhela') }} <sup>*</sup></label>
-                      <input v-model="payload.dakhela" type="number" class="form-control cb-input cb-input--sm" :disabled="payload?.id && payload.name && payload.name.indexOf('||dakhela') > -1">
-                    </div>
-                  </div>
-                  <div class="col-7">
-                    <div class="form-group">
-                      <label>{{ helper.t('Phone Number(11 Digit') }} <sup>*</sup></label>
-                      <div class="position-relative">
-                        <input v-model="payload.phone_number" type="text" class="form-control cb-input cb-input--sm" style="padding-right: 28px;">
-                        <span class="phone-valid-icon" :class="{ 'text-success': /^01\d{9}$/.test(String(payload.phone_number).trim()), 'text-danger': !/^01\d{9}$/.test(String(payload.phone_number).trim()) }">
-                          <i :class="{ 'bx bx-check-circle': /^01\d{9}$/.test(String(payload.phone_number).trim()), 'bx bx-x-circle': !/^01\d{9}$/.test(String(payload.phone_number).trim()) }"></i>
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Note -->
-                  <!-- <div class="col-12">
-                    <div class="form-group">
-                      <label>Note</label>
-                      <input v-model="payload.note" type="text" class="form-control cb-input cb-input--sm">
-                    </div>
-                  </div> -->
-
-                  <!-- Profile Image -->
-                  <div class="col-12">
-                    <div class="form-group">
-                      <label>{{ helper.t('Profile Image') }}</label>
-                      <div class="d-flex align-items-center gap-2">
-                        <img class="profile-thumb" :src="profileImagePreview || payload.profile_image || '/default-profile-image.png'" alt="profile" />
-                        <input v-model="payload.profile_image" type="text" class="form-control cb-input cb-input--sm" :placeholder="helper.t('Image URL or path')">
-                        <label for="profile_image_input" class="cb-file-btn cb-input--sm">
-                          <span>{{ helper.t('Choose Image') }}</span>
-                          <input id="profile_image_input" type="file" accept="image/*" class="d-none" @change="onProfileImageChange">
-                        </label>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Card Owner -->
-                   <template v-if="CONFIG?.settings?.attendance?.status">
-                     <div class="col-12 mt-3" v-if="CONFIG?.card_owners?.length">
-                       <div class="form-group d-flex align-items-center gap-3">
-                         <label class="mb-0">{{ helper.t('Card Owner') }}</label>
-                         <div class="d-flex flex-wrap gap-2">
-                           <template v-for="owner in CONFIG?.card_owners">
-                             <div @click.stop="payload.card_owner = owner.id" class="d-flex justify-content-start each-owner-name">
-                                 <span :class="{'checked': payload.card_owner == owner.id}" customized-radio></span>
-                                 <label class="cp">{{ owner.name }}</label>
-                             </div>
-                           </template>
-                         </div>
-                       </div>
-                     </div>
-                   </template>
-
-                  <div class="col-12 d-flex justify-content-center mt-3">
-                    <Btn @click.stop="clearPayload" class="red me-2">{{ helper.t('Cancel') }}</Btn>
-                    <Btn v-if="!payload.id" @click="addStudent" addStudentAttr class="me-0">{{ helper.t('Submit') }} <BtnLoader v-if="is___adding"></BtnLoader></Btn>
-                    <Btn v-else @click="updateStudent" updateStudentAttr class="me-0" v-if="payload.name && payload.name.indexOf('||dakhela') === -1">{{ helper.t('Update') }} <BtnLoader v-if="is___adding"></BtnLoader></Btn>
-                  </div>
-                </template>
+    <CloneStudent
+      v-model="showCloneModal"
+      :student="studentToClone"
+      :devices="devices"
+      @clone-success="onCloneSuccess"
+    />
 
 
-                <template v-else-if="editModeTabIndex == 2"> 
-                  <div class="col-12 overflow-y-scroll">
-                     <table class="table table-striped">
-                      <thead>
-                        <tr>
-                          <th>Name</th>
-                          <th>Date</th>
-                          <th>Time</th>
-                          <th>Before</th>
-                        </tr>
-                      </thead>
-
-                      <tbody>
-                        <template v-if="studentLogs?.length">
-                          <template v-for="(student, i) in studentLogs">
-                            <tr>
-                              <td>{{ student?.name }}</td>
-                              <td>{{ helper.enToBnDate(moment(student?.punch_exact_time_text).format('DD MMMM, dddd')).replace(/ /g, '&nbsp;') }}</td>
-                              <td>{{ helper.enToBnDate(moment(student?.punch_exact_time_text).format('hh:mm:ss&nbsp;A')) }}</td>
-                              <td>{{ helper.enToBnDate(moment().diff(student?.punch_exact_time_text, 'days')) }} দিন</td>
-                            </tr> 
-                          </template>
-                        </template>
-                        <template v-else> 
-                          <tr>
-                            <td colspan="44">{{ helper.t('No log found') }}</td>
-                          </tr>  
-                        </template>
-                      </tbody>
-                     </table>
-                  </div> 
-                </template> 
-
-
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </modal> 
-
-   
 
 
 
@@ -983,23 +939,11 @@ watch(fixedWidthSoundCol, (newVal) => {
                 <div class="align-items-center d-flex">
                   <span class="p-1" @dblclick="params.dakhela = std.dakhela">{{ std.dakhela }}</span>
                   <!-- No need multiple card Access If using only for attendance -->
-                  <span id="CLONE___STUDENT" v-if="CONFIG?.settings?.attendance?.only_attendance_feature === false" :tooltip="helper.t('Cone Student')">
-                    <i v-if="std.name && String(std.name)?.indexOf('||dakhela') > -1 === false" @click.stop="()=>{
-                      std.cloneMode = !(!!(std.cloneMode));
-                    }" class="bx bxs-copy-alt cp px-1">
+                  <span id="CLONE___STUDENT" v-if="CONFIG?.settings?.attendance?.only_attendance_feature === false" :tooltip="helper.t('Clone Student')">
+                    <i v-if="std.name && String(std.name)?.indexOf('||dakhela') > -1 === false" @click.stop="onClickClone(std)" class="bx bxs-copy-alt cp px-1">
                     </i>
                   </span>
                 </div>
-                
-                <template v-if="std?.cloneMode">
-                  <div class="std-clone-area">
-                    <input type="number" @input="std.dakhela_new = $event.target.value" />
-                    <button @click="onClickClone(std)">{{ helper.t('Copy') }}</button>
-                  </div>
-                  <p v-if="std?.error_message" class="text-danger">
-                    {{ std.error_message }} 
-                  </p>
-                </template>
                 
               </td> 
               
@@ -1477,58 +1421,8 @@ watch(fixedWidthSoundCol, (newVal) => {
   border: 1px solid #cfcfcf;
   background: #fff;
 }
-.cb-form .form-group { margin-bottom: 0; }
-.cb-form label { font-size: 12px; font-weight: 600; margin-bottom: 2px; color: #555; display: block; }
-.cb-input--sm { height: 34px !important; font-size: 13px !important; padding: 4px 10px !important; }
-.cb-file-btn {
-  flex-shrink: 0;
-  height: 34px;
-  padding: 0 12px;
-  display: flex;
-  align-items: center;
-  white-space: nowrap;
-  border: 1px solid #ced4da;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 13px;
-  background: #f8f9fa;
-  color: #333;
-}
-.cb-file-btn:hover { background: #e9ecef; }
-.phone-valid-icon { position: absolute; right: 7px; top: 50%; transform: translateY(-50%); font-size: 15px; line-height: 1; pointer-events: none; }
 .action-icons > *:not(:last-child){
   margin-right: 8px;
-}
-.overflow-y-scroll{
-  max-height: calc(100vh - 390px);
-  overflow-y: auto;
-  padding-bottom: 15px;
-}
-@media (max-width: 500px) {
-  .overflow-y-scroll{
-    max-height: calc(100vh - 390px);
-    overflow-y: auto;
-  }
-}
-[customized-radio]{
-  width: 17px;
-  height: 17px;
-  border-radius: 50%;
-  border: 1px solid var(--primaryColor);
-  background-color: white;
-  cursor: pointer;
-  margin-right: 5px;
-  transform: translateY(3px);
-}
-[customized-radio].checked{ 
-  border-color: var(--primaryColor);
-  background: radial-gradient(circle, var(--primaryColor) 0%, var(--primaryColor) 30%, #e2e2e2 40%, transparent 100%);
-}
-.each-owner-name{
-    padding: 3px 10px;
-    background: #f0f0f0;
-    border-radius: 32px;
-    box-shadow: 0px 3px 0px #0000004f;
 }
 .student-note{
     width: 100%;
@@ -1536,11 +1430,5 @@ watch(fixedWidthSoundCol, (newVal) => {
     background-color: #ffffff4f;
     border-radius: 3px;
     font-size: 13px;
-}
-.using-card-title-in-form{
-  padding: 5px 15px; 
-  border-radius: 15px;
-  background: var(--grad1);
-  border-color: var(--primaryColor);
 }
 </style>

@@ -97,6 +97,7 @@ module.exports = function (config, utils, Backup) {
       en: enLang.strings,
       bn: bnLang.strings,
     };
+    runtimeConfig.custom_css = runtimeConfig.settings?.custom_css || '';
 
     res.send(runtimeConfig);
   });

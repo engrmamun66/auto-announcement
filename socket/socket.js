@@ -1,33 +1,19 @@
 const WebSocket = require("ws");
 
-const { SOCKET_PORT } = global.config.env
+module.exports = function (httpServer) {
+    const wsServer = new WebSocket.Server({ server: httpServer });
 
-module.exports = function () {
-    const server = new WebSocket.Server({ port: SOCKET_PORT });
+    global.socketServer = wsServer;
 
-    global.socketServer = server; // Make WebSocket server accessible globally
+    wsServer.on("connection", (socket) => {
+    //   console.log("Frontend connected to WebSocket", new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true }));
 
-    server.on('error', (err) => {
-      if (err.code === 'EADDRINUSE') {
-        console.error(`WebSocket port ${SOCKET_PORT} is already in use. Retrying...`);
-        setTimeout(() => {
-          server.close();
-          module.exports();
-        }, 2000);
-      } else {
-        console.error('WebSocket server error:', err);
-      }
-    });
-
-    server.on("connection", (socket) => {
-      console.log("Frontend connected to WebSocket", new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true }));
-    
         socket.on("close", () => {
-            console.log("Frontend disconnected from WebSocket", new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true }));
+            // console.log("Frontend disconnected from WebSocket", new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true }));
         });
         socket.on("message", (message) => {
             const decodedMessage = JSON.parse(message.toString());
-            server.clients.forEach((client) => {
+            wsServer.clients.forEach((client) => {
                 if (client.readyState === client.OPEN) {
                     client.send(JSON.stringify(decodedMessage));
                 }
@@ -35,6 +21,6 @@ module.exports = function () {
         });
     });
 
-    console.log(`WebSocket server running on ws://localhost:${SOCKET_PORT}`);
+    return wsServer;
 };
 

@@ -6,6 +6,7 @@ import AttendenceView from '../pages/attendence.vue'
 import ContactUsView from '../pages/contactus.vue'
 import ErrorView from '../pages/error.vue'
 import EnvView from '../pages/env.vue'
+import DevicesView from '../pages/Devices.vue'
 
 const routes = [ 
     {
@@ -42,6 +43,11 @@ const routes = [
         path: "/env",
         name: 'env',
         component: EnvView,
+    },
+    {
+        path: "/devices",
+        name: 'devices',
+        component: DevicesView,
     },
     {
         path: "/*",

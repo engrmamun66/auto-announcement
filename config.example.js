@@ -28,7 +28,6 @@ module.exports = {
      // ── NOT saved to DB ── loaded from config.js at startup only ──
      env: {
           PORT: port_number,
-          SOCKET_PORT: 2424,
           SECRET_KEY: 'YOUR_SECRET_KEY',
           CODE_NUMBER: 'DEV_MAM', // Rrequeired for Client Identification
           PUNCH_LOG_FILENAME: 'punch.log.json', 
@@ -121,6 +120,7 @@ module.exports = {
                
           },
           sms: {
+               // mimsms length check: https://messages.com.bd/
                enabled: false,                    // master on/off
                provider: 'mimsms',               // ssl_wireless | mimsms | muthofon | custom
                api_base_url: 'https://api.mimsms.com',
@@ -129,6 +129,9 @@ module.exports = {
                sender_id: '',                     // approved sender ID / number
                send_on_in: true,                  // send SMS when student punches IN
                send_on_out: false,                // send SMS when student punches OUT
+               skip_sms_for_punch_after_shift_end: true, // skip SMS if punch-in occurs after shift end time 
+               per_sms_max_charecter: 70,
+               student_name_max_lenght_for_in_out_sms: 26,
                // {name}, {time}, {date}, {status} are replaced at send time
                in_message_template: `
                🕌 তালীমুল কুরআন মহিলা মাদ্রাসা
@@ -177,6 +180,7 @@ module.exports = {
      --grad2: linear-gradient(90deg, rgba(118, 118, 118, 0.348) 0%, rgba(246, 231, 255, 0.486) 100%);
      --grad3: linear-gradient(90deg, var(--primaryColor) 0%, var(--secondaryColor) 100%);
      `,
+     custom_css: `body{zoom: 1}`,
     
      classes: [
           {
@@ -342,7 +346,8 @@ module.exports = {
                id: 4,
                name: 'মাহরাম',
           },
-     ]
+     ],
+     
 
 }
  

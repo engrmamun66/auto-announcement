@@ -73,7 +73,7 @@
                       <td colspan="9" class="cs-cls-shifts-td">
                         <div v-if="expandedShifts[idx]" class="cs-cls-shifts-wrap">
                             <TransitionGroup name="shift-item" tag="div" class="cs-cls-shifts-items">
-                              <div v-for="(sh, si) in (cls.shifts||[])" :key="sh.start+'_'+si" class="cs-cls-shift-item">
+                              <div v-for="(sh, si) in (cls.shifts||[])" :key="si" class="cs-cls-shift-item">
                                 <span class="cs-cls-shift-label">#{{ si+1 }}</span>
                                 <label>{{ helper.t('Start') }} <input class="cs-cls-input cs-cls-input--time" type="time" v-model="sh.start" /></label>
                                 <label>{{ helper.t('End') }} <input class="cs-cls-input cs-cls-input--time" type="time" v-model="sh.end" /></label>
@@ -112,6 +112,12 @@
 
       </template>
     </div>
+
+    <!-- Password Confirmation Modal -->
+    <ConfirmByPassword
+      v-model="showPasswordConfirm"
+      @yes="handlePasswordConfirm"
+    />
   </Rightbar>
 </template>
 
@@ -121,6 +127,7 @@ import Rightbar from '../Rightbar.vue';
 import FormNode from './FormNode.vue';
 import BtnLoader from '../BtnLoader.vue';
 import Switch from '../Switch.vue';
+import ConfirmByPassword from '../ConfirmByPassword.vue';
 
 const emit = defineEmits(['unmount']);
 const http = inject('http');
@@ -139,6 +146,8 @@ const resettingAll = ref(false);
 const dragStartIdx = ref(null);
 const dragOverIdx = ref(null);
 const expandedShifts = reactive({});
+const showPasswordConfirm = ref(false);
+const pendingSaveKey = ref(null);
 
 function clsDrop(toIdx) {
   const arr = drafts['classes'];
@@ -199,24 +208,34 @@ function resetDraft(key) {
   errors[key] = '';
 }
 
-async function save(key, pass=false) {
-  if(!event?.ctrlKey){
-    let pass = prompt(helper.t('Type secret password'))
-    if(pass !== 'allowme' && pass !== 'asdf'){
-      if(pass) emitter.emit('toaster-error', { message: helper.t(`Secret key not matched`)})
-      return
-    }
+function save(key) {
+  if (!event?.ctrlKey) {
+    pendingSaveKey.value = key;
+    showPasswordConfirm.value = true;
+    return;
   }
+  _performSave(key);
+}
+
+async function _performSave(key) {
   errors[key] = '';
   saving[key] = true;
   try {
     await http.post(`/settings/${key}`, { value: drafts[key] });
     settings.value[key] = JSON.parse(JSON.stringify(drafts[key]));
-    hasSaved.value = true; 
+    hasSaved.value = true;
+    emitter.emit('toaster-success', { message: helper.t('Saved') });
   } catch(e) {
     errors[key] = helper.t('Save failed');
   } finally {
     saving[key] = false;
+  }
+}
+
+function handlePasswordConfirm() {
+  if (pendingSaveKey.value) {
+    _performSave(pendingSaveKey.value);
+    pendingSaveKey.value = null;
   }
 }
 

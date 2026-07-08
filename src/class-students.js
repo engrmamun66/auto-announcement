@@ -1146,7 +1146,7 @@ class Students {
 
         deleteProfileImageFile(row?.profile_image)
         checkAccess.CheckAppAccess({ save_info: true }).catch(() => {})
-    
+
         res.send({
           message: "Student deleted successfully.",
           studentId: id,
@@ -1154,12 +1154,52 @@ class Students {
       });
     })
   }
-  
-  
-  
-  
-  
-  
+
+  bulkSyncCard(req, res) {
+    const { dakhela, card_number } = req.body;
+
+    if (!dakhela) {
+      return res.status(400).send({ error: 'Dakhela is required' });
+    }
+
+    this.db.run(
+      'UPDATE students SET card_no = ? WHERE dakhela = ?',
+      [card_number || '', dakhela],
+      function(err) {
+        if (err) {
+          console.error('Error syncing card:', err.message);
+          return res.status(500).send({ error: err.message });
+        }
+        res.send({
+          success: true,
+          message: 'Card synced successfully',
+          dakhela,
+          card_number,
+          changes: this.changes
+        });
+      }
+    );
+  }
+
+  getByClasses(req, res) {
+    const { class_ids } = req.body;
+
+    if (!Array.isArray(class_ids) || class_ids.length === 0) {
+      return res.status(400).send({ error: 'class_ids array is required' });
+    }
+
+    const placeholders = class_ids.map(() => '?').join(',');
+    const query = `SELECT id, name, dakhela, class, class_short, card_no, year FROM ${this.tableName} WHERE class_short IN (${placeholders}) ORDER BY class_short ASC, name ASC`;
+
+    this.db.all(query, class_ids, (err, rows) => {
+      if (err) {
+        console.error('Error fetching students by classes:', err.message);
+        return res.status(500).send({ error: err.message });
+      }
+      res.send(rows || []);
+    });
+  }
+
 }
 
 module.exports = Students;

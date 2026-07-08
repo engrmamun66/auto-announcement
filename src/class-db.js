@@ -330,6 +330,42 @@ class myDB {
               }
             );
 
+            this.db.run(
+              // DROP TABLE devices;
+              `
+              CREATE TABLE IF NOT EXISTS devices (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                serial_number TEXT NOT NULL UNIQUE,
+                name TEXT DEFAULT NULL,
+                brand TEXT DEFAULT 'ZKTeco',
+                status INTEGER DEFAULT 1,
+                polling_interval INTEGER DEFAULT 2,
+                adjust_time VARCHAR DEFAULT "subtract(0, 'hours')",
+                updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                created TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+              )`,
+              (err) => {
+                if (err) console.error("Error creating devices table:", err.message);
+              }
+            );
+
+            this.db.run(
+              // DROP TABLE command_queue;
+              `
+              CREATE TABLE IF NOT EXISTS command_queue (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                device_serial_number TEXT NOT NULL,
+                command TEXT NOT NULL,
+                status TEXT DEFAULT 'pending',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                sent_at TIMESTAMP DEFAULT NULL,
+                FOREIGN KEY (device_serial_number) REFERENCES devices(serial_number)
+              )`,
+              (err) => {
+                if (err) console.error("Error creating command_queue table:", err.message);
+              }
+            );
+
         } catch (error) {
             console.log('ddfdf', error);
         }

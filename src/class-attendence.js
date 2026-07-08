@@ -189,11 +189,19 @@ class Attendance {
                     time = row.out_time;
                   }
 
+                  let student_name = student.name?.split('||')[0] || 'Student'
+                  const max_name_length = Math.abs(Number(smsConfig?.student_name_max_lenght_for_in_out_sms || 26))
+                  if(student_name.length > max_name_length){
+                    student_name = student_name.substring(0, max_name_length - 3) + '...'
+                  }
+
+
                   if (shouldSendSms && template) {
                     const formattedTime = formatTimeWithPeriod(time || '');
                     const message = template
-                      .replace(/{name}/g, student.name?.split('||')[0] || 'Student')
+                      .replace(/{name}/g, student_name)
                       .replace(/{class}/g, student.class || 'N/F')
+                      .replace(/{dakhela}/g, student.dakhela || 'N/F')
                       .replace(/{date}/g, formatDate(row.date || ''))
                       .replace(/{time}/g, formattedTime)
                     Sms._sendSmsInternal([student.phone_number], message).catch(err => {
@@ -1022,7 +1030,7 @@ class Attendance {
       });
     }
 
-    processPunchRequest(punchData = {}) {
+    _processPunchRequest(punchData = {}) {
       const {
         barcode,
         punch_time = moment(),
@@ -1100,126 +1108,224 @@ class Attendance {
         return currentShift;
       };
 
-      if (!today_entries?.length) {
+      const USE_PREVIOUSE_CODE = false
+
+      if(!USE_PREVIOUSE_CODE){
+        // Each punch creates separate entry (in_time OR out_time, not both)
         const runningShift = getRunningShift(shifts, moment_punch);
         if (!runningShift) {
           return { error: 'No valid shift found', action: null, payload: null };
         }
 
-        payload.in_time = moment_punch.format(TIME_FORMAT);
-        payload.shift_number = runningShift.shift_number;
-        payload.shift_duration = `${runningShift.start} - ${runningShift.end}`;
-        payload.late_in_minute = moment_punch.diff(moment(runningShift.start_datetime, `${DATE_FORMAT} HH:mm`), 'minutes');
+        const shiftDuration = `${runningShift.start} - ${runningShift.end}`;
+        const shiftEntries = today_entries.filter(e => e.shift_duration === shiftDuration);
+        const shiftEntry = shiftEntries[0];
 
-        if (late_consideration_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_consideration_minute) {
-          payload.late_in_minute = 0;
-        }
-        if (payload.late_in_minute > 0) payload.status = 'Late';
-        payload.remarks = 'First In Today';
-        action = 'create';
-      } else {
-        const runningShift = getRunningShift(shifts, moment_punch);
-        if (!runningShift) {
-          return { error: 'No valid shift found', action: null, payload: null };
+        // Check if shift already has max entries (in_time + out_time = 2 entries)
+        if (shiftEntries.length >= 2) {
+          return { error: 'In/Out added for this shift', action: null, payload: null };
         }
 
-        const current_shift_duration = `${runningShift.start} - ${runningShift.end}`;
-        const same_shift_entries = today_entries.filter(e => e.shift_duration === current_shift_duration);
-        const last_enty = same_shift_entries.length > 0 ? same_shift_entries[same_shift_entries.length - 1] : today_entries[today_entries.length - 1];
-        const is_different_shift = last_enty.shift_duration !== current_shift_duration;
+        // Check for duplicate punch (within punch_separator_gap) against LAST punch overall
+        const lastEntry = today_entries.length > 0 ? today_entries[today_entries.length - 1] : null;
+        if (lastEntry) {
+          const lastPunchTime = lastEntry.out_time || lastEntry.in_time;
+          if (lastPunchTime) {
+            const lastMoment = moment(`${date} ${lastPunchTime}`, `${DATE_FORMAT} HH:mm:ss`);
+            const timeDiffInSeconds = Math.abs(moment_punch.diff(lastMoment, 'seconds'));
+            if (timeDiffInSeconds < punch_separator_gap_in_seconds) {
+              return { error: `Duplicate punch. Wait ${punch_separator_gap_in_seconds} seconds.`, action: null, payload: null };
+            }
+          }
+        }
 
-        const last_punch_time = moment(`${moment_punch.format(DATE_FORMAT)} ${last_enty.in_time || last_enty.out_time}`);
-        const gap_seconds = moment_punch.diff(last_punch_time, 'seconds');
-
-        if (gap_seconds < punch_separator_gap_in_seconds && !is_different_shift) {
-          Object.assign(payload, last_enty);
+        if (!shiftEntry) {
+          // No entry for this shift yet - create with in_time
+          payload.in_time = moment_punch.format(TIME_FORMAT);
           payload.shift_number = runningShift.shift_number;
-          payload.shift_duration = current_shift_duration;
+          payload.shift_duration = shiftDuration;
           payload.late_in_minute = moment_punch.diff(moment(runningShift.start_datetime, `${DATE_FORMAT} HH:mm`), 'minutes');
 
-          const shift_in_time = same_shift_entries.find(e => e.in_time)?.in_time;
-          const shift_in_time_moment = shift_in_time ? moment(`${moment_punch.format(DATE_FORMAT)} ${shift_in_time}`, `${DATE_FORMAT} HH:mm:ss`) : null;
-
-          if (shift_in_time_moment && moment_punch.isBefore(shift_in_time_moment)) {
-            // Punch is before in_time, update the check-in entry
-            const in_time_entry = same_shift_entries.find(e => e.in_time);
-            if (in_time_entry) {
-              Object.assign(payload, in_time_entry);
+          if (late_consideration_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_consideration_minute) {
+            payload.late_in_minute = 0;
+          }
+          if (payload.late_in_minute > 0) payload.status = 'Late';
+          payload.remarks = 'Check In';
+          action = 'create';
+        } else {
+          // Entry exists - check if this is recovery scenario (punch time < existing in_time)
+          if (shiftEntry.in_time && !shiftEntry.out_time) {
+            const existingInMoment = moment(`${date} ${shiftEntry.in_time}`, `${DATE_FORMAT} HH:mm:ss`);
+            if (moment_punch.isBefore(existingInMoment)) {
+              // Recovery: Admin submitting missed check-in before existing in_time
+              // Create new entry with this punch as in_time
+              // Update existing entry: set out_time to old in_time, clear in_time
               payload.in_time = moment_punch.format(TIME_FORMAT);
+              payload.shift_number = runningShift.shift_number;
+              payload.shift_duration = shiftDuration;
               payload.late_in_minute = moment_punch.diff(moment(runningShift.start_datetime, `${DATE_FORMAT} HH:mm`), 'minutes');
+
               if (late_consideration_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_consideration_minute) {
                 payload.late_in_minute = 0;
               }
               if (payload.late_in_minute > 0) payload.status = 'Late';
-            }
-          } else {
-            // Punch is after in_time, update the check-out entry
-            if (last_enty.in_time) {
-              payload.in_time = moment_punch.format(TIME_FORMAT);
-              if (late_consideration_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_consideration_minute) {
-                payload.late_in_minute = 0;
-              }
-              if (payload.late_in_minute > 0) payload.status = 'Late';
-            } else if (last_enty.out_time) {
-              payload.out_time = moment_punch.format(TIME_FORMAT);
-              payload.status = '';
-              payload.late_in_minute = 0;
+              payload.remarks = 'Check In (Recovered)';
+              action = 'create';
+
+              // Check if SMS should be skipped for punch after shift end
+              const skip_sms_config = config.settings?.sms?.skip_sms_for_punch_after_shift_end || false;
+              const shiftEndMoment = moment(runningShift.end_datetime, `${DATE_FORMAT} HH:mm`);
+              const sms_abandoned = skip_sms_config && moment_punch.isAfter(shiftEndMoment);
+
+              // Return update info for existing entry
+              return {
+                error: null,
+                action: 'create_with_update',
+                payload,
+                updateEntry: {
+                  id: shiftEntry.id,
+                  in_time: null,
+                  out_time: shiftEntry.in_time
+                },
+                sms_abandoned
+              };
             }
           }
-          payload.remarks = 'Updated Existing Entry';
-          action = 'update';
-        } else if (today_entries?.length < max_permitte_entry) {
+
+          // Normal flow: Entry exists - create separate entry with out_time
+          payload.out_time = moment_punch.format(TIME_FORMAT);
           payload.shift_number = runningShift.shift_number;
-          payload.shift_duration = current_shift_duration;
-          payload.late_in_minute = moment_punch.diff(moment(runningShift.start_datetime, `${DATE_FORMAT} HH:mm`), 'minutes');
+          payload.shift_duration = shiftDuration;
+          payload.remarks = 'Check Out';
+          action = 'create';
+        }
+      } else {
 
-          const entry_count_by_shift = today_entries.filter(e => e.shift_duration === payload.shift_duration);
-          if (entry_count_by_shift?.length === 2) {
-            return { error: `Already ${entry_count_by_shift.length} entries for this shift`, action: null, payload: null };
+        // OLD Code
+        if (!today_entries?.length) {
+          const runningShift = getRunningShift(shifts, moment_punch);
+          if (!runningShift) {
+            return { error: 'No valid shift found', action: null, payload: null };
           }
-
-          if (last_enty.in_time) {
-            if (last_enty.shift_duration !== payload.shift_duration) {
-              payload.in_time = moment_punch.format(TIME_FORMAT);
+  
+          payload.in_time = moment_punch.format(TIME_FORMAT);
+          payload.shift_number = runningShift.shift_number;
+          payload.shift_duration = `${runningShift.start} - ${runningShift.end}`;
+          payload.late_in_minute = moment_punch.diff(moment(runningShift.start_datetime, `${DATE_FORMAT} HH:mm`), 'minutes');
+  
+          if (late_consideration_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_consideration_minute) {
+            payload.late_in_minute = 0;
+          }
+          if (payload.late_in_minute > 0) payload.status = 'Late';
+          payload.remarks = 'First In Today';
+          action = 'create';
+        } else {
+          const runningShift = getRunningShift(shifts, moment_punch);
+          if (!runningShift) {
+            return { error: 'No valid shift found', action: null, payload: null };
+          }
+  
+          const current_shift_duration = `${runningShift.start} - ${runningShift.end}`;
+          const same_shift_entries = today_entries.filter(e => e.shift_duration === current_shift_duration);
+          const last_enty = same_shift_entries.length > 0 ? same_shift_entries[same_shift_entries.length - 1] : today_entries[today_entries.length - 1];
+          const is_different_shift = last_enty.shift_duration !== current_shift_duration;
+  
+          const last_punch_time = moment(`${moment_punch.format(DATE_FORMAT)} ${last_enty.in_time || last_enty.out_time}`);
+          const gap_seconds = moment_punch.diff(last_punch_time, 'seconds');
+  
+          if (gap_seconds < punch_separator_gap_in_seconds && !is_different_shift) {
+            Object.assign(payload, last_enty);
+            payload.shift_number = runningShift.shift_number;
+            payload.shift_duration = current_shift_duration;
+            payload.late_in_minute = moment_punch.diff(moment(runningShift.start_datetime, `${DATE_FORMAT} HH:mm`), 'minutes');
+  
+            const shift_in_time = same_shift_entries.find(e => e.in_time)?.in_time;
+            const shift_in_time_moment = shift_in_time ? moment(`${moment_punch.format(DATE_FORMAT)} ${shift_in_time}`, `${DATE_FORMAT} HH:mm:ss`) : null;
+  
+            if (shift_in_time_moment && moment_punch.isBefore(shift_in_time_moment)) {
+              // Punch is before in_time, update the check-in entry
+              const in_time_entry = same_shift_entries.find(e => e.in_time);
+              if (in_time_entry) {
+                Object.assign(payload, in_time_entry);
+                payload.in_time = moment_punch.format(TIME_FORMAT);
+                payload.late_in_minute = moment_punch.diff(moment(runningShift.start_datetime, `${DATE_FORMAT} HH:mm`), 'minutes');
+                if (late_consideration_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_consideration_minute) {
+                  payload.late_in_minute = 0;
+                }
+                if (payload.late_in_minute > 0) payload.status = 'Late';
+              }
+            } else {
+              // Punch is after in_time, update the check-out entry
+              if (last_enty.in_time) {
+                payload.in_time = moment_punch.format(TIME_FORMAT);
+                if (late_consideration_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_consideration_minute) {
+                  payload.late_in_minute = 0;
+                }
+                if (payload.late_in_minute > 0) payload.status = 'Late';
+              } else if (last_enty.out_time) {
+                payload.out_time = moment_punch.format(TIME_FORMAT);
+                payload.status = '';
+                payload.late_in_minute = 0;
+              }
+            }
+            payload.remarks = 'Updated Existing Entry';
+            action = 'update';
+          } else if (today_entries?.length < max_permitte_entry) {
+            payload.shift_number = runningShift.shift_number;
+            payload.shift_duration = current_shift_duration;
+            payload.late_in_minute = moment_punch.diff(moment(runningShift.start_datetime, `${DATE_FORMAT} HH:mm`), 'minutes');
+  
+            const entry_count_by_shift = today_entries.filter(e => e.shift_duration === payload.shift_duration);
+            if (entry_count_by_shift?.length === 2) {
+              return { error: `Already ${entry_count_by_shift.length} entries for this shift`, action: null, payload: null };
+            }
+  
+  
+            if (last_enty.in_time) {
+  
+              if (last_enty.shift_duration !== payload.shift_duration) {
+                payload.in_time = moment_punch.format(TIME_FORMAT);
+                payload.out_time = null;
+                if (late_consideration_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_consideration_minute) {
+                  payload.late_in_minute = 0;
+                }
+                if (payload.late_in_minute > 0) payload.status = 'Late';
+                payload.remarks = 'Added In Time';
+              } else {
+                const shift_in_time = same_shift_entries.find(e => e.in_time)?.in_time;
+                if (shift_in_time) {
+                  const new_out_time = moment_punch;
+                  const existing_in_time = moment(`${moment_punch.format(DATE_FORMAT)} ${shift_in_time}`, `${DATE_FORMAT} HH:mm:ss`);
+                  if (new_out_time.isBefore(existing_in_time)) {
+                    return { error: 'Out time cannot be before in time', action: null, payload: null };
+                  }
+                }
+                payload.in_time = null;
+                payload.out_time = moment_punch.format(TIME_FORMAT);
+                payload.remarks = 'Added Out Time';
+                payload.late_in_minute = 0;
+              }
+            } else if (last_enty.out_time) {
+              const new_in_time = moment_punch;
+              const existing_out_time = moment(`${moment_punch.format(DATE_FORMAT)} ${last_enty.out_time}`, `${DATE_FORMAT} HH:mm:ss`);
+              if (new_in_time.isBefore(existing_out_time)) {
+                return { error: 'In time cannot be before previous out time', action: null, payload: null };
+              }
               payload.out_time = null;
+              payload.in_time = moment_punch.format(TIME_FORMAT);
               if (late_consideration_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_consideration_minute) {
                 payload.late_in_minute = 0;
               }
               if (payload.late_in_minute > 0) payload.status = 'Late';
               payload.remarks = 'Added In Time';
-            } else {
-              const shift_in_time = same_shift_entries.find(e => e.in_time)?.in_time;
-              if (shift_in_time) {
-                const new_out_time = moment_punch;
-                const existing_in_time = moment(`${moment_punch.format(DATE_FORMAT)} ${shift_in_time}`, `${DATE_FORMAT} HH:mm:ss`);
-                if (new_out_time.isBefore(existing_in_time)) {
-                  return { error: 'Out time cannot be before in time', action: null, payload: null };
-                }
-              }
-              payload.in_time = null;
-              payload.out_time = moment_punch.format(TIME_FORMAT);
-              payload.remarks = 'Added Out Time';
-              payload.late_in_minute = 0;
             }
-          } else if (last_enty.out_time) {
-            const new_in_time = moment_punch;
-            const existing_out_time = moment(`${moment_punch.format(DATE_FORMAT)} ${last_enty.out_time}`, `${DATE_FORMAT} HH:mm:ss`);
-            if (new_in_time.isAfter(existing_out_time)) {
-              return { error: 'In time cannot be after out time', action: null, payload: null };
-            }
-            payload.out_time = null;
-            payload.in_time = moment_punch.format(TIME_FORMAT);
-            if (late_consideration_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_consideration_minute) {
-              payload.late_in_minute = 0;
-            }
-            if (payload.late_in_minute > 0) payload.status = 'Late';
-            payload.remarks = 'Added In Time';
+            action = 'create';
+          } else {
+            return { error: 'Max entries reached for today', action: null, payload: null };
           }
-          action = 'create';
-        } else {
-          return { error: 'Max entries reached for today', action: null, payload: null };
         }
       }
+
 
       return { error: null, action, payload };
     }
@@ -1229,7 +1335,31 @@ class Attendance {
     // ========================Submit Attendance====================== //
     // =============================================================== //
 
-    submitAttendanceRequest(req, res, Students) {
+    _emitAttendanceToSocket(responseData, messageType = 'success') {
+      if (!global.socketServer || !global.socketServer.clients) return;
+
+      const clients = Array.from(global.socketServer.clients);
+      if (!clients.length) return;
+
+      clients.forEach((client) => {
+        if (client.readyState === client.OPEN) {
+          client.send(JSON.stringify({
+            type: 'device_punch',
+            message_type: messageType,
+            data: responseData?.data,
+            message: responseData?.message
+          }));
+        }
+      });
+    }
+
+    /**
+     * If synced device with our api server directly, This funciton will be use from
+     * file: src/controllers/cdataController.js
+     * method: _processDevicePunch()
+     */
+
+    submitAttendanceRequest(req, res, emitToSocket = false) {
       const {
         barcode = '',
         punch_time = moment().format(),
@@ -1244,7 +1374,6 @@ class Attendance {
       if (!barcode) {
         return res.status(400).send({ error: 'Barcode required.' });
       }
-
       const TIME_FORMAT = 'HH:mm:ss';
       const DATE_FORMAT = 'YYYY-MM-DD';
       const moment_punch = moment.isMoment(punch_time) ? punch_time : moment(new Date(punch_time));
@@ -1262,29 +1391,47 @@ class Attendance {
         `SELECT * FROM students WHERE dakhela = ?`,
         [dakhela],
         (err, student) => {
-          if (err) return res.status(500).send({ error: err.message });
-          if (!student) return res.status(400).send({ error: 'Student not found.' });
-          if (student.status !== 1) return res.status(400).send({ error: 'Student is inactive.' });
+          if (err) {
+            if (emitToSocket) this._emitAttendanceToSocket({ message: `E1:: ${err}`, data: null }, 'error');
+            return res.status(500).send({ error: err?.message });
+          }
+          if (!student){
+            if (emitToSocket) this._emitAttendanceToSocket({ message: `Student not found (dakhela: ${dakhela})`, data: null }, 'error');
+            return res.status(400).send({ error: 'Student not found.' })
+          };
+          if (student.status !== 1) {
+            if (emitToSocket) this._emitAttendanceToSocket({ message: `Student is inactive (dakhela: ${dakhela})`, data: null }, 'error');
+            return res.status(400).send({ error: 'Student is inactive.' });
+          }
 
           const class_short = student.class_short || '';
           const classConfig = this.getClassConfig(class_short);
           const shifts = Array.isArray(classConfig?.shifts) ? classConfig.shifts : [];
 
           if (!shifts.length) {
-            return res.status(400).send({ error: `No shift configured for ${student.class_name || class_short}` });
-          }
+            const errorMsg = `No shift configured for "${student.class_name || class_short}"`;
+            console.log(`::::${errorMsg}`);
 
+            // Emit error via socket
+            if (emitToSocket) this._emitAttendanceToSocket({ message: errorMsg, data: null }, 'error');
+
+            return res.status(400).send({ error: errorMsg });
+          }
           // Get today's entries for student
           this.db.all(
             `SELECT * FROM ${this.tableName} WHERE student_id = ? AND date = ? ORDER BY created ASC`,
             [student.dakhela, date],
             (err, entries) => {
-              if (err) return res.status(500).send({ error: err.message });
-
+              if (err) {
+                console.log(`submitAttendanceRequest__err_1:`, err)
+                if (emitToSocket) this._emitAttendanceToSocket({ message: `E2:: ${err}`, data: null }, 'error');
+                return res.status(500).send({ error: err.message });
+              }
+              
               const today_entries = entries || [];
 
               // Process punch request
-              const punchResult = this.processPunchRequest({
+              const punchResult = this._processPunchRequest({
                 barcode,
                 punch_time: moment_punch,
                 date,
@@ -1297,9 +1444,15 @@ class Attendance {
                 shifts,
               });
 
+              // console.log('punchResult::::::', punchResult);
+
               if (punchResult.error) {
+                if(emitToSocket) this._emitAttendanceToSocket({ message: punchResult.error + `(ID:${dakhela})`, data: null }, 'error');
                 return res.status(400).send({ error: punchResult.error });
               }
+              punchResult.remarks += `(ID:${dakhela})`
+
+
 
               const { action, payload } = punchResult;
 
@@ -1325,6 +1478,7 @@ class Attendance {
                   payload.shift_number,
                 ];
 
+                const self = this;
                 const db = this.db;
                 const tableName = this.tableName;
                 const Sms = this.Sms;
@@ -1337,42 +1491,190 @@ class Attendance {
                     if (err) return res.status(500).send({ error: err.message });
 
                     // Send SMS if enabled and not skipped
+                    console.log(`[SMS_DEBUG] Attendance created. skipSms=${skipSms}, row.student_id=${row?.student_id}, row.date=${row?.date}`);
                     if (row && row.student_id && row.date && !skipSms) {
                       db.get(`SELECT * FROM students WHERE dakhela = ?`, [row.student_id], (err, stdnt) => {
-                        if (!err && stdnt && stdnt.phone_number) {
-                          const smsConfig = global.config?.settings?.sms;
-                          if (smsConfig?.enabled && Sms) {
-                            let shouldSendSms = false;
-                            let template = null;
-                            let time = null;
+                        if (err) {
+                          console.log(`[SMS_DEBUG] Error fetching student:`, err.message);
+                          return;
+                        }
+                        console.log(`[SMS_DEBUG] Student found: ${stdnt?.name}, phone=${stdnt?.phone_number}`);
+                        if (!stdnt || !stdnt.phone_number) {
+                          console.log(`[SMS_DEBUG] No student or phone_number`);
+                          return;
+                        }
 
-                            if (row.in_time && smsConfig?.send_on_in) {
-                              shouldSendSms = true;
-                              template = smsConfig?.in_message_template;
-                              time = row.in_time;
-                            } else if (row.out_time && smsConfig?.send_on_out) {
-                              shouldSendSms = true;
-                              template = smsConfig?.out_message_template;
-                              time = row.out_time;
-                            }
+                        const smsConfig = global.config?.settings?.sms;
+                        console.log(`[SMS_DEBUG] SMS Config:`, { enabled: smsConfig?.enabled, send_on_in: smsConfig?.send_on_in, send_on_out: smsConfig?.send_on_out });
+                        if (!smsConfig?.enabled) {
+                          console.log(`[SMS_DEBUG] SMS not enabled in config`);
+                          return;
+                        }
+                        if (!Sms) {
+                          console.log(`[SMS_DEBUG] Sms class not available`);
+                          return;
+                        }
 
-                            if (shouldSendSms && template) {
-                              const formattedTime = formatTimeWithPeriod(time || '');
-                              const message = template
-                                .replace(/{name}/g, stdnt.name?.split('||')[0] || 'Student')
-                                .replace(/{class}/g, stdnt.class || 'N/F')
-                                .replace(/{date}/g, formatDate(row.date || ''))
-                                .replace(/{time}/g, formattedTime);
-                              Sms._sendSmsInternal([stdnt.phone_number], message).catch(err => {
-                                console.error('SMS send error:', err.message);
-                              });
-                            }
+                        let shouldSendSms = false;
+                        let template = null;
+                        let time = null;
+
+                        console.log(`[SMS_DEBUG] Row times: in_time=${row.in_time}, out_time=${row.out_time}`);
+                        if (row.in_time && smsConfig?.send_on_in) {
+                          shouldSendSms = true;
+                          template = smsConfig?.in_message_template;
+                          time = row.in_time;
+                          console.log(`[SMS_DEBUG] Using in_time template`);
+                        } else if (row.out_time && smsConfig?.send_on_out) {
+                          shouldSendSms = true;
+                          template = smsConfig?.out_message_template;
+                          time = row.out_time;
+                          console.log(`[SMS_DEBUG] Using out_time template`);
+                        } else {
+                          console.log(`[SMS_DEBUG] No matching conditions for SMS (in_time=${row.in_time}, out_time=${row.out_time})`);
+                        }
+
+                        console.log(`[SMS_DEBUG] shouldSendSms=${shouldSendSms}, template=${!!template}`);
+                        if (shouldSendSms && template) {
+
+                          let student_name = stdnt.name?.split('||')[0] || 'Student'
+                          const max_name_length = Math.abs(Number(smsConfig?.student_name_max_lenght_for_in_out_sms || 26))
+                          if(student_name.length > max_name_length){
+                            student_name = student_name.substring(0, max_name_length - 3) + '...'
                           }
+
+
+                          const formattedTime = formatTimeWithPeriod(time || '');
+                          const message = template
+                            .replace(/{name}/g, student_name)
+                            .replace(/{class}/g, stdnt.class || 'N/F')
+                            .replace(/{dakhela}/g, stdnt.dakhela || 'N/F')
+                            .replace(/{date}/g, formatDate(row.date || ''))
+                            .replace(/{time}/g, formattedTime);
+                          console.log(`[SMS_DEBUG] Sending SMS to ${stdnt.phone_number}: "${message}"`);
+                          Sms._sendSmsInternal([stdnt.phone_number], message).catch(err => {
+                            console.error('[SMS_DEBUG] SMS send error:', err.message);
+                          });
                         }
                       });
                     }
-                    
-                    res.send({ message: payload.remarks, data: row, action: 'create' });
+
+                    const responseData = { message: payload.remarks || 'Attendance created.', data: row, action: 'create' };
+                    if (emitToSocket) self._emitAttendanceToSocket(responseData);
+                    res.send(responseData);
+                  });
+                });
+              } else if (action === 'create_with_update') {
+                // Recovery: Update existing entry (convert in_time to out_time), then create new entry
+                const { updateEntry, sms_abandoned } = punchResult;
+                const updateQuery = `
+                  UPDATE ${this.tableName}
+                  SET in_time=?, out_time=?
+                  WHERE id=?
+                `;
+
+                const db = this.db;
+                const tableName = this.tableName;
+                const self = this;
+                const Sms = this.Sms;
+
+                db.run(updateQuery, [updateEntry.in_time, updateEntry.out_time, updateEntry.id], (err) => {
+                  if (err) return res.status(500).send({ error: err.message });
+
+                  // Now create the new entry
+                  const insertQuery = `
+                    INSERT INTO ${tableName}
+                      (student_id, date, in_time, out_time, status, remarks, late_in_minute, device_index, shift_duration, shift_count, shift_number)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                  `;
+
+                  const params = [
+                    payload.student_id,
+                    payload.date,
+                    payload.in_time || null,
+                    payload.out_time || null,
+                    payload.status,
+                    payload.remarks || null,
+                    payload.late_in_minute,
+                    payload.device_index,
+                    payload.shift_duration,
+                    payload.shift_count,
+                    payload.shift_number,
+                  ];
+
+                  db.run(insertQuery, params, function (err) {
+                    if (err) return res.status(500).send({ error: err.message });
+
+                    const insertedId = this.lastID;
+                    db.get(`SELECT * FROM ${tableName} WHERE id = ?`, [insertedId], (err, row) => {
+                      if (err) return res.status(500).send({ error: err.message });
+
+                      // Send SMS unless abandoned
+                      console.log(`[SMS_DEBUG_RECOVERY] Punch recovered. sms_abandoned=${sms_abandoned}, skipSms=${skipSms}, student_id=${row?.student_id}`);
+                      if (row && row.student_id && row.date && !sms_abandoned && !skipSms) {
+                        db.get(`SELECT * FROM students WHERE dakhela = ?`, [row.student_id], (err, stdnt) => {
+                          if (err) {
+                            console.log(`[SMS_DEBUG_RECOVERY] Error fetching student:`, err.message);
+                            return;
+                          }
+                          console.log(`[SMS_DEBUG_RECOVERY] Student found: ${stdnt?.name}, phone=${stdnt?.phone_number}`);
+                          if (!stdnt || !stdnt.phone_number) {
+                            console.log(`[SMS_DEBUG_RECOVERY] No student or phone_number`);
+                            return;
+                          }
+
+                          const smsConfig = global.config?.settings?.sms;
+                          console.log(`[SMS_DEBUG_RECOVERY] SMS Config:`, { enabled: smsConfig?.enabled, send_on_in: smsConfig?.send_on_in });
+                          if (!smsConfig?.enabled) {
+                            console.log(`[SMS_DEBUG_RECOVERY] SMS not enabled`);
+                            return;
+                          }
+                          if (!Sms) {
+                            console.log(`[SMS_DEBUG_RECOVERY] Sms class not available`);
+                            return;
+                          }
+
+                          let shouldSendSms = false;
+                          let template = null;
+                          let time = null;
+
+                          console.log(`[SMS_DEBUG_RECOVERY] Row in_time=${row.in_time}`);
+                          if (row.in_time && smsConfig?.send_on_in) {
+                            shouldSendSms = true;
+                            template = smsConfig?.in_message_template;
+                            time = row.in_time;
+                            console.log(`[SMS_DEBUG_RECOVERY] Using in_time template`);
+                          } else {
+                            console.log(`[SMS_DEBUG_RECOVERY] No in_time or send_on_in disabled`);
+                          }
+
+                          console.log(`[SMS_DEBUG_RECOVERY] shouldSendSms=${shouldSendSms}, template=${!!template}`);
+                          if (shouldSendSms && template) {
+
+                            let student_name = stdnt.name?.split('||')[0] || 'Student'
+                            const max_name_length = Math.abs(Number(smsConfig?.student_name_max_lenght_for_in_out_sms || 26))
+                            if(student_name.length > max_name_length){
+                              student_name = student_name.substring(0, max_name_length - 3) + '...'
+                            }
+
+                            const formattedTime = formatTimeWithPeriod(time || '');
+                            const message = template
+                              .replace(/{name}/g, student_name)
+                              .replace(/{class}/g, stdnt.class || 'N/F')
+                              .replace(/{date}/g, formatDate(row.date || ''))
+                              .replace(/{time}/g, formattedTime);
+                            console.log(`[SMS_DEBUG_RECOVERY] Sending SMS to ${stdnt.phone_number}: "${message}"`);
+                            Sms._sendSmsInternal([stdnt.phone_number], message).catch(err => {
+                              console.error(`[SMS_DEBUG_RECOVERY] Failed to send SMS:`, err.message);
+                            });
+                          }
+                        });
+                      }
+
+                      const responseData = { message: 'Punch recovered and recorded.', data: row, action: 'create_with_update' };
+                      if (emitToSocket) self._emitAttendanceToSocket(responseData);
+                      res.send(responseData);
+                    });
                   });
                 });
               } else if (action === 'update') {
@@ -1401,7 +1703,9 @@ class Attendance {
                   (err) => {
                     if (err) return res.status(500).send({ error: err.message });
 
-                    res.send({ message: payload.remarks || 'Attendance updated.', data: payload, action: 'update' });
+                    const responseData = { message: payload.remarks || 'Attendance updated.', data: payload, action: 'update' };
+                    if (emitToSocket) this._emitAttendanceToSocket(responseData);
+                    res.send(responseData);
                   }
                 );
               } else {

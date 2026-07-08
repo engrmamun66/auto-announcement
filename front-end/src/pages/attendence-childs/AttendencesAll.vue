@@ -268,7 +268,7 @@ async function deleteMultipleAttendance(){
                   </div> 
                 </td>   
                 <!-- <td style="width: 130px;"> <span class="inline">{{ item.date }}</span> </td>                     -->
-                <td style="width:100px;"> <span class="inline">{{ moment(item.in_time || item.out_time, 'HH:mm:ss').format('hh:mm A') }}</span> </td>                    
+                <td style="width:110px;"> <span class="inline">{{ moment(item.in_time || item.out_time, 'HH:mm:ss').format('hh:mm:ss A') }}</span> </td>                    
                 <td>{{ Ahelper.printShift(item?.shift_duration) }}</td> 
                                 
                 <td>

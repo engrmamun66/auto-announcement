@@ -90,7 +90,13 @@
           ></textarea>
           <small>{{ helper.t('Type message... use {name}, {time}, {date}, {class}') }}</small>
 
-          <div class="sms-char-count">{{ message.length }} {{ helper.t('chars') }} · ~{{ Math.ceil(message.length / 160) }} SMS</div>
+          <div class="sms-char-count">
+            <span>Max: {{ perSmsMaxCharacter }} {{ helper.t('char per SMS') }}</span>
+            <i class='bx bx-right-arrow-alt mx-2' ></i>
+            <span>{{ message.length }} {{ helper.t('chars') }}</span>
+            <i class='bx bx-right-arrow-alt mx-2' ></i>
+            <span>~{{ Math.ceil(message.length / perSmsMaxCharacter) }} SMS</span>
+          </div>
 
           <div class="sms-preview" v-if="message">
             <div class="sms-preview__label">{{ helper.t('Preview') }}</div>
@@ -122,6 +128,7 @@ const classes = inject('classes');
 const all_students_non_copied = inject('all_students_non_copied');
 const emitter = inject('emitter');
 const helper = inject('helper');
+const CONFIG = inject('CONFIG');
 
 const tab = ref('class');
 const selectedClasses = ref([]);
@@ -139,6 +146,11 @@ const balance = ref(null);
 const loadingBalance = ref(false);
 
 const activeClasses = computed(() => (classes.value || []).filter(c => c.isActive !== false));
+
+const perSmsMaxCharacter = computed(() => {
+  const configured = CONFIG.value?.settings?.sms?.per_sms_max_charecter;
+  return configured ? Math.max(1, Number(configured)) : 65;
+});
 
 function studentsForClass(class_short) {
   return (all_students_non_copied.value || []).filter(s => s.class_short === class_short && s.phone_number);
