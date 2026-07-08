@@ -1392,8 +1392,24 @@ class Attendance {
           const shifts = Array.isArray(classConfig?.shifts) ? classConfig.shifts : [];
 
           if (!shifts.length) {
-            console.log(`::::No shift configured for ${student.class_name || class_short}`);
-            return res.status(400).send({ error: `No shift configured for ${student.class_name || class_short}` });
+            const errorMsg = `No shift configured for ${student.class_name || class_short}`;
+            console.log(`::::${errorMsg}`);
+
+            // Broadcast error via socket
+            if (global.socketServer && global.socketServer.clients) {
+              global.socketServer.clients.forEach((client) => {
+                if (client.readyState === client.OPEN) {
+                  client.send(JSON.stringify({
+                    type: 'attendance_error',
+                    message: errorMsg,
+                    student_id: student.dakhela,
+                    class: student.class_name || class_short
+                  }))
+                }
+              })
+            }
+
+            return res.status(400).send({ error: errorMsg });
           }
           // Get today's entries for student
           this.db.all(

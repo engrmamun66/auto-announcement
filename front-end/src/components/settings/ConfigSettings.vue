@@ -73,7 +73,7 @@
                       <td colspan="9" class="cs-cls-shifts-td">
                         <div v-if="expandedShifts[idx]" class="cs-cls-shifts-wrap">
                             <TransitionGroup name="shift-item" tag="div" class="cs-cls-shifts-items">
-                              <div v-for="(sh, si) in (cls.shifts||[])" :key="sh.start+'_'+si" class="cs-cls-shift-item">
+                              <div v-for="(sh, si) in (cls.shifts||[])" :key="si" class="cs-cls-shift-item">
                                 <span class="cs-cls-shift-label">#{{ si+1 }}</span>
                                 <label>{{ helper.t('Start') }} <input class="cs-cls-input cs-cls-input--time" type="time" v-model="sh.start" /></label>
                                 <label>{{ helper.t('End') }} <input class="cs-cls-input cs-cls-input--time" type="time" v-model="sh.end" /></label>
