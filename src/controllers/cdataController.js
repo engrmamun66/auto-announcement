@@ -236,9 +236,10 @@ class CdataController {
         console.log('NOW:', now.format('YYYY-MM-DD HH:mm:ss'), '| Is Realtime:', is_realtime_punch);
         if(is_realtime_punch){
           console.log(`✅ Realtime punch detected. Processing immediately...`);
+          const skipSms = req.query.skipSms === 'true';
           records.forEach(record => {
-            this._processDevicePunch(record, sn);
-            console.log('======this._processDevicePunch======', '|||', {record, sn});
+            this._processDevicePunch(record, sn, skipSms);
+            console.log('======this._processDevicePunch======', '|||', {record, sn, skipSms});
           });
         } else {
           // Store by date key if pending, otherwise use 'all' key
@@ -433,7 +434,7 @@ class CdataController {
     });
   }
 
-  _processDevicePunch(record, sn) {
+  _processDevicePunch(record, sn, skipSms = false) {
     const { user_id, emp_code, punch_time } = record;
     const self = this;
 
@@ -470,7 +471,7 @@ class CdataController {
             device_index: 0,
             remarks: `device_fetch`,
             silent_mode: true,
-            skipSms: false
+            skipSms: skipSms
           },
           query: {}
         };

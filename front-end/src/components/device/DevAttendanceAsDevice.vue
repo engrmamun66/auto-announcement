@@ -20,8 +20,15 @@
 
     <div class="form-group checkbox-group">
       <label>
+        <input v-model="sendSMS" type="checkbox">
+        <span>Send SMS</span>
+      </label>
+    </div>
+    <div class="form-group checkbox-group">
+      <label>
         <input v-model="forceAsRealtime" type="checkbox">
-        <span>As Real-Time Punch (By Forced)</span>
+        <span v-if="forceAsRealtime">As Real-Time Punch (By Forced)</span>
+        <span v-if="!forceAsRealtime">As Real-Time Punch ( with detect by punch time )</span>
       </label>
     </div>
     <div class="form-group checkbox-group">
@@ -99,6 +106,7 @@ const emitter = inject('emitter')
 const sending = ref(false)
 const forceAsRealtime = ref(true)
 const sendCurrentDateTime = ref(true)
+const sendSMS = ref(true)
 const realtimeRefresh = ref(0)
 let realtimeIntervalId = null 
 const devPunch = ref({
@@ -218,6 +226,8 @@ function sendDevPunch() {
   if (forceAsRealtime.value) {
     url.searchParams.append('forceAsRealtime', 'true')
   }
+  // skipSms=true means skip SMS, skipSms=false means send SMS
+  url.searchParams.append('skipSms', sendSMS.value ? 'false' : 'true')
 
   // Send raw POST to /iclock/cdata endpoint
   fetch(url.toString(), {
