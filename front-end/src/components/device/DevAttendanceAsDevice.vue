@@ -17,19 +17,26 @@
       <input v-model="devPunch.userId" type="text" class="form-control" placeholder="e.g., 101">
     </div>
 
-    <div class="form-group">
-      <label>Punch Date & Time</label>
-      <div class="input-with-button">
-        <input v-model="devPunch.punchTime" type="datetime-local" class="form-control">
-        <button @click="setCurrentTime" class="btn-now">Now</button>
-      </div>
-    </div>
 
     <div class="form-group checkbox-group">
       <label>
         <input v-model="forceAsRealtime" type="checkbox">
-        <span>Force As Real-Time Punch</span>
+        <span>As Real-Time Punch (By Forced)</span>
       </label>
+    </div>
+    <div class="form-group checkbox-group">
+      <label>
+        <input v-model="sendCurrentDateTime" type="checkbox">
+        <span>With Current Date Time</span>
+      </label>
+    </div>
+
+    <div v-if="!sendCurrentDateTime" class="form-group">
+      <label>Custom Date & Time</label>
+      <div class="input-with-button">
+        <input v-model="devPunch.punchTime" type="datetime-local" class="form-control">
+        <button @click="setCurrentTime" class="btn-now">Now</button>
+      </div>
     </div>
 
 
@@ -77,7 +84,8 @@ const props = defineProps({
 const emitter = inject('emitter')
 
 const sending = ref(false)
-const forceAsRealtime = ref(true)
+const forceAsRealtime = ref(true) 
+const sendCurrentDateTime = ref(true) 
 const devPunch = ref({
   sn: localStorage.getItem('devPunch_sn') || '',
   userId: localStorage.getItem('devPunch_userId') || '',
@@ -117,13 +125,11 @@ const adjustedTimeInfo = computed(() => {
 
   let operations = adjustTime.replace(/^\./, '')
 
-  if(!forceAsRealtime.value){
-    if (adjustTime.startsWith('subtract')) {
-      operations = operations.replace(/(subtract)/g, 'add')
-    } else if (adjustTime.startsWith('add')) {
-      operations = operations.replace(/(add)/g, 'subtract')
-    } 
-  }   
+  if (adjustTime.startsWith('subtract')) {
+    operations = operations.replace(/(subtract)/g, 'add')
+  } else if (adjustTime.startsWith('add')) {
+    operations = operations.replace(/(add)/g, 'subtract')
+  }  
 
   // Calculate new time
   const punchTimeStr = devPunch.value.punchTime.replace('T', ' ') + ':00'
@@ -132,7 +138,7 @@ const adjustedTimeInfo = computed(() => {
 
   
   const original = punchMoment.format('YYYY-MM-DD hh:mm:ss A')
-  const adjustedMoment = forceAsRealtime.value ? original : adjustFn(moment, punchMoment).format('YYYY-MM-DD HH:mm:ss')
+  const adjustedMoment = adjustFn(moment, punchMoment).format('YYYY-MM-DD HH:mm:ss')
 
   return {
     original,
@@ -156,11 +162,10 @@ function sendDevPunch() {
 
   // Use adjusted time if not artificial punch, otherwise use selected punchTime
   let dateTime
-  if (!forceAsRealtime.value && adjustedTimeInfo.value) {
-    dateTime = adjustedTimeInfo.value.adjusted
-  } else {
-    // Convert punchTime from datetime-local format to API format
+  if (!sendCurrentDateTime.value) {
     dateTime = moment(devPunch.value.punchTime, 'YYYY-MM-DDTHH:mm').format('YYYY-MM-DD HH:mm:ss')
+  } else {
+    dateTime = adjustedTimeInfo.value.adjusted
   }
 
   // Create tab-separated row: user_id\tpunch_time\tstatus\tverify\twork_code
