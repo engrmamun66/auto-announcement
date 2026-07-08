@@ -238,7 +238,7 @@ class CdataController {
           console.log(`✅ Realtime punch detected. Processing immediately...`);
           records.forEach(record => {
             this._processDevicePunch(record, sn);
-            console.log('======this._processDevicePunch======');
+            console.log('======this._processDevicePunch======', '|||', {record, sn});
           });
         } else {
           // Store by date key if pending, otherwise use 'all' key

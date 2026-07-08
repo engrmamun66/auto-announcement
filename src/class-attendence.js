@@ -1392,6 +1392,7 @@ class Attendance {
           const shifts = Array.isArray(classConfig?.shifts) ? classConfig.shifts : [];
 
           if (!shifts.length) {
+            console.log(`::::No shift configured for ${student.class_name || class_short}`);
             return res.status(400).send({ error: `No shift configured for ${student.class_name || class_short}` });
           }
           // Get today's entries for student
