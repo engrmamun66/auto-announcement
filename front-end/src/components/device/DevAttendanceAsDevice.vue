@@ -40,13 +40,29 @@
     </div>
 
 
-    <div v-if="adjustedTimeInfo" class="alert-info">
-      <i class='bx bx-info-circle'></i>
-      <span>
-        <strong>Adjust Time Applied:</strong> {{ adjustedTimeInfo.original }} → {{ adjustedTimeInfo.adjusted }}
-        <br><small>Device adjustment time: <code>{{ selectedDevice?.adjust_time }}</code></small>
-        <br><small>Applied for device with: <code>{{ adjustedTimeInfo?.operations }}</code></small>
-      </span>
+    <div v-if="adjustedTimeInfo" class="time-adjustment-card">
+      <div class="adjustment-header">
+        <i class='bx bx-time-five'></i>
+        <span>Time Adjustment Applied</span>
+      </div>
+
+      <div class="time-flow">
+        <div class="time-point from">
+          <label>From</label>
+          <div class="time-value">{{ adjustedTimeInfo.original }}</div>
+          <small class="device-setting">{{ selectedDevice?.adjust_time }}</small>
+        </div>
+
+        <div class="flow-arrow">
+          <i class='bx bx-right-arrow-circle'></i>
+        </div>
+
+        <div class="time-point to">
+          <label>To</label>
+          <div class="time-value">{{ adjustedTimeInfo.adjusted }}</div>
+          <small class="operation-desc">{{ adjustedTimeInfo?.operations }}</small>
+        </div>
+      </div>
     </div>
 
     <!-- <div class="form-group">
@@ -335,38 +351,88 @@ function sendDevPunch() {
 }
 
 
-.alert-info {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 12px;
+.time-adjustment-card {
+  padding: 16px;
   margin-bottom: 16px;
-  background: #e3f2fd;
-  border-left: 4px solid #2196f3;
-  border-radius: 4px;
-  font-size: 13px;
+  background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+  border: 2px solid #2196f3;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.15);
+}
+
+.adjustment-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
   color: #1565c0;
-  line-height: 1.5;
+  font-weight: 600;
+  font-size: 14px;
 }
 
-.alert-info i {
-  flex-shrink: 0;
-  margin-top: 2px;
-  font-size: 16px;
+.adjustment-header i {
+  font-size: 20px;
 }
 
-.alert-info span {
+.time-flow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.time-point {
   flex: 1;
+  padding: 12px;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+  text-align: center;
 }
 
-.alert-info code {
-  display: inline-block;
-  padding: 2px 6px;
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 3px;
+.time-point label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.time-point .time-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #212121;
   font-family: 'Courier New', monospace;
-  font-size: 12px;
-  color: #0d47a1;
-  margin-top: 4px;
+  margin-bottom: 6px;
+}
+
+.time-point small {
+  display: block;
+  font-size: 11px;
+  color: #999;
+  font-family: 'Courier New', monospace;
+}
+
+.flow-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 24px;
+  color: #2196f3;
+  animation: pulse-arrow 2s ease-in-out infinite;
+}
+
+@keyframes pulse-arrow {
+  0%, 100% {
+    opacity: 0.7;
+    transform: translateX(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateX(4px);
+  }
 }
 </style>
