@@ -130,6 +130,7 @@ module.exports = {
                send_on_in: true,                  // send SMS when student punches IN
                send_on_out: false,                // send SMS when student punches OUT
                skip_sms_for_punch_after_shift_end: true, // skip SMS if punch-in occurs after shift end time 
+               student_name_max_lenght_for_in_out_sms: 26,
                // {name}, {time}, {date}, {status} are replaced at send time
                in_message_template: `
                🕌 তালীমুল কুরআন মহিলা মাদ্রাসা

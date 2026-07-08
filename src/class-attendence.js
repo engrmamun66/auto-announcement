@@ -189,11 +189,19 @@ class Attendance {
                     time = row.out_time;
                   }
 
+                  let student_name = student.name?.split('||')[0] || 'Student'
+                  const max_name_length = Math.abs(Number(smsConfig?.student_name_max_lenght_for_in_out_sms || 26))
+                  if(student_name.length > max_name_length){
+                    student_name = student_name.substring(0, max_name_length - 3) + '...'
+                  }
+
+
                   if (shouldSendSms && template) {
                     const formattedTime = formatTimeWithPeriod(time || '');
                     const message = template
-                      .replace(/{name}/g, student.name?.split('||')[0] || 'Student')
+                      .replace(/{name}/g, student_name)
                       .replace(/{class}/g, student.class || 'N/F')
+                      .replace(/{dakhela}/g, student.dakhela || 'N/F')
                       .replace(/{date}/g, formatDate(row.date || ''))
                       .replace(/{time}/g, formattedTime)
                     Sms._sendSmsInternal([student.phone_number], message).catch(err => {
@@ -1528,9 +1536,17 @@ class Attendance {
 
                         console.log(`[SMS_DEBUG] shouldSendSms=${shouldSendSms}, template=${!!template}`);
                         if (shouldSendSms && template) {
+
+                          let student_name = stdnt.name?.split('||')[0] || 'Student'
+                          const max_name_length = Math.abs(Number(smsConfig?.student_name_max_lenght_for_in_out_sms || 26))
+                          if(student_name.length > max_name_length){
+                            student_name = student_name.substring(0, max_name_length - 3) + '...'
+                          }
+
+
                           const formattedTime = formatTimeWithPeriod(time || '');
                           const message = template
-                            .replace(/{name}/g, stdnt.name?.split('||')[0] || 'Student')
+                            .replace(/{name}/g, student_name)
                             .replace(/{class}/g, stdnt.class || 'N/F')
                             .replace(/{dakhela}/g, stdnt.dakhela || 'N/F')
                             .replace(/{date}/g, formatDate(row.date || ''))
@@ -1634,9 +1650,16 @@ class Attendance {
 
                           console.log(`[SMS_DEBUG_RECOVERY] shouldSendSms=${shouldSendSms}, template=${!!template}`);
                           if (shouldSendSms && template) {
+
+                            let student_name = stdnt.name?.split('||')[0] || 'Student'
+                            const max_name_length = Math.abs(Number(smsConfig?.student_name_max_lenght_for_in_out_sms || 26))
+                            if(student_name.length > max_name_length){
+                              student_name = student_name.substring(0, max_name_length - 3) + '...'
+                            }
+
                             const formattedTime = formatTimeWithPeriod(time || '');
                             const message = template
-                              .replace(/{name}/g, stdnt.name?.split('||')[0] || 'Student')
+                              .replace(/{name}/g, student_name)
                               .replace(/{class}/g, stdnt.class || 'N/F')
                               .replace(/{date}/g, formatDate(row.date || ''))
                               .replace(/{time}/g, formattedTime);
