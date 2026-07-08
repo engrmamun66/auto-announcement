@@ -46,23 +46,34 @@
         <span>Time Adjustment Applied</span>
       </div>
 
-      <div class="time-flow">
-        <div class="time-point from">
-          <label>From</label>
-          <div class="time-value">{{ adjustedTimeInfo.original }}</div>
-          <small class="device-setting">{{ selectedDevice?.adjust_time }}</small>
+      <template v-if="adjustedTimeInfo.original !== adjustedTimeInfo.adjusted">
+        <div class="time-flow">
+          <div class="time-point from">
+            <label>From</label>
+            <div class="time-value">{{ adjustedTimeInfo.original }}</div>
+            <small class="device-setting">{{ selectedDevice?.adjust_time }}</small>
+          </div>
+    
+          <div class="flow-arrow">
+            <i class='bx bx-right-arrow-circle'></i>
+          </div>
+    
+          <div class="time-point to">
+            <label>To</label>
+            <div class="time-value">{{ adjustedTimeInfo.adjusted }}</div>
+            <small class="operation-desc">{{ adjustedTimeInfo?.operations }}</small>
+          </div>
         </div>
-
-        <div class="flow-arrow">
-          <i class='bx bx-right-arrow-circle'></i>
+      </template>
+      <template v-else>
+        <div class="time-flow">
+          <div class="time-point from">
+            <label>Current Time</label>
+            <div class="time-value">{{ adjustedTimeInfo.original }}</div>
+            <small class="device-setting">{{ selectedDevice?.adjust_time }}</small>
+          </div> 
         </div>
-
-        <div class="time-point to">
-          <label>To</label>
-          <div class="time-value">{{ adjustedTimeInfo.adjusted }}</div>
-          <small class="operation-desc">{{ adjustedTimeInfo?.operations }}</small>
-        </div>
-      </div>
+      </template>
     </div>
  
 
@@ -125,7 +136,7 @@ watch(sendCurrentDateTime, (isEnabled) => {
       realtimeIntervalId = null
     }
   }
-})
+}, {immediate: true})
 
 // Cleanup on unmount
 onBeforeUnmount(() => {
