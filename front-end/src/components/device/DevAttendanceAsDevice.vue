@@ -162,7 +162,7 @@ function sendDevPunch() {
 
   // Use adjusted time if not artificial punch, otherwise use selected punchTime
   let dateTime
-  if (!sendCurrentDateTime.value) {
+  if (sendCurrentDateTime.value) {
     dateTime = moment(devPunch.value.punchTime, 'YYYY-MM-DDTHH:mm').format('YYYY-MM-DD HH:mm:ss')
   } else {
     dateTime = adjustedTimeInfo.value.adjusted
