@@ -3,17 +3,17 @@
 
     <!-- Tab Navigation -->
     <ul class="nav nav-tabs mt-0 mb-3">
-      <li class="nav-item">
-        <a @click.stop="activeTab = 'devices'; fetchDevices()" class="nav-link cp text-black" :class="{'active': activeTab === 'devices'}">
+      <li class="nav-item usn">
+        <a @dblclick="allowDevTab = !allowDevTab" @click.stop="activeTab = 'devices'; fetchDevices()" class="nav-link cp text-black" :class="{'active': activeTab === 'devices'}">
           <i class='bx bxs-server' style="vertical-align:-2px;margin-right:4px"></i> {{ helper.t('Devices') }}
         </a>
       </li>
-      <li class="nav-item">
-        <a @click.stop="activeTab = 'commands'; fetchDevices()" class="nav-link cp text-black" :class="{'active': activeTab === 'commands'}">
+      <li class="nav-item usn">
+        <a @dblclick="allowDevTab = !allowDevTab" @click.stop="activeTab = 'commands'; fetchDevices()" class="nav-link cp text-black" :class="{'active': activeTab === 'commands'}">
           <i class='bx bxs-terminal' style="vertical-align:-2px;margin-right:4px"></i> {{ helper.t('Commands') }}
         </a>
       </li>
-      <li class="nav-item">
+      <li v-if="allowDevTab" class="nav-item usn">
         <a @click.stop="activeTab = 'dev-attendance'" class="nav-link cp text-black" :class="{'active': activeTab === 'dev-attendance'}">
           <i class='bx bx-flask' style="vertical-align:-2px;margin-right:4px"></i> Dev Attendance
         </a>
@@ -77,6 +77,7 @@ const showPasswordConfirm = ref(false);
 const deviceToDelete = ref(null);
 const selectedDeviceId = ref('');
 const executingCommand = ref(false);
+const allowDevTab = ref(false);
 
 watch(activeTab, (newTab) => {
   localStorage.setItem('devicesActiveTab', newTab);
