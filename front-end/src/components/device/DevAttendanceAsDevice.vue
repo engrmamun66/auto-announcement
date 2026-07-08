@@ -64,21 +64,7 @@
         </div>
       </div>
     </div>
-
-    <!-- <div class="form-group">
-      <label>Status</label>
-      <input v-model="devPunch.status" type="text" class="form-control" placeholder="e.g., 0">
-    </div>
-
-    <div class="form-group">
-      <label>Verify</label>
-      <input v-model="devPunch.verify" type="text" class="form-control" placeholder="e.g., 0">
-    </div>
-
-    <div class="form-group">
-      <label>Work Code</label>
-      <input v-model="devPunch.workCode" type="text" class="form-control" placeholder="Leave empty or enter code">
-    </div> -->
+ 
 
     <button @click="sendDevPunch" :disabled="!devPunch.sn || !devPunch.userId || sending" class="btn btn-primary">
       <span v-if="!sending">Send Punch (Now)</span>
@@ -88,7 +74,7 @@
 </template>
 
 <script setup>
-import { ref, inject, onMounted, watch, computed } from 'vue'
+import { ref, inject, onMounted, watch, computed, onBeforeUnmount } from 'vue'
 
 const props = defineProps({
   devices: {
@@ -100,8 +86,10 @@ const props = defineProps({
 const emitter = inject('emitter')
 
 const sending = ref(false)
-const forceAsRealtime = ref(true) 
-const sendCurrentDateTime = ref(true) 
+const forceAsRealtime = ref(true)
+const sendCurrentDateTime = ref(true)
+const realtimeRefresh = ref(0)
+let realtimeIntervalId = null 
 const devPunch = ref({
   sn: localStorage.getItem('devPunch_sn') || '',
   userId: localStorage.getItem('devPunch_userId') || '',
@@ -125,6 +113,27 @@ watch(() => devPunch.value.userId, (newUserId) => {
   if (newUserId) localStorage.setItem('devPunch_userId', newUserId)
 })
 
+// Start/stop real-time refresh interval
+watch(sendCurrentDateTime, (isEnabled) => {
+  if (isEnabled) {
+    realtimeIntervalId = setInterval(() => {
+      realtimeRefresh.value++
+    }, 1000)
+  } else {
+    if (realtimeIntervalId) {
+      clearInterval(realtimeIntervalId)
+      realtimeIntervalId = null
+    }
+  }
+})
+
+// Cleanup on unmount
+onBeforeUnmount(() => {
+  if (realtimeIntervalId) {
+    clearInterval(realtimeIntervalId)
+  }
+})
+
 // Get selected device
 const selectedDevice = computed(() => {
   return props.devices.find(d => d.serial_number === devPunch.value.sn)
@@ -132,6 +141,8 @@ const selectedDevice = computed(() => {
 
 // Calculate adjusted time if not artificial punch
 const adjustedTimeInfo = computed(() => {
+  realtimeRefresh.value // trigger reactivity on real-time updates
+
   if (!selectedDevice.value) {
     return null
   }
@@ -144,15 +155,15 @@ const adjustedTimeInfo = computed(() => {
     operations = operations.replace(/(subtract)/g, 'add')
   } else if (adjustTime.startsWith('add')) {
     operations = operations.replace(/(add)/g, 'subtract')
-  }  
+  }
 
   // Calculate new time
   const punchTimeStr = sendCurrentDateTime.value ? moment().format('YYYY-MM-DD HH:mm:ss') : devPunch.value.punchTime.replace('T', ' ') + ':00'
   const punchMoment = moment(punchTimeStr, 'YYYY-MM-DD HH:mm:ss')
   const adjustFn = new Function('moment', 'dateTime', `return moment(dateTime, 'YYYY-MM-DD HH:mm:ss').${operations}`)
 
-  
-  const original = punchMoment.format('YYYY-MM-DD hh:mm:ss A')
+
+  const original = punchMoment.format('YYYY-MM-DD HH:mm:ss')
   const adjustedMoment = adjustFn(moment, punchMoment).format('YYYY-MM-DD HH:mm:ss')
 
   return {
