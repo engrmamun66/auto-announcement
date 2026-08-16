@@ -494,11 +494,26 @@ class CdataController {
           }
         };
 
-        // Call attendance submission with socket emission enabled
-        const Attendance = require('../class-attendence');
-        const attendance = new Attendance(global.db);
-        attendance.Sms = global.Sms;
-        attendance.submitAttendanceRequest(mockReq, mockRes, true);
+        // Check if attendance is enabled
+        const attendanceEnabled = global.config?.settings?.attendance?.status;
+
+        if (attendanceEnabled) {
+          // Call attendance submission with socket emission enabled
+          const Attendance = require('../class-attendence');
+          const attendance = new Attendance(global.db);
+          attendance.Sms = global.Sms;
+          attendance.submitAttendanceRequest(mockReq, mockRes, true);
+        } else {
+          // Process as student calling (when attendance is disabled)
+          const Students = require('../class-students');
+          const students = new Students(global.db);
+          students.getStudentByDakhela_and_sentToSocket(student.dakhela, {
+            punch_time: punch_time.substring(0, 19),
+            start_time: punch_time.substring(0, 19),
+            device_index: 0,
+            studentOfDevice: student
+          });
+        }
       }
     );
   }

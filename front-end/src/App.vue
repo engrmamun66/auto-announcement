@@ -1001,6 +1001,18 @@ onMounted(async ()=>{
             if(!isIPAccess && action === 'call_punch__from_ip'){
                 punchToCallStudent(data.barcode, {...data})
             }
+            if(!isIPAccess && action === 'student_calling'){
+                // Handle student calling when attendance is disabled
+                const student = data?.[0]
+                if(student){
+                    const barcode = `${student.class_short}-${student.dakhela}-sound1-${student.year}`
+                    punchToCallStudent(barcode, {
+                        message: `Student called: ${student.name}`,
+                        source: 'device',
+                        device_index: student.device_index || 0
+                    })
+                }
+            }
             if(!isIPAccess && action === 'remote_toaster'){
                 punchToCallStudent(data.barcode, {...data})
             }

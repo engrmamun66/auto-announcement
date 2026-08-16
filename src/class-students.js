@@ -391,8 +391,26 @@ class Students {
       let using_attendance = global.config?.settings?.attendance?.status
       let is_not_copied = student.name.indexOf('Copied') === -1
       let for_attendence = using_attendance && is_not_copied
-   
 
+      /**
+       * === If attendance disabled, send as student calling
+       */
+      if (!using_attendance) {
+        global.socketServer.clients.forEach((client) => {
+          if (client.readyState === client.OPEN) {
+            client.send(JSON.stringify({
+              type: 'remote_action',
+              action: 'student_calling',
+              selector: null,
+              data: [student],
+              host_name: global.config?.env?.APP_HOST || 'localhost:2323'
+            }));
+          }
+        });
+        return;
+      }
+
+      // Otherwise send as attendance
       global.socketServer.clients.forEach((client) => {
         if (client.readyState === client.OPEN) {
           client.send(JSON.stringify({
