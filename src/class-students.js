@@ -1004,23 +1004,23 @@ class Students {
           if(existing_student_by_dakhela){
             return res.status(500).send({ message: `এই দাখেলাটি ইতিমধ্যে ব্যবহার করা হয়েছে (${dakhela_new})`, existing_student_by_dakhela });
           } else {
-            let {name, class: className, card_no, year, status, sound1, profile_image} = studentRow
-             
+            let {name, class: className, card_no, year, status, sound1, profile_image, dakhela: originalDakhela} = studentRow
+
               const class_short = utils.getClassShort(className);
-            
-              if (!className || !name || !class_short || !dakhela) {
+
+              if (!className || !name || !class_short || !dakhela_new || !year) {
                 res.status(500).send({ message: "All fields (class, name, class_short, dakhela, year) are required." });
                 return;
               }
-            
+
               const tableName = this.tableName;
-            
+
               const query = `
                 INSERT INTO ${tableName} (class, name, class_short, dakhela, year, card_no, sound1, profile_image)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
               `;
-            
-              name = `${name} (Copied)||dakhela::${dakhela}`
+
+              name = `${name} (Copied)||dakhela::${originalDakhela}`
               let params = [className, name, class_short, dakhela_new, year || null, card_no, sound1, profile_image || null];
             
               const db = this.db; // Capture `this.db` reference
