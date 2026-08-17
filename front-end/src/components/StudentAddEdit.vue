@@ -120,7 +120,12 @@ async function handleUpdateStudent() {
               <div class="col-12">
                 <div class="form-group">
                   <label>{{ helper.t('Name') }} <sup>*</sup></label>
-                  <input v-model="payload.name" type="text" class="form-control cb-input cb-input--sm" :disabled="payload?.id && payload.name && payload.name.indexOf('||dakhela') > -1">
+                  <template v-if="payload?.id">
+                    <input :value="String(payload.name || '').split(/\s?\(copied/i)[0]" type="text" class="form-control cb-input cb-input--sm" :disabled="payload?.id && payload.name && payload.name.indexOf('||dakhela') > -1">
+                  </template>
+                  <template v-else>
+                    <input v-model="payload.name" type="text" class="form-control cb-input cb-input--sm" :disabled="payload?.id && payload.name && payload.name.indexOf('||dakhela') > -1">
+                  </template>
                 </div>
               </div>
 
@@ -211,7 +216,7 @@ async function handleUpdateStudent() {
               <div class="col-12 d-flex justify-content-center mt-3">
                 <Btn @click.stop="handleClose" class="red me-2">{{ helper.t('Cancel') }}</Btn>
                 <Btn v-if="!payload.id" @click="handleAddStudent" addStudentAttr class="me-0">{{ helper.t('Submit') }} <BtnLoader v-if="isAdding"></BtnLoader></Btn>
-                <Btn v-else @click="handleUpdateStudent" updateStudentAttr class="me-0" v-if="payload.name && payload.name.indexOf('||dakhela') === -1">{{ helper.t('Update') }} <BtnLoader v-if="isAdding"></BtnLoader></Btn>
+                <Btn v-else @click="handleUpdateStudent" updateStudentAttr class="me-0">{{ helper.t('Update') }} <BtnLoader v-if="isAdding"></BtnLoader></Btn>
               </div>
             </template>
 
