@@ -193,7 +193,6 @@ function handleRestart() {
   const device = selectedDevice.value;
 
   if (!confirm(`${helper.t('Restart')} ${device.name || device.serial_number}?`)) {
-    selectedDeviceId.value = '';
     return;
   }
   emit('restart', device);
