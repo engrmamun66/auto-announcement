@@ -119,7 +119,7 @@ async function handleUpdateStudent() {
               <!-- Name -->
               <div class="col-12">
                 <div class="form-group">
-                  <label>{{ helper.t('Name') }} <sup>*</sup></label>
+                  <label :tooltip="payload?.name">{{ helper.t('Name') }} {{ payload?.id && (payload?.name || '').toLocaleLowerCase().indexOf('(copied)') > -1 ? '(copied)' : '' }} <sup>*</sup></label>
                   <template v-if="payload?.id">
                     <input :value="String(payload.name || '').split(/\s?\(copied/i)[0]" type="text" class="form-control cb-input cb-input--sm" :disabled="payload?.id && payload.name && payload.name.indexOf('||dakhela') > -1">
                   </template>
