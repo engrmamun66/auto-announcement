@@ -16,7 +16,7 @@ const mac = globalThis.GLOBAL_DATA?.env?.MAC_ADDRESS || 'unknown'
 
 function routerInstructions(){
   console.group('Permanent IP fixing from router admin') 
-  console.group('Find something like:')
+  console.group('1. Find something like:')
     console.log("DHCP Reservation")
     console.log("Address Reservation")
     console.log("Static DHCP")
