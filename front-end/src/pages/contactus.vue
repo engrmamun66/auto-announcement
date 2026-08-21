@@ -16,15 +16,17 @@ const mac = globalThis.GLOBAL_DATA?.env?.MAC_ADDRESS || 'unknown'
 
 function routerInstructions(){
   console.group('Permanent IP fixing from router admin') 
-  console.group('Find something like:')
+  console.group('1. Find something like:')
     console.log("Find something like:")
     console.log("DHCP Reservation")
     console.log("Address Reservation")
     console.log("Static DHCP")
     console.log("IP & MAC Binding")
+  console.groupEnd()
     
-    console.group("Add your PC's MAC address and assign, for example:") 
+  console.group("2. Add your PC's MAC address and assign, for example:") 
     console.log("MAC: " + mac)
+  console.groupEnd()
   
   console.groupEnd()
 }
