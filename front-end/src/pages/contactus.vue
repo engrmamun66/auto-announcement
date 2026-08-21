@@ -9,8 +9,25 @@ const all_students_non_copied = inject('all_students_non_copied');
 const appAccessData = inject('appAccessData');
 
 let CONFIG = inject('CONFIG');
+const log = console.log
 
 const ip = globalThis.GLOBAL_DATA?.env?.LOCAL_IP || 'localhost'
+const mac = globalThis.GLOBAL_DATA?.env?.MAC_ADDRESS || 'unknown'
+
+function routerInstructions(){
+  console.group('Permanent IP fixing from router admin') 
+  console.group('Find something like:')
+    console.log("Find something like:")
+    console.log("DHCP Reservation")
+    console.log("Address Reservation")
+    console.log("Static DHCP")
+    console.log("IP & MAC Binding")
+    
+    console.group("Add your PC's MAC address and assign, for example:") 
+    console.log("MAC: AA-BB-CC-DD-EE-FF")
+  
+  console.groupEnd()
+}
 
 let restarting = ref(false)
 async function restartServer() {
@@ -46,7 +63,8 @@ function CopyCode() {
   <!-- Contact Wrap -->
   <div class="container">
     <div class="header">
-      <p class="ip-badge">{{ helper.t('Server IP:') }} <strong>{{ ip }}</strong></p>
+      <p class="ip-badge" @click.stop="routerInstructions()">{{ helper.t('Server IP:') }} <strong>{{ ip }}</strong></p>
+      <p class="ip-badge" @click.stop="routerInstructions()">{{ helper.t('PC MAC Address:') }} <strong>{{ mac }}</strong></p>
       <h1>{{ helper.t('Contact Information') }}</h1>
       <p class="mt-3">
         {{ helper.t('Find all our contact details, office location, visit hours, and payment information below.') }}

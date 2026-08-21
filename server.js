@@ -17,7 +17,21 @@ function getLocalIP() {
   }
   return 'localhost'
 }
+
+function getMacAddress() {
+  const interfaces = os.networkInterfaces()
+  for (const name of Object.keys(interfaces)) {
+    for (const iface of interfaces[name]) {
+      if (iface.family === 'IPv4' && !iface.internal) {
+        return iface.mac
+      }
+    }
+  }
+  return 'unknown'
+}
+
 const LOCAL_IP = getLocalIP()
+const MAC_ADDRESS = getMacAddress()
 
 let config = require('./config.example');
 const configPath = path.join(__dirname, 'config.js');
@@ -186,7 +200,7 @@ app.get(`/app`, (req, res) => {
   let logo_padding = config?.logo?.padding || '10px'
   html = html.replace('DYNAMIC_LOGO_AREA_PADDING', logo_padding)
 
-  html = html.replace('ENV_VARIABLES_IN_JSON_FROMAT', JSON.stringify({...(config.env || {}), LOCAL_IP}))
+  html = html.replace('ENV_VARIABLES_IN_JSON_FROMAT', JSON.stringify({...(config.env || {}), LOCAL_IP, MAC_ADDRESS}))
 
   // With CSS variables
   if(config.css_vars){
