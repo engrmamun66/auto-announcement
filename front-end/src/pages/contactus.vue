@@ -24,7 +24,7 @@ function routerInstructions(){
     console.log("IP & MAC Binding")
     
     console.group("Add your PC's MAC address and assign, for example:") 
-    console.log("MAC: AA-BB-CC-DD-EE-FF")
+    console.log("MAC: " + mac)
   
   console.groupEnd()
 }
