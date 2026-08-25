@@ -3,6 +3,7 @@ const http_module = require('http');
 const url = require('url');
 const fs = require('fs');
 const path = require('path');
+const axios = require('axios');
 const { getSettings } = require('./settings');
 
 const logDir = path.join(__dirname, '../logs');
@@ -80,7 +81,7 @@ class ClassSms {
 
     if (!smsConfig.enabled) throw new Error('SMS not enabled in config');
 
-    const { api_base_url, api_key, sender_id, provider, user_name } = smsConfig;
+    const { api_base_url, api_key, sender_id, provider, user_name, wp_ajax } = smsConfig;
     if (!api_key) throw new Error('api_key not configured');
 
     const normalizedNumbers = numbers.map(n => {
@@ -89,18 +90,50 @@ class ClassSms {
       return num;
     });
 
+    if (wp_ajax?.status && wp_ajax?.ajax_url) {
+      return await this._dispatchViaWpAjax(wp_ajax.ajax_url, { api_base_url, api_key, sender_id, provider, user_name }, normalizedNumbers, message);
+    }
+
     return await this._dispatch({ api_base_url, api_key, sender_id, provider, user_name }, normalizedNumbers, message);
   }
 
   async sendSms(req, res) {
-    const { numbers, message } = req.body;
+    const { numbers, message, test, config } = req.body;
 
     try {
-      const result = await this._sendSmsInternal(numbers, message);
+      let result;
+      if (test && config) {
+        // Test mode: use provided config instead of stored settings
+        result = await this._dispatchWithCustomConfig(config, numbers, message);
+      } else {
+        // Normal mode: use stored config
+        result = await this._sendSmsInternal(numbers, message);
+      }
       res.json({ ok: true, result });
     } catch (e) {
       res.status(500).json({ error: e.message });
     }
+  }
+
+  async _dispatchWithCustomConfig(config, numbers, message) {
+    if (!numbers || !numbers.length || !message) {
+      throw new Error('numbers and message required');
+    }
+
+    const { api_base_url, api_key, sender_id, provider, user_name, wp_ajax } = config;
+    if (!api_key) throw new Error('api_key not configured');
+
+    const normalizedNumbers = numbers.map(n => {
+      let num = String(n).replace(/^\+/, '');
+      if (!num.startsWith('88')) num = '88' + num;
+      return num;
+    });
+
+    if (wp_ajax?.status && wp_ajax?.ajax_url) {
+      return await this._dispatchViaWpAjax(wp_ajax.ajax_url, { api_base_url, api_key, sender_id, provider, user_name }, normalizedNumbers, message);
+    }
+
+    return await this._dispatch({ api_base_url, api_key, sender_id, provider, user_name }, normalizedNumbers, message);
   }
 
   async checkBalance(req, res) {
@@ -130,6 +163,37 @@ class ClassSms {
     } catch (e) {
       res.status(500).json({ error: e.message });
     }
+  }
+
+  _dispatchViaWpAjax(ajaxUrl, { api_base_url, api_key, sender_id, provider, user_name }, numbers, message) {
+    return new Promise((resolve, reject) => {
+      const payload = {
+        action: 'cb_send_sms',
+        provider,
+        api_base_url,
+        api_key,
+        user_name,
+        sender_id,
+        numbers: numbers.join(','),
+        message,
+      };
+
+      axios.post(ajaxUrl, new URLSearchParams(payload), {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        timeout: 30000
+      })
+        .then(response => {
+          const data = response.data;
+          if (data?.success || data?.ok) {
+            resolve({ ok: true, response: data });
+          } else {
+            reject(new Error(data?.error || 'Failed to send SMS via WordPress'));
+          }
+        })
+        .catch(error => {
+          reject(new Error(`WordPress AJAX request failed: ${error.message}`));
+        });
+    });
   }
 
   _dispatch({ api_base_url, api_key, sender_id, provider, user_name }, numbers, message) {

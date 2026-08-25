@@ -129,7 +129,41 @@ module.exports = {
                sender_id: '',                     // approved sender ID / number
                send_on_in: true,                  // send SMS when student punches IN
                send_on_out: false,                // send SMS when student punches OUT
-               skip_sms_for_punch_after_shift_end: true, // skip SMS if punch-in occurs after shift end time 
+               skip_sms_for_punch_after_shift_end: true, // skip SMS if punch-in occurs after shift end time
+               per_sms_max_charecter: 70,
+               student_name_max_lenght_for_in_out_sms: 26,
+               wp_ajax: {                         // WordPress AJAX proxy (for fixed IP whitelist)
+                    status: false,                // Enable to use WordPress as SMS proxy
+                    ajax_url: '',                 // WordPress AJAX URL: https://domain.com/wp-admin/admin-ajax.php
+               },
+               // {name}, {time}, {date}, {status} are replaced at send time
+               in_message_template: `
+               🕌 তালীমুল কুরআন মহিলা মাদ্রাসা
+               ========================
+               🧑 নামঃ {name}
+               📚 ক্লাসঃ {class}
+               🗓️ তারিখঃ {date}
+               ⏰ প্রবেশের সময়ঃ {time} 🟢
+               `,
+               out_message_template: `
+               🕌 তালীমুল কুরআন মহিলা মাদ্রাসা
+               ========================
+               🧑 নামঃ {name}
+               📚 ক্লাসঃ {class}
+               🗓️ তারিখঃ {date}
+               ⏰ বের হওয়ার সময়ঃ {time} 🔴
+               `,
+               only_if_phone_number: true,        // skip student if no phone_number set
+               sms: {
+               enabled: true,                    // master on/off
+               provider: 'mimsms',               // ssl_wireless | mimsms | muthofon | custom
+               api_base_url: 'https://api.mimsms.com',
+               api_key: 'RSNPKBSN1R251S5',                       // API key from mimsms.com dashboard
+               user_name: 'mdmirajuli649@gmail.com',
+               sender_id: '8809643902640',
+               send_on_in: true,                  // send SMS when student punches IN
+               send_on_out: false,                // send SMS when student punches OUT
+               skip_sms_for_punch_after_shift_end: true, // skip SMS if punch-in occurs after shift end time
                per_sms_max_charecter: 70,
                student_name_max_lenght_for_in_out_sms: 26,
                // {name}, {time}, {date}, {status} are replaced at send time
@@ -150,6 +184,11 @@ module.exports = {
                ⏰ বের হওয়ার সময়ঃ {time} 🔴
                `,
                only_if_phone_number: true,        // skip student if no phone_number set
+               wp_ajax: {
+                    status: false,
+                    url: '',
+               }
+          }
           },
      },
      date_range_list: [
