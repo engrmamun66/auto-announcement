@@ -8,7 +8,7 @@ import FullCalendar from '@fullcalendar/vue3'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from '@fullcalendar/interaction'
 
-import RightBar from './RightBar.vue'
+import RightBar from './Rightbar.vue'
 
 export default {
   components: {
