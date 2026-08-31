@@ -4,7 +4,7 @@
 import { provide, inject, ref, computed, watch, onMounted } from 'vue';
 import RelaySwitch from './RelaySwitch.vue'
 import Modal from './modal.vue'
-import Switch2 from './switch2.vue'
+import Switch2 from './Switch2.vue'
 const getConfig = inject('getConfig');
 const controlSounds = inject('controlSounds');
 const switches_PreviewInHomePage = inject('switches_PreviewInHomePage');
