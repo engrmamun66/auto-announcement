@@ -1,5 +1,5 @@
 const moment = require('moment');
-const SunCalc = require('SunCalc');
+const SunCalc = require('suncalc');
 
 const dhakaLocation = {
   lat: 23.8103,
