@@ -8,13 +8,8 @@ export function socketInit({ emitter }) {
     function connect() {
         const isHttps = typeof window !== 'undefined' && window.location.protocol === 'https:'
         const host = (typeof window !== 'undefined' && window.location.hostname) || 'localhost'
-<<<<<<< HEAD
         const protocol = isHttps ? 'wss' : 'ws'
         const port = isHttps ? '' : `:${globalThis.GLOBAL_DATA?.env.PORT}`
-=======
-        const protocol = (typeof window !== 'undefined' && window.location.protocol === 'https:') ? 'wss' : 'ws'
-        const port = (typeof window !== 'undefined' && window.location.protocol === 'https:') ? '' : `:${globalThis.GLOBAL_DATA?.env.PORT}`
->>>>>>> 2cf87a0 (f)
         socket = new WebSocket(`${protocol}://${host}${port}`)
 
         socket.onopen = () => {
