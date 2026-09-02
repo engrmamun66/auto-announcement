@@ -167,6 +167,12 @@ class ClassSms {
         },
       };
 
+      console.log(`📨 SMS Request → MIMSMS API:`);
+      console.log(`   Host: ${options.hostname}:${options.port}`);
+      console.log(`   Path: ${options.path}`);
+      console.log(`   Recipients: ${numbers.join(', ')}`);
+      console.log(`   Sender: ${sender_id}`);
+
       const req = lib.request(options, (resp) => {
         let data = '';
         resp.on('data', d => { data += d; });
@@ -174,15 +180,21 @@ class ClassSms {
           try {
             const parsed = JSON.parse(data);
             if (parsed.statusCode && parsed.statusCode !== '200') {
+              console.error(`❌ MIMSMS Error [${parsed.statusCode}]: ${parsed.responseResult || parsed.status}`);
               return reject(new Error(parsed.responseResult || `MiMSMS Error: ${parsed.status}`));
             }
+            console.log(`✅ MIMSMS Response: ${parsed.statusCode || 'Success'}`);
             resolve(parsed);
           } catch (e) {
+            console.log(`✅ MIMSMS Response received`);
             resolve(data);
           }
         });
       });
-      req.on('error', reject);
+      req.on('error', (err) => {
+        console.error(`❌ MIMSMS Request Error: ${err.message}`);
+        reject(err);
+      });
       req.write(body);
       req.end();
     });
@@ -212,6 +224,11 @@ class ClassSms {
         },
       };
 
+      console.log(`🔍 Balance Check → MIMSMS API:`);
+      console.log(`   Host: ${options.hostname}:${options.port}`);
+      console.log(`   Path: ${options.path}`);
+      console.log(`   User: ${user_name}`);
+
       const req = lib.request(options, (resp) => {
         let data = '';
         resp.on('data', d => { data += d; });
@@ -219,15 +236,21 @@ class ClassSms {
           try {
             const parsed = JSON.parse(data);
             if (parsed.statusCode && parsed.statusCode !== '200') {
+              console.error(`❌ Balance Check Error [${parsed.statusCode}]: ${parsed.responseResult || parsed.status}`);
               return reject(new Error(parsed.responseResult || `Balance check failed: ${parsed.status}`));
             }
+            console.log(`✅ Balance Check Response: ${parsed.statusCode || 'Success'}`);
             resolve(parsed);
           } catch (e) {
+            console.log(`✅ Balance Check Response received`);
             resolve(data);
           }
         });
       });
-      req.on('error', reject);
+      req.on('error', (err) => {
+        console.error(`❌ Balance Check Error: ${err.message}`);
+        reject(err);
+      });
       req.write(body);
       req.end();
     });
@@ -252,14 +275,30 @@ class ClassSms {
         },
       };
 
+      console.log(`📨 SMS Request → SSL Wireless API:`);
+      console.log(`   Host: ${options.hostname}:${options.port}`);
+      console.log(`   Path: ${options.path}`);
+      console.log(`   Recipients: ${numbers.join(', ')}`);
+      console.log(`   Sender: ${sender_id}`);
+
       const req = lib.request(options, (resp) => {
         let data = '';
         resp.on('data', d => { data += d; });
         resp.on('end', () => {
-          try { resolve(JSON.parse(data)); } catch { resolve(data); }
+          try {
+            const parsed = JSON.parse(data);
+            console.log(`✅ SSL Wireless Response:`, JSON.stringify(parsed));
+            resolve(parsed);
+          } catch (e) {
+            console.log(`✅ SSL Wireless Response received`);
+            resolve(data);
+          }
         });
       });
-      req.on('error', reject);
+      req.on('error', (err) => {
+        console.error(`❌ SSL Wireless Error: ${err.message}`);
+        reject(err);
+      });
       req.write(body);
       req.end();
     });
