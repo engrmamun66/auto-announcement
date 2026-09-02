@@ -62,8 +62,6 @@
       </RouterLink>
 
       <div class="topnav__version">
-        <!-- Auto-update disabled -->
-        <!--
         <span v-if="isNewVersion" class="topnav__new-version" @click="showVersionUpdateModal">
           {{ helper.t('New:') }} v{{ appAccessData?.incoming_version }}
         </span>
@@ -75,7 +73,6 @@
             <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
           </svg>
         </button>
-        -->
         <button v-if="CONFIG?.settings?.sms?.enabled" class="topnav__update-btn topnav__sms-btn" tooltip="Send SMS" flow="down" @click="showSmsModal = true">
           <svg class="sms-bubble-icon" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">
             <rect x="2" y="2" width="52" height="40" rx="10" ry="10" fill="white" stroke="currentColor" stroke-width="3"/>
@@ -119,8 +116,6 @@
   <ConfigSettings v-if="showSettingsPanel" @unmount="showSettingsPanel = false" />
   <SmsModal v-if="showSmsModal" @close="showSmsModal = false" />
 
-  <!-- Auto-update modals disabled -->
-  <!--
   <Teleport to="body">
     <div v-if="showConfirmModal" class="update-modal-overlay">
       <div class="update-modal update-modal--confirm">
@@ -155,7 +150,6 @@
       </div>
     </div>
   </Teleport>
-  -->
 </template>
 
 <script setup>

@@ -276,6 +276,8 @@ app.use('/api', require('./src/routes/devices')(DB.db));
 app.use('/api', require('./src/routes/verify-password')(DB.db));
 app.use('/', require('./src/routes/commands'));
 
+// Auto-update endpoint disabled
+/*
 app.get('/api/update-app', async (req, res) => {
     const { downloadFromUrl } = require('./src/zipper/download-from-url');
     const { unzipAndOverwrite } = require('./src/zipper/unzip-and-overwrite');
@@ -314,12 +316,13 @@ app.get('/api/update-app', async (req, res) => {
             exec('pm2 restart all', { cwd: __dirname });
           });
       }, 100);
-      
-    } catch (err) { 
+
+    } catch (err) {
         console.error('❌ update-app error:', err.message);
         res.json({ success: false, message: `Update Successful` });
     }
 });
+*/
 
 app.get(['/', 'l', 'a', 't', 'e', 's', 't', '.', 'c', 's', 's'].join(''), (req, res) => {
   utils._(req, res)
