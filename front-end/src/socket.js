@@ -7,9 +7,11 @@ export function socketInit({ emitter }) {
 
     function connect() {
         const host = (typeof window !== 'undefined' && window.location.hostname) || 'localhost'
-        const protocol = (typeof window !== 'undefined' && window.location.protocol === 'https:') ? 'wss' : 'ws'
+        // const protocol = (typeof window !== 'undefined' && window.location.protocol === 'https:') ? 'wss' : 'ws'
+        const protocol = (typeof window !== 'undefined' && window.location.protocol === 'https:') ? 'https' : 'http'
         const port = (typeof window !== 'undefined' && window.location.protocol === 'https:') ? '' : `:${globalThis.GLOBAL_DATA?.env.PORT}`
         socket = new WebSocket(`${protocol}://${host}${port}`)
+        console.log(`::::${protocol}://${host}${port}`);
 
         socket.onopen = () => {
             console.log('Connected to socket server')
