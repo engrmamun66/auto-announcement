@@ -138,6 +138,8 @@
     </a>
   </nav>
 
+  <!-- Auto-update modals disabled -->
+  <!--
   <Teleport to="body">
     <div v-if="showMoreMenu" class="mobile-more-backdrop" @click="showMoreMenu = false"></div>
     <div class="mobile-more-sheet" :class="{ 'is-open': showMoreMenu }">
