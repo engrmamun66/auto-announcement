@@ -11,6 +11,9 @@ const DEVICE_NAMES = global.config.env.DEVICE_NAMES || ['Device 2']
 let interval = null
  
 function getToken(Students) {
+    return
+
+    
     const myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
 
@@ -50,27 +53,7 @@ function getToken(Students) {
             }
         })
         .catch((error) => {
-            console.error(`MamError:: ZKTeco Device is not connected with "${DEVICE_API_BASE_URL}"`)
-
-            // Just Fake request
-            let students_ids = [
-                91,
-                92,
-                93,
-                94,
-                95,
-                96,
-
-                91,
-                92,
-                93,
-                94,
-                95,
-                96,
-            ]
-            students_ids.forEach((students_id, i) => {
-                // setTimeout(()=> fake_getLastPunchData(Students, students_id, moment().subtract(1, 'seconds').format('Y-MM-DD HH:mm:ss')), 1000 * (i + 1))
-            })
+            // console.error(`MamError:: ZKTeco Device is not connected with "${DEVICE_API_BASE_URL}"`)
         });
 }
  
@@ -127,67 +110,11 @@ async function getLastPunchData(Students) {
     })
 
 }
-
-
-
-const TEST_TRANSACTION_DATA = [
-    {
-      "id": 1,
-      "emp_code": "467",
-      "punch_time": "2026-02-04 07:50:00",
-      "punch_state": "0",
-      "verify_type": 1,
-      "work_code": null,
-      "terminal_sn": "",
-      "terminal_alias": null,
-      "area_alias": null,
-      "longitude": null,
-      "latitude": null,
-      "gps_location": "",
-      "mobile": null,
-      "source": 0,
-      "purpose": 1,
-      "crc": null,
-      "is_attendance": 1,
-      "reserved": null,
-      "upload_time": "2019-03-04 09:50:00",
-      "sync_status": 1,
-      "sync_time": null,
-      "emp": null,
-      "terminal": null
-    },
-    {
-      "id": 2,
-      "emp_code": "430",
-      "punch_time": "2026-02-04 02:50:00",
-      "punch_state": "0",
-      "verify_type": 1,
-      "work_code": null,
-      "terminal_sn": "",
-      "terminal_alias": null,
-      "area_alias": null,
-      "longitude": null,
-      "latitude": null,
-      "gps_location": "",
-      "mobile": null,
-      "source": 0,
-      "purpose": 1,
-      "crc": null,
-      "is_attendance": 1,
-      "reserved": null,
-      "upload_time": "2019-03-04 18:10:00",
-      "sync_status": 1,
-      "sync_time": null,
-      "emp": null,
-      "terminal": null
-    }
-    // … more entries …
-  ];
+ 
 
 
 async function getBulkPunces(req) {
     if (!global.DEVICE_TOKEN) return []
-    // if (!global.DEVICE_TOKEN) return TEST_TRANSACTION_DATA
 
     
     const myHeaders = new Headers();
@@ -232,18 +159,7 @@ async function getBulkPunces(req) {
 }
 
 
-function fake_getLastPunchData(Students, dakhela, punch_time, device_index=0){ 
-
-    const start_time = moment().subtract(BACK_SECONDS, 'second').format('YYYY-MM-DD HH:mm:ss')
-
-    Students.getStudentByDakhela_and_sentToSocket(Number(dakhela), {
-        start_time,
-        studentOfDevice: null,
-        punch_time,
-        device_index,
-    });
-}
-
+ 
 
 
 module.exports = {
