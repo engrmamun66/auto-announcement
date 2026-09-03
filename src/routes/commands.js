@@ -35,10 +35,6 @@ router.all([
     '/iClock/devicecmd/',
 ], (req, res) => devicecmdController.handle(req, res));
 
-// Physical devices poll /iclock/* above and can't "log in" — everything below
-// here is triggered from the app's own UI (Devices page etc.) and needs a session.
-router.use(requireAuth);
-
 // { "pin": "123", "name": "John", "password": "", "card": "" }  — privilege forced to 1
 router.post('/:cn/add-enroller',    (req, res) => commandController.addEnroller(req, res));
 
