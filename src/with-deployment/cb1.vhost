@@ -109,9 +109,8 @@ context / {
   addDefaultCharset       off
 }
 
-websocketContext / {
-  type                    proxy
-  handler                 cb1node
+websocket / {
+  address                 127.0.0.1:3201
 }
 
 EOF
