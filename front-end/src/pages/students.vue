@@ -44,22 +44,7 @@ const getAllStudents = inject('getAllStudents', () => {})
 
 let students = ref([])
 let studentLogs = ref([])
-let linkPopup = ref(null) // { std, column }
-let linkPopupUrl = ref('')
-let linkPopupLoading = ref(false)
-let showRecorder = ref(false)
-let recorderMounted = ref(false)
-
-function copyRecorderUrl({target}) {
-  target.setAttribute('tooltip', 'Copied')
-  navigator.clipboard.writeText(appAccessData.value?.recorder_web_url + `?code=${CONFIG.value?.env?.CODE_NUMBER}`).then(() => {
-    setTimeout(() => {
-      target.setAttribute('tooltip', 'Copy link')
-    }, 1500)
-  })
-}
 const isIPAccess = inject('isIPAccess')
-let recorderLoaded = ref(false)
 let showPhoneModal = ref(false)
 let qrDataUrl = ref('')
 let copiedPhoneUrl = ref(false)
@@ -92,26 +77,6 @@ async function openPhoneModal() {
   }
 }
 
-async function saveAudioFromUrl() {
-  if (!linkPopupUrl.value || !linkPopup.value) return
-  const { std, column } = linkPopup.value
-  linkPopupLoading.value = true
-  try {
-    const response = await http.post('/students/upload-audio-from-url', {
-      id: std.id,
-      column,
-      url: linkPopupUrl.value,
-    })
-    std[column] = response.data.audio_url
-    emitter.emit('toaster-success', { message: helper.t('Audio upload completed') })
-    linkPopup.value = null
-    linkPopupUrl.value = ''
-  } catch (e) {
-    emitter.emit('toaster-error', { message: helper.t('Upload failed') })
-  } finally {
-    linkPopupLoading.value = false
-  }
-}
 let only_similler_students = ref(storage('only_similler_students', false).value)
 watch(only_similler_students, (bool) => storage('only_similler_students').value = bool )
 
@@ -609,12 +574,6 @@ onMounted(async()=>{
     editModeTabIndex.value = 1
   })
 
-  emitter.on('recorder_url_received', ({ url }) => {
-    showRecorder.value = false
-    linkPopup.value = null
-    linkPopupUrl.value = url || ''
-  })
-
   await getDevices()
   await getStudents()
 
@@ -711,21 +670,6 @@ watch(fixedWidthSoundCol, (newVal) => {
             <i class="bx bx-link" style="pointer-events: none;"></i>
           </button>
         </div>
-        <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
-          <div v-if="appAccessData?.recorder_web_url" class="btn-group me-2" style="display:inline-flex;align-items:stretch;">
-            <a v-if="isIPAccess" :href="appAccessData.recorder_web_url + `?code=${CONFIG?.env?.CODE_NUMBER}`" target="_blank" class="btn" style="background:#00796B;color:#fff;">
-              <i class='bx bx-microphone'></i> {{ helper.t('Recorder') }}
-            </a>
-            <Btn v-else style="background:#00796B;border-top-right-radius:0;border-bottom-right-radius:0;" @click="recorderMounted = true; showRecorder = true">
-              <i class='bx bx-microphone'></i> {{ helper.t('Recorder') }}
-            </Btn>
-            <button class="btn" style="background:#005a4a;color:#fff;border-left:1px solid rgba(255,255,255,0.2);padding:0 12px;display:inline-flex;align-items:center;justify-content:center;"
-              :tooltip="helper.t('Copy link')"
-              @click.prevent.stop="copyRecorderUrl">
-              <i class="bx bx-link" style="pointer-events: none;"></i>
-            </button>
-          </div>
-        </template>
         <Btn class="me-2" style="background: #673AB7;" :tooltip="`params.total = ${params?.total}`" >
           {{ helper.t('Total') }}: 
           <span class="bg-success- p-1">{{ all_students_non_copied?.length }}</span>
@@ -977,10 +921,6 @@ watch(fixedWidthSoundCol, (newVal) => {
                         <span :tooltip="helper.t('Rcord Sound')" @click="targetStd=std;columnName=column">
                           <i class='bx bxs-microphone p-1 ms-1 cp' ></i>
                         </span>
-                        <!-- Here -->
-                        <span v-if="appAccessData?.recorder_web_url" :tooltip="helper.t('Paste recorded URL')" @click.stop="linkPopup={std,column};linkPopupUrl=''">
-                          <i class='bx bx-link p-1 ms-1 cp'></i>
-                        </span>
                       </div>
   
                     </template>  
@@ -1083,19 +1023,6 @@ watch(fixedWidthSoundCol, (newVal) => {
     </div>
 
   
-    <!-- Recorder iframe overlay -->
-    <Teleport to="body">
-      <div v-if="recorderMounted" v-show="showRecorder" class="recorder-overlay" @click.self="showRecorder = false">
-        <div class="recorder-overlay__box">
-          <button class="recorder-overlay__close" @click="showRecorder = false">✕</button>
-          <div v-if="!recorderLoaded" class="recorder-overlay__loader">
-            <div class="recorder-spinner"></div>
-          </div>
-          <iframe :src="appAccessData.recorder_web_url + `?onCopyNewRecord=true&code=${CONFIG?.env?.CODE_NUMBER}`" class="recorder-overlay__frame" allow="microphone" @load="recorderLoaded = true" :style="{ visibility: recorderLoaded ? 'visible' : 'hidden' }"></iframe>
-        </div>
-      </div>
-    </Teleport>
-
     <!-- Open With Phone Modal -->
     <modal v-if="showPhoneModal" :title="helper.t('Open With Phone')" @close="showPhoneModal = false">
       <div class="phone-modal">
@@ -1141,16 +1068,6 @@ watch(fixedWidthSoundCol, (newVal) => {
       </div>
     </modal>
 
-    <!-- Audio Recorder Modal -->
-    <modal v-if="linkPopup" :title="helper.t('Paste Recorded Audio URL')" @close="linkPopup=null;linkPopupUrl=''">
-      <div class="p-2">
-        <input v-model="linkPopupUrl" type="text" class="form-control cb-input mb-2" :placeholder="helper.t('Paste recorded audio URL here...')" autofocus />
-        <Btn class="w-100" @click="saveAudioFromUrl" :disabled="linkPopupLoading || !linkPopupUrl">
-          <BtnLoader v-if="linkPopupLoading"></BtnLoader>
-          <span v-else>Upload</span>
-        </Btn>
-      </div>
-    </modal>
 
     <template v-if="targetStd && columnName">
     <modal @close="targetStd=null" :title="false">
