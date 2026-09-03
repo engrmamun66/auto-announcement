@@ -119,6 +119,19 @@ app.use(express.static(path.join(__dirname, 'front-end')));
 // Enable CORS
 app.use(cors());
 
+// ── Session-based login gate ──────────────────────────────────────────────
+const session = require('express-session');
+const { requireAuth } = require('./src/middleware/auth');
+app.set('trust proxy', 1); // needed for secure cookies behind the production reverse proxy
+app.use(session({
+  secret: config.env.SECRET_KEY,
+  resave: false,
+  saveUninitialized: false,
+  cookie: { maxAge: 7 * 24 * 60 * 60 * 1000, httpOnly: true, sameSite: 'lax', secure: 'auto' },
+}));
+app.use('/api', require('./src/routes/auth')(config)); // /login, /logout, /auth-status — unprotected
+app.use('/api', requireAuth); // everything mounted under /api AFTER this line is gated
+
 // Initialize ZKTeco device command store
 app.locals.commands = { queues: {}, nextId: 1 };
 

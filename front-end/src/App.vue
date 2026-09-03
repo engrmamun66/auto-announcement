@@ -14,6 +14,7 @@ import Lockscreen from './components/Lockscreen.vue'
 import DevicesPreloader from './components/DevicesPreloader.vue'
 import AddBulkAttendaceForDev from './components/AddBulkAttendaceForDev.vue'
 import FetchBulkAttendanceFromDevice from './components/FetchBulkAttendanceFromDevice.vue'
+import Login from './components/Login.vue'
 
 const socketInit = inject('socketInit');
 
@@ -810,7 +811,32 @@ emitter.on('is_connected_socket_server', (bool) => {
     socketServerIsRunning.value = bool
 })
 
-onMounted(async ()=>{ 
+const isAuthenticated = ref(false)
+const authChecked = ref(false)
+
+function onLoggedIn(){
+    isAuthenticated.value = true
+    initApp()
+}
+
+emitter.on('auth-required', () => {
+    isAuthenticated.value = false
+})
+
+onMounted(async () => {
+    try {
+        let res = await http.get('/auth-status')
+        isAuthenticated.value = !!res.data?.authenticated
+    } catch (error) {
+        isAuthenticated.value = false
+    }
+    authChecked.value = true
+    if(isAuthenticated.value){
+        await initApp()
+    }
+})
+
+async function initApp(){
     applyLanguageSettings()
 
     window.addEventListener('beforeunload', handleBeforeUnload)
@@ -1027,12 +1053,12 @@ onMounted(async ()=>{
         }
      })
 
-     await CheckAccess({loader: true}) 
- 
+     await CheckAccess({loader: true})
+
     setTimeout(() => {
         sendRemoteAction({from: 'ip'})
     }, 2000);
-})
+}
 
 
 function focusCurrenPlayingSoundCard_if_userIsInavtiveForFewSeconds(){
@@ -1362,7 +1388,13 @@ const force_active = computed(() => route.query.fa === 'true' || storage('active
         <routerView />
     </SideBar> -->
     <Toaster @onToaster="onToaster"></Toaster>
-    <template v-if="(appUseForbiddened || lockscreenDismissing) && appAccessData?.internet === true">
+    <template v-if="!authChecked">
+        <!-- waiting on /auth-status -->
+    </template>
+    <template v-else-if="!isAuthenticated">
+        <Login @loggedIn="onLoggedIn"></Login>
+    </template>
+    <template v-else-if="(appUseForbiddened || lockscreenDismissing) && appAccessData?.internet === true">
         <Lockscreen ref="LockscreenRef" :message="getForbiddenedMessage" :checking="checking_accessibility" @tryToUnlock="CheckAccess({loader: true})"></Lockscreen>
         <div ref="disabilityAlretRef" class="disablitily-alert">
             <div v-html="getForbiddenedMessage" @auxclick="log({getWarningMessage})"></div>

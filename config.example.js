@@ -29,6 +29,7 @@ module.exports = {
      env: {
           PORT: port_number,
           SECRET_KEY: 'YOUR_SECRET_KEY',
+          LOGIN_PASSWORD: 'changeme', // app-wide login password — override in config.js
           CODE_NUMBER: 'DEV_MAM', // Rrequeired for Client Identification
           PUNCH_LOG_FILENAME: 'punch.log.json', 
           DATABASE_PATH: 'database/database.db', // For Client DB Example: './../clientdb-DHM101.db'
