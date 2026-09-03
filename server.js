@@ -53,6 +53,7 @@ const EventBus = new EventEmitter()
 
 const { getToken, getBulkPunces } = require('./src/device.biotimeApp')
 
+const { pickPublicEnv } = require('./src/publicEnvKeys');
 let webContents = require("./src/web-contents");
 console.log('Initial webContents includes DYNAMIC_CUSTOM_CSS:', webContents.includes('DYNAMIC_CUSTOM_CSS'));
 let checkAccess = require("./src/checkaccess"); 
@@ -215,7 +216,7 @@ app.get(`/app`, (req, res) => {
   let logo_padding = config?.logo?.padding || '10px'
   html = html.replace('DYNAMIC_LOGO_AREA_PADDING', logo_padding)
 
-  html = html.replace('ENV_VARIABLES_IN_JSON_FROMAT', JSON.stringify({...(config.env || {}), LOCAL_IP, MAC_ADDRESS}))
+  html = html.replace('ENV_VARIABLES_IN_JSON_FROMAT', JSON.stringify({...pickPublicEnv(config.env), LOCAL_IP, MAC_ADDRESS}))
 
   // With CSS variables
   if(config.css_vars){
