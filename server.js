@@ -119,16 +119,11 @@ app.use(express.static(path.join(__dirname, 'front-end')));
 // Enable CORS
 app.use(cors());
 
-// ── Session-based login gate ──────────────────────────────────────────────
-const session = require('express-session');
+// ── File-based login gate (database/login.truck, 7-day token expiry) ──────
+const cookieParser = require('cookie-parser');
 const { requireAuth } = require('./src/middleware/auth');
-app.set('trust proxy', 1); // needed for secure cookies behind the production reverse proxy
-app.use(session({
-  secret: config.env.SECRET_KEY,
-  resave: false,
-  saveUninitialized: false,
-  cookie: { maxAge: 7 * 24 * 60 * 60 * 1000, httpOnly: true, sameSite: 'lax', secure: 'auto' },
-}));
+app.set('trust proxy', 1); // needed to detect https behind the production reverse proxy
+app.use(cookieParser());
 app.use('/api', require('./src/routes/auth')(config)); // /login, /logout, /auth-status — unprotected
 app.use('/api', requireAuth); // everything mounted under /api AFTER this line is gated
 

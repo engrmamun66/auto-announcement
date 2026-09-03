@@ -823,17 +823,23 @@ emitter.on('auth-required', () => {
     isAuthenticated.value = false
 })
 
-onMounted(async () => {
+async function checkAuthStatus(){
     try {
         let res = await http.get('/auth-status')
         isAuthenticated.value = !!res.data?.authenticated
     } catch (error) {
         isAuthenticated.value = false
     }
+}
+
+onMounted(async () => {
+    await checkAuthStatus()
     authChecked.value = true
     if(isAuthenticated.value){
         await initApp()
     }
+
+    setInterval(checkAuthStatus, 5 * 60 * 1000) // re-verify auth every 5 minutes
 })
 
 async function initApp(){
