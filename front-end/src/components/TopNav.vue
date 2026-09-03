@@ -4,7 +4,7 @@
       <img alt="site-logo" ref="logoEl" id="LOGO" src="" class="topnav__logo">
     </a>
 
-    <span v-if="isIPAccess" @click="sendRemoteAction()" class="topnav__wifi" :class="is_connected_with_main_app ? 'topnav__wifi--on' : 'topnav__wifi--off'"
+    <!-- <span v-if="isIPAccess" @click="sendRemoteAction()" class="topnav__wifi" :class="is_connected_with_main_app ? 'topnav__wifi--on' : 'topnav__wifi--off'"
       :tooltip="is_connected_with_main_app ? helper.t('Connected to main app') : helper.t('Not connected to main app')" flow="down">
       <i :class="is_connected_with_main_app ? 'bx bx-wifi' : 'bx bx-wifi-off'"></i>
     </span>
@@ -17,7 +17,7 @@
     <span v-if="!isIPAccess && !isUserActive" class="topnav__wifi topnav__wifi--on"
       :tooltip="helper.t('User is not active')" flow="down">
       <i class='bx bx-loader-circle topnav__hypnotize'></i>
-    </span>
+    </span> -->
 
     <button class="topnav__toggle" type="button" @click="isOpen = !isOpen" aria-label="Toggle navigation">
       <i :class="isOpen ? 'bx bx-x' : 'bx bx-menu'"></i>
