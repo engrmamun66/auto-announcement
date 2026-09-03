@@ -305,6 +305,12 @@ async function CheckAccess({loader=false}={}){
                 return
             }
 
+            if(accessdata?.success === false){
+                // license-check backend unreachable/erroring — fail open, don't lock the app over it
+                console.warn('_ac:: license check failed, failing open', accessdata)
+                return
+            }
+
 
             if(accessdata && accessdata.institute_name){
                 accessdata.last_paid_month = moment(accessdata.last_paid_month).startOf('day').toISOString()
