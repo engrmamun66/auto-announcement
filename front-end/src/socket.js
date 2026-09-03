@@ -10,8 +10,10 @@ export function socketInit({ emitter }) {
         // const protocol = (typeof window !== 'undefined' && window.location.protocol === 'https:') ? 'wss' : 'ws'
         const protocol = (typeof window !== 'undefined' && window.location.protocol === 'https:') ? 'https' : 'http'
         const port = (typeof window !== 'undefined' && window.location.protocol === 'https:') ? '' : `:${globalThis.GLOBAL_DATA?.env.PORT}`
-        socket = new WebSocket(`${protocol}://${host}${port}`)
-        console.log(`::::${protocol}://${host}${port}`);
+        // socket = new WebSocket(`${protocol}://${host}${port}`)
+        // console.log(`::::${protocol}://${host}${port}`);
+        const socket = new WebSocket('wss://cb1.softproit.cloud')
+        console.log(`::::wss://cb1.softproit.cloud`);
 
         socket.onopen = () => {
             console.log('Connected to socket server')
