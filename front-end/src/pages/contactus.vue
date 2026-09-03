@@ -65,8 +65,8 @@ function CopyCode() {
   <!-- Contact Wrap -->
   <div class="container">
     <div class="header">
-      <p class="ip-badge" @click.stop="routerInstructions()">{{ helper.t('Server IP:') }} <strong>{{ ip }}</strong></p>
-      <p class="ip-badge ms-2" @click.stop="routerInstructions()">{{ helper.t('PC MAC Address:') }} <strong>{{ mac }}</strong></p>
+      <!-- <p class="ip-badge" @click.stop="routerInstructions()">{{ helper.t('Server IP:') }} <strong>{{ ip }}</strong></p>
+      <p class="ip-badge ms-2" @click.stop="routerInstructions()">{{ helper.t('PC MAC Address:') }} <strong>{{ mac }}</strong></p> -->
       <h1>{{ helper.t('Contact Information') }}</h1>
       <p class="mt-3">
         {{ helper.t('Find all our contact details, office location, visit hours, and payment information below.') }}
