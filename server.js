@@ -106,6 +106,13 @@ utils.withTrackFile({version: '1.0.0', switch_mode: 'auto'}, {overwrite: false})
 
 
 const app = express();
+// app.use((req, res, next) => {
+//   console.log(`::${req.originalUrl}`);
+//   if (req.originalUrl.toLowerCase().includes('iclock')) {
+//     console.log(`[DEVICE-HIT] ${req.method} ${req.originalUrl} host=${req.headers.host} ip=${req.ip}`);
+//   }
+//   next();
+// });
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'front-end')));
@@ -334,7 +341,7 @@ webSocket(httpServer);
 
 async function startServer() {
   await loadDbSettings();
-  httpServer.listen(PORT, '127.0.0.1', () => {
+  httpServer.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}/app/#`);
     console.log(`WebSocket running on ws://localhost:${PORT}`);
 
