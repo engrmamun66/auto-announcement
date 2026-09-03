@@ -1,13 +1,16 @@
 const WebSocket = require("ws");
 
 module.exports = function (httpServer) {
-    const wsServer = new WebSocket.Server({ server: httpServer });
+    const wsServer = new WebSocket.Server({ server: httpServer, perMessageDeflate: false });
 
     global.socketServer = wsServer;
+
+    wsServer.on("error", () => {});
 
     wsServer.on("connection", (socket) => {
     //   console.log("Frontend connected to WebSocket", new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true }));
 
+        socket.on("error", () => {});
         socket.on("close", () => {
             // console.log("Frontend disconnected from WebSocket", new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true }));
         });
