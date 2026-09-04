@@ -31,8 +31,9 @@ module.exports = {
           SECRET_KEY: 'YOUR_SECRET_KEY',
           LOGIN_PASSWORD: 'changeme', // app-wide login password — override in config.js
           LOGIN_EXPIRE_AFTER: '7d', // login session lifetime — e.g. '30m', '5h', '1d', '7d'
+          DEFAULT_DEVICE_POLLING_INTERVAL: 15, // seconds — used when a ZKTeco device has no polling_interval set in DB yet
           CODE_NUMBER: 'DEV_MAM', // Rrequeired for Client Identification
-          PUNCH_LOG_FILENAME: 'punch.log.json', 
+          PUNCH_LOG_FILENAME: 'punch.log.json',
           DATABASE_PATH: 'database/database.db', // For Client DB Example: './../clientdb-DHM101.db'
 
 
