@@ -1,3 +1,4 @@
+process.env.TZ = process.env.TZ || 'Asia/Dhaka'; // must be set before any moment()/Date usage below
 global.DIR = __dirname;
 // require('dotenv').config()
 const fs = require('fs');
