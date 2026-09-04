@@ -48,7 +48,7 @@ class CdataController {
         'SELECT polling_interval FROM devices WHERE serial_number = ?',
         [sn],
         (err, device) => {
-          let polling_interval = 2; // default
+          let polling_interval = global.config?.env?.DEFAULT_DEVICE_POLLING_INTERVAL || 15; // default
 
           if (err) {
             console.error(`❌ Error fetching device polling_interval: ${err.message}`);
@@ -96,8 +96,9 @@ class CdataController {
       );
     } else {
       console.log('>>>>> SN is not OK', sn);
-      Store.pollingIntervals[sn] = 6; // || 6
-      this._sendPollingResponse(res, sn, pushVersion, 6); // || 6
+      const defaultInterval = global.config?.env?.DEFAULT_DEVICE_POLLING_INTERVAL || 15;
+      Store.pollingIntervals[sn] = defaultInterval;
+      this._sendPollingResponse(res, sn, pushVersion, defaultInterval);
     }
   }
 
