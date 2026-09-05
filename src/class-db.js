@@ -164,6 +164,8 @@ class myDB {
             }
             console.log("Connected to SQLite database.");
         });
+        // Retry internally on SQLITE_BUSY (concurrent writers) instead of erroring immediately
+        db.configure('busyTimeout', 5000);
         return db
     }
     _createTables(){
