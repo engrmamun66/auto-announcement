@@ -109,16 +109,6 @@
         <span class="border cp me-0 text-white px-1 size-08" @click.prevent.stop="show_cloner_component = true">
           <span :tooltip="helper.t('Clone Students')" flow="left">{{ helper.t('Clone') }}</span>
         </span>
-        <span class="border cp me-0 text-white px-1 size-08" @click.prevent.stop="getTemporaryZip">
-          <span :tooltip="helper.t('Temporary update')" flow="left">
-            <template v-if="temp_updating">
-                {{ helper.t('Temp') }}<BtnLoader></BtnLoader>
-            </template>
-            <template v-else>
-              {{ helper.t('Temp') }}
-            </template>
-          </span>
-        </span>
       </div>
     </nav>
   </header>
