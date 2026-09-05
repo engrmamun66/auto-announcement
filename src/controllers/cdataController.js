@@ -274,12 +274,13 @@ class CdataController {
         // const only_attendance_feature = global.config?.settings?.attendance?.only_attendance_feature
         const forceAsRealtime = req.query.forceAsRealtime === 'true'
         const realtime_window_seconds = device?.realtime_punch_window_seconds || 180
-        let is_realtime_punch = records?.length === 1 && moment(records?.[0]?.punch_time, 'YYYY-MM-DD HH:mm:ss').isBetween(
-            now.clone().subtract(realtime_window_seconds, 'seconds'),
-            now.clone().add(realtime_window_seconds, 'seconds'),
-            undefined,
-            '[]'
-          )
+        let is_realtime_punch = records?.length === 1
+          // && moment(records?.[0]?.punch_time, 'YYYY-MM-DD HH:mm:ss').isBetween(
+          //     now.clone().subtract(realtime_window_seconds, 'seconds'),
+          //     now.clone().add(realtime_window_seconds, 'seconds'),
+          //     undefined,
+          //     '[]'
+          //   )
 
         // Treat as real-time if forced (dev/test punch)
         if (forceAsRealtime) {
