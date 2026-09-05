@@ -133,6 +133,9 @@ function handleDevicesUpdate(data) {
     devices.value = data.data || [];
     console.log(`📡 Received ${devices.value.length} devices from socket`);
   }
+  if (data.type === 'device_time_calibrated') {
+    emitter.emit('toaster-success', { message: data.message });
+  }
 }
 
 function executeRestart(device) {
