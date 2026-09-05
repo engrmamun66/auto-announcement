@@ -38,6 +38,10 @@
           <span class="device-card__value">{{ formatTime(device.updated) }}</span>
         </div>
         <div class="device-card__row">
+          <span class="device-card__label">{{ helper.t('Realtime Window') }}:</span>
+          <span class="device-card__value">{{ device.realtime_punch_window_seconds }}s</span>
+        </div>
+        <div class="device-card__row">
           <span class="device-card__label">{{ helper.t('Last Updated') }}:</span>
           <span class="device-card__value">{{ formatTime(device.updated) }} | {{ getTimeAgo(device.updated) }}</span>
         </div>

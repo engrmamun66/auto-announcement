@@ -653,6 +653,7 @@ module.exports = {
     'Pinky': 'কনিষ্ঠা',
     'Select a finger to enroll': 'নিবন্ধনের জন্য একটি আঙুল নির্বাচন করুন',
     'Device time adjustment mode': 'ডিভাইস সময় সমন্বয় মোড',
+    'Realtime Window': 'রিয়েলটাইম উইন্ডো',
     'Punch the device now to calibrate': 'ক্যালিব্রেট করতে এখন ডিভাইসে পাঞ্চ করুন',
     'Failed to enable adjustment mode': 'সমন্বয় মোড চালু করতে ব্যর্থ',
     'Click on a finger to select': 'নির্বাচনের জন্য একটি আঙুলে ক্লিক করুন',

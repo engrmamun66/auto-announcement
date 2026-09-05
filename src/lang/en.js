@@ -654,6 +654,7 @@ module.exports = {
     'Pinky': 'Pinky',
     'Select a finger to enroll': 'Select a finger to enroll',
     'Device time adjustment mode': 'Device time adjustment mode',
+    'Realtime Window': 'Realtime Window',
     'Punch the device now to calibrate': 'Punch the device now to calibrate',
     'Failed to enable adjustment mode': 'Failed to enable adjustment mode',
     'Click on a finger to select': 'Click on a finger to select',
