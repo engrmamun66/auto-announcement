@@ -160,7 +160,6 @@ import { ref, inject, computed, onMounted, watch, onBeforeUnmount } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 import Btn from './Btn.vue'
 import cloneStudents from './cloneStudents.vue'
-import BtnLoader from './BtnLoader.vue';
 import ConfigSettings from './settings/ConfigSettings.vue'
 import SmsModal from './SmsModal.vue'
 
@@ -202,7 +201,6 @@ let showSettingsPanel = ref(false)
 let showConfirmModal = ref(false)
 let showUpdateModal = ref(false)
 let updateDone = ref(false)
-let temp_updating = ref(false)
 const autoUpdateEnabled = ref(storage('cb_auto_update', true).value)
 watch(autoUpdateEnabled, (val) => { storage('cb_auto_update').value = val })
 
@@ -254,23 +252,6 @@ async function confirmAndUpdate() {
     }
 }
 
-async function getTemporaryZip() {
-    temp_updating.value = true;
-    updateDone.value = false;
-    try {
-        await http.get('/update-app', { params: { debug_mode: true } });
-        updateDone.value = true;
-        allow_to_reaload.value = true;
-        emitter.emit('toaster-success', { message: helper.t('Updated'), duration: 0 });
-        setTimeout(() => { window.location.reload(); }, realod_after);
-    } catch (err) {
-        emitter.emit('toaster-error', { message: helper.t('Update failed.') });
-    } finally {
-        temp_updating.value = false;
-    }
-}
-
- 
 
 onMounted(()=>{
   if(typeof GLOBAL_DATA !== 'undefined'){
