@@ -728,99 +728,72 @@ watch(fixedWidthSoundCol, (newVal) => {
 
       
     <!-- Search -->
-    <div class="form-area mt-3 p-4 border radius-10">
+    <div class="form-area student-filter-bar mt-3 p-3 border radius-10">
       <div asform>
-        <div class="row">
-          <div class="col-md-3 col-12">
-            <div class="form-group">
-              <label for="email">{{ helper.t('Class') }}</label>
-              <select v-model="params.class_short" @change="getStudents" class="form-control cb-input" id="ClassId">
-                <option :value="null">-{{helper.t('class')}}-</option>
-                <template v-for="(cls, index) in classes" :key="index">
-                  <option :value="cls.class_short">{{cls.class_name}}</option>
-                </template>
-                
-              </select>
-            </div>
+        <div class="filter-grid">
+          <div class="form-group">
+            <label for="ClassId">{{ helper.t('Class') }}</label>
+            <select v-model="params.class_short" @change="getStudents" class="form-control cb-input" id="ClassId">
+              <option :value="null">-{{helper.t('class')}}-</option>
+              <template v-for="(cls, index) in classes" :key="index">
+                <option :value="cls.class_short">{{cls.class_name}}</option>
+              </template>
+
+            </select>
           </div>
-          <div class="col-md-3 col-12">
-            <div class="form-group sssffefefasdgsadfg">
-              <label for="email">{{ helper.t('Dakhela') }}
-                <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
-                  <span tooltip="All Smillar">
-                    <input v-model="only_similler_students" :value="only_similler_students" style="opacity: 0.7;" type="checkbox" @change="()=>{
-                      if(params.dakhela){
-                        getStudents()
-                      }
-                    }" >
-                  </span>
-                </template>
-              </label>
-              <input v-model="params.dakhela" @keyup="getStudentsDebounced" @input="getStudentsDebounced" type="number" class="form-control cb-input" :placeholder="helper.t('Search dakhela...')">
-            </div> 
+          <div class="form-group sssffefefasdgsadfg">
+            <label for="email">{{ helper.t('Dakhela') }}
+              <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
+                <span tooltip="All Smillar">
+                  <input v-model="only_similler_students" :value="only_similler_students" style="opacity: 0.7;" type="checkbox" @change="()=>{
+                    if(params.dakhela){
+                      getStudents()
+                    }
+                  }" >
+                </span>
+              </template>
+            </label>
+            <input v-model="params.dakhela" @keyup="getStudentsDebounced" @input="getStudentsDebounced" type="number" class="form-control cb-input" :placeholder="helper.t('Search dakhela...')">
           </div>
-          <!-- <div class="col-md-2 col-12">
-            <div class="form-group">
-              <label for="email">Card</label>
-              <input v-model="params.card_no" type="text" class="form-control cb-input">
-            </div>
-          </div> -->
-          <div class="col-md-3 col-12">
-            <div class="form-group">
-              <label for="name">{{ helper.t('Name') }}</label>
-              <input v-model="params.name" type="text" class="form-control cb-input" :placeholder="helper.t('Search name...')" @keyup="getStudentsDebounced" @input="getStudentsDebounced">
-            </div>
+          <div class="form-group">
+            <label for="name">{{ helper.t('Name') }}</label>
+            <input v-model="params.name" type="text" class="form-control cb-input" :placeholder="helper.t('Search name...')" @keyup="getStudentsDebounced" @input="getStudentsDebounced">
           </div>
-          <div class="col-md-3 col-12">
-            <div class="form-group">
-              <label>{{ helper.t('Phone Number') }}</label>
-              <input v-model="params.phone_number" type="tel" class="form-control cb-input" :placeholder="helper.t('Search phone...')" @keyup="getStudentsDebounced" @input="getStudentsDebounced">
-            </div>
+          <div class="form-group">
+            <label>{{ helper.t('Phone Number') }}</label>
+            <input v-model="params.phone_number" type="tel" class="form-control cb-input" :placeholder="helper.t('Search phone...')" @keyup="getStudentsDebounced" @input="getStudentsDebounced">
           </div>
           <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
-            <div class="col-md-3 col-12">
-              <div class="form-group">
-                <label for="email">{{ helper.t('Sound') }}</label>
-                <select v-model="params.sound1" @change="getStudents" class="form-control cb-input">
-                  <option :value="null">-{{helper.t('All')}}-</option>
-                  <option value="no_sound">No</option> 
-                  <option value="has_sound">Yes</option> 
-                </select>
-              </div>
+            <div class="form-group">
+              <label for="email">{{ helper.t('Sound') }}</label>
+              <select v-model="params.sound1" @change="getStudents" class="form-control cb-input">
+                <option :value="null">-{{helper.t('All')}}-</option>
+                <option value="no_sound">No</option>
+                <option value="has_sound">Yes</option>
+              </select>
             </div>
           </template>
 
-          <div class="col-md-3 col-12" style="margin-top: 12px;">
-            <div class="form-group mt-md-3"> 
-                <div class="d-flex justify-content-between w-100">
-                  <div>
-                    <Btn @click.stop="getStudents()" class="me-1"></Btn>
-                    <Btn @click.stop="clearParams();getStudents();editModeTabIndex=1" class="me-1 red">Clear</Btn>
-                  </div>
-                  
-                </div>
-              </div>
-          </div>
-          
-          </div>
-
-          <div class="col-12 mt-4 w-100 all-class-buttons-to-filter-area d-none d-md-block">
-            <div class="all-class-buttons-to-filter">
-              <template v-for="cls in classes">
-                <button class="class-short-btn" :class="{'active': params.class_short === cls.class_short}" var="cls?.display_name || cls.class_short"
-                @click="clearParams({get: false});params.page_no = 1;params.class_short = cls.class_short;getStudents()" >{{ helper.ucfirst(cls?.display_name || cls.class_short) }}</button>
-              </template>
-
+          <div class="form-group filter-actions">
+            <label class="filter-actions__spacer">&nbsp;</label>
+            <div class="d-flex">
+              <Btn @click.stop="getStudents()" class="me-1"></Btn>
+              <Btn @click.stop="clearParams();getStudents();editModeTabIndex=1" class="red">Clear</Btn>
             </div>
           </div>
-          
-          
-      
-        
         </div>
-      
+
+        <div class="mt-3 w-100 all-class-buttons-to-filter-area d-none d-md-block">
+          <div class="all-class-buttons-to-filter">
+            <template v-for="cls in classes">
+              <button class="class-short-btn" :class="{'active': params.class_short === cls.class_short}" var="cls?.display_name || cls.class_short"
+              @click="clearParams({get: false});params.page_no = 1;params.class_short = cls.class_short;getStudents()" >{{ helper.ucfirst(cls?.display_name || cls.class_short) }}</button>
+            </template>
+          </div>
+        </div>
+      </div>
     </div>
- 
+
 
     <myTable class="mt-3">
       <template #thead>
@@ -1262,6 +1235,34 @@ watch(fixedWidthSoundCol, (newVal) => {
   background: var(--grad1);
   /* margin-left: 0px 20px; */
 } 
+.student-filter-bar .filter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px 14px;
+  align-items: end;
+}
+.student-filter-bar .filter-grid .form-group {
+  margin-bottom: 0;
+}
+.student-filter-bar .filter-grid label {
+  margin-bottom: 4px;
+  display: inline-block;
+}
+.student-filter-bar .filter-actions {
+  display: flex;
+  flex-direction: column;
+}
+.student-filter-bar .filter-actions__spacer {
+  visibility: hidden;
+}
+@media (max-width: 767px) {
+  .student-filter-bar .filter-grid {
+    grid-template-columns: 1fr;
+  }
+  .student-filter-bar .filter-actions__spacer {
+    display: none;
+  }
+}
 .all-class-buttons-to-filter-area{
   min-height: 40px;
   overflow-y: auto;
