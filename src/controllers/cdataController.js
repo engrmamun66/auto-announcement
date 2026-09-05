@@ -229,28 +229,30 @@ class CdataController {
           Store.clearTimeAdjustmentMode(sn);
           const punchMoment = moment(records[0].punch_time, 'YYYY-MM-DD HH:mm:ss');
           const measured_gap_seconds = Math.ceil(Math.abs(now.diff(punchMoment, 'seconds')));
+          const CALIBRATION_SAFETY_MARGIN_SECONDS = 30; // real latency jitters punch-to-punch — never save the exact measured value with zero headroom
+          const saved_window_seconds = measured_gap_seconds + CALIBRATION_SAFETY_MARGIN_SECONDS;
 
           console.log(`\n🎯 [Device Time Adjustment Mode] Calibration punch received — device: ${sn}`);
           console.log(`   Punch time (after adjust_time): ${punchMoment.format('YYYY-MM-DD HH:mm:ss')}`);
           console.log(`   Server "now":                   ${now.format('YYYY-MM-DD HH:mm:ss')}`);
-          console.log(`   Measured gap:                   ${measured_gap_seconds}s`);
+          console.log(`   Measured gap:                   ${measured_gap_seconds}s (+${CALIBRATION_SAFETY_MARGIN_SECONDS}s margin = ${saved_window_seconds}s saved)`);
           console.log(`   → Calibration only: no attendance saved, no SMS sent.\n`);
 
           global.db.run(
             'UPDATE devices SET realtime_punch_window_seconds = ? WHERE serial_number = ?',
-            [measured_gap_seconds, sn],
+            [saved_window_seconds, sn],
             (updateErr) => {
               if (updateErr) {
                 console.error(`❌ Failed to save calibrated realtime_punch_window_seconds for ${sn}:`, updateErr.message);
                 return;
               }
-              console.log(`✅ Saved realtime_punch_window_seconds=${measured_gap_seconds}s for ${sn}`);
+              console.log(`✅ Saved realtime_punch_window_seconds=${saved_window_seconds}s for ${sn}`);
 
               if (!global.socketServer) return;
-              const calibrationMessage = `Device ${sn} calibrated — realtime window set to ${measured_gap_seconds}s`;
+              const calibrationMessage = `Device ${sn} calibrated — realtime window set to ${saved_window_seconds}s`;
               global.socketServer.clients.forEach((client) => {
                 if (client.readyState === client.OPEN) {
-                  client.send(JSON.stringify({ type: 'device_time_calibrated', sn, realtime_punch_window_seconds: measured_gap_seconds, message: calibrationMessage }));
+                  client.send(JSON.stringify({ type: 'device_time_calibrated', sn, realtime_punch_window_seconds: saved_window_seconds, message: calibrationMessage }));
                 }
               });
 
@@ -274,7 +276,9 @@ class CdataController {
         const realtime_window_seconds = device?.realtime_punch_window_seconds || 180
         let is_realtime_punch = records?.length === 1 && moment(records?.[0]?.punch_time, 'YYYY-MM-DD HH:mm:ss').isBetween(
             now.clone().subtract(realtime_window_seconds, 'seconds'),
-            now.clone().add(realtime_window_seconds, 'seconds')
+            now.clone().add(realtime_window_seconds, 'seconds'),
+            undefined,
+            '[]'
           )
 
         // Treat as real-time if forced (dev/test punch)
