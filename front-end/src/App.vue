@@ -1368,8 +1368,12 @@ async function __punchToSubmitAttendance(barcode='play-417-2024', {
         }
 
      } catch (error) {
-          console.warn('punchToSubmitAttendance_error::', error);
-          emitter.emit('toaster-error', { message: error.response?.data?.error || helper.t('Attendance failed!') })
+          const backendMessage = error.response?.data?.error
+          const isExpectedRejection = backendMessage === 'In/Out added for this shift'
+          if (!isExpectedRejection) {
+              console.warn('punchToSubmitAttendance_error::', error);
+          }
+          emitter.emit('toaster-error', { message: backendMessage || helper.t('Attendance failed!') })
      }
 }
 
