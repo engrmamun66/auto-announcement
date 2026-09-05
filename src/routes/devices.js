@@ -1,7 +1,17 @@
 const express = require('express');
+const { Store } = require('../stores/GlobalStore');
 
 module.exports = (db) => {
   const router = express.Router();
+
+  // Arms a 10-second calibration window for this device — the next punch
+  // received from it while armed is used to auto-measure the real network/
+  // processing latency and save it as that device's realtime_punch_window_seconds.
+  router.post('/devices/:sn/enable-time-adjustment-mode', (req, res) => {
+    const { sn } = req.params;
+    Store.enableTimeAdjustmentMode(sn);
+    res.json({ success: true });
+  });
 
   router.get('/devices', (req, res) => {
     db.all('SELECT * FROM devices ORDER BY id DESC', [], (err, rows) => {

@@ -34,6 +34,7 @@ class myDB {
         this._addColumn('students', 'phone_number', 'VARCHAR', 'NULL')
         this._addColumn('schedules', 'status', 'INTEGER', '1')
         this._addColumn('schedules', 'order_index', 'INTEGER', '1')
+        this._addColumn('devices', 'realtime_punch_window_seconds', 'INTEGER', '180')
         this._initSettings()
     }
 

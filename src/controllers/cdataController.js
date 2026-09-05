@@ -158,7 +158,7 @@ class CdataController {
 
 
     else if (table === 'ATTLOG' && this._isRealPunch(row_item)) {
-      global.db.get('SELECT adjust_time FROM devices WHERE serial_number = ?', [sn], (err, device) => {
+      global.db.get('SELECT adjust_time, realtime_punch_window_seconds FROM devices WHERE serial_number = ?', [sn], (err, device) => {
         let operations_add_subtract = `subtract(0, 'hour')`;
         if (!err && device && device.adjust_time) {
           operations_add_subtract = String(device.adjust_time).replace(/^\./, '');
@@ -223,15 +223,33 @@ class CdataController {
         // const only_attendance_feature = global.config?.settings?.attendance?.only_attendance_feature
         const now = moment()
         const forceAsRealtime = req.query.forceAsRealtime === 'true'
+        const realtime_window_seconds = device?.realtime_punch_window_seconds || 180
         let is_realtime_punch = records?.length === 1 && moment(records?.[0]?.punch_time, 'YYYY-MM-DD HH:mm:ss').isBetween(
-            now.clone().subtract(50, 'seconds'),
-            now.clone().add(50, 'seconds')
+            now.clone().subtract(realtime_window_seconds, 'seconds'),
+            now.clone().add(realtime_window_seconds, 'seconds')
           )
 
         // Treat as real-time if forced (dev/test punch)
         if (forceAsRealtime) {
           is_realtime_punch = true
           console.log('🧪 Forced as real-time punch. Processing immediately.')
+        }
+
+        // Device time adjustment mode (10s calibration window armed from the Devices UI):
+        // measure the actual gap between this punch and server "now", persist it as this
+        // device's own realtime_punch_window_seconds, and treat this punch as realtime.
+        if (records?.length === 1 && Store.isInTimeAdjustmentMode(sn)) {
+          Store.clearTimeAdjustmentMode(sn);
+          const measured_gap_seconds = Math.ceil(Math.abs(now.diff(moment(records[0].punch_time, 'YYYY-MM-DD HH:mm:ss'), 'seconds')));
+          global.db.run(
+            'UPDATE devices SET realtime_punch_window_seconds = ? WHERE serial_number = ?',
+            [measured_gap_seconds, sn],
+            (updateErr) => {
+              if (updateErr) console.error(`❌ Failed to save calibrated realtime_punch_window_seconds for ${sn}:`, updateErr.message);
+              else console.log(`🎯 Calibrated ${sn}: realtime_punch_window_seconds = ${measured_gap_seconds}s`);
+            }
+          );
+          is_realtime_punch = true;
         }
 
         console.log('NOW:', now.format('YYYY-MM-DD HH:mm:ss'), '| Is Realtime:', is_realtime_punch);

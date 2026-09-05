@@ -3,6 +3,14 @@
     <div v-for="device in devices" :key="device.id" class="device-card">
       <div class="device-card__header">
         <div class="device-card__title">{{ device.name || device.serial_number }}</div>
+        <label class="device-card__adjustment-toggle" :tooltip="helper.t('Device time adjustment mode')" flow="down">
+          <input
+            type="checkbox"
+            :checked="!!activeAdjustment[device.serial_number]"
+            @change="toggleAdjustmentMode(device)"
+          >
+          {{ helper.t('Device time adjustment mode') }}
+        </label>
         <span :class="['device-card__status', device.status ? 'active' : 'inactive']">
           {{ device.status ? helper.t('Active') : helper.t('Inactive') }}
         </span>
@@ -52,7 +60,7 @@
 </template>
 
 <script setup>
-import { inject } from 'vue';
+import { inject, reactive } from 'vue';
 import moment from 'moment';
 
 defineProps({
@@ -65,6 +73,26 @@ defineProps({
 const emit = defineEmits(['edit', 'delete']);
 
 const helper = inject('helper');
+const http = inject('http');
+const emitter = inject('emitter');
+
+const ADJUSTMENT_MODE_DURATION_MS = 10 * 1000;
+const activeAdjustment = reactive({});
+
+async function toggleAdjustmentMode(device) {
+  if (activeAdjustment[device.serial_number]) return; // already armed, ignore manual uncheck
+
+  activeAdjustment[device.serial_number] = true;
+  try {
+    await http.post(`/devices/${device.serial_number}/enable-time-adjustment-mode`);
+    emitter.emit('toaster-success', { message: helper.t('Punch the device now to calibrate') });
+  } catch (err) {
+    emitter.emit('toaster-error', { message: helper.t('Failed to enable adjustment mode') });
+  }
+  setTimeout(() => {
+    activeAdjustment[device.serial_number] = false;
+  }, ADJUSTMENT_MODE_DURATION_MS);
+}
 
 function formatTime(timestamp) {
   return moment(timestamp).format('DD/MM/YYYY HH:mm:ss');
@@ -113,6 +141,21 @@ function getTimeAgo(timestamp) {
   color: #333;
   font-size: 17px;
   flex: 1;
+}
+
+.device-card__adjustment-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #666;
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.device-card__adjustment-toggle input {
+  cursor: pointer;
 }
 
 .device-card__status {
