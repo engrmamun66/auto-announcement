@@ -246,6 +246,10 @@ function getAppVersion() {
   return '1.0.0';
 }
 
+app.get(`/api/server-time`, (req, res) => {
+  res.json({ time: moment().format('YYYY-MM-DD HH:mm:ss'), timezone: process.env.TZ });
+});
+
 // app.get(`/api/check-access`, async (req, res) => {
 app.get(`/api/_ac`, async (req, res) => {
   try {

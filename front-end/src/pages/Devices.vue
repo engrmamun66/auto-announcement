@@ -1,6 +1,13 @@
 <template>
   <div class="devices-page">
 
+    <div v-if="serverTime" class="server-time-badge">
+      <i class='bx bx-time-five'></i> {{ helper.t('Server time') }}: <strong>{{ serverTime.time }}</strong> ({{ serverTime.timezone }})
+    </div>
+    <label class="server-time-live-toggle" tooltip="Get Realtime">
+      <input type="checkbox" v-model="liveServerTime">
+    </label>
+
     <!-- Tab Navigation -->
     <ul class="nav nav-tabs mt-0 mb-3">
       <li class="nav-item usn">
@@ -71,7 +78,23 @@ const http = inject('http');
 const emitter = inject('emitter');
 
 const devices = ref([]);
+const serverTime = ref(null);
+const liveServerTime = ref(false);
+let serverTimeInterval = null;
 const editingDevice = ref(null);
+
+function fetchServerTime() {
+  http.get('/server-time')
+    .then((res) => { serverTime.value = res.data; })
+    .catch(() => {});
+}
+
+watch(liveServerTime, (isLive) => {
+  clearInterval(serverTimeInterval);
+  if (isLive) {
+    serverTimeInterval = setInterval(fetchServerTime, 1000);
+  }
+});
 const activeTab = ref(localStorage.getItem('devicesActiveTab') || 'devices');
 const showPasswordConfirm = ref(false);
 const deviceToDelete = ref(null);
@@ -156,11 +179,13 @@ function executeRestart(device) {
 
 onMounted(() => {
   fetchDevices();
+  fetchServerTime();
   emitter.on('on_socket_message', handleDevicesUpdate);
 });
 
 onBeforeUnmount(() => {
   emitter.off('on_socket_message', handleDevicesUpdate);
+  clearInterval(serverTimeInterval);
 });
 </script>
 
@@ -173,6 +198,35 @@ onBeforeUnmount(() => {
 
 .devices-tab-content {
   animation: fadeIn 0.2s ease-in;
+}
+
+.server-time-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f0f4ff;
+  border: 1px solid #c7d4f0;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  color: #4a6fa5;
+  margin-bottom: 14px;
+  margin-right: 10px;
+}
+
+.server-time-live-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: #666;
+  cursor: pointer;
+  user-select: none;
+  margin-bottom: 14px;
+}
+
+.server-time-live-toggle input {
+  cursor: pointer;
 }
 
 @keyframes fadeIn {

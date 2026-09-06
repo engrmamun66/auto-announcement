@@ -316,6 +316,8 @@ module.exports = {
     'Deleted {count} cloned students.': 'Deleted {count} cloned students.',
     'Contact Information': 'Contact Information',
     'Server IP:': 'Server IP:',
+    'Server time': 'Server time',
+    'Get Realtime': 'Get Realtime',
     'Find all our contact details, office location, visit hours, and payment information below.': 'Find all our contact details, office location, visit hours, and payment information below.',
     'Payable amout': 'Payable amout',
     'About payment': 'About payment',

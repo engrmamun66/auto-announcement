@@ -316,6 +316,8 @@ module.exports = {
     'Deleted {count} cloned students.': '{count} জন ক্লোন শিক্ষার্থী মুছে ফেলা হয়েছে।',
     'Contact Information': 'যোগাযোগের তথ্য',
     'Server IP:': 'সার্ভার IP:',
+    'Server time': 'সার্ভার সময়',
+    'Get Realtime': 'রিয়েলটাইম দেখুন',
     'Find all our contact details, office location, visit hours, and payment information below.': 'আমাদের সব যোগাযোগের তথ্য, অফিসের ঠিকানা, ভিজিট সময় এবং পেমেন্ট তথ্য নিচে দেখুন।',
     'Payable amout': 'প্রদেয় পরিমাণ',
     'About payment': 'পেমেন্ট সম্পর্কে',
