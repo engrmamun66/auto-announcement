@@ -1,5 +1,6 @@
 const { Store } = require('../stores/GlobalStore');
 const { wait } = require('../utils/wait');
+const moment = require('moment');
 
 class CommandController {
   getCommandStore(req) {
@@ -487,7 +488,7 @@ class CommandController {
   }
 
   syncTime(req, res) {
-    const now = new Date().toISOString().replace('T', ' ').slice(0, 19);
+    const now = moment().format('YYYY-MM-DD HH:mm:ss');
     this.respondQueued(res, this.pushCommand(req, req.params.cn, `DATE ${now}`));
   }
 

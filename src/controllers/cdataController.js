@@ -75,6 +75,19 @@ class CdataController {
                 console.error(`❌ Device insert error for ${sn}:`, insertErr.message);
               } else {
                 console.log(`✅ Device ${sn} checked/inserted [interval: ${polling_interval}s]`);
+                if (this.changes > 0) {
+                  // Brand new device (first time ever seen) — queue a DATE command so it
+                  // picks up the correct time/timezone on its very next poll.
+                  const dateCommand = `DATE ${moment().format('YYYY-MM-DD HH:mm:ss')}`;
+                  global.db.run(
+                    'INSERT INTO command_queue (device_serial_number, command, status) VALUES (?, ?, ?)',
+                    [sn, dateCommand, 'pending'],
+                    (cmdErr) => {
+                      if (cmdErr) console.error(`❌ Failed to queue initial time sync for ${sn}:`, cmdErr.message);
+                      else console.log(`🕒 Queued initial time sync for new device ${sn}: ${dateCommand}`);
+                    }
+                  );
+                }
               }
               // Always update timestamp
               global.db.run(
