@@ -39,7 +39,7 @@ let addUpdateMode = ref(false)
 let is___adding = ref(false)
 let tab = ref(2)
 let selectedFilterClasses = ref([])
-let filterMatchMode = ref('and')
+let filterMatchMode = ref('or')
 
 const activeClasses = computed(() => {
   return (classes.value || []).filter(cls => cls?.isActive !== false)
@@ -99,50 +99,50 @@ const INC = 5
 function decrementTime(key){
    if(key == 'start'){
       payload.start_time = moment(payload.start_time, 'HH:mm').subtract(INC, 'minutes').format('HH:mm')
+      applyCallStartCascade(payload.start_time)
    }
    else if(key == 'end'){
       payload.end_time = moment(payload.end_time, 'HH:mm').subtract(INC, 'minutes').format('HH:mm')
+      applyCallEndCascade(payload.end_time)
    }
 }
 function incrementTime(key){
   if(key == 'start'){
       payload.start_time = moment(payload.start_time, 'HH:mm').add(INC, 'minutes').format('HH:mm')
+      applyCallStartCascade(payload.start_time)
    }
    else if(key == 'end'){
       payload.end_time = moment(payload.end_time, 'HH:mm').add(INC, 'minutes').format('HH:mm')
+      applyCallEndCascade(payload.end_time)
    }
 }
 
-// Punch Start drives: Punch End (+3h), Call End (+3h), Call Start (+30min)
-function applyPunchStartCascade(newStart){
-  payload.end_time2 = moment(newStart, 'HH:mm').add(3, 'hours').format('HH:mm')
+// Call Start drives: Call End (+3h), Punch End (+3h), Punch Start (-30min)
+function applyCallStartCascade(newStart){
   payload.end_time = moment(newStart, 'HH:mm').add(3, 'hours').format('HH:mm')
-  payload.start_time = moment(newStart, 'HH:mm').add(30, 'minutes').format('HH:mm')
+  payload.end_time2 = moment(newStart, 'HH:mm').add(3, 'hours').format('HH:mm')
+  payload.start_time2 = moment(newStart, 'HH:mm').subtract(30, 'minutes').format('HH:mm')
 }
 
-// Punch End drives: Call End (kept equal)
-function applyPunchEndCascade(newEnd){
-  payload.end_time = newEnd
+// Call End drives: Punch End (kept equal)
+function applyCallEndCascade(newEnd){
+  payload.end_time2 = newEnd
 }
 
 function decrementTime2(key){
    if(key == 'start'){
       payload.start_time2 = moment(payload.start_time2, 'HH:mm').subtract(INC, 'minutes').format('HH:mm')
-      applyPunchStartCascade(payload.start_time2)
    }
    else if(key == 'end'){
       payload.end_time2 = moment(payload.end_time2, 'HH:mm').subtract(INC, 'minutes').format('HH:mm')
-      applyPunchEndCascade(payload.end_time2)
    }
 }
 function incrementTime2(key){
   if(key == 'start'){
       payload.start_time2 = moment(payload.start_time2, 'HH:mm').add(INC, 'minutes').format('HH:mm')
-      applyPunchStartCascade(payload.start_time2)
    }
    else if(key == 'end'){
       payload.end_time2 = moment(payload.end_time2, 'HH:mm').add(INC, 'minutes').format('HH:mm')
-      applyPunchEndCascade(payload.end_time2)
    }
 }
 
@@ -480,6 +480,60 @@ function canReOrderSchedule(item, action='up'){
               <!--  -->
               <!--  -->
               <!--  -->
+
+              <div class="col-12">
+                <div class="row">
+
+                  <div class="col-12">
+                    <label class="group-header">{{ payload.type == 1 ? helper.t('Punch Times') : helper.t('Call Times') }}</label>
+                  </div>
+
+                  <div class="col-6">
+                    <div class="form-group group-header2">
+                      <label for="">{{ payload.type == 1 ? 'Punch Start' : 'Call Start' }}</label>
+                       <div class="position-relative">
+                         <input ref="startTimePicker"
+                          v-model="payload.start_time"
+                          type="time"
+                          class="form-control cb-input"
+                          @change="applyCallStartCascade(payload.start_time)"
+                          style="width: 232px; padding-right: 5px"
+                          >
+                         <div class="position-absolute" :style="{ right: timeBtnOffset.right, top: timeBtnOffset.top }">
+                          <Btn @click="decrementTime('start')" class="me-1 sm opacity-75">-</Btn>
+                          <Btn @click="incrementTime('start')" class="sm opacity-75">+</Btn>
+                        </div>
+                       </div>
+                    </div>
+                  </div>
+
+                  <div class="col-6">
+                    <div class="form-group group-header2">
+                      <div class="d-flex justify-content-between">
+                        <label for="">{{ payload.type == 1 ? 'Punch End' : 'Call End' }}</label>
+                      </div>
+                      <div class="position-relative">
+                        <input ref="endTimePicker"
+                          v-model="payload.end_time"
+                          type="time"
+                          class="form-control cb-input"
+                          @change="applyCallEndCascade(payload.end_time)"
+                          style="width: 232px; padding-right: 5px"
+                          >
+                         <div class="position-absolute" :style="{ right: timeBtnOffset.right, top: timeBtnOffset.top }">
+                          <Btn @click="decrementTime('end')" class="me-1 sm opacity-75">-</Btn>
+                          <Btn @click="incrementTime('end')" class="sm opacity-75">+</Btn>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!--  -->
+              <!--  -->
+              <!--  -->
+              <!--  -->
               <template v-if="!payload.id && payload.type == 2">
 
 
@@ -503,7 +557,6 @@ function canReOrderSchedule(item, action='up'){
                             v-model="payload.start_time2"
                             type="time"
                             class="form-control cb-input"
-                            @change="applyPunchStartCascade(payload.start_time2)"
                             style="width: 232px; padding-right: 5px"
                             >
                             <div class="position-absolute" :style="{ right: timeBtnOffset.right, top: timeBtnOffset.top }">
@@ -524,7 +577,6 @@ function canReOrderSchedule(item, action='up'){
                             v-model="payload.end_time2"
                             type="time"
                             class="form-control cb-input"
-                            @change="applyPunchEndCascade(payload.end_time2)"
                             style="width: 232px; padding-right: 5px"
                             >
                             <div class="position-absolute" :style="{ right: timeBtnOffset.right, top: timeBtnOffset.top }">
@@ -538,57 +590,6 @@ function canReOrderSchedule(item, action='up'){
                 </div>
 
               </template>
-              <!--  -->
-              <!--  -->
-              <!--  -->
-              <!--  -->
-
-              <div class="col-12">
-                <div class="row">
-
-                  <div class="col-12">
-                    <label class="group-header">{{ payload.type == 1 ? helper.t('Punch Times') : helper.t('Call Times') }}</label>
-                  </div>
-
-                  <div class="col-6">
-                    <div class="form-group group-header2">
-                      <label for="">{{ payload.type == 1 ? 'Punch Start' : 'Call Start' }}</label>
-                       <div class="position-relative">
-                         <input ref="startTimePicker"
-                          v-model="payload.start_time"
-                          type="time"
-                          class="form-control cb-input"
-                          style="width: 232px; padding-right: 5px"
-                          >
-                         <div class="position-absolute" :style="{ right: timeBtnOffset.right, top: timeBtnOffset.top }">
-                          <Btn @click="decrementTime('start')" class="me-1 sm opacity-75">-</Btn>
-                          <Btn @click="incrementTime('start')" class="sm opacity-75">+</Btn>
-                        </div>
-                       </div>
-                    </div>
-                  </div>
-
-                  <div class="col-6">
-                    <div class="form-group group-header2">
-                      <div class="d-flex justify-content-between">
-                        <label for="">{{ payload.type == 1 ? 'Punch End' : 'Call End' }}</label>
-                      </div>
-                      <div class="position-relative">
-                        <input ref="endTimePicker"
-                          v-model="payload.end_time"
-                          type="time"
-                          class="form-control cb-input"
-                          style="width: 232px; padding-right: 5px"
-                          >
-                         <div class="position-absolute" :style="{ right: timeBtnOffset.right, top: timeBtnOffset.top }">
-                          <Btn @click="decrementTime('end')" class="me-1 sm opacity-75">-</Btn>
-                          <Btn @click="incrementTime('end')" class="sm opacity-75">+</Btn>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
 
 
 
@@ -634,8 +635,8 @@ function canReOrderSchedule(item, action='up'){
           <div class="schedule-filter-mode">
             <span class="text-muted small text-nowrap">Mode:</span>
             <div class="schedule-filter-mode__buttons">
-              <button type="button" class="schedule-filter-mode__btn" :class="{ active: filterMatchMode === 'and' }" @click="filterMatchMode = 'and'">AND</button>
               <button type="button" class="schedule-filter-mode__btn" :class="{ active: filterMatchMode === 'or' }" @click="filterMatchMode = 'or'">OR</button>
+              <button type="button" class="schedule-filter-mode__btn" :class="{ active: filterMatchMode === 'and' }" @click="filterMatchMode = 'and'">AND</button>
             </div>
           </div>
           <div class="schedule-filter-box">
