@@ -40,9 +40,16 @@ let is___adding = ref(false)
 let tab = ref(2)
 let selectedFilterClasses = ref([])
 let filterMatchMode = ref('or')
+let classesFilterSearchText = ref('')
 
 const activeClasses = computed(() => {
   return (classes.value || []).filter(cls => cls?.isActive !== false)
+})
+
+const filteredActiveClasses = computed(() => {
+  if(!classesFilterSearchText.value) return activeClasses.value
+  const search = classesFilterSearchText.value.toLowerCase()
+  return activeClasses.value.filter(cls => cls?.class_name?.toLowerCase().includes(search) || cls?.class_short?.toLowerCase().includes(search))
 })
 
 const filteredSchedules = computed(() => {
@@ -643,13 +650,14 @@ function canReOrderSchedule(item, action='up'){
             <span class="text-muted small text-nowrap">Filter:</span>
             <BaseSelectMultiple
               v-model="selectedFilterClasses"
-              :data="activeClasses"
+              :data="filteredActiveClasses"
               :label="false"
               :placeholder="helper.t('Classes')"
               displayKey="class_name"
               valueKey="class_short"
               :search="true"
               :searchDelayTime="100"
+              @searching="(text) => classesFilterSearchText = text"
               maxHeight="220px"
               style="width: 100%;"
             />
