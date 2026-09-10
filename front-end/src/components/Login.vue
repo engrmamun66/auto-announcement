@@ -10,11 +10,19 @@ const password = ref('')
 const errorMessage = ref('')
 const loading = ref(false)
 const passwordInput = ref(null)
+const logoEl = ref(null)
+const companyName = globalThis.GLOBAL_DATA?.env?.COMPANY || 'Calling Bird'
 
 onMounted(async () => {
   // typing + clicking Login already counts as user interaction —
   // stops the "Click me to allow sound" overlay CSS from firing on this screen
   document.body.classList.add('user-interacted')
+
+  if (globalThis.GLOBAL_DATA?.logo && logoEl.value) {
+    logoEl.value.src = globalThis.GLOBAL_DATA.logo
+    logoEl.value.style.width = globalThis.GLOBAL_DATA.logo_width || '140px'
+  }
+
   await nextTick()
   passwordInput.value?.focus()
 })
@@ -40,10 +48,10 @@ async function submit() {
 <template>
   <div class="login-gate">
     <div class="login-card">
-      <div class="login-icon">
-        <i class='bx bx-lock-alt'></i>
+      <div class="login-logo">
+        <img ref="logoEl" alt="logo" src="">
       </div>
-      <h2 class="login-title">Calling Bird</h2>
+      <h2 class="login-title">{{ companyName }}</h2>
       <p class="login-sub">Enter password to continue</p>
 
       <input
@@ -92,17 +100,16 @@ async function submit() {
     inset 0 1px 0 rgba(255, 255, 255, 0.07);
 }
 
-.login-icon {
-  width: 64px;
-  height: 64px;
+.login-logo {
   margin: 0 auto 18px;
-  border-radius: 50%;
-  background: rgba(255, 215, 0, 0.12);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 30px;
-  color: #ffd700;
+}
+.login-logo img {
+  max-width: 140px;
+  max-height: 80px;
+  object-fit: contain;
 }
 
 .login-title {

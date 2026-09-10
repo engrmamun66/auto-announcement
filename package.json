@@ -7,7 +7,7 @@
     "create-zip-with-latest-code": "node zipper.js",
     "upload": "node zipper.js --upload=true",
     "start": "nodemon server.js",
-    "kill_node_process": "pkill -9 node — force-kill all Node processes",
+    "kill": "pkill -9 node — force-kill all Node processes",
     "dev": "nodemon server.js"
   },
   "keywords": [],

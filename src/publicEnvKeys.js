@@ -1,7 +1,7 @@
 // Only these env{} keys are safe to expose to the browser (via /app's GLOBAL_DATA
 // and /api/config). Everything else (SECRET_KEY, LOGIN_PASSWORD, device credentials,
 // DATABASE_PATH, etc.) must never leave the server.
-const PUBLIC_ENV_KEYS = ['CODE_NUMBER', 'BASE_URL', 'API_BASE_URL', 'PORT'];
+const PUBLIC_ENV_KEYS = ['CODE_NUMBER', 'BASE_URL', 'API_BASE_URL', 'PORT', 'COMPANY'];
 
 function pickPublicEnv(env = {}) {
   const result = {};
