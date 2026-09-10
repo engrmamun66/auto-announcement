@@ -30,6 +30,7 @@
                     <th>{{ helper.t('Short') }}</th>
                     <th>{{ helper.t('Display Name') }}</th>
                     <th>{{ helper.t('Active') }}</th>
+                    <th></th>
                     <th>{{ helper.t('Shifts') }}</th>
                     <th></th>
                     <th></th>
@@ -53,6 +54,14 @@
                       <td class="cs-cls-active">
                         <Switch v-model="cls.isActive" :size="'sm'" />
                       </td>
+                      <td class="cs-cls-copypaste-cell">
+                        <button class="cs-cls-eye-btn" :tooltip="helper.t('Copy shifts')" @click="copyShifts(cls)">
+                          <i class="bx bx-copy"></i>
+                        </button>
+                        <button class="cs-cls-eye-btn" :class="{ disabled: !copiedShifts }" :tooltip="helper.t('Paste shifts (overwrites)')" @click="pasteShifts(cls)">
+                          <i class="bx bx-paste"></i>
+                        </button>
+                      </td>
                       <td class="cs-cls-shifts-cell">
                         <div class="cs-cls-shifts-display">
                           <span v-for="(sh, si) in (cls.shifts||[])" :key="si" class="cs-cls-shift-badge">{{ sh.start }}–{{ sh.end }}</span>
@@ -70,7 +79,7 @@
                     </tr>
                     <!-- Shifts expanded row -->
                     <tr class="cs-cls-shifts-row">
-                      <td colspan="9" class="cs-cls-shifts-td">
+                      <td colspan="10" class="cs-cls-shifts-td">
                         <div v-if="expandedShifts[idx]" class="cs-cls-shifts-wrap">
                             <TransitionGroup name="shift-item" tag="div" class="cs-cls-shifts-items">
                               <div v-for="(sh, si) in (cls.shifts||[])" :key="si" class="cs-cls-shift-item">
@@ -148,6 +157,34 @@ const dragOverIdx = ref(null);
 const expandedShifts = reactive({});
 const showPasswordConfirm = ref(false);
 const pendingSaveKey = ref(null);
+const copiedShifts = ref(null);
+
+function isValidShiftsArray(arr) {
+  if (!Array.isArray(arr) || !arr.length) return false;
+  return arr.every(sh => {
+    if (!sh || typeof sh.start !== 'string' || typeof sh.end !== 'string') return false;
+    const start = moment(sh.start, 'HH:mm', true);
+    const end = moment(sh.end, 'HH:mm', true);
+    return start.isValid() && end.isValid() && start.isBefore(end);
+  });
+}
+
+function copyShifts(cls) {
+  copiedShifts.value = JSON.parse(JSON.stringify(cls.shifts || []));
+  emitter.emit('toaster-success', { message: helper.t('Shifts copied') });
+}
+
+function pasteShifts(cls) {
+  if (!copiedShifts.value) {
+    emitter.emit('toaster-warning', { message: helper.t('Copy shifts from a class first') });
+    return;
+  }
+  if (!isValidShiftsArray(copiedShifts.value)) {
+    emitter.emit('toaster-error', { message: helper.t('Copied shifts are invalid') });
+    return;
+  }
+  cls.shifts = JSON.parse(JSON.stringify(copiedShifts.value));
+}
 
 function clsDrop(toIdx) {
   const arr = drafts['classes'];
@@ -336,9 +373,12 @@ onUnmounted(() => { if (hasSaved.value) {
 .cs-cls-shift-badge { background: #e8f0fe; color: #3a7bd5; border-radius: 4px; padding: 1px 5px; font-size: 10px; font-weight: 600; }
 .cs-cls-shift-empty { color: #bbb; font-size: 11px; font-style: italic; }
 .cs-cls-eye-cell { width: 28px; text-align: center; }
+.cs-cls-copypaste-cell { white-space: nowrap; display: flex; gap: 4px; }
 .cs-cls-eye-btn { background: none; border: 1.5px solid #d1d5db; border-radius: 6px; width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; color: #9ca3af; font-size: 15px; transition: border-color 0.15s, color 0.15s, background 0.15s; }
 .cs-cls-eye-btn:hover { border-color: #3a7bd5; color: #3a7bd5; background: #f0f4ff; }
 .cs-cls-eye-btn.active { border-color: #3a7bd5; color: #3a7bd5; background: #e8f0fe; }
+.cs-cls-eye-btn.disabled { opacity: 0.4; cursor: not-allowed; }
+.cs-cls-eye-btn.disabled:hover { border-color: #d1d5db; color: #9ca3af; background: none; }
 .cs-cls-shifts-row td { padding: 0; background: #f9fbff; }
 .cs-cls-shifts-td { padding: 0 !important; }
 .cs-cls-shifts-wrap { padding: 10px 14px; display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; overflow: hidden; flex-direction: column; }
