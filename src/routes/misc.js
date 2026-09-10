@@ -1,6 +1,6 @@
 const express = require('express');
 
-module.exports = function (utils, Backup, { DEVICE_API_BASE_URL }) {
+module.exports = function (utils, Backup) {
   const router = express.Router();
 
   router.get('/backup-list', (req, res) => Backup.getBackupDetails({ req, res }));
@@ -20,18 +20,6 @@ module.exports = function (utils, Backup, { DEVICE_API_BASE_URL }) {
   });
 
   router.get('/sw', (req, res) => utils._(req, res));
-
-  router.get('/transactions', async (req, res) => {
-    const myHeaders = new Headers();
-    myHeaders.append('Content-Type', 'application/json');
-    fetch(
-      `${DEVICE_API_BASE_URL}/iclock/api/transactions/?page=1&page_size=100&start_time=2025-01-26 16:08:00&end_time&terminal_alias=Device 1`,
-      { method: 'POST', headers: myHeaders, body: JSON.stringify({ username: USERNAME, password: PASSWORD }), redirect: 'follow' }
-    )
-      .then((r) => r.text())
-      .then((result) => { console.log(result); res.send(result); })
-      .catch((error) => res.status(420).send({ success: false, error }));
-  });
 
   return router;
 };

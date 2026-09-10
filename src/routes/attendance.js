@@ -1,6 +1,6 @@
 const express = require('express');
 
-module.exports = function (Attendence, { getBulkPunces, Sms }) {
+module.exports = function (Attendence, { Sms }) {
   const router = express.Router();
   Attendence.Sms = Sms;
 
@@ -13,11 +13,6 @@ module.exports = function (Attendence, { getBulkPunces, Sms }) {
   router.delete('/attendence-delete/:id', (req, res) => Attendence.delete(req, res));
   router.post('/attendence-delete-bulk-count', (req, res) => Attendence.deleteBulkCount(req, res));
   router.delete('/attendence-delete-bulk', (req, res) => Attendence.deleteBulk(req, res));
-
-  router.get('/get-bulk-punched', async (req, res) => {
-    const punch_data = await getBulkPunces(req);
-    res.send({ data: punch_data });
-  });
 
   return router;
 };

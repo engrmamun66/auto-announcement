@@ -37,21 +37,9 @@ module.exports = {
           PUNCH_LOG_FILENAME: 'punch.log.json',
           DATABASE_PATH: 'database/database.db', // For Client DB Example: './../clientdb-DHM101.db'
 
-
-          /** ==== with-BioTime-app === */
-          BIO_TIME_APP_USERNAME: "Admin",
-          BIO_TIME_APP_PASSWORD: "Admin@123",
-          DEVICE_NAMES: ['Device 2'], // zktecho device name, which already connected by name in BioTime-8.0 server
-          DATA_FETCH_BACK_SECONDS: 10,
-          DATA_FETCH_INTERVAL_IN_SECOND: 2,
-          PRIMARY_SERVER_LOCAL: 'http://wordpress-test.test/wp-admin/admin-ajax.php',
-          PRIMARY_SERVER: 'https://callingbird.softproit.com/wp-admin/admin-ajax.php', 
-          /** ==== End === */
-
           // #Front End variables
           BASE_URL: `http://localhost:${port_number}`,
           API_BASE_URL: `http://localhost:${port_number}/api`,
-          DEVICE_API_BASE_URL: 'http://127.0.0.1:8081/',
 
      },
 

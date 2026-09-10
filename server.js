@@ -52,13 +52,10 @@ const webSocket = require("./socket/socket")
 const EventEmitter = require('./src/EventEmitter')  
 const EventBus = new EventEmitter()
 
-const { getToken, getBulkPunces } = require('./src/device.biotimeApp')
-
 const { pickPublicEnv } = require('./src/publicEnvKeys');
 let webContents = require("./src/web-contents");
 console.log('Initial webContents includes DYNAMIC_CUSTOM_CSS:', webContents.includes('DYNAMIC_CUSTOM_CSS'));
-let checkAccess = require("./src/checkaccess"); 
-const DEVICE_API_BASE_URL = global.config.env.DEVICE_API_BASE_URL
+let checkAccess = require("./src/checkaccess");
 
 // checkAccess.CheckAppAccess()
 
@@ -285,11 +282,11 @@ app.get(`/api/_ac`, async (req, res) => {
 
 app.use('/api', require('./src/routes/students')(Students, { upload, audioUpload, imageUpload }));
 app.use('/api', require('./src/routes/schedules')(Schedules));
-app.use('/api', require('./src/routes/attendance')(Attendence, { getBulkPunces, Sms }));
+app.use('/api', require('./src/routes/attendance')(Attendence, { Sms }));
 app.use('/api', require('./src/routes/punchlog')(PunchLog));
 app.use('/api', require('./src/routes/leave')(LeavAndVacations));
 app.use('/api', require('./src/routes/config')(config, utils, Backup));
-app.use('/api', require('./src/routes/misc')(utils, Backup, { DEVICE_API_BASE_URL }));
+app.use('/api', require('./src/routes/misc')(utils, Backup));
 app.use('/api', require('./src/routes/refresh')(utils));
 app.use('/api', require('./src/routes/settings')(DB.db));
 app.use('/api', require('./src/routes/sms')(Sms));
@@ -358,9 +355,6 @@ async function startServer() {
   httpServer.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}/app/#`);
     console.log(`WebSocket running on ws://localhost:${PORT}`);
-
-    //  call token
-    getToken(Students)
   });
 }
 

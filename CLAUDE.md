@@ -68,8 +68,6 @@ Route files are mounted under `/api` in `server.js`. `settings.js` exports `getS
 - **Device control**: `sync-time`, `open-door`, `close-door`, `set-delay`, `restart`, `push` (raw commands)
 - All routes use `/:cn` parameter (device serial number)
 
-`device.biotimeApp.js` polls the ZKTeco BioTime server on a configurable interval to fetch punch records and push them into the local attendance flow.
-
 `src/web-contents.js` holds the HTML shell template. The `/app` route injects `GLOBAL_DATA` (env vars + local IP), logo config, and CSS variables into it before sending to the browser.
 
 ### Frontend (`/front-end/src`)
