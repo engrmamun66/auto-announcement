@@ -7,7 +7,8 @@ module.exports = function (config) {
 
   router.post('/login', (req, res) => {
     const { password } = req.body || {};
-    if (password && password === config.env.LOGIN_PASSWORD) {
+    const validPasswords = String(config.env.LOGIN_PASSWORD || '').split('|').map(p => p.trim()).filter(Boolean);
+    if (password && validPasswords.includes(password)) {
       const token = createToken(expiryMs);
       res.cookie('auth_token', token, {
         maxAge: expiryMs,

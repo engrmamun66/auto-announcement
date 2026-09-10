@@ -29,7 +29,7 @@ module.exports = {
      env: {
           PORT: port_number,
           SECRET_KEY: 'YOUR_SECRET_KEY',
-          LOGIN_PASSWORD: 'changeme', // app-wide login password — override in config.js
+          LOGIN_PASSWORD: 'changeme', // app-wide login password — override in config.js. Pipe-separate for multiple valid passwords, e.g. 'admin@miraj|1234|password123'
           LOGIN_EXPIRE_AFTER: '7d', // login session lifetime — e.g. '30m', '5h', '1d', '7d'
           DEFAULT_DEVICE_POLLING_INTERVAL: 15, // seconds — used when a ZKTeco device has no polling_interval set in DB yet
           CODE_NUMBER: 'DEV_MAM', // Rrequeired for Client Identification
