@@ -75,7 +75,7 @@ let startTimePicker2 = ref(null)
 let endTimePicker2 = ref(null)
 
 let timeBtnOffset = reactive({ 
-  right: '40px', 
+  right: '32px', 
   top: '6px' 
 })
 
@@ -504,7 +504,7 @@ function canReOrderSchedule(item, action='up'){
                             type="time"
                             class="form-control cb-input"
                             @change="applyPunchStartCascade(payload.start_time2)"
-                            style="width: 232px"
+                            style="width: 232px; padding-right: 5px"
                             >
                             <div class="position-absolute" :style="{ right: timeBtnOffset.right, top: timeBtnOffset.top }">
                             <Btn @click="decrementTime2('start')" class="me-1 sm opacity-75">-</Btn>
@@ -525,7 +525,7 @@ function canReOrderSchedule(item, action='up'){
                             type="time"
                             class="form-control cb-input"
                             @change="applyPunchEndCascade(payload.end_time2)"
-                            style="width: 232px"
+                            style="width: 232px; padding-right: 5px"
                             >
                             <div class="position-absolute" :style="{ right: timeBtnOffset.right, top: timeBtnOffset.top }">
                             <Btn @click="decrementTime2('end')" class="me-1 sm opacity-75">-</Btn>
@@ -558,7 +558,7 @@ function canReOrderSchedule(item, action='up'){
                           v-model="payload.start_time"
                           type="time"
                           class="form-control cb-input"
-                          style="width: 232px"
+                          style="width: 232px; padding-right: 5px"
                           >
                          <div class="position-absolute" :style="{ right: timeBtnOffset.right, top: timeBtnOffset.top }">
                           <Btn @click="decrementTime('start')" class="me-1 sm opacity-75">-</Btn>
@@ -578,7 +578,7 @@ function canReOrderSchedule(item, action='up'){
                           v-model="payload.end_time"
                           type="time"
                           class="form-control cb-input"
-                          style="width: 232px"
+                          style="width: 232px; padding-right: 5px"
                           >
                          <div class="position-absolute" :style="{ right: timeBtnOffset.right, top: timeBtnOffset.top }">
                           <Btn @click="decrementTime('end')" class="me-1 sm opacity-75">-</Btn>
