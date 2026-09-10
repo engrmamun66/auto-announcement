@@ -19,23 +19,29 @@ class myDB {
         this.DATABASE_PATH = path.join(global.DIR, env.DATABASE_PATH);
         fs.mkdirSync(path.dirname(this.DATABASE_PATH), { recursive: true });
         this.db = this._createDatabase();
-        this._createTables(this.db);
-        // ========== Delete column ==============
-        this._removeColumn('students', 'sound2')
-        this._removeColumn('students', 'sound3')
-        this._removeColumn('students', 'branch_id')
-        this._removeColumn('students', 'id_type')
-        // ========== New Column =================
-        this._addColumn('students', 'device_index', 'INTEGER', '1')
-        this._addColumn('students', 'card_owner', 'VARCHAR', 'NULL')
-        this._addColumn('students', 'options', 'VARCHAR', 'NULL')
-        this._addColumn('students', 'note', 'VARCHAR', 'NULL') 
-        this._addColumn('students', 'profile_image', 'VARCHAR', 'NULL')
-        this._addColumn('students', 'phone_number', 'VARCHAR', 'NULL')
-        this._addColumn('schedules', 'status', 'INTEGER', '1')
-        this._addColumn('schedules', 'order_index', 'INTEGER', '1')
-        this._addColumn('devices', 'realtime_punch_window_seconds', 'INTEGER', '180')
-        this._initSettings()
+        // serialize() guarantees each statement below finishes before the next starts —
+        // on a brand-new DB file, _initSettings()'s SELECT would otherwise race _createTables()'s
+        // CREATE TABLE and fail with "no such table: settings" (self-heals on restart, since by
+        // then the table exists — but shouldn't need a restart to work).
+        this.db.serialize(() => {
+            this._createTables(this.db);
+            // ========== Delete column ==============
+            this._removeColumn('students', 'sound2')
+            this._removeColumn('students', 'sound3')
+            this._removeColumn('students', 'branch_id')
+            this._removeColumn('students', 'id_type')
+            // ========== New Column =================
+            this._addColumn('students', 'device_index', 'INTEGER', '1')
+            this._addColumn('students', 'card_owner', 'VARCHAR', 'NULL')
+            this._addColumn('students', 'options', 'VARCHAR', 'NULL')
+            this._addColumn('students', 'note', 'VARCHAR', 'NULL')
+            this._addColumn('students', 'profile_image', 'VARCHAR', 'NULL')
+            this._addColumn('students', 'phone_number', 'VARCHAR', 'NULL')
+            this._addColumn('schedules', 'status', 'INTEGER', '1')
+            this._addColumn('schedules', 'order_index', 'INTEGER', '1')
+            this._addColumn('devices', 'realtime_punch_window_seconds', 'INTEGER', '180')
+            this._initSettings()
+        });
     }
 
     _initSettings(){
