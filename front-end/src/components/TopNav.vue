@@ -62,20 +62,6 @@
       </RouterLink>
 
       <div class="topnav__version">
-        <!-- Auto-update disabled -->
-        <!--
-        <span v-if="isNewVersion" class="topnav__new-version" @click="showVersionUpdateModal">
-          {{ helper.t('New:') }} v{{ appAccessData?.incoming_version }}
-        </span>
-        <span class="topnav__version-text" v-else-if="appAccessData?.app_version">v{{ appAccessData?.app_version }}</span>
-        <button class="topnav__update-btn" :tooltip="helper.t('Update App')" flow="down" @click="showVersionUpdateModal">
-          <svg v-if="!isNewVersion" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="23 4 23 10 17 10"/>
-            <polyline points="1 20 1 14 7 14"/>
-            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
-          </svg>
-        </button>
-        -->
         <button v-if="CONFIG?.settings?.sms?.enabled" class="topnav__update-btn topnav__sms-btn" tooltip="Send SMS" flow="down" @click="showSmsModal = true">
           <svg class="sms-bubble-icon" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">
             <rect x="2" y="2" width="52" height="40" rx="10" ry="10" fill="white" stroke="currentColor" stroke-width="3"/>
@@ -115,48 +101,10 @@
   <cloneStudents v-if="show_cloner_component" @unmount="show_cloner_component = false"></cloneStudents>
   <ConfigSettings v-if="showSettingsPanel" @unmount="showSettingsPanel = false" />
   <SmsModal v-if="showSmsModal" @close="showSmsModal = false" />
-
-  <!-- Auto-update modals disabled -->
-  <!--
-  <Teleport to="body">
-    <div v-if="showConfirmModal" class="update-modal-overlay">
-      <div class="update-modal update-modal--confirm">
-        <p class="update-modal__title">{{ helper.t('Update App?') }}</p>
-        <p class="update-modal__sub" v-if="appAccessData?.incoming_version">
-          v{{ appAccessData.app_version }} → v{{ appAccessData.incoming_version }}
-        </p>
-        <p class="update-modal__changelog" v-if="appAccessData?.change_log">
-          {{ appAccessData?.change_log }}
-        </p>
-        <label class="update-modal__checkbox">
-          <input type="checkbox" v-model="autoUpdateEnabled" @change="maybeAutoUpdate" />
-          {{ helper.t('Allow automatic update') }}
-        </label>
-        <div class="update-modal__actions">
-          <button class="update-modal__btn update-modal__btn--cancel" @click="showConfirmModal = false">{{ helper.t('Cancel') }}</button>
-          <button class="update-modal__btn update-modal__btn--ok" @click="confirmAndUpdate">{{ helper.t('Update') }}</button>
-        </div>
-      </div>
-    </div>
-
-    <div v-if="showUpdateModal" class="update-modal-overlay">
-      <div class="update-modal">
-        <template v-if="!updateDone">
-          <div class="update-modal__spinner"></div>
-          <p class="update-modal__text">{{ helper.t('Updating app...') }}</p>
-        </template>
-        <template v-else>
-          <div class="update-modal__check">✓</div>
-          <p class="update-modal__text">{{ helper.t('Update successful! Reloading...') }}</p>
-        </template>
-      </div>
-    </div>
-  </Teleport>
-  -->
 </template>
 
 <script setup>
-import { ref, inject, computed, onMounted, watch, onBeforeUnmount } from 'vue';
+import { ref, inject, onMounted, watch, onBeforeUnmount } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 import Btn from './Btn.vue'
 import cloneStudents from './cloneStudents.vue'
@@ -190,68 +138,11 @@ const main_app_user_is_active = inject('main_app_user_is_active');
 const sendRemoteAction = inject('sendRemoteAction');
 const is_connected_with_main_app = inject('is_connected_with_main_app');
 const show_bulk_attedance_component = inject('show_bulk_attedance_component');
-const appAccessData = inject('appAccessData');
 const http = inject('http');
-const allow_to_reaload = inject('allow_to_reaload');
-const storage = inject('storage');
 const helper = inject('helper');
 let showSmsModal = inject('showSmsModal')
 let show_cloner_component = inject('show_cloner_component')
 let showSettingsPanel = ref(false)
-let showConfirmModal = ref(false)
-let showUpdateModal = ref(false)
-let updateDone = ref(false)
-const autoUpdateEnabled = ref(storage('cb_auto_update', true).value)
-watch(autoUpdateEnabled, (val) => { storage('cb_auto_update').value = val })
-
-const isNewVersion = computed(() => {
-    const installed = appAccessData?.value?.app_version;
-    const incoming  = appAccessData?.value?.incoming_version;
-    if (route.query.dev === 'true') console.log({installed, incoming});
-    if (!installed || !incoming) return false;
-    return incoming !== installed;
-})
-const realod_after = 4000
-const checking_accessibility = inject('checking_accessibility')
-watch(checking_accessibility, (bool) => {
-  if (route.query.dev === 'true'){
-    console.log('===checking_accessibility', bool);
-  }
-  if(bool === false){
-    maybeAutoUpdate()
-  }
-})
-
-
-
-function maybeAutoUpdate() {
-    if (isNewVersion.value && autoUpdateEnabled.value) { 
-      confirmAndUpdate(); 
-    }
-}
-
-function showVersionUpdateModal() {
-    showConfirmModal.value = true;
-}
-
-
-
-async function confirmAndUpdate() {
-    if (showUpdateModal.value) return;
-    showConfirmModal.value = false;
-    showUpdateModal.value = true;
-    updateDone.value = false;
-    try {
-        await http.get('/update-app', { params: { new_version: appAccessData?.value?.incoming_version, change_log: appAccessData?.value?.change_log } });
-        updateDone.value = true;
-        allow_to_reaload.value = true;
-        setTimeout(() => { window.location.reload(); }, realod_after);
-    } catch (err) {
-        showUpdateModal.value = false;
-        emitter.emit('toaster-error', { message: helper.t('Update failed.') });
-    }
-}
-
 
 onMounted(()=>{
   if(typeof GLOBAL_DATA !== 'undefined'){
@@ -362,22 +253,6 @@ async function logout(){
   border-radius: 8px;
 }
 
-.topnav__new-version {
-  background: #4caf50;
-  color: #fff;
-  font-size: 11px;
-  font-weight: 700;
-  padding: 3px 8px;
-  border-radius: 12px;
-  cursor: pointer;
-  letter-spacing: 0.3px;
-  animation: new-ver-pulse 1.5s ease-in-out infinite;
-}
-@keyframes new-ver-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
-}
-
 .topnav__version {
   display: inline-flex;
   align-items: center;
@@ -385,10 +260,6 @@ async function logout(){
   margin-left: auto;
   color: rgba(255,255,255,0.7);
   font-size: 12px;
-}
-.topnav__version-text {
-  font-weight: 600;
-  letter-spacing: 0.5px;
 }
 .topnav__update-btn {
   background: none;
@@ -571,118 +442,4 @@ async function logout(){
   }
 }
 
-.update-modal--confirm {
-  padding: 28px 32px;
-  gap: 14px;
-  min-width: 300px;
-  width: 300px;
-}
-.update-modal__title {
-  color: #fff;
-  font-size: 17px;
-  font-weight: 700;
-  margin: 0;
-}
-.update-modal__sub {
-  color: rgba(255,255,255,0.5);
-  font-size: 13px;
-  margin: 0;
-}
-.update-modal__changelog {
-  color: rgba(255,255,255,0.75);
-  font-size: 12px;
-  margin: 0;
-  padding: 8px 12px;
-  border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 8px;
-  background: rgba(255,255,255,0.05);
-  width: 100%;
-  box-sizing: border-box;
-  line-height: 1.5;
-}
-.update-modal__checkbox {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: rgba(255,255,255,0.75);
-  font-size: 13px;
-  cursor: pointer;
-  user-select: none;
-  width: 100%;
-}
-.update-modal__checkbox input { cursor: pointer; }
-.update-modal__actions {
-  display: flex;
-  gap: 10px;
-  width: 100%;
-  margin-top: 4px;
-}
-.update-modal__btn {
-  flex: 1;
-  padding: 8px 0;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-}
-.update-modal__btn--cancel {
-  background: rgba(255,255,255,0.1);
-  color: rgba(255,255,255,0.8);
-}
-.update-modal__btn--cancel:hover { background: rgba(255,255,255,0.15); }
-.update-modal__btn--ok {
-  background: #4caf50;
-  color: #fff;
-}
-.update-modal__btn--ok:hover { background: #43a047; }
-
-.update-modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-}
-.update-modal {
-  background: #1f2937;
-  border-radius: 14px;
-  padding: 40px 52px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  min-width: 220px;
-}
-.update-modal__spinner {
-  width: 48px;
-  height: 48px;
-  border: 4px solid rgba(255,255,255,0.15);
-  border-top-color: #4caf50;
-  border-radius: 50%;
-  animation: update-spin 0.8s linear infinite;
-}
-@keyframes update-spin {
-  to { transform: rotate(360deg); }
-}
-.update-modal__check {
-  width: 48px;
-  height: 48px;
-  background: rgba(76,175,80,0.2);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #4caf50;
-  font-size: 24px;
-  font-weight: bold;
-}
-.update-modal__text {
-  color: rgba(255,255,255,0.85);
-  font-size: 15px;
-  margin: 0;
-  white-space: nowrap;
-}
 </style>
