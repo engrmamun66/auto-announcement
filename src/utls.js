@@ -99,17 +99,26 @@ module.exports = {
     audioFullUrl(req, audio_path){
         return `${req.protocol}://${req.get("host")}${audio_path}`
     },
+    normalizeForClassMatch(value){
+        return String(value || '')
+            .normalize('NFC')
+            .replace(/[\u200B-\u200D\uFEFF]/g, '') // zero-width chars, invisible when copy-pasted into Excel
+            .replace(/\u00A0/g, ' ') // non-breaking space -> normal space
+            .trim()
+            .toLowerCase()
+    },
     getClassName(className){
+        const normalized = this.normalizeForClassMatch(className)
         const classes = global.config?.classes || []
-        let _class = classes.find(c => c.class_name == className)
+        let _class = classes.find(c => this.normalizeForClassMatch(c.class_name) === normalized)
         return _class?.class_name || '<>'
     },
     getClassShort(className){
-        const normalized = String(className || '').trim().toLowerCase()
+        const normalized = this.normalizeForClassMatch(className)
         const classes = global.config?.classes || []
         let _class = classes.find(c =>
-            String(c.class_name || '').trim().toLowerCase() === normalized ||
-            String(c.class_short || '').trim().toLowerCase() === normalized
+            this.normalizeForClassMatch(c.class_name) === normalized ||
+            this.normalizeForClassMatch(c.class_short) === normalized
         )
         return _class?.class_short || null
     },

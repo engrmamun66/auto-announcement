@@ -8,15 +8,24 @@ import Barcode from '../components/createBarcode.vue'
 import Btn from '../components/Btn.vue'
 import FileUpload from '../components/FileUpload.vue'
 import BtnLoader from '../components/BtnLoader.vue'
+import Rightbar from '../components/Rightbar.vue'
 
 
 const emitter = inject('emitter');
-let http = inject('http'); 
-let moment = inject('moment'); 
+let http = inject('http');
+let moment = inject('moment');
 const helper = inject('helper');
 const getAllStudents = inject('getAllStudents');
 let loading = ref(false);
 let loading2 = ref(false);
+
+let showReport = ref(false);
+let importResult = ref(null);
+
+function onImported(data){
+     importResult.value = data;
+     showReport.value = true;
+}
 
 const optionalCols = ['id', 'class_short', 'card_no', 'year', 'status', 'sound1', 'created', 'card_owner', 'options', 'note', 'device_index', 'profile_image', 'phone_number'];
 
@@ -80,7 +89,54 @@ async function exportAll(){
 
           </div>
      </div>
-     <FileUpload></FileUpload>
+     <FileUpload @imported="onImported"></FileUpload>
+
+     <Rightbar v-if="showReport" :title="helper.t('Import Report')" size="sm" @unmount="showReport = false">
+          <div class="d-flex flex-wrap gap-2 mb-3">
+               <span class="badge bg-secondary">{{ helper.t('Total') }}: {{ importResult?.total ?? 0 }}</span>
+               <span class="badge bg-success">{{ helper.t('Created') }}: {{ importResult?.created ?? 0 }}</span>
+               <span class="badge bg-primary">{{ helper.t('Updated') }}: {{ importResult?.updated ?? 0 }}</span>
+               <span class="badge bg-warning text-dark">{{ helper.t('Not Found') }}: {{ importResult?.not_found ?? 0 }}</span>
+               <span class="badge bg-secondary">{{ helper.t('Skipped') }}: {{ importResult?.skipped ?? 0 }}</span>
+               <span class="badge bg-danger">{{ helper.t('Errors') }}: {{ importResult?.errors ?? 0 }}</span>
+          </div>
+
+          <div class="table-responsive import-report-table">
+               <table class="table table-sm table-striped align-middle">
+                    <thead>
+                         <tr>
+                              <th>{{ helper.t('Row') }}</th>
+                              <th>{{ helper.t('Name') }}</th>
+                              <th>{{ helper.t('Dakhela') }}</th>
+                              <th>{{ helper.t('Class') }}</th>
+                              <th>{{ helper.t('Status') }}</th>
+                              <th>{{ helper.t('Reason') }}</th>
+                         </tr>
+                    </thead>
+                    <tbody>
+                         <tr v-for="row in (importResult?.students || [])" :key="row.excelRow">
+                              <td>{{ row.excelRow }}</td>
+                              <td>{{ row.name }}</td>
+                              <td>{{ row.dakhela }}</td>
+                              <td>{{ row.class }}</td>
+                              <td>
+                                   <span class="badge" :class="{
+                                        'bg-success': row.status === 'created',
+                                        'bg-primary': row.status === 'updated',
+                                        'bg-warning text-dark': row.status === 'not_found',
+                                        'bg-secondary': row.status === 'skipped',
+                                        'bg-danger': row.status === 'error',
+                                   }">{{ row.status }}</span>
+                              </td>
+                              <td class="text-muted small">{{ row.reason }}</td>
+                         </tr>
+                         <tr v-if="!importResult?.students?.length">
+                              <td colspan="6" class="text-center text-muted">{{ helper.t('No rows to show') }}</td>
+                         </tr>
+                    </tbody>
+               </table>
+          </div>
+     </Rightbar>
 
      <div class="card mt-4 border-0 shadow-sm">
           <div class="card-header bg-light d-flex align-items-center gap-2">
@@ -137,5 +193,14 @@ async function exportAll(){
      </div>
 
 </template>
+
+<style scoped>
+.import-report-table {
+     font-size: 12px;
+}
+.import-report-table .badge {
+     font-size: 11px;
+}
+</style>
 
  

@@ -30,6 +30,8 @@ import BtnLoader from './BtnLoader.vue'
 
 
 
+const emit = defineEmits(['imported'])
+
 let uploader = ref(null)
 let file = ref(null)
 let loading = ref(false)
@@ -55,6 +57,7 @@ async function uploadNow(){
     const url = forceAsNewEntity.value ? '/students/import?force_as_newentity=true' : '/students/import'
     http.post(url, {file: file.value}, {formData: true}).then(response => {
       emitter.emit('toaster-success', {message: helper.t('Import completed')})
+      emit('imported', response.data)
       file.value = null;
     }).finally(()=>{
       getAllStudents()

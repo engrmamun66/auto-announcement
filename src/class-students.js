@@ -477,12 +477,18 @@ class Students {
       let pending = 0;
       let studentLoopDone = false;
       let scheduleLoopDone = false;
+      const studentReport = [];
+      const scheduleReport = [];
 
       const finalizeImport = () => {
         if (!studentLoopDone || !scheduleLoopDone || pending > 0) return;
         fs.unlink(filePath, () => {});
+        studentReport.sort((a, b) => a.excelRow - b.excelRow);
+        scheduleReport.sort((a, b) => a.excelRow - b.excelRow);
+        const skipped = studentReport.filter(r => r.status === 'skipped').length;
+        const errors = studentReport.filter(r => r.status === 'error').length;
         if (!errorOccurred) {
-          callback(null, { total: created + updated, created, updated, not_found });
+          callback(null, { total: created + updated, created, updated, not_found, skipped, errors, students: studentReport, schedules: scheduleReport });
           checkAccess.CheckAppAccess({ save_info: true });
           Backup.createBackupAndSend();
         } else {
@@ -515,12 +521,15 @@ class Students {
           const dakhela   = getCol(row, 'dakhela')
           const className = getCol(row, 'class')
 
+          const excelRow = i + 1
+
           const missingFields = []
           if (!name)      missingFields.push('name')
           if (!dakhela)   missingFields.push('dakhela')
           if (!className) missingFields.push('class')
           if (missingFields.length) {
             console.warn(`[import] row ${i} skipped — missing: ${missingFields.join(', ')} | name="${name || ''}"`)
+            studentReport.push({ excelRow, name, dakhela, class: className, status: 'skipped', reason: `missing: ${missingFields.join(', ')}` })
             return
           }
 
@@ -528,6 +537,7 @@ class Students {
           const class_short = getCol(row, 'class_short') || utils.getClassShort(className)
           if (!class_short) {
             console.warn(`[import] row ${i} skipped — class_short unresolved for class="${className}"`)
+            studentReport.push({ excelRow, name, dakhela, class: className, status: 'skipped', reason: `class_short unresolved for class="${className}"` })
             return
           }
           const card_no     = getCol(row, 'card_no') || null
@@ -551,8 +561,10 @@ class Students {
                 if (err) {
                   console.error("Error inserting data (force):", err);
                   errorOccurred = true;
+                  studentReport.push({ excelRow, name, dakhela, class: className, status: 'error', reason: err.message })
                 } else {
                   created++;
+                  studentReport.push({ excelRow, name, dakhela, class: className, status: 'created', reason: 'forced as new entry' })
                 }
                 pending--;
                 finalizeImport();
@@ -568,10 +580,13 @@ class Students {
                 if (err) {
                   console.error(`Error updating data with ID ${id}:`, err);
                   errorOccurred = true;
+                  studentReport.push({ excelRow, name, dakhela, class: className, status: 'error', reason: err.message })
                 } else if (this.changes > 0) {
                   updated++;
+                  studentReport.push({ excelRow, name, dakhela, class: className, status: 'updated', reason: `matched by id=${id}` })
                 } else {
                   not_found++;
+                  studentReport.push({ excelRow, name, dakhela, class: className, status: 'not_found', reason: `id=${id} not found` })
                 }
                 pending--;
                 finalizeImport();
@@ -584,6 +599,7 @@ class Students {
               if (err) {
                 console.error("Error querying existing data:", err);
                 errorOccurred = true;
+                studentReport.push({ excelRow, name, dakhela, class: className, status: 'error', reason: err.message })
                 pending--;
                 finalizeImport();
                 return;
@@ -598,8 +614,10 @@ class Students {
                     if (err) {
                       console.error(`Error updating data for dakhela: ${dakhela}, class: ${className}, year: ${year}:`, err);
                       errorOccurred = true;
+                      studentReport.push({ excelRow, name, dakhela, class: className, status: 'error', reason: err.message })
                     } else {
                       updated++;
+                      studentReport.push({ excelRow, name, dakhela, class: className, status: 'updated', reason: `matched existing dakhela/class/year (id=${existingRow.id})` })
                     }
                     pending--;
                     finalizeImport();
@@ -614,8 +632,10 @@ class Students {
                     if (err) {
                       console.error("Error inserting data:", err);
                       errorOccurred = true;
+                      studentReport.push({ excelRow, name, dakhela, class: className, status: 'error', reason: err.message })
                     } else {
                       created++;
+                      studentReport.push({ excelRow, name, dakhela, class: className, status: 'created', reason: 'new dakhela/class/year' })
                     }
                     pending--;
                     finalizeImport();
@@ -649,6 +669,7 @@ class Students {
             if (i === 0 && scheduleHasHeader) return;
             if (row.length === 0) return;
 
+            const excelRow = i + 1
             const id = getScheduleValue(row, 'id', 0)
             const type = getScheduleValue(row, 'type', 1)
             const title = getScheduleValue(row, 'title', 2)
@@ -660,6 +681,7 @@ class Students {
 
             if (!type || !start_time || !end_time || !classes) {
               console.log("Skipping invalid schedule row:", row);
+              scheduleReport.push({ excelRow, title, status: 'skipped', reason: 'missing type/start_time/end_time/classes' })
               return;
             }
 
@@ -676,13 +698,15 @@ class Students {
                 updateScheduleQuery,
                 [...scheduleParams, id],
                 function(err) {
-                  if (err) { console.error(`Error updating schedule ${id}:`, err); errorOccurred = true; pending--; finalizeImport(); return; }
+                  if (err) { console.error(`Error updating schedule ${id}:`, err); errorOccurred = true; scheduleReport.push({ excelRow, title: resolvedTitle, status: 'error', reason: err.message }); pending--; finalizeImport(); return; }
                   if (this.changes === 0) {
                     db.run(insertScheduleQuery, scheduleParams, (err2) => {
-                      if (err2) { console.error("Error inserting schedule (fallback):", err2); errorOccurred = true; }
+                      if (err2) { console.error("Error inserting schedule (fallback):", err2); errorOccurred = true; scheduleReport.push({ excelRow, title: resolvedTitle, status: 'error', reason: err2.message }) }
+                      else { scheduleReport.push({ excelRow, title: resolvedTitle, status: 'created', reason: `id=${id} not found — inserted new` }) }
                       pending--; finalizeImport()
                     })
                   } else {
+                    scheduleReport.push({ excelRow, title: resolvedTitle, status: 'updated', reason: `matched by id=${id}` })
                     pending--; finalizeImport()
                   }
                 }
@@ -692,7 +716,8 @@ class Students {
                 insertScheduleQuery,
                 scheduleParams,
                 (err) => {
-                  if (err) { console.error("Error inserting schedule:", err); errorOccurred = true; }
+                  if (err) { console.error("Error inserting schedule:", err); errorOccurred = true; scheduleReport.push({ excelRow, title: resolvedTitle, status: 'error', reason: err.message }) }
+                  else { scheduleReport.push({ excelRow, title: resolvedTitle, status: 'created', reason: forceAsNewEntity ? 'forced as new entry' : 'new schedule' }) }
                   pending--; finalizeImport()
                 }
               );
