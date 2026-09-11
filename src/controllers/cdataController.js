@@ -558,10 +558,16 @@ class CdataController {
           }
         };
 
+        // A cloned student (name has the "(Copied)" marker, from Students > Clone) exists solely
+        // so the same physical device can also trigger a call-only announcement for a second
+        // dakhela/card number — it must never be recorded as attendance, regardless of the
+        // attendance.status setting. Mirrors the manual "Call Punch" button in students.vue.
+        const isCallOnlyClone = String(student.name || '').indexOf('Copied') > -1;
+
         // Check if attendance is enabled
         const attendanceEnabled = global.config?.settings?.attendance?.status;
 
-        if (attendanceEnabled) {
+        if (attendanceEnabled && !isCallOnlyClone) {
           // Call attendance submission with socket emission enabled
           const Attendance = require('../class-attendence');
           const attendance = new Attendance(global.db);
