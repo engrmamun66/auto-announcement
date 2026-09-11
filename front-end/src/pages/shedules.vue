@@ -124,10 +124,18 @@ function incrementTime(key){
    }
 }
 
+// Adds hours to a 'HH:mm' time, but clamps to 23:59 instead of rolling into the next day
+function addHoursClampToday(timeStr, hours){
+  const start = moment(timeStr, 'HH:mm')
+  const end = start.clone().add(hours, 'hours')
+  if(end.date() !== start.date()) return '23:59'
+  return end.format('HH:mm')
+}
+
 // Call Start drives: Call End (+3h), Punch End (+3h), Punch Start (-30min)
 function applyCallStartCascade(newStart){
-  payload.end_time = moment(newStart, 'HH:mm').add(3, 'hours').format('HH:mm')
-  payload.end_time2 = moment(newStart, 'HH:mm').add(3, 'hours').format('HH:mm')
+  payload.end_time = addHoursClampToday(newStart, 3)
+  payload.end_time2 = addHoursClampToday(newStart, 3)
   payload.start_time2 = moment(newStart, 'HH:mm').subtract(30, 'minutes').format('HH:mm')
 }
 
