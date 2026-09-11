@@ -114,25 +114,36 @@
       <i class='bx bxs-user'></i>
       <span>{{ helper.t('Students') }}</span>
     </RouterLink>
-    <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
-      <RouterLink id="footer-link-shedules" :to="{name: 'shedules', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active': route.name === 'shedules'}" @click="sendRemoteAction({from: 'ip', action: 'onClick', selector: '#nav-link-shedules'})">
-        <i class='bx bxs-calendar'></i>
-        <span>{{ helper.t('Shedules') }}</span>
-      </RouterLink>
-    </template>
-    <RouterLink id="footer-link-devices" :to="{name: 'devices', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active': route.name === 'devices'}" @click="sendRemoteAction({from: 'ip', action: 'onClick', selector: '#nav-link-devices'})">
-      <i class='bx bxs-server'></i>
-      <span>{{ helper.t('Devices') }}</span>
-    </RouterLink>
-    <RouterLink id="footer-link-import" :to="{name: 'import', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active': route.name === 'import'}" @click="sendRemoteAction({from: 'ip', action: 'onClick', selector: '#nav-link-import'})">
-      <i class='bx bxs-file-import'></i>
-      <span>{{ helper.t('Import') }}</span>
-    </RouterLink>
     <RouterLink id="footer-link-contact" :to="{name: 'ContactUs', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active': route.name === 'ContactUs'}" @click="sendRemoteAction({from: 'ip', action: 'onClick', selector: '#nav-link-contact'})">
       <i class='bx bx-phone'></i>
       <span>{{ helper.t('Contact') }}</span>
     </RouterLink>
+    <a href="#" id="footer-link-more" :class="{'active': ['shedules','devices','import'].includes(route.name)}" @click.prevent="showMoreMenu = true">
+      <i class='bx bx-dots-horizontal-rounded'></i>
+      <span>{{ helper.t('More') }}</span>
+    </a>
   </nav>
+
+  <Teleport to="body">
+    <div v-if="showMoreMenu" class="mobile-more-backdrop" @click="showMoreMenu = false"></div>
+    <div class="mobile-more-sheet" :class="{ 'is-open': showMoreMenu }">
+      <div class="mobile-more-sheet__handle"></div>
+      <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
+        <RouterLink id="more-link-shedules" :to="{name: 'shedules', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" @click="showMoreMenu = false; sendRemoteAction({from: 'ip', action: 'onClick', selector: '#nav-link-shedules'})">
+          <i class='bx bxs-calendar'></i>
+          <span>{{ helper.t('Shedules') }}</span>
+        </RouterLink>
+      </template>
+      <RouterLink id="more-link-devices" :to="{name: 'devices', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" @click="showMoreMenu = false; sendRemoteAction({from: 'ip', action: 'onClick', selector: '#nav-link-devices'})">
+        <i class='bx bxs-server'></i>
+        <span>{{ helper.t('Devices') }}</span>
+      </RouterLink>
+      <RouterLink id="more-link-import" :to="{name: 'import', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" @click="showMoreMenu = false; sendRemoteAction({from: 'ip', action: 'onClick', selector: '#nav-link-import'})">
+        <i class='bx bxs-file-import'></i>
+        <span>{{ helper.t('Import') }}</span>
+      </RouterLink>
+    </div>
+  </Teleport>
 
   <cloneStudents v-if="show_cloner_component" @unmount="show_cloner_component = false"></cloneStudents>
   <ConfigSettings v-if="showSettingsPanel" @unmount="showSettingsPanel = false" />
@@ -140,7 +151,7 @@
 </template>
 
 <script setup>
-import { ref, inject, onMounted } from 'vue';
+import { ref, inject, onMounted, watch } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 import Btn from './Btn.vue'
 import cloneStudents from './cloneStudents.vue'
@@ -151,6 +162,10 @@ let logoEl = ref(null)
 let logo_wrapper = ref(null)
 let route = useRoute()
 let router = useRouter()
+let showMoreMenu = ref(false)
+
+// Close the "More" sheet after navigating to one of its links
+watch(() => route.path, () => { showMoreMenu.value = false })
 
 const emitter = inject('emitter');
 const CONFIG = inject('CONFIG');
@@ -382,7 +397,16 @@ async function logout(){
     overflow-x: auto;
     padding: 4px 4px calc(4px + env(safe-area-inset-bottom));
     -webkit-overflow-scrolling: touch;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+
   }
+  /* Dashboard sits visually centered among the footer tabs */
+  #footer-link-attendence { order: 1; }
+  #footer-link-students { order: 2; }
+  #footer-link-home { order: 3; }
+  #footer-link-contact { order: 4; }
+  #footer-link-more { order: 5; }
   .mobile-footer-nav a {
     position: relative;
     flex: 1 0 64px;
@@ -392,6 +416,7 @@ async function logout(){
     justify-content: center;
     gap: 3px;
     padding: 6px 8px;
+    min-height: 48px;
     color: rgba(255,255,255,0.65);
     text-decoration: none;
     font-size: 11px;
@@ -425,6 +450,64 @@ async function logout(){
     height: 3px;
     border-radius: 0 0 3px 3px;
     background: rgba(209, 209, 209, 0.659);
+  }
+
+  /* "More" overflow sheet (Shedules / Devices / Import) */
+  .mobile-more-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 14;
+    animation: moreBdIn 0.2s ease;
+  }
+  @keyframes moreBdIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .mobile-more-sheet {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 15;
+    background: #333;
+    border-top: 1px solid rgba(255,255,255,0.12);
+    border-radius: 16px 16px 0 0;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.35);
+    padding: 8px 12px calc(12px + env(safe-area-inset-bottom));
+    transform: translateY(100%);
+    transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+  }
+  .mobile-more-sheet.is-open {
+    transform: translateY(0);
+  }
+  .mobile-more-sheet__handle {
+    width: 36px;
+    height: 4px;
+    background: rgba(255,255,255,0.3);
+    border-radius: 2px;
+    margin: 4px auto 10px;
+  }
+  .mobile-more-sheet a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 10px;
+    color: rgba(255,255,255,0.85);
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 600;
+    border-radius: 10px;
+  }
+  .mobile-more-sheet a i {
+    font-size: 20px;
+    width: 24px;
+    text-align: center;
+  }
+  .mobile-more-sheet a:active {
+    background-color: rgba(255,255,255,0.1);
+  }
+  .mobile-more-sheet a.router-link-active {
+    color: #fff;
+    background-color: rgba(255,255,255,0.13);
   }
 }
 
