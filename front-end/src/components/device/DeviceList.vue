@@ -42,6 +42,10 @@
           <span class="device-card__value">{{ device.realtime_punch_window_seconds }}s</span>
         </div>
         <div class="device-card__row">
+          <span class="device-card__label">{{ helper.t('Adjust Diff Time Each Punch') }}:</span>
+          <span class="device-card__value">{{ device.adjust_diff_time_each_punch ? helper.t('Yes') : helper.t('No') }}</span>
+        </div>
+        <div class="device-card__row">
           <span class="device-card__label">{{ helper.t('Last Updated') }}:</span>
           <span class="device-card__value">{{ formatTime(device.updated) }} | {{ getTimeAgo(device.updated) }}</span>
         </div>

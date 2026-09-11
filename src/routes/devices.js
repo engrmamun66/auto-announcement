@@ -25,12 +25,12 @@ module.exports = (db) => {
   });
 
   router.post('/devices/update', (req, res) => {
-    const { id, name, brand, polling_interval, status, adjust_time } = req.body;
+    const { id, name, brand, polling_interval, status, adjust_time, adjust_diff_time_each_punch } = req.body;
 
     db.run(
-      `UPDATE devices SET name = ?, brand = ?, polling_interval = ?, status = ?, adjust_time = ?, updated = CURRENT_TIMESTAMP
+      `UPDATE devices SET name = ?, brand = ?, polling_interval = ?, status = ?, adjust_time = ?, adjust_diff_time_each_punch = ?, updated = CURRENT_TIMESTAMP
        WHERE id = ?`,
-      [name, brand, polling_interval, status, adjust_time, id],
+      [name, brand, polling_interval, status, adjust_time, adjust_diff_time_each_punch ? 1 : 0, id],
       function(err) {
         if (err) {
           console.error('Update device error:', err.message);

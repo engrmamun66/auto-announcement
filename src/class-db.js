@@ -40,6 +40,7 @@ class myDB {
             this._addColumn('schedules', 'status', 'INTEGER', '1')
             this._addColumn('schedules', 'order_index', 'INTEGER', '1')
             this._addColumn('devices', 'realtime_punch_window_seconds', 'INTEGER', '180')
+            this._addColumn('devices', 'adjust_diff_time_each_punch', 'INTEGER', '0')
             this._initSettings()
         });
     }

@@ -158,7 +158,7 @@ class CdataController {
 
 
     else if (table === 'ATTLOG' && this._isRealPunch(row_item)) {
-      global.db.get('SELECT adjust_time, realtime_punch_window_seconds FROM devices WHERE serial_number = ?', [sn], (err, device) => {
+      global.db.get('SELECT adjust_time, realtime_punch_window_seconds, adjust_diff_time_each_punch FROM devices WHERE serial_number = ?', [sn], (err, device) => {
         let operations_add_subtract = `subtract(0, 'hour')`;
         if (!err && device && device.adjust_time) {
           operations_add_subtract = String(device.adjust_time).replace(/^\./, '');
@@ -222,37 +222,36 @@ class CdataController {
         const now = moment()
 
         // Device time adjustment mode (10s calibration window armed from the Devices UI):
-        // measure the actual gap between this punch and server "now", persist it as this
-        // device's own realtime_punch_window_seconds. This is a calibration-only punch —
+        // measure the signed clock-drift gap between this punch and server "now", persist it as
+        // this device's own realtime_punch_window_seconds. Positive = device clock is faster than
+        // the server; negative = device clock is slower. This is a calibration-only punch —
         // it must NOT save attendance and must NOT send SMS.
         if (records?.length === 1 && Store.isInTimeAdjustmentMode(sn)) {
           Store.clearTimeAdjustmentMode(sn);
           const punchMoment = moment(records[0].punch_time, 'YYYY-MM-DD HH:mm:ss');
-          const measured_gap_seconds = Math.ceil(Math.abs(now.diff(punchMoment, 'seconds')));
-          const CALIBRATION_SAFETY_MARGIN_SECONDS = 30; // real latency jitters punch-to-punch — never save the exact measured value with zero headroom
-          const saved_window_seconds = measured_gap_seconds + CALIBRATION_SAFETY_MARGIN_SECONDS;
+          const measured_gap_seconds = Math.round(punchMoment.diff(now, 'seconds'));
 
           console.log(`\n🎯 [Device Time Adjustment Mode] Calibration punch received — device: ${sn}`);
           console.log(`   Punch time (after adjust_time): ${punchMoment.format('YYYY-MM-DD HH:mm:ss')}`);
           console.log(`   Server "now":                   ${now.format('YYYY-MM-DD HH:mm:ss')}`);
-          console.log(`   Measured gap:                   ${measured_gap_seconds}s (+${CALIBRATION_SAFETY_MARGIN_SECONDS}s margin = ${saved_window_seconds}s saved)`);
+          console.log(`   Measured drift:                 ${measured_gap_seconds}s (${measured_gap_seconds >= 0 ? 'device faster' : 'device slower'})`);
           console.log(`   → Calibration only: no attendance saved, no SMS sent.\n`);
 
           global.db.run(
             'UPDATE devices SET realtime_punch_window_seconds = ? WHERE serial_number = ?',
-            [saved_window_seconds, sn],
+            [measured_gap_seconds, sn],
             (updateErr) => {
               if (updateErr) {
                 console.error(`❌ Failed to save calibrated realtime_punch_window_seconds for ${sn}:`, updateErr.message);
                 return;
               }
-              console.log(`✅ Saved realtime_punch_window_seconds=${saved_window_seconds}s for ${sn}`);
+              console.log(`✅ Saved realtime_punch_window_seconds=${measured_gap_seconds}s for ${sn}`);
 
               if (!global.socketServer) return;
-              const calibrationMessage = `Device ${sn} calibrated — realtime window set to ${saved_window_seconds}s`;
+              const calibrationMessage = `Device ${sn} calibrated — clock drift set to ${measured_gap_seconds}s`;
               global.socketServer.clients.forEach((client) => {
                 if (client.readyState === client.OPEN) {
-                  client.send(JSON.stringify({ type: 'device_time_calibrated', sn, realtime_punch_window_seconds: saved_window_seconds, message: calibrationMessage }));
+                  client.send(JSON.stringify({ type: 'device_time_calibrated', sn, realtime_punch_window_seconds: measured_gap_seconds, message: calibrationMessage }));
                 }
               });
 
@@ -270,10 +269,20 @@ class CdataController {
           return; // stop here — do not fall through to normal attendance processing
         }
 
+        // Apply calibrated clock-drift correction (seconds-level) from Device Time Adjustment Mode.
+        // realtime_punch_window_seconds is a SIGNED drift value: positive = device faster than
+        // server (subtract to correct), negative = device slower (subtracting a negative adds).
+        const drift_seconds = device?.realtime_punch_window_seconds || 0
+        records.forEach(record => {
+          record.punch_time_before_adjust = record.punch_time
+          if (drift_seconds && device?.adjust_diff_time_each_punch) {
+            record.punch_time = moment(record.punch_time, 'YYYY-MM-DD HH:mm:ss').subtract(drift_seconds, 'seconds').format('YYYY-MM-DD HH:mm:ss')
+          }
+        })
+
         // Process each punch through attendance submission
         // const only_attendance_feature = global.config?.settings?.attendance?.only_attendance_feature
         const forceAsRealtime = req.query.forceAsRealtime === 'true'
-        const realtime_window_seconds = device?.realtime_punch_window_seconds || 180
         let is_realtime_punch = records?.length === 1
           // && moment(records?.[0]?.punch_time, 'YYYY-MM-DD HH:mm:ss').isBetween(
           //     now.clone().subtract(realtime_window_seconds, 'seconds'),
