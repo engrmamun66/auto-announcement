@@ -703,6 +703,7 @@ class Students {
         })
       } else {
         scheduleLoopDone = true
+        finalizeImport()
       }
   
 
