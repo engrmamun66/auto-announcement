@@ -19,14 +19,7 @@
       <i class='bx bx-loader-circle topnav__hypnotize'></i>
     </span> -->
 
-    <button class="topnav__toggle" type="button" @click="isOpen = !isOpen" aria-label="Toggle navigation">
-      <i :class="isOpen ? 'bx bx-x' : 'bx bx-menu'"></i>
-    </button>
-    <Teleport to="body">
-      <div v-if="isOpen" class="topnav-backdrop" @click="isOpen = false"></div>
-    </Teleport>
-
-    <nav class="topnav__links" :class="{ 'is-open': isOpen }">
+    <nav class="topnav__links">
       <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
         <RouterLink id="nav-link-home" :to="{name: 'home', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active': route.name === 'home'}" @click="sendRemoteAction({from: 'ip', action: 'onClick', selector: '#nav-link-home'})">
           <i class='bx bxs-home pre-icon'></i> {{ helper.t('Dashboard') }}
@@ -98,13 +91,56 @@
       </div>
     </nav>
   </header>
+
+  <!-- Mobile-only bottom tab bar — replaces the hamburger menu for quick nav access -->
+  <nav class="mobile-footer-nav">
+    <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
+      <RouterLink id="footer-link-home" :to="{name: 'home', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active': route.name === 'home'}" @click="sendRemoteAction({from: 'ip', action: 'onClick', selector: '#nav-link-home'})">
+        <i class='bx bxs-home'></i>
+        <span>{{ helper.t('Dashboard') }}</span>
+      </RouterLink>
+    </template>
+    <template v-if="CONFIG?.settings?.attendance?.status">
+      <RouterLink id="footer-link-attendence" :to="{name: 'attendence', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active': route.name === 'attendence'}"
+        @click="sendRemoteAction({from: 'ip', action: 'onClick', selector: '#nav-link-attendence'})"
+        @dblclick.prevent="show_bulk_attedance_component = true">
+        <i class='bx bx-user-pin'></i>
+        <span>{{ helper.t('Attendence') }}</span>
+      </RouterLink>
+    </template>
+    <RouterLink id="footer-link-students" :to="{name: 'students', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active': route.name === 'students'}"
+      @click="sendRemoteAction({from: 'ip', action: 'onClick', selector: '#nav-link-students'})"
+      @dblclick.prevent="show_cloner_component = true">
+      <i class='bx bxs-user'></i>
+      <span>{{ helper.t('Students') }}</span>
+    </RouterLink>
+    <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
+      <RouterLink id="footer-link-shedules" :to="{name: 'shedules', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active': route.name === 'shedules'}" @click="sendRemoteAction({from: 'ip', action: 'onClick', selector: '#nav-link-shedules'})">
+        <i class='bx bxs-calendar'></i>
+        <span>{{ helper.t('Shedules') }}</span>
+      </RouterLink>
+    </template>
+    <RouterLink id="footer-link-devices" :to="{name: 'devices', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active': route.name === 'devices'}" @click="sendRemoteAction({from: 'ip', action: 'onClick', selector: '#nav-link-devices'})">
+      <i class='bx bxs-server'></i>
+      <span>{{ helper.t('Devices') }}</span>
+    </RouterLink>
+    <RouterLink id="footer-link-import" :to="{name: 'import', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active': route.name === 'import'}" @click="sendRemoteAction({from: 'ip', action: 'onClick', selector: '#nav-link-import'})">
+      <i class='bx bxs-file-import'></i>
+      <span>{{ helper.t('Import') }}</span>
+    </RouterLink>
+    <RouterLink id="footer-link-contact" :to="{name: 'ContactUs', query: {[route?.query?.dev ? 'dev' : '']: route?.query?.dev}}" :class="{'active': route.name === 'ContactUs'}" @click="sendRemoteAction({from: 'ip', action: 'onClick', selector: '#nav-link-contact'})">
+      <i class='bx bx-phone'></i>
+      <span>{{ helper.t('Contact') }}</span>
+    </RouterLink>
+  </nav>
+
   <cloneStudents v-if="show_cloner_component" @unmount="show_cloner_component = false"></cloneStudents>
   <ConfigSettings v-if="showSettingsPanel" @unmount="showSettingsPanel = false" />
   <SmsModal v-if="showSmsModal" @close="showSmsModal = false" />
 </template>
 
 <script setup>
-import { ref, inject, onMounted, watch, onBeforeUnmount } from 'vue';
+import { ref, inject, onMounted } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 import Btn from './Btn.vue'
 import cloneStudents from './cloneStudents.vue'
@@ -115,20 +151,6 @@ let logoEl = ref(null)
 let logo_wrapper = ref(null)
 let route = useRoute()
 let router = useRouter()
-let isOpen = ref(false)
-
-// Close menu on route change (after clicking a nav link on mobile)
-watch(() => route.path, () => { isOpen.value = false })
-
-// Close menu on outside click
-function onOutsideClick(e) {
-  const header = document.getElementById('myTopnav')
-  if (isOpen.value && header && !header.contains(e.target)) {
-    isOpen.value = false
-  }
-}
-onMounted(() => document.addEventListener('click', onOutsideClick))
-onBeforeUnmount(() => document.removeEventListener('click', onOutsideClick))
 
 const emitter = inject('emitter');
 const CONFIG = inject('CONFIG');
@@ -221,19 +243,6 @@ async function logout(){
   border-radius: 10px;
 }
 
-.topnav__toggle{
-  border: 1px solid #3f3f46;
-  background: #1f2937;
-  color: #ffffff;
-  width: 42px;
-  height: 42px;
-  border-radius: 10px;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
-}
-
 .topnav__links{
   display: flex;
   align-items: center;
@@ -321,22 +330,16 @@ async function logout(){
   width: calc(100% - 10px);
 }
 
-@media screen and (max-width: 960px) {
-  /* Backdrop overlay */
-  .topnav-backdrop {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.5);
-    z-index: 9;
-    animation: bdIn 0.2s ease;
-  }
+/* Mobile bottom tab bar — hidden on desktop, shown in the mobile media query below */
+.mobile-footer-nav {
+  display: none;
+}
 
-  .topnav__wifi { 
+@media screen and (max-width: 960px) {
+  .topnav__wifi {
     top: 13px;
     left: 160px;
   }
-
-  @keyframes bdIn { from { opacity: 0; } to { opacity: 1; } }
 
   .topnav {
     padding: 8px 12px;
@@ -347,92 +350,14 @@ async function logout(){
   }
   .topnav__logo { width: 130px !important; }
 
-  /* Hamburger ↔ X toggle */
-  .topnav__toggle {
-    display: inline-flex;
-    margin-left: auto;
-    width: 44px;
-    height: 44px;
-    font-size: 24px;
-    transition: background 0.15s, transform 0.2s;
-    z-index: 11;
-    position: relative;
-  }
-  .topnav__toggle:active { transform: scale(0.92); }
-
-  /* Slide-down menu (no display:none flash) */
+  /* Page navigation now lives in the bottom tab bar on mobile */
   .topnav__links {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 2px;
-    padding: 0;
-    overflow: hidden;
-    max-height: 0;
-    opacity: 0;
-    pointer-events: none;
-    transition: max-height 0.32s cubic-bezier(0.4,0,0.2,1),
-                opacity 0.22s ease,
-                padding 0.28s ease;
-  }
-  .topnav__links.is-open {
-    max-height: 700px;
-    opacity: 1;
-    pointer-events: auto;
-    padding: 8px 0 12px;
-  }
-
-  /* Full-width pill links with active indicator bar */
-  .topnav__links a {
-    width: 100%;
-    text-align: left;
-    padding: 13px 16px;
-    font-size: 15px;
-    font-weight: 600;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    min-height: 48px;
-  }
-  /* Remove desktop underline indicator on mobile */
-  .topnav__links a:not(.madrasha-title)::after {
     display: none;
   }
-  /* Active: filled pill + left accent bar */
-  .topnav__links a.active:not(.madrasha-title) {
-    background: rgba(255,255,255,0.13);
-    color: #fff;
-    font-weight: 700;
-  }
-  .topnav__links a.active:not(.madrasha-title)::before {
-    content: '';
-    display: inline-block;
-    width: 4px;
-    min-width: 4px;
-    height: 22px;
-    background: var(--primaryColor, #f59928);
-    border-radius: 2px;
-  }
 
-  /* Version/icon row — full width, separated */
   .topnav__version {
-    width: 100%;
-    justify-content: flex-end;
-    border-top: 1px solid rgba(255,255,255,0.1);
-    padding-top: 10px;
-    margin-top: 4px;
+    margin-left: auto;
   }
-  .topnav__update-btn {
-    width: 38px;
-    height: 38px;
-    justify-content: center;
-    border-radius: 8px;
-    background: rgba(255,255,255,0.08);
-    padding: 0;
-  }
-  .topnav__update-btn:hover { background: rgba(255,255,255,0.15); color: #fff; }
 
   .topnav__dev {
     width: 100%;
@@ -440,6 +365,76 @@ async function logout(){
     margin-left: 0;
     padding-left: 4px;
   }
+
+  /* Bottom tab bar */
+  .mobile-footer-nav {
+    display: flex;
+    align-items: stretch;
+    gap: 2px;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 12;
+    background-color: #333;
+    border-top: 1px solid rgba(255,255,255,0.12);
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.25);
+    overflow-x: auto;
+    padding: 4px 4px calc(4px + env(safe-area-inset-bottom));
+    -webkit-overflow-scrolling: touch;
+  }
+  .mobile-footer-nav a {
+    position: relative;
+    flex: 1 0 64px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    padding: 6px 8px;
+    color: rgba(255,255,255,0.65);
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 10px;
+    white-space: nowrap;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mobile-footer-nav a i {
+    font-size: 20px;
+  }
+  .mobile-footer-nav a:active {
+    background-color: rgba(255,255,255,0.1);
+  }
+  .mobile-footer-nav a.active {
+    color: #fff;
+    background-color: #ffffff33;
+    font-weight: 700;
+  }
+  .mobile-footer-nav a.active i {
+    color: #fff;
+  }
+  .mobile-footer-nav a.active::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 26px;
+    height: 3px;
+    border-radius: 0 0 3px 3px;
+    background: rgba(209, 209, 209, 0.659);
+  }
 }
 
+</style>
+
+<style>
+/* Reserve room for the fixed mobile footer nav so it doesn't cover page content */
+@media screen and (max-width: 960px) {
+  .page-contents {
+    margin-bottom: 64px;
+  }
+}
 </style>
