@@ -21,7 +21,14 @@ const socketInit = inject('socketInit');
 
 
 const log = console.log
-const isIPAccess = window.location.hostname !== 'localhost'
+// "main device" = whichever hostname this install's BASE_URL points to (localhost for a
+// local relay PC, or the public domain for a single-device cloud deployment like cb2).
+// Anything accessing on a DIFFERENT hostname (e.g. a LAN tablet by IP) is a remote client.
+const mainDeviceHostname = (() => {
+    try { return new URL(globalThis.GLOBAL_DATA?.env?.BASE_URL).hostname || 'localhost' }
+    catch { return 'localhost' }
+})()
+const isIPAccess = window.location.hostname !== mainDeviceHostname
 
 let helper = inject('helper')
 let http = inject('http')
