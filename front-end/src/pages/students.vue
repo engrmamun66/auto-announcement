@@ -772,7 +772,7 @@ watch(fixedWidthSoundCol, (newVal) => {
             <th>{{ helper.t('Dakhela') }}</th>
             <th class="d-none d-lg-table-cell">{{ helper.t('Year') }}</th>
             <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
-              <th class="d-none d-lg-table-cell" @dblclick="fixedWidthSoundCol = !fixedWidthSoundCol" :style="fixedWidthSoundCol ? 'width: 300px;' : ''" :tooltip="helper.t('Double Click')" flow="down">
+              <th @dblclick="fixedWidthSoundCol = !fixedWidthSoundCol" :style="fixedWidthSoundCol ? 'width: 300px;' : ''" :tooltip="helper.t('Double Click')" flow="down">
                 {{ helper.t('Sound') }}
                 <template v-if="fixedWidthSoundCol">
                   <i class='bx bx-arrow-from-right transformY-3px' ></i>
@@ -830,7 +830,7 @@ watch(fixedWidthSoundCol, (newVal) => {
               <td class="d-none d-lg-table-cell"> {{ std.year }} </td>
               <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
                 <template v-for="column in ['sound1']">
-                  <td class="d-none d-lg-table-cell">
+                  <td>
                     <!-- Sound -->
                     <template v-if="std[column]">            
                       <template v-if="!std[`isPlaying_${column}`]">            

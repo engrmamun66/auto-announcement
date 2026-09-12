@@ -1,12 +1,16 @@
 <template>
   <div class="devices-page">
 
-    <div v-if="serverTime" class="server-time-badge">
-      <i class='bx bx-time-five'></i> {{ helper.t('Server time') }}: <strong>{{ serverTime.time }}</strong> ({{ serverTime.timezone }})
+    <div class="server-time-row">
+      <div v-if="serverTime" class="server-time-badge">
+        <label class="server-time-live-toggle" tooltip="Get Realtime">
+          <input type="checkbox" v-model="liveServerTime">
+        </label>
+        <span>
+          {{ helper.t('Server time') }}: <strong>{{ serverTime.time }}</strong> ({{ serverTime.timezone }})
+        </span>
+      </div>
     </div>
-    <label class="server-time-live-toggle" tooltip="Get Realtime">
-      <input type="checkbox" v-model="liveServerTime">
-    </label>
 
     <!-- Tab Navigation -->
     <ul class="nav nav-tabs mt-0 mb-3">
@@ -200,6 +204,16 @@ onBeforeUnmount(() => {
   animation: fadeIn 0.2s ease-in;
 }
 
+.server-time-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  transform: translateY(var(--transformY, 2px));
+  margin-bottom: 14px;
+}
+
 .server-time-badge {
   display: inline-flex;
   align-items: center;
@@ -210,8 +224,6 @@ onBeforeUnmount(() => {
   padding: 6px 14px;
   font-size: 0.85rem;
   color: #4a6fa5;
-  margin-bottom: 14px;
-  margin-right: 10px;
 }
 
 .server-time-live-toggle {
@@ -222,7 +234,6 @@ onBeforeUnmount(() => {
   color: #666;
   cursor: pointer;
   user-select: none;
-  margin-bottom: 14px;
 }
 
 .server-time-live-toggle input {
@@ -232,5 +243,12 @@ onBeforeUnmount(() => {
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+@media (max-width: 768px) {
+  .server-time-badge,
+  .server-time-live-toggle {
+    font-size: 11px;
+  }
 }
 </style>
