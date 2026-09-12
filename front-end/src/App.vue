@@ -70,7 +70,7 @@ let internet = ref(true)
  */
 let showRecurringModal = ref(true) 
 
-let is_started_schedule = ref(0) 
+let is_started_schedule = ref(1) 
 let schedule_timeout = ref(0) 
 let classes = ref([]);
 let wattingList = ref([])
@@ -656,7 +656,7 @@ function speakText(text) {
   
 watch(is_started_schedule, (a, b) => {
     storage('is_started_schedule').value = a 
-}) 
+}, {immediate: true}) 
   
 watch(emergency_mode, (a, b) => {
     storage('emergency_mode').value = a 

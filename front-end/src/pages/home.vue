@@ -294,8 +294,8 @@ function recallAllPunchedStudents(){
                <span class="manual-mode" v-if="!isSpeakersAutoMode">{{ helper.t('manual') }}</span>
           </div> 
          
-          <BarcodeScannigAnimation v-if="is_started_schedule" :scannig="is_started_schedule" class="me-1"  ></BarcodeScannigAnimation> 
-          <Switch v-model="is_started_schedule" @click="checkSchedule" size="lg" :yes="helper.t('Started')" :no="helper.t('Stopped')" :bothVisible="false" class="me-2" ></Switch>
+          <!-- <BarcodeScannigAnimation v-if="is_started_schedule" :scannig="is_started_schedule" class="me-1"  ></BarcodeScannigAnimation>  -->
+          <!-- <Switch v-model="is_started_schedule" @click="checkSchedule" size="lg" :yes="helper.t('Started')" :no="helper.t('Stopped')" :bothVisible="false" class="me-2" ></Switch> -->
      </div>
 
      
