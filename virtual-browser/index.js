@@ -7,7 +7,10 @@ const RELOAD_ON_CRASH_DELAY_MS = 3000;
 async function run() {
   const browser = await chromium.launch({
     headless: HEADLESS,
-    args: HEADLESS ? [] : ['--kiosk', '--start-fullscreen', '--noerrdialogs', '--disable-infobars'],
+    args: [
+      '--autoplay-policy=no-user-gesture-required',
+      ...(HEADLESS ? [] : ['--kiosk', '--start-fullscreen', '--noerrdialogs', '--disable-infobars']),
+    ],
   });
 
   const context = await browser.newContext({ viewport: null });
