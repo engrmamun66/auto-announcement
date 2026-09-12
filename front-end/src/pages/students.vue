@@ -44,38 +44,6 @@ const getAllStudents = inject('getAllStudents', () => {})
 
 let students = ref([])
 let studentLogs = ref([])
-const isIPAccess = inject('isIPAccess')
-let showPhoneModal = ref(false)
-let qrDataUrl = ref('')
-let copiedPhoneUrl = ref(false)
-
-function copyPhoneUrl({target}) {
-  target.setAttribute('tooltip', 'Copied')
-  navigator.clipboard.writeText(buildPhoneUrl()).then(() => {
-    copiedPhoneUrl.value = true
-    setTimeout(() => copiedPhoneUrl.value = false, 2000)
-    setTimeout(() => {
-      target.setAttribute('tooltip', 'Copy link')
-    }, 1500)
-  })
-}
-
-function buildPhoneUrl() {
-  const ip = globalThis.GLOBAL_DATA?.env?.LOCAL_IP || 'localhost'
-  const port = globalThis.GLOBAL_DATA?.env?.PORT || 2323
-  return `http://${ip}:${port}/app/#/students`
-}
-
-async function openPhoneModal() {
-  showPhoneModal.value = true
-  if (qrDataUrl.value) return
-  try {
-    const QRCode = (await import('qrcode')).default
-    qrDataUrl.value = await QRCode.toDataURL(buildPhoneUrl(), { width: 260, margin: 2 })
-  } catch (e) {
-    console.error('QR error', e)
-  }
-}
 
 let only_similler_students = ref(storage('only_similler_students', false).value)
 watch(only_similler_students, (bool) => storage('only_similler_students').value = bool )
@@ -658,18 +626,9 @@ watch(fixedWidthSoundCol, (newVal) => {
 <template>
 
     <div class="d-flex justify-content-between align-items-center flex-wrap">
-      <h1>{{ !addMode ? helper.t('Students') : helper.t('Add Student') }}</h1>
+      <h1 class="students-page-title">{{ !addMode ? helper.t('Students') : helper.t('Add Student') }}</h1>
 
-      <div class="d-flex justify-content-end align-items-center flex-wrap gap-2">
-        <div v-if="!isIPAccess" class="btn-group me-2" style="display:inline-flex;align-items:stretch;">
-
-          <Btn style="background: #1565C0;border-top-right-radius: 0px; border-bottom-right-radius: 0px;" @click="openPhoneModal"><i class='bx bx-qr'></i> {{ helper.t('Open With Phone') }}</Btn>
-          <button class="btn" style="background:#005a4a;color:#fff;border-left:1px solid rgba(255,255,255,0.2);padding:0 12px;display:inline-flex;align-items:center;justify-content:center;"
-            :tooltip="helper.t('Copy link')"
-            @click.prevent="copyPhoneUrl">
-            <i class="bx bx-link" style="pointer-events: none;"></i>
-          </button>
-        </div>
+      <div class="d-flex justify-content-end align-items-center flex-wrap gap-2 students-toolbar-actions">
         <Btn class="me-2" style="background: #673AB7;" :tooltip="`params.total = ${params?.total}`" >
           {{ helper.t('Total') }}: 
           <span class="bg-success- p-1">{{ all_students_non_copied?.length }}</span>
@@ -996,24 +955,6 @@ watch(fixedWidthSoundCol, (newVal) => {
     </div>
 
   
-    <!-- Open With Phone Modal -->
-    <modal v-if="showPhoneModal" :title="helper.t('Open With Phone')" @close="showPhoneModal = false">
-      <div class="phone-modal">
-        <div class="phone-modal__qr">
-          <img v-if="qrDataUrl" :src="qrDataUrl" />
-          <div v-else class="phone-modal__qr-spinner"><div class="recorder-spinner"></div></div>
-        </div>
-        <p class="phone-modal__hint"><i class='bx bx-scan'></i> {{ helper.t('Point your phone camera at the QR code to open the app') }}</p>
-        <div class="phone-modal__url-row">
-          <a :href="buildPhoneUrl()" target="_blank" class="phone-modal__url">{{ buildPhoneUrl() }}</a>
-          <button @click="copyPhoneUrl" class="phone-modal__copy-btn" :class="{ 'phone-modal__copy-btn--copied': copiedPhoneUrl }">
-            <i :class="copiedPhoneUrl ? 'bx bx-check' : 'bx bx-copy'"></i>
-            {{ copiedPhoneUrl ? helper.t('Copied!') : helper.t('Copy') }}
-          </button>
-        </div>
-      </div>
-    </modal>
-
     <!-- Bulk Punch Modal -->
     <modal v-if="showBulkPunchModal" :title="helper.t('Bulk Punch')" @close="!bulkPunchRunning && (showBulkPunchModal = false)" :close-on-esc="!bulkPunchRunning" :close-on-click-away="false">
       <div>
@@ -1131,89 +1072,6 @@ watch(fixedWidthSoundCol, (newVal) => {
   to { transform: rotate(360deg); }
 }
 
-/* Phone Modal */
-.phone-modal {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  padding: 8px 0 4px;
-}
-.phone-modal__qr {
-  width: 220px;
-  height: 220px;
-  border-radius: 12px;
-  overflow: hidden;
-  border: 1px solid #e5e7eb;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #f9fafb;
-}
-.phone-modal__qr img {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-.phone-modal__qr-spinner {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.phone-modal__qr-spinner .recorder-spinner {
-  border-color: rgba(0,0,0,0.1);
-  border-top-color: #4a6fa5;
-}
-.phone-modal__hint {
-  font-size: 13px;
-  color: #6b7280;
-  margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.phone-modal__hint .bx {
-  font-size: 16px;
-  color: #4a6fa5;
-}
-.phone-modal__url-row {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  background: #f3f4f6;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  overflow: hidden;
-}
-.phone-modal__url {
-  flex: 1;
-  font-size: 12px;
-  font-family: monospace;
-  color: #374151;
-  padding: 8px 12px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  text-decoration: none;
-}
-.phone-modal__url:hover { text-decoration: underline; }
-.phone-modal__copy-btn {
-  flex-shrink: 0;
-  border: none;
-  border-left: 1px solid #e5e7eb;
-  background: #fff;
-  color: #374151;
-  padding: 8px 14px;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  transition: background 0.15s;
-}
-.phone-modal__copy-btn:hover { background: #f9fafb; }
-.phone-modal__copy-btn--copied { color: #16a34a; }
 .recorder-overlay__close {
   position: absolute;
   top: 10px;
@@ -1257,11 +1115,40 @@ watch(fixedWidthSoundCol, (newVal) => {
   visibility: hidden;
 }
 @media (max-width: 767px) {
+  .students-page-title {
+    display: none;
+  }
+  .students-toolbar-actions {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    justify-content: flex-start;
+    width: 100%;
+  }
+  .students-toolbar-actions > * {
+    flex-shrink: 0;
+  }
+  .student-filter-bar {
+    padding: 12px !important;
+  }
   .student-filter-bar .filter-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .student-filter-bar .filter-grid label {
+    font-size: 12.5px;
+    margin-bottom: 2px;
+  }
+  .student-filter-bar .filter-grid .form-group.filter-actions {
+    grid-column: 1 / -1;
   }
   .student-filter-bar .filter-actions__spacer {
     display: none;
+  }
+  .student-filter-bar .filter-actions .d-flex {
+    width: 100%;
+  }
+  .student-filter-bar .filter-actions .d-flex > button {
+    flex: 1;
   }
 }
 .all-class-buttons-to-filter-area{

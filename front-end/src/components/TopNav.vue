@@ -402,7 +402,7 @@ async function logout(){
     right: 0;
     bottom: 0;
     z-index: 12;
-    background-color: #333;
+    background: var(--grad3);
     border-top: 1px solid rgba(255,255,255,0.12);
     box-shadow: 0 -2px 10px rgba(0,0,0,0.25);
     overflow-x: auto;
@@ -481,7 +481,7 @@ async function logout(){
     right: 0;
     bottom: 0;
     z-index: 15;
-    background: #333;
+    background: var(--grad3);
     border-top: 1px solid rgba(255,255,255,0.12);
     border-radius: 16px 16px 0 0;
     box-shadow: 0 -4px 20px rgba(0,0,0,0.35);
