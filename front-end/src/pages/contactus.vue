@@ -1,10 +1,9 @@
 <script setup>
-import { inject, ref } from "vue";
+import { inject } from "vue";
 import Btn from '../components/Btn.vue'
 import helper from '../utilities/helper'
 
 const emitter = inject('emitter');
-const http = inject('http');
 const all_students_non_copied = inject('all_students_non_copied');
 const appAccessData = inject('appAccessData');
 
@@ -31,24 +30,6 @@ function routerInstructions(){
   console.groupEnd()
 }
 
-let restarting = ref(false)
-async function restartServer() {
-  restarting.value = true
-  try {
-    await http.get('/refresh')
-    emitter.emit('toaster-success', { message: helper.t('Server restarting...') })
-  } catch (_) {
-    emitter.emit('toaster-success', { message: helper.t('Server restarting...') })
-  } finally {
-    restarting.value = false
-    
-    setTimeout(() => {
-      emitter.emit('toaster-success', { message: helper.t('Reloading...') })
-      window.location.reload()
-    }, 3000)
-  }
-}
- 
 function CopyCode() {
   if(CONFIG.value?.env?.CODE_NUMBER){
     helper.copyToClipboard(CONFIG.value?.env?.CODE_NUMBER);
@@ -261,9 +242,6 @@ function CopyCode() {
       <p>
         © {{ new Date().getFullYear() }} Calling Bird. All rights reserved.
       </p>
-      <button class="restart-btn" @click="restartServer" :disabled="restarting">
-        <i class='bx bx-refresh' :class="{ 'bx-spin': restarting }"></i>
-      </button>
     </div>
   </div>
 
@@ -403,25 +381,6 @@ body {
   color: var(--secondary-color);
   font-size: 0.9rem;
 }
-
-.restart-btn {
-  margin-top: 10px;
-  background: none;
-  border: 1px solid #ddd;
-  border-radius: 50%;
-  width: 36px;
-  height: 36px;
-  cursor: pointer;
-  font-size: 18px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--secondary-color);
-  transition: color 0.2s, border-color 0.2s;
-  background: linear-gradient(135deg, rgb(42, 165, 151) 0%, rgb(37, 211, 102) 50%, rgb(18, 140, 126) 100%);
-}
-.restart-btn:hover { color: #333; border-color: #999; }
-.restart-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 @media (max-width: 768px) {
   .info-card {

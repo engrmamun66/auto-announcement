@@ -287,7 +287,6 @@ app.use('/api', require('./src/routes/punchlog')(PunchLog));
 app.use('/api', require('./src/routes/leave')(LeavAndVacations));
 app.use('/api', require('./src/routes/config')(config, utils, Backup));
 app.use('/api', require('./src/routes/misc')(utils, Backup));
-app.use('/api', require('./src/routes/refresh')(utils));
 app.use('/api', require('./src/routes/settings')(DB.db));
 app.use('/api', require('./src/routes/sms')(Sms));
 app.use('/api', require('./src/routes/devices')(DB.db));
