@@ -632,7 +632,8 @@ function _______SEAPRATOR______(){}
 
 function focusBarcodeInput__and__startAnnoucement(){
     callbacks.clearWattingList()
-    if(is_started_schedule.value && !isIPAccess && !showSmsModal.value && !show_cloner_component.value){
+    const isMobileViewport = window.innerWidth <= 960
+    if(is_started_schedule.value && !isIPAccess && !showSmsModal.value && !show_cloner_component.value && !isMobileViewport){
         let inputEl = document.getElementById('BARCODE_INPUT')
         if(inputEl) inputEl.focus()
     }
