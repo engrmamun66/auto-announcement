@@ -1,12 +1,13 @@
 const { chromium } = require('playwright');
 
 const URL = process.argv[2] || process.env.VB_URL || 'https://cb2.softproit.cloud';
+const HEADLESS = process.env.VB_HEADLESS === 'true';
 const RELOAD_ON_CRASH_DELAY_MS = 3000;
 
 async function run() {
   const browser = await chromium.launch({
-    headless: false,
-    args: ['--kiosk', '--start-fullscreen', '--noerrdialogs', '--disable-infobars'],
+    headless: HEADLESS,
+    args: HEADLESS ? [] : ['--kiosk', '--start-fullscreen', '--noerrdialogs', '--disable-infobars'],
   });
 
   const context = await browser.newContext({ viewport: null });
