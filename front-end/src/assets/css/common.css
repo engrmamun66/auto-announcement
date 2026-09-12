@@ -42,6 +42,13 @@ body:not([forbidden]):not(.user-interacted)::after {
   cursor: pointer;
 }
 
+@media screen and (max-width: 790px) {
+  body[forbidden="false"]:not(.user-interacted)::after,
+  body:not([forbidden]):not(.user-interacted)::after { 
+    font-size: 22px; 
+  }
+}
+ 
 .page-contents {
   height: auto;
   margin: 0px;
