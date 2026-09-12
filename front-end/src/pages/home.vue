@@ -50,19 +50,14 @@ const log = console.log
 const classes = inject('classes');
 const wattingList = inject('wattingList');
 
-let toggleSettings = inject('toggleSettings') 
-let refreshDOM = inject('refreshDOM') 
-let isIPAccess = inject('isIPAccess') 
-let sendRemoteAction = inject('sendRemoteAction') 
+let toggleSettings = inject('toggleSettings')
+let refreshDOM = inject('refreshDOM')
 
 let emergency_mode = inject('emergency_mode')
 let palylistComponent = inject('palylistComponent')
 
 function toggleEmergencyMode() {
   emergency_mode.value = !emergency_mode.value
-  if (isIPAccess) {
-    sendRemoteAction({ from: 'ip', action: 'toogle_emergency_mode', data: emergency_mode.value })
-  }
 }
 
 const barcodePlaceholder = computed(() =>
@@ -91,13 +86,6 @@ function handlePayPause(){
 
 function onClickSpeed(item){
      playback_speed.value = item.value
-     if(isIPAccess){
-          sendRemoteAction({
-               from: 'ip',
-               action: 'set_playback_speed',
-               data: item.value
-          })
-     }
 }
 
 let ttoout
@@ -143,17 +131,9 @@ async function checkSchedule(){
                is_started_schedule.value = true
           } 
                  
-     } 
+     }
 
      await nextTick()
-
-     if(isIPAccess){
-          sendRemoteAction({
-               from: 'ip',
-               action: 'toogle_is_started_schedule',
-               data: Boolean(is_started_schedule.value),
-          })
-     }
 }
 
 let tab = ref(1)

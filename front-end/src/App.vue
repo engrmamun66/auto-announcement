@@ -21,14 +21,6 @@ const socketInit = inject('socketInit');
 
 
 const log = console.log
-// "main device" = whichever hostname this install's BASE_URL points to (localhost for a
-// local relay PC, or the public domain for a single-device cloud deployment like cb2).
-// Anything accessing on a DIFFERENT hostname (e.g. a LAN tablet by IP) is a remote client.
-const mainDeviceHostname = (() => {
-    try { return new URL(globalThis.GLOBAL_DATA?.env?.BASE_URL).hostname || 'localhost' }
-    catch { return 'localhost' }
-})()
-const isIPAccess = window.location.hostname !== mainDeviceHostname
 
 let helper = inject('helper')
 let http = inject('http')
@@ -93,17 +85,12 @@ let show_bulk_attedance_component = ref(false)
 let last_mouse_keyboard_activity = ref(new Date().getTime())
 // true if mouse/keyboard was used within the last 5 seconds
 const isUserActive = ref(false)
-const main_app_user_is_active = ref(false)
 const allow_to_reaload = ref(false)
 const showSmsModal = ref(false)
 const show_cloner_component = ref(false)
 
-watch(isUserActive, (bool) => {
-    sendRemoteAction({from: 'localhost', action: 'is_active_main_user', data: isUserActive.value})
-})
-
 const handleBeforeUnload = (event) => {
-    if(allow_to_reaload.value || (!isIPAccess && !isUserActive.value)){
+    if(allow_to_reaload.value || !isUserActive.value){
 
     } else {
         event.preventDefault()
@@ -123,7 +110,6 @@ watch(switches_PreviewInHomePage, (bool) => {
 let _skipWattingListWatch = false
 watch(wattingList, (newWaittinglist) => {
     storage('wattingList').value = newWaittinglist
-    sendRemoteAction({from: 'localhost', action: 'update_waiting_list', data: newWaittinglist, host_name: window.location.host})
 }, {deep: true})
 
 watch(attendenceList, (newAttendenceList) => {
@@ -453,7 +439,6 @@ provide('CONFIG', CONFIG)
 provide('langCode', langCode)
 provide('isBanglaUi', isBanglaUi)
 provide('t', t)
-provide('isIPAccess', isIPAccess)
 provide('is_started_schedule', is_started_schedule)
 provide('schedule_timeout', schedule_timeout)
 provide('classes', classes)
@@ -480,8 +465,6 @@ provide('getConfig', getConfig)
 provide('controlSounds', controlSounds)
 provide('showSwithBoardModal', showSwithBoardModal)
 provide('show_bulk_attedance_component', show_bulk_attedance_component)
-provide('isUserActive', isUserActive)
-provide('main_app_user_is_active', main_app_user_is_active)
 provide('allow_to_reaload', allow_to_reaload)
 provide('borad_image_url', borad_image_url)
 provide('switches_PreviewInHomePage', switches_PreviewInHomePage)
@@ -633,7 +616,7 @@ function _______SEAPRATOR______(){}
 function focusBarcodeInput__and__startAnnoucement(){
     callbacks.clearWattingList()
     const isMobileViewport = window.innerWidth <= 960
-    if(is_started_schedule.value && !isIPAccess && !showSmsModal.value && !show_cloner_component.value && !isMobileViewport){
+    if(is_started_schedule.value && !showSmsModal.value && !show_cloner_component.value && !isMobileViewport){
         let inputEl = document.getElementById('BARCODE_INPUT')
         if(inputEl) inputEl.focus()
     }
@@ -777,43 +760,6 @@ let Socket = ref(null)
 provide('Socket', Socket)
 let socketServerIsRunning = ref(false)
 let allow_auto_fetch = ref(false)
-let is_connected_with_main_app = ref(false)
-provide('sendRemoteAction', sendRemoteAction)
-provide('is_connected_with_main_app', is_connected_with_main_app)
-
-function onToaster({ type, message, duration }) {
-    sendRemoteAction({ from: 'localhost', action: 'onToaster', data: { type, message, duration } })
-}
-
-function sendRemoteAction(
-    {
-        from='any', // ip | localhost
-        action='say_hi',
-        selector = null,
-        data = null, 
-        host_name = null, 
-    } = {}
-){
-    try {
-        if(!Socket.value) return 
-        let SOCKET = Socket.value
-
-        let __data = { type: 'remote_action', action, selector, data, host_name }
-
-        if(from == 'any' || (from == 'ip' && isIPAccess) || (from == 'localhost' && !isIPAccess)){
-
-            if(from === 'ip'){
-                if(!is_connected_with_main_app.value) {
-                    sendRemoteAction() // try to connect with main app
-                    return
-                }
-            }
-            SOCKET.send(JSON.stringify(__data))
-        }
-    } catch (sendRemoteAction_error) {
-        console.error({sendRemoteAction_error}) 
-    }
-}
 
 emitter.on('is_connected_socket_server', (bool) => {
     socketServerIsRunning.value = bool
@@ -1005,53 +951,11 @@ async function initApp(){
         }
 
         if(socket_data.type == 'remote_action') {
-            let { action, selector, data } = socket_data
+            let { action, data } = socket_data
 
-            // localhost receives say_hi → reply with ack
-            if(!isIPAccess && action === 'say_hi'){
-                sendRemoteAction({action: 'say_hi_reply'})
-            }
-            // IP client receives ack → mark connected
-            if(isIPAccess && action === 'say_hi_reply'){
-                is_connected_with_main_app.value = true
-            }
-            // on/off
-            if(!isIPAccess && action === 'toogle_is_started_schedule'){
-                is_started_schedule.value = data // boolean
-            }
-            // Toggle emergency mode
-            if(!isIPAccess && action === 'toogle_emergency_mode'){
-                emergency_mode.value = data // boolean
-            }
-            // set playback speed
-            if(!isIPAccess && action === 'set_playback_speed'){
-                playback_speed.value = data
-            }
-            // localhost receives onClick from IP client → click the element (only if user is not active)
-            // !isUserActive.value
-            if(!isIPAccess && action === 'onClick' && selector && !isUserActive.value){
-                const el = document.querySelector(selector)
-                if(el) el.click()
-            }
-            if(isIPAccess && action === 'update_waiting_list'){
-                let { host_name } = socket_data
-                let _data = (data || []).map(item => {
-                    if(item.sound1){
-                        item.sound1 = String(item.sound1).replace(host_name, window.location.host)
-                    }
-                    return item
-                })
-                console.log({_data});
-                wattingList.value = _data
-            }
-            if(isIPAccess && action === 'is_active_main_user'){
-                main_app_user_is_active.value = data // boolean
-            }
-            if(!isIPAccess && action === 'call_punch__from_ip'){
-                punchToCallStudent(data.barcode, {...data})
-            }
-            if(!isIPAccess && action === 'student_calling'){
-                // Handle student calling when attendance is disabled
+            // Server-triggered "call this student" event (e.g. a random-call schedule)
+            // when attendance is disabled — sent directly by the backend to all clients.
+            if(action === 'student_calling'){
                 const student = data?.[0]
                 if(student){
                     const barcode = `${student.class_short}-${student.dakhela}-sound1-${student.year}`
@@ -1063,20 +967,10 @@ async function initApp(){
                     })
                 }
             }
-            if(!isIPAccess && action === 'remote_toaster'){
-                punchToCallStudent(data.barcode, {...data})
-            }
-            if(!isIPAccess && action === 'reload'){
-                window.location.reload()
-            }
         }
      })
 
      await CheckAccess({loader: true})
-
-    setTimeout(() => {
-        sendRemoteAction({from: 'ip'})
-    }, 2000);
 }
 
 
@@ -1113,12 +1007,6 @@ function broadcastPunch(barcode, punch_time){
 
 function punchToCallStudent(barcode='play-417-2024', { message='', source='device', device_index=0, fromSocket=false }={}){
     try {
-        
-        if(isIPAccess){
-            sendRemoteAction({from: 'ip', action: 'call_punch__from_ip', data: {barcode, message, source, device_index}})
-            return
-        }
-
 
         if(!is_started_schedule.value){
             emitter.emit('toaster-error', { message: helper.t('Switch is off')})
@@ -1423,7 +1311,7 @@ const force_active = computed(() => route.query.fa === 'true' || storage('active
     <!-- <SideBar>
         <routerView />
     </SideBar> -->
-    <Toaster @onToaster="onToaster"></Toaster>
+    <Toaster></Toaster>
     <template v-if="!authChecked">
         <!-- waiting on /auth-status -->
     </template>
