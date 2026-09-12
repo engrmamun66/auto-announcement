@@ -350,6 +350,12 @@ async function logout(){
   display: none;
 }
 
+/* "More" overflow sheet — hidden on desktop (it's Teleported to <body>, outside the media query's DOM scope, so it needs its own default-hidden rule) */
+.mobile-more-backdrop,
+.mobile-more-sheet {
+  display: none;
+}
+
 @media screen and (max-width: 960px) {
   .topnav__wifi {
     top: 13px;
@@ -454,6 +460,7 @@ async function logout(){
 
   /* "More" overflow sheet (Shedules / Devices / Import) */
   .mobile-more-backdrop {
+    display: block;
     position: fixed;
     inset: 0;
     background: rgba(0,0,0,0.5);
@@ -463,6 +470,7 @@ async function logout(){
   @keyframes moreBdIn { from { opacity: 0; } to { opacity: 1; } }
 
   .mobile-more-sheet {
+    display: block;
     position: fixed;
     left: 0;
     right: 0;
