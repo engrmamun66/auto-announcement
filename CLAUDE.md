@@ -57,9 +57,13 @@ Each domain has a class file and a corresponding route file:
 | — | `routes/config.js` | Config read/write endpoints |
 | — | `routes/settings.js` | DB settings read/write endpoints |
 | — | `routes/misc.js` | Miscellaneous utility endpoints |
-| — | `routes/refresh.js` | App refresh/restart triggers |
+| — | `routes/devices.js` | Registered device CRUD |
+| — | `routes/auth.js` | Login/logout/auth-status |
+| — | `routes/verify-password.js` | Password verification endpoint |
 
 Route files are mounted under `/api` in `server.js`. `settings.js` exports `getSettings`, `updateSetting`, `resetAllSettings` for use both in routes and during startup.
+
+**Auth gate**: `routes/auth.js` is mounted first and unprotected (`/login`, `/logout`, `/auth-status`). The `requireAuth` middleware (`src/middleware/auth.js`) is mounted right after — every `/api` route registered below it in `server.js` is gated behind authentication. `routes/commands.js` (device polling) is mounted last, at `/` (not `/api`), so it bypasses `requireAuth` entirely — devices authenticate via their own protocol instead.
 
 `routes/commands.js` handles **ZKTeco device communication** — includes polling endpoints (cdata/registry/getrequest/devicecmd) and command handlers:
 - **User management**: `add-enroller`, `add-admin`, `add-superadmin`, `add-users`, `remove-user`, `remove-users`
@@ -67,6 +71,7 @@ Route files are mounted under `/api` in `server.js`. `settings.js` exports `getS
 - **Biometric**: `create-fingerprint`, `get-fingerprints`, `delete-fingerprint`, `clear-fingerprints`
 - **Device control**: `sync-time`, `open-door`, `close-door`, `set-delay`, `restart`, `push` (raw commands)
 - All routes use `/:cn` parameter (device serial number)
+- Polling endpoint logic (cdata/registry/getrequest/devicecmd handlers) lives in `src/controllers/`
 
 `src/web-contents.js` holds the HTML shell template. The `/app` route injects `GLOBAL_DATA` (env vars + local IP), logo config, and CSS variables into it before sending to the browser.
 
