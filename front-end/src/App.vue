@@ -980,14 +980,18 @@ async function initApp(){
             let { punch_time, barcode, for_attendence, device_index } = socket_data
             let time_and_barcode = `${punch_time}-${barcode}`
 
-            let existing = storage('time_and_barcode').value
+            // sessionStorage (not the localStorage-backed `storage()` helper) —
+            // dedup must be per-tab: localStorage is shared across every tab of this
+            // origin, so two windows of the same browser would each see the other's
+            // write and silently skip processing the punch as a "duplicate"
+            let existing = sessionStorage.getItem('time_and_barcode')
 
             if(!existing || existing != time_and_barcode || useRoute()?.query?.force=='true'){
-                storage('time_and_barcode').value = time_and_barcode
+                sessionStorage.setItem('time_and_barcode', time_and_barcode)
                 if(for_attendence){
                     punchToSubmitAttendance(barcode, { for_attendence, device_index })
                 } else {
-                    punchToCallStudent(barcode, { for_attendence, device_index })
+                    punchToCallStudent(barcode, { for_attendence, device_index, fromSocket: true })
                 }
 
             }
@@ -1054,7 +1058,8 @@ async function initApp(){
                     punchToCallStudent(barcode, {
                         message: `Student called: ${student.name}`,
                         source: 'device',
-                        device_index: student.device_index || 0
+                        device_index: student.device_index || 0,
+                        fromSocket: true
                     })
                 }
             }
@@ -1096,7 +1101,17 @@ function focusCurrenPlayingSoundCard_if_userIsInavtiveForFewSeconds(){
 }
 
 
-function punchToCallStudent(barcode='play-417-2024', { message='', source='device', device_index=0 }={}){
+function broadcastPunch(barcode, punch_time){
+    try {
+        if(!Socket.value) return
+        sessionStorage.setItem('time_and_barcode', `${punch_time}-${barcode}`)
+        Socket.value.send(JSON.stringify({ type: 'attendence', punch_time, barcode, for_attendence: false, device_index: 0 }))
+    } catch (broadcastPunch_error) {
+        console.error({broadcastPunch_error})
+    }
+}
+
+function punchToCallStudent(barcode='play-417-2024', { message='', source='device', device_index=0, fromSocket=false }={}){
     try {
         
         if(isIPAccess){
@@ -1229,10 +1244,11 @@ function punchToCallStudent(barcode='play-417-2024', { message='', source='devic
                         if(!findLast){
                             wattingList.value.push(student)
                             addPunchLog(student)
+                            if(!fromSocket) broadcastPunch(barcode, student['punch_exact_time_text'])
                             emitter.emit('pushed_a_student__or__rechecktoPlay', student)
                             if(message){
                                     emitter.emit('toaster-success', { message, duration: 3000})
-                            } 
+                            }
                         }
                         else if(findLast && findLast?.is_called){
                             // wattingList.value.splice(findLastIndex, 0, student)
@@ -1249,6 +1265,7 @@ function punchToCallStudent(barcode='play-417-2024', { message='', source='devic
                             findLast['punch_exact_time_text'] = moment().format('Y-MM-DD HH:mm:ss')
 
                             addPunchLog(student)
+                            if(!fromSocket) broadcastPunch(barcode, findLast['punch_exact_time_text'])
                             emitter.emit('pushed_a_student__or__rechecktoPlay', student)
                             if(message){
                                     emitter.emit('toaster-success', { message, duration: 3000})
@@ -1266,8 +1283,9 @@ function punchToCallStudent(barcode='play-417-2024', { message='', source='devic
                     } else {
                         student['start_ms'] = helper.miliseconds() - 1000
                         student['end_ms'] = helper.miliseconds() + (10 * 1000)
-                        wattingList.value.unshift(student)  
+                        wattingList.value.unshift(student)
                         addPunchLog(student)
+                        if(!fromSocket) broadcastPunch(barcode, student['punch_exact_time_text'])
                         emitter.emit('toaster-success', { message: helper.t('Punch has been accepted in emergency mode'), duration: 5000})
                     } 
 
