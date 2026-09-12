@@ -542,7 +542,7 @@ body {
   .students-stat-card { padding: 20px; }
   .students-stat-card__body { flex-wrap: wrap; gap: 16px; }
   .students-stat-card__count { font-size: 2.4rem; }
-  .students-stat-card__badge { margin-left: 0; }
+  .students-stat-card__badge { display: none; }
 }
 
 /* WhatsApp Card Styles */
@@ -691,20 +691,96 @@ body {
         flex-direction: column;
         text-align: center;
     }
-    
+
     .whatsapp-icon {
         margin-right: 0;
         margin-bottom: 15px;
     }
-    
+
     .whatsapp-button {
         margin-left: 0;
         margin-top: 15px;
         width: 100%;
     }
-    
+
     .whatsapp-button .btn {
         width: 100%;
     }
+}
+
+@media (max-width: 480px) {
+  body {
+    padding: 10px;
+  }
+
+  .container {
+    margin-top: 15px;
+    margin-bottom: 25px;
+  }
+
+  .header {
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+  }
+
+  .header h1 {
+    font-size: 1.5rem;
+  }
+
+  .header p {
+    font-size: 0.9rem;
+  }
+
+  .info-card {
+    padding: 18px;
+  }
+
+  .card-icon {
+    width: 56px;
+    height: 56px;
+    margin-bottom: 15px;
+    font-size: 26px;
+  }
+
+  .card-title {
+    font-size: 1.1rem;
+  }
+
+  .card-body {
+    font-size: 0.9rem;
+  }
+
+  .students-stat-card {
+    padding: 16px;
+  }
+
+  .students-stat-card__icon {
+    width: 52px;
+    height: 52px;
+    font-size: 26px;
+  }
+
+  .students-stat-card__count {
+    font-size: 1.6rem;
+    flex-wrap: wrap;
+  }
+
+  .students-stat-card__count_sub {
+    font-size: 1rem;
+  }
+
+  .students-stat-card__badge {
+    font-size: 0.72rem;
+    padding: 5px 12px;
+  }
+
+  .students-stat-card__notice {
+    font-size: 0.8rem;
+    padding: 8px 10px;
+  }
+
+  iframe {
+    height: 260px !important;
+  }
 }
 </style>
