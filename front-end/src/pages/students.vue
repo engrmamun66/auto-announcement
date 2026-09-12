@@ -1129,6 +1129,18 @@ watch(fixedWidthSoundCol, (newVal) => {
   .sound-filter-group {
     display: none;
   }
+  .table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .table-container .table {
+    width: max-content;
+    min-width: 100%;
+  }
+  .table-container td,
+  .table-container th {
+    white-space: nowrap;
+  }
   .bulk-punch-label-full,
   .add-new-label-full {
     display: none;
