@@ -1061,25 +1061,26 @@ watch(fixedWidthSoundCol, (newVal) => {
 
     </template>
   
-
-    <EmDateTimePicker ref="dateTimePickerRef"
-      v-model="pickerModelValue"
-      @change="onChange_dateTimePicker"
-      @close="false"
-      :displayFormat="'DD-MMM-Y'"
-      :rangePicker="false" 
-      :timePicker="true" 
-      :minDate="moment().subtract(1, 'month')"
-      :isDisabled="false"
-      :autoOpen="false"
-      :timePickerButtons="true"
-      :use24FormatTimeForEvents="true"
-      :invisible="true"
-      :pickTimeFirst="true"
-      displayIn="modal" 
-      :buttons="{applyBtn: 'Set-Attendace', todayBtn: false}"
-      >
-    </EmDateTimePicker>
+    <div style="position: fixed;">
+      <EmDateTimePicker ref="dateTimePickerRef"
+        v-model="pickerModelValue"
+        @change="onChange_dateTimePicker"
+        @close="false"
+        :displayFormat="'DD-MMM-Y'"
+        :rangePicker="false" 
+        :timePicker="true" 
+        :minDate="moment().subtract(1, 'month')"
+        :isDisabled="false"
+        :autoOpen="false"
+        :timePickerButtons="true"
+        :use24FormatTimeForEvents="true"
+        :invisible="true"
+        :pickTimeFirst="true"
+        displayIn="modal" 
+        :buttons="{applyBtn: 'Set-Attendace', todayBtn: false}"
+        >
+      </EmDateTimePicker>
+    </div>
 
 
 </template>
