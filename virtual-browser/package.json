@@ -7,7 +7,7 @@
     "start": "node index.js",
     "postinstall": "playwright install chromium",
     "site": "node index.js https://cb2.softproit.cloud/app/#/?password=engrdevpass1",
-    "nohead": "VB_HEADLESS=true node index.js https://cb2.softproit.cloud/app/#/?password=engrdevpass1"
+    "vsite": "VB_HEADLESS=true node index.js https://cb2.softproit.cloud/app/#/?password=engrdevpass1"
   },
   "dependencies": {
     "playwright": "^1.47.0"
