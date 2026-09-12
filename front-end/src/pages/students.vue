@@ -629,15 +629,19 @@ watch(fixedWidthSoundCol, (newVal) => {
       <h1 class="students-page-title">{{ !addMode ? helper.t('Students') : helper.t('Add Student') }}</h1>
 
       <div class="d-flex justify-content-end align-items-center flex-wrap gap-2 students-toolbar-actions">
-        <Btn class="me-2" style="background: #673AB7;" :tooltip="`params.total = ${params?.total}`" >
+        <Btn style="background: #673AB7;" :tooltip="`params.total = ${params?.total}`" >
           {{ helper.t('Total') }}: 
           <span class="bg-success- p-1">{{ all_students_non_copied?.length }}</span>
            <!-- <span>{{ params?.total || '0' }}</span> -->
         </Btn>
         <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
-          <Btn @click.stop="bulkPunch()" style="background: #673AB7;" :disabled="!PunchButtonsRef?.length">{{ helper.t('Bulk Punch') }} ({{ PunchButtonsRef?.length || 0 }})</Btn>
+          <Btn @click.stop="bulkPunch()" style="background: #673AB7;" :disabled="!PunchButtonsRef?.length">
+            <span class="bulk-punch-label-full">{{ helper.t('Bulk Punch') }}</span>
+            <span class="bulk-punch-label-short">{{ helper.t('Punch') }}</span>
+            ({{ PunchButtonsRef?.length || 0 }})
+          </Btn>
         </template>
-        <Btn v-if="!addMode" class="me-2" @click="startAddingNewStudent" ><i class='bx bx-plus'></i> {{ helper.t('Add New') }}</Btn>
+        <Btn v-if="!addMode" class="me-2" @click="startAddingNewStudent" ><i class='bx bx-plus'></i> <span class="add-new-label-full">{{ helper.t('Add New') }}</span><span class="add-new-label-short">{{ helper.t('New') }}</span></Btn>
       </div>
     </div>
 
@@ -723,7 +727,7 @@ watch(fixedWidthSoundCol, (newVal) => {
             <input v-model="params.phone_number" type="tel" class="form-control cb-input" :placeholder="helper.t('Search phone...')" @keyup="getStudentsDebounced" @input="getStudentsDebounced">
           </div>
           <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
-            <div class="form-group">
+            <div class="form-group sound-filter-group">
               <label for="email">{{ helper.t('Sound') }}</label>
               <select v-model="params.sound1" @change="getStudents" class="form-control cb-input">
                 <option :value="null">-{{helper.t('All')}}-</option>
@@ -1114,9 +1118,24 @@ watch(fixedWidthSoundCol, (newVal) => {
 .student-filter-bar .filter-actions__spacer {
   visibility: hidden;
 }
+.bulk-punch-label-short,
+.add-new-label-short {
+  display: none;
+}
 @media (max-width: 767px) {
   .students-page-title {
     display: none;
+  }
+  .sound-filter-group {
+    display: none;
+  }
+  .bulk-punch-label-full,
+  .add-new-label-full {
+    display: none;
+  }
+  .bulk-punch-label-short,
+  .add-new-label-short {
+    display: inline;
   }
   .students-toolbar-actions {
     flex-wrap: nowrap;
