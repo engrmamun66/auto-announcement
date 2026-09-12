@@ -341,4 +341,21 @@ onMounted(() => {
 .sms-panel__title-row { display: flex; align-items: center; justify-content: space-between; }
 .sms-uncheck-btn { background: none; border: none; font-size: 11px; color: #9ca3af; cursor: pointer; padding: 0; text-decoration: underline; }
 .sms-uncheck-btn:hover { color: #374151; }
+
+.sms-modal-anim-enter-active,
+.sms-modal-anim-leave-active {
+  transition: opacity 0.3s ease;
+}
+.sms-modal-anim-enter-from,
+.sms-modal-anim-leave-to {
+  opacity: 0;
+}
+.sms-modal-anim-enter-active .sms-modal,
+.sms-modal-anim-leave-active .sms-modal {
+  transition: transform 0.3s ease;
+}
+.sms-modal-anim-enter-from .sms-modal,
+.sms-modal-anim-leave-to .sms-modal {
+  transform: translateY(100%);
+}
 </style>

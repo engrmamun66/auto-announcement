@@ -176,6 +176,10 @@ let card_dynamic_width = ref(200)
 
 onMounted(()=>{
 
+     if(window.innerWidth <= 450){
+          toggleSettings.value = false
+     }
+
      if(route.query.barcode){
           punchToCallStudent(route.query.barcode)
           setTimeout(() => {
@@ -257,11 +261,7 @@ function recallAllPunchedStudents(){
 
 
 
-     <div class="d-flex align-items-center bttt">
-          <!-- <div class="togglerbtn">
-               <btn @click="toggleSettings = !toggleSettings" class="px-3 shadow me-2"><i class='bx bx-list-ul'></i></btn>
-          </div> -->
-          
+     <div class="d-flex align-items-center justify-content-evenly bttt gap-2">
           <div class="relative w-100 me-2">
                <EmergencyMode v-if="emergency_mode"></EmergencyMode>
                <EmergencyMode v-if="emergency_mode" style="left:calc(100% - 30px)"></EmergencyMode>
@@ -269,41 +269,53 @@ function recallAllPunchedStudents(){
                :placeholder="barcodePlaceholder">
           </div>
 
-          <div v-if="is_started_schedule" class="me-2 p-1 px-2 play-pause" 
-          :class="{ 'emergency-active': emergency_mode }" 
-          @click="toggleEmergencyMode()"
-          :tooltip="helper.t('Emergency Mode')" flow="down" style="--tfsize:12px"
-           >
-               <i class='bx bxs-bell-ring'></i>
+          <div class="bttt-row2">
+               <div v-if="is_started_schedule" class="me-2 p-1 px-2 play-pause"
+               :class="{ 'emergency-active': emergency_mode }"
+               @click="toggleEmergencyMode()"
+               :tooltip="helper.t('Emergency Mode')" flow="down" style="--tfsize:12px"
+                >
+                    <i class='bx bxs-bell-ring'></i>
+               </div>
+
+               <div v-if="!manually_paused_the_playlist" @click="handlePayPause()" class="me-2 p-1 px-2 play-pause"><i class='bx bx-pause'></i></div>
+               <div v-else @click="handlePayPause()" class="me-2 p-1 px-2 play-pause"><i class='bx bx-play'></i></div>
+
+               <!-- Add here a button group (Normal & Faster) with icon prefix -->
+               <div class="btn-group me-2" role="group">
+                    <template v-for="item in speedList">
+                         <button :tooltip="helper.t('Playback Speed({value})').replace('{value}', item.value)" flow="down" style="--tfsize:12px" type="button" class="btn btn-outline-primary playbackButton" :class="{'active': playback_speed === item.value }" @click="onClickSpeed(item)">
+                              {{ item.label }}
+                         </button>
+                    </template>
+               </div>
+
+               <div class="togglerbtn">
+                    <btn @click="toggleSettings = !toggleSettings" class="px-3 shadow me-2"><i :class="toggleSettings ? 'bx bx-x' : 'bx bx-list-ul'"></i></btn>
+               </div>
+
+               <div v-if="isUsingSpeakerAutoControl" class="me-2 p-1 position-relative" @click.stop="showSwithBoardModal = !showSwithBoardModal">
+                    <img :src="borad_image_url" alt="" class="board-image">
+                    <span class="manual-mode" v-if="!isSpeakersAutoMode">{{ helper.t('manual') }}</span>
+               </div>
+
+               <!-- <BarcodeScannigAnimation v-if="is_started_schedule" :scannig="is_started_schedule" class="me-1"  ></BarcodeScannigAnimation>  -->
+               <!-- <Switch v-model="is_started_schedule" @click="checkSchedule" size="lg" :yes="helper.t('Started')" :no="helper.t('Stopped')" :bothVisible="false" class="me-2" ></Switch> -->
           </div>
-
-          <div v-if="!manually_paused_the_playlist" @click="handlePayPause()" class="me-2 p-1 px-2 play-pause"><i class='bx bx-pause'></i></div>
-          <div v-else @click="handlePayPause()" class="me-2 p-1 px-2 play-pause"><i class='bx bx-play'></i></div>
-
-          <!-- Add here a button group (Normal & Faster) with icon prefix -->
-          <div class="btn-group me-2" role="group">
-               <template v-for="item in speedList">
-                    <button :tooltip="helper.t('Playback Speed({value})').replace('{value}', item.value)" flow="down" style="--tfsize:12px" type="button" class="btn btn-outline-primary playbackButton" :class="{'active': playback_speed === item.value }" @click="onClickSpeed(item)">
-                         {{ item.label }}
-                    </button>
-               </template>
-          </div>
-
-          <div v-if="isUsingSpeakerAutoControl" class="me-2 p-1 position-relative" @click.stop="showSwithBoardModal = !showSwithBoardModal">
-               <img :src="borad_image_url" alt="" class="board-image">
-               <span class="manual-mode" v-if="!isSpeakersAutoMode">{{ helper.t('manual') }}</span>
-          </div> 
-         
-          <!-- <BarcodeScannigAnimation v-if="is_started_schedule" :scannig="is_started_schedule" class="me-1"  ></BarcodeScannigAnimation>  -->
-          <!-- <Switch v-model="is_started_schedule" @click="checkSchedule" size="lg" :yes="helper.t('Started')" :no="helper.t('Stopped')" :bothVisible="false" class="me-2" ></Switch> -->
      </div>
 
      
 
 
 
+     <Transition name="class-list-fade">
+          <div class="class-list-backdrop" v-if="toggleSettings" @click="toggleSettings = false"></div>
+     </Transition>
+
      <div class="sections mt-3">
+          <Transition name="class-list-slide">
           <div class="single-section class-list " v-if="toggleSettings">
+               <span class="class-list-close" @click="toggleSettings = false"><i class='bx bx-x'></i></span>
                <div class="tab-view" >
                     <div :class="{'active': tab==1}" @click="tab=1">{{ helper.t('Punch') }}</div>
                     <div :class="{'active': tab==2}" @click="tab=2">{{ helper.t('Call') }}</div>
@@ -427,6 +439,7 @@ function recallAllPunchedStudents(){
                     </ul>
                </div>
           </div>
+          </Transition>
 
 
           <div class="single-section watting-list relative">
@@ -723,12 +736,6 @@ function recallAllPunchedStudents(){
      .sections {
           flex-direction: column;
      }
-     .togglerbtn{
-          position: fixed;
-          top: 10px;
-          right: 10px;
-          z-index: 99999; 
-     }
      .togglerbtn > button,
      .togglerbtn > button:active,
      .togglerbtn > button:active:focus
@@ -739,8 +746,16 @@ function recallAllPunchedStudents(){
      .bttt{
           flex-wrap: wrap;
      }
-     .bttt > *{
-          margin-bottom: 5px;
+     .bttt-row2{
+          display: flex;
+          align-items: center;
+          flex-wrap: nowrap;
+          overflow-x: auto;
+          width: 100%;
+          padding-bottom: 5px;
+     }
+     .btn-group .playbackButton:nth-child(2){
+          display: none;
      }
 }
 .card-canceller{
@@ -853,5 +868,66 @@ function recallAllPunchedStudents(){
      color: white;
      background: var(--grad3);
      border-color: var(--primaryColor);
+}
+.togglerbtn{
+     display: none;
+}
+.bttt-row2{
+     display: contents;
+}
+.class-list-backdrop{
+     display: none;
+}
+.class-list-close{
+     display: none;
+}
+@media screen and (max-width: 450px) {
+     .togglerbtn{
+          display: block;
+     }
+     .class-list-close{
+          display: block;
+          position: absolute;
+          top: 10px;
+          right: 15px;
+          z-index: 10000;
+          font-size: 28px;
+          line-height: 1;
+          cursor: pointer;
+          color: #333;
+     }
+     .class-list-backdrop{
+          display: block;
+          position: fixed;
+          inset: 0;
+          background: rgba(0,0,0,0.5);
+          z-index: 9998;
+     }
+     .class-list-slide-enter-active,
+     .class-list-slide-leave-active{
+          transition: transform 0.3s ease;
+     }
+     .class-list-slide-enter-from,
+     .class-list-slide-leave-to{
+          transform: translateY(100%);
+     }
+     .class-list-fade-enter-active,
+     .class-list-fade-leave-active{
+          transition: opacity 0.3s ease;
+     }
+     .class-list-fade-enter-from,
+     .class-list-fade-leave-to{
+          opacity: 0;
+     }
+     .sections > .single-section.class-list{
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          z-index: 9999;
+          border-radius: 0;
+          background-color: rgb(240, 240, 240);
+     }
 }
 </style>
