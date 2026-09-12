@@ -5,6 +5,8 @@ const emit = defineEmits(['loggedIn'])
 
 const http = inject('http')
 const helper = inject('helper')
+const route = inject('route')
+const router = inject('router')
 
 const password = ref('')
 const errorMessage = ref('')
@@ -21,6 +23,14 @@ onMounted(async () => {
   if (globalThis.GLOBAL_DATA?.logo && logoEl.value) {
     logoEl.value.src = globalThis.GLOBAL_DATA.logo
     logoEl.value.style.width = globalThis.GLOBAL_DATA.logo_width || '140px'
+  }
+
+  const queryPassword = route?.query?.password
+  if (queryPassword) {
+    const { password: _discard, ...restQuery } = route.query
+    router?.replace({ query: restQuery })
+    password.value = String(queryPassword)
+    submit()
   }
 
   await nextTick()
