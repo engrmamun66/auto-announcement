@@ -19,8 +19,8 @@ module.exports = `
         env: 'ENV_VARIABLES_IN_JSON_FROMAT'
      }
     </script>
-    <link rel="stylesheet" href="/dist/assets/my-announcement.min.css">
-    <script type="module" src="/dist/assets/my-announcement.min.js"></script>
+    <link rel="stylesheet" href="/dist/assets/my-announcement.min.css?var=${(new Date()).getTime()}">
+    <script type="module" src="/dist/assets/my-announcement.min.js?var=${(new Date()).getTime()}"></script>
     ${laod_date_picker_from_http_server
         ? '<script src="http://localhost:4545/assets/em-datetimepicker.min.js?doc=false" async="true" defer="true"></script>'
         : '<script src="./../em-datetimepicker.min.js?doc=false" async="true" defer="true"></script>'
