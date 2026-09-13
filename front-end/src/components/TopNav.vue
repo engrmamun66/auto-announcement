@@ -5,17 +5,26 @@
 
       <div v-if="showDevPopup" class="dev-popup-backdrop" @click.prevent="showDevPopup = false" @contextmenu.prevent="showDevPopup = false"></div>
       <div v-if="showDevPopup" class="dev-popup" @click.stop>
-        <span class="border cp me-1 text-white px-1 size-08" @click.prevent.stop="show_bulk_attedance_component = true; showDevPopup = false">
+        <span class="border cp me-1 dev-popup-btn px-1 size-08" @click.prevent.stop="show_bulk_attedance_component = true; showDevPopup = false">
           <span :tooltip="helper.t('Bulk Attendence')" flow="left">{{ helper.t('Bulk') }}</span>
         </span>
-        <!-- <span class="border cp me-1 text-white px-1 size-08" @click.prevent.stop="$goto({name: 'env'}); showDevPopup = false">
+        <!-- <span class="border cp me-1 dev-popup-btn px-1 size-08" @click.prevent.stop="$goto({name: 'env'}); showDevPopup = false">
           <span :tooltip="helper.t('Show Config.js')" flow="left">{{ helper.t('Config') }}</span>
         </span> -->
-        <span class="border cp me-1 text-white px-1 size-08" @click.prevent.stop="show_cloner_component = true; showDevPopup = false">
+        <span class="border cp me-1 dev-popup-btn px-1 size-08" @click.prevent.stop="show_cloner_component = true; showDevPopup = false">
           <span :tooltip="helper.t('Clone Students')" flow="left">{{ helper.t('Clone') }}</span>
         </span>
-        <span class="border cp me-0 text-white px-1 size-08" @click.prevent.stop="reloadAllClients(); showDevPopup = false">
+        <span class="border cp me-1 dev-popup-btn px-1 size-08" @click.prevent.stop="reloadAllClients(); showDevPopup = false">
           <span :tooltip="helper.t('Reload every connected browser')" flow="left">{{ helper.t('Reload All') }}</span>
+        </span>
+        <span class="border cp me-1 dev-popup-btn px-1 size-08"
+        @click.prevent.stop="clearTimeAndBarcodeAllClients(); showDevPopup = false"
+        @contextmenu="log('Clear all `clear_time_and_barcode` from session storage')"
+        >
+          <span :tooltip="helper.t('Clear punch clear_time_and_barcode key on every connected browser')" flow="left">{{ helper.t('Clear Last Punch') }}</span>
+        </span>
+        <span class="border cp me-0 dev-popup-btn px-1 size-08" @click.prevent.stop="clearAllStorageAllClients(); showDevPopup = false">
+          <span :tooltip="helper.t('Clear all localStorage and sessionStorage keys on every connected browser')" flow="left">{{ helper.t('Clear All Storage') }}</span>
         </span>
       </div>
     </a>
@@ -174,10 +183,22 @@ let show_cloner_component = inject('show_cloner_component')
 let showSettingsPanel = ref(false)
 let showDevPopup = ref(false)
 const Socket = inject('Socket')
+const log = console.log
 
 function reloadAllClients(){
   if(!Socket.value) return
   Socket.value.send(JSON.stringify({ type: 'force_reload' }))
+}
+
+function clearTimeAndBarcodeAllClients(){
+  if(!Socket.value) return
+  Socket.value.send(JSON.stringify({ type: 'clear_time_and_barcode' }))
+  console.log(`Cleared all 'clear_time_and_barcode' from session storage`);
+}
+
+function clearAllStorageAllClients(){
+  if(!Socket.value) return
+  Socket.value.send(JSON.stringify({ type: 'clear_all_storage' }))
 }
 
 onMounted(()=>{
@@ -230,6 +251,13 @@ async function logout(){
   border-radius: 8px;
   box-shadow: 0 6px 20px rgba(0,0,0,0.35);
   white-space: nowrap;
+}
+
+.dev-popup-btn {
+  background: #fff !important;
+  color: #222 !important;
+  text-shadow: none !important;
+  border-radius: 5px;
 }
 
 .topnav {

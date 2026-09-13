@@ -955,6 +955,15 @@ async function initApp(){
             window.location.reload()
         }
 
+        if(socket_data.type == 'clear_time_and_barcode') {
+            sessionStorage.removeItem('time_and_barcode')
+        }
+
+        if(socket_data.type == 'clear_all_storage') {
+            localStorage.clear()
+            sessionStorage.clear()
+        }
+
         if(socket_data.type == 'remote_action') {
             let { action, data } = socket_data
 
