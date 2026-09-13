@@ -92,16 +92,6 @@ watch(selectedClassShort, (newClassShort) => {
   }
 })
 
-// `classes` can still be empty when this component mounts (e.g. right after a full
-// storage clear forces every cache to refetch) — the one-shot 500ms selectFistClass()
-// timer in onMounted would then find nothing and never retry, leaving the grid stuck
-// on its loading skeleton forever. Retry as soon as classes actually arrive.
-watch(classes, (newClasses) => {
-  if (!selectedClassShort.value && newClasses?.length) {
-    selectFistClass()
-  }
-})
-
 let timeout = null
 
 watch(liveAttendenceList, (len, prev) => {
@@ -572,12 +562,11 @@ function resolveStatus(item, dateStr) {
 let requestId = 0
 async function loadDailyLogs(classShortOverride = null) {
   const classShort = classShortOverride || selectedClassShort.value
-  if (!classShort) { isMounted.value = true; return }
-  if (!selectedRange.value?.[0] || !selectedRange.value?.[1]) { isMounted.value = true; return }
+  if (!classShort) return
+  if (!selectedRange.value?.[0] || !selectedRange.value?.[1]) return
   const students = getClassStudents(classShort)
   if (!students.length) {
     dailyLogs.value = []
-    isMounted.value = true
     return
   }
 
@@ -1864,58 +1853,6 @@ watch(
   }
   .class-button-list{
     max-width: 100%;
-    gap: 4px;
-    padding: 8px !important;
-  }
-  .class-button{
-    padding: 4px 6px;
-    padding-right: 2px;
-    font-size: 11px;
-    gap: 2px;
-  }
-  .class-menu-icon{
-    width: 16px;
-    height: 16px;
-    font-size: 12px;
-  }
-  .hazira-controls-bar{
-    gap: 6px;
-  }
-  .hazira-view-tabs{
-    padding: 0 4px;
-    gap: 4px;
-  }
-  .view-tab{
-    padding: 6px 8px;
-    font-size: 12px;
-  }
-  .shift-tab{
-    padding: 4px 6px;
-    gap: 0;
-  }
-  .shift-tab-name{
-    font-size: 11px;
-  }
-  .shift-tab-time{
-    font-size: 9px;
-  }
-  .legend-item-inline,
-  .legend-label-text{
-    font-size: 10px;
-  }
-  .daily-grid-row{
-    grid-template-columns: 130px repeat(var(--day-count), 30px);
-  }
-  .daily-grid-cell{
-    padding: 4px 2px;
-    font-size: 10px;
-  }
-  .student-name{
-    font-size: 11px;
-  }
-  .student-menu-icon{
-    width: 18px;
-    height: 18px;
   }
 }
 
