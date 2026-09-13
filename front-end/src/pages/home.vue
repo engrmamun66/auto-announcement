@@ -426,8 +426,9 @@ function recallAllPunchedStudents(){
                <div class="header-and-tools">
                     <h4 class="header-title"> {{ helper.t('Puch Board') }} </h4>
                     <div class="right-section" v-if="wattingList?.length">
-                         <span class="outlined" >{{ helper.t('Waitting:') }} {{ wattingList.filter(student => !student.is_called).length }}/{{ wattingList.length }}</span>
-                         <span class="outlined" >{{ helper.t('Completed:') }} {{ wattingList.filter(student => student.is_called).length }}/{{ wattingList.length }}</span>
+                         <span class="outlined wait-complete-count" >{{ helper.t('Waitting:') }} {{ wattingList.filter(student => !student.is_called).length }}/{{ wattingList.length }}</span>
+                         <span class="outlined wait-complete-count" >{{ helper.t('Completed:') }} {{ wattingList.filter(student => student.is_called).length }}/{{ wattingList.length }}</span>
+                         <span class="outlined total-count" >{{ helper.t('Total:') }} {{ wattingList.length }}</span>
                          <button class="action-button" @click.stop="showRecallConfirmation = true" ><i class='bx bxs-speaker transformY-1px' ></i> {{ helper.t('Recall All') }}</button>
                     </div> 
                </div>
@@ -864,6 +865,9 @@ function recallAllPunchedStudents(){
 @media screen and (max-width: 450px) {
      .togglerbtn{
           display: block;
+     }
+     .wait-complete-count{
+          display: none;
      }
      .class-list-close{
           display: block;
