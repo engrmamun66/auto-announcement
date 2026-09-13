@@ -950,6 +950,11 @@ async function initApp(){
             localStorage.setItem('gap_time__' + sn, text)
         }
 
+        if(socket_data.type == 'force_reload') {
+            allow_to_reaload.value = true
+            window.location.reload()
+        }
+
         if(socket_data.type == 'remote_action') {
             let { action, data } = socket_data
 

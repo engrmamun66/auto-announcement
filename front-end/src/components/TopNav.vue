@@ -1,7 +1,23 @@
 <template>
   <header class="topnav bg3" id="myTopnav">
-    <a ref="logo_wrapper" class="madrasha-title logo-area" :href="CONFIG?.settings?.attendance?.only_attendance_feature === true ? '#/attendence' : '#'">
+    <a ref="logo_wrapper" class="madrasha-title logo-area" :href="CONFIG?.settings?.attendance?.only_attendance_feature === true ? '#/attendence' : '#'" @contextmenu.prevent="showDevPopup = !showDevPopup">
       <img alt="site-logo" ref="logoEl" id="LOGO" src="" class="topnav__logo">
+
+      <div v-if="showDevPopup" class="dev-popup-backdrop" @click.prevent="showDevPopup = false" @contextmenu.prevent="showDevPopup = false"></div>
+      <div v-if="showDevPopup" class="dev-popup" @click.stop>
+        <span class="border cp me-1 text-white px-1 size-08" @click.prevent.stop="show_bulk_attedance_component = true; showDevPopup = false">
+          <span :tooltip="helper.t('Bulk Attendence')" flow="left">{{ helper.t('Bulk') }}</span>
+        </span>
+        <!-- <span class="border cp me-1 text-white px-1 size-08" @click.prevent.stop="$goto({name: 'env'}); showDevPopup = false">
+          <span :tooltip="helper.t('Show Config.js')" flow="left">{{ helper.t('Config') }}</span>
+        </span> -->
+        <span class="border cp me-1 text-white px-1 size-08" @click.prevent.stop="show_cloner_component = true; showDevPopup = false">
+          <span :tooltip="helper.t('Clone Students')" flow="left">{{ helper.t('Clone') }}</span>
+        </span>
+        <span class="border cp me-0 text-white px-1 size-08" @click.prevent.stop="reloadAllClients(); showDevPopup = false">
+          <span :tooltip="helper.t('Reload every connected browser')" flow="left">{{ helper.t('Reload All') }}</span>
+        </span>
+      </div>
     </a>
 
     <nav class="topnav__links">
@@ -156,6 +172,13 @@ const helper = inject('helper');
 let showSmsModal = inject('showSmsModal')
 let show_cloner_component = inject('show_cloner_component')
 let showSettingsPanel = ref(false)
+let showDevPopup = ref(false)
+const Socket = inject('Socket')
+
+function reloadAllClients(){
+  if(!Socket.value) return
+  Socket.value.send(JSON.stringify({ type: 'force_reload' }))
+}
 
 onMounted(()=>{
   if(typeof GLOBAL_DATA !== 'undefined'){
@@ -179,12 +202,34 @@ async function logout(){
 
 <style scoped>
 .madrasha-title {
+  position: relative;
   color: #ff0;
   font-size: 17px;
   text-shadow: 1px 2px 2px rgb(0,0,0);
   margin-right: 12px;
   border-top-left-radius: 0px;
   border-top-right-radius: 0px;
+}
+
+.dev-popup-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 998;
+}
+
+.dev-popup {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  background: var(--grad3);
+  border-radius: 8px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+  white-space: nowrap;
 }
 
 .topnav {
