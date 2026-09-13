@@ -1535,6 +1535,7 @@ watch(
   padding-left: 10px;
 }
 
+
 .sticky-head{
   z-index: 3;
   background: #f8fafc;
@@ -2322,6 +2323,14 @@ watch(
   font-weight: 600;
   margin-left: 0;
   line-height: 1;
+}
+
+
+@media (max-width: 768px) { 
+  .daily-grid-header,
+  .sticky-col {
+    position: static;
+  }
 }
 
 </style>
