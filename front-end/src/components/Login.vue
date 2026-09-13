@@ -7,6 +7,8 @@ const http = inject('http')
 const helper = inject('helper')
 const route = inject('route')
 const router = inject('router')
+const emitter = inject('emitter');
+const user_interacted = inject('user_interacted')
 
 const password = ref('')
 const errorMessage = ref('')
@@ -31,6 +33,19 @@ onMounted(async () => {
     router?.replace({ query: restQuery })
     password.value = String(queryPassword)
     submit()
+
+    user_interacted.value = true
+    // setTimeout(() => {
+    //   try {
+    //     const audio = document.createElement('audio')
+    //     audio.src = 'https://cb2.softproit.cloud/media/DHM103-1789221963903-blob'
+    //     document.body.appendChild(audio)
+    //     audio.play()
+    //     emitter.emit('toaster-success', { message: 'Auto play fired'})
+    //   } catch (e) {
+    //     console.error('audio play error', e)
+    //   }
+    // }, 1000)
   }
 
   await nextTick()
