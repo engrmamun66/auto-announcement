@@ -1379,7 +1379,6 @@ const force_active = computed(() => route.query.fa === 'true' || storage('active
             <Playlist ref="palylistComponent"></Playlist>
             <AddBulkAttendaceForDev v-if="show_bulk_attedance_component" @unmount="show_bulk_attedance_component = false"></AddBulkAttendaceForDev>
             <FetchBulkAttendanceFromDevice v-if="allow_auto_fetch" :isAutomatic="true" />
-
         </div>
     
         <template v-if="showAccessibilityAlert && appAccessData?.internet === true">
