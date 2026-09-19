@@ -1,6 +1,8 @@
 module.exports = {
   code: 'bn',
   strings: {
+    'Mute For Me': 'শুধু আমার জন্য মিউট করুন',
+    'Unmute For Me': 'শুধু আমার জন্য আনমিউট করুন',
     'Dashboard': 'ড্যাশবোর্ড',
     'Attendence': 'উপস্থিতি',
     'Attendance': 'উপস্থিতি',

@@ -45,9 +45,10 @@ defineProps({
 })
 
 let emergency_mode = inject('emergency_mode')
+let setEmergencyMode = inject('setEmergencyMode')
 
 function toggle(){
-  emergency_mode.value = !emergency_mode.value
+  setEmergencyMode(!emergency_mode.value)
 }
 
 </script>

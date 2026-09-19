@@ -352,8 +352,7 @@ webSocket(httpServer);
 async function startServer() {
   await loadDbSettings();
   httpServer.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}/app/#`);
-    console.log(`WebSocket running on ws://localhost:${PORT}`);
+    console.log(`Server & Soccket running on http://localhost:${PORT}/app/#`);
   });
 }
 

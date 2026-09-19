@@ -1,6 +1,8 @@
 module.exports = {
   code: 'en',
   strings: {
+    'Mute For Me': 'Mute For Me',
+    'Unmute For Me': 'Unmute For Me',
     'Dashboard': 'Dashboard',
     'Attendence': 'Attendance',
     'Attendance': 'Attendance',

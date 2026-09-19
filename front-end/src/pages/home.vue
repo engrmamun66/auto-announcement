@@ -54,10 +54,13 @@ let toggleSettings = inject('toggleSettings')
 let refreshDOM = inject('refreshDOM')
 
 let emergency_mode = inject('emergency_mode')
+let setEmergencyMode = inject('setEmergencyMode')
+let mute_for_me = inject('mute_for_me')
+let toggleMuteMode = inject('toggleMuteMode')
 let palylistComponent = inject('palylistComponent')
 
 function toggleEmergencyMode() {
-  emergency_mode.value = !emergency_mode.value
+  setEmergencyMode(!emergency_mode.value)
 }
 
 const barcodePlaceholder = computed(() =>
@@ -256,6 +259,14 @@ function recallAllPunchedStudents(){
                :tooltip="helper.t('Emergency Mode')" flow="down" style="--tfsize:12px"
                 >
                     <i class='bx bxs-bell-ring'></i>
+               </div>
+
+               <div class="me-2 p-1 px-2 play-pause"
+               :class="{ 'emergency-active': mute_for_me }"
+               @click="toggleMuteMode()"
+               :tooltip="helper.t(mute_for_me ? 'Unmute For Me' : 'Mute For Me')" flow="down" style="--tfsize:12px"
+                >
+                    <i :class="mute_for_me ? 'bx bx-volume-mute' : 'bx bx-volume-full'"></i>
                </div>
 
                <div v-if="!manually_paused_the_playlist" @click="handlePayPause()" class="me-2 p-1 px-2 play-pause"><i class='bx bx-pause'></i></div>

@@ -76,6 +76,11 @@ let isMounted = ref(false)
 let user_interacted = ref(false)
 let last_mouse_activity_time = ref(Date.now())
 let emergency_mode = ref(false)
+let mute_for_me = ref(false)
+
+function toggleMuteMode(){
+    mute_for_me.value = !mute_for_me.value
+}
 let LockscreenRef = ref(null)
 let lockscreenDismissing = ref(false)
 let disabilityAlretRef = ref(null)
@@ -452,8 +457,10 @@ provide('call_schedules', call_schedules)
 provide('toggleSettings', toggleSettings) 
 provide('refreshDOM', refreshDOM) 
 provide('user_interacted', user_interacted) 
-provide('emergency_mode', emergency_mode) 
-provide('punchToCallStudent', punchToCallStudent) 
+provide('emergency_mode', emergency_mode)
+provide('mute_for_me', mute_for_me)
+provide('toggleMuteMode', toggleMuteMode)
+provide('punchToCallStudent', punchToCallStudent)
 provide('punchToSubmitAttendance', punchToSubmitAttendance) 
 provide('all_students', all_students) 
 provide('all_students_non_copied', all_students_non_copied) 
@@ -643,8 +650,12 @@ watch(is_started_schedule, (a, b) => {
 }, {immediate: true}) 
   
 watch(emergency_mode, (a, b) => {
-    storage('emergency_mode').value = a 
-}) 
+    storage('emergency_mode').value = a
+})
+
+watch(mute_for_me, (a, b) => {
+    storage('mute_for_me').value = a
+})
 
 
 function stop_clear_and_reload(){
@@ -870,6 +881,7 @@ async function initApp(){
     wattingList.value = storage('wattingList').value || []
     is_started_schedule.value = Number(storage('is_started_schedule').value || 0) || is_started_schedule.value 
     emergency_mode.value = Boolean(storage('emergency_mode').value)
+    mute_for_me.value = Boolean(storage('mute_for_me').value)
  
 
     setTimeout(() => {
@@ -964,6 +976,10 @@ async function initApp(){
             sessionStorage.clear()
         }
 
+        if(socket_data.type == 'emergency_mode_sync') {
+            setEmergencyMode(!!socket_data.data, { fromSocket: true })
+        }
+
         if(socket_data.type == 'remote_action') {
             let { action, data } = socket_data
 
@@ -1009,6 +1025,19 @@ function focusCurrenPlayingSoundCard_if_userIsInavtiveForFewSeconds(){
 }
 
 
+function setEmergencyMode(value, { fromSocket=false } = {}){
+    emergency_mode.value = value
+    if(!fromSocket){
+        try {
+            if(!Socket.value) return
+            Socket.value.send(JSON.stringify({ type: 'emergency_mode_sync', data: value }))
+        } catch (setEmergencyMode_error) {
+            console.error({setEmergencyMode_error})
+        }
+    }
+}
+provide('setEmergencyMode', setEmergencyMode)
+
 function broadcastPunch(barcode, punch_time){
     try {
         if(!Socket.value) return
@@ -1028,7 +1057,7 @@ function punchToCallStudent(barcode='play-417-2024', { message='', source='devic
         }
         
         if(barcode == 'i' || barcode == 'I'){
-            emergency_mode.value = !emergency_mode.value
+            setEmergencyMode(!emergency_mode.value)
             return
         }
 
@@ -1233,7 +1262,7 @@ async function __punchToSubmitAttendance(barcode='play-417-2024', {
         const date = moment.isMoment(punch_time) ? moment(punch_time).format('YYYY-MM-DD') : moment(new Date(punch_time)).format('YYYY-MM-DD')
 
         if(barcode == 'i' || barcode == 'I'){
-            emergency_mode.value = !emergency_mode.value
+            setEmergencyMode(!emergency_mode.value)
             return
         }
 
@@ -1341,6 +1370,9 @@ const force_active = computed(() => route.query.fa === 'true' || storage('active
     </template>
     <template v-else>
         <TopNav></TopNav>
+        <div v-if="route.name !== 'home' && !CONFIG?.settings?.attendance?.only_attendance_feature" class="mute-fab" :class="{ 'emergency-active': mute_for_me }" @click="toggleMuteMode()" :tooltip="helper.t(mute_for_me ? 'Unmute For Me' : 'Mute For Me')" flow="left">
+            <i :class="mute_for_me ? 'bx bx-volume-mute' : 'bx bx-volume-full'"></i>
+        </div>
         <div v-if="isMounted" class="page-contents" :style="{ paddingBottom: (showAccessibilityAlert && appAccessData?.internet === true) || !appAccessData?.internet ? '80px' : '0' }" >
             <routerView />
             <SwitchBoard v-if="showSwithBoardModal" @close="showSwithBoardModal = false"></SwitchBoard>
@@ -1425,6 +1457,32 @@ const force_active = computed(() => route.query.fa === 'true' || storage('active
     18%       { transform: translateY(-12px); }
     24%       { transform: translateY(-3px); }
     25%, 100% { transform: translateY(0); }
+}
+
+.mute-fab {
+    display: none;
+}
+@media screen and (max-width: 960px) {
+    .mute-fab {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: fixed;
+        right: 16px;
+        bottom: 76px;
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        background: var(--grad3);
+        color: #fff;
+        font-size: 20px;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.35);
+        z-index: 998;
+        cursor: pointer;
+    }
+    .mute-fab.emergency-active {
+        background: #dc3545;
+    }
 }
 </style>
  
