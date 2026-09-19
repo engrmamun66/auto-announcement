@@ -95,7 +95,7 @@ vhssl  {
 
 extprocessor cb3node {
   type                    proxy
-  address                 127.0.0.1:3204
+  address                 127.0.0.1:3203
   maxConns                100
   pcKeepAliveTimeout      60
   initTimeout             60
@@ -110,7 +110,7 @@ context / {
 }
 
 websocket / {
-  address                 127.0.0.1:3204
+  address                 127.0.0.1:3203
 }
 
 EOF
