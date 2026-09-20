@@ -807,7 +807,15 @@ onMounted(async () => {
     setInterval(checkAuthStatus, 5 * 60 * 1000) // re-verify auth every 5 minutes
 })
 
+let appInitialized = false
+
 async function initApp(){
+    // initApp() can be reached twice (onMounted when already authenticated, and
+    // onLoggedIn after a fresh login) — without this guard each call opened its own
+    // socket + watchdog, leaving duplicate live WebSocket connections from one tab.
+    if(appInitialized) return
+    appInitialized = true
+
     applyLanguageSettings()
 
     window.addEventListener('beforeunload', handleBeforeUnload)
@@ -817,12 +825,13 @@ async function initApp(){
     }, 1000);
 
     setInterval(()=>{
-        if(Socket.value){ 
+        if(Socket.value){
             if(socketServerIsRunning.value === false){
+                Socket.value.close()
                 Socket.value = socketInit({emitter, toaster: true})
             }
         }
-    }, 5000) 
+    }, 5000)
 
     window.addEventListener("online", () => {
         appAccessData.value.internet = true
@@ -978,6 +987,12 @@ async function initApp(){
 
         if(socket_data.type == 'emergency_mode_sync') {
             setEmergencyMode(!!socket_data.data, { fromSocket: true })
+        }
+
+        if(socket_data.type == 'force_logout') {
+            http.post('/logout').catch(()=>{}).finally(()=>{
+                emitter.emit('auth-required')
+            })
         }
 
         if(socket_data.type == 'remote_action') {

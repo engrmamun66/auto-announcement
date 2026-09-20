@@ -21,5 +21,26 @@ module.exports = function (utils, Backup) {
 
   router.get('/sw', (req, res) => utils._(req, res));
 
+  router.get('/connected-devices', (req, res) => {
+    const devices = global.connectedDevices ? Array.from(global.connectedDevices.values()) : [];
+    res.status(200).send({ success: true, data: devices });
+  });
+
+  router.post('/connected-devices/:id/logout', (req, res) => {
+    const targetId = Number(req.params.id);
+    if (!global.connectedDevices) {
+      return res.status(404).send({ success: false, message: 'No connected devices tracked.' });
+    }
+    for (const [client, info] of global.connectedDevices.entries()) {
+      if (info.id === targetId) {
+        if (client.readyState === client.OPEN) {
+          client.send(JSON.stringify({ type: 'force_logout' }));
+        }
+        return res.status(200).send({ success: true, message: 'Logout signal sent.' });
+      }
+    }
+    res.status(404).send({ success: false, message: 'Device not found or already disconnected.' });
+  });
+
   return router;
 };

@@ -30,8 +30,11 @@
         <span class="border cp me-1 dev-popup-btn dev-popup-btn-danger px-1 size-08" @click.prevent.stop="clearAllStorageAllClients(); showDevPopup = false">
           <span :tooltip="helper.t('Clear all localStorage and sessionStorage keys on every connected browser')" flow="left">{{ helper.t('Clear All Storage') }}</span>
         </span>
-        <span class="border cp me-0 dev-popup-btn dev-popup-btn-danger px-1 size-08" @click.prevent.stop="show_bulk_attedance_component = true; showDevPopup = false">
+        <span class="border cp me-1 dev-popup-btn dev-popup-btn-danger px-1 size-08" @click.prevent.stop="show_bulk_attedance_component = true; showDevPopup = false">
           <span :tooltip="helper.t('Bulk Attendence')" flow="left">{{ helper.t('Bulk') }}</span>
+        </span>
+        <span class="border cp me-0 dev-popup-btn px-1 size-08" @click.prevent.stop="openConnectedDevicesModal(); showDevPopup = false">
+          <span :tooltip="helper.t('Show all connected devices')" flow="left">{{ helper.t('Connected Devices') }}</span>
         </span>
       </div>
     </a>
@@ -161,6 +164,53 @@
   <Transition name="sms-modal-anim">
     <SmsModal v-if="showSmsModal" @close="showSmsModal = false" />
   </Transition>
+
+  <modal v-if="showConnectedDevicesModal" :title="helper.t('Connected Devices')" width="800px" @close="showConnectedDevicesModal = false">
+    <div class="connected-devices-modal">
+      <div v-if="loadingConnectedDevices" class="text-center p-3">{{ helper.t('Loading...') }}</div>
+      <div v-else-if="!connectedDevicesList.length" class="text-center p-3">{{ helper.t('No devices connected') }}</div>
+      <div v-else class="connected-devices-table-wrapper">
+        <table class="connected-devices-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>{{ helper.t('IP Address') }}</th>
+              <th>{{ helper.t('Device Type') }}</th>
+              <th>{{ helper.t('OS') }}</th>
+              <th>{{ helper.t('Browser') }}</th>
+              <th>{{ helper.t('Connected At') }}</th>
+              <th>{{ helper.t('User Agent') }}</th>
+              <th>{{ helper.t('Action') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="device in connectedDevicesList" :key="device.id">
+              <td>{{ device.id }}</td>
+              <td>{{ device.ip }}</td>
+              <td>
+                <span class="device-type-badge" :class="'device-type-' + device.deviceType.toLowerCase()">
+                  <i :class="device.deviceType === 'Mobile' ? 'bx bx-mobile-alt' : device.deviceType === 'Tablet' ? 'bx bx-tab' : 'bx bx-desktop'"></i>
+                  {{ device.deviceType }}
+                </span>
+              </td>
+              <td>{{ device.os }}</td>
+              <td>{{ device.browser }}</td>
+              <td>{{ new Date(device.connectedAt).toLocaleString() }}</td>
+              <td class="connected-devices-ua" :tooltip="device.userAgent" flow="up">{{ device.userAgent }}</td>
+              <td>
+                <button class="device-logout-btn" :disabled="loggingOutDeviceId === device.id" @click="logoutDevice(device.id)">
+                  <i class='bx bx-log-out'></i> {{ loggingOutDeviceId === device.id ? helper.t('Logging out...') : helper.t('Logout') }}
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="text-end mt-2">
+        <button class="topnav__update-btn" @click="openConnectedDevicesModal()"><i class='bx bx-refresh'></i> {{ helper.t('Refresh') }}</button>
+      </div>
+    </div>
+  </modal>
 </template>
 
 <script setup>
@@ -170,6 +220,7 @@ import Btn from './Btn.vue'
 import cloneStudents from './cloneStudents.vue'
 import ConfigSettings from './settings/ConfigSettings.vue'
 import SmsModal from './SmsModal.vue'
+import Modal from './modal.vue'
 
 let logoEl = ref(null)
 let logo_wrapper = ref(null)
@@ -228,6 +279,37 @@ function clearTimeAndBarcodeAllClients(){
 function clearAllStorageAllClients(){
   if(!Socket.value) return
   Socket.value.send(JSON.stringify({ type: 'clear_all_storage' }))
+}
+
+let showConnectedDevicesModal = ref(false)
+let loadingConnectedDevices = ref(false)
+let connectedDevicesList = ref([])
+let loggingOutDeviceId = ref(null)
+
+async function openConnectedDevicesModal(){
+  showConnectedDevicesModal.value = true
+  loadingConnectedDevices.value = true
+  try {
+    const res = await http.get('/connected-devices')
+    connectedDevicesList.value = res.data?.data || []
+  } catch (error) {
+    connectedDevicesList.value = []
+  } finally {
+    loadingConnectedDevices.value = false
+  }
+}
+
+async function logoutDevice(id){
+  if(!confirm(helper.t('Log this device out now?'))) return
+  loggingOutDeviceId.value = id
+  try {
+    await http.post(`/connected-devices/${id}/logout`)
+    connectedDevicesList.value = connectedDevicesList.value.filter(d => d.id !== id)
+  } catch (error) {
+    emitter.emit('toaster-error', { message: helper.t('Failed to logout this device.') })
+  } finally {
+    loggingOutDeviceId.value = null
+  }
 }
 
 onMounted(()=>{
@@ -292,6 +374,92 @@ async function logout(){
 .dev-popup-btn.dev-popup-btn-danger {
   background: #dc3545 !important;
   color: #fff !important;
+}
+
+.connected-devices-table-wrapper {
+  overflow-x: auto;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.connected-devices-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.connected-devices-table th,
+.connected-devices-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.connected-devices-table th {
+  background: #f8fafc;
+  position: sticky;
+  top: 0;
+  font-weight: 700;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #374151;
+}
+
+.connected-devices-table td.connected-devices-ua {
+  min-width: 260px;
+  max-width: 420px;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.device-type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.device-type-desktop {
+  background: rgba(59,130,246,0.12);
+  color: #2563eb;
+}
+
+.device-type-mobile {
+  background: rgba(34,197,94,0.12);
+  color: #16a34a;
+}
+
+.device-type-tablet {
+  background: rgba(234,179,8,0.15);
+  color: #b45309;
+}
+
+.device-logout-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border: none;
+  border-radius: 6px;
+  background: #dc3545;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.device-logout-btn:hover:not(:disabled) {
+  background: #b02a37;
+}
+
+.device-logout-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .topnav {
