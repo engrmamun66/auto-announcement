@@ -160,6 +160,7 @@
       </RouterLink>
     </div>
   </Teleport>
+  -->
 
   <cloneStudents v-if="show_cloner_component" @unmount="show_cloner_component = false"></cloneStudents>
   <ConfigSettings v-if="showSettingsPanel" @unmount="showSettingsPanel = false" />
