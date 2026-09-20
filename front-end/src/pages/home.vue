@@ -118,11 +118,16 @@ function inputBarcode(event){
                punchToCallStudent(barcode)
                setTimeout(() => {
                     event.target.value = ''
-               }, 300); 
+               }, 300);
           }
      }, 10);
 }
- 
+
+function submitBarcodeInput(){
+     let inputEl = document.getElementById('BARCODE_INPUT')
+     if(inputEl) inputBarcode({ target: inputEl })
+}
+
 
 
  
@@ -250,6 +255,7 @@ function recallAllPunchedStudents(){
                <EmergencyMode v-if="emergency_mode" style="left:calc(100% - 30px)"></EmergencyMode>
                <input id="BARCODE_INPUT" type="text" @keyup.enter="inputBarcode" @paste="inputBarcode" class="form-control px-4 py-2 text-center py-1 cb-input"
                :placeholder="barcodePlaceholder">
+               <span class="barcode-submit-btn" @click="submitBarcodeInput()"><i class='bx bx-right-arrow-alt'></i></span>
           </div>
 
           <div class="bttt-row2">
@@ -868,6 +874,9 @@ function recallAllPunchedStudents(){
 .togglerbtn{
      display: none;
 }
+.barcode-submit-btn{
+     display: none;
+}
 .class-list-backdrop{
      display: none;
 }
@@ -875,6 +884,23 @@ function recallAllPunchedStudents(){
      display: none;
 }
 @media screen and (max-width: 450px) {
+     .barcode-submit-btn{
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          position: absolute;
+          right: 6px;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 30px;
+          height: 30px;
+          border-radius: 50%;
+          background: var(--grad3);
+          color: #fff;
+          font-size: 18px;
+          cursor: pointer;
+          z-index: 2;
+     }
      .togglerbtn{
           display: block;
      }
