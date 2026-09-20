@@ -1,6 +1,12 @@
 <template>
   <header class="topnav bg3" id="myTopnav">
-    <a ref="logo_wrapper" class="madrasha-title logo-area" :href="CONFIG?.settings?.attendance?.only_attendance_feature === true ? '#/attendence' : '#'" @contextmenu.prevent="showDevPopup = !showDevPopup">
+    <a ref="logo_wrapper" class="madrasha-title logo-area" :href="CONFIG?.settings?.attendance?.only_attendance_feature === true ? '#/attendence' : '#'"
+      @contextmenu.prevent="showDevPopup = !showDevPopup"
+      @touchstart="handleLogoTouchStart"
+      @touchend="handleLogoTouchEnd"
+      @touchmove="cancelLogoLongPress"
+      @touchcancel="cancelLogoLongPress"
+      >
       <img alt="site-logo" ref="logoEl" id="LOGO" src="" class="topnav__logo">
 
       <div v-if="showDevPopup" class="dev-popup-backdrop" @click.prevent="showDevPopup = false" @contextmenu.prevent="showDevPopup = false"></div>
@@ -15,16 +21,16 @@
         <span class="border cp me-1 dev-popup-btn px-1 size-08" @click.prevent.stop="reloadAllClients(); showDevPopup = false">
           <span :tooltip="helper.t('Reload every connected browser')" flow="left">{{ helper.t('Reload All') }}</span>
         </span>
-        <span class="border cp me-1 dev-popup-btn px-1 size-08"
+        <span class="border cp me-1 dev-popup-btn dev-popup-btn-danger px-1 size-08"
         @click.prevent.stop="clearTimeAndBarcodeAllClients(); showDevPopup = false"
         @contextmenu="log('Clear all `clear_time_and_barcode` from session storage')"
         >
           <span :tooltip="helper.t('Clear punch clear_time_and_barcode key on every connected browser')" flow="left">{{ helper.t('Clear Last Punch') }}</span>
         </span>
-        <span class="border cp me-0 dev-popup-btn px-1 size-08" @click.prevent.stop="clearAllStorageAllClients(); showDevPopup = false">
+        <span class="border cp me-1 dev-popup-btn dev-popup-btn-danger px-1 size-08" @click.prevent.stop="clearAllStorageAllClients(); showDevPopup = false">
           <span :tooltip="helper.t('Clear all localStorage and sessionStorage keys on every connected browser')" flow="left">{{ helper.t('Clear All Storage') }}</span>
         </span>
-        <span class="border cp me-1 dev-popup-btn px-1 size-08" @click.prevent.stop="show_bulk_attedance_component = true; showDevPopup = false">
+        <span class="border cp me-0 dev-popup-btn dev-popup-btn-danger px-1 size-08" @click.prevent.stop="show_bulk_attedance_component = true; showDevPopup = false">
           <span :tooltip="helper.t('Bulk Attendence')" flow="left">{{ helper.t('Bulk') }}</span>
         </span>
       </div>
@@ -186,6 +192,28 @@ let showDevPopup = ref(false)
 const Socket = inject('Socket')
 const log = console.log
 
+let logoLongPressTimer = null
+let logoLongPressTriggered = false
+
+function handleLogoTouchStart(){
+  logoLongPressTriggered = false
+  logoLongPressTimer = setTimeout(() => {
+    logoLongPressTriggered = true
+    showDevPopup.value = true
+  }, 600)
+}
+
+function cancelLogoLongPress(){
+  clearTimeout(logoLongPressTimer)
+}
+
+function handleLogoTouchEnd(event){
+  clearTimeout(logoLongPressTimer)
+  if(logoLongPressTriggered){
+    event.preventDefault()
+  }
+}
+
 function reloadAllClients(){
   if(!Socket.value) return
   Socket.value.send(JSON.stringify({ type: 'force_reload' }))
@@ -259,6 +287,11 @@ async function logout(){
   color: #222 !important;
   text-shadow: none !important;
   border-radius: 5px;
+}
+
+.dev-popup-btn.dev-popup-btn-danger {
+  background: #dc3545 !important;
+  color: #fff !important;
 }
 
 .topnav {
@@ -391,6 +424,12 @@ async function logout(){
     z-index: 10;
   }
   .topnav__logo { width: 130px !important; }
+
+  .dev-popup {
+    flex-wrap: wrap;
+    white-space: normal;
+    max-width: min(320px, 90vw);
+  }
 
   /* Page navigation now lives in the bottom tab bar on mobile */
   .topnav__links {
