@@ -721,7 +721,11 @@ function recallAllPunchedStudents(){
 .tab-view div.active{
      background: rgba(255, 255, 255, 0.495);
      border-bottom: 2px solid white;
-     
+
+}
+
+.bttt-row2{
+     display: contents;
 }
 
 @media screen and (max-width: 450px) {
@@ -863,9 +867,6 @@ function recallAllPunchedStudents(){
 }
 .togglerbtn{
      display: none;
-}
-.bttt-row2{
-     display: contents;
 }
 .class-list-backdrop{
      display: none;

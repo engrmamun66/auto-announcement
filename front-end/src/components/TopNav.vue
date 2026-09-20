@@ -5,9 +5,7 @@
 
       <div v-if="showDevPopup" class="dev-popup-backdrop" @click.prevent="showDevPopup = false" @contextmenu.prevent="showDevPopup = false"></div>
       <div v-if="showDevPopup" class="dev-popup" @click.stop>
-        <span class="border cp me-1 dev-popup-btn px-1 size-08" @click.prevent.stop="show_bulk_attedance_component = true; showDevPopup = false">
-          <span :tooltip="helper.t('Bulk Attendence')" flow="left">{{ helper.t('Bulk') }}</span>
-        </span>
+        
         <!-- <span class="border cp me-1 dev-popup-btn px-1 size-08" @click.prevent.stop="$goto({name: 'env'}); showDevPopup = false">
           <span :tooltip="helper.t('Show Config.js')" flow="left">{{ helper.t('Config') }}</span>
         </span> -->
@@ -25,6 +23,9 @@
         </span>
         <span class="border cp me-0 dev-popup-btn px-1 size-08" @click.prevent.stop="clearAllStorageAllClients(); showDevPopup = false">
           <span :tooltip="helper.t('Clear all localStorage and sessionStorage keys on every connected browser')" flow="left">{{ helper.t('Clear All Storage') }}</span>
+        </span>
+        <span class="border cp me-1 dev-popup-btn px-1 size-08" @click.prevent.stop="show_bulk_attedance_component = true; showDevPopup = false">
+          <span :tooltip="helper.t('Bulk Attendence')" flow="left">{{ helper.t('Bulk') }}</span>
         </span>
       </div>
     </a>
@@ -432,10 +433,10 @@ async function logout(){
 
   }
   /* Dashboard sits visually centered among the footer tabs */
-  #footer-link-attendence { order: 1; }
+  #footer-link-attendence { order: 4; }
   #footer-link-students { order: 2; }
   #footer-link-home { order: 3; }
-  #footer-link-contact { order: 4; }
+  #footer-link-contact { order: 1; }
   #footer-link-more { order: 5; }
   .mobile-footer-nav a {
     position: relative;
