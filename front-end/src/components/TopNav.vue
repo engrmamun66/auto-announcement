@@ -85,6 +85,13 @@
     </nav>
 
     <div class="topnav__version">
+      <button v-if="!isInsideMobileApp" class="topnav__update-btn" :tooltip="helper.t('Download Android App')" flow="down" :disabled="checkingApk" @click="downloadMobileApp()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+      </button>
       <button v-if="CONFIG?.settings?.sms?.enabled" class="topnav__update-btn topnav__sms-btn" tooltip="Send SMS" flow="down" @click="showSmsModal = true">
         <svg class="sms-bubble-icon" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">
           <rect x="2" y="2" width="52" height="40" rx="10" ry="10" fill="white" stroke="currentColor" stroke-width="3"/>
@@ -324,6 +331,30 @@ onMounted(()=>{
     }
   }
 })
+
+// Android app built from /mobile-app, copied manually to public/CallingBird.apk
+const MOBILE_APP_URL = '/CallingBird.apk'
+// No need to offer the APK inside the app itself (window.CallingBirdApp is injected by the Android WebView)
+const isInsideMobileApp = typeof window.CallingBirdApp !== 'undefined'
+let checkingApk = ref(false)
+
+async function downloadMobileApp(){
+  checkingApk.value = true
+  try {
+    const res = await fetch(MOBILE_APP_URL, { method: 'HEAD', cache: 'no-store' })
+    if(!res.ok) throw new Error(res.status)
+    const link = document.createElement('a')
+    link.href = MOBILE_APP_URL
+    link.setAttribute('download', 'CallingBird.apk')
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+  } catch (error) {
+    emitter.emit('toaster-error', { message: helper.t('Mobile app (CallingBird.apk) is not available yet.') })
+  } finally {
+    checkingApk.value = false
+  }
+}
 
 async function logout(){
   try {
