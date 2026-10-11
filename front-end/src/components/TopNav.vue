@@ -11,6 +11,8 @@
 
       <div v-if="showDevPopup" class="dev-popup-backdrop" @click.prevent="showDevPopup = false" @contextmenu.prevent="showDevPopup = false"></div>
       <div v-if="showDevPopup" class="dev-popup" @click.stop>
+        <div v-if="companyName" class="dev-popup__company">{{ companyName }}</div>
+        <div class="dev-popup__actions">
         
         <!-- <span class="border cp me-1 dev-popup-btn px-1 size-08" @click.prevent.stop="$goto({name: 'env'}); showDevPopup = false">
           <span :tooltip="helper.t('Show Config.js')" flow="left">{{ helper.t('Config') }}</span>
@@ -36,6 +38,7 @@
         <span class="border cp me-0 dev-popup-btn px-1 size-08" @click.prevent.stop="openConnectedDevicesModal(); showDevPopup = false">
           <span :tooltip="helper.t('Show all connected devices')" flow="left">{{ helper.t('Connected Devices') }}</span>
         </span>
+        </div>
       </div>
     </a>
 
@@ -277,6 +280,7 @@ let showSettingsPanel = ref(false)
 let showDevPopup = ref(false)
 const Socket = inject('Socket')
 const log = console.log
+const companyName = globalThis.GLOBAL_DATA?.env?.COMPANY || ''
 
 let logoLongPressTimer = null
 let logoLongPressTriggered = false
@@ -450,13 +454,33 @@ async function logout(){
   left: 0;
   z-index: 999;
   display: flex;
-  align-items: center;
-  gap: 6px;
+  flex-direction: column;
+  align-items: stretch;
   padding: 8px 10px;
   background: var(--grad3);
   border-radius: 8px;
   box-shadow: 0 6px 20px rgba(0,0,0,0.35);
   white-space: nowrap;
+}
+
+.dev-popup__company {
+  /* width:0 + min-width:100% → wraps to the button row's width instead of stretching the popup */
+  width: 0;
+  min-width: 100%;
+  white-space: normal;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  text-shadow: none;
+  padding: 0 2px 6px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+
+.dev-popup__actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .dev-popup-btn {
@@ -718,9 +742,11 @@ async function logout(){
   .topnav__logo { width: 130px !important; }
 
   .dev-popup {
-    flex-wrap: wrap;
     white-space: normal;
     max-width: min(320px, 90vw);
+  }
+  .dev-popup__actions {
+    flex-wrap: wrap;
   }
 
   /* Page navigation now lives in the bottom tab bar on mobile */
