@@ -7,6 +7,21 @@ class Store {
   lastPollingTimes = {};
   timeAdjustmentModeExpiry = {}; // sn -> timestamp (ms) when the calibration window closes
   timeAdjustmentModeTimers = {}; // sn -> setTimeout handle that auto-disables it
+  attendanceQueryPendingUntil = {}; // sn -> timestamp (ms) while a DATA QUERY ATTLOG is being collected
+  attendancePackReceivedAt = {}; // sn -> timestamp (ms) of the last ATTLOG query pack
+
+  setAttendanceQueryPending(sn, durationMs) {
+    if (durationMs) this.attendanceQueryPendingUntil[sn] = Date.now() + durationMs;
+    else delete this.attendanceQueryPendingUntil[sn];
+  }
+
+  isAttendanceQueryPending(sn) {
+    return (this.attendanceQueryPendingUntil[sn] || 0) > Date.now();
+  }
+
+  markAttendancePackReceived(sn) {
+    this.attendancePackReceivedAt[sn] = Date.now();
+  }
 
   nextPollingTime(sn) {
     const last = this.lastPollingTimes[sn];

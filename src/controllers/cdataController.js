@@ -283,7 +283,14 @@ class CdataController {
         // Process each punch through attendance submission
         // const only_attendance_feature = global.config?.settings?.attendance?.only_attendance_feature
         const forceAsRealtime = req.query.forceAsRealtime === 'true'
-        let is_realtime_punch = records?.length === 1
+        // A history query (DATA QUERY ATTLOG) is answered in packs of ~128 rows. Its last pack can
+        // hold a single row, which must not be mistaken for a live punch (that would save it and send SMS).
+        // Live punches carry no PackIdx and are recent; query packs do, or are old while a query is pending.
+        const isQueryPack = req.query.PackIdx !== undefined || (
+          Store.isAttendanceQueryPending(sn) &&
+          moment().diff(moment(records?.[0]?.punch_time, 'YYYY-MM-DD HH:mm:ss'), 'minutes') > 2
+        )
+        let is_realtime_punch = records?.length === 1 && !isQueryPack
           // && moment(records?.[0]?.punch_time, 'YYYY-MM-DD HH:mm:ss').isBetween(
           //     now.clone().subtract(realtime_window_seconds, 'seconds'),
           //     now.clone().add(realtime_window_seconds, 'seconds'),
@@ -309,8 +316,13 @@ class CdataController {
           // Store by date key if pending, otherwise use 'all' key
           console.log(`📋 Batch attendance (${records.length} records). Stored for manual review or bulk import.`);
           const dateKey = Store.data[sn].pendingDateKey || 'all';
-          Store.data[sn].attendance[dateKey] = records;
-          console.log(`✅ Attendance stored [${dateKey}]: ${records.length} records`);
+          // Append each pack (do not overwrite), skipping rows already received
+          const existing = Store.data[sn].attendance[dateKey] || [];
+          const seen = new Set(existing.map(r => `${r.user_id}|${r.punch_time}`));
+          const fresh = records.filter(r => !seen.has(`${r.user_id}|${r.punch_time}`));
+          Store.data[sn].attendance[dateKey] = [...existing, ...fresh];
+          Store.markAttendancePackReceived(sn);
+          console.log(`✅ Attendance stored [${dateKey}] pack ${packIdx}: +${fresh.length} → ${Store.data[sn].attendance[dateKey].length} records`);
         }
       });
     }
