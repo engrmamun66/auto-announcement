@@ -4,6 +4,8 @@ module.exports = {
     'Realtime Attendance Card': 'রিয়েলটাইম উপস্থিতি কার্ড',
     'Card: Face Focus': 'কার্ড: ফেস ফোকাস',
     'Card: Standard': 'কার্ড: স্ট্যান্ডার্ড',
+    'Card: Neon Glow': 'কার্ড: নিয়ন গ্লো',
+    'Glossy gradient card with an animated neon border': 'অ্যানিমেটেড নিয়ন বর্ডারসহ চকচকে গ্রেডিয়েন্ট কার্ড',
     'Full-colour card with the status as the background': 'স্ট্যাটাস অনুযায়ী রঙিন কার্ড',
     'Photo fills the card; details slide up on hover': 'পুরো কার্ডজুড়ে ছবি; মাউস রাখলে বিস্তারিত দেখাবে',
     'Clean white card with the time as the headline': 'সময়কে প্রধান করে পরিষ্কার সাদা কার্ড',

@@ -91,6 +91,40 @@
                     <div v-if="item?.remarks" class="std-remarks">“{{ item.remarks }}”</div>
                   </div>
 
+                  <!-- ===== Design 4: Neon Glow — gradient base, animated neon border, glossy finish ===== -->
+                  <div v-else-if="cardDesign === 4" class="neo-wrap" :class="['is-' + statusKey(item), { live_data: item?.live_data }]">
+                    <div class="neo-card">
+                      <span class="neo-gloss"></span>
+                      <div class="neo-chips">
+                        <span class="neo-chip">ID: {{ item?.student_id }}</span>
+                        <span class="neo-chip neo-chip--dir">{{ item?.in_time ? 'IN' : 'OUT' }}</span>
+                      </div>
+                      <div class="neo-avatar">
+                        <img class="neo-photo" :src="getProfileImage(getStudent(item))" alt="profile" />
+                      </div>
+                      <h4 class="neo-name" :title="getStudent(item)?.name">{{ getStudent(item)?.name || 'Unknown' }}</h4>
+                      <div class="neo-class">{{ getStudent(item)?.class || 'Unknown' }}</div>
+
+                      <div class="neo-time-block" :tooltip="lateTooltip(item)">
+                        <div class="neo-time-label">{{ item?.in_time ? helper.t('In Time :') : helper.t('Out Time :') }}</div>
+                        <div class="neo-time">{{ timeValue(item) }}</div>
+                        <div class="neo-status-row">
+                          <span class="neo-pill">{{ statusText(item) }}</span>
+                          <span v-if="lateText(item)" class="neo-late">{{ lateText(item) }}</span>
+                        </div>
+                      </div>
+
+                      <div class="neo-foot">
+                        <span class="neo-shift"><i class='bx bx-time-five'></i> {{ Ahelper.printShift(item?.shift_duration) }}</span>
+                        <span class="d-flex column-gap-1">
+                          <span class="neo-mini">{{ Ahelper.printDate(item) }}</span>
+                          <button class="neo-del" type="button" :title="helper.t('Delete this attendance?')" @click.stop="deleteAttedence(item)"><i class='bx bxs-trash'></i></button>
+                        </span>
+                      </div>
+                      <div v-if="item?.remarks" class="neo-remarks">“{{ item.remarks }}”</div>
+                    </div>
+                  </div>
+
                   <!-- ===== Design 1: Default ===== -->
                   <template v-else>
                     <div class="popup in-out d-flex">
@@ -206,7 +240,7 @@ const liveAttendenceList = inject("liveAttendenceList");
 let log = console.log
 
 const late_consideration_minute = CONFIG.value?.settings?.attendance?.late_consideration_minute || 0
-// 1 = Default, 2 = Face Focus, 3 = Standard (Settings → Settings tab)
+// 1 = Default, 2 = Face Focus, 3 = Standard, 4 = Neon Glow (Settings → Settings tab)
 const cardDesign = getSelectedRealtimeCard(CONFIG.value?.settings?.attendance)
 // Face Focus: on touch screens (no hover) a tap opens the details panel
 const openDetailsKey = ref(null)
@@ -692,6 +726,7 @@ span[status]{
   flex-direction: column;
   background: #fff;
   border: none;
+  border-bottom: 3px solid var(--std-accent); /* matches the header's status colour */
   border-radius: 14px;
   padding: 0 16px 12px;
   color: #1f2937;
@@ -862,6 +897,241 @@ span[status]{
   font-size: 12px;
   font-style: italic;
   color: #64748b;
+}
+
+/* ===== Design 4: Neon Glow ===== */
+/* Rotating conic-gradient border (animated via a registered custom property) around a glossy dark card */
+@property --neo-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+.neo-wrap{
+  --neo-1: #22c55e;
+  --neo-2: #06b6d4;
+  --neo-3: #a3e635;
+  --neo-glow: rgba(34, 197, 94, 0.45);
+  position: relative;
+  height: 100%;
+  padding: 2px; /* border thickness */
+  border-radius: 18px;
+  background: conic-gradient(from var(--neo-angle), var(--neo-1), var(--neo-2), var(--neo-3), var(--neo-1));
+  animation: neoSpin 4s linear infinite;
+  box-shadow: 0 0 14px var(--neo-glow), 0 0 32px -8px var(--neo-glow);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.neo-wrap.is-late{
+  --neo-1: #f97316;
+  --neo-2: #f43f5e;
+  --neo-3: #facc15;
+  --neo-glow: rgba(249, 115, 22, 0.45);
+}
+.neo-wrap.is-out{
+  --neo-1: #06b6d4;
+  --neo-2: #8b5cf6;
+  --neo-3: #3b82f6;
+  --neo-glow: rgba(6, 182, 212, 0.45);
+}
+.neo-wrap:hover{
+  transform: translateY(-4px);
+  box-shadow: 0 0 22px var(--neo-glow), 0 0 48px -6px var(--neo-glow);
+}
+.neo-wrap.live_data{ animation: neoSpin 4s linear infinite, livePulse 0.9s ease; }
+@keyframes neoSpin{ to { --neo-angle: 360deg; } }
+
+.neo-card{
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 16px 16px 12px;
+  border-radius: 16px;
+  overflow: hidden;
+  color: #e2e8f0;
+  background:
+    radial-gradient(120% 60% at 50% 0%, color-mix(in srgb, var(--neo-1) 35%, transparent), transparent 70%),
+    linear-gradient(160deg, #111827 0%, #1e1b4b 55%, #0f172a 100%);
+}
+
+/* Glossy reflection + hover sheen */
+.neo-gloss{
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(175deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.06) 32%, rgba(255, 255, 255, 0) 46%);
+}
+.neo-gloss::after{
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -60%;
+  width: 40%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.28), transparent);
+  transform: skewX(-18deg);
+  transition: left 0.7s ease;
+}
+.neo-wrap:hover .neo-gloss::after{ left: 130%; }
+
+.neo-chips{
+  position: relative;
+  align-self: flex-start;
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.neo-chip{
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 9px;
+  border-radius: 999px;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(4px);
+}
+.neo-chip--dir{
+  background: color-mix(in srgb, var(--neo-1) 35%, transparent);
+  border-color: var(--neo-1);
+}
+
+.neo-avatar{
+  position: relative;
+  padding: 3px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--neo-1), var(--neo-2));
+  box-shadow: 0 0 16px var(--neo-glow);
+}
+.neo-photo{
+  display: block;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #1e293b;
+  border: 2px solid #0f172a;
+}
+.neo-name{
+  position: relative;
+  margin: 10px 0 2px;
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.3;
+  color: #fff;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.4);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.neo-class{
+  position: relative;
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.neo-time-block{
+  position: relative;
+  width: 100%;
+  margin: 12px 0 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+.neo-time-label{
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #94a3b8;
+}
+.neo-time{
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+  text-shadow: 0 0 10px var(--neo-glow), 0 0 22px var(--neo-glow);
+}
+.neo-status-row{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+.neo-pill{
+  font-size: 11px;
+  font-weight: 800;
+  padding: 2px 12px;
+  border-radius: 999px;
+  color: #0f172a;
+  background: linear-gradient(90deg, var(--neo-1), var(--neo-3));
+  box-shadow: 0 0 10px var(--neo-glow);
+}
+.neo-late{
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--neo-3);
+}
+
+.neo-foot{
+  position: relative;
+  width: 100%;
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 12px;
+  color: #cbd5e1;
+}
+.neo-shift{
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+.neo-mini{
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 1px 6px;
+  font-size: 11px;
+}
+.neo-del{
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  padding: 0 4px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+.neo-del:hover{
+  color: #fecaca;
+  background: rgba(239, 68, 68, 0.25);
+}
+.neo-remarks{
+  position: relative;
+  width: 100%;
+  margin-top: 6px;
+  font-size: 12px;
+  font-style: italic;
+  color: #94a3b8;
+  text-align: left;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .neo-wrap,
+  .neo-wrap.live_data{ animation: none; }
+  .neo-gloss::after{ transition: none; }
 }
 
 @keyframes livePulse{

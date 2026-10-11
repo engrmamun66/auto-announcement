@@ -7,6 +7,7 @@ export const REALTIME_CARD_DESIGNS = [
   { id: 1, name: 'Default', description: 'Full-colour card with the status as the background' },
   { id: 2, name: 'Card: Face Focus', description: 'Photo fills the card; details slide up on hover' },
   { id: 3, name: 'Card: Standard', description: 'Clean white card with the time as the headline' },
+  { id: 4, name: 'Card: Neon Glow', description: 'Glossy gradient card with an animated neon border' },
 ]
 
 export function getSelectedRealtimeCard(attendanceSettings) {

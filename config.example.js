@@ -123,6 +123,10 @@ module.exports = {
                          id: 3,
                          name: 'Card: Standard',
                     },
+                    {
+                         id: 4,
+                         name: 'Card: Neon Glow',
+                    },
                ],
                
           },

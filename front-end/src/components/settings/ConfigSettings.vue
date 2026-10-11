@@ -398,10 +398,15 @@ onUnmounted(() => { if (hasSaved.value) {
 .cs-card-thumb--2 .t-photo { width: 30px; height: 30px; border-radius: 50%; background: #e2e8f0; top: 8px; left: calc(50% - 15px); }
 .cs-card-thumb--2 .t-line { left: 0; right: 0; bottom: 0; height: 24px; background: linear-gradient(to top, rgba(15,23,42,0.95), rgba(15,23,42,0)); }
 .cs-card-thumb--2 .t-line--short { height: 4px; border-radius: 3px; background: #fff; width: 40%; left: 8px; bottom: 8px; right: auto; }
-.cs-card-thumb--3 { background: #fff; border: 1px solid #e5e7eb; box-shadow: 0 2px 6px rgba(15,23,42,0.12); }
+.cs-card-thumb--3 { background: #fff; border: 1px solid #e5e7eb; border-bottom: 3px solid #16a34a; box-shadow: 0 2px 6px rgba(15,23,42,0.12); }
 .cs-card-thumb--3 .t-photo { width: 18px; height: 18px; border-radius: 50%; background: #e2e8f0; border: 2px solid #fff; top: 6px; left: 8px; z-index: 1; }
 .cs-card-thumb--3 .t-line { left: 0; right: 0; top: 0; height: 30px; background: linear-gradient(135deg, #16a34a, #15803d); }
 .cs-card-thumb--3 .t-line--short { width: auto; height: 20px; left: 8px; right: 8px; top: 38px; bottom: auto; border-radius: 5px; background: #dcfce7; }
+
+.cs-card-thumb--4 { background: linear-gradient(160deg, #111827, #1e1b4b); border: 2px solid #22c55e; box-shadow: 0 0 8px rgba(34,197,94,0.55), inset 0 0 0 1px #06b6d4; }
+.cs-card-thumb--4 .t-photo { width: 22px; height: 22px; border-radius: 50%; background: #e2e8f0; border: 2px solid #22c55e; box-shadow: 0 0 6px #22c55e; top: 8px; left: calc(50% - 11px); }
+.cs-card-thumb--4 .t-line { left: 0; right: 0; top: 0; height: 45%; background: linear-gradient(175deg, rgba(255,255,255,0.22), rgba(255,255,255,0)); }
+.cs-card-thumb--4 .t-line--short { height: 5px; border-radius: 3px; background: #22c55e; box-shadow: 0 0 6px #22c55e; width: 44%; left: 28%; top: 42px; }
 
 /* Classes table */
 .cs__panel--table { padding: 10px; overflow-x: auto; }
