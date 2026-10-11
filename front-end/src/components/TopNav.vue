@@ -86,15 +86,15 @@
 
     <div class="topnav__version">
       <button v-if="!isInsideMobileApp" class="topnav__update-btn topnav__app-btn" :tooltip="helper.t('Download Android App')" flow="down" :disabled="checkingApk" @click="downloadMobileApp()">
-        <!-- "App Download" icon: "App" label above a phone with a download arrow -->
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="28" viewBox="0 0 24 38" fill="none">
-          <path d="M3.65128 10H2.24503L4.8054 2.72727H6.43182L8.99574 10H7.58949L5.64702 4.21875H5.5902L3.65128 10ZM3.69744 7.14844H7.53267V8.20668H3.69744V7.14844ZM9.89684 12.0455V4.54545H11.161V5.44744H11.2356C11.3019 5.31487 11.3954 5.17401 11.5162 5.02486C11.6369 4.87334 11.8002 4.74432 12.0062 4.63778C12.2122 4.52888 12.475 4.47443 12.7946 4.47443C13.216 4.47443 13.5959 4.58215 13.9345 4.79759C14.2754 5.01065 14.5453 5.3267 14.7441 5.74574C14.9454 6.16241 15.046 6.67377 15.046 7.27983C15.046 7.87879 14.9477 8.38778 14.7512 8.80682C14.5547 9.22585 14.2872 9.54545 13.9487 9.76562C13.6101 9.9858 13.2266 10.0959 12.7981 10.0959C12.4856 10.0959 12.2264 10.0438 12.0204 9.93963C11.8145 9.83546 11.6487 9.70999 11.5233 9.56321C11.4002 9.41406 11.3043 9.2732 11.2356 9.14062H11.1824V12.0455H9.89684ZM11.1575 7.27273C11.1575 7.62547 11.2072 7.93442 11.3066 8.19957C11.4084 8.46473 11.554 8.67187 11.7434 8.82102C11.9352 8.9678 12.1672 9.04119 12.4395 9.04119C12.7235 9.04119 12.9615 8.96544 13.1532 8.81392C13.345 8.66004 13.4894 8.45052 13.5865 8.18537C13.6859 7.91785 13.7356 7.61364 13.7356 7.27273C13.7356 6.93419 13.6871 6.63352 13.59 6.37074C13.493 6.10795 13.3485 5.90199 13.1568 5.75284C12.965 5.60369 12.7259 5.52912 12.4395 5.52912C12.1648 5.52912 11.9316 5.60133 11.7399 5.74574C11.5481 5.89015 11.4025 6.09257 11.3031 6.35298C11.206 6.6134 11.1575 6.91998 11.1575 7.27273ZM16.1468 12.0455V4.54545H17.411V5.44744H17.4856C17.5519 5.31487 17.6454 5.17401 17.7662 5.02486C17.8869 4.87334 18.0502 4.74432 18.2562 4.63778C18.4622 4.52888 18.725 4.47443 19.0446 4.47443C19.466 4.47443 19.8459 4.58215 20.1845 4.79759C20.5254 5.01065 20.7953 5.3267 20.9941 5.74574C21.1954 6.16241 21.296 6.67377 21.296 7.27983C21.296 7.87879 21.1977 8.38778 21.0012 8.80682C20.8047 9.22585 20.5372 9.54545 20.1987 9.76562C19.8601 9.9858 19.4766 10.0959 19.0481 10.0959C18.7356 10.0959 18.4764 10.0438 18.2704 9.93963C18.0645 9.83546 17.8987 9.70999 17.7733 9.56321C17.6502 9.41406 17.5543 9.2732 17.4856 9.14062H17.4324V12.0455H16.1468ZM17.4075 7.27273C17.4075 7.62547 17.4572 7.93442 17.5566 8.19957C17.6584 8.46473 17.804 8.67187 17.9934 8.82102C18.1852 8.9678 18.4172 9.04119 18.6895 9.04119C18.9735 9.04119 19.2115 8.96544 19.4032 8.81392C19.595 8.66004 19.7394 8.45052 19.8365 8.18537C19.9359 7.91785 19.9856 7.61364 19.9856 7.27273C19.9856 6.93419 19.9371 6.63352 19.84 6.37074C19.743 6.10795 19.5985 5.90199 19.4068 5.75284C19.215 5.60369 18.9759 5.52912 18.6895 5.52912C18.4148 5.52912 18.1816 5.60133 17.9899 5.74574C17.7981 5.89015 17.6525 6.09257 17.5531 6.35298C17.456 6.6134 17.4075 6.91998 17.4075 7.27273Z" fill="currentColor"/>
+        <!-- "App Download" icon: phone with a download arrow, "App" label below -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="29" viewBox="0 0 24 39" fill="none">
           <g stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M17.5 16H6.5C4.84315 16 3.5 17.3431 3.5 19V33C3.5 34.6569 4.84315 36 6.5 36H17.5C19.1569 36 20.5 34.6569 20.5 33V19C20.5 17.3431 19.1569 16 17.5 16Z"/>
-            <path d="M12 20.75V27.75"/>
-            <path d="M8.75 24.5L12 27.75L15.25 24.5"/>
-            <path d="M10 32.25H14"/>
+            <path d="M17.5 2H6.5C4.84315 2 3.5 3.34315 3.5 5V19C3.5 20.6569 4.84315 22 6.5 22H17.5C19.1569 22 20.5 20.6569 20.5 19V5C20.5 3.34315 19.1569 2 17.5 2Z"/>
+            <path d="M12 6.75V13.75"/>
+            <path d="M8.75 10.5L12 13.75L15.25 10.5"/>
+            <path d="M10 18.25H14"/>
           </g>
+          <path d="M3.65128 36H2.24503L4.8054 28.7273H6.43182L8.99574 36H7.58949L5.64702 30.2188H5.5902L3.65128 36ZM3.69744 33.1484H7.53267V34.2067H3.69744V33.1484ZM9.89684 38.0455V30.5455H11.161V31.4474H11.2356C11.3019 31.3149 11.3954 31.174 11.5162 31.0249C11.6369 30.8733 11.8002 30.7443 12.0062 30.6378C12.2122 30.5289 12.475 30.4744 12.7946 30.4744C13.216 30.4744 13.5959 30.5821 13.9345 30.7976C14.2754 31.0107 14.5453 31.3267 14.7441 31.7457C14.9454 32.1624 15.046 32.6738 15.046 33.2798C15.046 33.8788 14.9477 34.3878 14.7512 34.8068C14.5547 35.2259 14.2872 35.5455 13.9487 35.7656C13.6101 35.9858 13.2266 36.0959 12.7981 36.0959C12.4856 36.0959 12.2264 36.0438 12.0204 35.9396C11.8145 35.8355 11.6487 35.71 11.5233 35.5632C11.4002 35.4141 11.3043 35.2732 11.2356 35.1406H11.1824V38.0455H9.89684ZM11.1575 33.2727C11.1575 33.6255 11.2072 33.9344 11.3066 34.1996C11.4084 34.4647 11.554 34.6719 11.7434 34.821C11.9352 34.9678 12.1672 35.0412 12.4395 35.0412C12.7235 35.0412 12.9615 34.9654 13.1532 34.8139C13.345 34.66 13.4894 34.4505 13.5865 34.1854C13.6859 33.9179 13.7356 33.6136 13.7356 33.2727C13.7356 32.9342 13.6871 32.6335 13.59 32.3707C13.493 32.108 13.3485 31.902 13.1568 31.7528C12.965 31.6037 12.7259 31.5291 12.4395 31.5291C12.1648 31.5291 11.9316 31.6013 11.7399 31.7457C11.5481 31.8902 11.4025 32.0926 11.3031 32.353C11.206 32.6134 11.1575 32.92 11.1575 33.2727ZM16.1468 38.0455V30.5455H17.411V31.4474H17.4856C17.5519 31.3149 17.6454 31.174 17.7662 31.0249C17.8869 30.8733 18.0502 30.7443 18.2562 30.6378C18.4622 30.5289 18.725 30.4744 19.0446 30.4744C19.466 30.4744 19.8459 30.5821 20.1845 30.7976C20.5254 31.0107 20.7953 31.3267 20.9941 31.7457C21.1954 32.1624 21.296 32.6738 21.296 33.2798C21.296 33.8788 21.1977 34.3878 21.0012 34.8068C20.8047 35.2259 20.5372 35.5455 20.1987 35.7656C19.8601 35.9858 19.4766 36.0959 19.0481 36.0959C18.7356 36.0959 18.4764 36.0438 18.2704 35.9396C18.0645 35.8355 17.8987 35.71 17.7733 35.5632C17.6502 35.4141 17.5543 35.2732 17.4856 35.1406H17.4324V38.0455H16.1468ZM17.4075 33.2727C17.4075 33.6255 17.4572 33.9344 17.5566 34.1996C17.6584 34.4647 17.804 34.6719 17.9934 34.821C18.1852 34.9678 18.4172 35.0412 18.6895 35.0412C18.9735 35.0412 19.2115 34.9654 19.4032 34.8139C19.595 34.66 19.7394 34.4505 19.8365 34.1854C19.9359 33.9179 19.9856 33.6136 19.9856 33.2727C19.9856 32.9342 19.9371 32.6335 19.84 32.3707C19.743 32.108 19.5985 31.902 19.4068 31.7528C19.215 31.6037 18.9759 31.5291 18.6895 31.5291C18.4148 31.5291 18.1816 31.6013 17.9899 31.7457C17.7981 31.8902 17.6525 32.0926 17.5531 32.353C17.456 32.6134 17.4075 32.92 17.4075 33.2727Z" fill="currentColor"/>
         </svg>
       </button>
       <button v-if="CONFIG?.settings?.sms?.enabled" class="topnav__update-btn topnav__sms-btn" tooltip="Send SMS" flow="down" @click="showSmsModal = true">
@@ -179,6 +179,26 @@
   <Transition name="sms-modal-anim">
     <SmsModal v-if="showSmsModal" @close="showSmsModal = false" />
   </Transition>
+
+  <modal v-if="showApkUploadModal" :title="helper.t('Upload Android App')" width="460px" @close="closeApkUploadModal()">
+    <div class="apk-upload">
+      <p class="apk-upload__note">
+        {{ helper.t('The Android app is not uploaded yet. Upload the APK file; it will be saved as') }}
+        <code>CallingBird.apk</code>.
+      </p>
+      <input type="file" accept=".apk,application/vnd.android.package-archive" class="form-control" :disabled="uploadingApk" @change="apkFile = $event.target.files[0] || null">
+      <div v-if="uploadingApk" class="apk-upload__progress">
+        <div class="apk-upload__bar" :style="{ width: apkUploadProgress + '%' }"></div>
+        <span>{{ apkUploadProgress }}%</span>
+      </div>
+      <div class="text-end mt-3">
+        <button class="btn btn-secondary me-2" :disabled="uploadingApk" @click="closeApkUploadModal()">{{ helper.t('Cancel') }}</button>
+        <button class="btn btn-primary" :disabled="!apkFile || uploadingApk" @click="uploadMobileApp()">
+          {{ uploadingApk ? helper.t('Uploading...') : helper.t('Upload') }}
+        </button>
+      </div>
+    </div>
+  </modal>
 
   <modal v-if="showConnectedDevicesModal" :title="helper.t('Connected Devices')" width="800px" @close="showConnectedDevicesModal = false">
     <div class="connected-devices-modal">
@@ -355,9 +375,45 @@ async function downloadMobileApp(){
     link.click()
     link.remove()
   } catch (error) {
-    emitter.emit('toaster-error', { message: helper.t('Mobile app (CallingBird.apk) is not available yet.') })
+    // Not uploaded yet: let the user upload it to public/CallingBird.apk
+    showApkUploadModal.value = true
   } finally {
     checkingApk.value = false
+  }
+}
+
+let showApkUploadModal = ref(false)
+let apkFile = ref(null)
+let uploadingApk = ref(false)
+let apkUploadProgress = ref(0)
+
+function closeApkUploadModal(){
+  if(uploadingApk.value) return
+  showApkUploadModal.value = false
+  apkFile.value = null
+}
+
+async function uploadMobileApp(){
+  if(!apkFile.value) return
+  if(!/\.apk$/i.test(apkFile.value.name)){
+    emitter.emit('toaster-error', { message: helper.t('Only .apk files are allowed.') })
+    return
+  }
+  const formData = new FormData()
+  formData.append('apk', apkFile.value)
+  uploadingApk.value = true
+  apkUploadProgress.value = 0
+  try {
+    const res = await http.post('/mobile-app', formData, {
+      formData: true,
+      onUploadProgress: (e) => { if(e.total) apkUploadProgress.value = Math.round(e.loaded * 100 / e.total) },
+    })
+    emitter.emit('toaster-success', { message: res.data?.message || helper.t('Uploaded.') })
+    uploadingApk.value = false
+    closeApkUploadModal()
+  } catch (error) {
+    uploadingApk.value = false
+    emitter.emit('toaster-error', { message: error?.response?.data?.message || helper.t('Upload failed.') })
   }
 }
 
@@ -564,6 +620,31 @@ async function logout(){
 }
 .topnav__update-btn:hover {
   color: #4caf50;
+}
+.apk-upload__note {
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+.apk-upload__progress {
+  position: relative;
+  height: 20px;
+  margin-top: 12px;
+  background: #e5e7eb;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.apk-upload__bar {
+  height: 100%;
+  background: #22c55e;
+  transition: width 0.2s;
+}
+.apk-upload__progress span {
+  position: absolute;
+  inset: 0;
+  text-align: center;
+  font-size: 12px;
+  line-height: 20px;
+  font-weight: 600;
 }
 .topnav__app-btn:disabled {
   opacity: 0.6;
