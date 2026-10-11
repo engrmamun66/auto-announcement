@@ -153,7 +153,7 @@
                   </template>
 
                   <!-- Card menu, shared by all designs -->
-                  <button class="card-menu-toggle" :class="{ 'card-menu-toggle--light': cardDesign === 3 }" type="button" @click.stop="toggleCardMenu(item, i)" :aria-label="helper.t('Card menu')">
+                  <button class="card-menu-toggle" type="button" @click.stop="toggleCardMenu(item, i)" :aria-label="helper.t('Card menu')">
                     <i class="bx bx-menu"></i>
                   </button>
                   <div v-if="isCardMenuOpen(item, i)" class="card-menu">
@@ -681,37 +681,29 @@ span[status]{
 }
 
 /* ===== Design 3: Standard ===== */
+/* White card with a status-coloured gradient header; stands out from the grey page background */
 .std-card{
   --std-accent: #16a34a;
+  --std-accent-dark: #15803d;
   --std-soft: #dcfce7;
-  --std-bg: #f1f3f5; /* light grey card */
   position: relative;
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: var(--std-bg);
-  border: 1px solid #e2e5e9;
+  background: #fff;
+  border: none;
   border-radius: 14px;
-  padding: 18px 16px 12px;
+  padding: 0 16px 12px;
   color: #1f2937;
   overflow: hidden;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.12), 0 1px 3px rgba(15, 23, 42, 0.08);
   transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
-.std-card::before{ /* status bar on top */
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: var(--std-accent);
-}
-.std-card.is-late{ --std-accent: #ea580c; --std-soft: #ffedd5; }
-.std-card.is-out{ --std-accent: #0891b2; --std-soft: #cffafe; }
+.std-card.is-late{ --std-accent: #ea580c; --std-accent-dark: #c2410c; --std-soft: #ffedd5; }
+.std-card.is-out{ --std-accent: #0891b2; --std-accent-dark: #0e7490; --std-soft: #cffafe; }
 .std-card:hover{
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.1);
-  transform: translateY(-2px);
+  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.18), 0 2px 6px rgba(15, 23, 42, 0.08);
+  transform: translateY(-3px);
 }
 .std-card.live_data{ animation: livePulse 0.9s ease; }
 
@@ -719,7 +711,10 @@ span[status]{
   display: flex;
   align-items: center;
   gap: 12px;
-  padding-right: 40px; /* keep clear of the menu button */
+  margin: 0 -16px;
+  padding: 16px 56px 16px 16px; /* right side keeps clear of the menu button */
+  background: linear-gradient(135deg, var(--std-accent), var(--std-accent-dark));
+  color: #fff;
 }
 .std-avatar{
   position: relative;
@@ -731,7 +726,8 @@ span[status]{
   border-radius: 50%;
   object-fit: cover;
   background: #f1f5f9;
-  box-shadow: 0 0 0 3px var(--std-bg), 0 0 0 5px var(--std-accent);
+  border: 3px solid #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 .std-dir{
   position: absolute;
@@ -740,13 +736,14 @@ span[status]{
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: var(--std-accent);
-  color: #fff;
-  border: 2px solid var(--std-bg);
+  background: #fff;
+  color: var(--std-accent-dark);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: 13px;
+  font-weight: 700;
 }
 .std-title{ min-width: 0; }
 .std-name{
@@ -754,7 +751,7 @@ span[status]{
   font-size: 15px;
   font-weight: 700;
   line-height: 1.3;
-  color: #0f172a;
+  color: #fff;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -766,14 +763,14 @@ span[status]{
   gap: 6px;
   margin-top: 3px;
   font-size: 12px;
-  color: #64748b;
+  color: rgba(255, 255, 255, 0.88);
   min-width: 0;
 }
 .std-id{
   flex-shrink: 0;
   font-weight: 700;
-  color: #334155;
-  background: #fff;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.22);
   border-radius: 6px;
   padding: 0 6px;
 }

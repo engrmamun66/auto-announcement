@@ -398,10 +398,10 @@ onUnmounted(() => { if (hasSaved.value) {
 .cs-card-thumb--2 .t-photo { width: 30px; height: 30px; border-radius: 50%; background: #e2e8f0; top: 8px; left: calc(50% - 15px); }
 .cs-card-thumb--2 .t-line { left: 0; right: 0; bottom: 0; height: 24px; background: linear-gradient(to top, rgba(15,23,42,0.95), rgba(15,23,42,0)); }
 .cs-card-thumb--2 .t-line--short { height: 4px; border-radius: 3px; background: #fff; width: 40%; left: 8px; bottom: 8px; right: auto; }
-.cs-card-thumb--3 { background: #f1f3f5; border: 1px solid #e5e7eb; border-top: 4px solid #16a34a; }
-.cs-card-thumb--3 .t-photo { width: 18px; height: 18px; border-radius: 50%; background: #e2e8f0; box-shadow: 0 0 0 2px #fff, 0 0 0 3px #16a34a; top: 7px; left: 8px; }
-.cs-card-thumb--3 .t-line { height: 5px; border-radius: 3px; background: #cbd5e1; width: 45%; left: 34px; top: 13px; }
-.cs-card-thumb--3 .t-line--short { width: auto; height: 22px; left: 8px; right: 8px; top: 34px; border-radius: 5px; background: #dcfce7; }
+.cs-card-thumb--3 { background: #fff; border: 1px solid #e5e7eb; box-shadow: 0 2px 6px rgba(15,23,42,0.12); }
+.cs-card-thumb--3 .t-photo { width: 18px; height: 18px; border-radius: 50%; background: #e2e8f0; border: 2px solid #fff; top: 6px; left: 8px; z-index: 1; }
+.cs-card-thumb--3 .t-line { left: 0; right: 0; top: 0; height: 30px; background: linear-gradient(135deg, #16a34a, #15803d); }
+.cs-card-thumb--3 .t-line--short { width: auto; height: 20px; left: 8px; right: 8px; top: 38px; bottom: auto; border-radius: 5px; background: #dcfce7; }
 
 /* Classes table */
 .cs__panel--table { padding: 10px; overflow-x: auto; }
