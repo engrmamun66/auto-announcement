@@ -6,7 +6,12 @@ A native Android WebView wrapper that opens the Calling Bird web app (`WEB_URL`)
 
 ```env
 WEB_URL=https://{subdomain}.softproit.cloud
+SUBDOMAIN=
 ```
+
+- `SUBDOMAIN` empty (default): the app asks for the subdomain on first launch (see below).
+- `SUBDOMAIN=cb2`: the APK opens `https://cb2.softproit.cloud` directly. The setup screen, the
+  "Change subdomain" option and the host name on the error screen are all hidden.
 
 - `.env` is read at **build time** and injected into `BuildConfig.WEB_URL`. If `.env` is missing, `.env.example` is used.
 - If `WEB_URL` contains `{subdomain}`, the app asks for the subdomain on first launch

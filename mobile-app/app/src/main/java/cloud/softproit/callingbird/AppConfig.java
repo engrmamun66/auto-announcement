@@ -27,7 +27,12 @@ final class AppConfig {
 
     /** True when WEB_URL contains {subdomain} and the user must provide it. */
     static boolean needsSubdomain() {
-        return BuildConfig.WEB_URL.contains(PLACEHOLDER);
+        return BuildConfig.WEB_URL.contains(PLACEHOLDER) && !hasBuiltInSubdomain();
+    }
+
+    /** True when SUBDOMAIN is set in .env: the URL is fixed and hidden from the user. */
+    static boolean hasBuiltInSubdomain() {
+        return !BuildConfig.SUBDOMAIN.trim().isEmpty();
     }
 
     /** Text shown before the input field, e.g. "https://". */
@@ -74,6 +79,9 @@ final class AppConfig {
 
     /** The URL to open, or null when the subdomain has not been set yet. */
     static String getWebUrl(Context ctx) {
+        if (hasBuiltInSubdomain()) {
+            return BuildConfig.WEB_URL.replace(PLACEHOLDER, BuildConfig.SUBDOMAIN.trim().toLowerCase(Locale.ROOT));
+        }
         if (!needsSubdomain()) return BuildConfig.WEB_URL;
         String sub = getSubdomain(ctx);
         return sub == null ? null : BuildConfig.WEB_URL.replace(PLACEHOLDER, sub);

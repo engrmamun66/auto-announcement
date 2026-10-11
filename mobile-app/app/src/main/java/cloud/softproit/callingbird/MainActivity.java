@@ -297,7 +297,9 @@ public class MainActivity extends Activity implements WebBridge.Host {
         @Override
         public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
             if (!request.isForMainFrame()) return;
-            errorMessage.setText(String.format(Locale.ROOT, "%s\n\n%s", request.getUrl().getHost(), error.getDescription()));
+            errorMessage.setText(AppConfig.hasBuiltInSubdomain()
+                    ? error.getDescription()
+                    : String.format(Locale.ROOT, "%s\n\n%s", request.getUrl().getHost(), error.getDescription()));
             errorView.setVisibility(View.VISIBLE);
         }
     }

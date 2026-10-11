@@ -2,7 +2,7 @@ plugins {
     id 'com.android.application'
 }
 
-// Read WEB_URL from mobile-app/.env (falls back to .env.example).
+// Read WEB_URL and SUBDOMAIN from mobile-app/.env (falls back to .env.example).
 def readEnv = { String key ->
     def file = rootProject.file('.env')
     if (!file.exists()) file = rootProject.file('.env.example')
@@ -11,6 +11,7 @@ def readEnv = { String key ->
     return line ? line.substring(key.length() + 1).trim().replaceAll(/^["']|["']$/, '') : null
 }
 def webUrl = readEnv('WEB_URL') ?: 'https://{subdomain}.softproit.cloud'
+def subdomain = readEnv('SUBDOMAIN') ?: ''
 
 // Optional release signing: create mobile-app/keystore.properties (see README.md).
 def keystorePropsFile = rootProject.file('keystore.properties')
@@ -28,6 +29,7 @@ android {
         versionCode = 1
         versionName = '1.0.0'
         buildConfigField 'String', 'WEB_URL', "\"${webUrl}\""
+        buildConfigField 'String', 'SUBDOMAIN', "\"${subdomain}\""
     }
 
     buildFeatures {
