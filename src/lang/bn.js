@@ -1,6 +1,14 @@
 module.exports = {
   code: 'bn',
   strings: {
+    'Terms & Conditions and Privacy Policy': 'শর্তাবলি ও গোপনীয়তা নীতি',
+    'Download Android App': 'অ্যান্ড্রয়েড অ্যাপ ডাউনলোড করুন',
+    'Upload Android App': 'অ্যান্ড্রয়েড অ্যাপ আপলোড করুন',
+    'The Android app is not uploaded yet. Upload the APK file; it will be saved as': 'অ্যান্ড্রয়েড অ্যাপটি এখনো আপলোড করা হয়নি। APK ফাইলটি আপলোড করুন; এটি এই নামে সংরক্ষিত হবে:',
+    'Only .apk files are allowed.': 'শুধুমাত্র .apk ফাইল গ্রহণযোগ্য।',
+    'Uploading...': 'আপলোড হচ্ছে...',
+    'Uploaded.': 'আপলোড সম্পন্ন হয়েছে।',
+    'Upload APK': 'APK আপলোড করুন',
     'Mute For Me': 'শুধু আমার জন্য মিউট করুন',
     'Unmute For Me': 'শুধু আমার জন্য আনমিউট করুন',
     'Connected Devices': 'সংযুক্ত ডিভাইসসমূহ',

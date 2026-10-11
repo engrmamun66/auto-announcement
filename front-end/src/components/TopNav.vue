@@ -194,7 +194,7 @@
       <div class="text-end mt-3">
         <button class="btn btn-secondary me-2" :disabled="uploadingApk" @click="closeApkUploadModal()">{{ helper.t('Cancel') }}</button>
         <button class="btn btn-primary" :disabled="!apkFile || uploadingApk" @click="uploadMobileApp()">
-          {{ uploadingApk ? helper.t('Uploading...') : helper.t('Upload') }}
+          {{ uploadingApk ? helper.t('Uploading...') : helper.t('Upload APK') }}
         </button>
       </div>
     </div>

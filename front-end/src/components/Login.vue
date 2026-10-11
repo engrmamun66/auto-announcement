@@ -1,5 +1,6 @@
 <script setup>
-import { ref, nextTick, onMounted, inject } from 'vue'
+import { ref, nextTick, onMounted, onBeforeUnmount, inject } from 'vue'
+import TermsContent from './TermsContent.vue'
 
 const emit = defineEmits(['loggedIn'])
 
@@ -16,8 +17,16 @@ const loading = ref(false)
 const passwordInput = ref(null)
 const logoEl = ref(null)
 const companyName = globalThis.GLOBAL_DATA?.env?.COMPANY || 'Calling Bird'
+const showTerms = ref(false)
+
+function onKeydown(e) {
+  if (e.key === 'Escape') showTerms.value = false
+}
+onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
 
 onMounted(async () => {
+  window.addEventListener('keydown', onKeydown)
+
   // typing + clicking Login already counts as user interaction —
   // stops the "Click me to allow sound" overlay CSS from firing on this screen
   document.body.classList.add('user-interacted')
@@ -94,8 +103,25 @@ async function submit() {
       <button class="login-btn" :disabled="loading" @click="submit()">
         {{ loading ? (helper?.t?.('Logging in...') || 'Logging in...') : (helper?.t?.('Login') || 'Login') }}
       </button>
+
+      <a href="#" class="login-terms-link" @click.prevent="showTerms = true">
+        {{ helper?.t?.('Terms & Conditions and Privacy Policy') || 'Terms & Conditions and Privacy Policy' }}
+      </a>
     </div>
   </div>
+
+  <!-- Full-screen, scrollable Terms & Conditions / Privacy Policy -->
+  <Teleport to="body">
+    <div v-if="showTerms" class="terms-modal" role="dialog" aria-modal="true">
+      <div class="terms-modal__header">
+        <span class="terms-modal__title">{{ helper?.t?.('Terms & Conditions and Privacy Policy') || 'Terms & Conditions and Privacy Policy' }}</span>
+        <button class="terms-modal__close" aria-label="Close" @click="showTerms = false">&times;</button>
+      </div>
+      <div class="terms-modal__body">
+        <TermsContent />
+      </div>
+    </div>
+  </Teleport>
 </template>
 
 <style scoped>
@@ -190,4 +216,53 @@ async function submit() {
 }
 .login-btn:hover:not(:disabled) { background: #ffe44d; }
 .login-btn:disabled { opacity: 0.6; cursor: default; }
+
+.login-terms-link {
+  display: inline-block;
+  margin-top: 16px;
+  color: rgba(255, 230, 160, 0.6);
+  font-size: 0.78rem;
+  text-decoration: underline;
+}
+.login-terms-link:hover { color: #ffd700; }
+
+.terms-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1100; /* above .login-gate */
+  display: flex;
+  flex-direction: column;
+  background: #f5f7fa;
+}
+.terms-modal__header {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 16px;
+  padding-top: calc(10px + env(safe-area-inset-top));
+  background: #16130d;
+  color: #f0e6c0;
+}
+.terms-modal__title {
+  font-weight: 700;
+  font-size: 1rem;
+}
+.terms-modal__close {
+  background: none;
+  border: none;
+  color: #ffd700;
+  font-size: 32px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+}
+.terms-modal__body {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 24px 16px calc(32px + env(safe-area-inset-bottom));
+  background: #fff;
+}
 </style>

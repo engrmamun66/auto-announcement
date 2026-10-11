@@ -242,6 +242,9 @@ function CopyCode() {
       <p>
         © {{ new Date().getFullYear() }} Calling Bird. All rights reserved.
       </p>
+      <RouterLink :to="{ name: 'terms' }" class="terms-link">
+        <i class='bx bx-shield-quarter'></i> {{ helper.t('Terms & Conditions and Privacy Policy') }}
+      </RouterLink>
     </div>
   </div>
 
@@ -380,6 +383,18 @@ body {
   border-top: 1px solid #eaeaea;
   color: var(--secondary-color);
   font-size: 0.9rem;
+}
+
+.terms-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--primary-color, #4a6fa5);
+  font-weight: 600;
+  text-decoration: none;
+}
+.terms-link:hover {
+  text-decoration: underline;
 }
 
 @media (max-width: 768px) {

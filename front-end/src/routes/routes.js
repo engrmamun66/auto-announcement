@@ -7,6 +7,7 @@ import ContactUsView from '../pages/contactus.vue'
 import ErrorView from '../pages/error.vue'
 import EnvView from '../pages/env.vue'
 import DevicesView from '../pages/Devices.vue'
+import TermsView from '../pages/TermsAndConditions.vue'
 
 const routes = [ 
     {
@@ -33,6 +34,12 @@ const routes = [
         path: "/contactus",
         name: 'ContactUs',
         component: ContactUsView,
+    },
+    {
+        // Hidden route: not shown in the nav, linked from the Contact page
+        path: "/terms",
+        name: 'terms',
+        component: TermsView,
     },
     {
         path: "/import",
