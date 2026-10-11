@@ -1109,20 +1109,33 @@ class Students {
 
   updateStudent(req, res) {
 
-    const { id, class: className, name, dakhela, year, card_no, card_owner, note, phone_number, profile_image: profile_image_input } = req.body;
+    const { id, class: classInput, class_short: classShortInput, name, dakhela, year, card_no, card_owner, note, phone_number, profile_image: profile_image_input } = req.body;
     const profile_image = req.file ? `/media/${req.file.filename}` : profile_image_input;
-  
+
     if (!id) {
       res.status(400).send({ error: "Student ID is required for updating." });
       return;
     }
-  
-    const class_short = utils.getClassShort(className);
-  
-    if (!className || !name || !class_short || !dakhela) {
-      res.status(400).send({ error: "All fields (id, class, name, class_short, dakhela, year, card_no) are required." });
+
+    const missing = [['class', classInput], ['name', name], ['dakhela', dakhela]].filter(([, v]) => !v).map(([k]) => k);
+    if (missing.length) {
+      res.status(400).send({ error: `Required fields missing: ${missing.join(', ')}.` });
       return;
     }
+
+    // Resolve the class from the configured classes: by name first, then by the class_short sent with
+    // the row (the browser's class list can be stale after classes are renamed in Settings).
+    const classes = global.config?.classes || [];
+    const configuredClass =
+      classes.find(c => c.class_short === utils.getClassShort(classInput)) ||
+      (classShortInput && classes.find(c => utils.normalizeForClassMatch(c.class_short) === utils.normalizeForClassMatch(classShortInput)));
+
+    if (!configuredClass) {
+      res.status(400).send({ error: `Class "${classInput}" was not found in the class list. Please reload the page and select the class again.` });
+      return;
+    }
+    const className = configuredClass.class_name;
+    const class_short = configuredClass.class_short;
   
     const tableName = this.tableName;
   
