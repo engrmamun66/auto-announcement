@@ -93,6 +93,7 @@ const isUserActive = ref(false)
 const allow_to_reaload = ref(false)
 const showSmsModal = ref(false)
 const show_cloner_component = ref(false)
+const showSettingsPanel = ref(false) // ConfigSettings panel (opened from TopNav)
 
 const handleBeforeUnload = (event) => {
     if(allow_to_reaload.value || !isUserActive.value){
@@ -479,7 +480,8 @@ provide('isUsingSpeakerAutoControl', isUsingSpeakerAutoControl)
 provide('isSpeakersAutoMode', isSpeakersAutoMode) 
 provide('last_requested_ports_for_auto_mode', last_requested_ports_for_auto_mode) 
 provide('showSmsModal', showSmsModal) 
-provide('show_cloner_component', show_cloner_component) 
+provide('show_cloner_component', show_cloner_component)
+provide('showSettingsPanel', showSettingsPanel) 
 
 
 
@@ -623,7 +625,7 @@ function _______SEAPRATOR______(){}
 function focusBarcodeInput__and__startAnnoucement(){
     callbacks.clearWattingList()
     const isMobileViewport = window.innerWidth <= 960
-    if(is_started_schedule.value && !showSmsModal.value && !show_cloner_component.value && !isMobileViewport){
+    if(is_started_schedule.value && !showSmsModal.value && !show_cloner_component.value && !showSettingsPanel.value && !isMobileViewport){
         let inputEl = document.getElementById('BARCODE_INPUT')
         if(inputEl) inputEl.focus()
     }
