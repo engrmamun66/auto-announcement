@@ -203,7 +203,14 @@ const filteredLogs = computed(() => {
   })
 })
 
-const previewLogs = computed(() => filteredLogs.value.slice(0, 50)) 
+// Show every fetched row (the old .slice(0, 50) hid the rest, so they could not be selected or submitted)
+const previewLogs = computed(() => filteredLogs.value)
+
+// Selection is stored by row index, so a new search would point the ticks at different records
+watch(searchQuery, () => {
+  selectedIndices.value.clear()
+  selectAll.value = false
+})
 
 function hasStudent(item){
   return studentsMap.value.has(String(item?.emp_code || item?.user_id))
