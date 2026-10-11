@@ -109,6 +109,21 @@ module.exports = {
                     pagiation_positon: 'bottom_center', // bottom_left | bottom_center | bottom_right
                },
                weekends: ['Friday'], // Saturday, 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'
+               selected_realtime_cart: 1, // id from select_realtime_cart below; picked in Settings → Settings tab
+               select_realtime_cart: [ // radio button for realtime cart selection
+                    {
+                         id: 1,
+                         name: 'Default',
+                    },
+                    {
+                         id: 2,
+                         name: 'Card: Face Focus',
+                    },
+                    {
+                         id: 3,
+                         name: 'Card: Standard',
+                    },
+               ],
                
           },
           sms: {

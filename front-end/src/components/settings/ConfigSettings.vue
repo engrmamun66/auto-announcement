@@ -102,6 +102,22 @@
 
           <!-- All other tabs: generic FormNode -->
           <div v-else class="cs__panel">
+            <!-- Realtime attendance card design (settings.attendance.selected_realtime_cart) -->
+            <div v-if="activeKey === 'settings' && drafts.settings?.attendance" class="cs-card-picker">
+              <div class="cs-card-picker__title">{{ helper.t('Realtime Attendance Card') }}</div>
+              <div class="cs-card-picker__options">
+                <label v-for="design in REALTIME_CARD_DESIGNS" :key="design.id"
+                  class="cs-card-opt" :class="{ active: selectedCardDesign === design.id }">
+                  <input type="radio" name="realtime-card-design" :value="design.id"
+                    :checked="selectedCardDesign === design.id" @change="selectedCardDesign = design.id" />
+                  <span class="cs-card-thumb" :class="'cs-card-thumb--' + design.id">
+                    <i class="t-photo"></i><i class="t-line"></i><i class="t-line t-line--short"></i>
+                  </span>
+                  <span class="cs-card-opt__name">{{ design.id }}. {{ helper.t(design.name) }}</span>
+                  <span class="cs-card-opt__desc">{{ helper.t(design.description) }}</span>
+                </label>
+              </div>
+            </div>
             <FormNode :obj="drafts" :propKey="activeKey" :depth="0" />
           </div>
           <p v-if="errors[activeKey]" class="cs__error">{{ errors[activeKey] }}</p>
@@ -131,7 +147,8 @@
 </template>
 
 <script setup>
-import { ref, reactive, inject, onMounted, onUnmounted } from 'vue';
+import { ref, reactive, computed, inject, onMounted, onUnmounted } from 'vue';
+import { REALTIME_CARD_DESIGNS, getSelectedRealtimeCard } from '../../pages/attendence-childs/realtimeCardDesigns';
 import Rightbar from '../Rightbar.vue';
 import FormNode from './FormNode.vue';
 import BtnLoader from '../BtnLoader.vue';
@@ -158,6 +175,15 @@ const expandedShifts = reactive({});
 const showPasswordConfirm = ref(false);
 const pendingSaveKey = ref(null);
 const copiedShifts = ref(null);
+
+// Older databases may not have this key yet; it is created on first save
+const selectedCardDesign = computed({
+  get: () => getSelectedRealtimeCard(drafts.settings?.attendance),
+  set: (id) => {
+    if (!drafts.settings?.attendance) return;
+    drafts.settings.attendance.selected_realtime_cart = id;
+  },
+});
 
 function isValidShiftsArray(arr) {
   if (!Array.isArray(arr) || !arr.length) return false;
@@ -349,6 +375,33 @@ onUnmounted(() => { if (hasSaved.value) {
 .cs__btn--reset-all:hover { background: #ffe0e0; }
 .cs__btn--reset-all:disabled { opacity: 0.6; cursor: not-allowed; }
 .cs__error { color: #e53e3e; font-size: 12px; margin: 0; }
+
+/* Realtime card design picker */
+.cs-card-picker { border: 1px solid #e0e0e0; border-radius: 10px; padding: 12px; background: #fafbff; flex-shrink: 0; }
+.cs-card-picker__title { font-size: 11px; font-weight: 700; color: #555; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 8px; }
+.cs-card-picker__options { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }
+.cs-card-opt { position: relative; display: flex; flex-direction: column; gap: 4px; padding: 8px; border: 2px solid #e5e7eb; border-radius: 10px; background: #fff; cursor: pointer; transition: border-color 0.15s; }
+.cs-card-opt:hover { border-color: #b0c4de; }
+.cs-card-opt.active { border-color: #4caf50; box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.15); }
+.cs-card-opt input { position: absolute; opacity: 0; pointer-events: none; }
+.cs-card-opt__name { font-size: 12px; font-weight: 700; color: #333; }
+.cs-card-opt__desc { font-size: 11px; color: #888; line-height: 1.3; }
+
+/* Mini previews */
+.cs-card-thumb { position: relative; display: block; height: 70px; border-radius: 8px; overflow: hidden; }
+.cs-card-thumb i { position: absolute; display: block; }
+.cs-card-thumb--1 { background: #f0893a; }
+.cs-card-thumb--1 .t-photo { width: 22px; height: 22px; border-radius: 50%; background: #fff; top: 10px; left: calc(50% - 11px); }
+.cs-card-thumb--1 .t-line { height: 5px; border-radius: 3px; background: rgba(255,255,255,0.85); width: 60%; left: 20%; top: 40px; }
+.cs-card-thumb--1 .t-line--short { width: 40%; left: 30%; top: 51px; }
+.cs-card-thumb--2 { background: linear-gradient(160deg, #94a3b8, #475569); border-bottom: 4px solid #2ab361; }
+.cs-card-thumb--2 .t-photo { width: 30px; height: 30px; border-radius: 50%; background: #e2e8f0; top: 8px; left: calc(50% - 15px); }
+.cs-card-thumb--2 .t-line { left: 0; right: 0; bottom: 0; height: 24px; background: linear-gradient(to top, rgba(15,23,42,0.95), rgba(15,23,42,0)); }
+.cs-card-thumb--2 .t-line--short { height: 4px; border-radius: 3px; background: #fff; width: 40%; left: 8px; bottom: 8px; right: auto; }
+.cs-card-thumb--3 { background: #f1f3f5; border: 1px solid #e5e7eb; border-top: 4px solid #16a34a; }
+.cs-card-thumb--3 .t-photo { width: 18px; height: 18px; border-radius: 50%; background: #e2e8f0; box-shadow: 0 0 0 2px #fff, 0 0 0 3px #16a34a; top: 7px; left: 8px; }
+.cs-card-thumb--3 .t-line { height: 5px; border-radius: 3px; background: #cbd5e1; width: 45%; left: 34px; top: 13px; }
+.cs-card-thumb--3 .t-line--short { width: auto; height: 22px; left: 8px; right: 8px; top: 34px; border-radius: 5px; background: #dcfce7; }
 
 /* Classes table */
 .cs__panel--table { padding: 10px; overflow-x: auto; }

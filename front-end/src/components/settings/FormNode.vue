@@ -10,7 +10,11 @@ const props = defineProps({
 
 const val = computed(() => props.obj[props.propKey]);
 
+// Edited by the card-design picker in ConfigSettings.vue, not by hand
+const HIDDEN_KEYS = ['select_realtime_cart', 'selected_realtime_cart'];
+
 const type = computed(() => {
+    if (HIDDEN_KEYS.includes(props.propKey)) return 'hidden';
     const v = val.value;
     if (v === null || v === undefined) return 'null';
     if (typeof v === 'boolean') return 'boolean';
@@ -45,7 +49,7 @@ function keyToLabel(k) {
 </script>
 
 <template>
-    <div class="fn" :class="`fn--d${Math.min(depth, 3)}`">
+    <div v-if="type !== 'hidden'" class="fn" :class="`fn--d${Math.min(depth, 3)}`">
 
         <!-- boolean -->
         <label v-if="type === 'boolean'" class="fn__toggle">
