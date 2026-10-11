@@ -11,7 +11,7 @@ const props = defineProps({
 const val = computed(() => props.obj[props.propKey]);
 
 // Edited by the card-design picker in ConfigSettings.vue, not by hand
-const HIDDEN_KEYS = ['select_realtime_cart', 'selected_realtime_cart'];
+const HIDDEN_KEYS = ['select_realtime_cart', 'selected_realtime_cart', 'select_punch_card', 'selected_punch_card'];
 
 const type = computed(() => {
     if (HIDDEN_KEYS.includes(props.propKey)) return 'hidden';

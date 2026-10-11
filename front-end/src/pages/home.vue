@@ -14,6 +14,8 @@ import EmergencyMode from '../components/EmergencyMode.vue'
 import PlayingAnimation from '../components/PlayingAnimation.vue'
 import SwitchBoard from '../components/SwitchBoard.vue'
 import Confirm from '../components/Confirm.vue'
+import PunchCard from '../components/PunchCard.vue'
+import { getSelectedPunchCard } from './punchCardDesigns'
 import helper from '../utilities/helper';
 
 
@@ -236,6 +238,24 @@ function makeAsUncalled(student){
      student.is__playing = false;
 }
 
+// Punch Board card design: 1 = Default, 2 = Ticket, 3 = Neon Glow, 4 = Compact Row (Settings → Settings tab)
+const punchCardDesign = getSelectedPunchCard(CONFIG.value?.settings)
+
+function punchStatus(student){
+     if(student?.sound1_haserror) return 'error'
+     if(student.is_called) return 'completed'
+     if(isPayingThisCard(student)) return manually_paused_the_playlist.value ? 'paused' : 'calling'
+     return 'waiting'
+}
+
+function openStudentPage(student, withLog = false){
+     router.push({name: 'students', query: {
+          dakhela: student.dakhela,
+          barcode: student?.barcode,
+          ...(withLog ? { log: true } : {}),
+     }})
+}
+
 let showRecallConfirmation = ref(false)
 function recallAllPunchedStudents(){
      wattingList.value.forEach(makeAsUncalled)
@@ -450,8 +470,10 @@ function recallAllPunchedStudents(){
                     </div> 
                </div>
                <div class="set-max-height" id="students_card_container">
-                    <div v-if="wattingList?.length">
+                    <div v-if="wattingList?.length" :class="{ 'punch-card-list': punchCardDesign !== 1 }">
                          <template v-for="(student, i) in wattingList" :key="i"> 
+                              <!-- Design 1: Default (original card) -->
+                              <template v-if="punchCardDesign === 1">
                               <div class="student-box" :class="{'is_called': student.is_called}" 
                               :style="`--std-card-width:${card_dynamic_width}px`"
                               :barcode="student?.barcode" :card-id="student.id" :playing="isPayingThisCard(student)" >
@@ -518,6 +540,18 @@ function recallAllPunchedStudents(){
                                    </span>
                                    </div>
                               </div> 
+                              </template>
+                              <!-- Designs 2-4: Ticket / Neon Glow / Compact Row -->
+                              <PunchCard v-else
+                                   :student="student"
+                                   :design="punchCardDesign"
+                                   :status="punchStatus(student)"
+                                   :width="card_dynamic_width"
+                                   :mainDakhela="originalDakhela(student)"
+                                   @open="(withLog) => openStudentPage(student, withLog)"
+                                   @recall="makeAsUncalled(student)"
+                                   @remove="removeFromWattingList(student, i)"
+                              />
                          </template>
                     </div>
                     <div v-else>
@@ -650,6 +684,11 @@ function recallAllPunchedStudents(){
   column-gap: 10px;
   row-gap: 10px;
 }
+/* Designs 2-4: room for outlines, glows and the hover lift, which the scrolling list would otherwise clip */
+.watting-list .set-max-height > div.punch-card-list {
+  padding: 6px 3px 8px; /* sides kept small: card widths are computed with ~10px spare per row */
+}
+
 .watting-list .set-max-height div .student-box {
      --call-done: linear-gradient(0deg, #2fe9df00 0%, #9c9cec00 100%); 
 }

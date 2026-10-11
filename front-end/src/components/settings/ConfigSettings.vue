@@ -102,6 +102,22 @@
 
           <!-- All other tabs: generic FormNode -->
           <div v-else class="cs__panel">
+            <!-- Dashboard punch board card design (settings.selected_punch_card) -->
+            <div v-if="activeKey === 'settings' && drafts.settings" class="cs-card-picker">
+              <div class="cs-card-picker__title">{{ helper.t('Punch Board Card') }}</div>
+              <div class="cs-card-picker__options">
+                <label v-for="design in PUNCH_CARD_DESIGNS" :key="design.id"
+                  class="cs-card-opt" :class="{ active: selectedPunchDesign === design.id }">
+                  <input type="radio" name="punch-card-design" :value="design.id"
+                    :checked="selectedPunchDesign === design.id" @change="selectedPunchDesign = design.id" />
+                  <span class="cs-card-thumb" :class="'cs-card-thumb--p' + design.id">
+                    <i class="t-photo"></i><i class="t-line"></i><i class="t-line t-line--short"></i>
+                  </span>
+                  <span class="cs-card-opt__name">{{ design.id }}. {{ helper.t(design.name) }}</span>
+                  <span class="cs-card-opt__desc">{{ helper.t(design.description) }}</span>
+                </label>
+              </div>
+            </div>
             <!-- Realtime attendance card design (settings.attendance.selected_realtime_cart) -->
             <div v-if="activeKey === 'settings' && drafts.settings?.attendance" class="cs-card-picker">
               <div class="cs-card-picker__title">{{ helper.t('Realtime Attendance Card') }}</div>
@@ -149,6 +165,7 @@
 <script setup>
 import { ref, reactive, computed, inject, onMounted, onUnmounted } from 'vue';
 import { REALTIME_CARD_DESIGNS, getSelectedRealtimeCard } from '../../pages/attendence-childs/realtimeCardDesigns';
+import { PUNCH_CARD_DESIGNS, getSelectedPunchCard } from '../../pages/punchCardDesigns';
 import Rightbar from '../Rightbar.vue';
 import FormNode from './FormNode.vue';
 import BtnLoader from '../BtnLoader.vue';
@@ -182,6 +199,14 @@ const selectedCardDesign = computed({
   set: (id) => {
     if (!drafts.settings?.attendance) return;
     drafts.settings.attendance.selected_realtime_cart = id;
+  },
+});
+
+const selectedPunchDesign = computed({
+  get: () => getSelectedPunchCard(drafts.settings),
+  set: (id) => {
+    if (!drafts.settings) return;
+    drafts.settings.selected_punch_card = id;
   },
 });
 
@@ -407,6 +432,24 @@ onUnmounted(() => { if (hasSaved.value) {
 .cs-card-thumb--4 .t-photo { width: 22px; height: 22px; border-radius: 50%; background: #e2e8f0; border: 2px solid #22c55e; box-shadow: 0 0 6px #22c55e; top: 8px; left: calc(50% - 11px); }
 .cs-card-thumb--4 .t-line { left: 0; right: 0; top: 0; height: 45%; background: linear-gradient(175deg, rgba(255,255,255,0.22), rgba(255,255,255,0)); }
 .cs-card-thumb--4 .t-line--short { height: 5px; border-radius: 3px; background: #22c55e; box-shadow: 0 0 6px #22c55e; width: 44%; left: 28%; top: 42px; }
+
+/* Punch board previews */
+.cs-card-thumb--p1 { background: linear-gradient(0deg, #e0f2fe, #fff); border: 1px solid rgb(7, 109, 146); }
+.cs-card-thumb--p1 .t-photo { width: 34px; height: 8px; border-radius: 6px; background: #07a527; top: 8px; left: 8px; }
+.cs-card-thumb--p1 .t-line { height: 6px; border-radius: 3px; background: #475569; width: 60%; left: 8px; top: 24px; }
+.cs-card-thumb--p1 .t-line--short { height: 12px; border-radius: 4px; background: #e2e8f0; width: auto; left: 8px; right: 8px; top: 40px; }
+.cs-card-thumb--p2 { background: #fff; box-shadow: 0 2px 6px rgba(15,23,42,0.15); }
+.cs-card-thumb--p2 .t-photo { width: 30%; top: 0; bottom: 0; left: 0; background: linear-gradient(160deg, #facc15, #eab308); border-right: 2px dashed #fff; }
+.cs-card-thumb--p2 .t-line { height: 6px; border-radius: 3px; background: #475569; width: 45%; left: 40%; top: 18px; }
+.cs-card-thumb--p2 .t-line--short { height: 10px; border-radius: 4px; background: #e2e8f0; width: 35%; left: 40%; top: 36px; }
+.cs-card-thumb--p3 { background: linear-gradient(160deg, #111827, #1e1b4b); border: 2px solid #e905bf; box-shadow: 0 0 8px rgba(233,5,191,0.6), inset 0 0 0 1px #a855f7; }
+.cs-card-thumb--p3 .t-photo { width: 20px; height: 20px; border-radius: 50%; background: #e2e8f0; border: 2px solid #e905bf; box-shadow: 0 0 6px #e905bf; top: 18px; left: 10px; }
+.cs-card-thumb--p3 .t-line { left: 0; right: 0; top: 0; height: 45%; background: linear-gradient(175deg, rgba(255,255,255,0.22), rgba(255,255,255,0)); }
+.cs-card-thumb--p3 .t-line--short { height: 5px; border-radius: 3px; background: #fff; width: 45%; left: 38px; top: 26px; }
+.cs-card-thumb--p4 { background: #f1f5f9; }
+.cs-card-thumb--p4 .t-photo { height: 16px; left: 6px; right: 6px; top: 8px; border-radius: 4px; background: #fff; border-left: 4px solid #e905bf; }
+.cs-card-thumb--p4 .t-line { height: 16px; left: 6px; right: 6px; top: 28px; border-radius: 4px; background: #fff; border-left: 4px solid #eab308; }
+.cs-card-thumb--p4 .t-line--short { height: 16px; left: 6px; right: 6px; top: 48px; border-radius: 4px; background: #fff; border-left: 4px solid #07a527; width: auto; }
 
 /* Classes table */
 .cs__panel--table { padding: 10px; overflow-x: auto; }

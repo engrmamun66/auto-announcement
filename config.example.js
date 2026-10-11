@@ -64,6 +64,25 @@ module.exports = {
                switch_mode: 'auto', // auto || manual,
                delay_before_starting: 10, // miliseconds
           },
+          selected_punch_card: 1, // id from select_punch_card below; picked in Settings → Settings tab
+          select_punch_card: [ // radio button for punch board waitting list in dashboard selection
+               {
+                    id: 1,
+                    name: 'Default',
+               },
+               {
+                    id: 2,
+                    name: 'Card: Ticket',
+               },
+               {
+                    id: 3,
+                    name: 'Card: Neon Glow',
+               },
+               {
+                    id: 4,
+                    name: 'Card: Compact Row',
+               },
+          ],
           attendance: {
                status: true, // -------------------------- on/off
                only_attendance_feature: false,
