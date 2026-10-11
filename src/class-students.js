@@ -534,12 +534,22 @@ class Students {
           }
 
           const id = getCol(row, 'id')
-          const class_short = getCol(row, 'class_short') || utils.getClassShort(className)
-          if (!class_short) {
+          const rawClassShort = getCol(row, 'class_short') || utils.getClassShort(className)
+          if (!rawClassShort) {
             console.warn(`[import] row ${i} skipped — class_short unresolved for class="${className}"`)
             studentReport.push({ excelRow, name, dakhela, class: className, status: 'skipped', reason: `class_short unresolved for class="${className}"` })
             return
           }
+          // Only create/update students whose class_short exists in the classes setting (DB)
+          const configuredClass = (global.config?.classes || []).find(c =>
+            String(c?.class_short || '').trim().toLowerCase() === String(rawClassShort).trim().toLowerCase()
+          )
+          if (!configuredClass) {
+            console.warn(`[import] row ${i} skipped — class_short "${rawClassShort}" not found in classes`)
+            studentReport.push({ excelRow, name, dakhela, class: className, status: 'skipped', reason: `class_short "${rawClassShort}" not found in classes` })
+            return
+          }
+          const class_short = configuredClass.class_short
           const card_no     = getCol(row, 'card_no') || null
           const year        = getCol(row, 'year') || new Date().getFullYear()
           const status      = parseInt(getCol(row, 'status')) || 1
