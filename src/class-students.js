@@ -55,6 +55,18 @@ function getActiveClassConfig() {
   };
 }
 
+// Find a configured class by name, falling back to class_short. Stored rows / the browser's class list
+// can carry an old class name after classes are renamed in Settings, while class_short stays the same.
+function resolveConfiguredClass(className, classShort) {
+  const classes = global.config?.classes || [];
+  const byName = utils.getClassShort(className);
+  return (
+    (byName && classes.find(c => c.class_short === byName)) ||
+    (classShort && classes.find(c => utils.normalizeForClassMatch(c.class_short) === utils.normalizeForClassMatch(classShort))) ||
+    null
+  );
+}
+
 function appendActiveClassFilter(query = '', queryParams = [], { classShortColumn = 'class_short', classNameColumn = 'class' } = {}) {
   const { classShorts, classNames } = getActiveClassConfig();
   const nextParams = [...queryParams];
@@ -970,15 +982,22 @@ class Students {
   }
 
   addStudent(req, res) {
-    const { class: className, name, dakhela, year, card_no, card_owner, note, phone_number, profile_image: profile_image_input } = req.body;
+    const { class: classInput, class_short: classShortInput, name, dakhela, year, card_no, card_owner, note, phone_number, profile_image: profile_image_input } = req.body;
     const profile_image = req.file ? `/media/${req.file.filename}` : profile_image_input;
 
-    const class_short = utils.getClassShort(className);
-  
-    if (!className || !name || !class_short || !dakhela) {
-      res.status(400).send({ error: "All fields (class, name, class_short, dakhela, year) are required." });
+    const missing = [['class', classInput], ['name', name], ['dakhela', dakhela]].filter(([, v]) => !v).map(([k]) => k);
+    if (missing.length) {
+      res.status(400).send({ error: `Required fields missing: ${missing.join(', ')}.` });
       return;
     }
+
+    const configuredClass = resolveConfiguredClass(classInput, classShortInput);
+    if (!configuredClass) {
+      res.status(400).send({ error: `Class "${classInput}" was not found in the class list. Please reload the page and select the class again.` });
+      return;
+    }
+    const className = configuredClass.class_name;
+    const class_short = configuredClass.class_short;
   
     const tableName = this.tableName;
   
@@ -1035,19 +1054,27 @@ class Students {
         res.status(500).send({ message: err.message });
         return;
       } 
+      if (!studentRow) {
+        return res.status(404).send({ message: `Student not found (id: ${id})` });
+      }
 
        this.db.get(`SELECT * FROM ${this.tableName} WHERE dakhela=?`, [dakhela_new], async(error, existing_student_by_dakhela) => {
           if(existing_student_by_dakhela){
             return res.status(500).send({ message: `এই দাখেলাটি ইতিমধ্যে ব্যবহার করা হয়েছে (${dakhela_new})`, existing_student_by_dakhela });
           } else {
-            let {name, class: className, card_no, year, status, sound1, profile_image, dakhela: originalDakhela} = studentRow
+            let {name, class: storedClassName, class_short: storedClassShort, card_no, year, status, sound1, profile_image, dakhela: originalDakhela} = studentRow
 
-              const class_short = utils.getClassShort(className);
-
-              if (!className || !name || !class_short || !dakhela_new || !year) {
-                res.status(500).send({ message: "All fields (class, name, class_short, dakhela, year) are required." });
-                return;
+              if (!name || !dakhela_new) {
+                return res.status(400).send({ message: `Required fields missing: ${[!name && 'name', !dakhela_new && 'new dakhela'].filter(Boolean).join(', ')}` });
               }
+
+              const configuredClass = resolveConfiguredClass(storedClassName, storedClassShort);
+              if (!configuredClass) {
+                return res.status(400).send({ message: `Class "${storedClassName}" (${storedClassShort || '-'}) was not found in the class list.` });
+              }
+              const className = configuredClass.class_name;
+              const class_short = configuredClass.class_short;
+              year = year || new Date().getFullYear();
 
               const tableName = this.tableName;
 
@@ -1125,10 +1152,7 @@ class Students {
 
     // Resolve the class from the configured classes: by name first, then by the class_short sent with
     // the row (the browser's class list can be stale after classes are renamed in Settings).
-    const classes = global.config?.classes || [];
-    const configuredClass =
-      classes.find(c => c.class_short === utils.getClassShort(classInput)) ||
-      (classShortInput && classes.find(c => utils.normalizeForClassMatch(c.class_short) === utils.normalizeForClassMatch(classShortInput)));
+    const configuredClass = resolveConfiguredClass(classInput, classShortInput);
 
     if (!configuredClass) {
       res.status(400).send({ error: `Class "${classInput}" was not found in the class list. Please reload the page and select the class again.` });
