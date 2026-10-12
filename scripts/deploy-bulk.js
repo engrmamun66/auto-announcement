@@ -6,13 +6,13 @@
  * Run from ONE of them:  npm run deploy:bulk
  *
  *   1. Pick folders (type to filter, ↑/↓ move, Space toggle, "Select All", Enter continue)
- *   2. Branch (default: master) → git fetch + checkout + pull in all selected folders, in parallel (concurrently)
+ *   2. Branch (default: develop) → git fetch + checkout + pull in all selected folders, in parallel (concurrently)
  *   3. front-end build in the CURRENT folder only (watch mode removed from vite.config.mjs for the build, then restored)
  *   4. Copy front-end/dist/assets/* to the other selected folders
- *   5. pm2 restart all --update-env
+ *   5. pm2 restart <folder> --update-env for each selected folder (pm2 process name = folder name)
  *
  * Non-interactive / testing:
- *   npm run deploy:bulk -- --folders=cb1,cb3 --branch=master --yes
+ *   npm run deploy:bulk -- --folders=cb1,cb3 --branch=develop --yes
  *   npm run deploy:bulk -- --dry-run          (print the steps, change nothing)
  */
 const fs = require('fs');
@@ -23,6 +23,7 @@ const { spawnSync } = require('child_process');
 const CURRENT_DIR = path.resolve(__dirname, '..');           // the install this command runs from
 const BASE_DIR = path.dirname(CURRENT_DIR);                  // one step back: the folder holding all installs
 const CURRENT_NAME = path.basename(CURRENT_DIR);
+const DEFAULT_BRANCH = 'develop';
 
 const args = Object.fromEntries(process.argv.slice(2).map(a => {
   const [k, ...v] = a.replace(/^--/, '').split('=');
@@ -216,6 +217,20 @@ function copyAssets(targets) {
   });
 }
 
+// Only the selected installs are restarted; each pm2 process is named after its folder (cb1, cb2, …).
+// One failing restart does not stop the others; failures are returned and reported at the end.
+function restartSelected(names) {
+  const failed = [];
+  names.forEach(name => {
+    const cmd = `pm2 restart ${name} --update-env`;
+    console.log(c.dim(`$ ${cmd}`));
+    if (DRY_RUN) return;
+    const res = spawnSync(cmd, { cwd: path.join(BASE_DIR, name), stdio: 'inherit', shell: true });
+    if (res.status !== 0) failed.push(name);
+  });
+  return failed;
+}
+
 // ------------------------------------------------------------------ main
 
 (async () => {
@@ -229,7 +244,7 @@ function copyAssets(targets) {
     if (unknown.length) fail(`Unknown folder(s): ${unknown.join(', ')}. Available: ${folders.join(', ')}`);
     chosen = wanted;
   } else {
-    if (!process.stdin.isTTY) fail('Run this in a terminal, or pass --folders=cb1,cb2 --branch=master --yes');
+    if (!process.stdin.isTTY) fail('Run this in a terminal, or pass --folders=cb1,cb2 --branch=develop --yes');
     chosen = await selectFolders(folders);
   }
 
@@ -239,7 +254,7 @@ function copyAssets(targets) {
     console.log(c.yellow(`! Added "${CURRENT_NAME}" (current folder): it is built and copied to the others, so it must be updated too.`));
   }
 
-  const branch = String(args.branch || (args.yes ? 'master' : await ask(`Branch to deploy ${c.dim('(master)')}: `, 'master')));
+  const branch = String(args.branch || (args.yes ? DEFAULT_BRANCH : await ask(`Branch to deploy ${c.dim(`(${DEFAULT_BRANCH})`)}: `, DEFAULT_BRANCH)));
   if (!/^[\w./-]+$/.test(branch)) fail(`Invalid branch name: ${branch}`);
   const others = chosen.filter(f => f !== CURRENT_NAME);
 
@@ -247,7 +262,7 @@ function copyAssets(targets) {
   console.log(`  Folders : ${chosen.join(', ')}`);
   console.log(`  Branch  : ${branch}`);
   console.log(`  Build in: ${CURRENT_NAME}  →  assets copied to: ${others.join(', ') || '(none)'}`);
-  console.log(`  Then    : pm2 restart all --update-env`);
+  console.log(`  Restart : ${chosen.map(name => `pm2 restart ${name}`).join(', ')}  (--update-env)`);
   if (!args.yes && !DRY_RUN) {
     const ok = await ask(`\nProceed? ${c.dim('(y/N)')} `, 'n');
     if (!/^y(es)?$/i.test(ok)) { console.log('Cancelled.'); process.exit(0); }
@@ -263,9 +278,12 @@ function copyAssets(targets) {
   step(3, 'Copy assets to the other folders');
   copyAssets(others);
 
-  step(4, 'Restart pm2');
-  run('pm2 restart all --update-env', CURRENT_DIR, 'pm2 restart');
+  step(4, 'Restart the selected pm2 processes');
+  const restartFailed = restartSelected(chosen);
 
   step(5, 'Done');
+  if (restartFailed.length) {
+    console.log(c.yellow(`! Code deployed, but pm2 restart failed for: ${restartFailed.join(', ')}. Check "pm2 list" (the pm2 name must match the folder name).`));
+  }
   console.log(c.green(`✔ Deployed ${branch} to ${chosen.join(', ')} in ${((Date.now() - startedAt) / 1000).toFixed(1)}s${DRY_RUN ? ' (dry run)' : ''}`));
 })().catch(err => fail(err?.stack || String(err)));
