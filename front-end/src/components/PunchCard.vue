@@ -76,6 +76,17 @@ function onStatusClick() {
           <span v-if="!student?.call_slot && student?.emergency_mode" class="text-danger">{{ helper.t('Emergency Call') }}</span>
           <span v-else v-html="student?.call_slot"></span>
         </div>
+        <!-- Owner / audio error live inside the body so the ID stub always spans the full card height -->
+        <div v-if="showOwner" class="pc-owner" tooltip="Card Owner">
+          <span>
+            <i class='bx bxs-id-card'></i>
+            {{ student.card_owner ? ownerName : CONFIG.card_not_set_message }}
+          </span>
+        </div>
+        <div v-if="status === 'error'" class="pc-error" @click="emit('open', false)">
+          <span>এই অডিওটি পুনরায় রেকর্ড করুন!</span>
+          <button type="button" class="pc-error__btn">{{ helper.t('Click Here') }}</button>
+        </div>
       </div>
     </template>
 
@@ -120,7 +131,8 @@ function onStatusClick() {
       </button>
     </template>
 
-    <!-- Shared extras -->
+    <!-- Shared extras (designs 3 and 4; the Ticket renders them inside its body) -->
+    <template v-if="design !== 2">
     <div v-if="showOwner" class="pc-owner" tooltip="Card Owner">
       <span>
         <i class='bx bxs-id-card'></i>
@@ -131,6 +143,7 @@ function onStatusClick() {
       <span>এই অডিওটি পুনরায় রেকর্ড করুন!</span>
       <button type="button" class="pc-error__btn">{{ helper.t('Click Here') }}</button>
     </div>
+    </template>
 
     <button type="button" class="pc-close" :title="helper.t('Remove')" @click.stop="emit('remove')"><i class='bx bx-x'></i></button>
   </div>
@@ -302,9 +315,7 @@ function onStatusClick() {
   color: #334155;
 }
 .pc--d2 .pc-owner,
-.pc--d2 .pc-error{ position: absolute; left: 76px; right: 10px; bottom: 6px; }
-.pc--d2:has(.pc-owner),
-.pc--d2:has(.pc-error){ padding-bottom: 22px; }
+.pc--d2 .pc-error{ margin-top: 2px; }
 
 /* ===== 3: Neon Glow ===== */
 @property --pc-angle {
