@@ -242,7 +242,7 @@ module.exports = {
     'status — defaults to 1 (active) if empty': 'status — defaults to 1 (active) if empty',
     'Downlaod Backups Here': 'Downlaod Backups Here',
     'Upload Files': 'Upload Files',
-    'Select File here': 'Select File here--',
+    'Select File here': 'Select File here',
     'Files Supported: Excel Only': 'Files Supported: Excel Only',
     'Choose File': 'Choose File',
     'Upload Now': 'Upload Now',
