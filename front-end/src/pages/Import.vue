@@ -10,6 +10,7 @@ import FileUpload from '../components/FileUpload.vue'
 import BtnLoader from '../components/BtnLoader.vue'
 import Rightbar from '../components/Rightbar.vue'
 import ImportMappingModal from '../components/ImportMappingModal.vue'
+import ImportReport from '../components/ImportReport.vue'
 
 
 const emitter = inject('emitter');
@@ -33,10 +34,6 @@ function onImported(data){
      getAllStudents()
 }
 
-const studentReport = computed(() => importResult.value?.students || null)
-const scheduleRows = computed(() => studentReport.value?.schedules || [])
-const settingsReport = computed(() => importResult.value?.settings || null)
-const attendanceReport = computed(() => importResult.value?.attendance || null)
 
 // ---------- Export dropdown
 const EXPORT_PARTS = [
@@ -217,87 +214,7 @@ async function exportParts(parts){
      </Modal>
 
      <Rightbar v-if="showReport" :title="helper.t('Import Report')" size="sm" @unmount="showReport = false">
-          <!-- Settings -->
-          <div v-if="settingsReport" class="report-block">
-               <h6>{{ helper.t('Settings') }}</h6>
-               <div class="d-flex flex-wrap gap-1 mb-1">
-                    <span v-for="key in settingsReport.updated" :key="key" class="badge bg-success">{{ key }}</span>
-                    <span v-if="!settingsReport.updated?.length" class="small text-muted">{{ helper.t('Nothing updated') }}</span>
-               </div>
-               <div v-for="row in settingsReport.skipped" :key="row.key" class="small text-muted">{{ row.key }} — {{ row.reason }}</div>
-          </div>
-
-          <!-- Attendance -->
-          <div v-if="attendanceReport" class="report-block">
-               <h6>{{ helper.t('Attendance') }}</h6>
-               <div class="d-flex flex-wrap gap-2 mb-1">
-                    <span class="badge bg-secondary">{{ helper.t('Total') }}: {{ attendanceReport.total }}</span>
-                    <span class="badge bg-success">{{ helper.t('Created') }}: {{ attendanceReport.created }}</span>
-                    <span class="badge bg-primary">{{ helper.t('Updated') }}: {{ attendanceReport.updated }}</span>
-                    <span class="badge bg-secondary">{{ helper.t('Skipped') }}: {{ attendanceReport.skipped }}</span>
-                    <span class="badge bg-danger">{{ helper.t('Errors') }}: {{ attendanceReport.errors }}</span>
-               </div>
-               <div v-for="row in attendanceReport.issues" :key="row.excelRow" class="small text-muted">
-                    {{ helper.t('Row') }} {{ row.excelRow }}: {{ row.student_id }} / {{ row.date }} — {{ row.reason }}
-               </div>
-          </div>
-
-          <!-- Schedules -->
-          <div v-if="scheduleRows.length" class="report-block">
-               <h6>{{ helper.t('Schedules') }}</h6>
-               <div v-for="row in scheduleRows" :key="row.excelRow" class="small">
-                    <span class="badge me-1" :class="{ 'bg-success': row.status === 'created', 'bg-primary': row.status === 'updated', 'bg-secondary': row.status === 'skipped', 'bg-danger': row.status === 'error' }">{{ row.status }}</span>
-                    {{ row.title }} <span class="text-muted">— {{ row.reason }}</span>
-               </div>
-          </div>
-
-          <template v-if="studentReport?.students?.length || studentReport?.total">
-          <h6 class="mt-2">{{ helper.t('Students') }}</h6>
-          <div class="d-flex flex-wrap gap-2 mb-3">
-               <span class="badge bg-secondary">{{ helper.t('Total') }}: {{ studentReport?.total ?? 0 }}</span>
-               <span class="badge bg-success">{{ helper.t('Created') }}: {{ studentReport?.created ?? 0 }}</span>
-               <span class="badge bg-primary">{{ helper.t('Updated') }}: {{ studentReport?.updated ?? 0 }}</span>
-               <span class="badge bg-warning text-dark">{{ helper.t('Not Found') }}: {{ studentReport?.not_found ?? 0 }}</span>
-               <span class="badge bg-secondary">{{ helper.t('Skipped') }}: {{ studentReport?.skipped ?? 0 }}</span>
-               <span class="badge bg-danger">{{ helper.t('Errors') }}: {{ studentReport?.errors ?? 0 }}</span>
-          </div>
-
-          <div class="table-responsive import-report-table">
-               <table class="table table-sm table-striped align-middle">
-                    <thead>
-                         <tr>
-                              <th>{{ helper.t('Row') }}</th>
-                              <th>{{ helper.t('Name') }}</th>
-                              <th>{{ helper.t('Dakhela') }}</th>
-                              <th>{{ helper.t('Class') }}</th>
-                              <th>{{ helper.t('Status') }}</th>
-                              <th>{{ helper.t('Reason') }}</th>
-                         </tr>
-                    </thead>
-                    <tbody>
-                         <tr v-for="row in (studentReport?.students || [])" :key="row.excelRow">
-                              <td>{{ row.excelRow }}</td>
-                              <td>{{ row.name }}</td>
-                              <td>{{ row.dakhela }}</td>
-                              <td>{{ row.class }}</td>
-                              <td>
-                                   <span class="badge" :class="{
-                                        'bg-success': row.status === 'created',
-                                        'bg-primary': row.status === 'updated',
-                                        'bg-warning text-dark': row.status === 'not_found',
-                                        'bg-secondary': row.status === 'skipped',
-                                        'bg-danger': row.status === 'error',
-                                   }">{{ row.status }}</span>
-                              </td>
-                              <td class="text-muted small">{{ row.reason }}</td>
-                         </tr>
-                         <tr v-if="!studentReport?.students?.length">
-                              <td colspan="6" class="text-center text-muted">{{ helper.t('No rows to show') }}</td>
-                         </tr>
-                    </tbody>
-               </table>
-          </div>
-          </template>
+          <ImportReport :report="importResult" />
      </Rightbar>
 
      <div class="card mt-4 border-0 shadow-sm">
@@ -357,9 +274,6 @@ async function exportParts(parts){
 </template>
 
 <style scoped>
-.import-report-table {
-     font-size: 12px;
-}
 .export-dd{ position: relative; display: inline-block; }
 .export-dd__menu{
      position: absolute; right: 0; top: calc(100% + 6px); z-index: 20;
@@ -376,12 +290,8 @@ async function exportParts(parts){
 .export-dd__menu small{ color: #94a3b8; }
 .export-dd__sep{ height: 1px; background: #e5e7eb; margin: 4px 6px; }
 .export-pick{ display: flex; align-items: center; gap: 8px; padding: 6px 0; cursor: pointer; }
-.report-block{ margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid #eef2f7; }
 .media-report{ display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
 .media-report > div{ flex-basis: 100%; }
-.import-report-table .badge {
-     font-size: 11px;
-}
 </style>
 
  
