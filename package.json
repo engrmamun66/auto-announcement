@@ -9,7 +9,8 @@
     "start": "nodemon server.js",
     "kill": "pkill -9 node — force-kill all Node processes",
     "dev": "nodemon server.js",
-    "deploy:bulk": "node scripts/deploy-bulk.js"
+    "deploy:bulk": "node scripts/deploy-bulk.js",
+    "command:bulk": "node scripts/command-bulk.js"
   },
   "keywords": [],
   "author": "",

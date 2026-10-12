@@ -17,123 +17,13 @@
  */
 const fs = require('fs');
 const path = require('path');
-const readline = require('readline');
 const { spawnSync } = require('child_process');
+const { CURRENT_DIR, BASE_DIR, CURRENT_NAME, c, fail, parseArgs, chooseFolders, ask, runParallel } = require('./lib/bulk-common');
 
-const CURRENT_DIR = path.resolve(__dirname, '..');           // the install this command runs from
-const BASE_DIR = path.dirname(CURRENT_DIR);                  // one step back: the folder holding all installs
-const CURRENT_NAME = path.basename(CURRENT_DIR);
 const DEFAULT_BRANCH = 'develop';
-
-const args = Object.fromEntries(process.argv.slice(2).map(a => {
-  const [k, ...v] = a.replace(/^--/, '').split('=');
-  return [k, v.length ? v.join('=') : true];
-}));
+const args = parseArgs();
 const DRY_RUN = !!args['dry-run'];
-
-const c = {
-  bold: s => `\x1b[1m${s}\x1b[0m`, dim: s => `\x1b[2m${s}\x1b[0m`, green: s => `\x1b[32m${s}\x1b[0m`,
-  red: s => `\x1b[31m${s}\x1b[0m`, yellow: s => `\x1b[33m${s}\x1b[0m`, cyan: s => `\x1b[36m${s}\x1b[0m`,
-};
 const step = (n, title) => console.log(`\n${c.cyan(c.bold(`[${n}/5]`))} ${c.bold(title)}`);
-const fail = (msg) => { console.error(`\n${c.red('✖')} ${msg}`); process.exit(1); };
-
-// ------------------------------------------------------------------ folders
-
-function listInstallFolders() {
-  return fs.readdirSync(BASE_DIR, { withFileTypes: true })
-    .filter(d => d.isDirectory() && !d.name.startsWith('.'))
-    .map(d => d.name)
-    .filter(name => {
-      const dir = path.join(BASE_DIR, name);
-      // a Calling Bird install: git checkout with a front-end folder
-      return fs.existsSync(path.join(dir, '.git')) && fs.existsSync(path.join(dir, 'front-end'));
-    })
-    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
-}
-
-/** Checkbox list: type to filter, ↑/↓ move, Space toggle, Enter confirm, Esc clear filter, Ctrl+C quit */
-function selectFolders(folders) {
-  return new Promise((resolve) => {
-    let filter = '';
-    let cursor = 0;
-    const selected = new Set();
-    const ALL = '__all__';
-
-    const visible = () => folders.filter(f => f.toLowerCase().includes(filter));
-    const rows = () => [ALL, ...visible()];
-
-    const render = () => {
-      const list = visible();
-      const allOn = list.length > 0 && list.every(f => selected.has(f));
-      const out = [];
-      out.push(`${c.bold('Select folders')} ${c.dim(`in ${BASE_DIR}`)}`);
-      out.push(c.dim('Type to filter · ↑/↓ move · Space toggle · Enter continue · Esc clear filter · Ctrl+C quit'));
-      out.push(`Filter: ${filter ? c.yellow(filter) : c.dim('(none)')}`);
-      out.push('');
-      rows().forEach((row, i) => {
-        const pointer = i === cursor ? c.cyan('❯') : ' ';
-        if (row === ALL) {
-          out.push(`${pointer} ${allOn ? c.green('[x]') : '[ ]'} ${c.bold('Select All')}`);
-          out.push('  ' + c.dim('─'.repeat(28)));
-          return;
-        }
-        const mark = selected.has(row) ? c.green('[x]') : '[ ]';
-        const tag = row === CURRENT_NAME ? c.dim('  (current: builds here)') : '';
-        out.push(`${pointer} ${mark} ${row}${tag}`);
-      });
-      if (!visible().length) out.push(c.dim('  no folders match'));
-      out.push('');
-      out.push(`${c.bold(selected.size)} selected`);
-      process.stdout.write('\x1b[2J\x1b[H' + out.join('\n') + '\n');
-    };
-
-    readline.emitKeypressEvents(process.stdin);
-    process.stdin.setRawMode(true);
-    process.stdin.resume();
-
-    const onKey = (str, key = {}) => {
-      if (key.ctrl && key.name === 'c') { cleanup(); console.log('\nCancelled.'); process.exit(130); }
-      const r = rows();
-      if (key.name === 'up') cursor = (cursor - 1 + r.length) % r.length;
-      else if (key.name === 'down') cursor = (cursor + 1) % r.length;
-      else if (key.name === 'space') {
-        const row = r[cursor];
-        if (row === ALL) {
-          const list = visible();
-          const allOn = list.length > 0 && list.every(f => selected.has(f));
-          list.forEach(f => allOn ? selected.delete(f) : selected.add(f));
-        } else if (row) {
-          selected.has(row) ? selected.delete(row) : selected.add(row);
-        }
-      } else if (key.name === 'return') {
-        if (!selected.size) { render(); process.stdout.write(c.red('Select at least one folder (Space to tick).\n')); return; }
-        cleanup();
-        resolve(folders.filter(f => selected.has(f)));
-        return;
-      } else if (key.name === 'escape') { filter = ''; cursor = 0; }
-      else if (key.name === 'backspace') { filter = filter.slice(0, -1); cursor = 0; }
-      else if (str && /^[\w.-]$/.test(str)) { filter += str.toLowerCase(); cursor = 0; }
-      render();
-    };
-
-    const cleanup = () => {
-      process.stdin.off('keypress', onKey);
-      process.stdin.setRawMode(false);
-      process.stdin.pause();
-    };
-
-    process.stdin.on('keypress', onKey);
-    render();
-  });
-}
-
-function ask(question, fallback) {
-  return new Promise(resolve => {
-    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-    rl.question(question, answer => { rl.close(); resolve(answer.trim() || fallback); });
-  });
-}
 
 // ------------------------------------------------------------------ steps
 
@@ -153,21 +43,8 @@ async function gitUpdate(folders, branch) {
   commands.forEach(cmd => console.log(c.dim(`$ ${cmd.command}  (${cmd.name})`)));
   if (DRY_RUN) return;
 
-  let concurrently;
-  try { ({ concurrently } = require('concurrently')); }
-  catch (e) { fail('The "concurrently" package is not installed. Run "npm install" in this folder first.'); }
-
-  // One folder failing does not stop the others (concurrently's default), so every failure is reported
-  const { result } = concurrently(commands, {
-    prefix: 'name',
-    prefixColors: ['cyan', 'magenta', 'yellow', 'green', 'blue', 'red'],
-  });
-  try {
-    await result;
-  } catch (events) {
-    const failed = (Array.isArray(events) ? events : []).filter(e => e.exitCode !== 0).map(e => e.command?.name).filter(Boolean);
-    fail(`git update failed in: ${failed.join(', ') || 'one or more folders'}. Nothing was built or restarted.`);
-  }
+  const { failed } = await runParallel(commands);
+  if (failed.length) fail(`git update failed in: ${failed.join(', ')}. Nothing was built or restarted.`);
 }
 
 // Build once in the current folder: watch mode (build.watch in vite.config.mjs) would never exit,
@@ -234,19 +111,7 @@ function restartSelected(names) {
 // ------------------------------------------------------------------ main
 
 (async () => {
-  const folders = listInstallFolders();
-  if (!folders.length) fail(`No Calling Bird folders (with .git and front-end) found in ${BASE_DIR}`);
-
-  let chosen;
-  if (args.folders) {
-    const wanted = String(args.folders).split(',').map(s => s.trim()).filter(Boolean);
-    const unknown = wanted.filter(w => !folders.includes(w));
-    if (unknown.length) fail(`Unknown folder(s): ${unknown.join(', ')}. Available: ${folders.join(', ')}`);
-    chosen = wanted;
-  } else {
-    if (!process.stdin.isTTY) fail('Run this in a terminal, or pass --folders=cb1,cb2 --branch=develop --yes');
-    chosen = await selectFolders(folders);
-  }
+  let chosen = await chooseFolders(args, { currentTag: '(current: builds here)', usage: '--folders=cb1,cb2 --branch=develop --yes' });
 
   // The build runs here and its assets are copied to the others, so this folder must be updated too
   if (!chosen.includes(CURRENT_NAME)) {
