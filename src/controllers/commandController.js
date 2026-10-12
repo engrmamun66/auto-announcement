@@ -525,8 +525,12 @@ class CommandController {
    * Wait for a paginated device reply stored in Store.data[cn][key]:
    * up to firstPackMs for the first pack, then until no new pack for settleMs (capped at maxMs).
    */
-  async waitForPacks(cn, key, { firstPackMs = 15000, settleMs = 3000, maxMs = 55000 } = {}) {
+  async waitForPacks(cn, key, { firstPackMs, settleMs, maxMs = 55000 } = {}) {
     const startedAt = Date.now();
+    // Some devices send the next pack only after their next poll, so wait at least one polling interval between packs
+    const pollMs = (Store.pollingIntervals?.[cn] || 5) * 1000;
+    firstPackMs = firstPackMs ?? Math.min(pollMs + 15000, 40000);
+    settleMs = settleMs ?? Math.min(Math.max(3000, pollMs + 2000), 20000);
     const received = () => Store.data?.[cn]?.[key];
     while (!received() && Date.now() - startedAt < firstPackMs) await wait(200);
     if (!received()) {

@@ -14,6 +14,15 @@ router.all([
     '/iClock/cdata/',
 ], (req, res) => cdataController.handle(req, res));
 
+// Newer ZKTeco firmware (push protocol 3.x) posts DATA QUERY results here instead of /cdata;
+// the body has the same tab-separated rows, so the same handler applies.
+router.all([
+    '/iclock/querydata',
+    '/iclock/querydata/',
+    '/iClock/querydata',
+    '/iClock/querydata/',
+], (req, res) => cdataController.handle(req, res));
+
 router.all([
     '/iclock/registry',
     '/iclock/registry/',
@@ -105,5 +114,11 @@ router.post('/:cn/restart',         (req, res) => commandController.restart(req,
 
 // { "command": "REBOOT" }
 router.post('/:cn/push-command',    (req, res) => commandController.pushRawCommand(req, res));
+
+// Log any other device endpoint so unexpected protocol calls are visible instead of silently 404-ing
+router.all(/^\/iclock\//i, (req, res) => {
+  console.warn(`⚠️ Unhandled device request: ${req.method} ${req.originalUrl}`);
+  res.status(200).type('text/plain').send('OK\r\n');
+});
 
 module.exports = router;
