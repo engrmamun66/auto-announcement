@@ -315,7 +315,7 @@ module.exports = {
     'status — defaults to 1 (active) if empty': 'status — খালি থাকলে ১ (সক্রিয়) ব্যবহার হবে',
     'Downlaod Backups Here': 'ব্যাকআপ এখানে ডাউনলোড করুন',
     'Upload Files': 'ফাইল আপলোড',
-    'Select File here': 'এখানে ফাইল নির্বাচন করুন',
+    'Select File here': 'এখানে ফাইল নির্বাচন করুন--',
     'Files Supported: Excel Only': 'সমর্থিত ফাইল: শুধু এক্সেল',
     'Choose File': 'ফাইল নির্বাচন করুন',
     'Upload Now': 'এখনই আপলোড করুন',
