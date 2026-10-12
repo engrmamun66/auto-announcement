@@ -8,7 +8,8 @@
     "upload": "node zipper.js --upload=true",
     "start": "nodemon server.js",
     "kill": "pkill -9 node — force-kill all Node processes",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "deploy:bulk": "node scripts/deploy-bulk.js"
   },
   "keywords": [],
   "author": "",
@@ -17,6 +18,7 @@
   "dependencies": {
     "archiver": "^7.0.1",
     "axios": "^1.7.9",
+    "concurrently": "^9.2.5",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
