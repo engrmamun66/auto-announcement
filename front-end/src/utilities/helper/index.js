@@ -49,8 +49,17 @@ function replaceTemplateParams(template = '', params = {}) {
   })
 }
 
-const helper = { 
+const helper = {
     log: console.log,
+    // This server's subdomain, used to name downloaded files: cb3.softproit.cloud -> "cb3",
+    // localhost -> "localhost", 192.168.0.5 -> "192-168-0-5"
+    subdomain(){
+      const host = String(globalThis.location?.hostname || '').toLowerCase()
+      if (!host) return 'local'
+      if (/^\d{1,3}(\.\d{1,3}){3}$/.test(host)) return host.replace(/\./g, '-')
+      const parts = host.split('.')
+      return parts.length > 2 ? parts[0] : parts[0] || 'local'
+    },
     // ====================================================== //
     // ===================== t function ===================== //
     // ====================================================== //

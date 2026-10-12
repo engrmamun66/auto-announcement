@@ -16,6 +16,9 @@
         <!-- <button class="btn btn-sm btn-outline-secondary" @click="refreshPreview" :disabled="loading">
           Preview
         </button> -->
+        <button class="btn btn-sm btn-outline-secondary" @click="downloadConfig" :disabled="loading || !rawText" :title="`Download as ${downloadName}`">
+          <i class='bx bx-download'></i> Download
+        </button>
         <button class="btn btn-sm btn-primary" @click="saveConfig" :disabled="loading">
           Save
         </button>
@@ -50,8 +53,22 @@
 
 <script setup>
 import { inject, onMounted, ref, watch } from 'vue'
+import helper from '../utilities/helper'
 
 const http = inject('http')
+
+// Downloads the file shown in the editor as ".env.<subdomain>" (e.g. ".env.cb3" on cb3.softproit.cloud)
+const downloadName = `.env.${helper.subdomain()}`
+function downloadConfig(){
+  const url = URL.createObjectURL(new Blob([rawText.value], { type: 'text/plain;charset=utf-8' }))
+  const link = document.createElement('a')
+  link.href = url
+  link.setAttribute('download', downloadName)
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  URL.revokeObjectURL(url)
+}
 const loading = ref(false)
 const rawText = ref('')
 const jsonPreview = ref('')

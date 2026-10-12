@@ -61,7 +61,8 @@ function exportSelected(){
 function saveDownload(response, fallbackName){
      const url = window.URL.createObjectURL(new Blob([response.data]));
      const disposition = response.headers?.['content-disposition'] || ''
-     const fileName = (disposition.match(/filename="?([^";]+)"?/) || [])[1] || fallbackName
+     // Prefix with this server's subdomain so files from different sites don't get mixed up (cb3_callingbird_….xlsx)
+     const fileName = `${helper.subdomain()}_${(disposition.match(/filename="?([^";]+)"?/) || [])[1] || fallbackName}`
      const link = document.createElement("a");
      link.href = url;
      link.setAttribute("download", fileName);
