@@ -156,10 +156,10 @@ async function gitUpdate(folders, branch) {
   try { ({ concurrently } = require('concurrently')); }
   catch (e) { fail('The "concurrently" package is not installed. Run "npm install" in this folder first.'); }
 
+  // One folder failing does not stop the others (concurrently's default), so every failure is reported
   const { result } = concurrently(commands, {
     prefix: 'name',
     prefixColors: ['cyan', 'magenta', 'yellow', 'green', 'blue', 'red'],
-    killOthers: [],
   });
   try {
     await result;
