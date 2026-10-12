@@ -445,14 +445,26 @@ class Students {
     
   
 
-  importExcel(filePath, forceAsNewEntity, callback) {
+  /**
+   * options (all optional; used by the Import page's sheet mapping):
+   *   studentsSheet  - sheet name for students, or null to skip (default: first sheet)
+   *   schedulesSheet - sheet name for schedules, or null to skip (default: sheet named "Schedules")
+   *   keepFile       - don't delete the uploaded file when done (the caller cleans up)
+   */
+  importExcel(filePath, forceAsNewEntity, callback, options = {}) {
     try {
       const workbook = xlsx.readFile(filePath);
-      const sheetName = workbook.SheetNames[0]; // Assuming data is in the first sheet
-      const scheduleSheetName = workbook.SheetNames.find((name) => String(name).toLowerCase() === 'schedules') || null;
-      const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName], {
+      const hasOption = (key) => Object.prototype.hasOwnProperty.call(options, key);
+      const sheetName = hasOption('studentsSheet') ? options.studentsSheet : workbook.SheetNames[0];
+      const scheduleSheetName = hasOption('schedulesSheet')
+        ? options.schedulesSheet
+        : (workbook.SheetNames.find((name) => String(name).toLowerCase() === 'schedules') || null);
+      for (const name of [sheetName, scheduleSheetName]) {
+        if (name && !workbook.Sheets[name]) return callback(`Sheet "${name}" was not found in the file`);
+      }
+      const data = sheetName ? xlsx.utils.sheet_to_json(workbook.Sheets[sheetName], {
         header: 1,
-      });
+      }) : [];
       const scheduleData = scheduleSheetName ? xlsx.utils.sheet_to_json(workbook.Sheets[scheduleSheetName], { header: 1 }) : [];
       const insertQuery = `
         INSERT INTO students (name, dakhela, class, class_short, card_no, year, status, sound1, device_index, card_owner, options, note, profile_image, phone_number)
@@ -494,7 +506,7 @@ class Students {
 
       const finalizeImport = () => {
         if (!studentLoopDone || !scheduleLoopDone || pending > 0) return;
-        fs.unlink(filePath, () => {});
+        if (!options.keepFile) fs.unlink(filePath, () => {});
         studentReport.sort((a, b) => a.excelRow - b.excelRow);
         scheduleReport.sort((a, b) => a.excelRow - b.excelRow);
         const skipped = studentReport.filter(r => r.status === 'skipped').length;
@@ -516,8 +528,8 @@ class Students {
         if (key && defaultColumns.includes(key)) headerMap[key] = idx
       })
 
-      // Require name, dakhela, class in header
-      const missingCols = ['name', 'dakhela', 'class'].filter(c => headerMap[c] === undefined)
+      // Require name, dakhela, class in header (only when a students sheet is being imported)
+      const missingCols = sheetName ? ['name', 'dakhela', 'class'].filter(c => headerMap[c] === undefined) : []
       if (missingCols.length) {
         return callback(`Missing required columns in Excel header: ${missingCols.join(', ')}`)
       }
@@ -595,6 +607,7 @@ class Students {
           } else if (id) {
             // If `id` is provided, update the row
             pending++;
+            const self = this;
             this.db.run(
               updateQuery,
               [name, dakhela, className, class_short, card_no, year, status || 1, sound1 || '', device_index || null, card_owner || null, options || null, note || null, profile_image || null, phone_number || null, id],
@@ -607,16 +620,23 @@ class Students {
                   updated++;
                   studentReport.push({ excelRow, name, dakhela, class: className, status: 'updated', reason: `matched by id=${id}` })
                 } else {
-                  not_found++;
-                  studentReport.push({ excelRow, name, dakhela, class: className, status: 'not_found', reason: `id=${id} not found` })
+                  // id not in this database (e.g. restoring an export on another server):
+                  // fall back to the dakhela/class/year match, like schedules do
+                  matchOrInsert.call(self, `id=${id} not found — `);
+                  return; // matchOrInsert decrements pending
                 }
                 pending--;
                 finalizeImport();
               }
             );
           } else {
-            // Check if the row already exists based on `dakhela`, `class`, and `year`
             pending++;
+            matchOrInsert.call(this);
+          }
+
+          // Check if the row already exists based on `dakhela`, `class`, and `year`; update it or insert a new one.
+          // Caller has already incremented `pending`.
+          function matchOrInsert(reasonPrefix = '') {
             this.db.get(findQuery, [dakhela, className, year], (err, existingRow) => {
               if (err) {
                 console.error("Error querying existing data:", err);
@@ -639,7 +659,7 @@ class Students {
                       studentReport.push({ excelRow, name, dakhela, class: className, status: 'error', reason: err.message })
                     } else {
                       updated++;
-                      studentReport.push({ excelRow, name, dakhela, class: className, status: 'updated', reason: `matched existing dakhela/class/year (id=${existingRow.id})` })
+                      studentReport.push({ excelRow, name, dakhela, class: className, status: 'updated', reason: `${reasonPrefix}matched existing dakhela/class/year (id=${existingRow.id})` })
                     }
                     pending--;
                     finalizeImport();
@@ -657,7 +677,7 @@ class Students {
                       studentReport.push({ excelRow, name, dakhela, class: className, status: 'error', reason: err.message })
                     } else {
                       created++;
-                      studentReport.push({ excelRow, name, dakhela, class: className, status: 'created', reason: 'new dakhela/class/year' })
+                      studentReport.push({ excelRow, name, dakhela, class: className, status: 'created', reason: `${reasonPrefix}new dakhela/class/year` })
                     }
                     pending--;
                     finalizeImport();

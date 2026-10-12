@@ -288,6 +288,7 @@ app.use('/api', require('./src/routes/leave')(LeavAndVacations));
 app.use('/api', require('./src/routes/config')(config, utils, Backup));
 app.use('/api', require('./src/routes/misc')(utils, Backup));
 app.use('/api', require('./src/routes/settings')(DB.db));
+app.use('/api', require('./src/routes/data-transfer')(DB.db, Students, { upload })); // Import page: Excel export/import
 app.use('/api', require('./src/routes/sms')(Sms));
 app.use('/api', require('./src/routes/devices')(DB.db));
 app.use('/api', require('./src/routes/verify-password')(DB.db));
