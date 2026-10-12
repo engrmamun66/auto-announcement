@@ -27,13 +27,12 @@
     "prismjs": "^1.29.0",
     "qrcode": "^1.5.4",
     "recordrtc": "^5.6.2",
-    "sqlite3": "^5.1.7",
     "vue": "^3.3.4",
     "vue-router": "4"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.3.1",
     "terser": "^5.47.1",
-    "vite": "^4.4.9"
+    "vite": "^8.3.4"
   }
 }

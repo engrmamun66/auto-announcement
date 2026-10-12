@@ -45,19 +45,10 @@ defineProps({
 })
 
 let emergency_mode = inject('emergency_mode')
-let isIPAccess = inject('isIPAccess')
-let sendRemoteAction = inject('sendRemoteAction')
+let setEmergencyMode = inject('setEmergencyMode')
 
 function toggle(){
-  emergency_mode.value = !emergency_mode.value
-
-  if(isIPAccess){
-    sendRemoteAction({
-      from: 'ip',
-      action: 'toogle_emergency_mode',
-      data: emergency_mode.value,
-    })
-  }
+  setEmergencyMode(!emergency_mode.value)
 }
 
 </script>

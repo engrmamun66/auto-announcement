@@ -29,25 +29,17 @@ module.exports = {
      env: {
           PORT: port_number,
           SECRET_KEY: 'YOUR_SECRET_KEY',
+          LOGIN_PASSWORD: 'changeme', // app-wide login password — override in config.js. Pipe-separate for multiple valid passwords, e.g. 'admin@miraj|1234|password123'
+          LOGIN_EXPIRE_AFTER: '7d', // login session lifetime — e.g. '30m', '5h', '1d', '7d'
+          DEFAULT_DEVICE_POLLING_INTERVAL: 15, // seconds — used when a ZKTeco device has no polling_interval set in DB yet
           CODE_NUMBER: 'DEV_MAM', // Rrequeired for Client Identification
-          PUNCH_LOG_FILENAME: 'punch.log.json', 
+          COMPANY: 'Calling Bird', // shown on the Login screen title
+          PUNCH_LOG_FILENAME: 'punch.log.json',
           DATABASE_PATH: 'database/database.db', // For Client DB Example: './../clientdb-DHM101.db'
-
-
-          /** ==== with-BioTime-app === */
-          BIO_TIME_APP_USERNAME: "Admin",
-          BIO_TIME_APP_PASSWORD: "Admin@123",
-          DEVICE_NAMES: ['Device 2'], // zktecho device name, which already connected by name in BioTime-8.0 server
-          DATA_FETCH_BACK_SECONDS: 10,
-          DATA_FETCH_INTERVAL_IN_SECOND: 2,
-          PRIMARY_SERVER_LOCAL: 'http://wordpress-test.test/wp-admin/admin-ajax.php',
-          PRIMARY_SERVER: 'https://callingbird.softproit.com/wp-admin/admin-ajax.php', 
-          /** ==== End === */
 
           // #Front End variables
           BASE_URL: `http://localhost:${port_number}`,
           API_BASE_URL: `http://localhost:${port_number}/api`,
-          DEVICE_API_BASE_URL: 'http://127.0.0.1:8081/',
 
      },
 
@@ -72,6 +64,25 @@ module.exports = {
                switch_mode: 'auto', // auto || manual,
                delay_before_starting: 10, // miliseconds
           },
+          selected_punch_card: 1, // id from select_punch_card below; picked in Settings → Settings tab
+          select_punch_card: [ // radio button for punch board waitting list in dashboard selection
+               {
+                    id: 1,
+                    name: 'Default',
+               },
+               {
+                    id: 2,
+                    name: 'Card: Ticket',
+               },
+               {
+                    id: 3,
+                    name: 'Card: Neon Glow',
+               },
+               {
+                    id: 4,
+                    name: 'Card: Compact Row',
+               },
+          ],
           attendance: {
                status: true, // -------------------------- on/off
                only_attendance_feature: false,
@@ -117,6 +128,25 @@ module.exports = {
                     pagiation_positon: 'bottom_center', // bottom_left | bottom_center | bottom_right
                },
                weekends: ['Friday'], // Saturday, 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'
+               selected_realtime_cart: 1, // id from select_realtime_cart below; picked in Settings → Settings tab
+               select_realtime_cart: [ // radio button for realtime cart selection
+                    {
+                         id: 1,
+                         name: 'Default',
+                    },
+                    {
+                         id: 2,
+                         name: 'Card: Face Focus',
+                    },
+                    {
+                         id: 3,
+                         name: 'Card: Standard',
+                    },
+                    {
+                         id: 4,
+                         name: 'Card: Neon Glow',
+                    },
+               ],
                
           },
           sms: {

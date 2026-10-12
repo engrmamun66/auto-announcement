@@ -30,9 +30,7 @@ const storage = inject('storage');
 const classes = inject('classes');
 const CONFIG = inject('CONFIG');
 const appAccessData = inject('appAccessData');
-const sendRemoteAction = inject('sendRemoteAction');
 const Socket = inject('Socket');
-const is_connected_with_main_app = inject('is_connected_with_main_app');
 let http = inject('http');
 const punchToCallStudent = inject('punchToCallStudent');
 const punchToSubmitAttendance = inject('punchToSubmitAttendance');
@@ -43,75 +41,18 @@ const all_students_non_copied = inject('all_students_non_copied', [])
 const getAllStudents = inject('getAllStudents', () => {})
 
 let students = ref([])
+// Skeleton rows while students load; delayed so quick refreshes don't flash the table
+const loadingStudents = ref(false)
+const showStudentsSkeleton = ref(false)
+let skeletonTimer = null
+watch(loadingStudents, (loading) => {
+  clearTimeout(skeletonTimer)
+  if (loading && !students.value?.length) showStudentsSkeleton.value = true // nothing to show yet: skeleton right away
+  else if (loading) skeletonTimer = setTimeout(() => { showStudentsSkeleton.value = true }, 150)
+  else showStudentsSkeleton.value = false
+})
 let studentLogs = ref([])
-let linkPopup = ref(null) // { std, column }
-let linkPopupUrl = ref('')
-let linkPopupLoading = ref(false)
-let showRecorder = ref(false)
-let recorderMounted = ref(false)
 
-function copyRecorderUrl({target}) {
-  target.setAttribute('tooltip', 'Copied')
-  navigator.clipboard.writeText(appAccessData.value?.recorder_web_url + `?code=${CONFIG.value?.env?.CODE_NUMBER}`).then(() => {
-    setTimeout(() => {
-      target.setAttribute('tooltip', 'Copy link')
-    }, 1500)
-  })
-}
-const isIPAccess = inject('isIPAccess')
-let recorderLoaded = ref(false)
-let showPhoneModal = ref(false)
-let qrDataUrl = ref('')
-let copiedPhoneUrl = ref(false)
-
-function copyPhoneUrl({target}) {
-  target.setAttribute('tooltip', 'Copied')
-  navigator.clipboard.writeText(buildPhoneUrl()).then(() => {
-    copiedPhoneUrl.value = true
-    setTimeout(() => copiedPhoneUrl.value = false, 2000)
-    setTimeout(() => {
-      target.setAttribute('tooltip', 'Copy link')
-    }, 1500)
-  })
-}
-
-function buildPhoneUrl() {
-  const ip = globalThis.GLOBAL_DATA?.env?.LOCAL_IP || 'localhost'
-  const port = globalThis.GLOBAL_DATA?.env?.PORT || 2323
-  return `http://${ip}:${port}/app/#/students`
-}
-
-async function openPhoneModal() {
-  showPhoneModal.value = true
-  if (qrDataUrl.value) return
-  try {
-    const QRCode = (await import('qrcode')).default
-    qrDataUrl.value = await QRCode.toDataURL(buildPhoneUrl(), { width: 260, margin: 2 })
-  } catch (e) {
-    console.error('QR error', e)
-  }
-}
-
-async function saveAudioFromUrl() {
-  if (!linkPopupUrl.value || !linkPopup.value) return
-  const { std, column } = linkPopup.value
-  linkPopupLoading.value = true
-  try {
-    const response = await http.post('/students/upload-audio-from-url', {
-      id: std.id,
-      column,
-      url: linkPopupUrl.value,
-    })
-    std[column] = response.data.audio_url
-    emitter.emit('toaster-success', { message: helper.t('Audio upload completed') })
-    linkPopup.value = null
-    linkPopupUrl.value = ''
-  } catch (e) {
-    emitter.emit('toaster-error', { message: helper.t('Upload failed') })
-  } finally {
-    linkPopupLoading.value = false
-  }
-}
 let only_similler_students = ref(storage('only_similler_students', false).value)
 watch(only_similler_students, (bool) => storage('only_similler_students').value = bool )
 
@@ -172,6 +113,7 @@ function debounce(fn, delay) {
 }
 
 async function getStudents({id=null}={}){
+  loadingStudents.value = true
   try {
     // console.log('params.value', params.value);
     let parameters = {...params.value, id}
@@ -208,6 +150,8 @@ async function getStudents({id=null}={}){
     
   } catch (error) {
     console.warn('getStudents_error::', error);
+  } finally {
+    loadingStudents.value = false
   }
 }
 
@@ -609,12 +553,6 @@ onMounted(async()=>{
     editModeTabIndex.value = 1
   })
 
-  emitter.on('recorder_url_received', ({ url }) => {
-    showRecorder.value = false
-    linkPopup.value = null
-    linkPopupUrl.value = url || ''
-  })
-
   await getDevices()
   await getStudents()
 
@@ -653,6 +591,20 @@ function is_skip_sms(){
 
 function onChange_dateTimePicker(data){
   punchToSubmitAttendance(makeCarcode(targetStudent.value), {source: 'manual_button', delay: 0, punch_time: data.startDateTime, skipSms: is_skip_sms() })
+}
+
+// Punch / Attendance actions, used by the Punch column and the mobile buttons under the name
+function callPunch(std){
+  punchToCallStudent(makeCarcode(std), {message: 'কার্ডটি সফলভাবে পাঞ্চ হয়েছে।', source: 'manual_button', for_attendence: false})
+}
+function plainPunch(std){
+  punchToCallStudent(makeCarcode(std), {message: 'কার্ডটি সফলভাবে পাঞ্চ হয়েছে।', source: 'manual_button'})
+}
+async function openAttendanceCalendar(std){
+  targetStudent.value = std
+  dateTimePickerRef.value?.setTime(moment().format('HH:mm'))
+  await helper.wait(100)
+  dateTimePickerRef.value?.toggle()
 }
 
 function onClickAttendance(std){
@@ -699,42 +651,22 @@ watch(fixedWidthSoundCol, (newVal) => {
 <template>
 
     <div class="d-flex justify-content-between align-items-center flex-wrap">
-      <h1>{{ !addMode ? helper.t('Students') : helper.t('Add Student') }}</h1>
+      <h1 class="students-page-title">{{ !addMode ? helper.t('Students') : helper.t('Add Student') }}</h1>
 
-      <div class="d-flex justify-content-end align-items-center flex-wrap gap-2">
-        <div v-if="!isIPAccess" class="btn-group me-2" style="display:inline-flex;align-items:stretch;">
-
-          <Btn style="background: #1565C0;border-top-right-radius: 0px; border-bottom-right-radius: 0px;" @click="openPhoneModal"><i class='bx bx-qr'></i> {{ helper.t('Open With Phone') }}</Btn>
-          <button class="btn" style="background:#005a4a;color:#fff;border-left:1px solid rgba(255,255,255,0.2);padding:0 12px;display:inline-flex;align-items:center;justify-content:center;"
-            :tooltip="helper.t('Copy link')"
-            @click.prevent="copyPhoneUrl">
-            <i class="bx bx-link" style="pointer-events: none;"></i>
-          </button>
-        </div>
-        <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
-          <div v-if="appAccessData?.recorder_web_url" class="btn-group me-2" style="display:inline-flex;align-items:stretch;">
-            <a v-if="isIPAccess" :href="appAccessData.recorder_web_url + `?code=${CONFIG?.env?.CODE_NUMBER}`" target="_blank" class="btn" style="background:#00796B;color:#fff;">
-              <i class='bx bx-microphone'></i> {{ helper.t('Recorder') }}
-            </a>
-            <Btn v-else style="background:#00796B;border-top-right-radius:0;border-bottom-right-radius:0;" @click="recorderMounted = true; showRecorder = true">
-              <i class='bx bx-microphone'></i> {{ helper.t('Recorder') }}
-            </Btn>
-            <button class="btn" style="background:#005a4a;color:#fff;border-left:1px solid rgba(255,255,255,0.2);padding:0 12px;display:inline-flex;align-items:center;justify-content:center;"
-              :tooltip="helper.t('Copy link')"
-              @click.prevent.stop="copyRecorderUrl">
-              <i class="bx bx-link" style="pointer-events: none;"></i>
-            </button>
-          </div>
-        </template>
-        <Btn class="me-2" style="background: #673AB7;" :tooltip="`params.total = ${params?.total}`" >
+      <div class="d-flex justify-content-end align-items-center flex-wrap gap-2 students-toolbar-actions">
+        <Btn style="background: #673AB7;" :tooltip="`params.total = ${params?.total}`" >
           {{ helper.t('Total') }}: 
           <span class="bg-success- p-1">{{ all_students_non_copied?.length }}</span>
            <!-- <span>{{ params?.total || '0' }}</span> -->
         </Btn>
         <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
-          <Btn @click.stop="bulkPunch()" style="background: #673AB7;" :disabled="!PunchButtonsRef?.length">{{ helper.t('Bulk Punch') }} ({{ PunchButtonsRef?.length || 0 }})</Btn>
+          <Btn @click.stop="bulkPunch()" style="background: #673AB7;" :disabled="!PunchButtonsRef?.length">
+            <span class="bulk-punch-label-full">{{ helper.t('Bulk Punch') }}</span>
+            <span class="bulk-punch-label-short">{{ helper.t('Punch') }}</span>
+            ({{ PunchButtonsRef?.length || 0 }})
+          </Btn>
         </template>
-        <Btn v-if="!addMode" class="me-2" @click="startAddingNewStudent" ><i class='bx bx-plus'></i> {{ helper.t('Add New') }}</Btn>
+        <Btn v-if="!addMode" class="me-2" @click="startAddingNewStudent" ><i class='bx bx-plus'></i> <span class="add-new-label-full">{{ helper.t('Add New') }}</span><span class="add-new-label-short">{{ helper.t('New') }}</span></Btn>
       </div>
     </div>
 
@@ -784,99 +716,72 @@ watch(fixedWidthSoundCol, (newVal) => {
 
       
     <!-- Search -->
-    <div class="form-area mt-3 p-4 border radius-10">
+    <div class="form-area student-filter-bar mt-3 p-3 border radius-10">
       <div asform>
-        <div class="row">
-          <div class="col-md-3 col-12">
-            <div class="form-group">
-              <label for="email">{{ helper.t('Class') }}</label>
-              <select v-model="params.class_short" @change="getStudents" class="form-control cb-input" id="ClassId">
-                <option :value="null">-{{helper.t('class')}}-</option>
-                <template v-for="(cls, index) in classes" :key="index">
-                  <option :value="cls.class_short">{{cls.class_name}}</option>
-                </template>
-                
-              </select>
-            </div>
+        <div class="filter-grid">
+          <div class="form-group">
+            <label for="ClassId">{{ helper.t('Class') }}</label>
+            <select v-model="params.class_short" @change="getStudents" class="form-control cb-input" id="ClassId">
+              <option :value="null">-{{helper.t('class')}}-</option>
+              <template v-for="(cls, index) in classes" :key="index">
+                <option :value="cls.class_short">{{cls.class_name}}</option>
+              </template>
+
+            </select>
           </div>
-          <div class="col-md-3 col-12">
-            <div class="form-group sssffefefasdgsadfg">
-              <label for="email">{{ helper.t('Dakhela') }}
-                <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
-                  <span tooltip="All Smillar">
-                    <input v-model="only_similler_students" :value="only_similler_students" style="opacity: 0.7;" type="checkbox" @change="()=>{
-                      if(params.dakhela){
-                        getStudents()
-                      }
-                    }" >
-                  </span>
-                </template>
-              </label>
-              <input v-model="params.dakhela" @keyup="getStudentsDebounced" @input="getStudentsDebounced" type="number" class="form-control cb-input" :placeholder="helper.t('Search dakhela...')">
-            </div> 
+          <div class="form-group sssffefefasdgsadfg">
+            <label for="email">{{ helper.t('Dakhela') }}
+              <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
+                <span tooltip="All Smillar">
+                  <input v-model="only_similler_students" :value="only_similler_students" style="opacity: 0.7;" type="checkbox" @change="()=>{
+                    if(params.dakhela){
+                      getStudents()
+                    }
+                  }" >
+                </span>
+              </template>
+            </label>
+            <input v-model="params.dakhela" @keyup="getStudentsDebounced" @input="getStudentsDebounced" type="number" class="form-control cb-input" :placeholder="helper.t('Search dakhela...')">
           </div>
-          <!-- <div class="col-md-2 col-12">
-            <div class="form-group">
-              <label for="email">Card</label>
-              <input v-model="params.card_no" type="text" class="form-control cb-input">
-            </div>
-          </div> -->
-          <div class="col-md-3 col-12">
-            <div class="form-group">
-              <label for="name">{{ helper.t('Name') }}</label>
-              <input v-model="params.name" type="text" class="form-control cb-input" :placeholder="helper.t('Search name...')" @keyup="getStudentsDebounced" @input="getStudentsDebounced">
-            </div>
+          <div class="form-group">
+            <label for="name">{{ helper.t('Name') }}</label>
+            <input v-model="params.name" type="text" class="form-control cb-input" :placeholder="helper.t('Search name...')" @keyup="getStudentsDebounced" @input="getStudentsDebounced">
           </div>
-          <div class="col-md-3 col-12">
-            <div class="form-group">
-              <label>{{ helper.t('Phone Number') }}</label>
-              <input v-model="params.phone_number" type="tel" class="form-control cb-input" :placeholder="helper.t('Search phone...')" @keyup="getStudentsDebounced" @input="getStudentsDebounced">
-            </div>
+          <div class="form-group">
+            <label>{{ helper.t('Phone Number') }}</label>
+            <input v-model="params.phone_number" type="tel" class="form-control cb-input" :placeholder="helper.t('Search phone...')" @keyup="getStudentsDebounced" @input="getStudentsDebounced">
           </div>
           <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
-            <div class="col-md-3 col-12">
-              <div class="form-group">
-                <label for="email">{{ helper.t('Sound') }}</label>
-                <select v-model="params.sound1" @change="getStudents" class="form-control cb-input">
-                  <option :value="null">-{{helper.t('All')}}-</option>
-                  <option value="no_sound">No</option> 
-                  <option value="has_sound">Yes</option> 
-                </select>
-              </div>
+            <div class="form-group sound-filter-group">
+              <label for="email">{{ helper.t('Sound') }}</label>
+              <select v-model="params.sound1" @change="getStudents" class="form-control cb-input">
+                <option :value="null">-{{helper.t('All')}}-</option>
+                <option value="no_sound">No</option>
+                <option value="has_sound">Yes</option>
+              </select>
             </div>
           </template>
 
-          <div class="col-md-3 col-12" style="margin-top: 12px;">
-            <div class="form-group mt-md-3"> 
-                <div class="d-flex justify-content-between w-100">
-                  <div>
-                    <Btn @click.stop="getStudents()" class="me-1"></Btn>
-                    <Btn @click.stop="clearParams();getStudents();editModeTabIndex=1" class="me-1 red">Clear</Btn>
-                  </div>
-                  
-                </div>
-              </div>
-          </div>
-          
-          </div>
-
-          <div class="col-12 mt-4 w-100 all-class-buttons-to-filter-area d-none d-md-block">
-            <div class="all-class-buttons-to-filter">
-              <template v-for="cls in classes">
-                <button class="class-short-btn" :class="{'active': params.class_short === cls.class_short}" var="cls?.display_name || cls.class_short"
-                @click="clearParams({get: false});params.page_no = 1;params.class_short = cls.class_short;getStudents()" >{{ helper.ucfirst(cls?.display_name || cls.class_short) }}</button>
-              </template>
-
+          <div class="form-group filter-actions">
+            <label class="filter-actions__spacer">&nbsp;</label>
+            <div class="d-flex">
+              <Btn @click.stop="getStudents()" class="me-1"></Btn>
+              <Btn @click.stop="clearParams();getStudents();editModeTabIndex=1" class="red">Clear</Btn>
             </div>
           </div>
-          
-          
-      
-        
         </div>
-      
+
+        <div class="mt-3 w-100 all-class-buttons-to-filter-area d-none d-md-block">
+          <div class="all-class-buttons-to-filter">
+            <template v-for="cls in classes">
+              <button class="class-short-btn" :class="{'active': params.class_short === cls.class_short}" var="cls?.display_name || cls.class_short"
+              @click="clearParams({get: false});params.page_no = 1;params.class_short = cls.class_short;getStudents()" >{{ helper.ucfirst(cls?.display_name || cls.class_short) }}</button>
+            </template>
+          </div>
+        </div>
+      </div>
     </div>
- 
+
 
     <myTable class="mt-3">
       <template #thead>
@@ -892,7 +797,7 @@ watch(fixedWidthSoundCol, (newVal) => {
             <th>{{ helper.t('Dakhela') }}</th>
             <th class="d-none d-lg-table-cell">{{ helper.t('Year') }}</th>
             <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
-              <th class="d-none d-lg-table-cell" @dblclick="fixedWidthSoundCol = !fixedWidthSoundCol" :style="fixedWidthSoundCol ? 'width: 300px;' : ''" :tooltip="helper.t('Double Click')" flow="down">
+              <th @dblclick="fixedWidthSoundCol = !fixedWidthSoundCol" :style="fixedWidthSoundCol ? 'width: 300px;' : ''" :tooltip="helper.t('Double Click')" flow="down">
                 {{ helper.t('Sound') }}
                 <template v-if="fixedWidthSoundCol">
                   <i class='bx bx-arrow-from-right transformY-3px' ></i>
@@ -901,7 +806,7 @@ watch(fixedWidthSoundCol, (newVal) => {
               </th>
             </template>
             <th>{{ helper.t('Status') }}</th>
-            <th>
+            <th class="d-none d-md-table-cell">
               {{ helper.t('Punch') }}
               <template v-if="CONFIG?.settings?.attendance?.status">
                 / {{ helper.t('Attendance') }}
@@ -912,11 +817,33 @@ watch(fixedWidthSoundCol, (newVal) => {
         </thead>
       </template>
       <template #rows>
-        <template v-if="students?.length">
+        <template v-if="showStudentsSkeleton">
+          <tr v-for="n in 8" :key="'sk-' + n" class="sk-row" aria-hidden="true">
+            <td class="d-none d-md-table-cell"><span class="sk sk-line" style="width: 70%"></span></td>
+            <td>
+              <span class="sk sk-line" :style="`width: ${55 + (n * 7) % 35}%`"></span>
+              <span class="sk sk-line sk-line--sm d-md-none mt-1" style="width: 40%"></span>
+            </td>
+            <td class="d-none d-md-table-cell"><span class="sk sk-circle"></span></td>
+            <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
+              <td class="d-none d-lg-table-cell"><span class="sk sk-line" style="width: 60%"></span></td>
+            </template>
+            <td class="d-none d-md-table-cell"><span class="sk sk-line" style="width: 80%"></span></td>
+            <td><span class="sk sk-line" style="width: 45%"></span></td>
+            <td class="d-none d-lg-table-cell"><span class="sk sk-line" style="width: 50%"></span></td>
+            <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
+              <td><span class="sk sk-pill" style="width: 90%"></span></td>
+            </template>
+            <td><span class="sk sk-pill" style="width: 42px"></span></td>
+            <td class="d-none d-md-table-cell"><span class="sk sk-pill" style="width: 70%"></span></td>
+            <td><span class="sk sk-btn"></span><span class="sk sk-btn"></span></td>
+          </tr>
+        </template>
+        <template v-else-if="students?.length">
           <template v-for="(std, i) in students.toReversed()">
             <tr @auxclick="log(std)" :style="!std.status ? 'opacity: 0.9' : ''"  >
               <td class="text-left d-none d-md-table-cell" @click.stop="log(std)"> {{ std.class }} </td>
-              <td class="text-left cp" @click.stop="prepareToEdit(std)" :student-id="std.id">
+              <td class="text-left cp student-name-cell" @click.stop="prepareToEdit(std)" :student-id="std.id">
                 {{ std.name.split('||')?.[0] }}
                 <div class="d-md-none mt-1">
                   <small class="text-muted d-block">{{ std.class }}</small>
@@ -944,13 +871,24 @@ watch(fixedWidthSoundCol, (newVal) => {
                     </i>
                   </span>
                 </div>
+                <!-- Mobile: Punch / Attendance always visible under the dakhela (the column is hidden on phones) -->
+                <div class="mobile-punch-actions d-md-none" @click.stop>
+                  <template v-if="CONFIG?.settings?.attendance?.status">
+                    <button v-if="std.name.indexOf('Copied') > -1" class="class-short-btn px-2 for-call" @click.stop="callPunch(std)">Call&nbsp;Punch</button>
+                    <template v-else>
+                      <button class="class-short-btn px-2 for-attendence" @click.stop="onClickAttendance(std)">Attendance</button>
+                      <button class="class-short-btn px-2 for-attendence" @click.stop="openAttendanceCalendar(std)"><i class='bx bxs-calendar'></i></button>
+                    </template>
+                  </template>
+                  <button v-else class="class-short-btn px-2" @click.stop="plainPunch(std)">Punch</button>
+                </div>
                 
               </td> 
               
               <td class="d-none d-lg-table-cell"> {{ std.year }} </td>
               <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
                 <template v-for="column in ['sound1']">
-                  <td class="d-none d-lg-table-cell">
+                  <td>
                     <!-- Sound -->
                     <template v-if="std[column]">            
                       <template v-if="!std[`isPlaying_${column}`]">            
@@ -977,10 +915,6 @@ watch(fixedWidthSoundCol, (newVal) => {
                         <span :tooltip="helper.t('Rcord Sound')" @click="targetStd=std;columnName=column">
                           <i class='bx bxs-microphone p-1 ms-1 cp' ></i>
                         </span>
-                        <!-- Here -->
-                        <span v-if="appAccessData?.recorder_web_url" :tooltip="helper.t('Paste recorded URL')" @click.stop="linkPopup={std,column};linkPopupUrl=''">
-                          <i class='bx bx-link p-1 ms-1 cp'></i>
-                        </span>
                       </div>
   
                     </template>  
@@ -994,7 +928,7 @@ watch(fixedWidthSoundCol, (newVal) => {
                 }"></Switch> 
               </td> 
 
-              <td>
+              <td class="d-none d-md-table-cell">
                 <template v-if="CONFIG?.settings?.attendance?.status">
                   <template v-if="std.name.indexOf('Copied') > -1">
                     <button ref="PunchButtonsRef" class="class-short-btn px-2 for-call" 
@@ -1083,37 +1017,6 @@ watch(fixedWidthSoundCol, (newVal) => {
     </div>
 
   
-    <!-- Recorder iframe overlay -->
-    <Teleport to="body">
-      <div v-if="recorderMounted" v-show="showRecorder" class="recorder-overlay" @click.self="showRecorder = false">
-        <div class="recorder-overlay__box">
-          <button class="recorder-overlay__close" @click="showRecorder = false">✕</button>
-          <div v-if="!recorderLoaded" class="recorder-overlay__loader">
-            <div class="recorder-spinner"></div>
-          </div>
-          <iframe :src="appAccessData.recorder_web_url + `?onCopyNewRecord=true&code=${CONFIG?.env?.CODE_NUMBER}`" class="recorder-overlay__frame" allow="microphone" @load="recorderLoaded = true" :style="{ visibility: recorderLoaded ? 'visible' : 'hidden' }"></iframe>
-        </div>
-      </div>
-    </Teleport>
-
-    <!-- Open With Phone Modal -->
-    <modal v-if="showPhoneModal" :title="helper.t('Open With Phone')" @close="showPhoneModal = false">
-      <div class="phone-modal">
-        <div class="phone-modal__qr">
-          <img v-if="qrDataUrl" :src="qrDataUrl" />
-          <div v-else class="phone-modal__qr-spinner"><div class="recorder-spinner"></div></div>
-        </div>
-        <p class="phone-modal__hint"><i class='bx bx-scan'></i> {{ helper.t('Point your phone camera at the QR code to open the app') }}</p>
-        <div class="phone-modal__url-row">
-          <a :href="buildPhoneUrl()" target="_blank" class="phone-modal__url">{{ buildPhoneUrl() }}</a>
-          <button @click="copyPhoneUrl" class="phone-modal__copy-btn" :class="{ 'phone-modal__copy-btn--copied': copiedPhoneUrl }">
-            <i :class="copiedPhoneUrl ? 'bx bx-check' : 'bx bx-copy'"></i>
-            {{ copiedPhoneUrl ? helper.t('Copied!') : helper.t('Copy') }}
-          </button>
-        </div>
-      </div>
-    </modal>
-
     <!-- Bulk Punch Modal -->
     <modal v-if="showBulkPunchModal" :title="helper.t('Bulk Punch')" @close="!bulkPunchRunning && (showBulkPunchModal = false)" :close-on-esc="!bulkPunchRunning" :close-on-click-away="false">
       <div>
@@ -1141,16 +1044,6 @@ watch(fixedWidthSoundCol, (newVal) => {
       </div>
     </modal>
 
-    <!-- Audio Recorder Modal -->
-    <modal v-if="linkPopup" :title="helper.t('Paste Recorded Audio URL')" @close="linkPopup=null;linkPopupUrl=''">
-      <div class="p-2">
-        <input v-model="linkPopupUrl" type="text" class="form-control cb-input mb-2" :placeholder="helper.t('Paste recorded audio URL here...')" autofocus />
-        <Btn class="w-100" @click="saveAudioFromUrl" :disabled="linkPopupLoading || !linkPopupUrl">
-          <BtnLoader v-if="linkPopupLoading"></BtnLoader>
-          <span v-else>Upload</span>
-        </Btn>
-      </div>
-    </modal>
 
     <template v-if="targetStd && columnName">
     <modal @close="targetStd=null" :title="false">
@@ -1171,28 +1064,73 @@ watch(fixedWidthSoundCol, (newVal) => {
 
     </template>
   
-
-    <EmDateTimePicker ref="dateTimePickerRef"
-      v-model="pickerModelValue"
-      @change="onChange_dateTimePicker"
-      @close="false"
-      :displayFormat="'DD-MMM-Y'"
-      :rangePicker="false" 
-      :timePicker="true" 
-      :minDate="moment().subtract(1, 'month')"
-      :isDisabled="false"
-      :autoOpen="false"
-      :timePickerButtons="true"
-      :use24FormatTimeForEvents="true"
-      :invisible="true"
-      :pickTimeFirst="true"
-      displayIn="modal" 
-      :buttons="{applyBtn: 'Set-Attendace', todayBtn: false}"
-      >
-    </EmDateTimePicker>
+    <div style="position: fixed;">
+      <EmDateTimePicker ref="dateTimePickerRef"
+        v-model="pickerModelValue"
+        @change="onChange_dateTimePicker"
+        @close="false"
+        :displayFormat="'DD-MMM-Y'"
+        :rangePicker="false" 
+        :timePicker="true" 
+        :minDate="moment().subtract(1, 'month')"
+        :isDisabled="false"
+        :autoOpen="false"
+        :timePickerButtons="true"
+        :use24FormatTimeForEvents="true"
+        :invisible="true"
+        :pickTimeFirst="true"
+        displayIn="modal" 
+        :buttons="{applyBtn: 'Set-Attendace', todayBtn: false}"
+        >
+      </EmDateTimePicker>
+    </div>
 
 
 </template>
+
+<style scoped>
+/* Mobile Punch / Attendance buttons under the student name */
+.mobile-punch-actions{
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap; /* Attendance + calendar always on one line */
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+}
+@media (max-width: 767px){
+  /* Let long names wrap so name + dakhela (with buttons) fit without sideways scrolling */
+  .table-container td.student-name-cell{
+    white-space: normal;
+    /* Name column takes half the screen width on phones */
+    width: calc( 50vw + 15px );
+    min-width: calc( 50vw + 15px );
+    max-width: calc( 50vw + 15px );
+  }
+}
+
+/* ===== Students list skeleton / shimmer ===== */
+.sk{
+  display: block;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #e5e7eb 0%, #f3f4f6 40%, #e5e7eb 80%);
+  background-size: 300% 100%;
+  animation: skShimmer 1.3s ease-in-out infinite;
+}
+.sk-line{ height: 12px; }
+.sk-line--sm{ height: 9px; }
+.sk-circle{ width: 36px; height: 36px; border-radius: 50%; }
+.sk-pill{ height: 22px; border-radius: 999px; }
+.sk-btn{ display: inline-block; width: 28px; height: 28px; border-radius: 8px; margin-right: 6px; }
+.sk-row td{ vertical-align: middle; padding-top: 14px; padding-bottom: 14px; }
+@keyframes skShimmer{
+  0%{ background-position: 100% 0; }
+  100%{ background-position: 0 0; }
+}
+@media (prefers-reduced-motion: reduce){
+  .sk{ animation: none; }
+}
+</style>
 
 <style>
 .recorder-overlay {
@@ -1240,89 +1178,6 @@ watch(fixedWidthSoundCol, (newVal) => {
   to { transform: rotate(360deg); }
 }
 
-/* Phone Modal */
-.phone-modal {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  padding: 8px 0 4px;
-}
-.phone-modal__qr {
-  width: 220px;
-  height: 220px;
-  border-radius: 12px;
-  overflow: hidden;
-  border: 1px solid #e5e7eb;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #f9fafb;
-}
-.phone-modal__qr img {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-.phone-modal__qr-spinner {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.phone-modal__qr-spinner .recorder-spinner {
-  border-color: rgba(0,0,0,0.1);
-  border-top-color: #4a6fa5;
-}
-.phone-modal__hint {
-  font-size: 13px;
-  color: #6b7280;
-  margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.phone-modal__hint .bx {
-  font-size: 16px;
-  color: #4a6fa5;
-}
-.phone-modal__url-row {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  background: #f3f4f6;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  overflow: hidden;
-}
-.phone-modal__url {
-  flex: 1;
-  font-size: 12px;
-  font-family: monospace;
-  color: #374151;
-  padding: 8px 12px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  text-decoration: none;
-}
-.phone-modal__url:hover { text-decoration: underline; }
-.phone-modal__copy-btn {
-  flex-shrink: 0;
-  border: none;
-  border-left: 1px solid #e5e7eb;
-  background: #fff;
-  color: #374151;
-  padding: 8px 14px;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  transition: background 0.15s;
-}
-.phone-modal__copy-btn:hover { background: #f9fafb; }
-.phone-modal__copy-btn--copied { color: #16a34a; }
 .recorder-overlay__close {
   position: absolute;
   top: 10px;
@@ -1345,6 +1200,90 @@ watch(fixedWidthSoundCol, (newVal) => {
   background: var(--grad1);
   /* margin-left: 0px 20px; */
 } 
+.student-filter-bar .filter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px 14px;
+  align-items: end;
+}
+.student-filter-bar .filter-grid .form-group {
+  margin-bottom: 0;
+}
+.student-filter-bar .filter-grid label {
+  margin-bottom: 4px;
+  display: inline-block;
+}
+.student-filter-bar .filter-actions {
+  display: flex;
+  flex-direction: column;
+}
+.student-filter-bar .filter-actions__spacer {
+  visibility: hidden;
+}
+.bulk-punch-label-short,
+.add-new-label-short {
+  display: none;
+}
+@media (max-width: 767px) {
+  .students-page-title {
+    display: none;
+  }
+  .sound-filter-group {
+    display: none;
+  }
+  .table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .table-container .table {
+    width: max-content;
+    min-width: 100%;
+  }
+  .table-container td,
+  .table-container th {
+    white-space: nowrap;
+  }
+  .bulk-punch-label-full,
+  .add-new-label-full {
+    display: none;
+  }
+  .bulk-punch-label-short,
+  .add-new-label-short {
+    display: inline;
+  }
+  .students-toolbar-actions {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    justify-content: flex-start;
+    width: 100%;
+  }
+  .students-toolbar-actions > * {
+    flex-shrink: 0;
+  }
+  .student-filter-bar {
+    padding: 12px !important;
+  }
+  .student-filter-bar .filter-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .student-filter-bar .filter-grid label {
+    font-size: 12.5px;
+    margin-bottom: 2px;
+  }
+  .student-filter-bar .filter-grid .form-group.filter-actions {
+    grid-column: 1 / -1;
+  }
+  .student-filter-bar .filter-actions__spacer {
+    display: none;
+  }
+  .student-filter-bar .filter-actions .d-flex {
+    width: 100%;
+  }
+  .student-filter-bar .filter-actions .d-flex > button {
+    flex: 1;
+  }
+}
 .all-class-buttons-to-filter-area{
   min-height: 40px;
   overflow-y: auto;

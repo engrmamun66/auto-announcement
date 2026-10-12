@@ -43,6 +43,17 @@
           <label>{{ helper.t('Adjust Time') }}</label>
           <input v-model="editingDevice.adjust_time" type="text" class="form-control" placeholder="e.g., subtract(2, 'hours')">
         </div>
+        <div class="form-group">
+          <Switch
+            v-model="editingDevice.adjust_diff_time_each_punch"
+            :label="helper.t('Adjust Diff Time Each Punch')"
+            :yesNoValue="[1, 0]"
+            yes="Yes"
+            no="No"
+            inline
+            size="lg"
+          />
+        </div>
       </div>
 
       <div class="device-modal__actions">
@@ -88,6 +99,7 @@ function handleSave() {
     brand: props.editingDevice.brand || 'ZKTeco',
     polling_interval: props.editingDevice.polling_interval,
     adjust_time: props.editingDevice.adjust_time || `subtract(0, 'hours')`,
+    adjust_diff_time_each_punch: props.editingDevice.adjust_diff_time_each_punch ? 1 : 0,
     status: props.editingDevice.status ? 1 : 0
   });
 }

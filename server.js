@@ -1,3 +1,4 @@
+process.env.TZ = process.env.TZ || 'Asia/Dhaka'; // must be set before any moment()/Date usage below
 global.DIR = __dirname;
 // require('dotenv').config()
 const fs = require('fs');
@@ -51,12 +52,10 @@ const webSocket = require("./socket/socket")
 const EventEmitter = require('./src/EventEmitter')  
 const EventBus = new EventEmitter()
 
-const { getToken, getBulkPunces } = require('./src/device.biotimeApp')
-
+const { pickPublicEnv } = require('./src/publicEnvKeys');
 let webContents = require("./src/web-contents");
 console.log('Initial webContents includes DYNAMIC_CUSTOM_CSS:', webContents.includes('DYNAMIC_CUSTOM_CSS'));
-let checkAccess = require("./src/checkaccess"); 
-const DEVICE_API_BASE_URL = global.config.env.DEVICE_API_BASE_URL
+let checkAccess = require("./src/checkaccess");
 
 // checkAccess.CheckAppAccess()
 
@@ -118,6 +117,14 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'front-end')));
 // Enable CORS
 app.use(cors());
+
+// ── File-based login gate (database/login.truck, 7-day token expiry) ──────
+const cookieParser = require('cookie-parser');
+const { requireAuth } = require('./src/middleware/auth');
+app.set('trust proxy', 1); // needed to detect https behind the production reverse proxy
+app.use(cookieParser());
+app.use('/api', require('./src/routes/auth')(config)); // /login, /logout, /auth-status — unprotected
+app.use('/api', requireAuth); // everything mounted under /api AFTER this line is gated
 
 // Initialize ZKTeco device command store
 app.locals.commands = { queues: {}, nextId: 1 };
@@ -207,7 +214,7 @@ app.get(`/app`, (req, res) => {
   let logo_padding = config?.logo?.padding || '10px'
   html = html.replace('DYNAMIC_LOGO_AREA_PADDING', logo_padding)
 
-  html = html.replace('ENV_VARIABLES_IN_JSON_FROMAT', JSON.stringify({...(config.env || {}), LOCAL_IP, MAC_ADDRESS}))
+  html = html.replace('ENV_VARIABLES_IN_JSON_FROMAT', JSON.stringify({...pickPublicEnv(config.env), LOCAL_IP, MAC_ADDRESS}))
 
   // With CSS variables
   if(config.css_vars){
@@ -235,6 +242,10 @@ function getAppVersion() {
   } catch(e) {}
   return '1.0.0';
 }
+
+app.get(`/api/server-time`, (req, res) => {
+  res.json({ time: moment().format('YYYY-MM-DD HH:mm:ss'), timezone: process.env.TZ });
+});
 
 // app.get(`/api/check-access`, async (req, res) => {
 app.get(`/api/_ac`, async (req, res) => {
@@ -271,13 +282,13 @@ app.get(`/api/_ac`, async (req, res) => {
 
 app.use('/api', require('./src/routes/students')(Students, { upload, audioUpload, imageUpload }));
 app.use('/api', require('./src/routes/schedules')(Schedules));
-app.use('/api', require('./src/routes/attendance')(Attendence, { getBulkPunces, Sms }));
+app.use('/api', require('./src/routes/attendance')(Attendence, { Sms }));
 app.use('/api', require('./src/routes/punchlog')(PunchLog));
 app.use('/api', require('./src/routes/leave')(LeavAndVacations));
 app.use('/api', require('./src/routes/config')(config, utils, Backup));
-app.use('/api', require('./src/routes/misc')(utils, Backup, { DEVICE_API_BASE_URL }));
-app.use('/api', require('./src/routes/refresh')(utils));
+app.use('/api', require('./src/routes/misc')(utils, Backup));
 app.use('/api', require('./src/routes/settings')(DB.db));
+app.use('/api', require('./src/routes/data-transfer')(DB.db, Students, { upload })); // Import page: Excel export/import
 app.use('/api', require('./src/routes/sms')(Sms));
 app.use('/api', require('./src/routes/devices')(DB.db));
 app.use('/api', require('./src/routes/verify-password')(DB.db));
@@ -342,11 +353,7 @@ webSocket(httpServer);
 async function startServer() {
   await loadDbSettings();
   httpServer.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}/app/#`);
-    console.log(`WebSocket running on ws://localhost:${PORT}`);
-
-    //  call token
-    getToken(Students)
+    console.log(`Server & Soccket running on http://localhost:${PORT}/app/#`);
   });
 }
 

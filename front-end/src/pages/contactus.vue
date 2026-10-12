@@ -1,10 +1,9 @@
 <script setup>
-import { inject, ref } from "vue";
+import { inject } from "vue";
 import Btn from '../components/Btn.vue'
 import helper from '../utilities/helper'
 
 const emitter = inject('emitter');
-const http = inject('http');
 const all_students_non_copied = inject('all_students_non_copied');
 const appAccessData = inject('appAccessData');
 
@@ -31,24 +30,6 @@ function routerInstructions(){
   console.groupEnd()
 }
 
-let restarting = ref(false)
-async function restartServer() {
-  restarting.value = true
-  try {
-    await http.get('/refresh')
-    emitter.emit('toaster-success', { message: helper.t('Server restarting...') })
-  } catch (_) {
-    emitter.emit('toaster-success', { message: helper.t('Server restarting...') })
-  } finally {
-    restarting.value = false
-    
-    setTimeout(() => {
-      emitter.emit('toaster-success', { message: helper.t('Reloading...') })
-      window.location.reload()
-    }, 3000)
-  }
-}
- 
 function CopyCode() {
   if(CONFIG.value?.env?.CODE_NUMBER){
     helper.copyToClipboard(CONFIG.value?.env?.CODE_NUMBER);
@@ -65,8 +46,8 @@ function CopyCode() {
   <!-- Contact Wrap -->
   <div class="container">
     <div class="header">
-      <p class="ip-badge" @click.stop="routerInstructions()">{{ helper.t('Server IP:') }} <strong>{{ ip }}</strong></p>
-      <p class="ip-badge ms-2" @click.stop="routerInstructions()">{{ helper.t('PC MAC Address:') }} <strong>{{ mac }}</strong></p>
+      <!-- <p class="ip-badge" @click.stop="routerInstructions()">{{ helper.t('Server IP:') }} <strong>{{ ip }}</strong></p>
+      <p class="ip-badge ms-2" @click.stop="routerInstructions()">{{ helper.t('PC MAC Address:') }} <strong>{{ mac }}</strong></p> -->
       <h1>{{ helper.t('Contact Information') }}</h1>
       <p class="mt-3">
         {{ helper.t('Find all our contact details, office location, visit hours, and payment information below.') }}
@@ -261,9 +242,9 @@ function CopyCode() {
       <p>
         © {{ new Date().getFullYear() }} Calling Bird. All rights reserved.
       </p>
-      <button class="restart-btn" @click="restartServer" :disabled="restarting">
-        <i class='bx bx-refresh' :class="{ 'bx-spin': restarting }"></i>
-      </button>
+      <RouterLink :to="{ name: 'terms' }" class="terms-link">
+        <i class='bx bx-shield-quarter'></i> {{ helper.t('Terms & Conditions and Privacy Policy') }}
+      </RouterLink>
     </div>
   </div>
 
@@ -404,24 +385,17 @@ body {
   font-size: 0.9rem;
 }
 
-.restart-btn {
-  margin-top: 10px;
-  background: none;
-  border: 1px solid #ddd;
-  border-radius: 50%;
-  width: 36px;
-  height: 36px;
-  cursor: pointer;
-  font-size: 18px;
+.terms-link {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  color: var(--secondary-color);
-  transition: color 0.2s, border-color 0.2s;
-  background: linear-gradient(135deg, rgb(42, 165, 151) 0%, rgb(37, 211, 102) 50%, rgb(18, 140, 126) 100%);
+  gap: 6px;
+  color: var(--primary-color, #4a6fa5);
+  font-weight: 600;
+  text-decoration: none;
 }
-.restart-btn:hover { color: #333; border-color: #999; }
-.restart-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.terms-link:hover {
+  text-decoration: underline;
+}
 
 @media (max-width: 768px) {
   .info-card {
@@ -542,7 +516,7 @@ body {
   .students-stat-card { padding: 20px; }
   .students-stat-card__body { flex-wrap: wrap; gap: 16px; }
   .students-stat-card__count { font-size: 2.4rem; }
-  .students-stat-card__badge { margin-left: 0; }
+  .students-stat-card__badge { display: none; }
 }
 
 /* WhatsApp Card Styles */
@@ -691,20 +665,96 @@ body {
         flex-direction: column;
         text-align: center;
     }
-    
+
     .whatsapp-icon {
         margin-right: 0;
         margin-bottom: 15px;
     }
-    
+
     .whatsapp-button {
         margin-left: 0;
         margin-top: 15px;
         width: 100%;
     }
-    
+
     .whatsapp-button .btn {
         width: 100%;
     }
+}
+
+@media (max-width: 480px) {
+  body {
+    padding: 10px;
+  }
+
+  .container {
+    margin-top: 15px;
+    margin-bottom: 25px;
+  }
+
+  .header {
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+  }
+
+  .header h1 {
+    font-size: 1.5rem;
+  }
+
+  .header p {
+    font-size: 0.9rem;
+  }
+
+  .info-card {
+    padding: 18px;
+  }
+
+  .card-icon {
+    width: 56px;
+    height: 56px;
+    margin-bottom: 15px;
+    font-size: 26px;
+  }
+
+  .card-title {
+    font-size: 1.1rem;
+  }
+
+  .card-body {
+    font-size: 0.9rem;
+  }
+
+  .students-stat-card {
+    padding: 16px;
+  }
+
+  .students-stat-card__icon {
+    width: 52px;
+    height: 52px;
+    font-size: 26px;
+  }
+
+  .students-stat-card__count {
+    font-size: 1.6rem;
+    flex-wrap: wrap;
+  }
+
+  .students-stat-card__count_sub {
+    font-size: 1rem;
+  }
+
+  .students-stat-card__badge {
+    font-size: 0.72rem;
+    padding: 5px 12px;
+  }
+
+  .students-stat-card__notice {
+    font-size: 0.8rem;
+    padding: 8px 10px;
+  }
+
+  iframe {
+    height: 260px !important;
+  }
 }
 </style>

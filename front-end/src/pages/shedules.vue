@@ -14,7 +14,6 @@ import Player from '../components/Player.vue'
 import AudioRecorAndUpload from '../components/AudioRecorAndUpload.vue'
 import RecoringAnimation from '../components/RecoringAnimation.vue'
 import BaseSelectMultiple from '../components/BaseSelectMultiple.vue'
-import TimePicker from '../components/EmDateTimePicker.vue'
 import { template } from 'lodash';
 
 let route = useRoute()
@@ -38,12 +37,19 @@ let http = inject('http');
 
 let addUpdateMode = ref(false)
 let is___adding = ref(false)
-let tab = ref(1)
+let tab = ref(2)
 let selectedFilterClasses = ref([])
-let filterMatchMode = ref('and')
+let filterMatchMode = ref('or')
+let classesFilterSearchText = ref('')
 
 const activeClasses = computed(() => {
   return (classes.value || []).filter(cls => cls?.isActive !== false)
+})
+
+const filteredActiveClasses = computed(() => {
+  if(!classesFilterSearchText.value) return activeClasses.value
+  const search = classesFilterSearchText.value.toLowerCase()
+  return activeClasses.value.filter(cls => cls?.class_name?.toLowerCase().includes(search) || cls?.class_short?.toLowerCase().includes(search))
 })
 
 const filteredSchedules = computed(() => {
@@ -75,16 +81,21 @@ let endTimePicker = ref(null)
 let startTimePicker2 = ref(null)
 let endTimePicker2 = ref(null)
 
+let timeBtnOffset = reactive({ 
+  right: '32px', 
+  top: '6px' 
+})
+
 let payload = reactive({
     id: null,
     type: 1,
     title: null,
-    start_time: '12:00 AM',
-    end_time: '12:00 AM',
+    start_time: '00:00',
+    end_time: '00:00',
     order_index: 1,
 
-    start_time2: '12:00 AM',
-    end_time2: '12:00 AM',
+    start_time2: '00:00',
+    end_time2: '00:00',
     status: 1,
     classes: [],
     both: true,
@@ -94,62 +105,60 @@ const INC = 5
 
 function decrementTime(key){
    if(key == 'start'){
-      payload.start_time = moment(payload.start_time, 'hh:mm A').subtract(INC, 'minutes').format('hh:mm A')
-      startTimePicker.value.setTime(payload.start_time)
+      payload.start_time = moment(payload.start_time, 'HH:mm').subtract(INC, 'minutes').format('HH:mm')
+      applyCallStartCascade(payload.start_time)
    }
    else if(key == 'end'){
-      payload.end_time = moment(payload.end_time, 'hh:mm A').subtract(INC, 'minutes').format('hh:mm A')
-      endTimePicker.value.setTime(payload.end_time)
+      payload.end_time = moment(payload.end_time, 'HH:mm').subtract(INC, 'minutes').format('HH:mm')
+      applyCallEndCascade(payload.end_time)
    }
-   updateSecondPickers()
-  
 }
 function incrementTime(key){
   if(key == 'start'){
-      payload.start_time = moment(payload.start_time, 'hh:mm A').add(INC, 'minutes').format('hh:mm A')
-      startTimePicker.value.setTime(payload.start_time)
+      payload.start_time = moment(payload.start_time, 'HH:mm').add(INC, 'minutes').format('HH:mm')
+      applyCallStartCascade(payload.start_time)
    }
    else if(key == 'end'){
-      payload.end_time = moment(payload.end_time, 'hh:mm A').add(INC, 'minutes').format('hh:mm A')
-      endTimePicker.value.setTime(payload.end_time)
+      payload.end_time = moment(payload.end_time, 'HH:mm').add(INC, 'minutes').format('HH:mm')
+      applyCallEndCascade(payload.end_time)
    }
-   updateSecondPickers()
 }
 
+// Adds hours to a 'HH:mm' time, but clamps to 23:59 instead of rolling into the next day
+function addHoursClampToday(timeStr, hours){
+  const start = moment(timeStr, 'HH:mm')
+  const end = start.clone().add(hours, 'hours')
+  if(end.date() !== start.date()) return '23:59'
+  return end.format('HH:mm')
+}
 
+// Call Start drives: Call End (+3h), Punch End (+3h), Punch Start (-30min)
+function applyCallStartCascade(newStart){
+  payload.end_time = addHoursClampToday(newStart, 3)
+  payload.end_time2 = addHoursClampToday(newStart, 3)
+  payload.start_time2 = moment(newStart, 'HH:mm').subtract(30, 'minutes').format('HH:mm')
+}
+
+// Call End drives: Punch End (kept equal)
+function applyCallEndCascade(newEnd){
+  payload.end_time2 = newEnd
+}
 
 function decrementTime2(key){
    if(key == 'start'){
-      payload.start_time2 = moment(payload.start_time2, 'hh:mm A').subtract(INC, 'minutes').format('hh:mm A')
-      if(startTimePicker2.value) startTimePicker2.value.setTime(payload.start_time2)
+      payload.start_time2 = moment(payload.start_time2, 'HH:mm').subtract(INC, 'minutes').format('HH:mm')
    }
    else if(key == 'end'){
-      payload.end_time = moment(payload.end_time, 'hh:mm A').subtract(INC, 'minutes').format('hh:mm A')
-      endTimePicker2.value.setTime(payload.end_time)
+      payload.end_time2 = moment(payload.end_time2, 'HH:mm').subtract(INC, 'minutes').format('HH:mm')
    }
-   updateSecondPickers()
 }
 function incrementTime2(key){
   if(key == 'start'){
-      payload.start_time2 = moment(payload.start_time2, 'hh:mm A').add(INC, 'minutes').format('hh:mm A')
-      if(startTimePicker2.value) startTimePicker2.value.setTime(payload.start_time2)
+      payload.start_time2 = moment(payload.start_time2, 'HH:mm').add(INC, 'minutes').format('HH:mm')
    }
    else if(key == 'end'){
-      payload.end_time2 = moment(payload.end_time2, 'hh:mm A').add(INC, 'minutes').format('hh:mm A')
-      endTimePicker2.value.setTime(payload.end_time2)
+      payload.end_time2 = moment(payload.end_time2, 'HH:mm').add(INC, 'minutes').format('HH:mm')
    }
-}
-function updateSecondPickers(){
-  setTimeout(() => {
-
-    // start_time2
-    payload.start_time2 = moment(payload.start_time, 'hh:mm A').add(30, 'minutes').format('hh:mm A')
-    if(startTimePicker2.value) startTimePicker2.value.setTime(payload.start_time2)
-
-    // end_time2
-    payload.end_time2 = moment(payload.end_time, 'hh:mm A').add(0, 'minutes').format('hh:mm A')
-    endTimePicker2.value.setTime(payload.end_time2)
-  }, 10);
 }
 
 
@@ -182,29 +191,12 @@ watch(addUpdateMode, (bool)=>{
 })
 
 
-function updatePickersTime(delay=0, item = null){ 
+function updatePickersTime(delay=0, item = null){
   setTimeout(() => {
-    startTimePicker.value.setTime((item || payload).start_time)
-    endTimePicker.value.setTime((item || payload).end_time)
-
     if(item?.start_time && item?.end_time){
       payload.start_time = item.start_time
       payload.end_time = item.end_time
     }
-
-  }, delay);
-}
-
-function updatePickersTime2(delay=0, item = null){ 
-  setTimeout(() => {
-    startTimePicker2.value.setTime((item || payload).start_time2)
-    endTimePicker2.value.setTime((item || payload).end_time2)
-
-    if(item?.start_time2 && item?.end_time2){
-      payload.start_time2 = item.start_time2
-      payload.end_time2 = item.end_time2
-    }
-
   }, delay);
 }
 
@@ -219,8 +211,8 @@ function clearPayload(){
   payload.status =  1
   payload.order_index =  1
   payload.title =  null
-  payload.start_time = '12:00 AM'
-  payload.end_time = '12:00 AM',
+  payload.start_time = '00:00'
+  payload.end_time = '00:00'
   payload.classes = []
   payload.both = true
   addUpdateMode.value = false;
@@ -278,9 +270,9 @@ function addSchedule(){
       }
     }).finally(()=>{
 
-      if(payload.type === 1 && payload.both){
+      if(payload.type === 2 && payload.both){
         let anotherPayload = _payload
-        anotherPayload.type = 2
+        anotherPayload.type = 1
         anotherPayload['start_time'] = payload.start_time2
         anotherPayload['end_time'] = payload.end_time2
         http.post('/schedules/add', anotherPayload).then(response => {
@@ -499,6 +491,11 @@ function canReOrderSchedule(item, action='up'){
                 </div>
               </div>
 
+              <!--  -->
+              <!--  -->
+              <!--  -->
+              <!--  -->
+
               <div class="col-12">
                 <div class="row">
 
@@ -509,92 +506,58 @@ function canReOrderSchedule(item, action='up'){
                   <div class="col-6">
                     <div class="form-group group-header2">
                       <label for="">{{ payload.type == 1 ? 'Punch Start' : 'Call Start' }}</label>
-                      <!-- <input v-model="payload.start_time" type="time" class="form-control cb-input"> -->
                        <div class="position-relative">
-                         <TimePicker ref="startTimePicker"
+                         <input ref="startTimePicker"
                           v-model="payload.start_time"
-                          modelValueType="string"
-                          @change="(time) => {
-                            if(!isValidTimesInPayload()){
-                              $refs.endTimePicker.setTime(time);
-                              payload.end_time = time
-                            }
-                          }"
-                          @close="false"
-                          :displayFormat="'DD-MMM-Y'"
-                          :rangePicker="false" 
-                          :onlyTimePicker="true" 
-                          :startTime="payload.start_time"  
-                          @click="updatePickersTime()"
-                          :timePickerButtons="true"
-                          :use24FormatTimeForEvents="true"
-                          :invisible="false"
-                          :minuteStep="5"
-                          displayIn="top_left"
-                          :adjustY="-208" 
-                          :openigAimationClass="'none-'"
-                          style="width: 232px"
+                          type="time"
+                          class="form-control cb-input"
+                          @change="applyCallStartCascade(payload.start_time)"
+                          style="width: 232px; padding-right: 5px"
                           >
-                         </TimePicker>
-                         <div class="position-absolute" style="right: 5px; top: 8px">
+                         <div class="position-absolute" :style="{ right: timeBtnOffset.right, top: timeBtnOffset.top }">
                           <Btn @click="decrementTime('start')" class="me-1 sm opacity-75">-</Btn>
                           <Btn @click="incrementTime('start')" class="sm opacity-75">+</Btn>
                         </div>
                        </div>
                     </div>
                   </div>
-    
+
                   <div class="col-6">
                     <div class="form-group group-header2">
                       <div class="d-flex justify-content-between">
                         <label for="">{{ payload.type == 1 ? 'Punch End' : 'Call End' }}</label>
                       </div>
                       <div class="position-relative">
-                        <TimePicker ref="endTimePicker"
+                        <input ref="endTimePicker"
                           v-model="payload.end_time"
-                          modelValueType="string"
-                          @change="false"
-                          @close="false"
-                          :displayFormat="'DD-MMM-Y'"
-                          :rangePicker="false" 
-                          :onlyTimePicker="true" 
-                          :startTime="payload.end_time"  
-                          @click="updatePickersTime()"
-                          :timePickerButtons="true"
-                          :use24FormatTimeForEvents="true"
-                          :invisible="false"
-                          :minuteStep="5"
-                          displayIn="top_left"
-                          :adjustY="-208" 
-                          :openigAimationClass="'none-'"
-                          style="width: 232px"
+                          type="time"
+                          class="form-control cb-input"
+                          @change="applyCallEndCascade(payload.end_time)"
+                          style="width: 232px; padding-right: 5px"
                           >
-                         </TimePicker>
-                         <div class="position-absolute" style="right: 5px; top: 8px">
+                         <div class="position-absolute" :style="{ right: timeBtnOffset.right, top: timeBtnOffset.top }">
                           <Btn @click="decrementTime('end')" class="me-1 sm opacity-75">-</Btn>
                           <Btn @click="incrementTime('end')" class="sm opacity-75">+</Btn>
                         </div>
                       </div>
                     </div>
-                  </div> 
+                  </div>
                 </div>
               </div>
 
+              <!--  -->
+              <!--  -->
+              <!--  -->
+              <!--  -->
+              <template v-if="!payload.id && payload.type == 2">
 
 
-              <!--  -->
-              <!--  -->
-              <!--  -->
-              <!--  -->
-              <template v-if="!payload.id && payload.type == 1">
-               
 
- 
                 <div class="col-12">
                   <div class="row">
                     <div class="col-12">
                       <div class="d-flex justify-content-between align-items-center">
-                        <label class="group-header">Set Call Times</label>
+                        <label class="group-header">Set Punch Times</label>
                         <label for="">
                           <input v-model="payload.both" type="checkbox">
                           Both
@@ -603,83 +566,45 @@ function canReOrderSchedule(item, action='up'){
                     </div>
                     <div class="col-6" :class="{'opacity-25 nc': !payload.both}">
                       <div class="form-group group-header2">
-                        <label for="">Call Start</label>
-                        <!-- <input v-model="payload.start_time" type="time" class="form-control cb-input"> -->
+                        <label for="">Punch Start</label>
                           <div class="position-relative">
-                            <TimePicker ref="startTimePicker2"
+                            <input ref="startTimePicker2"
                             v-model="payload.start_time2"
-                            modelValueType="string"
-                            @change="(time) => {
-                              if(!isValidTimesInPayload()){
-                                $refs.endTimePicker2.setTime(time);
-                                payload.end_time2 = time
-                              }
-                            }"
-                            @close="false"
-                            :displayFormat="'DD-MMM-Y'"
-                            :rangePicker="false" 
-                            :onlyTimePicker="true" 
-                            :startTime="payload.start_time2"  
-                            @click="updatePickersTime2()"
-                            :timePickerButtons="true"
-                            :use24FormatTimeForEvents="true"
-                            :invisible="false"
-                            :minuteStep="5"
-                            displayIn="top_left"
-                            :adjustY="-208" 
-                            :openigAimationClass="'none-'"
-                            style="width: 232px"
+                            type="time"
+                            class="form-control cb-input"
+                            style="width: 232px; padding-right: 5px"
                             >
-                            </TimePicker>
-                            <div class="position-absolute" style="right: 5px; top: 8px">
+                            <div class="position-absolute" :style="{ right: timeBtnOffset.right, top: timeBtnOffset.top }">
                             <Btn @click="decrementTime2('start')" class="me-1 sm opacity-75">-</Btn>
                             <Btn @click="incrementTime2('start')" class="sm opacity-75">+</Btn>
                           </div>
                           </div>
                       </div>
                     </div>
-      
+
                     <div class="col-6" :class="{'opacity-25 nc': !payload.both}">
                       <div class="form-group group-header2">
                         <div class="d-flex justify-content-between">
-                          <label for="">Call End</label>
+                          <label for="">Punch End</label>
                         </div>
                         <div class="position-relative">
-                          <TimePicker ref="endTimePicker2"
+                          <input ref="endTimePicker2"
                             v-model="payload.end_time2"
-                            modelValueType="string"
-                            @change="false"
-                            @close="false"
-                            :displayFormat="'DD-MMM-Y'"
-                            :rangePicker="false" 
-                            :onlyTimePicker="true" 
-                            :startTime="payload.end_time2"  
-                            @click="updatePickersTime2()"
-                            :timePickerButtons="true"
-                            :use24FormatTimeForEvents="true"
-                            :invisible="false"
-                            :minuteStep="5"
-                            displayIn="top_left"
-                            :adjustY="-208" 
-                            :openigAimationClass="'none-'"
-                            style="width: 232px"
+                            type="time"
+                            class="form-control cb-input"
+                            style="width: 232px; padding-right: 5px"
                             >
-                            </TimePicker>
-                            <div class="position-absolute" style="right: 5px; top: 8px">
+                            <div class="position-absolute" :style="{ right: timeBtnOffset.right, top: timeBtnOffset.top }">
                             <Btn @click="decrementTime2('end')" class="me-1 sm opacity-75">-</Btn>
                             <Btn @click="incrementTime2('end')" class="sm opacity-75">+</Btn>
                           </div>
                         </div>
                       </div>
-                    </div> 
+                    </div>
                   </div>
                 </div>
- 
+
               </template>
-              <!--  -->
-              <!--  -->
-              <!--  -->
-              <!--  -->
 
 
 
@@ -711,10 +636,10 @@ function canReOrderSchedule(item, action='up'){
       <div class="d-flex justify-content-between align-items-end flex-wrap gap-3 mt-4 mb-3">
         <ul class="nav nav-tabs bottom-borderless mb-0">
           <li class="nav-item">
-            <a @click.stop="tab = 1" class="nav-link cp text-black" :class="{'active': tab==1}" >{{ helper.t('Puch Times') }}</a>
+            <a @click.stop="tab = 2" class="nav-link cp text-black" :class="{'active': tab==2}" >{{ helper.t('Call Times') }}</a>
           </li>
           <li class="nav-item">
-            <a @click.stop="tab = 2" class="nav-link cp text-black" :class="{'active': tab==2}" >{{ helper.t('Call Times') }}</a>
+            <a @click.stop="tab = 1" class="nav-link cp text-black" :class="{'active': tab==1}" >{{ helper.t('Puch Times') }}</a>
           </li>
           <!-- <li v-if="CONFIG?.settings?.with_speaker_controls?.status" class="nav-item">
             <a @click.stop="tab = 3" class="nav-link cp text-black" :class="{'active': tab==3}" >Speaker Ports</a>
@@ -725,21 +650,22 @@ function canReOrderSchedule(item, action='up'){
           <div class="schedule-filter-mode">
             <span class="text-muted small text-nowrap">Mode:</span>
             <div class="schedule-filter-mode__buttons">
-              <button type="button" class="schedule-filter-mode__btn" :class="{ active: filterMatchMode === 'and' }" @click="filterMatchMode = 'and'">AND</button>
               <button type="button" class="schedule-filter-mode__btn" :class="{ active: filterMatchMode === 'or' }" @click="filterMatchMode = 'or'">OR</button>
+              <button type="button" class="schedule-filter-mode__btn" :class="{ active: filterMatchMode === 'and' }" @click="filterMatchMode = 'and'">AND</button>
             </div>
           </div>
           <div class="schedule-filter-box">
             <span class="text-muted small text-nowrap">Filter:</span>
             <BaseSelectMultiple
               v-model="selectedFilterClasses"
-              :data="activeClasses"
+              :data="filteredActiveClasses"
               :label="false"
               :placeholder="helper.t('Classes')"
               displayKey="class_name"
               valueKey="class_short"
               :search="true"
               :searchDelayTime="100"
+              @searching="(text) => classesFilterSearchText = text"
               maxHeight="220px"
               style="width: 100%;"
             />

@@ -1,0 +1,66 @@
+plugins {
+    id 'com.android.application'
+}
+
+// Read WEB_URL and SUBDOMAIN from mobile-app/.env (falls back to .env.example).
+def readEnv = { String key ->
+    def file = rootProject.file('.env')
+    if (!file.exists()) file = rootProject.file('.env.example')
+    if (!file.exists()) return null
+    def line = file.readLines().collect { it.trim() }.find { !it.startsWith('#') && it.startsWith(key + '=') }
+    return line ? line.substring(key.length() + 1).trim().replaceAll(/^["']|["']$/, '') : null
+}
+def webUrl = readEnv('WEB_URL') ?: 'https://{subdomain}.softproit.cloud'
+def subdomain = readEnv('SUBDOMAIN') ?: ''
+
+// Optional release signing: create mobile-app/keystore.properties (see README.md).
+def keystorePropsFile = rootProject.file('keystore.properties')
+def keystoreProps = new Properties()
+if (keystorePropsFile.exists()) keystorePropsFile.withInputStream { keystoreProps.load(it) }
+
+android {
+    namespace = 'cloud.softproit.callingbird'
+    compileSdk = 37
+
+    defaultConfig {
+        applicationId = 'cloud.softproit.callingbird'
+        minSdk = 24
+        targetSdk = 37
+        versionCode = 1
+        versionName = '1.0.0'
+        buildConfigField 'String', 'WEB_URL', "\"${webUrl}\""
+        buildConfigField 'String', 'SUBDOMAIN', "\"${subdomain}\""
+    }
+
+    buildFeatures {
+        buildConfig = true
+    }
+
+    signingConfigs {
+        if (keystorePropsFile.exists()) {
+            release {
+                storeFile = rootProject.file(keystoreProps['storeFile'])
+                storePassword = keystoreProps['storePassword']
+                keyAlias = keystoreProps['keyAlias']
+                keyPassword = keystoreProps['keyPassword']
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled = false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            if (keystorePropsFile.exists()) signingConfig = signingConfigs.release
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    implementation 'androidx.core:core:1.19.1'
+}

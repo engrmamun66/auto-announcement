@@ -90,7 +90,7 @@ module.exports = {
             lastSaveInfoResult = responseData
             return responseData
           } catch (error) {
-            console.error("Fetch error:", error);
+            console.warn(`⚠️ License check (save_info) unreachable — ${error.message}. Continuing without it.`);
             return { success: false, error: error.message, status: error.status, bodySnippet: error.bodySnippet };
           } finally {
             saveInfoInFlight = false
@@ -124,7 +124,7 @@ module.exports = {
             lastAccessResult = data
             return data;
           } catch (error) {
-            console.error("Fetch error:", error);
+            console.warn(`⚠️ License check unreachable — ${error.message}. Failing open (app stays usable).`);
             return lastAccessResult || { success: false, error: error.message, status: error.status, bodySnippet: error.bodySnippet };
           } finally {
             accessInFlight = false
@@ -133,8 +133,8 @@ module.exports = {
 
 
       } catch (error) {
-        console.error("Fetch error:", error);
+        console.warn(`⚠️ License check failed unexpectedly — ${error.message}. Failing open.`);
         return { success: false, error: error.message };
-      } 
+      }
     }
 }

@@ -4,6 +4,7 @@ const path = require('path');
 const vm = require('vm');
 const enLang = require('../lang/en');
 const bnLang = require('../lang/bn');
+const { pickPublicEnv } = require('../publicEnvKeys');
 
 const ENV_FILES = {
   'config.example.js': path.join(__dirname, '..', '..', 'config.example.js'),
@@ -76,6 +77,7 @@ module.exports = function (config, utils, Backup) {
 
     config.settings.with_speaker_controls.switch_mode = track?.switch_mode || 'auto';
     const runtimeConfig = cloneData(config);
+    runtimeConfig.env = pickPublicEnv(runtimeConfig.env); // never leak secrets (SECRET_KEY, LOGIN_PASSWORD, device creds, etc.)
     const lang_code = getLanguageCode(runtimeConfig);
     const attendanceLangConfig = getAttendanceLangConfig(lang_code);
 

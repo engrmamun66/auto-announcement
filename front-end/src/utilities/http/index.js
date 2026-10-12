@@ -1,4 +1,5 @@
 import Axios from 'axios';
+import emitter from '../emitter';
 
 /* -------------------------------------------------------------------------- */
 /*                            Common Authentication                           */
@@ -53,4 +54,15 @@ http.interceptors.request.use((config) => {
     }
     return config
 });
+
+http.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error?.response?.status === 401 && error.config?.url !== '/login') {
+            emitter.emit('auth-required')
+        }
+        return Promise.reject(error)
+    }
+);
+
 export default http

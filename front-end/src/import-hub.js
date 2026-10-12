@@ -1,5 +1,5 @@
-import mitt from 'mitt'
-export const emitter = mitt()
+import emitter from '@utils/emitter'
+export { emitter }
 // Doc: https://www.npmjs.com/package/mitt
 
 /* -------------------------------------------------------------------------- */

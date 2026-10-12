@@ -14,13 +14,13 @@ import Lockscreen from './components/Lockscreen.vue'
 import DevicesPreloader from './components/DevicesPreloader.vue'
 import AddBulkAttendaceForDev from './components/AddBulkAttendaceForDev.vue'
 import FetchBulkAttendanceFromDevice from './components/FetchBulkAttendanceFromDevice.vue'
+import Login from './components/Login.vue'
 
 const socketInit = inject('socketInit');
 
 
 
 const log = console.log
-const isIPAccess = window.location.hostname !== 'localhost'
 
 let helper = inject('helper')
 let http = inject('http')
@@ -62,7 +62,7 @@ let internet = ref(true)
  */
 let showRecurringModal = ref(true) 
 
-let is_started_schedule = ref(0) 
+let is_started_schedule = ref(1) 
 let schedule_timeout = ref(0) 
 let classes = ref([]);
 let wattingList = ref([])
@@ -76,6 +76,11 @@ let isMounted = ref(false)
 let user_interacted = ref(false)
 let last_mouse_activity_time = ref(Date.now())
 let emergency_mode = ref(false)
+let mute_for_me = ref(false)
+
+function toggleMuteMode(){
+    mute_for_me.value = !mute_for_me.value
+}
 let LockscreenRef = ref(null)
 let lockscreenDismissing = ref(false)
 let disabilityAlretRef = ref(null)
@@ -85,17 +90,13 @@ let show_bulk_attedance_component = ref(false)
 let last_mouse_keyboard_activity = ref(new Date().getTime())
 // true if mouse/keyboard was used within the last 5 seconds
 const isUserActive = ref(false)
-const main_app_user_is_active = ref(false)
 const allow_to_reaload = ref(false)
 const showSmsModal = ref(false)
 const show_cloner_component = ref(false)
-
-watch(isUserActive, (bool) => {
-    sendRemoteAction({from: 'localhost', action: 'is_active_main_user', data: isUserActive.value})
-})
+const showSettingsPanel = ref(false) // ConfigSettings panel (opened from TopNav)
 
 const handleBeforeUnload = (event) => {
-    if(allow_to_reaload.value || (!isIPAccess && !isUserActive.value)){
+    if(allow_to_reaload.value || !isUserActive.value){
 
     } else {
         event.preventDefault()
@@ -115,7 +116,6 @@ watch(switches_PreviewInHomePage, (bool) => {
 let _skipWattingListWatch = false
 watch(wattingList, (newWaittinglist) => {
     storage('wattingList').value = newWaittinglist
-    sendRemoteAction({from: 'localhost', action: 'update_waiting_list', data: newWaittinglist, host_name: window.location.host})
 }, {deep: true})
 
 watch(attendenceList, (newAttendenceList) => {
@@ -445,7 +445,6 @@ provide('CONFIG', CONFIG)
 provide('langCode', langCode)
 provide('isBanglaUi', isBanglaUi)
 provide('t', t)
-provide('isIPAccess', isIPAccess)
 provide('is_started_schedule', is_started_schedule)
 provide('schedule_timeout', schedule_timeout)
 provide('classes', classes)
@@ -459,8 +458,10 @@ provide('call_schedules', call_schedules)
 provide('toggleSettings', toggleSettings) 
 provide('refreshDOM', refreshDOM) 
 provide('user_interacted', user_interacted) 
-provide('emergency_mode', emergency_mode) 
-provide('punchToCallStudent', punchToCallStudent) 
+provide('emergency_mode', emergency_mode)
+provide('mute_for_me', mute_for_me)
+provide('toggleMuteMode', toggleMuteMode)
+provide('punchToCallStudent', punchToCallStudent)
 provide('punchToSubmitAttendance', punchToSubmitAttendance) 
 provide('all_students', all_students) 
 provide('all_students_non_copied', all_students_non_copied) 
@@ -472,8 +473,6 @@ provide('getConfig', getConfig)
 provide('controlSounds', controlSounds)
 provide('showSwithBoardModal', showSwithBoardModal)
 provide('show_bulk_attedance_component', show_bulk_attedance_component)
-provide('isUserActive', isUserActive)
-provide('main_app_user_is_active', main_app_user_is_active)
 provide('allow_to_reaload', allow_to_reaload)
 provide('borad_image_url', borad_image_url)
 provide('switches_PreviewInHomePage', switches_PreviewInHomePage)
@@ -481,7 +480,8 @@ provide('isUsingSpeakerAutoControl', isUsingSpeakerAutoControl)
 provide('isSpeakersAutoMode', isSpeakersAutoMode) 
 provide('last_requested_ports_for_auto_mode', last_requested_ports_for_auto_mode) 
 provide('showSmsModal', showSmsModal) 
-provide('show_cloner_component', show_cloner_component) 
+provide('show_cloner_component', show_cloner_component)
+provide('showSettingsPanel', showSettingsPanel) 
 
 
 
@@ -624,7 +624,8 @@ function _______SEAPRATOR______(){}
 
 function focusBarcodeInput__and__startAnnoucement(){
     callbacks.clearWattingList()
-    if(is_started_schedule.value && !isIPAccess && !showSmsModal.value && !show_cloner_component.value){
+    const isMobileViewport = window.innerWidth <= 960
+    if(is_started_schedule.value && !showSmsModal.value && !show_cloner_component.value && !showSettingsPanel.value && !isMobileViewport){
         let inputEl = document.getElementById('BARCODE_INPUT')
         if(inputEl) inputEl.focus()
     }
@@ -648,11 +649,15 @@ function speakText(text) {
   
 watch(is_started_schedule, (a, b) => {
     storage('is_started_schedule').value = a 
-}) 
+}, {immediate: true}) 
   
 watch(emergency_mode, (a, b) => {
-    storage('emergency_mode').value = a 
-}) 
+    storage('emergency_mode').value = a
+})
+
+watch(mute_for_me, (a, b) => {
+    storage('mute_for_me').value = a
+})
 
 
 function stop_clear_and_reload(){
@@ -768,65 +773,67 @@ let Socket = ref(null)
 provide('Socket', Socket)
 let socketServerIsRunning = ref(false)
 let allow_auto_fetch = ref(false)
-let is_connected_with_main_app = ref(false)
-provide('sendRemoteAction', sendRemoteAction)
-provide('is_connected_with_main_app', is_connected_with_main_app)
-
-function onToaster({ type, message, duration }) {
-    sendRemoteAction({ from: 'localhost', action: 'onToaster', data: { type, message, duration } })
-}
-
-function sendRemoteAction(
-    {
-        from='any', // ip | localhost
-        action='say_hi',
-        selector = null,
-        data = null, 
-        host_name = null, 
-    } = {}
-){
-    try {
-        if(!Socket.value) return 
-        let SOCKET = Socket.value
-
-        let __data = { type: 'remote_action', action, selector, data, host_name }
-
-        if(from == 'any' || (from == 'ip' && isIPAccess) || (from == 'localhost' && !isIPAccess)){
-
-            if(from === 'ip'){
-                if(!is_connected_with_main_app.value) {
-                    sendRemoteAction() // try to connect with main app
-                    return
-                }
-            }
-            SOCKET.send(JSON.stringify(__data))
-        }
-    } catch (sendRemoteAction_error) {
-        console.error({sendRemoteAction_error}) 
-    }
-}
 
 emitter.on('is_connected_socket_server', (bool) => {
     socketServerIsRunning.value = bool
 })
 
-onMounted(async ()=>{ 
+const isAuthenticated = ref(false)
+const authChecked = ref(false)
+
+function onLoggedIn(){
+    isAuthenticated.value = true
+    initApp()
+}
+
+emitter.on('auth-required', () => {
+    isAuthenticated.value = false
+})
+
+async function checkAuthStatus(){
+    try {
+        let res = await http.get('/auth-status')
+        isAuthenticated.value = !!res.data?.authenticated
+    } catch (error) {
+        isAuthenticated.value = false
+    }
+}
+
+onMounted(async () => {
+    await checkAuthStatus()
+    authChecked.value = true
+    if(isAuthenticated.value){
+        await initApp()
+    }
+
+    setInterval(checkAuthStatus, 5 * 60 * 1000) // re-verify auth every 5 minutes
+})
+
+let appInitialized = false
+
+async function initApp(){
+    // initApp() can be reached twice (onMounted when already authenticated, and
+    // onLoggedIn after a fresh login) — without this guard each call opened its own
+    // socket + watchdog, leaving duplicate live WebSocket connections from one tab.
+    if(appInitialized) return
+    appInitialized = true
+
     applyLanguageSettings()
 
     window.addEventListener('beforeunload', handleBeforeUnload)
-    window.addEventListener('message', onIframeMessage)
-    
+
     setTimeout(() => {
         Socket.value = socketInit({emitter, toaster: true})
     }, 1000);
 
     setInterval(()=>{
-        if(Socket.value){ 
+        if(Socket.value){
             if(socketServerIsRunning.value === false){
+                Socket.value.close()
                 Socket.value = socketInit({emitter, toaster: true})
             }
         }
-    }, 5000) 
+    }, 5000)
 
     window.addEventListener("online", () => {
         appAccessData.value.internet = true
@@ -885,6 +892,7 @@ onMounted(async ()=>{
     wattingList.value = storage('wattingList').value || []
     is_started_schedule.value = Number(storage('is_started_schedule').value || 0) || is_started_schedule.value 
     emergency_mode.value = Boolean(storage('emergency_mode').value)
+    mute_for_me.value = Boolean(storage('mute_for_me').value)
  
 
     setTimeout(() => {
@@ -941,14 +949,18 @@ onMounted(async ()=>{
             let { punch_time, barcode, for_attendence, device_index } = socket_data
             let time_and_barcode = `${punch_time}-${barcode}`
 
-            let existing = storage('time_and_barcode').value
+            // sessionStorage (not the localStorage-backed `storage()` helper) —
+            // dedup must be per-tab: localStorage is shared across every tab of this
+            // origin, so two windows of the same browser would each see the other's
+            // write and silently skip processing the punch as a "duplicate"
+            let existing = sessionStorage.getItem('time_and_barcode')
 
             if(!existing || existing != time_and_barcode || useRoute()?.query?.force=='true'){
-                storage('time_and_barcode').value = time_and_barcode
+                sessionStorage.setItem('time_and_barcode', time_and_barcode)
                 if(for_attendence){
                     punchToSubmitAttendance(barcode, { for_attendence, device_index })
                 } else {
-                    punchToCallStudent(barcode, { for_attendence, device_index })
+                    punchToCallStudent(barcode, { for_attendence, device_index, fromSocket: true })
                 }
 
             }
@@ -961,79 +973,52 @@ onMounted(async ()=>{
             localStorage.setItem('gap_time__' + sn, text)
         }
 
-        if(socket_data.type == 'remote_action') {
-            let { action, selector, data } = socket_data
+        if(socket_data.type == 'force_reload') {
+            allow_to_reaload.value = true
+            window.location.reload()
+        }
 
-            // localhost receives say_hi → reply with ack
-            if(!isIPAccess && action === 'say_hi'){
-                sendRemoteAction({action: 'say_hi_reply'})
-            }
-            // IP client receives ack → mark connected
-            if(isIPAccess && action === 'say_hi_reply'){
-                is_connected_with_main_app.value = true
-            }
-            // on/off
-            if(!isIPAccess && action === 'toogle_is_started_schedule'){
-                is_started_schedule.value = data // boolean
-            }
-            // Toggle emergency mode
-            if(!isIPAccess && action === 'toogle_emergency_mode'){
-                emergency_mode.value = data // boolean
-            }
-            // set playback speed
-            if(!isIPAccess && action === 'set_playback_speed'){
-                playback_speed.value = data
-            }
-            // localhost receives onClick from IP client → click the element (only if user is not active)
-            // !isUserActive.value
-            if(!isIPAccess && action === 'onClick' && selector && !isUserActive.value){
-                const el = document.querySelector(selector)
-                if(el) el.click()
-            }
-            if(isIPAccess && action === 'update_waiting_list'){
-                let { host_name } = socket_data
-                let _data = (data || []).map(item => {
-                    if(item.sound1){
-                        item.sound1 = String(item.sound1).replace(host_name, window.location.host)
-                    }
-                    return item
-                })
-                console.log({_data});
-                wattingList.value = _data
-            }
-            if(isIPAccess && action === 'is_active_main_user'){
-                main_app_user_is_active.value = data // boolean
-            }
-            if(!isIPAccess && action === 'call_punch__from_ip'){
-                punchToCallStudent(data.barcode, {...data})
-            }
-            if(!isIPAccess && action === 'student_calling'){
-                // Handle student calling when attendance is disabled
+        if(socket_data.type == 'clear_time_and_barcode') {
+            sessionStorage.removeItem('time_and_barcode')
+        }
+
+        if(socket_data.type == 'clear_all_storage') {
+            localStorage.clear()
+            sessionStorage.clear()
+        }
+
+        if(socket_data.type == 'emergency_mode_sync') {
+            setEmergencyMode(!!socket_data.data, { fromSocket: true })
+        }
+
+        if(socket_data.type == 'force_logout') {
+            http.post('/logout').catch(()=>{}).finally(()=>{
+                emitter.emit('auth-required')
+            })
+        }
+
+        if(socket_data.type == 'remote_action') {
+            let { action, data } = socket_data
+
+            // Server-triggered "call this student" event (e.g. a random-call schedule)
+            // when attendance is disabled — sent directly by the backend to all clients.
+            if(action === 'student_calling'){
                 const student = data?.[0]
                 if(student){
                     const barcode = `${student.class_short}-${student.dakhela}-sound1-${student.year}`
                     punchToCallStudent(barcode, {
                         message: `Student called: ${student.name}`,
                         source: 'device',
-                        device_index: student.device_index || 0
+                        device_index: student.device_index || 0,
+                        fromSocket: true
                     })
                 }
-            }
-            if(!isIPAccess && action === 'remote_toaster'){
-                punchToCallStudent(data.barcode, {...data})
-            }
-            if(!isIPAccess && action === 'reload'){
-                window.location.reload()
             }
         }
      })
 
-     await CheckAccess({loader: true}) 
- 
-    setTimeout(() => {
-        sendRemoteAction({from: 'ip'})
-    }, 2000);
-})
+     await CheckAccess({loader: true})
+}
 
 
 function focusCurrenPlayingSoundCard_if_userIsInavtiveForFewSeconds(){
@@ -1057,14 +1042,31 @@ function focusCurrenPlayingSoundCard_if_userIsInavtiveForFewSeconds(){
 }
 
 
-function punchToCallStudent(barcode='play-417-2024', { message='', source='device', device_index=0 }={}){
-    try {
-        
-        if(isIPAccess){
-            sendRemoteAction({from: 'ip', action: 'call_punch__from_ip', data: {barcode, message, source, device_index}})
-            return
+function setEmergencyMode(value, { fromSocket=false } = {}){
+    emergency_mode.value = value
+    if(!fromSocket){
+        try {
+            if(!Socket.value) return
+            Socket.value.send(JSON.stringify({ type: 'emergency_mode_sync', data: value }))
+        } catch (setEmergencyMode_error) {
+            console.error({setEmergencyMode_error})
         }
+    }
+}
+provide('setEmergencyMode', setEmergencyMode)
 
+function broadcastPunch(barcode, punch_time){
+    try {
+        if(!Socket.value) return
+        sessionStorage.setItem('time_and_barcode', `${punch_time}-${barcode}`)
+        Socket.value.send(JSON.stringify({ type: 'attendence', punch_time, barcode, for_attendence: false, device_index: 0 }))
+    } catch (broadcastPunch_error) {
+        console.error({broadcastPunch_error})
+    }
+}
+
+function punchToCallStudent(barcode='play-417-2024', { message='', source='device', device_index=0, fromSocket=false }={}){
+    try {
 
         if(!is_started_schedule.value){
             emitter.emit('toaster-error', { message: helper.t('Switch is off')})
@@ -1072,7 +1074,7 @@ function punchToCallStudent(barcode='play-417-2024', { message='', source='devic
         }
         
         if(barcode == 'i' || barcode == 'I'){
-            emergency_mode.value = !emergency_mode.value
+            setEmergencyMode(!emergency_mode.value)
             return
         }
 
@@ -1190,10 +1192,11 @@ function punchToCallStudent(barcode='play-417-2024', { message='', source='devic
                         if(!findLast){
                             wattingList.value.push(student)
                             addPunchLog(student)
+                            if(!fromSocket) broadcastPunch(barcode, student['punch_exact_time_text'])
                             emitter.emit('pushed_a_student__or__rechecktoPlay', student)
                             if(message){
                                     emitter.emit('toaster-success', { message, duration: 3000})
-                            } 
+                            }
                         }
                         else if(findLast && findLast?.is_called){
                             // wattingList.value.splice(findLastIndex, 0, student)
@@ -1210,6 +1213,7 @@ function punchToCallStudent(barcode='play-417-2024', { message='', source='devic
                             findLast['punch_exact_time_text'] = moment().format('Y-MM-DD HH:mm:ss')
 
                             addPunchLog(student)
+                            if(!fromSocket) broadcastPunch(barcode, findLast['punch_exact_time_text'])
                             emitter.emit('pushed_a_student__or__rechecktoPlay', student)
                             if(message){
                                     emitter.emit('toaster-success', { message, duration: 3000})
@@ -1227,8 +1231,9 @@ function punchToCallStudent(barcode='play-417-2024', { message='', source='devic
                     } else {
                         student['start_ms'] = helper.miliseconds() - 1000
                         student['end_ms'] = helper.miliseconds() + (10 * 1000)
-                        wattingList.value.unshift(student)  
+                        wattingList.value.unshift(student)
                         addPunchLog(student)
+                        if(!fromSocket) broadcastPunch(barcode, student['punch_exact_time_text'])
                         emitter.emit('toaster-success', { message: helper.t('Punch has been accepted in emergency mode'), duration: 5000})
                     } 
 
@@ -1274,7 +1279,7 @@ async function __punchToSubmitAttendance(barcode='play-417-2024', {
         const date = moment.isMoment(punch_time) ? moment(punch_time).format('YYYY-MM-DD') : moment(new Date(punch_time)).format('YYYY-MM-DD')
 
         if(barcode == 'i' || barcode == 'I'){
-            emergency_mode.value = !emergency_mode.value
+            setEmergencyMode(!emergency_mode.value)
             return
         }
 
@@ -1337,21 +1342,17 @@ async function __punchToSubmitAttendance(barcode='play-417-2024', {
         }
 
      } catch (error) {
-          console.warn('punchToSubmitAttendance_error::', error);
-          emitter.emit('toaster-error', { message: error.response?.data?.error || helper.t('Attendance failed!') })
+          const backendMessage = error.response?.data?.error
+          const isExpectedRejection = backendMessage === 'In/Out added for this shift'
+          if (!isExpectedRejection) {
+              console.warn('punchToSubmitAttendance_error::', error);
+          }
+          emitter.emit('toaster-error', { message: backendMessage || helper.t('Attendance failed!') })
      }
-}
-
-function onIframeMessage(e) {
-    if (e.data && e.data.event === 'recorded_url_copied') {
-        emitter.emit('recorder_url_received', { url: e.data.url })
-        emitter.emit('toaster-success', { message: helper.t('Recorded URL copied') })
-    }
 }
 
 onBeforeUnmount(() => {
     window.removeEventListener('beforeunload', handleBeforeUnload)
-    window.removeEventListener('message', onIframeMessage)
 })
 
 watch(
@@ -1370,8 +1371,14 @@ const force_active = computed(() => route.query.fa === 'true' || storage('active
     <!-- <SideBar>
         <routerView />
     </SideBar> -->
-    <Toaster @onToaster="onToaster"></Toaster>
-    <template v-if="(appUseForbiddened || lockscreenDismissing) && appAccessData?.internet === true">
+    <Toaster></Toaster>
+    <template v-if="!authChecked">
+        <!-- waiting on /auth-status -->
+    </template>
+    <template v-else-if="!isAuthenticated">
+        <Login @loggedIn="onLoggedIn"></Login>
+    </template>
+    <template v-else-if="(appUseForbiddened || lockscreenDismissing) && appAccessData?.internet === true">
         <Lockscreen ref="LockscreenRef" :message="getForbiddenedMessage" :checking="checking_accessibility" @tryToUnlock="CheckAccess({loader: true})"></Lockscreen>
         <div ref="disabilityAlretRef" class="disablitily-alert">
             <div v-html="getForbiddenedMessage" @auxclick="log({getWarningMessage})"></div>
@@ -1380,13 +1387,15 @@ const force_active = computed(() => route.query.fa === 'true' || storage('active
     </template>
     <template v-else>
         <TopNav></TopNav>
+        <div v-if="route.name !== 'home' && !CONFIG?.settings?.attendance?.only_attendance_feature" class="mute-fab" :class="{ 'emergency-active': mute_for_me }" @click="toggleMuteMode()" :tooltip="helper.t(mute_for_me ? 'Unmute For Me' : 'Mute For Me')" flow="left">
+            <i :class="mute_for_me ? 'bx bx-volume-mute' : 'bx bx-volume-full'"></i>
+        </div>
         <div v-if="isMounted" class="page-contents" :style="{ paddingBottom: (showAccessibilityAlert && appAccessData?.internet === true) || !appAccessData?.internet ? '80px' : '0' }" >
             <routerView />
             <SwitchBoard v-if="showSwithBoardModal" @close="showSwithBoardModal = false"></SwitchBoard>
             <Playlist ref="palylistComponent"></Playlist>
             <AddBulkAttendaceForDev v-if="show_bulk_attedance_component" @unmount="show_bulk_attedance_component = false"></AddBulkAttendaceForDev>
             <FetchBulkAttendanceFromDevice v-if="allow_auto_fetch" :isAutomatic="true" />
-
         </div>
     
         <template v-if="showAccessibilityAlert && appAccessData?.internet === true">
@@ -1464,6 +1473,32 @@ const force_active = computed(() => route.query.fa === 'true' || storage('active
     18%       { transform: translateY(-12px); }
     24%       { transform: translateY(-3px); }
     25%, 100% { transform: translateY(0); }
+}
+
+.mute-fab {
+    display: none;
+}
+@media screen and (max-width: 960px) {
+    .mute-fab {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: fixed;
+        right: 16px;
+        bottom: 76px;
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        background: var(--grad3);
+        color: #fff;
+        font-size: 20px;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.35);
+        z-index: 998;
+        cursor: pointer;
+    }
+    .mute-fab.emergency-active {
+        background: #dc3545;
+    }
 }
 </style>
  

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Calling Bird</string>
+    <string name="setup_title">Connect to your institution</string>
+    <string name="setup_hint">subdomain</string>
+    <string name="setup_help">Enter the subdomain given to your institution.</string>
+    <string name="setup_continue">Continue</string>
+    <string name="setup_invalid">Use only letters, numbers and hyphens.</string>
+    <string name="error_title">Unable to connect</string>
+    <string name="retry">Retry</string>
+    <string name="change_server">Change subdomain</string>
+    <string name="exit">Exit</string>
+    <string name="cancel">Cancel</string>
+    <string name="exit_title">Exit Calling Bird?</string>
+    <string name="permission_denied">Permission denied. Enable it from app settings.</string>
+    <string name="download_saved">Saved to Downloads: %1$s</string>
+    <string name="download_started">Downloading %1$s</string>
+    <string name="download_failed">Download failed</string>
+    <string name="choose_file">Choose file</string>
+</resources>

@@ -1,6 +1,17 @@
 <template>
   <div class="devices-page">
 
+    <div class="server-time-row">
+      <div v-if="serverTime" class="server-time-badge">
+        <label class="server-time-live-toggle" tooltip="Get Realtime">
+          <input type="checkbox" v-model="liveServerTime">
+        </label>
+        <span>
+          {{ helper.t('Server time') }}: <strong>{{ serverTime.time }}</strong> ({{ serverTime.timezone }})
+        </span>
+      </div>
+    </div>
+
     <!-- Tab Navigation -->
     <ul class="nav nav-tabs mt-0 mb-3">
       <li class="nav-item usn">
@@ -71,7 +82,23 @@ const http = inject('http');
 const emitter = inject('emitter');
 
 const devices = ref([]);
+const serverTime = ref(null);
+const liveServerTime = ref(false);
+let serverTimeInterval = null;
 const editingDevice = ref(null);
+
+function fetchServerTime() {
+  http.get('/server-time')
+    .then((res) => { serverTime.value = res.data; })
+    .catch(() => {});
+}
+
+watch(liveServerTime, (isLive) => {
+  clearInterval(serverTimeInterval);
+  if (isLive) {
+    serverTimeInterval = setInterval(fetchServerTime, 1000);
+  }
+});
 const activeTab = ref(localStorage.getItem('devicesActiveTab') || 'devices');
 const showPasswordConfirm = ref(false);
 const deviceToDelete = ref(null);
@@ -133,6 +160,9 @@ function handleDevicesUpdate(data) {
     devices.value = data.data || [];
     console.log(`📡 Received ${devices.value.length} devices from socket`);
   }
+  if (data.type === 'device_time_calibrated') {
+    emitter.emit('toaster-success', { message: data.message });
+  }
 }
 
 function executeRestart(device) {
@@ -153,11 +183,13 @@ function executeRestart(device) {
 
 onMounted(() => {
   fetchDevices();
+  fetchServerTime();
   emitter.on('on_socket_message', handleDevicesUpdate);
 });
 
 onBeforeUnmount(() => {
   emitter.off('on_socket_message', handleDevicesUpdate);
+  clearInterval(serverTimeInterval);
 });
 </script>
 
@@ -172,8 +204,51 @@ onBeforeUnmount(() => {
   animation: fadeIn 0.2s ease-in;
 }
 
+.server-time-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  transform: translateY(var(--transformY, 2px));
+  margin-bottom: 14px;
+}
+
+.server-time-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f0f4ff;
+  border: 1px solid #c7d4f0;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  color: #4a6fa5;
+}
+
+.server-time-live-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: #666;
+  cursor: pointer;
+  user-select: none;
+}
+
+.server-time-live-toggle input {
+  cursor: pointer;
+}
+
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+@media (max-width: 768px) {
+  .server-time-badge,
+  .server-time-live-toggle {
+    font-size: 11px;
+  }
 }
 </style>

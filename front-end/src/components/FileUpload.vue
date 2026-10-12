@@ -8,10 +8,10 @@
         <p>{{ helper.t('Files Supported: Excel Only') }}</p>
         <input v-if="fileInputField" ref="uploader" @change="onChangeFile" type="file" hidden accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"   id="fileID" style="display:none;">
         <Btn v-if="!file?.name"  @click="open" >{{ helper.t('Choose File') }}</Btn>
-        <Btn v-if="file?.name" @click.stop="uploadNow()" >{{ helper.t('Upload Now') }} <BtnLoader v-if="loading"></BtnLoader></Btn>
-        <label v-if="useRoute().query.dev == 'true'" class="mt-2 d-flex align-items-center gap-2" style="cursor:pointer;font-size:13px;">
-          <input type="checkbox" v-model="forceAsNewEntity" /> {{ helper.t('Force data as new entry') }}
-        </label>
+        <div v-if="file?.name" class="d-flex gap-2">
+          <Btn @click.stop="uploadNow()" >{{ helper.t('Continue') }} <BtnLoader v-if="loading"></BtnLoader></Btn>
+          <Btn class="white" @click.stop="file = null" >{{ helper.t('Change File') }}</Btn>
+        </div>
         <a :href="`${BASE_URL}/sample.xlsx`" class="mt-2">{{ helper.t('Download Sample File') }}</a>
         
         </div>  
@@ -25,16 +25,17 @@ import { useRoute } from "vue-router";
 let http = inject('http');
 let emitter = inject('emitter');
 let helper = inject('helper');
-let getAllStudents = inject('getAllStudents');
 import BtnLoader from './BtnLoader.vue'
 
 
+
+// 'inspected': the file was uploaded and read; the page shows the sheet-mapping modal (ImportMappingModal.vue)
+const emit = defineEmits(['inspected'])
 
 let uploader = ref(null)
 let file = ref(null)
 let loading = ref(false)
 let fileInputField = ref(true)
-let forceAsNewEntity = ref(false)
 
 let { BASE_URL } = globalThis.GLOBAL_DATA?.env
 
@@ -52,12 +53,12 @@ function onChangeFile(event){
 async function uploadNow(){
   if(file.value){    
     loading.value = true
-    const url = forceAsNewEntity.value ? '/students/import?force_as_newentity=true' : '/students/import'
-    http.post(url, {file: file.value}, {formData: true}).then(response => {
-      emitter.emit('toaster-success', {message: helper.t('Import completed')})
+    http.post('/data/import/inspect', {file: file.value}, {formData: true}).then(response => {
+      emit('inspected', response.data)
       file.value = null;
+    }).catch(err => {
+      emitter.emit('toaster-error', {message: err?.response?.data?.error || helper.t('Could not read the Excel file')})
     }).finally(()=>{
-      getAllStudents()
       fileInputField.value = false
       setTimeout(() => {
         loading.value = false       

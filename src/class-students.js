@@ -55,6 +55,18 @@ function getActiveClassConfig() {
   };
 }
 
+// Find a configured class by name, falling back to class_short. Stored rows / the browser's class list
+// can carry an old class name after classes are renamed in Settings, while class_short stays the same.
+function resolveConfiguredClass(className, classShort) {
+  const classes = global.config?.classes || [];
+  const byName = utils.getClassShort(className);
+  return (
+    (byName && classes.find(c => c.class_short === byName)) ||
+    (classShort && classes.find(c => utils.normalizeForClassMatch(c.class_short) === utils.normalizeForClassMatch(classShort))) ||
+    null
+  );
+}
+
 function appendActiveClassFilter(query = '', queryParams = [], { classShortColumn = 'class_short', classNameColumn = 'class' } = {}) {
   const { classShorts, classNames } = getActiveClassConfig();
   const nextParams = [...queryParams];
@@ -433,14 +445,27 @@ class Students {
     
   
 
-  importExcel(filePath, forceAsNewEntity, callback) {
+  /**
+   * options (all optional; used by the Import page's sheet mapping):
+   *   studentsSheet  - sheet name for students, or null to skip (default: first sheet)
+   *   schedulesSheet - sheet name for schedules, or null to skip (default: sheet named "Schedules")
+   *   keepFile       - don't delete the uploaded file when done (the caller cleans up)
+   *   skipAfterImport - don't run the post-import access check / backup (caller runs another import right after)
+   */
+  importExcel(filePath, forceAsNewEntity, callback, options = {}) {
     try {
       const workbook = xlsx.readFile(filePath);
-      const sheetName = workbook.SheetNames[0]; // Assuming data is in the first sheet
-      const scheduleSheetName = workbook.SheetNames.find((name) => String(name).toLowerCase() === 'schedules') || null;
-      const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName], {
+      const hasOption = (key) => Object.prototype.hasOwnProperty.call(options, key);
+      const sheetName = hasOption('studentsSheet') ? options.studentsSheet : workbook.SheetNames[0];
+      const scheduleSheetName = hasOption('schedulesSheet')
+        ? options.schedulesSheet
+        : (workbook.SheetNames.find((name) => String(name).toLowerCase() === 'schedules') || null);
+      for (const name of [sheetName, scheduleSheetName]) {
+        if (name && !workbook.Sheets[name]) return callback(`Sheet "${name}" was not found in the file`);
+      }
+      const data = sheetName ? xlsx.utils.sheet_to_json(workbook.Sheets[sheetName], {
         header: 1,
-      });
+      }) : [];
       const scheduleData = scheduleSheetName ? xlsx.utils.sheet_to_json(workbook.Sheets[scheduleSheetName], { header: 1 }) : [];
       const insertQuery = `
         INSERT INTO students (name, dakhela, class, class_short, card_no, year, status, sound1, device_index, card_owner, options, note, profile_image, phone_number)
@@ -477,14 +502,22 @@ class Students {
       let pending = 0;
       let studentLoopDone = false;
       let scheduleLoopDone = false;
+      const studentReport = [];
+      const scheduleReport = [];
 
       const finalizeImport = () => {
         if (!studentLoopDone || !scheduleLoopDone || pending > 0) return;
-        fs.unlink(filePath, () => {});
+        if (!options.keepFile) fs.unlink(filePath, () => {});
+        studentReport.sort((a, b) => a.excelRow - b.excelRow);
+        scheduleReport.sort((a, b) => a.excelRow - b.excelRow);
+        const skipped = studentReport.filter(r => r.status === 'skipped').length;
+        const errors = studentReport.filter(r => r.status === 'error').length;
         if (!errorOccurred) {
-          callback(null, { total: created + updated, created, updated, not_found });
-          checkAccess.CheckAppAccess({ save_info: true });
-          Backup.createBackupAndSend();
+          callback(null, { total: created + updated, created, updated, not_found, skipped, errors, students: studentReport, schedules: scheduleReport });
+          if (!options.skipAfterImport) {
+            checkAccess.CheckAppAccess({ save_info: true });
+            Backup.createBackupAndSend();
+          }
         } else {
           callback("Failed to upload some rows. Check logs for details.");
         }
@@ -498,8 +531,8 @@ class Students {
         if (key && defaultColumns.includes(key)) headerMap[key] = idx
       })
 
-      // Require name, dakhela, class in header
-      const missingCols = ['name', 'dakhela', 'class'].filter(c => headerMap[c] === undefined)
+      // Require name, dakhela, class in header (only when a students sheet is being imported)
+      const missingCols = sheetName ? ['name', 'dakhela', 'class'].filter(c => headerMap[c] === undefined) : []
       if (missingCols.length) {
         return callback(`Missing required columns in Excel header: ${missingCols.join(', ')}`)
       }
@@ -515,21 +548,35 @@ class Students {
           const dakhela   = getCol(row, 'dakhela')
           const className = getCol(row, 'class')
 
+          const excelRow = i + 1
+
           const missingFields = []
           if (!name)      missingFields.push('name')
           if (!dakhela)   missingFields.push('dakhela')
           if (!className) missingFields.push('class')
           if (missingFields.length) {
             console.warn(`[import] row ${i} skipped — missing: ${missingFields.join(', ')} | name="${name || ''}"`)
+            studentReport.push({ excelRow, name, dakhela, class: className, status: 'skipped', reason: `missing: ${missingFields.join(', ')}` })
             return
           }
 
           const id = getCol(row, 'id')
-          const class_short = getCol(row, 'class_short') || utils.getClassShort(className)
-          if (!class_short) {
+          const rawClassShort = getCol(row, 'class_short') || utils.getClassShort(className)
+          if (!rawClassShort) {
             console.warn(`[import] row ${i} skipped — class_short unresolved for class="${className}"`)
+            studentReport.push({ excelRow, name, dakhela, class: className, status: 'skipped', reason: `class_short unresolved for class="${className}"` })
             return
           }
+          // Only create/update students whose class_short exists in the classes setting (DB)
+          const configuredClass = (global.config?.classes || []).find(c =>
+            String(c?.class_short || '').trim().toLowerCase() === String(rawClassShort).trim().toLowerCase()
+          )
+          if (!configuredClass) {
+            console.warn(`[import] row ${i} skipped — class_short "${rawClassShort}" not found in classes`)
+            studentReport.push({ excelRow, name, dakhela, class: className, status: 'skipped', reason: `class_short "${rawClassShort}" not found in classes` })
+            return
+          }
+          const class_short = configuredClass.class_short
           const card_no     = getCol(row, 'card_no') || null
           const year        = getCol(row, 'year') || new Date().getFullYear()
           const status      = parseInt(getCol(row, 'status')) || 1
@@ -551,8 +598,10 @@ class Students {
                 if (err) {
                   console.error("Error inserting data (force):", err);
                   errorOccurred = true;
+                  studentReport.push({ excelRow, name, dakhela, class: className, status: 'error', reason: err.message })
                 } else {
                   created++;
+                  studentReport.push({ excelRow, name, dakhela, class: className, status: 'created', reason: 'forced as new entry' })
                 }
                 pending--;
                 finalizeImport();
@@ -561,6 +610,7 @@ class Students {
           } else if (id) {
             // If `id` is provided, update the row
             pending++;
+            const self = this;
             this.db.run(
               updateQuery,
               [name, dakhela, className, class_short, card_no, year, status || 1, sound1 || '', device_index || null, card_owner || null, options || null, note || null, profile_image || null, phone_number || null, id],
@@ -568,22 +618,33 @@ class Students {
                 if (err) {
                   console.error(`Error updating data with ID ${id}:`, err);
                   errorOccurred = true;
+                  studentReport.push({ excelRow, name, dakhela, class: className, status: 'error', reason: err.message })
                 } else if (this.changes > 0) {
                   updated++;
+                  studentReport.push({ excelRow, name, dakhela, class: className, status: 'updated', reason: `matched by id=${id}` })
                 } else {
-                  not_found++;
+                  // id not in this database (e.g. restoring an export on another server):
+                  // fall back to the dakhela/class/year match, like schedules do
+                  matchOrInsert.call(self, `id=${id} not found — `);
+                  return; // matchOrInsert decrements pending
                 }
                 pending--;
                 finalizeImport();
               }
             );
           } else {
-            // Check if the row already exists based on `dakhela`, `class`, and `year`
             pending++;
+            matchOrInsert.call(this);
+          }
+
+          // Check if the row already exists based on `dakhela`, `class`, and `year`; update it or insert a new one.
+          // Caller has already incremented `pending`.
+          function matchOrInsert(reasonPrefix = '') {
             this.db.get(findQuery, [dakhela, className, year], (err, existingRow) => {
               if (err) {
                 console.error("Error querying existing data:", err);
                 errorOccurred = true;
+                studentReport.push({ excelRow, name, dakhela, class: className, status: 'error', reason: err.message })
                 pending--;
                 finalizeImport();
                 return;
@@ -598,8 +659,10 @@ class Students {
                     if (err) {
                       console.error(`Error updating data for dakhela: ${dakhela}, class: ${className}, year: ${year}:`, err);
                       errorOccurred = true;
+                      studentReport.push({ excelRow, name, dakhela, class: className, status: 'error', reason: err.message })
                     } else {
                       updated++;
+                      studentReport.push({ excelRow, name, dakhela, class: className, status: 'updated', reason: `${reasonPrefix}matched existing dakhela/class/year (id=${existingRow.id})` })
                     }
                     pending--;
                     finalizeImport();
@@ -614,8 +677,10 @@ class Students {
                     if (err) {
                       console.error("Error inserting data:", err);
                       errorOccurred = true;
+                      studentReport.push({ excelRow, name, dakhela, class: className, status: 'error', reason: err.message })
                     } else {
                       created++;
+                      studentReport.push({ excelRow, name, dakhela, class: className, status: 'created', reason: `${reasonPrefix}new dakhela/class/year` })
                     }
                     pending--;
                     finalizeImport();
@@ -649,6 +714,7 @@ class Students {
             if (i === 0 && scheduleHasHeader) return;
             if (row.length === 0) return;
 
+            const excelRow = i + 1
             const id = getScheduleValue(row, 'id', 0)
             const type = getScheduleValue(row, 'type', 1)
             const title = getScheduleValue(row, 'title', 2)
@@ -660,6 +726,7 @@ class Students {
 
             if (!type || !start_time || !end_time || !classes) {
               console.log("Skipping invalid schedule row:", row);
+              scheduleReport.push({ excelRow, title, status: 'skipped', reason: 'missing type/start_time/end_time/classes' })
               return;
             }
 
@@ -676,13 +743,15 @@ class Students {
                 updateScheduleQuery,
                 [...scheduleParams, id],
                 function(err) {
-                  if (err) { console.error(`Error updating schedule ${id}:`, err); errorOccurred = true; pending--; finalizeImport(); return; }
+                  if (err) { console.error(`Error updating schedule ${id}:`, err); errorOccurred = true; scheduleReport.push({ excelRow, title: resolvedTitle, status: 'error', reason: err.message }); pending--; finalizeImport(); return; }
                   if (this.changes === 0) {
                     db.run(insertScheduleQuery, scheduleParams, (err2) => {
-                      if (err2) { console.error("Error inserting schedule (fallback):", err2); errorOccurred = true; }
+                      if (err2) { console.error("Error inserting schedule (fallback):", err2); errorOccurred = true; scheduleReport.push({ excelRow, title: resolvedTitle, status: 'error', reason: err2.message }) }
+                      else { scheduleReport.push({ excelRow, title: resolvedTitle, status: 'created', reason: `id=${id} not found — inserted new` }) }
                       pending--; finalizeImport()
                     })
                   } else {
+                    scheduleReport.push({ excelRow, title: resolvedTitle, status: 'updated', reason: `matched by id=${id}` })
                     pending--; finalizeImport()
                   }
                 }
@@ -692,7 +761,8 @@ class Students {
                 insertScheduleQuery,
                 scheduleParams,
                 (err) => {
-                  if (err) { console.error("Error inserting schedule:", err); errorOccurred = true; }
+                  if (err) { console.error("Error inserting schedule:", err); errorOccurred = true; scheduleReport.push({ excelRow, title: resolvedTitle, status: 'error', reason: err.message }) }
+                  else { scheduleReport.push({ excelRow, title: resolvedTitle, status: 'created', reason: forceAsNewEntity ? 'forced as new entry' : 'new schedule' }) }
                   pending--; finalizeImport()
                 }
               );
@@ -703,6 +773,7 @@ class Students {
         })
       } else {
         scheduleLoopDone = true
+        finalizeImport()
       }
   
 
@@ -934,15 +1005,22 @@ class Students {
   }
 
   addStudent(req, res) {
-    const { class: className, name, dakhela, year, card_no, card_owner, note, phone_number, profile_image: profile_image_input } = req.body;
+    const { class: classInput, class_short: classShortInput, name, dakhela, year, card_no, card_owner, note, phone_number, profile_image: profile_image_input } = req.body;
     const profile_image = req.file ? `/media/${req.file.filename}` : profile_image_input;
 
-    const class_short = utils.getClassShort(className);
-  
-    if (!className || !name || !class_short || !dakhela) {
-      res.status(400).send({ error: "All fields (class, name, class_short, dakhela, year) are required." });
+    const missing = [['class', classInput], ['name', name], ['dakhela', dakhela]].filter(([, v]) => !v).map(([k]) => k);
+    if (missing.length) {
+      res.status(400).send({ error: `Required fields missing: ${missing.join(', ')}.` });
       return;
     }
+
+    const configuredClass = resolveConfiguredClass(classInput, classShortInput);
+    if (!configuredClass) {
+      res.status(400).send({ error: `Class "${classInput}" was not found in the class list. Please reload the page and select the class again.` });
+      return;
+    }
+    const className = configuredClass.class_name;
+    const class_short = configuredClass.class_short;
   
     const tableName = this.tableName;
   
@@ -999,19 +1077,27 @@ class Students {
         res.status(500).send({ message: err.message });
         return;
       } 
+      if (!studentRow) {
+        return res.status(404).send({ message: `Student not found (id: ${id})` });
+      }
 
        this.db.get(`SELECT * FROM ${this.tableName} WHERE dakhela=?`, [dakhela_new], async(error, existing_student_by_dakhela) => {
           if(existing_student_by_dakhela){
             return res.status(500).send({ message: `এই দাখেলাটি ইতিমধ্যে ব্যবহার করা হয়েছে (${dakhela_new})`, existing_student_by_dakhela });
           } else {
-            let {name, class: className, card_no, year, status, sound1, profile_image, dakhela: originalDakhela} = studentRow
+            let {name, class: storedClassName, class_short: storedClassShort, card_no, year, status, sound1, profile_image, dakhela: originalDakhela} = studentRow
 
-              const class_short = utils.getClassShort(className);
-
-              if (!className || !name || !class_short || !dakhela_new || !year) {
-                res.status(500).send({ message: "All fields (class, name, class_short, dakhela, year) are required." });
-                return;
+              if (!name || !dakhela_new) {
+                return res.status(400).send({ message: `Required fields missing: ${[!name && 'name', !dakhela_new && 'new dakhela'].filter(Boolean).join(', ')}` });
               }
+
+              const configuredClass = resolveConfiguredClass(storedClassName, storedClassShort);
+              if (!configuredClass) {
+                return res.status(400).send({ message: `Class "${storedClassName}" (${storedClassShort || '-'}) was not found in the class list.` });
+              }
+              const className = configuredClass.class_name;
+              const class_short = configuredClass.class_short;
+              year = year || new Date().getFullYear();
 
               const tableName = this.tableName;
 
@@ -1073,20 +1159,30 @@ class Students {
 
   updateStudent(req, res) {
 
-    const { id, class: className, name, dakhela, year, card_no, card_owner, note, phone_number, profile_image: profile_image_input } = req.body;
+    const { id, class: classInput, class_short: classShortInput, name, dakhela, year, card_no, card_owner, note, phone_number, profile_image: profile_image_input } = req.body;
     const profile_image = req.file ? `/media/${req.file.filename}` : profile_image_input;
-  
+
     if (!id) {
       res.status(400).send({ error: "Student ID is required for updating." });
       return;
     }
-  
-    const class_short = utils.getClassShort(className);
-  
-    if (!className || !name || !class_short || !dakhela) {
-      res.status(400).send({ error: "All fields (id, class, name, class_short, dakhela, year, card_no) are required." });
+
+    const missing = [['class', classInput], ['name', name], ['dakhela', dakhela]].filter(([, v]) => !v).map(([k]) => k);
+    if (missing.length) {
+      res.status(400).send({ error: `Required fields missing: ${missing.join(', ')}.` });
       return;
     }
+
+    // Resolve the class from the configured classes: by name first, then by the class_short sent with
+    // the row (the browser's class list can be stale after classes are renamed in Settings).
+    const configuredClass = resolveConfiguredClass(classInput, classShortInput);
+
+    if (!configuredClass) {
+      res.status(400).send({ error: `Class "${classInput}" was not found in the class list. Please reload the page and select the class again.` });
+      return;
+    }
+    const className = configuredClass.class_name;
+    const class_short = configuredClass.class_short;
   
     const tableName = this.tableName;
   

@@ -14,13 +14,13 @@
   const helper = inject('helper');
   const emitter = inject('emitter');
   const storage = inject('storage');
-  const isIPAccess = inject('isIPAccess')
   const wattingList = inject('wattingList');
   const callbacks = inject('callbacks');
   const user_interacted = inject('user_interacted');
   const CONFIG = inject('CONFIG');
   const controlSounds = inject('controlSounds');
   const playback_speed = inject('playback_speed');
+  const mute_for_me = inject('mute_for_me');
   const isUsingSpeakerAutoControl = inject('isUsingSpeakerAutoControl');
   const isSpeakersAutoMode = inject('isSpeakersAutoMode');
   const currentItem = ref(null);
@@ -33,7 +33,17 @@
         audio.value.playbackRate = p_speed
       }
     } catch (error) {
-      
+
+    }
+  })
+
+  watch(mute_for_me, (muted)=>{
+    try {
+      if(audio.value){
+        audio.value.volume = muted ? 0 : 1
+      }
+    } catch (error) {
+
     }
   })
   watch(currentItem, (newData, b)=>{
@@ -105,17 +115,18 @@
       const soundSrc = nextItem[nextItem['soundColName'] || 'sound1'];
       if(soundSrc){ 
         let delay_time = CONFIG.value?.settings?.with_speaker_controls?.delay_before_starting
-        if(isIPAccess) audio.value.volume = 0
 
         if(isUsingSpeakerAutoControl.value && delay_time){
           setTimeout(() => {
             audio.value.src = soundSrc;
+            audio.value.volume = mute_for_me.value ? 0 : 1;
             audio.value.play();
             is__playing.value = true
           }, delay_time);
 
         } else {
           audio.value.src = soundSrc;
+          audio.value.volume = mute_for_me.value ? 0 : 1;
           audio.value.play();
           is__playing.value = true
         }

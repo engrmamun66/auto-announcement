@@ -48,7 +48,7 @@ class CdataController {
         'SELECT polling_interval FROM devices WHERE serial_number = ?',
         [sn],
         (err, device) => {
-          let polling_interval = 2; // default
+          let polling_interval = global.config?.env?.DEFAULT_DEVICE_POLLING_INTERVAL || 15; // default
 
           if (err) {
             console.error(`❌ Error fetching device polling_interval: ${err.message}`);
@@ -96,8 +96,9 @@ class CdataController {
       );
     } else {
       console.log('>>>>> SN is not OK', sn);
-      Store.pollingIntervals[sn] = 6; // || 6
-      this._sendPollingResponse(res, sn, pushVersion, 6); // || 6
+      const defaultInterval = global.config?.env?.DEFAULT_DEVICE_POLLING_INTERVAL || 15;
+      Store.pollingIntervals[sn] = defaultInterval;
+      this._sendPollingResponse(res, sn, pushVersion, defaultInterval);
     }
   }
 
@@ -157,7 +158,7 @@ class CdataController {
 
 
     else if (table === 'ATTLOG' && this._isRealPunch(row_item)) {
-      global.db.get('SELECT adjust_time FROM devices WHERE serial_number = ?', [sn], (err, device) => {
+      global.db.get('SELECT adjust_time, realtime_punch_window_seconds, adjust_diff_time_each_punch FROM devices WHERE serial_number = ?', [sn], (err, device) => {
         let operations_add_subtract = `subtract(0, 'hour')`;
         if (!err && device && device.adjust_time) {
           operations_add_subtract = String(device.adjust_time).replace(/^\./, '');
@@ -218,14 +219,84 @@ class CdataController {
         if (!Store.data[sn].attendance) Store.data[sn].attendance = {};
 
 
+        const now = moment()
+
+        // Device time adjustment mode (10s calibration window armed from the Devices UI):
+        // measure the signed clock-drift gap between this punch and server "now", persist it as
+        // this device's own realtime_punch_window_seconds. Positive = device clock is faster than
+        // the server; negative = device clock is slower. This is a calibration-only punch —
+        // it must NOT save attendance and must NOT send SMS.
+        if (records?.length === 1 && Store.isInTimeAdjustmentMode(sn)) {
+          Store.clearTimeAdjustmentMode(sn);
+          const punchMoment = moment(records[0].punch_time, 'YYYY-MM-DD HH:mm:ss');
+          const measured_gap_seconds = Math.round(punchMoment.diff(now, 'seconds'));
+
+          console.log(`\n🎯 [Device Time Adjustment Mode] Calibration punch received — device: ${sn}`);
+          console.log(`   Punch time (after adjust_time): ${punchMoment.format('YYYY-MM-DD HH:mm:ss')}`);
+          console.log(`   Server "now":                   ${now.format('YYYY-MM-DD HH:mm:ss')}`);
+          console.log(`   Measured drift:                 ${measured_gap_seconds}s (${measured_gap_seconds >= 0 ? 'device faster' : 'device slower'})`);
+          console.log(`   → Calibration only: no attendance saved, no SMS sent.\n`);
+
+          global.db.run(
+            'UPDATE devices SET realtime_punch_window_seconds = ? WHERE serial_number = ?',
+            [measured_gap_seconds, sn],
+            (updateErr) => {
+              if (updateErr) {
+                console.error(`❌ Failed to save calibrated realtime_punch_window_seconds for ${sn}:`, updateErr.message);
+                return;
+              }
+              console.log(`✅ Saved realtime_punch_window_seconds=${measured_gap_seconds}s for ${sn}`);
+
+              if (!global.socketServer) return;
+              const calibrationMessage = `Device ${sn} calibrated — clock drift set to ${measured_gap_seconds}s`;
+              global.socketServer.clients.forEach((client) => {
+                if (client.readyState === client.OPEN) {
+                  client.send(JSON.stringify({ type: 'device_time_calibrated', sn, realtime_punch_window_seconds: measured_gap_seconds, message: calibrationMessage }));
+                }
+              });
+
+              // Re-fetch and broadcast the full devices list so the Devices page updates live.
+              global.db.all('SELECT * FROM devices ORDER BY updated DESC', [], (fetchErr, rows) => {
+                if (fetchErr) return;
+                global.socketServer.clients.forEach((client) => {
+                  if (client.readyState === client.OPEN) {
+                    client.send(JSON.stringify({ type: 'devices_updated', data: rows || [] }));
+                  }
+                });
+              });
+            }
+          );
+          return; // stop here — do not fall through to normal attendance processing
+        }
+
+        // Apply calibrated clock-drift correction (seconds-level) from Device Time Adjustment Mode.
+        // realtime_punch_window_seconds is a SIGNED drift value: positive = device faster than
+        // server (subtract to correct), negative = device slower (subtracting a negative adds).
+        const drift_seconds = device?.realtime_punch_window_seconds || 0
+        records.forEach(record => {
+          record.punch_time_before_adjust = record.punch_time
+          if (drift_seconds && device?.adjust_diff_time_each_punch) {
+            record.punch_time = moment(record.punch_time, 'YYYY-MM-DD HH:mm:ss').subtract(drift_seconds, 'seconds').format('YYYY-MM-DD HH:mm:ss')
+          }
+        })
+
         // Process each punch through attendance submission
         // const only_attendance_feature = global.config?.settings?.attendance?.only_attendance_feature
-        const now = moment()
         const forceAsRealtime = req.query.forceAsRealtime === 'true'
-        let is_realtime_punch = records?.length === 1 && moment(records?.[0]?.punch_time, 'YYYY-MM-DD HH:mm:ss').isBetween(
-            now.clone().subtract(50, 'seconds'),
-            now.clone().add(50, 'seconds')
-          )
+        // A history query (DATA QUERY ATTLOG) is answered in packs of ~128 rows. Its last pack can
+        // hold a single row, which must not be mistaken for a live punch (that would save it and send SMS).
+        // Live punches carry no PackIdx and are recent; query packs do, or are old while a query is pending.
+        const isQueryPack = req.query.PackIdx !== undefined || (
+          Store.isAttendanceQueryPending(sn) &&
+          moment().diff(moment(records?.[0]?.punch_time, 'YYYY-MM-DD HH:mm:ss'), 'minutes') > 2
+        )
+        let is_realtime_punch = records?.length === 1 && !isQueryPack
+          // && moment(records?.[0]?.punch_time, 'YYYY-MM-DD HH:mm:ss').isBetween(
+          //     now.clone().subtract(realtime_window_seconds, 'seconds'),
+          //     now.clone().add(realtime_window_seconds, 'seconds'),
+          //     undefined,
+          //     '[]'
+          //   )
 
         // Treat as real-time if forced (dev/test punch)
         if (forceAsRealtime) {
@@ -245,8 +316,13 @@ class CdataController {
           // Store by date key if pending, otherwise use 'all' key
           console.log(`📋 Batch attendance (${records.length} records). Stored for manual review or bulk import.`);
           const dateKey = Store.data[sn].pendingDateKey || 'all';
-          Store.data[sn].attendance[dateKey] = records;
-          console.log(`✅ Attendance stored [${dateKey}]: ${records.length} records`);
+          // Append each pack (do not overwrite), skipping rows already received
+          const existing = Store.data[sn].attendance[dateKey] || [];
+          const seen = new Set(existing.map(r => `${r.user_id}|${r.punch_time}`));
+          const fresh = records.filter(r => !seen.has(`${r.user_id}|${r.punch_time}`));
+          Store.data[sn].attendance[dateKey] = [...existing, ...fresh];
+          Store.markAttendancePackReceived(sn);
+          console.log(`✅ Attendance stored [${dateKey}] pack ${packIdx}: +${fresh.length} → ${Store.data[sn].attendance[dateKey].length} records`);
         }
       });
     }
@@ -494,10 +570,16 @@ class CdataController {
           }
         };
 
+        // A cloned student (name has the "(Copied)" marker, from Students > Clone) exists solely
+        // so the same physical device can also trigger a call-only announcement for a second
+        // dakhela/card number — it must never be recorded as attendance, regardless of the
+        // attendance.status setting. Mirrors the manual "Call Punch" button in students.vue.
+        const isCallOnlyClone = String(student.name || '').indexOf('Copied') > -1;
+
         // Check if attendance is enabled
         const attendanceEnabled = global.config?.settings?.attendance?.status;
 
-        if (attendanceEnabled) {
+        if (attendanceEnabled && !isCallOnlyClone) {
           // Call attendance submission with socket emission enabled
           const Attendance = require('../class-attendence');
           const attendance = new Attendance(global.db);

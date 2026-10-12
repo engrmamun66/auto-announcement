@@ -1108,9 +1108,9 @@ class Attendance {
         return currentShift;
       };
 
-      const USE_PREVIOUSE_CODE = false
+      const CODE_VERSION  = 2
 
-      if(!USE_PREVIOUSE_CODE){
+      if( CODE_VERSION === 2 ){
         // Each punch creates separate entry (in_time OR out_time, not both)
         const runningShift = getRunningShift(shifts, moment_punch);
         if (!runningShift) {
@@ -1139,18 +1139,28 @@ class Attendance {
           }
         }
 
+        
         if (!shiftEntry) {
-          // No entry for this shift yet - create with in_time
-          payload.in_time = moment_punch.format(TIME_FORMAT);
-          payload.shift_number = runningShift.shift_number;
-          payload.shift_duration = shiftDuration;
-          payload.late_in_minute = moment_punch.diff(moment(runningShift.start_datetime, `${DATE_FORMAT} HH:mm`), 'minutes');
+          if (moment_punch.isSameOrAfter(runningShift.out_moment)) {
+            // First log of the day, but punched at/after the shift's end time —
+            // record it as a check-out, not a check-in.
+            payload.out_time = moment_punch.format(TIME_FORMAT);
+            payload.shift_number = runningShift.shift_number;
+            payload.shift_duration = shiftDuration;
+            payload.remarks = 'Check Out';
+          } else {
+            // No entry for this shift yet - create with in_time
+            payload.in_time = moment_punch.format(TIME_FORMAT);
+            payload.shift_number = runningShift.shift_number;
+            payload.shift_duration = shiftDuration;
+            payload.late_in_minute = moment_punch.diff(moment(runningShift.start_datetime, `${DATE_FORMAT} HH:mm`), 'minutes');
 
-          if (late_consideration_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_consideration_minute) {
-            payload.late_in_minute = 0;
+            if (late_consideration_minute > 0 && payload.late_in_minute > 0 && payload.late_in_minute <= late_consideration_minute) {
+              payload.late_in_minute = 0;
+            }
+            if (payload.late_in_minute > 0) payload.status = 'Late';
+            payload.remarks = 'Check In';
           }
-          if (payload.late_in_minute > 0) payload.status = 'Late';
-          payload.remarks = 'Check In';
           action = 'create';
         } else {
           // Entry exists - check if this is recovery scenario (punch time < existing in_time)

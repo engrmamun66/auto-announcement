@@ -47,6 +47,8 @@ Example
     position: absolute;
     display: none;
     opacity: 0;
+    text-shadow: none;
+    /* never inherit a shadow from whatever element hosts the tooltip */
 }
 
 [tooltip]::before {

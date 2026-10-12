@@ -14,6 +14,8 @@ import EmergencyMode from '../components/EmergencyMode.vue'
 import PlayingAnimation from '../components/PlayingAnimation.vue'
 import SwitchBoard from '../components/SwitchBoard.vue'
 import Confirm from '../components/Confirm.vue'
+import PunchCard from '../components/PunchCard.vue'
+import { getSelectedPunchCard } from './punchCardDesigns'
 import helper from '../utilities/helper';
 
 
@@ -50,19 +52,17 @@ const log = console.log
 const classes = inject('classes');
 const wattingList = inject('wattingList');
 
-let toggleSettings = inject('toggleSettings') 
-let refreshDOM = inject('refreshDOM') 
-let isIPAccess = inject('isIPAccess') 
-let sendRemoteAction = inject('sendRemoteAction') 
+let toggleSettings = inject('toggleSettings')
+let refreshDOM = inject('refreshDOM')
 
 let emergency_mode = inject('emergency_mode')
+let setEmergencyMode = inject('setEmergencyMode')
+let mute_for_me = inject('mute_for_me')
+let toggleMuteMode = inject('toggleMuteMode')
 let palylistComponent = inject('palylistComponent')
 
 function toggleEmergencyMode() {
-  emergency_mode.value = !emergency_mode.value
-  if (isIPAccess) {
-    sendRemoteAction({ from: 'ip', action: 'toogle_emergency_mode', data: emergency_mode.value })
-  }
+  setEmergencyMode(!emergency_mode.value)
 }
 
 const barcodePlaceholder = computed(() =>
@@ -91,13 +91,6 @@ function handlePayPause(){
 
 function onClickSpeed(item){
      playback_speed.value = item.value
-     if(isIPAccess){
-          sendRemoteAction({
-               from: 'ip',
-               action: 'set_playback_speed',
-               data: item.value
-          })
-     }
 }
 
 let ttoout
@@ -127,11 +120,16 @@ function inputBarcode(event){
                punchToCallStudent(barcode)
                setTimeout(() => {
                     event.target.value = ''
-               }, 300); 
+               }, 300);
           }
      }, 10);
 }
- 
+
+function submitBarcodeInput(){
+     let inputEl = document.getElementById('BARCODE_INPUT')
+     if(inputEl) inputBarcode({ target: inputEl })
+}
+
 
 
  
@@ -143,17 +141,9 @@ async function checkSchedule(){
                is_started_schedule.value = true
           } 
                  
-     } 
+     }
 
      await nextTick()
-
-     if(isIPAccess){
-          sendRemoteAction({
-               from: 'ip',
-               action: 'toogle_is_started_schedule',
-               data: Boolean(is_started_schedule.value),
-          })
-     }
 }
 
 let tab = ref(1)
@@ -172,9 +162,11 @@ function originalDakhela({name}){
      }
 }
 
-let card_dynamic_width = ref(200)
-
 onMounted(()=>{
+
+     if(window.innerWidth <= 450){
+          toggleSettings.value = false
+     }
 
      if(route.query.barcode){
           punchToCallStudent(route.query.barcode)
@@ -183,48 +175,8 @@ onMounted(()=>{
           }, 100);
      }
 
-     emitter.on('document_click', updateStudetCardSize)
-     emitter.on('document_resize', updateStudetCardSize)
-     emitter.on('document_mousemove', updateStudetCardSize)
 })
 
-function updateStudetCardSize(){
-     let targetCard = document.getElementById('students_card_container')
-     if(targetCard){
-          let bound = targetCard.getBoundingClientRect()
-          let width = Math.floor(bound.width) 
-
-          const scroolbarWidth = 10 
-          
-          if(width < 400){
-               card_dynamic_width.value = width - 15
-          } 
-          else if(width < 600){
-               card_dynamic_width.value = Math.floor(width / 2) - (scroolbarWidth)
-          }
-          else if(width < 800){
-               card_dynamic_width.value = Math.floor(width / 3) - (scroolbarWidth)
-          } 
-          else if(width < 1000){
-               card_dynamic_width.value = Math.floor(width / 4) - (scroolbarWidth)
-          } 
-          else if(width < 1200){
-               card_dynamic_width.value = Math.floor(width / 5) - (scroolbarWidth)
-          } 
-          else if(width < 1400){
-               card_dynamic_width.value = Math.floor(width / 6) - (scroolbarWidth)
-          } 
-          else if(width < 1600){
-               card_dynamic_width.value = Math.floor(width / 7) - (scroolbarWidth)
-          } 
-          else if(width < 1800){
-               card_dynamic_width.value = Math.floor(width / 8) - (scroolbarWidth)
-          } 
-          else {
-               card_dynamic_width.value = 300
-          } 
-     }
-}
 function removeFromWattingList(student, i){
      wattingList.value.splice(i, 1)
      if(isPayingThisCard(student)){
@@ -244,6 +196,26 @@ function makeAsUncalled(student){
      student.is__playing = false;
 }
 
+// Punch Board card design: 1 = Default, 2 = Ticket, 3 = Neon Glow, 4 = Compact Row (Settings → Settings tab)
+const punchCardDesign = getSelectedPunchCard(CONFIG.value?.settings)
+// Minimum card width per design; the grid fits as many columns as possible and stretches them to fill the row
+const punchCardMinWidth = { 1: 200, 2: 260, 3: 240, 4: 200 }[punchCardDesign] || 200
+
+function punchStatus(student){
+     if(student?.sound1_haserror) return 'error'
+     if(student.is_called) return 'completed'
+     if(isPayingThisCard(student)) return manually_paused_the_playlist.value ? 'paused' : 'calling'
+     return 'waiting'
+}
+
+function openStudentPage(student, withLog = false){
+     router.push({name: 'students', query: {
+          dakhela: student.dakhela,
+          barcode: student?.barcode,
+          ...(withLog ? { log: true } : {}),
+     }})
+}
+
 let showRecallConfirmation = ref(false)
 function recallAllPunchedStudents(){
      wattingList.value.forEach(makeAsUncalled)
@@ -257,53 +229,70 @@ function recallAllPunchedStudents(){
 
 
 
-     <div class="d-flex align-items-center bttt">
-          <!-- <div class="togglerbtn">
-               <btn @click="toggleSettings = !toggleSettings" class="px-3 shadow me-2"><i class='bx bx-list-ul'></i></btn>
-          </div> -->
-          
+     <div class="d-flex align-items-center justify-content-evenly bttt gap-2">
           <div class="relative w-100 me-2">
                <EmergencyMode v-if="emergency_mode"></EmergencyMode>
                <EmergencyMode v-if="emergency_mode" style="left:calc(100% - 30px)"></EmergencyMode>
                <input id="BARCODE_INPUT" type="text" @keyup.enter="inputBarcode" @paste="inputBarcode" class="form-control px-4 py-2 text-center py-1 cb-input"
                :placeholder="barcodePlaceholder">
+               <span class="barcode-submit-btn" @click="submitBarcodeInput()"><i class='bx bx-right-arrow-alt'></i></span>
           </div>
 
-          <div v-if="is_started_schedule" class="me-2 p-1 px-2 play-pause" 
-          :class="{ 'emergency-active': emergency_mode }" 
-          @click="toggleEmergencyMode()"
-          :tooltip="helper.t('Emergency Mode')" flow="down" style="--tfsize:12px"
-           >
-               <i class='bx bxs-bell-ring'></i>
+          <div class="bttt-row2">
+               <div v-if="is_started_schedule" class="me-2 p-1 px-2 play-pause"
+               :class="{ 'emergency-active': emergency_mode }"
+               @click="toggleEmergencyMode()"
+               :tooltip="helper.t('Emergency Mode')" flow="down" style="--tfsize:12px"
+                >
+                    <i class='bx bxs-bell-ring'></i>
+               </div>
+
+               <div class="me-2 p-1 px-2 play-pause"
+               :class="{ 'emergency-active': mute_for_me }"
+               @click="toggleMuteMode()"
+               :tooltip="helper.t(mute_for_me ? 'Unmute For Me' : 'Mute For Me')" flow="down" style="--tfsize:12px"
+                >
+                    <i :class="mute_for_me ? 'bx bx-volume-mute' : 'bx bx-volume-full'"></i>
+               </div>
+
+               <div v-if="!manually_paused_the_playlist" @click="handlePayPause()" class="me-2 p-1 px-2 play-pause"><i class='bx bx-pause'></i></div>
+               <div v-else @click="handlePayPause()" class="me-2 p-1 px-2 play-pause"><i class='bx bx-play'></i></div>
+
+               <!-- Add here a button group (Normal & Faster) with icon prefix -->
+               <div class="btn-group me-2" role="group">
+                    <template v-for="item in speedList">
+                         <button :tooltip="helper.t('Playback Speed({value})').replace('{value}', item.value)" flow="down" style="--tfsize:12px" type="button" class="btn btn-outline-primary playbackButton" :class="{'active': playback_speed === item.value }" @click="onClickSpeed(item)">
+                              {{ item.label }}
+                         </button>
+                    </template>
+               </div>
+
+               <div class="togglerbtn">
+                    <btn @click="toggleSettings = !toggleSettings" class="px-3 shadow me-2"><i :class="toggleSettings ? 'bx bx-x' : 'bx bx-list-ul'"></i></btn>
+               </div>
+
+               <div v-if="isUsingSpeakerAutoControl" class="me-2 p-1 position-relative" @click.stop="showSwithBoardModal = !showSwithBoardModal">
+                    <img :src="borad_image_url" alt="" class="board-image">
+                    <span class="manual-mode" v-if="!isSpeakersAutoMode">{{ helper.t('manual') }}</span>
+               </div>
+
+               <!-- <BarcodeScannigAnimation v-if="is_started_schedule" :scannig="is_started_schedule" class="me-1"  ></BarcodeScannigAnimation>  -->
+               <!-- <Switch v-model="is_started_schedule" @click="checkSchedule" size="lg" :yes="helper.t('Started')" :no="helper.t('Stopped')" :bothVisible="false" class="me-2" ></Switch> -->
           </div>
-
-          <div v-if="!manually_paused_the_playlist" @click="handlePayPause()" class="me-2 p-1 px-2 play-pause"><i class='bx bx-pause'></i></div>
-          <div v-else @click="handlePayPause()" class="me-2 p-1 px-2 play-pause"><i class='bx bx-play'></i></div>
-
-          <!-- Add here a button group (Normal & Faster) with icon prefix -->
-          <div class="btn-group me-2" role="group">
-               <template v-for="item in speedList">
-                    <button :tooltip="helper.t('Playback Speed({value})').replace('{value}', item.value)" flow="down" style="--tfsize:12px" type="button" class="btn btn-outline-primary playbackButton" :class="{'active': playback_speed === item.value }" @click="onClickSpeed(item)">
-                         {{ item.label }}
-                    </button>
-               </template>
-          </div>
-
-          <div v-if="isUsingSpeakerAutoControl" class="me-2 p-1 position-relative" @click.stop="showSwithBoardModal = !showSwithBoardModal">
-               <img :src="borad_image_url" alt="" class="board-image">
-               <span class="manual-mode" v-if="!isSpeakersAutoMode">{{ helper.t('manual') }}</span>
-          </div> 
-         
-          <BarcodeScannigAnimation v-if="is_started_schedule" :scannig="is_started_schedule" class="me-1"  ></BarcodeScannigAnimation> 
-          <Switch v-model="is_started_schedule" @click="checkSchedule" size="lg" :yes="helper.t('Started')" :no="helper.t('Stopped')" :bothVisible="false" class="me-2" ></Switch>
      </div>
 
      
 
 
 
+     <Transition name="class-list-fade">
+          <div class="class-list-backdrop" v-if="toggleSettings" @click="toggleSettings = false"></div>
+     </Transition>
+
      <div class="sections mt-3">
+          <Transition name="class-list-slide">
           <div class="single-section class-list " v-if="toggleSettings">
+               <span class="class-list-close" @click="toggleSettings = false"><i class='bx bx-x'></i></span>
                <div class="tab-view" >
                     <div :class="{'active': tab==1}" @click="tab=1">{{ helper.t('Punch') }}</div>
                     <div :class="{'active': tab==2}" @click="tab=2">{{ helper.t('Call') }}</div>
@@ -427,22 +416,25 @@ function recallAllPunchedStudents(){
                     </ul>
                </div>
           </div>
+          </Transition>
 
 
           <div class="single-section watting-list relative">
                <div class="header-and-tools">
                     <h4 class="header-title"> {{ helper.t('Puch Board') }} </h4>
                     <div class="right-section" v-if="wattingList?.length">
-                         <span class="outlined" >{{ helper.t('Waitting:') }} {{ wattingList.filter(student => !student.is_called).length }}/{{ wattingList.length }}</span>
-                         <span class="outlined" >{{ helper.t('Completed:') }} {{ wattingList.filter(student => student.is_called).length }}/{{ wattingList.length }}</span>
+                         <span class="outlined wait-complete-count" >{{ helper.t('Waitting:') }} {{ wattingList.filter(student => !student.is_called).length }}/{{ wattingList.length }}</span>
+                         <span class="outlined wait-complete-count" >{{ helper.t('Completed:') }} {{ wattingList.filter(student => student.is_called).length }}/{{ wattingList.length }}</span>
+                         <span class="outlined total-count" >{{ helper.t('Total:') }} {{ wattingList.length }}</span>
                          <button class="action-button" @click.stop="showRecallConfirmation = true" ><i class='bx bxs-speaker transformY-1px' ></i> {{ helper.t('Recall All') }}</button>
                     </div> 
                </div>
                <div class="set-max-height" id="students_card_container">
-                    <div v-if="wattingList?.length">
+                    <div v-if="wattingList?.length" class="punch-grid" :class="{ 'punch-card-list': punchCardDesign !== 1 }" :style="`--punch-card-min:${punchCardMinWidth}px`">
                          <template v-for="(student, i) in wattingList" :key="i"> 
+                              <!-- Design 1: Default (original card) -->
+                              <template v-if="punchCardDesign === 1">
                               <div class="student-box" :class="{'is_called': student.is_called}" 
-                              :style="`--std-card-width:${card_dynamic_width}px`"
                               :barcode="student?.barcode" :card-id="student.id" :playing="isPayingThisCard(student)" >
                                    <div class="card-content" :class="{ 'bg_animation': student?.isPlaying }" >
                                         <!-- Student name -->
@@ -507,6 +499,17 @@ function recallAllPunchedStudents(){
                                    </span>
                                    </div>
                               </div> 
+                              </template>
+                              <!-- Designs 2-4: Ticket / Neon Glow / Compact Row -->
+                              <PunchCard v-else
+                                   :student="student"
+                                   :design="punchCardDesign"
+                                   :status="punchStatus(student)"
+                                   :mainDakhela="originalDakhela(student)"
+                                   @open="(withLog) => openStudentPage(student, withLog)"
+                                   @recall="makeAsUncalled(student)"
+                                   @remove="removeFromWattingList(student, i)"
+                              />
                          </template>
                     </div>
                     <div v-else>
@@ -639,6 +642,26 @@ function recallAllPunchedStudents(){
   column-gap: 10px;
   row-gap: 10px;
 }
+/* Cards: responsive grid that always fills the row (no empty strip on the right), for every design */
+.watting-list .set-max-height > div.punch-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(var(--punch-card-min, 200px), 100%), 1fr));
+  gap: 10px;
+  align-content: start;
+}
+.watting-list .set-max-height > div.punch-grid > .student-box,
+.watting-list .set-max-height > div.punch-grid > .pc {
+  width: auto;
+  min-width: 0;
+}
+.watting-list .set-max-height > div.punch-grid > .pc--d4 {
+  grid-column: 1 / -1; /* Compact Row: full-width rows */
+}
+/* Designs 2-4: room for outlines, glows and the hover lift, which the scrolling list would otherwise clip */
+.watting-list .set-max-height > div.punch-card-list {
+  padding: 6px 4px 8px;
+}
+
 .watting-list .set-max-height div .student-box {
      --call-done: linear-gradient(0deg, #2fe9df00 0%, #9c9cec00 100%); 
 }
@@ -716,18 +739,16 @@ function recallAllPunchedStudents(){
 .tab-view div.active{
      background: rgba(255, 255, 255, 0.495);
      border-bottom: 2px solid white;
-     
+
+}
+
+.bttt-row2{
+     display: contents;
 }
 
 @media screen and (max-width: 450px) {
      .sections {
           flex-direction: column;
-     }
-     .togglerbtn{
-          position: fixed;
-          top: 10px;
-          right: 10px;
-          z-index: 99999; 
      }
      .togglerbtn > button,
      .togglerbtn > button:active,
@@ -739,8 +760,16 @@ function recallAllPunchedStudents(){
      .bttt{
           flex-wrap: wrap;
      }
-     .bttt > *{
-          margin-bottom: 5px;
+     .bttt-row2{
+          display: flex;
+          align-items: center;
+          flex-wrap: nowrap;
+          overflow-x: auto;
+          width: 100%;
+          padding-bottom: 5px;
+     }
+     .btn-group .playbackButton:nth-child(2){
+          display: none;
      }
 }
 .card-canceller{
@@ -853,5 +882,86 @@ function recallAllPunchedStudents(){
      color: white;
      background: var(--grad3);
      border-color: var(--primaryColor);
+}
+.togglerbtn{
+     display: none;
+}
+.barcode-submit-btn{
+     display: none;
+}
+.class-list-backdrop{
+     display: none;
+}
+.class-list-close{
+     display: none;
+}
+@media screen and (max-width: 450px) {
+     .barcode-submit-btn{
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          position: absolute;
+          right: 6px;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 30px;
+          height: 30px;
+          border-radius: 50%;
+          background: var(--grad3);
+          color: #fff;
+          font-size: 18px;
+          cursor: pointer;
+          z-index: 2;
+     }
+     .togglerbtn{
+          display: block;
+     }
+     .wait-complete-count{
+          display: none;
+     }
+     .class-list-close{
+          display: block;
+          position: absolute;
+          top: 10px;
+          right: 15px;
+          z-index: 10000;
+          font-size: 28px;
+          line-height: 1;
+          cursor: pointer;
+          color: #333;
+     }
+     .class-list-backdrop{
+          display: block;
+          position: fixed;
+          inset: 0;
+          background: rgba(0,0,0,0.5);
+          z-index: 9998;
+     }
+     .class-list-slide-enter-active,
+     .class-list-slide-leave-active{
+          transition: transform 0.3s ease;
+     }
+     .class-list-slide-enter-from,
+     .class-list-slide-leave-to{
+          transform: translateY(100%);
+     }
+     .class-list-fade-enter-active,
+     .class-list-fade-leave-active{
+          transition: opacity 0.3s ease;
+     }
+     .class-list-fade-enter-from,
+     .class-list-fade-leave-to{
+          opacity: 0;
+     }
+     .sections > .single-section.class-list{
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          z-index: 9999;
+          border-radius: 0;
+          background-color: rgb(240, 240, 240);
+     }
 }
 </style>
