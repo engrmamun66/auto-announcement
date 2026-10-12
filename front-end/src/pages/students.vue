@@ -593,6 +593,20 @@ function onChange_dateTimePicker(data){
   punchToSubmitAttendance(makeCarcode(targetStudent.value), {source: 'manual_button', delay: 0, punch_time: data.startDateTime, skipSms: is_skip_sms() })
 }
 
+// Punch / Attendance actions, used by the Punch column and the mobile buttons under the name
+function callPunch(std){
+  punchToCallStudent(makeCarcode(std), {message: 'কার্ডটি সফলভাবে পাঞ্চ হয়েছে।', source: 'manual_button', for_attendence: false})
+}
+function plainPunch(std){
+  punchToCallStudent(makeCarcode(std), {message: 'কার্ডটি সফলভাবে পাঞ্চ হয়েছে।', source: 'manual_button'})
+}
+async function openAttendanceCalendar(std){
+  targetStudent.value = std
+  dateTimePickerRef.value?.setTime(moment().format('HH:mm'))
+  await helper.wait(100)
+  dateTimePickerRef.value?.toggle()
+}
+
 function onClickAttendance(std){
   if(!confirm(helper.t('Are you sure to submit attendance?'))) return;
   punchToSubmitAttendance(makeCarcode(std), {source: 'manual_button', delay: 0, skipSms: is_skip_sms()})
@@ -792,7 +806,7 @@ watch(fixedWidthSoundCol, (newVal) => {
               </th>
             </template>
             <th>{{ helper.t('Status') }}</th>
-            <th>
+            <th class="d-none d-md-table-cell">
               {{ helper.t('Punch') }}
               <template v-if="CONFIG?.settings?.attendance?.status">
                 / {{ helper.t('Attendance') }}
@@ -821,7 +835,7 @@ watch(fixedWidthSoundCol, (newVal) => {
               <td><span class="sk sk-pill" style="width: 90%"></span></td>
             </template>
             <td><span class="sk sk-pill" style="width: 42px"></span></td>
-            <td><span class="sk sk-pill" style="width: 70%"></span></td>
+            <td class="d-none d-md-table-cell"><span class="sk sk-pill" style="width: 70%"></span></td>
             <td><span class="sk sk-btn"></span><span class="sk sk-btn"></span></td>
           </tr>
         </template>
@@ -829,7 +843,7 @@ watch(fixedWidthSoundCol, (newVal) => {
           <template v-for="(std, i) in students.toReversed()">
             <tr @auxclick="log(std)" :style="!std.status ? 'opacity: 0.9' : ''"  >
               <td class="text-left d-none d-md-table-cell" @click.stop="log(std)"> {{ std.class }} </td>
-              <td class="text-left cp" @click.stop="prepareToEdit(std)" :student-id="std.id">
+              <td class="text-left cp student-name-cell" @click.stop="prepareToEdit(std)" :student-id="std.id">
                 {{ std.name.split('||')?.[0] }}
                 <div class="d-md-none mt-1">
                   <small class="text-muted d-block">{{ std.class }}</small>
@@ -856,6 +870,17 @@ watch(fixedWidthSoundCol, (newVal) => {
                     <i v-if="std.name && String(std.name)?.indexOf('||dakhela') > -1 === false" @click.stop="onClickClone(std)" class="bx bxs-copy-alt cp px-1">
                     </i>
                   </span>
+                </div>
+                <!-- Mobile: Punch / Attendance always visible under the dakhela (the column is hidden on phones) -->
+                <div class="mobile-punch-actions d-md-none" @click.stop>
+                  <template v-if="CONFIG?.settings?.attendance?.status">
+                    <button v-if="std.name.indexOf('Copied') > -1" class="class-short-btn px-2 for-call" @click.stop="callPunch(std)">Call&nbsp;Punch</button>
+                    <template v-else>
+                      <button class="class-short-btn px-2 for-attendence" @click.stop="onClickAttendance(std)">Attendance</button>
+                      <button class="class-short-btn px-2 for-attendence" @click.stop="openAttendanceCalendar(std)"><i class='bx bxs-calendar'></i></button>
+                    </template>
+                  </template>
+                  <button v-else class="class-short-btn px-2" @click.stop="plainPunch(std)">Punch</button>
                 </div>
                 
               </td> 
@@ -903,7 +928,7 @@ watch(fixedWidthSoundCol, (newVal) => {
                 }"></Switch> 
               </td> 
 
-              <td>
+              <td class="d-none d-md-table-cell">
                 <template v-if="CONFIG?.settings?.attendance?.status">
                   <template v-if="std.name.indexOf('Copied') > -1">
                     <button ref="PunchButtonsRef" class="class-short-btn px-2 for-call" 
@@ -1064,6 +1089,26 @@ watch(fixedWidthSoundCol, (newVal) => {
 </template>
 
 <style scoped>
+/* Mobile Punch / Attendance buttons under the student name */
+.mobile-punch-actions{
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap; /* Attendance + calendar always on one line */
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+}
+@media (max-width: 767px){
+  /* Let long names wrap so name + dakhela (with buttons) fit without sideways scrolling */
+  .table-container td.student-name-cell{
+    white-space: normal;
+    /* Name column takes half the screen width on phones */
+    width: calc( 50vw + 15px );
+    min-width: calc( 50vw + 15px );
+    max-width: calc( 50vw + 15px );
+  }
+}
+
 /* ===== Students list skeleton / shimmer ===== */
 .sk{
   display: block;
