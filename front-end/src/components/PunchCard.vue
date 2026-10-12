@@ -8,7 +8,6 @@ const props = defineProps({
   student: { type: Object, required: true },
   design: { type: Number, required: true },
   status: { type: String, required: true }, // waiting | calling | paused | completed | error
-  width: { type: Number, default: 200 },
   mainDakhela: { default: false },
 })
 const emit = defineEmits(['open', 'recall', 'remove'])
@@ -53,7 +52,7 @@ function onStatusClick() {
 </script>
 
 <template>
-  <div class="pc" :class="[`pc--d${design}`, `is-${status}`]" :style="design === 4 ? '' : `--std-card-width:${width}px`"
+  <div class="pc" :class="[`pc--d${design}`, `is-${status}`]" 
     :barcode="student?.barcode" :card-id="student?.id">
 
     <!-- ===== 2: Ticket ===== -->

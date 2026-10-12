@@ -162,8 +162,6 @@ function originalDakhela({name}){
      }
 }
 
-let card_dynamic_width = ref(200)
-
 onMounted(()=>{
 
      if(window.innerWidth <= 450){
@@ -177,48 +175,8 @@ onMounted(()=>{
           }, 100);
      }
 
-     emitter.on('document_click', updateStudetCardSize)
-     emitter.on('document_resize', updateStudetCardSize)
-     emitter.on('document_mousemove', updateStudetCardSize)
 })
 
-function updateStudetCardSize(){
-     let targetCard = document.getElementById('students_card_container')
-     if(targetCard){
-          let bound = targetCard.getBoundingClientRect()
-          let width = Math.floor(bound.width) 
-
-          const scroolbarWidth = 10 
-          
-          if(width < 400){
-               card_dynamic_width.value = width - 15
-          } 
-          else if(width < 600){
-               card_dynamic_width.value = Math.floor(width / 2) - (scroolbarWidth)
-          }
-          else if(width < 800){
-               card_dynamic_width.value = Math.floor(width / 3) - (scroolbarWidth)
-          } 
-          else if(width < 1000){
-               card_dynamic_width.value = Math.floor(width / 4) - (scroolbarWidth)
-          } 
-          else if(width < 1200){
-               card_dynamic_width.value = Math.floor(width / 5) - (scroolbarWidth)
-          } 
-          else if(width < 1400){
-               card_dynamic_width.value = Math.floor(width / 6) - (scroolbarWidth)
-          } 
-          else if(width < 1600){
-               card_dynamic_width.value = Math.floor(width / 7) - (scroolbarWidth)
-          } 
-          else if(width < 1800){
-               card_dynamic_width.value = Math.floor(width / 8) - (scroolbarWidth)
-          } 
-          else {
-               card_dynamic_width.value = 300
-          } 
-     }
-}
 function removeFromWattingList(student, i){
      wattingList.value.splice(i, 1)
      if(isPayingThisCard(student)){
@@ -240,6 +198,8 @@ function makeAsUncalled(student){
 
 // Punch Board card design: 1 = Default, 2 = Ticket, 3 = Neon Glow, 4 = Compact Row (Settings → Settings tab)
 const punchCardDesign = getSelectedPunchCard(CONFIG.value?.settings)
+// Minimum card width per design; the grid fits as many columns as possible and stretches them to fill the row
+const punchCardMinWidth = { 1: 200, 2: 260, 3: 240, 4: 200 }[punchCardDesign] || 200
 
 function punchStatus(student){
      if(student?.sound1_haserror) return 'error'
@@ -470,12 +430,11 @@ function recallAllPunchedStudents(){
                     </div> 
                </div>
                <div class="set-max-height" id="students_card_container">
-                    <div v-if="wattingList?.length" :class="{ 'punch-card-list': punchCardDesign !== 1 }">
+                    <div v-if="wattingList?.length" class="punch-grid" :class="{ 'punch-card-list': punchCardDesign !== 1 }" :style="`--punch-card-min:${punchCardMinWidth}px`">
                          <template v-for="(student, i) in wattingList" :key="i"> 
                               <!-- Design 1: Default (original card) -->
                               <template v-if="punchCardDesign === 1">
                               <div class="student-box" :class="{'is_called': student.is_called}" 
-                              :style="`--std-card-width:${card_dynamic_width}px`"
                               :barcode="student?.barcode" :card-id="student.id" :playing="isPayingThisCard(student)" >
                                    <div class="card-content" :class="{ 'bg_animation': student?.isPlaying }" >
                                         <!-- Student name -->
@@ -546,7 +505,6 @@ function recallAllPunchedStudents(){
                                    :student="student"
                                    :design="punchCardDesign"
                                    :status="punchStatus(student)"
-                                   :width="card_dynamic_width"
                                    :mainDakhela="originalDakhela(student)"
                                    @open="(withLog) => openStudentPage(student, withLog)"
                                    @recall="makeAsUncalled(student)"
@@ -684,9 +642,24 @@ function recallAllPunchedStudents(){
   column-gap: 10px;
   row-gap: 10px;
 }
+/* Cards: responsive grid that always fills the row (no empty strip on the right), for every design */
+.watting-list .set-max-height > div.punch-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(var(--punch-card-min, 200px), 100%), 1fr));
+  gap: 10px;
+  align-content: start;
+}
+.watting-list .set-max-height > div.punch-grid > .student-box,
+.watting-list .set-max-height > div.punch-grid > .pc {
+  width: auto;
+  min-width: 0;
+}
+.watting-list .set-max-height > div.punch-grid > .pc--d4 {
+  grid-column: 1 / -1; /* Compact Row: full-width rows */
+}
 /* Designs 2-4: room for outlines, glows and the hover lift, which the scrolling list would otherwise clip */
 .watting-list .set-max-height > div.punch-card-list {
-  padding: 6px 3px 8px; /* sides kept small: card widths are computed with ~10px spare per row */
+  padding: 6px 4px 8px;
 }
 
 .watting-list .set-max-height div .student-box {
