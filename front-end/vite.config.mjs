@@ -1,6 +1,5 @@
 import { defineConfig, version as viteVersion } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import path from 'path'
 import { fileURLToPath, URL } from 'node:url'
 
 // The app ships as ONE js + ONE css file (fixed names, no code splitting).
@@ -21,7 +20,7 @@ export default defineConfig({
   optimizeDeps: {
     include: ['highcharts', 'highcharts-vue'],
   },
-  envDir: path.resolve(__dirname, '../'),
+  envDir: fileURLToPath(new URL('../', import.meta.url)), // ESM equivalent of path.resolve(__dirname, '../')
   resolve: {
     alias: {
       '~': fileURLToPath(new URL('/', import.meta.url)),
