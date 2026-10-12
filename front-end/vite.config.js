@@ -1,7 +1,17 @@
-import { defineConfig } from 'vite'
+import { defineConfig, version as viteVersion } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import path from 'path'
 import { fileURLToPath, URL } from 'node:url'
+
+// The app ships as ONE js + ONE css file (fixed names, no code splitting).
+// Vite 8+ (rolldown) renamed the option: inlineDynamicImports -> codeSplitting: false under rolldownOptions.
+// Pick the right one so the same config builds without warnings on both the server and older local installs.
+const isRolldownVite = Number(String(viteVersion).split('.')[0]) >= 8
+const singleBundleOutput = {
+  entryFileNames: 'assets/my-announcement.min.js',
+  assetFileNames: 'assets/my-announcement.min.[ext]',
+  ...(isRolldownVite ? { codeSplitting: false } : { inlineDynamicImports: true }),
+}
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -27,17 +37,13 @@ export default defineConfig({
     emptyOutDir: true,
     minify: true,
     sourcemap: true,
-    chunkSizeWarningLimit: 1600,
+    chunkSizeWarningLimit: 3000, // single-bundle by design (~1.6 MB), so only warn if it grows a lot
     watch: {
       include: ['src/**'],
       exclude: 'node_modules/**, .git/**, dist/**, .vscode/**',
     },
-    rollupOptions: {
-      output: {
-        entryFileNames: 'assets/my-announcement.min.js',
-        assetFileNames: 'assets/my-announcement.min.[ext]',
-        inlineDynamicImports: true,
-      },
+    [isRolldownVite ? 'rolldownOptions' : 'rollupOptions']: {
+      output: singleBundleOutput,
     },
   }
 })
