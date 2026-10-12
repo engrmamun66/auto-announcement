@@ -1,6 +1,6 @@
 <script setup>
 // Import result shown in the Rightbar after an Excel import (see pages/Import.vue)
-import { computed, inject } from 'vue'
+import { computed, inject, reactive } from 'vue'
 
 const props = defineProps({
   report: { type: Object, default: () => ({}) }, // { settings?, students? (with .schedules), attendance? }
@@ -14,6 +14,18 @@ const students = computed(() => props.report?.students || null)
 const studentRows = computed(() => students.value?.students || [])
 const scheduleRows = computed(() => students.value?.schedules || [])
 const showStudents = computed(() => studentRows.value.length || students.value?.total)
+
+// { reason, rows, ids (distinct student_id) } for each skip/error reason
+const openGroups = reactive({})
+const attendanceIssueGroups = computed(() => {
+  const groups = {}
+  ;(attendance.value?.issues || []).forEach(row => {
+    const g = groups[row.reason] || (groups[row.reason] = { reason: row.reason, rows: [], ids: [] })
+    g.rows.push(row)
+    if (row.student_id && !g.ids.includes(row.student_id)) g.ids.push(row.student_id)
+  })
+  return Object.values(groups).sort((a, b) => b.rows.length - a.rows.length)
+})
 
 const STATUS_LABEL = {
   created: 'Created',
@@ -68,11 +80,19 @@ const scheduleStats = computed(() => ({
         <div class="ir-stat is-skipped"><b>{{ attendance.skipped }}</b><span>{{ helper.t('Skipped') }}</span></div>
         <div class="ir-stat is-error"><b>{{ attendance.errors }}</b><span>{{ helper.t('Errors') }}</span></div>
       </div>
-      <ul v-if="attendance.issues?.length" class="ir-issues">
-        <li v-for="row in attendance.issues" :key="row.excelRow">
-          {{ helper.t('Row') }} {{ row.excelRow }}: {{ row.student_id }} / {{ row.date }} — {{ row.reason }}
-        </li>
-      </ul>
+      <!-- Issues grouped by reason, rows behind a toggle (a large import can list hundreds) -->
+      <div v-for="group in attendanceIssueGroups" :key="group.reason" class="ir-group">
+        <button type="button" class="ir-group__head" @click="openGroups[group.reason] = !openGroups[group.reason]">
+          <span class="ir-pill is-skipped">{{ group.rows.length }}</span>
+          <span class="ir-group__reason">{{ group.reason }}</span>
+          <span v-if="group.ids.length" class="ir-muted">({{ helper.t('IDs') }}: {{ group.ids.slice(0, 12).join(', ') }}{{ group.ids.length > 12 ? '…' : '' }})</span>
+          <span class="ir-group__toggle">{{ openGroups[group.reason] ? helper.t('Hide rows') : helper.t('Show rows') }}</span>
+        </button>
+        <ul v-if="openGroups[group.reason]" class="ir-issues">
+          <li v-for="row in group.rows" :key="row.excelRow">{{ helper.t('Row') }} {{ row.excelRow }}: {{ row.student_id }} / {{ row.date }}</li>
+        </ul>
+      </div>
+      <p v-if="attendance.issues?.length >= 500" class="ir-muted mt-1">{{ helper.t('Showing the first 500 issues.') }}</p>
     </section>
 
     <!-- Schedules -->
@@ -230,6 +250,15 @@ const scheduleStats = computed(() => ({
 .ir-pill.is-not_found{ color: #b45309; background: #fef3c7; }
 .ir-pill.is-error{ color: #b91c1c; background: #fee2e2; }
 
+.ir-group{ margin-top: 10px; border: 1px solid #eef2f7; border-radius: 10px; overflow: hidden; }
+.ir-group__head{
+  display: flex; align-items: center; flex-wrap: wrap; gap: 8px; width: 100%;
+  padding: 8px 10px; border: none; background: #f8fafc; text-align: left; font-size: 13px; cursor: pointer;
+}
+.ir-group__head:hover{ background: #f1f5f9; }
+.ir-group__reason{ font-weight: 600; color: #334155; }
+.ir-group__toggle{ margin-left: auto; font-size: 12px; font-weight: 600; color: #2563eb; }
+.ir-group .ir-issues{ max-height: 220px; overflow: auto; margin: 0; padding: 8px 10px 8px 28px; }
 .ir-issues{ margin: 10px 0 0; padding-left: 18px; font-size: 12px; color: #64748b; }
 .ir-issues li{ margin-bottom: 2px; }
 .ir-empty{ margin: 0; font-size: 13px; color: #94a3b8; }

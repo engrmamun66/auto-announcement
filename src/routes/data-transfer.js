@@ -202,6 +202,8 @@ module.exports = (db, Students, { upload }) => {
     const cols = ATTENDANCE_COLUMNS.join(', ');
     const placeholders = ATTENDANCE_COLUMNS.map(() => '?').join(', ');
     const setClause = ATTENDANCE_COLUMNS.map(c => `${c} = ?`).join(', ');
+    // attendance.student_id is the student's dakhela; read after the students import so new students count
+    const knownDakhela = new Set((await dbAll('SELECT dakhela FROM students')).map(r => String(r.dakhela).trim()));
 
     // One transaction: thousands of rows would otherwise take minutes (one disk sync per row)
     let inTransaction = false;
@@ -212,9 +214,16 @@ module.exports = (db, Students, { upload }) => {
         const excelRow = i + 2;
         const rec = {};
         ATTENDANCE_COLUMNS.forEach(c => { rec[c] = blank(row[c]) ? null : String(row[c]).trim(); });
-        if (!rec.student_id || !rec.date || !rec.status) {
+        if (!rec.student_id || !rec.date) {
           report.skipped++;
-          report.issues.push({ excelRow, student_id: rec.student_id, date: rec.date, status: 'skipped', reason: 'missing student_id/date/status' });
+          report.issues.push({ excelRow, student_id: rec.student_id, date: rec.date, status: 'skipped', reason: 'missing student_id/date' });
+          continue;
+        }
+        // status is NOT NULL but may legitimately be empty in the source database; keep it as-is
+        if (rec.status === null) rec.status = '';
+        if (!knownDakhela.has(String(rec.student_id))) {
+          report.skipped++;
+          report.issues.push({ excelRow, student_id: rec.student_id, date: rec.date, status: 'skipped', reason: 'student not found (no student with this dakhela)' });
           continue;
         }
         if (!/^\d{4}-\d{2}-\d{2}$/.test(rec.date)) {
