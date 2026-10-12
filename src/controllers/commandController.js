@@ -312,7 +312,7 @@ class CommandController {
 
   async getUsers(req, res) {
     const cn = this.resolveSnKey(req.params.cn);
-    const command = 'DATA QUERY USERINFO';
+    const command = 'DATA QUERY USERINFO PageSize=3000'; // without PageSize the device returns only its default first page (128 users)
 
     console.log(`👥 Get users request for ${cn}: ${command}`);
 
@@ -420,7 +420,7 @@ class CommandController {
 
   async getFingerprints(req, res) {
     const cn = this.resolveSnKey(req.params.cn);
-    const command = 'DATA QUERY FINGERTMP';
+    const command = 'DATA QUERY FINGERTMP PageSize=3000'; // same as USERINFO / ATTLOG: ask for all rows, not just the first page
 
     console.log(`🔐 Get fingerprints request for ${cn}: ${command}`);
 
