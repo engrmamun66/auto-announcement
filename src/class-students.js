@@ -450,6 +450,7 @@ class Students {
    *   studentsSheet  - sheet name for students, or null to skip (default: first sheet)
    *   schedulesSheet - sheet name for schedules, or null to skip (default: sheet named "Schedules")
    *   keepFile       - don't delete the uploaded file when done (the caller cleans up)
+   *   skipAfterImport - don't run the post-import access check / backup (caller runs another import right after)
    */
   importExcel(filePath, forceAsNewEntity, callback, options = {}) {
     try {
@@ -513,8 +514,10 @@ class Students {
         const errors = studentReport.filter(r => r.status === 'error').length;
         if (!errorOccurred) {
           callback(null, { total: created + updated, created, updated, not_found, skipped, errors, students: studentReport, schedules: scheduleReport });
-          checkAccess.CheckAppAccess({ save_info: true });
-          Backup.createBackupAndSend();
+          if (!options.skipAfterImport) {
+            checkAccess.CheckAppAccess({ save_info: true });
+            Backup.createBackupAndSend();
+          }
         } else {
           callback("Failed to upload some rows. Check logs for details.");
         }

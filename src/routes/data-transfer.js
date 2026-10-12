@@ -268,16 +268,27 @@ module.exports = (db, Students, { upload }) => {
         if (!workbook.Sheets[mapping[part]]) return res.status(400).json({ error: `Sheet "${mapping[part]}" was not found in the file.` });
       }
 
-      // Settings first: the class list decides which students are accepted
+      const runImportExcel = (options) => new Promise((resolve, reject) => {
+        Students.importExcel(filePath, forceAsNew, (err, result) => {
+          if (err) return reject(new Error(String(err?.message || err)));
+          resolve(result);
+        }, { keepFile: true, ...options });
+      });
+
+      // Order matters: settings (class list decides which students are accepted) → schedules → students → attendance
       if (mapping.settings) report.settings = await importSettings(workbook.Sheets[mapping.settings]);
 
-      if (mapping.students || mapping.schedules) {
-        report.students = await new Promise((resolve, reject) => {
-          Students.importExcel(filePath, forceAsNew, (err, result) => {
-            if (err) return reject(new Error(String(err?.message || err)));
-            resolve(result);
-          }, { studentsSheet: mapping.students || null, schedulesSheet: mapping.schedules || null, keepFile: true });
-        });
+      let schedulesResult = null;
+      if (mapping.schedules) {
+        // When students follow, they run the post-import access check / backup once at the end
+        schedulesResult = await runImportExcel({ studentsSheet: null, schedulesSheet: mapping.schedules, skipAfterImport: !!mapping.students });
+      }
+
+      if (mapping.students) {
+        const studentsResult = await runImportExcel({ studentsSheet: mapping.students, schedulesSheet: null });
+        report.students = { ...studentsResult, schedules: schedulesResult?.schedules || [] };
+      } else if (schedulesResult) {
+        report.students = { ...schedulesResult, students: [] };
       }
 
       if (mapping.attendance) report.attendance = await importAttendance(workbook.Sheets[mapping.attendance], forceAsNew);
