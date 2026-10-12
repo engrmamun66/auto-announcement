@@ -41,6 +41,16 @@ const all_students_non_copied = inject('all_students_non_copied', [])
 const getAllStudents = inject('getAllStudents', () => {})
 
 let students = ref([])
+// Skeleton rows while students load; delayed so quick refreshes don't flash the table
+const loadingStudents = ref(false)
+const showStudentsSkeleton = ref(false)
+let skeletonTimer = null
+watch(loadingStudents, (loading) => {
+  clearTimeout(skeletonTimer)
+  if (loading && !students.value?.length) showStudentsSkeleton.value = true // nothing to show yet: skeleton right away
+  else if (loading) skeletonTimer = setTimeout(() => { showStudentsSkeleton.value = true }, 150)
+  else showStudentsSkeleton.value = false
+})
 let studentLogs = ref([])
 
 let only_similler_students = ref(storage('only_similler_students', false).value)
@@ -103,6 +113,7 @@ function debounce(fn, delay) {
 }
 
 async function getStudents({id=null}={}){
+  loadingStudents.value = true
   try {
     // console.log('params.value', params.value);
     let parameters = {...params.value, id}
@@ -139,6 +150,8 @@ async function getStudents({id=null}={}){
     
   } catch (error) {
     console.warn('getStudents_error::', error);
+  } finally {
+    loadingStudents.value = false
   }
 }
 
@@ -790,7 +803,29 @@ watch(fixedWidthSoundCol, (newVal) => {
         </thead>
       </template>
       <template #rows>
-        <template v-if="students?.length">
+        <template v-if="showStudentsSkeleton">
+          <tr v-for="n in 8" :key="'sk-' + n" class="sk-row" aria-hidden="true">
+            <td class="d-none d-md-table-cell"><span class="sk sk-line" style="width: 70%"></span></td>
+            <td>
+              <span class="sk sk-line" :style="`width: ${55 + (n * 7) % 35}%`"></span>
+              <span class="sk sk-line sk-line--sm d-md-none mt-1" style="width: 40%"></span>
+            </td>
+            <td class="d-none d-md-table-cell"><span class="sk sk-circle"></span></td>
+            <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
+              <td class="d-none d-lg-table-cell"><span class="sk sk-line" style="width: 60%"></span></td>
+            </template>
+            <td class="d-none d-md-table-cell"><span class="sk sk-line" style="width: 80%"></span></td>
+            <td><span class="sk sk-line" style="width: 45%"></span></td>
+            <td class="d-none d-lg-table-cell"><span class="sk sk-line" style="width: 50%"></span></td>
+            <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
+              <td><span class="sk sk-pill" style="width: 90%"></span></td>
+            </template>
+            <td><span class="sk sk-pill" style="width: 42px"></span></td>
+            <td><span class="sk sk-pill" style="width: 70%"></span></td>
+            <td><span class="sk sk-btn"></span><span class="sk sk-btn"></span></td>
+          </tr>
+        </template>
+        <template v-else-if="students?.length">
           <template v-for="(std, i) in students.toReversed()">
             <tr @auxclick="log(std)" :style="!std.status ? 'opacity: 0.9' : ''"  >
               <td class="text-left d-none d-md-table-cell" @click.stop="log(std)"> {{ std.class }} </td>
@@ -1027,6 +1062,30 @@ watch(fixedWidthSoundCol, (newVal) => {
 
 
 </template>
+
+<style scoped>
+/* ===== Students list skeleton / shimmer ===== */
+.sk{
+  display: block;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #e5e7eb 0%, #f3f4f6 40%, #e5e7eb 80%);
+  background-size: 300% 100%;
+  animation: skShimmer 1.3s ease-in-out infinite;
+}
+.sk-line{ height: 12px; }
+.sk-line--sm{ height: 9px; }
+.sk-circle{ width: 36px; height: 36px; border-radius: 50%; }
+.sk-pill{ height: 22px; border-radius: 999px; }
+.sk-btn{ display: inline-block; width: 28px; height: 28px; border-radius: 8px; margin-right: 6px; }
+.sk-row td{ vertical-align: middle; padding-top: 14px; padding-bottom: 14px; }
+@keyframes skShimmer{
+  0%{ background-position: 100% 0; }
+  100%{ background-position: 0 0; }
+}
+@media (prefers-reduced-motion: reduce){
+  .sk{ animation: none; }
+}
+</style>
 
 <style>
 .recorder-overlay {
