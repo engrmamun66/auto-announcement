@@ -23,6 +23,17 @@ class Store {
     this.attendancePackReceivedAt[sn] = Date.now();
   }
 
+  // Device query replies (users, fingerprints) arrive in packs of ~128 rows; remember when the last one came
+  packReceivedAt = {}; // "sn:key" -> timestamp (ms)
+
+  markPackReceived(sn, key) {
+    this.packReceivedAt[`${sn}:${key}`] = Date.now();
+  }
+
+  lastPackReceivedAt(sn, key) {
+    return this.packReceivedAt[`${sn}:${key}`] || 0;
+  }
+
   nextPollingTime(sn) {
     const last = this.lastPollingTimes[sn];
     const interval = (this.pollingIntervals[sn] ?? 10) * 1000;

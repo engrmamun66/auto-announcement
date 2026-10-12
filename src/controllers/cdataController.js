@@ -153,7 +153,7 @@ class CdataController {
     else if (table === 'FINGERTMP' && this._isFingerprintData(row_item)) {
       const fingerprints = rows.map(r => this._parseFingerprintData(r.parts));
       this._writeFingerprintsToFile(sn, packIdx, fingerprints);
-      Store.data[sn] = { ...Store.data[sn], fingerprints };
+      this._appendPack(sn, 'fingerprints', fingerprints);
     }
 
 
@@ -330,7 +330,7 @@ class CdataController {
     else if (this._isUserData(row_item)) {
       const users = rows.map(r => this._parseUserData(r.parts));
       this._writeUsersToFile(sn, packIdx, users);
-      Store.data[sn] = { ...Store.data[sn], users };
+      this._appendPack(sn, 'users', users);
     }
     else if (this._isOplog(row_item)) {
       const oplogs = rows.map(r => this._parseOplogData(r.parts));
@@ -437,6 +437,17 @@ class CdataController {
       obj[key] = value;
     });
     return obj;
+  }
+
+  // Query replies come in packs of ~128 rows (one POST each): add each pack to what we have,
+  // skipping records already received (a re-sent pack), instead of overwriting the previous pack.
+  _appendPack(sn, key, records) {
+    const existing = Store.data[sn]?.[key] || [];
+    const seen = new Set(existing.map(r => JSON.stringify(r)));
+    const fresh = records.filter(r => !seen.has(JSON.stringify(r)));
+    Store.data[sn] = { ...Store.data[sn], [key]: [...existing, ...fresh] };
+    Store.markPackReceived(sn, key);
+    console.log(`>>>>>>>>> ${key} pack: +${fresh.length} → ${Store.data[sn][key].length}`);
   }
 
   _isUserData({ user_id }) {

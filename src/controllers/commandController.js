@@ -335,24 +335,9 @@ class CommandController {
       }
     );
 
-    // Poll for data with timeout
-    const maxWaitMs = 12000; // 12 second timeout
-    const pollIntervalMs = 200; // check every 200ms
-    const startTime = Date.now();
-
-    console.log(`⏳ Polling for fresh users data (max ${maxWaitMs}ms)...`);
-
-    while (Date.now() - startTime < maxWaitMs) {
-      if (Store.data?.[cn]?.users) {
-        const elapsed = Date.now() - startTime;
-        console.log(`✅ Fresh users data received after ${elapsed}ms: ${Store.data[cn].users.length} records`);
-        return res.status(200).json({ users: Store.data[cn].users });
-      }
-      await wait(pollIntervalMs);
-    }
-
-    console.log(`⚠️ Timeout waiting for users data after ${maxWaitMs}ms`);
-    const users = Store.data?.[cn]?.users || [];
+    // The device answers in packs of ~128 rows; wait until they stop arriving (returning on the
+    // first pack is what capped the list at 128)
+    const users = await this.waitForPacks(cn, 'users');
     res.status(200).json({ users });
   }
 
@@ -458,24 +443,9 @@ class CommandController {
       }
     );
 
-    // Poll for data with timeout
-    const maxWaitMs = 12000; // 12 second timeout
-    const pollIntervalMs = 200; // check every 200ms
-    const startTime = Date.now();
-
-    console.log(`⏳ Polling for fresh fingerprints data (max ${maxWaitMs}ms)...`);
-
-    while (Date.now() - startTime < maxWaitMs) {
-      if (Store.data?.[cn]?.fingerprints) {
-        const elapsed = Date.now() - startTime;
-        console.log(`✅ Fresh fingerprints data received after ${elapsed}ms: ${Store.data[cn].fingerprints.length} records`);
-        return res.status(200).json({ fingerprints: Store.data[cn].fingerprints });
-      }
-      await wait(pollIntervalMs);
-    }
-
-    console.log(`⚠️ Timeout waiting for fingerprints data after ${maxWaitMs}ms`);
-    const fingerprints = Store.data?.[cn]?.fingerprints || [];
+    // The device answers in packs of ~128 rows; wait until they stop arriving (returning on the
+    // first pack is what capped the list at 128)
+    const fingerprints = await this.waitForPacks(cn, 'fingerprints');
     res.status(200).json({ fingerprints });
   }
 
@@ -549,6 +519,24 @@ class CommandController {
   closeDoor(req, res) {
     const door = req.query.door || this.getBodyData(req).door || 1;
     this.respondQueued(res, this.pushCommand(req, req.params.cn, `CLOSE DOOR ${door}`));
+  }
+
+  /**
+   * Wait for a paginated device reply stored in Store.data[cn][key]:
+   * up to firstPackMs for the first pack, then until no new pack for settleMs (capped at maxMs).
+   */
+  async waitForPacks(cn, key, { firstPackMs = 15000, settleMs = 3000, maxMs = 55000 } = {}) {
+    const startedAt = Date.now();
+    const received = () => Store.data?.[cn]?.[key];
+    while (!received() && Date.now() - startedAt < firstPackMs) await wait(200);
+    if (!received()) {
+      console.log(`⚠️ Timeout waiting for ${key} from ${cn} after ${firstPackMs}ms`);
+      return [];
+    }
+    while (Date.now() - Store.lastPackReceivedAt(cn, key) < settleMs && Date.now() - startedAt < maxMs) await wait(200);
+    const data = received() || [];
+    console.log(`✅ ${key} collected from ${cn}: ${data.length} records in ${((Date.now() - startedAt) / 1000).toFixed(1)}s`);
+    return data;
   }
 
   resolveSnKey(cn) {
