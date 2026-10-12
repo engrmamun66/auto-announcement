@@ -384,7 +384,7 @@ class CommandController {
     // pack has arrived for SETTLE_MS — returning on the first pack is what capped results at 128.
     const pollingInterval = Store.pollingIntervals?.[cn] || 5;
     const FIRST_PACK_TIMEOUT_MS = Math.min(pollingInterval * 1000 + 10000, 40000);
-    const SETTLE_MS = 3000;
+    const SETTLE_MS = Math.min(Math.max(3000, pollingInterval * 1000 + 2000), 20000); // some devices send the next pack only on their next poll
     const MAX_TOTAL_MS = 55000; // stay under typical reverse-proxy timeouts (60s)
     const startedAt = Date.now();
     const received = () => Store.data?.[cn]?.attendance?.[dateKey];

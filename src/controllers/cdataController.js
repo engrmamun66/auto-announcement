@@ -130,8 +130,11 @@ class CdataController {
     if (!rawData.trim()) return;
 
     const sn = req.query.SN || req.query.sn || 'UNKNOWN';
-    const table = req.query.table;
-    const packIdx = parseInt(req.query.PackIdx || '1', 10);
+    // /cdata sends ?table=ATTLOG&PackIdx=…; /querydata (push protocol 3.x) sends ?tablename=user|templatev10|transaction&packidx=…
+    const TABLE_ALIASES = { USER: 'USERINFO', TEMPLATEV10: 'FINGERTMP', TEMPLATE: 'FINGERTMP', TRANSACTION: 'ATTLOG' };
+    const rawTable = String(req.query.table || req.query.tablename || '').toUpperCase();
+    const table = TABLE_ALIASES[rawTable] || rawTable || undefined;
+    const packIdx = parseInt(req.query.PackIdx || req.query.packidx || '1', 10);
 
     const all_rows = rawData.trim().split('\n');
     const rows = all_rows.map(row => {
@@ -286,7 +289,7 @@ class CdataController {
         // A history query (DATA QUERY ATTLOG) is answered in packs of ~128 rows. Its last pack can
         // hold a single row, which must not be mistaken for a live punch (that would save it and send SMS).
         // Live punches carry no PackIdx and are recent; query packs do, or are old while a query is pending.
-        const isQueryPack = req.query.PackIdx !== undefined || (
+        const isQueryPack = req.query.PackIdx !== undefined || req.query.packidx !== undefined || /querydata/i.test(req.path) || (
           Store.isAttendanceQueryPending(sn) &&
           moment().diff(moment(records?.[0]?.punch_time, 'YYYY-MM-DD HH:mm:ss'), 'minutes') > 2
         )
