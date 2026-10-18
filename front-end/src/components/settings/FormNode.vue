@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 
 const props = defineProps({
     obj:      { required: true },
@@ -38,7 +38,40 @@ function removeIdx(i)     { props.obj[props.propKey].splice(i, 1); }
 function copyKey()        { navigator.clipboard.writeText(JSON.stringify(val.value, null, 2)); }
 function deleteKey()      { delete props.obj[props.propKey]; }
 function addPrimitive()   { props.obj[props.propKey].push(''); }
-function addObject()      { const t = props.obj[props.propKey][0]; props.obj[props.propKey].push(t ? JSON.parse(JSON.stringify(t)) : {}); }
+function addObject() {
+    const arr = props.obj[props.propKey];
+    const template = arr[0];
+    const newItem = template ? JSON.parse(JSON.stringify(template)) : {};
+    const idKey = Object.keys(newItem).find(k => k.toLowerCase() === 'id');
+    Object.keys(newItem).forEach(k => {
+        if (k === idKey) return;
+        if (typeof newItem[k] === 'string') newItem[k] = '';
+    });
+    if (idKey) {
+        const maxId = arr.reduce((max, item) => {
+            const n = Number(item[idKey]);
+            return Number.isFinite(n) && n > max ? n : max;
+        }, 0);
+        newItem[idKey] = maxId + 1;
+    }
+    arr.push(newItem);
+}
+
+// Drag-to-reorder for array-of-objects lists (Card Owners, etc.)
+const dragIndex = ref(null);
+const dragOverIndex = ref(null);
+function onDragStart(i) { dragIndex.value = i; }
+function onDragOver(i)  { dragOverIndex.value = i; }
+function onDragLeave()  { dragOverIndex.value = null; }
+function onDrop(i) {
+    dragOverIndex.value = null;
+    if (dragIndex.value === null || dragIndex.value === i) return;
+    const arr = props.obj[props.propKey];
+    const [moved] = arr.splice(dragIndex.value, 1);
+    arr.splice(i, 0, moved);
+    dragIndex.value = null;
+}
+function onDragEnd() { dragIndex.value = null; dragOverIndex.value = null; }
 
 function keyToLabel(k) {
     return String(k)
@@ -113,8 +146,17 @@ function keyToLabel(k) {
         <!-- array of objects -->
         <div v-else-if="type === 'array-object'" class="fn__col">
             <label class="fn__lbl">{{ keyToLabel(label || propKey) }}</label>
-            <div v-for="(item, i) in val" :key="i" class="fn__obj-item">
+            <div v-for="(item, i) in val" :key="i" class="fn__obj-item"
+                :class="{ 'fn__obj-item--dragging': dragIndex === i, 'fn__obj-item--drag-over': dragOverIndex === i && dragIndex !== i }"
+                draggable="true"
+                @dragstart="onDragStart(i)"
+                @dragover.prevent="onDragOver(i)"
+                @dragleave="onDragLeave()"
+                @drop="onDrop(i)"
+                @dragend="onDragEnd()"
+            >
                 <div class="fn__obj-item-head">
+                    <span class="fn__obj-item-drag" title="Drag to reorder"><i class='bx bx-grid-vertical'></i></span>
                     <span class="fn__obj-item-num">#{{ i + 1 }}</span>
                     <button class="fn__arr-rm" @click="removeIdx(i)">×</button>
                 </div>
@@ -273,13 +315,43 @@ function keyToLabel(k) {
 }
 .fn__obj-item-head {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    gap: 8px;
     background: #f5f5f5;
     padding: 4px 10px;
+    cursor: grab;
 }
-.fn__obj-item-num { font-size: 11px; font-weight: 700; color: #888; }
-.fn__obj-item-body { padding: 8px 12px; }
+.fn__obj-item-head:active { cursor: grabbing; }
+.fn__obj-item-drag { color: #999; font-size: 16px; display: flex; align-items: center; }
+.fn__obj-item-num { font-size: 11px; font-weight: 700; color: #888; flex: 1; }
+.fn__obj-item-body {
+    padding: 8px 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 16px;
+    align-items: flex-start;
+}
+/* Compact side-by-side fields inside array-object items (e.g. Card Owners'
+   ID + NAME) — scoped here so normal top-level settings keep their
+   label-beside-input full-width row layout. */
+.fn__obj-item-body > .fn {
+    width: auto;
+    flex: 1 1 140px;
+}
+.fn__obj-item-body .fn__row {
+    flex-direction: column;
+    align-items: stretch;
+    border-bottom: none;
+    padding: 0;
+    gap: 4px;
+}
+.fn__obj-item-body .fn__row .fn__lbl {
+    width: auto;
+    margin: 0;
+}
+
+.fn__obj-item--dragging { opacity: 0.4; }
+.fn__obj-item--drag-over { border-color: #4caf50; box-shadow: 0 -2px 0 #4caf50 inset; }
 
 /* Add/remove buttons */
 .fn__arr-rm {

@@ -203,10 +203,12 @@ async function handleUpdateStudent() {
                     <label class="mb-0">{{ helper.t('Card Owner') }}</label>
                     <div class="d-flex flex-wrap gap-2">
                       <template v-for="owner in CONFIG?.card_owners">
-                        <div @click.stop="payload.card_owner = owner.id" class="d-flex justify-content-start each-owner-name">
-                          <span :class="{'checked': payload.card_owner == owner.id}" customized-radio></span>
-                          <label class="cp">{{ owner.name }}</label>
-                        </div>
+                        <template v-if="owner.id && owner.name">
+                          <div @click.stop="payload.card_owner = owner.id" class="d-flex justify-content-start each-owner-name">
+                            <span :class="{'checked': payload.card_owner == owner.id}" customized-radio></span>
+                            <label class="cp">{{ owner.name }}</label>
+                          </div>
+                        </template>
                       </template>
                     </div>
                   </div>
