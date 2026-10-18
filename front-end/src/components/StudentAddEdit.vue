@@ -197,7 +197,7 @@ async function handleUpdateStudent() {
               </template>
 
               <!-- Card Owner -->
-              <template v-if="CONFIG?.settings?.attendance?.status">
+              <template v-if="!CONFIG?.settings?.attendance?.only_attendance_feature">
                 <div class="col-12 mt-3" v-if="CONFIG?.card_owners?.length">
                   <div class="form-group d-flex align-items-center gap-3">
                     <label class="mb-0">{{ helper.t('Card Owner') }}</label>
